@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Button from '@/components/shared/Button';
 import SectionTitle from '@/components/shared/SectionTitle';
 import { useArchetypes } from '@/hooks/useArchetypes';
@@ -10,6 +10,7 @@ import ArchetypeReport from '@/components/insights/ArchetypeReport';
 const Insights = () => {
   const [selectedArchetype, setSelectedArchetype] = useState<ArchetypeId | null>(null);
   const location = useLocation();
+  const navigate = useNavigate();
   const { getAllArchetypeSummaries } = useArchetypes();
   
   // Fix: getAllArchetypeSummaries is returning an array, not a function
@@ -27,6 +28,11 @@ const Insights = () => {
   // Handle clicking on an archetype card
   const handleSelectArchetype = (archetypeId: ArchetypeId) => {
     setSelectedArchetype(archetypeId);
+  };
+
+  // Handle retaking the assessment
+  const handleRetakeAssessment = () => {
+    navigate('/assessment');
   };
 
   return (
@@ -97,20 +103,23 @@ const Insights = () => {
           </div>
         )}
 
-        {/* Show either selected archetype report or all archetype cards */}
-        {selectedArchetype ? (
+        {/* Show selected archetype report with retake assessment button */}
+        {selectedArchetype && (
           <div>
             <div className="mb-8 flex justify-end">
               <Button 
                 variant="outline" 
-                onClick={() => setSelectedArchetype(null)}
+                onClick={handleRetakeAssessment}
               >
-                View All Archetypes
+                Retake Assessment
               </Button>
             </div>
             <ArchetypeReport archetypeId={selectedArchetype} />
           </div>
-        ) : (
+        )}
+
+        {/* Show all archetype cards if no assessment has been taken */}
+        {!selectedArchetype && (
           <div className="mt-20">
             <h2 className="text-2xl font-bold mb-6 text-center">Explore Healthcare Archetypes</h2>
             <p className="text-gray-600 text-center max-w-3xl mx-auto mb-10">
