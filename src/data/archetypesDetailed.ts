@@ -1,4 +1,3 @@
-
 import { ArchetypeDetailedData } from '../types/archetype';
 
 export const archetypesDetailed: ArchetypeDetailedData[] = [
@@ -420,6 +419,429 @@ export const archetypesDetailed: ArchetypeDetailedData[] = [
         {
           title: 'Centers of Excellence Implementation',
           description: 'Establish partnerships with high-performing providers for complex procedures and conditions.'
+        }
+      ]
+    }
+  },
+  
+  // Family B: Pragmatists
+  {
+    id: 'b1',
+    familyId: 'b',
+    name: 'Resourceful Adapters',
+    familyName: 'Pragmatists',
+    color: 'blue',
+    
+    // Level 1: Summary for home page cards
+    summary: {
+      description: 'Skilled at overcoming access barriers, these are organizations operating in environments with significant socioeconomic factors.',
+      keyCharacteristics: [
+        'Strong adaptability to constraints',
+        'Effective SDOH intervention programs'
+      ]
+    },
+    
+    // Level 2: Standard for archetype detail pages
+    standard: {
+      fullDescription: 'Skilled at overcoming access barriers, these are organizations operating in environments with significant socioeconomic factors. They develop tailored care delivery models that work within constraints, transforming access limitations into opportunities for targeted health interventions.',
+      keyCharacteristics: [
+        'Strong adaptability to constraints',
+        'Moderate healthcare costs',
+        'Practical benefits design',
+        'Effective SDOH intervention programs',
+        'Resourceful approach to care delivery',
+        'Creative solutions to access challenges'
+      ],
+      overview: 'Resourceful Adapters operate in environments with significant socioeconomic and access barriers, yet find innovative ways to deliver care effectively. They excel at developing practical solutions that address social determinants of health while maintaining reasonable cost efficiency despite operational challenges.',
+      keyStatistics: {
+        emergencyUtilization: {
+          value: '+18.2%',
+          trend: 'up'
+        },
+        specialistUtilization: {
+          value: '-16.2%',
+          trend: 'down'
+        },
+        healthcareSpend: {
+          value: '+0.8%',
+          trend: 'neutral'
+        },
+        familySize: {
+          value: '+2.4%',
+          trend: 'neutral'
+        }
+      },
+      keyInsights: [
+        'Social determinants of health factors significantly impact access to appropriate care',
+        'Higher emergency utilization reflects access barriers to primary and specialty care',
+        'Cost-effective adaptation to challenges keeps overall spend near benchmark average',
+        'COPD and substance use disorders require targeted intervention programs'
+      ]
+    },
+    
+    // Level 3: Enhanced for full reports
+    enhanced: {
+      riskProfile: {
+        score: '0.96',
+        comparison: '+1.4% above archetype average',
+        conditions: [
+          {
+            name: 'COPD',
+            value: '+27%',
+            barWidth: '6.75%'
+          },
+          {
+            name: 'Substance Use Disorders',
+            value: '+19%',
+            barWidth: '4.75%'
+          },
+          {
+            name: 'Heart Disease',
+            value: '+12%',
+            barWidth: '3%'
+          }
+        ]
+      },
+      strategicPriorities: [
+        {
+          number: '1',
+          title: 'SDOH Barriers Reduction',
+          description: 'Address social determinants of health factors that limit access to appropriate care.'
+        },
+        {
+          number: '2',
+          title: 'Specialist Access Enhancement',
+          description: 'Improve access to specialty care to reduce reliance on emergency services.'
+        },
+        {
+          number: '3',
+          title: 'Chronic Condition Management',
+          description: 'Implement targeted programs for prevalent conditions like COPD and heart disease.'
+        },
+        {
+          number: '4',
+          title: 'Behavioral Health Integration',
+          description: 'Expand substance use disorder services and behavioral health support.'
+        }
+      ],
+      swot: {
+        strengths: [
+          'Strong adaptability to constraints',
+          'Moderate healthcare costs (+0.8%)',
+          'Practical benefits design',
+          'Effective SDOH intervention programs'
+        ],
+        weaknesses: [
+          'Higher emergency utilization (+18.2%)',
+          'Lower specialist utilization (-16.2%)',
+          'Elevated COPD prevalence (+27%)',
+          'Higher substance use disorder rates (+19%)'
+        ],
+        opportunities: [
+          'Mobile health expansion',
+          'Telehealth access enhancement',
+          'Community-based care partnerships',
+          'Targeted SDOH intervention programs'
+        ],
+        threats: [
+          'Healthcare access disparities',
+          'Provider shortages in key areas',
+          'Rising chronic condition burden',
+          'Care deferral leading to higher acuity'
+        ]
+      },
+      costSavings: [
+        {
+          title: 'Emergency Alternatives',
+          description: 'Implement urgent care and telehealth alternatives to reduce high-cost emergency utilization.'
+        },
+        {
+          title: 'Chronic Care Management',
+          description: 'Deploy targeted programs for COPD, heart disease, and other prevalent conditions.'
+        },
+        {
+          title: 'Transportation Solutions',
+          description: 'Address SDOH barriers with transportation assistance to appropriate care settings.'
+        }
+      ]
+    }
+  },
+  
+  // Healthcare Pragmatists (b2)
+  {
+    id: 'b2',
+    familyId: 'b',
+    name: 'Healthcare Pragmatists',
+    familyName: 'Pragmatists',
+    color: 'purple',
+    
+    summary: {
+      description: 'Cost-effective and practical, these are organizations balancing populations with elevated substance use disorder rates.',
+      keyCharacteristics: [
+        'Practical benefits design',
+        'Strong cost-effectiveness orientation'
+      ]
+    },
+    
+    standard: {
+      fullDescription: 'Cost-effective and practical, these are organizations balancing populations with elevated substance use disorder rates. They focus resources precisely on essential services addressing critical workforce health needs, achieving notable cost efficiency through practical benefit design.',
+      keyCharacteristics: [
+        'Lower healthcare spend',
+        'Practical benefits design',
+        'Strong cost-effectiveness orientation',
+        'Focused approach to essential services',
+        'Targeted intervention programs',
+        'Efficient resource allocation'
+      ],
+      overview: 'Healthcare Pragmatists demonstrate exceptional ability to control costs while addressing challenging health conditions. They excel at focusing resources on high-impact interventions, maintaining a lean benefits portfolio that addresses essential needs while avoiding excessive spending on less critical services.',
+      keyStatistics: {
+        emergencyUtilization: {
+          value: '+19.8%',
+          trend: 'up'
+        },
+        specialistUtilization: {
+          value: '-16.3%',
+          trend: 'down'
+        },
+        healthcareSpend: {
+          value: '-11.0%',
+          trend: 'down'
+        },
+        familySize: {
+          value: '-6.7%',
+          trend: 'down'
+        }
+      },
+      keyInsights: [
+        'Significantly lower healthcare spend demonstrates strong cost management despite challenges',
+        'Higher emergency utilization reflects access barriers and care deferral patterns',
+        'Substance use disorders represent a significant health challenge requiring targeted intervention',
+        'Musculoskeletal conditions suggest opportunities for focused case management'
+      ]
+    },
+    
+    enhanced: {
+      riskProfile: {
+        score: '0.92',
+        comparison: '-2.0% below archetype average',
+        conditions: [
+          {
+            name: 'Substance Use Disorders',
+            value: '+44%',
+            barWidth: '11%'
+          },
+          {
+            name: 'Musculoskeletal Conditions',
+            value: '+24%',
+            barWidth: '6%'
+          },
+          {
+            name: 'Cancer',
+            value: '-17%',
+            barWidth: '4.25%'
+          }
+        ]
+      },
+      strategicPriorities: [
+        {
+          number: '1',
+          title: 'Chronic Condition Management',
+          description: 'Implement practical, high-impact programs for prevalent chronic conditions.'
+        },
+        {
+          number: '2',
+          title: 'Substance Use Disorder Support',
+          description: 'Expand access to substance use treatment and recovery services.'
+        },
+        {
+          number: '3',
+          title: 'MSK Care Pathway Optimization',
+          description: 'Develop effective care pathways for musculoskeletal conditions common in this population.'
+        },
+        {
+          number: '4',
+          title: 'Emergency Alternatives',
+          description: 'Create accessible alternatives to emergency department utilization.'
+        }
+      ],
+      swot: {
+        strengths: [
+          'Lower healthcare spend (-11.0%)',
+          'Practical benefits design',
+          'Strong cost-effectiveness orientation',
+          'Focused approach to essential services'
+        ],
+        weaknesses: [
+          'Higher emergency utilization (+19.8%)',
+          'Lower specialist utilization (-16.3%)',
+          'Elevated substance use disorder rates (+44%)',
+          'Higher musculoskeletal condition prevalence (+24%)'
+        ],
+        opportunities: [
+          'Targeted substance use disorder programs',
+          'MSK condition management enhancement',
+          'Urgent care/telehealth expansion',
+          'Site of care optimization'
+        ],
+        threats: [
+          'Care deferral leading to higher acuity',
+          'Rising substance use disorder impacts',
+          'Workforce productivity challenges',
+          'Provider network access limitations'
+        ]
+      },
+      costSavings: [
+        {
+          title: 'Emergency Alternatives Implementation',
+          description: 'Deploy urgent care and telehealth options to reduce high-cost emergency utilization.'
+        },
+        {
+          title: 'Substance Use Disorder Program',
+          description: 'Implement effective substance use disorder management and prevention initiatives.'
+        },
+        {
+          title: 'MSK Care Management',
+          description: 'Develop targeted programs for musculoskeletal conditions to reduce disability and costs.'
+        }
+      ]
+    }
+  },
+  
+  // Care Channel Optimizers (b3)
+  {
+    id: 'b3',
+    familyId: 'b',
+    name: 'Care Channel Optimizers',
+    familyName: 'Pragmatists',
+    color: 'green',
+    
+    summary: {
+      description: 'Effective across geographic boundaries, these are organizations skilled at creating consistent experiences in multiple regions.',
+      keyCharacteristics: [
+        'Effective multi-region coordination',
+        'Consistent benefits implementation'
+      ]
+    },
+    
+    standard: {
+      fullDescription: 'Effective across geographic boundaries, these are organizations skilled at creating consistent experiences in multiple regions. They maintain cohesive benefits strategies despite operational complexity, delivering cost-effective care while successfully navigating regional healthcare variations.',
+      keyCharacteristics: [
+        'Effective multi-region coordination',
+        'Consistent benefits implementation',
+        'Average healthcare costs',
+        'Strong program standardization',
+        'Regional network management',
+        'Cross-boundary care coordination'
+      ],
+      overview: 'Care Channel Optimizers excel at creating consistent healthcare experiences across geographic boundaries. These organizations successfully implement standardized approaches to benefits and care delivery despite regional variations in healthcare systems, achieving remarkable consistency in outcomes across their diverse operational footprint.',
+      keyStatistics: {
+        emergencyUtilization: {
+          value: '+8.3%',
+          trend: 'up'
+        },
+        specialistUtilization: {
+          value: '-0.3%',
+          trend: 'neutral'
+        },
+        healthcareSpend: {
+          value: '-0.1%',
+          trend: 'neutral'
+        },
+        familySize: {
+          value: '+5.3%',
+          trend: 'up'
+        }
+      },
+      keyInsights: [
+        'Moderate emergency utilization increase reflects regional access variations',
+        'Near-benchmark healthcare costs demonstrate effective multi-region management',
+        'Chronic conditions like diabetes and hypertension present opportunities for standardized approaches',
+        'Digital health solutions show strong potential for addressing geographic barriers'
+      ]
+    },
+    
+    enhanced: {
+      riskProfile: {
+        score: '0.94',
+        comparison: '+0.1% above archetype average',
+        conditions: [
+          {
+            name: 'Diabetes',
+            value: '+14%',
+            barWidth: '3.5%'
+          },
+          {
+            name: 'Hypertension',
+            value: '+12%',
+            barWidth: '3%'
+          },
+          {
+            name: 'Asthma',
+            value: '+9%',
+            barWidth: '2.25%'
+          }
+        ]
+      },
+      strategicPriorities: [
+        {
+          number: '1',
+          title: 'Multi-State Coordination',
+          description: 'Optimize care delivery across geographic regions with consistent approaches.'
+        },
+        {
+          number: '2',
+          title: 'Chronic Condition Management',
+          description: 'Implement standardized programs for diabetes, hypertension, and other prevalent conditions.'
+        },
+        {
+          number: '3',
+          title: 'Network Optimization',
+          description: 'Ensure consistent provider network quality across all regions.'
+        },
+        {
+          number: '4',
+          title: 'Digital Health Integration',
+          description: 'Leverage digital solutions to create consistency across geographic boundaries.'
+        }
+      ],
+      swot: {
+        strengths: [
+          'Effective multi-region coordination',
+          'Consistent benefits implementation',
+          'Average healthcare costs (-0.1%)',
+          'Strong program standardization'
+        ],
+        weaknesses: [
+          'Higher emergency utilization (+8.3%)',
+          'Average specialist utilization (-0.3%)',
+          'Elevated diabetes prevalence (+14%)',
+          'Regional variations in outcomes'
+        ],
+        opportunities: [
+          'Telehealth expansion across regions',
+          'Standardized chronic care programs',
+          'Digital health platform integration',
+          'Regional center of excellence development'
+        ],
+        threats: [
+          'Geographic provider network variations',
+          'Regional healthcare cost disparities',
+          'Operational complexity across areas',
+          'Inconsistent care quality across regions'
+        ]
+      },
+      costSavings: [
+        {
+          title: 'Region-Specific Network Optimization',
+          description: 'Develop targeted network strategies for each region while maintaining consistent quality standards.'
+        },
+        {
+          title: 'Standardized Chronic Care Programs',
+          description: 'Implement consistent chronic condition management approaches across all regions.'
+        },
+        {
+          title: 'Virtual Care Platform Expansion',
+          description: 'Leverage telehealth to ensure consistent access regardless of geographic location.'
         }
       ]
     }

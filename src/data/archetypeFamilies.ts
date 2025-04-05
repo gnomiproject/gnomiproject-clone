@@ -16,7 +16,7 @@ export const archetypeFamilies: ArchetypeFamily[] = [
   {
     id: 'b',
     name: 'Pragmatists',
-    description: 'Organizations that emphasize practical, cost-effective healthcare solutions. They prioritize value and efficiency while maintaining adequate healthcare coverage for their workforce.',
+    description: 'Resourceful and pragmatic, these are organizations that excel at finding practical solutions that deliver high-value care efficiently. They deploy straightforward solutions for chronic conditions, developing accessible care pathways despite geographic challenges and operational constraints.',
     commonTraits: [
       'Cost-conscious healthcare decision making',
       'Preference for established healthcare solutions',
