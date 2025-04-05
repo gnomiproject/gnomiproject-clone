@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useAssessment } from '../hooks/useAssessment';
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -23,7 +24,7 @@ const Assessment = () => {
         {questions.length > 0 && (
           <div>
             <h2 className="text-2xl font-semibold mb-4">Question {currentQuestion} of {totalQuestions}</h2>
-            <p className="mb-4">{questions[currentQuestion - 1].question}</p>
+            <p className="mb-4">{questions[currentQuestion - 1].text}</p>
             
             <div className="space-y-4">
               {questions[currentQuestion - 1].options.map(option => (
@@ -36,7 +37,7 @@ const Assessment = () => {
                     onChange={() => setAnswer(questions[currentQuestion - 1].id, option.id)}
                     className="form-radio h-5 w-5 text-blue-600"
                   />
-                  <span>{option.label}</span>
+                  <span>{option.text}</span>
                 </label>
               ))}
             </div>
