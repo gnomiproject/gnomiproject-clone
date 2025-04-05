@@ -11,7 +11,9 @@ const Insights = () => {
   const [selectedArchetype, setSelectedArchetype] = useState<ArchetypeId | null>(null);
   const location = useLocation();
   const { getAllArchetypeSummaries } = useArchetypes();
-  const archetypeSummaries = getAllArchetypeSummaries();
+  
+  // Fix: getAllArchetypeSummaries is returning an array, not a function
+  const archetypeSummaries = getAllArchetypeSummaries;
   
   useEffect(() => {
     // Check if an archetype was selected from Results page
