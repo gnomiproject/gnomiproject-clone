@@ -1,8 +1,8 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Button from '@/components/shared/Button';
 import SectionTitle from '@/components/shared/SectionTitle';
-import { Card, CardContent } from '@/components/ui/card';
 import { ArrowRight, Grid, List } from 'lucide-react';
 import { useArchetypes } from '@/hooks/useArchetypes';
 import ArchetypeCard from '@/components/home/ArchetypeCard';
@@ -15,38 +15,48 @@ const Index = () => {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="py-16 px-6 md:px-12 bg-gradient-to-br from-blue-50 to-white">
+      <section className="pt-20 pb-32 px-6 md:px-12 bg-gradient-to-br from-blue-50/50 to-white relative overflow-hidden">
         <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col md:flex-row items-center relative">
-            <div className="md:w-1/4 flex justify-center mb-6 md:mb-0">
-              <img 
-                src="/lovable-uploads/3efcc8b7-0e2d-4a2b-bb23-fa686f18c691.png" 
-                alt="Gnome character" 
-                className="h-28 md:h-32 animate-fade-in absolute md:absolute -top-16 md:-top-28"
-              />
-            </div>
-            <div className="md:w-3/4">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
-                What's Your Company's <span className="text-blue-500">Healthcare Personality?</span>
+          <div className="flex flex-col items-start relative">
+            <div className="w-full md:w-3/5 z-10">
+              {/* Gnome character positioned absolutely */}
+              <div className="absolute left-0 -top-8 md:left-0 md:-top-6">
+                <img 
+                  src="/lovable-uploads/3efcc8b7-0e2d-4a2b-bb23-fa686f18c691.png" 
+                  alt="Gnome character" 
+                  className="h-36 md:h-44 animate-fade-in"
+                />
+              </div>
+              
+              {/* Title with larger spacing from image */}
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mt-32 md:mt-40">
+                What's Your Company's <span className="text-blue-500">Healthcare <br className="hidden md:block" />Personality?</span>
               </h1>
-              <p className="text-lg md:text-xl text-gray-600 mb-6">
+              
+              <p className="text-lg md:text-xl text-gray-700 mt-8 mb-4 max-w-3xl">
                 Curious why your healthcare program differs from similar companies? Wonder which strategies would work best for your unique workforce?
               </p>
-              <p className="text-lg md:text-xl text-gray-600 mb-6">
+              
+              <p className="text-lg md:text-xl text-gray-700 mb-4 max-w-3xl">
                 In just 3 minutes, discover which of our nine healthcare archetypes matches your organization. Based on data from 400+ companies and 7+ million members, these archetypes reveal insights that typical industry benchmarks miss.
               </p>
-              <p className="text-lg md:text-xl text-gray-600 mb-8">
+              
+              <p className="text-lg md:text-xl text-gray-700 mb-8 max-w-3xl">
                 Give it a try! Uncover your organization's true healthcare identity and learn what strategies work best for companies just like yours.
               </p>
+              
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link to="/assessment">
-                  <Button>Find Your Archetype</Button>
+                  <Button size="lg">Find Your Archetype</Button>
                 </Link>
                 <Link to="#archetype-section">
-                  <Button variant="secondary">Explore All Archetypes</Button>
+                  <Button variant="secondary" size="lg">Explore All Archetypes</Button>
                 </Link>
               </div>
             </div>
+            
+            {/* Light blue curved shape background */}
+            <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-blue-50/30 rounded-l-full transform translate-x-1/4 z-0 hidden md:block"></div>
           </div>
         </div>
       </section>
