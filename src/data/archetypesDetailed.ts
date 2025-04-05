@@ -1,3 +1,4 @@
+
 import { ArchetypeDetailedData } from '../types/archetype';
 
 export const archetypesDetailed: ArchetypeDetailedData[] = [
@@ -1039,3 +1040,234 @@ export const archetypesDetailed: ArchetypeDetailedData[] = [
         'Exceptional cost efficiency demonstrates the value of systematic healthcare approaches',
         'Strong performance with chronic conditions like hypertension and diabetes despite elevated prevalence',
         'Lower emergency utilization reflects effective condition management and care pathways',
+        'Medication adherence rates significantly outperform peer organizations'
+      ]
+    },
+    
+    enhanced: {
+      riskProfile: {
+        score: '0.98',
+        comparison: '+4.3% above archetype average',
+        conditions: [
+          {
+            name: 'Hypertension',
+            value: '+22%',
+            barWidth: '5.5%'
+          },
+          {
+            name: 'Diabetes',
+            value: '+18%',
+            barWidth: '4.5%'
+          },
+          {
+            name: 'Asthma',
+            value: '+11%',
+            barWidth: '2.75%'
+          }
+        ]
+      },
+      strategicPriorities: [
+        {
+          number: '1',
+          title: 'Benefits Enhancement',
+          description: 'Strengthen benefit offerings to maintain excellent care adherence and outcomes.'
+        },
+        {
+          number: '2',
+          title: 'Chronic Condition Management',
+          description: 'Expand successful approaches to hypertension and diabetes management.'
+        },
+        {
+          number: '3',
+          title: 'Medication Adherence Programs',
+          description: 'Maintain and enhance industry-leading medication adherence rates.'
+        },
+        {
+          number: '4',
+          title: 'Preventive Care Expansion',
+          description: 'Build on successful preventive screening and wellness programs.'
+        }
+      ],
+      swot: {
+        strengths: [
+          'Exceptional cost efficiency (-16.8%)',
+          'Lower emergency utilization (-4.3%)',
+          'Strong medication adherence rates',
+          'Effective protocol compliance'
+        ],
+        weaknesses: [
+          'Lower specialist utilization (-6.2%)',
+          'Elevated hypertension prevalence (+22%)',
+          'Higher diabetes prevalence (+18%)',
+          'Smaller family sizes (-10.6%)'
+        ],
+        opportunities: [
+          'Chronic condition management expansion',
+          'Preventive care enhancement',
+          'Patient engagement platform optimization',
+          'Medication therapy management'
+        ],
+        threats: [
+          'Workforce turnover impacts',
+          'Benefit adequacy perceptions',
+          'Rising chronic condition burden',
+          'Geographic expansion challenges'
+        ]
+      },
+      costSavings: [
+        {
+          title: 'Chronic Condition Program Optimization',
+          description: 'Enhance already successful chronic condition management programs for hypertension and diabetes.'
+        },
+        {
+          title: 'Medication Adherence Enhancement',
+          description: 'Build on strong medication adherence rates through digital tools and pharmacy partnerships.'
+        },
+        {
+          title: 'Preventive Screening Expansion',
+          description: 'Increase participation in successful preventive screening programs with targeted outreach.'
+        }
+      ]
+    }
+  },
+  
+  // Engaged Healthcare Consumers (c3)
+  {
+    id: 'c3',
+    familyId: 'c',
+    name: 'Engaged Healthcare Consumers',
+    familyName: 'Logisticians',
+    color: 'pink',
+    
+    summary: {
+      description: 'Committed to self-directed care, these are organizations working with populations showing elevated mental health needs.',
+      keyCharacteristics: [
+        'Strong member engagement',
+        'Effective telehealth utilization'
+      ]
+    },
+    
+    standard: {
+      fullDescription: 'Committed to self-directed care, these are organizations working with populations showing elevated mental health needs. They embrace telehealth solutions and medication management approaches, creating environments where members actively participate in healthcare decisions with minimal access barriers.',
+      keyCharacteristics: [
+        'Strong member engagement',
+        'Effective telehealth utilization',
+        'Self-directed care pathways',
+        'Digital tool adoption',
+        'Moderate healthcare costs',
+        'Mental health focus'
+      ],
+      overview: 'Engaged Healthcare Consumers excel at creating environments where members actively participate in healthcare decisions. They leverage digital solutions and telehealth to improve access and engagement, particularly for mental health services, achieving better-than-expected outcomes despite elevated depression and anxiety prevalence.',
+      keyStatistics: {
+        emergencyUtilization: {
+          value: '-1.4%',
+          trend: 'neutral'
+        },
+        specialistUtilization: {
+          value: '-9.6%',
+          trend: 'down'
+        },
+        healthcareSpend: {
+          value: '-3.2%',
+          trend: 'down'
+        },
+        familySize: {
+          value: '-5.8%',
+          trend: 'down'
+        }
+      },
+      keyInsights: [
+        'Moderate healthcare cost reduction despite elevated mental health needs',
+        'Telehealth adoption significantly outpaces peer organizations',
+        'Digital engagement shows strong correlation with improved outcomes',
+        'Mental health utilization patterns suggest opportunities for further integration'
+      ]
+    },
+    
+    enhanced: {
+      riskProfile: {
+        score: '0.97',
+        comparison: '+3.2% above archetype average',
+        conditions: [
+          {
+            name: 'Depression',
+            value: '+28%',
+            barWidth: '7%'
+          },
+          {
+            name: 'Anxiety Disorders',
+            value: '+24%',
+            barWidth: '6%'
+          },
+          {
+            name: 'Cancer',
+            value: '+11%',
+            barWidth: '2.75%'
+          }
+        ]
+      },
+      strategicPriorities: [
+        {
+          number: '1',
+          title: 'Mental Health Management',
+          description: 'Enhance mental health resources and support for depression and anxiety.'
+        },
+        {
+          number: '2',
+          title: 'Telehealth Optimization',
+          description: 'Expand successful telehealth programs to improve access and engagement.'
+        },
+        {
+          number: '3',
+          title: 'Medication Management',
+          description: 'Strengthen medication management programs with digital tools and support.'
+        },
+        {
+          number: '4',
+          title: 'Cancer Support Enhancement',
+          description: 'Develop comprehensive support resources for members with cancer diagnoses.'
+        }
+      ],
+      swot: {
+        strengths: [
+          'Strong member engagement',
+          'Effective telehealth utilization',
+          'Moderate healthcare costs (-3.2%)',
+          'Self-directed care pathways'
+        ],
+        weaknesses: [
+          'Elevated mental health needs',
+          'Higher depression prevalence (+28%)',
+          'Increased anxiety prevalence (+24%)',
+          'Higher cancer prevalence (+11%)'
+        ],
+        opportunities: [
+          'Mental health integration',
+          'Digital therapeutic expansion',
+          'Cancer support program enhancement',
+          'Medication management optimization'
+        ],
+        threats: [
+          'Rising mental health needs',
+          'Workforce wellbeing challenges',
+          'Cancer care cost escalation',
+          'Access barriers for specialized care'
+        ]
+      },
+      costSavings: [
+        {
+          title: 'Mental Health Integration',
+          description: 'Implement integrated behavioral health approaches to address elevated mental health needs.'
+        },
+        {
+          title: 'Telehealth Expansion',
+          description: 'Build on successful telehealth adoption to improve access and reduce costs.'
+        },
+        {
+          title: 'Cancer Care Management',
+          description: 'Develop targeted programs for cancer care coordination and support services.'
+        }
+      ]
+    }
+  }
+];
