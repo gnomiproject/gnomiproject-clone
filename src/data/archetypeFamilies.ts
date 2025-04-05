@@ -27,7 +27,7 @@ export const archetypeFamilies: ArchetypeFamily[] = [
   {
     id: 'c',
     name: 'Logisticians',
-    description: 'Organizations that excel in systematic healthcare management through rigorous processes and standards. They prioritize consistency and reliability in healthcare delivery.',
+    description: 'Organizations that achieve operational efficiency while managing workforces with variable schedules and higher turnover dynamics. They craft scalable systems that function effectively despite staffing complexities, achieving lower costs while maintaining necessary care quality.',
     commonTraits: [
       'Structured healthcare benefit programs',
       'Emphasis on care coordination',

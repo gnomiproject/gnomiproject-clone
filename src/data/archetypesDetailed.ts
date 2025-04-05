@@ -845,5 +845,197 @@ export const archetypesDetailed: ArchetypeDetailedData[] = [
         }
       ]
     }
-  }
-];
+  },
+  
+  // Family C: Logisticians
+  {
+    id: 'c1',
+    familyId: 'c',
+    name: 'Scalable Access Architects',
+    familyName: 'Logisticians',
+    color: 'red',
+    
+    // Level 1: Summary for home page cards
+    summary: {
+      description: 'Adaptable to varying schedules, these are organizations managing workforces with variable schedules and smaller household sizes.',
+      keyCharacteristics: [
+        'Adaptable to varying schedules',
+        'Operational efficiency across locations'
+      ]
+    },
+    
+    // Level 2: Standard for archetype detail pages
+    standard: {
+      fullDescription: 'Adaptable to varying schedules, these are organizations managing workforces with variable schedules and smaller household sizes. They create access frameworks that function effectively across diverse locations and shifts, accommodating fluctuating work patterns while maintaining care continuity.',
+      keyCharacteristics: [
+        'Adaptable to varying schedules',
+        'Operational efficiency across locations',
+        'Lower healthcare spend',
+        'Flexible access solutions',
+        'Effective scalable programs',
+        'Smaller household sizes'
+      ],
+      overview: 'Scalable Access Architects excel at creating healthcare frameworks that accommodate variable schedules and diverse locations. They achieve remarkable cost efficiency while maintaining necessary care quality, effectively addressing the unique challenges of workforces with fluctuating patterns and higher turnover dynamics.',
+      keyStatistics: {
+        emergencyUtilization: {
+          value: '+7.1%',
+          trend: 'up'
+        },
+        specialistUtilization: {
+          value: '-8.4%',
+          trend: 'down'
+        },
+        healthcareSpend: {
+          value: '-15.0%',
+          trend: 'down'
+        },
+        familySize: {
+          value: '-12.6%',
+          trend: 'down'
+        }
+      },
+      keyInsights: [
+        'Lower healthcare costs reflect efficient operations and smaller household sizes',
+        'Moderately higher emergency utilization suggests opportunity for additional access options',
+        'Depression prevalence indicates need for enhanced mental health support',
+        'Digital engagement shows strong potential for improving access and outcomes'
+      ]
+    },
+    
+    // Level 3: Enhanced for full reports
+    enhanced: {
+      riskProfile: {
+        score: '0.91',
+        comparison: '-3.2% below archetype average',
+        conditions: [
+          {
+            name: 'Depression',
+            value: '+16%',
+            barWidth: '4%'
+          },
+          {
+            name: 'Asthma',
+            value: '+12%',
+            barWidth: '3%'
+          },
+          {
+            name: 'Diabetes',
+            value: '-8%',
+            barWidth: '2%'
+          }
+        ]
+      },
+      strategicPriorities: [
+        {
+          number: '1',
+          title: 'Emergency Alternatives',
+          description: 'Implement urgent care and telehealth alternatives to reduce emergency utilization.'
+        },
+        {
+          number: '2',
+          title: 'Mental Health Support',
+          description: 'Expand mental health resources to address elevated depression prevalence.'
+        },
+        {
+          number: '3',
+          title: 'Flexible Access Solutions',
+          description: 'Create care access options that accommodate variable work schedules.'
+        },
+        {
+          number: '4',
+          title: 'Digital Health Expansion',
+          description: 'Leverage digital solutions to improve access and engagement.'
+        }
+      ],
+      swot: {
+        strengths: [
+          'Lower healthcare spend (-15.0%)',
+          'Operational efficiency across locations',
+          'Flexible access solutions',
+          'Effective scalable programs'
+        ],
+        weaknesses: [
+          'Higher emergency utilization (+7.1%)',
+          'Lower specialist utilization (-8.4%)',
+          'Elevated depression prevalence (+16%)',
+          'Smaller family sizes (-12.6%)'
+        ],
+        opportunities: [
+          'Virtual care expansion',
+          'Mental health integration',
+          'Retail clinic partnerships',
+          'Digital engagement enhancement'
+        ],
+        threats: [
+          'Workforce turnover impacts',
+          'Variable scheduling challenges',
+          'Geographic expansion challenges',
+          'Care continuity disruptions'
+        ]
+      },
+      costSavings: [
+        {
+          title: 'On-demand Care Solutions',
+          description: 'Implement flexible care options that accommodate varying work schedules and locations.'
+        },
+        {
+          title: 'Mental Health Telehealth',
+          description: 'Expand virtual mental health services to address elevated depression prevalence.'
+        },
+        {
+          title: 'Site of Care Optimization',
+          description: 'Shift care to more cost-effective settings through retail clinics and urgent care.'
+        }
+      ]
+    }
+  },
+  
+  // Care Adherence Advocates (c2)
+  {
+    id: 'c2',
+    familyId: 'c',
+    name: 'Care Adherence Advocates',
+    familyName: 'Logisticians',
+    color: 'indigo',
+    
+    summary: {
+      description: 'Systematic in their approach, these are organizations achieving remarkable cost efficiency despite moderate risk profiles.',
+      keyCharacteristics: [
+        'Exceptional cost efficiency',
+        'Strong medication adherence rates'
+      ]
+    },
+    
+    standard: {
+      fullDescription: 'Systematic in their approach, these are organizations achieving remarkable cost efficiency despite moderate risk profiles. They drive exceptional compliance with treatment guidelines and preventive care protocols, demonstrating how structured approaches maximize outcomes from available resources.',
+      keyCharacteristics: [
+        'Exceptional cost efficiency',
+        'Strong medication adherence rates',
+        'Lower emergency utilization',
+        'Effective protocol compliance',
+        'Systematic healthcare approach',
+        'Smaller household sizes'
+      ],
+      overview: 'Care Adherence Advocates excel at driving remarkable cost efficiency through systematic approaches to healthcare delivery. They achieve exceptional compliance with treatment guidelines and preventive care protocols, particularly for chronic conditions like hypertension and diabetes, demonstrating how structured management maximizes outcomes from available resources.',
+      keyStatistics: {
+        emergencyUtilization: {
+          value: '-4.3%',
+          trend: 'down'
+        },
+        specialistUtilization: {
+          value: '-6.2%',
+          trend: 'down'
+        },
+        healthcareSpend: {
+          value: '-16.8%',
+          trend: 'down'
+        },
+        familySize: {
+          value: '-10.6%',
+          trend: 'down'
+        }
+      },
+      keyInsights: [
+        'Exceptional cost efficiency demonstrates the value of systematic healthcare approaches',
+        'Strong performance with chronic conditions like hypertension and diabetes despite elevated prevalence',
+        'Lower emergency utilization reflects effective condition management and care pathways',
