@@ -23,7 +23,7 @@ const Index = () => {
               <img 
                 src="/lovable-uploads/3efcc8b7-0e2d-4a2b-bb23-fa686f18c691.png" 
                 alt="Gnome character" 
-                className="h-28 md:h-36"
+                className="h-20 md:h-28"
               />
             </div>
             
