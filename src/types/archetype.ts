@@ -11,6 +11,13 @@ export type ArchetypeId =
   | 'b1' | 'b2' | 'b3'
   | 'c1' | 'c2' | 'c3';
 
+export type ArchetypeColor = 
+  | 'orange' | 'teal' | 'yellow' | 'blue' | 'purple' | 'green' | 'red' | 'indigo' | 'pink'
+  | 'archetype-a1' | 'archetype-a2' | 'archetype-a3'
+  | 'archetype-b1' | 'archetype-b2' | 'archetype-b3'
+  | 'archetype-c1' | 'archetype-c2' | 'archetype-c3'
+  | 'family-a' | 'family-b' | 'family-c';
+
 export type Archetype = {
   id: ArchetypeId;
   name: string;
@@ -26,7 +33,7 @@ export type Archetype = {
   riskScore: number; // 1-10 scale
   riskVariance: number; // Percentage variance from average
   primaryRiskDriver: string;
-  color: 'orange' | 'teal' | 'yellow' | 'blue' | 'purple' | 'green' | 'red' | 'indigo' | 'pink';
+  color: ArchetypeColor;
 };
 
 export type ArchetypeMetrics = {
@@ -63,7 +70,7 @@ export interface ArchetypeDetailedData {
   familyId: 'a' | 'b' | 'c';
   name: string;
   familyName: string;
-  color: 'orange' | 'teal' | 'yellow' | 'blue' | 'purple' | 'green' | 'red' | 'indigo' | 'pink';
+  color: ArchetypeColor;
   
   // Level 1: Home page card (minimal)
   summary: {
