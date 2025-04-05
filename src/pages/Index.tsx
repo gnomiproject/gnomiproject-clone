@@ -26,8 +26,8 @@ const Index = () => {
               />
             </div>
             
-            {/* Title with centered text */}
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-12 max-w-3xl">
+            {/* Title with centered text - now using full width */}
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-12 w-full">
               <span className="block">What's Your</span>
               <span className="block">Company's</span>
               <span className="block text-blue-500">Healthcare</span>
