@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Button from '@/components/shared/Button';
@@ -16,25 +17,27 @@ const Index = () => {
       {/* Hero Section with light blue background */}
       <section className="pt-16 pb-32 bg-blue-50/50 relative overflow-hidden">
         <div className="max-w-6xl mx-auto px-6 md:px-12">
-          <div className="flex flex-col items-center text-center">
+          <div className="flex flex-col items-center">
             {/* Gnome character centered */}
             <div className="mb-6">
               <img 
                 src="/lovable-uploads/3efcc8b7-0e2d-4a2b-bb23-fa686f18c691.png" 
                 alt="Gnome character" 
-                className="h-44 md:h-52"
+                className="h-52 md:h-64"
               />
             </div>
             
-            {/* Title with centered text - now using full width */}
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-12 w-full">
-              <span className="block">What's Your</span>
-              <span className="block">Company's</span>
-              <span className="block text-blue-500">Healthcare</span>
-              <span className="block text-blue-500">Personality?</span>
-            </h1>
+            {/* Title with larger text and black/blue contrast */}
+            <div className="text-center w-full mb-12">
+              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold">
+                <div className="mb-2">What's Your</div>
+                <div className="mb-2">Company's</div>
+                <div className="text-blue-500">Healthcare</div>
+                <div className="text-blue-500">Personality?</div>
+              </h1>
+            </div>
             
-            <div className="max-w-4xl">
+            <div className="max-w-4xl text-center">
               <p className="text-lg md:text-xl text-gray-700 mb-4">
                 Curious why your healthcare program differs from similar companies? Wonder which strategies would work best for your unique workforce?
               </p>
