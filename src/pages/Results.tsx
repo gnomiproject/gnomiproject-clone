@@ -68,20 +68,14 @@ const Results = () => {
               {archetypeData.summary.description}
             </p>
 
-            <div className="flex justify-center gap-4 mb-8">
+            <div className="flex justify-center mb-8">
               <Button
                 onClick={handleRetakeAssessment}
                 variant="outline"
-                className="flex items-center"
+                className="flex items-center text-sm"
+                size="sm"
               >
                 <RefreshCw className="mr-2 h-4 w-4" /> Retake Assessment
-              </Button>
-              
-              <Button
-                onClick={handleViewInsights}
-                className={`bg-${color} hover:bg-${color}/90 text-white flex items-center`}
-              >
-                View Full Insights
               </Button>
             </div>
 
