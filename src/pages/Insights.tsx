@@ -47,7 +47,7 @@ const Insights = () => {
                     you'll need to complete our quick 3-minute assessment.
                   </p>
                   <Link to="/assessment">
-                    <Button size="lg">Take the Assessment</Button>
+                    <Button>Take the Assessment</Button>
                   </Link>
                 </div>
               </div>
@@ -87,7 +87,7 @@ const Insights = () => {
               
               <div className="mt-12">
                 <Link to="/assessment">
-                  <Button size="lg" className="mx-auto">Start My Assessment</Button>
+                  <Button className="mx-auto">Start My Assessment</Button>
                 </Link>
               </div>
             </div>

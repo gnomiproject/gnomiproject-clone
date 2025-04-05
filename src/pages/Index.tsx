@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Button from '@/components/shared/Button';
@@ -19,10 +18,7 @@ const Index = () => {
       <section className="py-16 px-6 md:px-12 bg-gradient-to-br from-blue-50 to-white">
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row items-center">
-            <div className="md:w-1/6 mb-8 md:mb-0">
-              {/* Gnome image removed */}
-            </div>
-            <div className="md:w-full md:pl-8">
+            <div className="md:w-full">
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
                 What's Your Company's <span className="text-blue-500">Healthcare Personality?</span>
               </h1>
@@ -51,15 +47,8 @@ const Index = () => {
       {/* DNA Section */}
       <section className="py-16 px-6 md:px-12 bg-blue-50">
         <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col md:flex-row items-center gap-8">
-            <div className="md:w-2/5">
-              <img 
-                src="/lovable-uploads/ca1c73d6-92e6-464a-b685-4f51fb7c26c1.png" 
-                alt="DNA Double Helix" 
-                className="w-full h-auto"
-              />
-            </div>
-            <div className="md:w-full">
+          <div className="flex flex-col items-center gap-8">
+            <div className="w-full">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
                 Archetypes Unlock Your Healthcare Program's Hidden Potential
               </h2>
@@ -134,18 +123,10 @@ const Index = () => {
             high-impact opportunities without months of analysis.
           </p>
           
-          <div className="flex justify-center mb-10">
+          <div className="flex justify-center">
             <Link to="/assessment">
               <Button className="text-lg px-8 py-4">Find Your Healthcare Archetype</Button>
             </Link>
-          </div>
-          
-          <div className="flex justify-center">
-            <img 
-              src="/lovable-uploads/207a4c72-eb25-4e20-9794-c53fdbb4ea68.png" 
-              alt="Gnome Mascot" 
-              className="h-auto w-32"
-            />
           </div>
         </div>
       </section>
