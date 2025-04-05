@@ -35,7 +35,7 @@ const Results = () => {
     navigate('/assessment');
   };
 
-  const handleViewReport = () => {
+  const handleViewInsights = () => {
     navigate('/insights', { state: { selectedArchetype: archetypeData.id } });
   };
   
@@ -78,20 +78,21 @@ const Results = () => {
               </Button>
               
               <Button
-                onClick={handleViewReport}
+                onClick={handleViewInsights}
                 className={`bg-${color} hover:bg-${color}/90 text-white flex items-center`}
               >
-                View Full Report
+                View Full Insights
               </Button>
             </div>
 
+            {/* Make the dropdown button more prominent */}
             <div className="text-center mb-8">
               <button 
                 onClick={() => setShowDetails(!showDetails)}
-                className="flex items-center justify-center mx-auto text-gray-600 hover:text-gray-800"
+                className={`flex items-center justify-center mx-auto px-6 py-3 rounded-lg text-white font-medium transition-colors bg-${color} hover:bg-${color}/90`}
               >
-                Explore the detailed sections below to see KPIs, strategic priorities, risk profiles, and cost-saving opportunities
-                <ChevronDown className={`ml-2 h-4 w-4 transition-transform ${showDetails ? 'rotate-180' : ''}`} />
+                {showDetails ? "Hide Detailed Analysis" : "Show Detailed Analysis"}
+                <ChevronDown className={`ml-2 h-5 w-5 transition-transform ${showDetails ? 'rotate-180' : ''}`} />
               </button>
             </div>
           </div>

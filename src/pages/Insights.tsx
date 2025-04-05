@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Button from '@/components/shared/Button';
@@ -102,16 +103,16 @@ const Insights = () => {
               </div>
             </div>
             
-            {/* Detailed analysis section - now open by default */}
+            {/* Detailed analysis section - now with a more prominent toggle button */}
             <Collapsible
               open={isOpen}
               onOpenChange={setIsOpen}
               className="w-full"
             >
               <div className="border-t py-4 px-8 text-center">
-                <CollapsibleTrigger className="flex items-center justify-center text-gray-600 hover:text-gray-800 w-full">
+                <CollapsibleTrigger className={`flex items-center justify-center mx-auto px-6 py-3 rounded-lg text-white font-medium transition-colors bg-${`archetype-${archetypeData.id}`} hover:bg-${`archetype-${archetypeData.id}`}/90 w-auto`}>
                   {isOpen ? "Hide detailed analysis" : "Show detailed analysis"}
-                  <ChevronDown className={`ml-2 h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`ml-2 h-5 w-5 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
                 </CollapsibleTrigger>
               </div>
               
