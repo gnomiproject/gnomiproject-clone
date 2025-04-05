@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Button from '@/components/shared/Button';
@@ -9,6 +8,9 @@ import ArchetypeReport from '@/components/insights/ArchetypeReport';
 import { Badge } from '@/components/ui/badge';
 import { ChevronDown, RefreshCw } from 'lucide-react';
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
+
+// Storage key for insights
+const INSIGHTS_STORAGE_KEY = 'healthcareArchetypeInsights';
 
 const Insights = () => {
   const [selectedArchetype, setSelectedArchetype] = useState<ArchetypeId | null>(null);
@@ -23,14 +25,33 @@ const Insights = () => {
   useEffect(() => {
     // Check if an archetype was selected from Results page
     if (location.state?.selectedArchetype) {
-      setSelectedArchetype(location.state.selectedArchetype);
+      const newArchetype = location.state.selectedArchetype;
+      setSelectedArchetype(newArchetype);
+      
+      // Store in localStorage to persist across refreshes
+      localStorage.setItem(INSIGHTS_STORAGE_KEY, newArchetype);
+      
       // Clear the location state to avoid persisting the selection on refresh
       window.history.replaceState({}, document.title);
+    } else {
+      // Try to retrieve from localStorage if no state is present
+      const storedArchetype = localStorage.getItem(INSIGHTS_STORAGE_KEY);
+      if (storedArchetype) {
+        setSelectedArchetype(storedArchetype as ArchetypeId);
+      }
     }
+    
+    // Clean up function - we don't clear localStorage here
+    // as we want to persist it for the session
+    return () => {
+      // No cleanup needed
+    };
   }, [location.state]);
 
   // Handle retaking the assessment
   const handleRetakeAssessment = () => {
+    // Navigate to assessment without clearing localStorage
+    // This allows the user to come back to insights with their previous results
     navigate('/assessment');
   };
 

@@ -1,9 +1,12 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { calculateArchetypeMatch, getAssessmentQuestions } from '../utils/assessmentUtils';
 import { AssessmentResult } from '../types/assessment';
 import { ArchetypeId } from '../types/archetype';
+
+// Storage key for insights - must match the one in Insights.tsx
+const INSIGHTS_STORAGE_KEY = 'healthcareArchetypeInsights';
 
 /**
  * Hook to manage the assessment process
@@ -59,6 +62,9 @@ export const useAssessment = () => {
       const assessmentResult = calculateArchetypeMatch(answers);
       setResult(assessmentResult);
       
+      // Clear previous archetype insights when a new assessment is completed
+      localStorage.removeItem(INSIGHTS_STORAGE_KEY);
+      
       // Navigate to results page with the results
       navigate('/results', { state: { result: assessmentResult } });
       setIsCalculating(false);
@@ -72,6 +78,9 @@ export const useAssessment = () => {
     setCurrentQuestion(1);
     setAnswers({});
     setResult(null);
+    
+    // Clear stored insights when assessment is reset
+    localStorage.removeItem(INSIGHTS_STORAGE_KEY);
   };
 
   return {
