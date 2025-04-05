@@ -66,7 +66,7 @@ const ArchetypeCard = ({ id, title, category, color, description, characteristic
             onClick={openDetails}
             className={`inline-flex items-center mt-auto text-sm font-medium py-1.5 px-3 rounded-md bg-${archetypeColorClass}/10 hover:bg-${archetypeColorClass}/20 text-${archetypeColorClass} transition-colors`}
           >
-            View Details 
+            Learn More 
             <ArrowRight className="w-4 h-4 ml-1.5" />
           </button>
         </div>
