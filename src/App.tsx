@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Navbar from "./components/layout/Navbar";
 import Index from "./pages/Index";
+import About from "./pages/About";
 import Assessment from "./pages/Assessment";
 import Results from "./pages/Results";
 import Insights from "./pages/Insights";
@@ -25,6 +26,7 @@ const App = () => (
           <main className="flex-grow">
             <Routes>
               <Route path="/" element={<Index />} />
+              <Route path="/about" element={<About />} />
               <Route path="/assessment" element={<Assessment />} />
               <Route path="/results" element={<Results />} />
               <Route path="/insights" element={<Insights />} />
