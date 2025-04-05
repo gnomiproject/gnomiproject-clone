@@ -23,15 +23,19 @@ const ArchetypeCard = ({ id, title, category, color, description, characteristic
   const openDetails = () => setShowDetails(true);
   const closeDetails = () => setShowDetails(false);
   
+  // Determine if this is a family or archetype color
+  const isFamily = category.toLowerCase().includes('family');
+  const colorClass = isFamily ? `family-${id.charAt(0)}` : `archetype-${id}`;
+  
   return (
     <>
-      <div className={`bg-white rounded-lg shadow-sm border-l-4 border-${color} overflow-hidden`}>
+      <div className={`bg-white rounded-lg shadow-sm border-l-4 border-${colorClass} overflow-hidden`}>
         <div className="p-6">
           <div className="mb-4 flex items-center">
-            <span className={`text-xs font-medium px-2 py-1 rounded-full bg-${color}/10 text-${color} mr-2`}>
+            <span className={`text-xs font-medium px-2 py-1 rounded-full bg-${colorClass}/10 text-${colorClass} mr-2`}>
               {category.toLowerCase()}
             </span>
-            <span className={`text-xs font-medium px-2 py-1 rounded-full bg-${color}/20 text-${color}`}>
+            <span className={`text-xs font-medium px-2 py-1 rounded-full bg-${colorClass}/20 text-${colorClass}`}>
               {id}
             </span>
           </div>
@@ -47,7 +51,7 @@ const ArchetypeCard = ({ id, title, category, color, description, characteristic
             <ul className="space-y-2">
               {characteristics.slice(0, 3).map((item, index) => (
                 <li key={index} className="flex items-center">
-                  <span className={`mr-2 flex-shrink-0 text-${color}`}>●</span>
+                  <span className={`mr-2 flex-shrink-0 text-${colorClass}`}>●</span>
                   <span className="text-sm">{item}</span>
                 </li>
               ))}
@@ -56,7 +60,7 @@ const ArchetypeCard = ({ id, title, category, color, description, characteristic
           
           <button 
             onClick={openDetails}
-            className={`inline-flex items-center text-sm font-medium text-gray-700 hover:text-${color}`}
+            className={`inline-flex items-center text-sm font-medium text-gray-700 hover:text-${colorClass}`}
           >
             View Details 
             <ArrowRight className="w-4 h-4 ml-1" />
