@@ -2,7 +2,7 @@
 import { Archetype } from '../types/archetype';
 
 export const archetypes: Archetype[] = [
-  // Family A: Strategists
+  // Family a: Strategists
   {
     id: 'a1',
     name: 'Savvy Healthcare Navigators',
@@ -30,7 +30,7 @@ export const archetypes: Archetype[] = [
     riskScore: 7.2,
     riskVariance: 10,
     primaryRiskDriver: 'Specialty condition prevalence',
-    color: 'orange'
+    color: 'archetype-a1'
   },
   {
     id: 'a2',
@@ -59,7 +59,7 @@ export const archetypes: Archetype[] = [
     riskScore: 8.5,
     riskVariance: 25,
     primaryRiskDriver: 'Chronic condition prevalence',
-    color: 'teal'
+    color: 'archetype-a2'
   },
   {
     id: 'a3',
@@ -88,13 +88,13 @@ export const archetypes: Archetype[] = [
     riskScore: 5.8,
     riskVariance: -5,
     primaryRiskDriver: 'Family health management',
-    color: 'yellow'
+    color: 'archetype-a3'
   },
   
-  // Family B: Pragmatists
+  // Family b: Pragmatists
   {
     id: 'b1',
-    name: 'Cost-Conscious Optimizers',
+    name: 'Resourceful Adapters',
     familyId: 'b',
     shortDescription: 'Organizations that prioritize healthcare cost management while maintaining effective health outcomes.',
     longDescription: 'These organizations excel at balancing cost efficiency with appropriate healthcare access, implementing targeted interventions that deliver the highest value for their specific population needs.',
@@ -119,11 +119,11 @@ export const archetypes: Archetype[] = [
     riskScore: 6.4,
     riskVariance: -2,
     primaryRiskDriver: 'Utilization variance',
-    color: 'blue'
+    color: 'archetype-b1'
   },
   {
     id: 'b2',
-    name: 'Balanced Benefits Providers',
+    name: 'Healthcare Pragmatists',
     familyId: 'b',
     shortDescription: 'Organizations that maintain a methodical approach to healthcare benefits with balanced cost and access priorities.',
     longDescription: 'These organizations achieve consistent health outcomes through well-structured benefit designs that balance access, quality, and cost considerations for their workforce demographics.',
@@ -148,11 +148,11 @@ export const archetypes: Archetype[] = [
     riskScore: 6.0,
     riskVariance: 0,
     primaryRiskDriver: 'Demographic distribution',
-    color: 'purple'
+    color: 'archetype-b2'
   },
   {
     id: 'b3',
-    name: 'Workforce Health Stabilizers',
+    name: 'Care Channel Optimizers',
     familyId: 'b',
     shortDescription: 'Organizations focused on maintaining workforce health through practical interventions and targeted health initiatives.',
     longDescription: 'These organizations prioritize stability in healthcare outcomes and costs, implementing practical programs that address the specific health needs of their employee population.',
@@ -177,13 +177,13 @@ export const archetypes: Archetype[] = [
     riskScore: 5.9,
     riskVariance: -3,
     primaryRiskDriver: 'Occupational risk factors',
-    color: 'green'
+    color: 'archetype-b3'
   },
 
-  // Family C: Logisticians
+  // Family c: Logisticians
   {
     id: 'c1',
-    name: 'Process-Driven Care Coordinators',
+    name: 'Scalable Access Architects',
     familyId: 'c',
     shortDescription: 'Organizations that excel in systematic care coordination through established protocols and procedures.',
     longDescription: 'These organizations leverage highly structured healthcare processes to ensure consistent care delivery, implementing standardized protocols that guide members through the healthcare system efficiently.',
@@ -208,11 +208,11 @@ export const archetypes: Archetype[] = [
     riskScore: 6.7,
     riskVariance: 5,
     primaryRiskDriver: 'Care coordination complexity',
-    color: 'red'
+    color: 'archetype-c1'
   },
   {
     id: 'c2',
-    name: 'Data-Driven Decision Makers',
+    name: 'Care Adherence Advocates',
     familyId: 'c',
     shortDescription: 'Organizations that leverage comprehensive data analysis to guide healthcare strategy and interventions.',
     longDescription: 'These organizations excel at using healthcare data to inform benefit design and clinical interventions, implementing targeted programs based on robust analytics and population insights.',
@@ -237,11 +237,11 @@ export const archetypes: Archetype[] = [
     riskScore: 7.1,
     riskVariance: 8,
     primaryRiskDriver: 'Population health complexities',
-    color: 'indigo'
+    color: 'archetype-c2'
   },
   {
     id: 'c3',
-    name: 'Compliance-Focused Implementers',
+    name: 'Engaged Healthcare Consumers',
     familyId: 'c',
     shortDescription: 'Organizations that prioritize healthcare regulatory compliance while maintaining effective benefit structures.',
     longDescription: 'These organizations excel at maintaining compliance with healthcare regulations while implementing effective benefits programs, focusing on quality standards and documentation throughout the healthcare delivery system.',
@@ -266,7 +266,6 @@ export const archetypes: Archetype[] = [
     riskScore: 6.3,
     riskVariance: 2,
     primaryRiskDriver: 'Regulatory complexity',
-    color: 'pink'
+    color: 'archetype-c3'
   }
 ];
-

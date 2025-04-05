@@ -18,46 +18,6 @@ const ArchetypeCard = ({ id, title, category, color, description, characteristic
   const [showDetails, setShowDetails] = useState(false);
   const { getArchetypeStandard } = useArchetypes();
   
-  const colorStyles = {
-    orange: {
-      border: 'border-l-orange-500',
-      badge: 'bg-orange-100 text-orange-600',
-      category: 'bg-orange-100 text-orange-600',
-      icon: 'text-orange-500'
-    },
-    teal: {
-      border: 'border-l-teal-500',
-      badge: 'bg-teal-100 text-teal-600',
-      category: 'bg-teal-100 text-teal-600',
-      icon: 'text-teal-500'
-    },
-    yellow: {
-      border: 'border-l-yellow-500',
-      badge: 'bg-yellow-100 text-yellow-600',
-      category: 'bg-yellow-100 text-yellow-600',
-      icon: 'text-yellow-500'
-    },
-    blue: {
-      border: 'border-l-blue-500',
-      badge: 'bg-blue-100 text-blue-600',
-      category: 'bg-blue-100 text-blue-600',
-      icon: 'text-blue-500'
-    },
-    purple: {
-      border: 'border-l-purple-500',
-      badge: 'bg-purple-100 text-purple-600',
-      category: 'bg-purple-100 text-purple-600',
-      icon: 'text-purple-500'
-    },
-    green: {
-      border: 'border-l-green-500',
-      badge: 'bg-green-100 text-green-600',
-      category: 'bg-green-100 text-green-600',
-      icon: 'text-green-500'
-    }
-  };
-  
-  const styles = colorStyles[color as keyof typeof colorStyles] || colorStyles.blue;
   const detailedData = getArchetypeStandard(id);
   
   const openDetails = () => setShowDetails(true);
@@ -65,13 +25,13 @@ const ArchetypeCard = ({ id, title, category, color, description, characteristic
   
   return (
     <>
-      <div className={`bg-white rounded-lg shadow-sm border-l-4 ${styles.border} overflow-hidden`}>
+      <div className={`bg-white rounded-lg shadow-sm border-l-4 border-l-${color} overflow-hidden`}>
         <div className="p-6">
           <div className="mb-4 flex items-center">
-            <span className={`text-xs font-medium px-2 py-1 rounded-full ${styles.category} mr-2`}>
-              {category}
+            <span className={`text-xs font-medium px-2 py-1 rounded-full bg-${color}/10 text-${color} mr-2`}>
+              {category.toLowerCase()}
             </span>
-            <span className={`text-xs font-medium px-2 py-1 rounded-full ${styles.badge}`}>
+            <span className={`text-xs font-medium px-2 py-1 rounded-full bg-${color}/20 text-${color}`}>
               {id}
             </span>
           </div>
@@ -87,7 +47,7 @@ const ArchetypeCard = ({ id, title, category, color, description, characteristic
             <ul className="space-y-2">
               {characteristics.slice(0, 3).map((item, index) => (
                 <li key={index} className="flex items-center">
-                  <span className={`mr-2 flex-shrink-0 ${styles.icon}`}>●</span>
+                  <span className={`mr-2 flex-shrink-0 text-${color}`}>●</span>
                   <span className="text-sm">{item}</span>
                 </li>
               ))}
@@ -96,7 +56,7 @@ const ArchetypeCard = ({ id, title, category, color, description, characteristic
           
           <button 
             onClick={openDetails}
-            className="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600"
+            className={`inline-flex items-center text-sm font-medium text-gray-700 hover:text-${color}`}
           >
             View Details 
             <ArrowRight className="w-4 h-4 ml-1" />
@@ -110,10 +70,10 @@ const ArchetypeCard = ({ id, title, category, color, description, characteristic
             <>
               <DialogHeader>
                 <div className="flex items-center gap-2 mb-2">
-                  <span className={`text-xs font-medium px-2 py-1 rounded-full ${styles.category}`}>
-                    {detailedData.familyName}
+                  <span className={`text-xs font-medium px-2 py-1 rounded-full bg-${color}/10 text-${color}`}>
+                    {detailedData.familyName.toLowerCase()}
                   </span>
-                  <span className={`text-xs font-medium px-2 py-1 rounded-full ${styles.badge}`}>
+                  <span className={`text-xs font-medium px-2 py-1 rounded-full bg-${color}/20 text-${color}`}>
                     {detailedData.id}
                   </span>
                 </div>
@@ -128,7 +88,7 @@ const ArchetypeCard = ({ id, title, category, color, description, characteristic
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
                     {detailedData.keyCharacteristics.map((characteristic, index) => (
                       <div key={index} className="flex items-center gap-3 p-3 rounded-md bg-gray-50">
-                        <div className={`h-2 w-2 rounded-full bg-${color}-500`}></div>
+                        <div className={`h-2 w-2 rounded-full bg-${color}`}></div>
                         <span>{characteristic}</span>
                       </div>
                     ))}
@@ -165,7 +125,7 @@ const ArchetypeCard = ({ id, title, category, color, description, characteristic
                   <ul className="space-y-2 mb-8">
                     {detailedData.keyInsights.map((insight, index) => (
                       <li key={index} className="flex items-center gap-2">
-                        <div className={`h-2 w-2 rounded-full bg-${color}-500 flex-shrink-0`}></div>
+                        <div className={`h-2 w-2 rounded-full bg-${color} flex-shrink-0`}></div>
                         <span>{insight}</span>
                       </li>
                     ))}

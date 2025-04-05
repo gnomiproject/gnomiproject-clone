@@ -62,7 +62,22 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+				// Family colors
+				'family-a': '#00B0F0',  // Strategists
+				'family-b': '#00B2B1',  // Pragmatists
+				'family-c': '#FF8B91',  // Logisticians
+				
+				// Archetype specific colors
+				'archetype-a1': '#EC7500', // Savvy Healthcare Navigators
+				'archetype-a2': '#46E0D3', // Complex Condition Managers
+				'archetype-a3': '#FFC600', // Proactive Care Consumers
+				'archetype-b1': '#7030A0', // Resourceful Adapters
+				'archetype-b2': '#FF8C91', // Healthcare Pragmatists
+				'archetype-b3': '#0D41C0', // Care Channel Optimizers
+				'archetype-c1': '#E40032', // Scalable Access Architects
+				'archetype-c2': '#00B0F0', // Care Adherence Advocates
+				'archetype-c3': '#870C0C',  // Engaged Healthcare Consumers
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

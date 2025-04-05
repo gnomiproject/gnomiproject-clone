@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Button from '@/components/shared/Button';
@@ -38,10 +39,14 @@ const Results = () => {
     navigate('/insights', { state: { selectedArchetype: archetypeData.id } });
   };
   
+  // Using the custom color based on archetype.id
+  const color = `archetype-${archetypeData.id}`;
+  const familyColor = `family-${archetypeData.familyId}`;
+  
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-6 md:px-12">
       <div className="max-w-4xl mx-auto">
-        <div className={`bg-white rounded-lg shadow-sm overflow-hidden border-t-4 border-${archetypeData.color}-500`}>
+        <div className={`bg-white rounded-lg shadow-sm overflow-hidden border-t-4 border-${color}`}>
           <div className="p-8">
             <SectionTitle 
               title="Assessment Results"
@@ -50,13 +55,13 @@ const Results = () => {
             />
 
             <div className="text-center mb-6">
-              <span className="inline-block bg-blue-100 text-blue-600 rounded-full px-4 py-1 text-sm font-medium">
-                Family {archetypeData.familyId}: {familyData?.name || ''}
+              <span className={`inline-block bg-${familyColor}/10 text-${familyColor} rounded-full px-4 py-1 text-sm font-medium`}>
+                family {archetypeData.familyId}: {familyData?.name || ''}
               </span>
             </div>
 
             <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
-              {archetypeData.name} <span className={`inline-block bg-${archetypeData.color}-50 text-${archetypeData.color}-600 border border-${archetypeData.color}-300 rounded-full px-3 py-1 text-sm font-medium align-middle ml-2`}>{archetypeData.id}</span>
+              {archetypeData.name} <span className={`inline-block bg-${color}/10 text-${color} border border-${color}/30 rounded-full px-3 py-1 text-sm font-medium align-middle ml-2`}>{archetypeData.id}</span>
             </h2>
 
             <p className="text-gray-700 text-lg text-center mb-8">
@@ -74,7 +79,7 @@ const Results = () => {
               
               <Button
                 onClick={handleViewReport}
-                className={`bg-${archetypeData.color}-500 hover:bg-${archetypeData.color}-600 flex items-center`}
+                className={`bg-${color} hover:bg-${color}/90 text-white flex items-center`}
               >
                 View Full Report
               </Button>
@@ -97,7 +102,7 @@ const Results = () => {
                 <h3 className="text-2xl font-bold mb-6">Detailed Analysis</h3>
                 
                 <div className="border-b flex overflow-x-auto">
-                  <button className="px-6 py-3 font-medium text-blue-600 border-b-2 border-blue-500">Overview</button>
+                  <button className={`px-6 py-3 font-medium text-${color} border-b-2 border-${color}`}>Overview</button>
                   <button className="px-6 py-3 font-medium text-gray-600 hover:text-gray-800">KPIs & Risk</button>
                   <button className="px-6 py-3 font-medium text-gray-600 hover:text-gray-800">Strategic Priorities</button>
                   <button className="px-6 py-3 font-medium text-gray-600 hover:text-gray-800">SWOT Analysis</button>
@@ -108,8 +113,8 @@ const Results = () => {
                   <div className="flex flex-col md:flex-row">
                     <div className="w-full md:w-1/3 md:border-r md:pr-8">
                       <div className="flex flex-col h-full">
-                        <div className={`bg-${archetypeData.color}-50 rounded-full h-24 w-24 flex items-center justify-center mb-6`}>
-                          <span className={`text-3xl font-bold text-${archetypeData.color}-600`}>{archetypeData.id}</span>
+                        <div className={`bg-${color}/10 rounded-full h-24 w-24 flex items-center justify-center mb-6`}>
+                          <span className={`text-3xl font-bold text-${color}`}>{archetypeData.id}</span>
                         </div>
                         <h4 className="text-2xl font-bold mb-4">{archetypeData.name}</h4>
                         <h5 className="text-xl font-bold mb-4">What Makes {archetypeData.name} Unique</h5>
@@ -128,8 +133,8 @@ const Results = () => {
                         {archetypeData.enhanced?.strategicPriorities?.slice(0, 3).map((priority, index) => (
                           <div key={index} className="bg-white rounded-lg border p-6">
                             <div className="flex items-start gap-4">
-                              <div className={`bg-${archetypeData.color}-50 rounded-full p-3`}>
-                                <span className={`text-${archetypeData.color}-500`}>
+                              <div className={`bg-${color}/10 rounded-full p-3`}>
+                                <span className={`text-${color}`}>
                                   {index === 0 ? '🧠' : index === 1 ? '💎' : '📈'}
                                 </span>
                               </div>
@@ -158,28 +163,28 @@ const Results = () => {
 
             <div className="bg-white rounded-lg border p-6">
               <div className="flex items-center gap-2 mb-4">
-                <span className={`text-${archetypeData.color}-500 text-xl`}>📄</span>
+                <span className={`text-${color} text-xl`}>📄</span>
                 <h4 className="text-xl font-bold">Complete {archetypeData.id} Archetype Analysis</h4>
-                <span className={`bg-${archetypeData.color}-100 text-${archetypeData.color}-700 text-xs px-2 py-1 rounded-full`}>PREMIUM</span>
+                <span className={`bg-${color}/10 text-${color} text-xs px-2 py-1 rounded-full`}>PREMIUM</span>
               </div>
 
               <h5 className="font-bold mb-4">Your detailed report includes:</h5>
 
               <ul className="space-y-3 mb-6">
                 <li className="flex items-start">
-                  <span className={`text-${archetypeData.color}-500 mr-2`}>→</span>
+                  <span className={`text-${color} mr-2`}>→</span>
                   <span>Customized benchmarking against similar organizations</span>
                 </li>
                 <li className="flex items-start">
-                  <span className={`text-${archetypeData.color}-500 mr-2`}>→</span>
+                  <span className={`text-${color} mr-2`}>→</span>
                   <span>Strategic implementation roadmap with priorities</span>
                 </li>
                 <li className="flex items-start">
-                  <span className={`text-${archetypeData.color}-500 mr-2`}>→</span>
+                  <span className={`text-${color} mr-2`}>→</span>
                   <span>Cost-saving estimates specific to your business</span>
                 </li>
                 <li className="flex items-start">
-                  <span className={`text-${archetypeData.color}-500 mr-2`}>→</span>
+                  <span className={`text-${color} mr-2`}>→</span>
                   <span>Expert consultation with a healthcare strategist</span>
                 </li>
               </ul>
@@ -188,7 +193,7 @@ const Results = () => {
                 <p className="text-gray-600 mb-4 md:mb-0">
                   Our team will prepare a custom analysis within 24 hours.
                 </p>
-                <Button className={`bg-${archetypeData.color}-500 hover:bg-${archetypeData.color}-600 w-full md:w-auto`}>
+                <Button className={`bg-${color} hover:bg-${color}/90 text-white w-full md:w-auto`}>
                   Request My Detailed Report
                 </Button>
               </div>

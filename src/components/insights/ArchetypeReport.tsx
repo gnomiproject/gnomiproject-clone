@@ -21,30 +21,20 @@ const ArchetypeReport = ({ archetypeId }: ArchetypeReportProps) => {
   const metrics = getMetricsForArchetype(archetypeId);
   
   if (!archetype) return <div>Archetype not found</div>;
-  
-  const colorMap = {
-    orange: 'orange',
-    teal: 'teal',
-    yellow: 'yellow',
-    blue: 'blue',
-    purple: 'purple',
-    green: 'green',
-    red: 'red',
-    indigo: 'indigo',
-    pink: 'pink'
-  };
-  
-  const color = colorMap[archetype.color] || 'blue';
+
+  // Using the custom color based on archetype.id
+  const color = `archetype-${archetype.id}`;
+  const familyColor = `family-${archetype.familyId}`;
   
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-12">
-      <div className={`h-2 bg-${color}-500`}></div>
+      <div className={`h-2 bg-${color}`}></div>
       <div className="p-8">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <Badge className={`bg-${color}-100 text-${color}-700 hover:bg-${color}-200`}>
-                {archetype.familyName}
+              <Badge className={`bg-${familyColor}/10 text-${familyColor} hover:bg-${familyColor}/20 border-0`}>
+                {`family ${archetype.familyId}`}
               </Badge>
               <Badge variant="outline">{archetype.id}</Badge>
             </div>
@@ -80,8 +70,8 @@ const ArchetypeReport = ({ archetypeId }: ArchetypeReportProps) => {
           <TabsContent value="overview" className="mt-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="md:col-span-1">
-                <div className={`w-24 h-24 rounded-full bg-${color}-100 flex items-center justify-center mb-4`}>
-                  <span className={`text-3xl font-bold text-${color}-600`}>{archetype.id}</span>
+                <div className={`w-24 h-24 rounded-full bg-${color}/10 flex items-center justify-center mb-4`}>
+                  <span className={`text-3xl font-bold text-${color}`}>{archetype.id}</span>
                 </div>
                 <h3 className="text-xl font-bold mb-4">About {archetype.name}</h3>
                 <p className="text-gray-700">{archetype.standard.overview}</p>
@@ -97,7 +87,7 @@ const ArchetypeReport = ({ archetypeId }: ArchetypeReportProps) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
                   {archetype.standard.keyCharacteristics.map((characteristic, index) => (
                     <div key={index} className="flex items-center gap-3 p-3 rounded-md bg-gray-50">
-                      <div className={`h-2 w-2 rounded-full bg-${color}-500`}></div>
+                      <div className={`h-2 w-2 rounded-full bg-${color}`}></div>
                       <span>{characteristic}</span>
                     </div>
                   ))}
@@ -132,8 +122,8 @@ const ArchetypeReport = ({ archetypeId }: ArchetypeReportProps) => {
               {archetype.enhanced?.strategicPriorities?.map((priority, index) => (
                 <div key={index} className="bg-white border rounded-lg p-6 shadow-sm">
                   <div className="flex items-start gap-4">
-                    <div className={`bg-${color}-100 rounded-lg p-4 flex-shrink-0`}>
-                      <span className={`text-${color}-600 text-xl font-bold`}>{priority.number}</span>
+                    <div className={`bg-${color}/10 rounded-lg p-4 flex-shrink-0`}>
+                      <span className={`text-${color} text-xl font-bold`}>{priority.number}</span>
                     </div>
                     <div>
                       <h4 className="text-lg font-bold mb-2">{priority.title}</h4>
@@ -163,7 +153,7 @@ const ArchetypeReport = ({ archetypeId }: ArchetypeReportProps) => {
                 <div className="bg-white border rounded-lg p-6 mb-6">
                   <div className="flex items-baseline justify-between mb-2">
                     <h4 className="font-bold">Risk Score</h4>
-                    <span className={`text-${color}-600 text-lg font-bold`}>{archetype.enhanced?.riskProfile.score}</span>
+                    <span className={`text-${color} text-lg font-bold`}>{archetype.enhanced?.riskProfile.score}</span>
                   </div>
                   <p className="text-sm text-gray-600 mb-4">{archetype.enhanced?.riskProfile.comparison}</p>
                   
@@ -237,7 +227,7 @@ const ArchetypeReport = ({ archetypeId }: ArchetypeReportProps) => {
                 <ul className="space-y-2">
                   {traits.uniqueInsights.map((insight, index) => (
                     <li key={index} className="flex items-center gap-2">
-                      <div className={`h-2 w-2 rounded-full bg-${color}-500 flex-shrink-0`}></div>
+                      <div className={`h-2 w-2 rounded-full bg-${color} flex-shrink-0`}></div>
                       <span>{insight}</span>
                     </li>
                   ))}
@@ -309,7 +299,7 @@ const ArchetypeReport = ({ archetypeId }: ArchetypeReportProps) => {
             <h3 className="text-lg font-bold mb-1">Want an even deeper analysis?</h3>
             <p className="text-gray-600">Get a customized report tailored to your specific organization.</p>
           </div>
-          <Button className={`bg-${color}-500 hover:bg-${color}-600`}>Request Custom Analysis</Button>
+          <Button className={`bg-${color} hover:bg-${color}/90 text-white`}>Request Custom Analysis</Button>
         </div>
       </div>
     </div>
