@@ -16,9 +16,9 @@ const Index = () => {
       {/* Hero Section with light blue background */}
       <section className="py-8 bg-blue-50/50 relative overflow-hidden">
         <div className="max-w-6xl mx-auto px-6 md:px-12">
-          <div className="flex flex-col items-center">
-            {/* Gnome character - smaller with reduced bottom margin */}
-            <div className="mb-2">
+          <div className="flex flex-col items-start">
+            {/* Gnome character positioned to the left */}
+            <div className="mb-2 self-center md:self-start">
               <img 
                 src="/lovable-uploads/3efcc8b7-0e2d-4a2b-bb23-fa686f18c691.png" 
                 alt="Gnome character" 
@@ -26,15 +26,15 @@ const Index = () => {
               />
             </div>
             
-            {/* Title - with reduced spacing */}
-            <div className="text-center mb-5">
+            {/* Title - left aligned */}
+            <div className="mb-5 text-left">
               <h1 className="text-4xl md:text-5xl font-bold">
                 <span className="block">What's Your Company's</span>
                 <span className="block text-blue-500">Healthcare Personality?</span>
               </h1>
             </div>
             
-            <div className="max-w-4xl text-center">
+            <div className="max-w-4xl text-left">
               <p className="text-lg text-gray-700 mb-3">
                 Curious why your healthcare program differs from similar companies? Wonder which strategies would work best for your unique workforce?
               </p>
@@ -43,7 +43,7 @@ const Index = () => {
                 In just 3 minutes, discover which of our nine healthcare archetypes matches your organization. Based on data from 400+ companies and 7+ million members, these archetypes reveal insights that typical industry benchmarks miss.
               </p>
               
-              <div className="flex flex-col sm:flex-row justify-center gap-4">
+              <div className="flex flex-col sm:flex-row gap-4">
                 <Link to="/assessment">
                   <Button size="lg">Find Your Archetype</Button>
                 </Link>
