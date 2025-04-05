@@ -54,7 +54,7 @@ export const useAssessment = () => {
     const assessmentResult = calculateArchetypeMatch(answers);
     setResult(assessmentResult);
     
-    // Navigate to results page
+    // Navigate to results page with the results
     navigate('/results', { state: { result: assessmentResult } });
   };
 
@@ -80,4 +80,3 @@ export const useAssessment = () => {
     resetAssessment
   };
 };
-

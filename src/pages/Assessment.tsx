@@ -1,34 +1,18 @@
-
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
 import Button from '@/components/shared/Button';
 import SectionTitle from '@/components/shared/SectionTitle';
 import { RefreshCw } from 'lucide-react';
+import { useAssessment } from '../hooks/useAssessment';
 
 const Assessment = () => {
-  const [currentQuestion, setCurrentQuestion] = useState(1);
-  const [answers, setAnswers] = useState<Record<string, string>>({});
-  const navigate = useNavigate();
-  
-  const totalQuestions = 5;
-  
-  const handleAnswerSelect = (questionId: string, answer: string) => {
-    setAnswers(prev => ({ ...prev, [questionId]: answer }));
-  };
-  
-  const goToNextQuestion = () => {
-    if (currentQuestion < totalQuestions) {
-      setCurrentQuestion(currentQuestion + 1);
-    } else {
-      navigate('/results');
-    }
-  };
-  
-  const goToPreviousQuestion = () => {
-    if (currentQuestion > 1) {
-      setCurrentQuestion(currentQuestion - 1);
-    }
-  };
+  const { 
+    currentQuestion, 
+    totalQuestions, 
+    answers, 
+    setAnswer, 
+    goToNext, 
+    goToPrevious 
+  } = useAssessment();
   
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-6 md:px-12">
@@ -60,41 +44,41 @@ const Assessment = () => {
           {currentQuestion === 1 && (
             <QuestionOne
               value={answers['industry'] || ''}
-              onChange={(value) => handleAnswerSelect('industry', value)}
+              onChange={(value) => setAnswer('industry', value)}
             />
           )}
           
           {currentQuestion === 2 && (
             <QuestionTwo
               value={answers['geography'] || ''}
-              onChange={(value) => handleAnswerSelect('geography', value)}
+              onChange={(value) => setAnswer('geography', value)}
             />
           )}
           
           {currentQuestion === 3 && (
             <QuestionThree
               value={answers['size'] || ''}
-              onChange={(value) => handleAnswerSelect('size', value)}
+              onChange={(value) => setAnswer('size', value)}
             />
           )}
           
           {currentQuestion === 4 && (
             <QuestionFour
               value={answers['gender'] || ''}
-              onChange={(value) => handleAnswerSelect('gender', value)}
+              onChange={(value) => setAnswer('gender', value)}
             />
           )}
           
           {currentQuestion === 5 && (
             <QuestionFive
               value={answers['priorities'] || ''}
-              onChange={(value) => handleAnswerSelect('priorities', value)}
+              onChange={(value) => setAnswer('priorities', value)}
             />
           )}
           
           <div className="flex justify-between mt-8">
             <Button
-              onClick={goToPreviousQuestion}
+              onClick={goToPrevious}
               variant="outline"
               className="px-4 py-2"
             >
@@ -103,14 +87,14 @@ const Assessment = () => {
             
             {currentQuestion === totalQuestions ? (
               <Button
-                onClick={goToNextQuestion}
+                onClick={goToNext}
                 className="px-8"
               >
                 See Results
               </Button>
             ) : (
               <Button
-                onClick={goToNextQuestion}
+                onClick={goToNext}
                 className="px-8"
               >
                 Next
