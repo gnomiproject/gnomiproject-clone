@@ -12,7 +12,7 @@ import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/component
 
 const Insights = () => {
   const [selectedArchetype, setSelectedArchetype] = useState<ArchetypeId | null>(null);
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
   const location = useLocation();
   const navigate = useNavigate();
   const { getAllArchetypeSummaries, getArchetypeEnhanced, getFamilyById } = useArchetypes();
@@ -81,7 +81,7 @@ const Insights = () => {
               </div>
             </div>
             
-            {/* Collapsible section for detailed analysis */}
+            {/* Detailed analysis section - now open by default */}
             <Collapsible
               open={isOpen}
               onOpenChange={setIsOpen}
@@ -89,7 +89,7 @@ const Insights = () => {
             >
               <div className="border-t py-4 px-8 text-center">
                 <CollapsibleTrigger className="flex items-center justify-center text-gray-600 hover:text-gray-800 w-full">
-                  Explore the detailed sections below to see KPIs, strategic priorities, risk profiles, and cost-saving opportunities
+                  {isOpen ? "Hide detailed analysis" : "Show detailed analysis"}
                   <ChevronDown className={`ml-2 h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
                 </CollapsibleTrigger>
               </div>
