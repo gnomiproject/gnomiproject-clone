@@ -1,17 +1,15 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import SectionTitle from '@/components/shared/SectionTitle';
 import { useArchetypes } from '../hooks/useArchetypes';
 import { AssessmentResult } from '../types/assessment';
 import RetakeButton from '@/components/results/RetakeButton';
 import ArchetypeHeader from '@/components/results/ArchetypeHeader';
-import DetailToggleButton from '@/components/results/DetailToggleButton';
 import DetailedAnalysisTabs from '@/components/results/DetailedAnalysisTabs';
 import PremiumReport from '@/components/results/PremiumReport';
 
 const Results = () => {
-  const [showDetails, setShowDetails] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { getArchetypeEnhanced, getFamilyById } = useArchetypes();
@@ -19,7 +17,7 @@ const Results = () => {
   // Get the result from location state or redirect to assessment
   const result = location.state?.result as AssessmentResult | undefined;
   
-  useEffect(() => {
+  React.useEffect(() => {
     if (!result) {
       navigate('/assessment');
     }
@@ -63,20 +61,18 @@ const Results = () => {
               <RetakeButton onClick={handleRetakeAssessment} />
             </div>
 
-            {/* Detail Toggle Button Component */}
-            <DetailToggleButton 
-              showDetails={showDetails}
-              setShowDetails={setShowDetails}
-              archetypeData={archetypeData}
-            />
+            {/* Prompt to check detailed analysis */}
+            <div className="text-center mb-8">
+              <p className="text-gray-600">
+                Scroll down to explore your detailed analysis results below.
+              </p>
+            </div>
           </div>
 
-          {/* Detailed Analysis Tabs (conditionally rendered) */}
-          {showDetails && (
-            <div className="border-t">
-              <DetailedAnalysisTabs archetypeData={archetypeData} />
-            </div>
-          )}
+          {/* Detailed Analysis Tabs (always visible) */}
+          <div className="border-t">
+            <DetailedAnalysisTabs archetypeData={archetypeData} />
+          </div>
           
           {/* Premium Report Component */}
           <PremiumReport archetypeData={archetypeData} />
