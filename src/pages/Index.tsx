@@ -26,15 +26,15 @@ const Index = () => {
               />
             </div>
             
-            {/* Title - left aligned with max width matching text below */}
-            <div className="mb-5 text-left max-w-4xl">
+            {/* Title - Each line matches the width of text below */}
+            <div className="mb-5 text-left w-full">
               <h1 className="text-4xl md:text-5xl font-bold">
                 <span className="block">What's Your Company's</span>
                 <span className="block text-blue-500">Healthcare Personality?</span>
               </h1>
             </div>
             
-            <div className="max-w-4xl text-left">
+            <div className="w-full text-left">
               <p className="text-lg text-gray-700 mb-3">
                 Curious why your healthcare program differs from similar companies? Wonder which strategies would work best for your unique workforce?
               </p>
