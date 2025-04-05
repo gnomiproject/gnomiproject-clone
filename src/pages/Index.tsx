@@ -14,20 +14,20 @@ const Index = () => {
   return (
     <div className="min-h-screen">
       {/* Hero Section with light blue background */}
-      <section className="py-12 bg-blue-50/50 relative overflow-hidden">
+      <section className="py-8 bg-blue-50/50 relative overflow-hidden">
         <div className="max-w-6xl mx-auto px-6 md:px-12">
           <div className="flex flex-col items-center">
-            {/* Gnome character centered - made smaller */}
-            <div className="mb-4">
+            {/* Gnome character - smaller with reduced bottom margin */}
+            <div className="mb-2">
               <img 
                 src="/lovable-uploads/3efcc8b7-0e2d-4a2b-bb23-fa686f18c691.png" 
                 alt="Gnome character" 
-                className="h-32 md:h-40"
+                className="h-28 md:h-36"
               />
             </div>
             
-            {/* Title - reduced text size and spacing */}
-            <div className="text-center mb-6">
+            {/* Title - with reduced spacing */}
+            <div className="text-center mb-5">
               <h1 className="text-4xl md:text-5xl font-bold">
                 <span className="block">What's Your Company's</span>
                 <span className="block text-blue-500">Healthcare Personality?</span>
@@ -35,11 +35,11 @@ const Index = () => {
             </div>
             
             <div className="max-w-4xl text-center">
-              <p className="text-lg text-gray-700 mb-4">
+              <p className="text-lg text-gray-700 mb-3">
                 Curious why your healthcare program differs from similar companies? Wonder which strategies would work best for your unique workforce?
               </p>
               
-              <p className="text-lg text-gray-700 mb-6">
+              <p className="text-lg text-gray-700 mb-5">
                 In just 3 minutes, discover which of our nine healthcare archetypes matches your organization. Based on data from 400+ companies and 7+ million members, these archetypes reveal insights that typical industry benchmarks miss.
               </p>
               
