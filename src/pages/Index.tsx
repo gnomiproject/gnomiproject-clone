@@ -1,48 +1,17 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Button from '@/components/shared/Button';
 import SectionTitle from '@/components/shared/SectionTitle';
 import { Card, CardContent } from '@/components/ui/card';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Grid, List } from 'lucide-react';
+import { useArchetypes } from '@/hooks/useArchetypes';
+import ArchetypeCard from '@/components/home/ArchetypeCard';
 
 const Index = () => {
-  // Archetype data for the cards
-  const archetypes = [
-    {
-      family: 'a',
-      id: 'a1',
-      title: 'Innovation Leaders',
-      description: 'Organizations focused on innovation with knowledge workers and significant resources for benefits.',
-      characteristics: [
-        'Technology-forward approach',
-        'High percentage of knowledge workers'
-      ],
-      color: 'border-orange-400'
-    },
-    {
-      family: 'a',
-      id: 'a2',
-      title: 'Complex Condition Managers',
-      description: 'Adept at managing clinical complexity, these are organizations that face populations with elevated risk scores and high-cost specialty conditions.',
-      characteristics: [
-        'Effectively manages populations with higher clinical risk',
-        'Coordinates care for complex specialty conditions'
-      ],
-      color: 'border-teal-400'
-    },
-    {
-      family: 'a',
-      id: 'a3',
-      title: 'Proactive Care Consumers',
-      description: 'Focused on prevention and early intervention, these are organizations with younger populations, large families, and high specialty care demand.',
-      characteristics: [
-        'Focuses intensively on prevention and early intervention',
-        'Supports larger families with comprehensive benefits'
-      ],
-      color: 'border-yellow-400'
-    }
-  ];
+  const [view, setView] = useState<'grid' | 'list'>('grid');
+  const { getAllArchetypeSummaries } = useArchetypes();
+  const archetypeSummaries = getAllArchetypeSummaries;
 
   return (
     <div className="min-h-screen">
@@ -70,7 +39,9 @@ const Index = () => {
                 <Link to="/assessment">
                   <Button>Find Your Archetype</Button>
                 </Link>
-                <Button variant="secondary">Explore All Archetypes</Button>
+                <Link to="#archetype-section">
+                  <Button variant="secondary">Explore All Archetypes</Button>
+                </Link>
               </div>
             </div>
           </div>
@@ -82,7 +53,11 @@ const Index = () => {
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row items-center gap-8">
             <div className="md:w-2/5">
-              {/* DNA image removed */}
+              <img 
+                src="/lovable-uploads/ca1c73d6-92e6-464a-b685-4f51fb7c26c1.png" 
+                alt="DNA Double Helix" 
+                className="w-full h-auto"
+              />
             </div>
             <div className="md:w-full">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
@@ -100,7 +75,7 @@ const Index = () => {
       </section>
 
       {/* Archetypes Section */}
-      <section className="py-16 px-6 md:px-12">
+      <section id="archetype-section" className="py-16 px-6 md:px-12">
         <div className="max-w-6xl mx-auto">
           <SectionTitle 
             title="Meet the Employer Healthcare Archetypes" 
@@ -109,70 +84,34 @@ const Index = () => {
             className="mb-12"
           />
 
-          <div className="mb-8 flex gap-4">
-            <button className="bg-blue-500 text-white px-4 py-2 rounded-md flex items-center gap-2">
-              <span className="grid place-items-center w-5 h-5">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="3" y="3" width="7" height="7"></rect>
-                  <rect x="14" y="3" width="7" height="7"></rect>
-                  <rect x="3" y="14" width="7" height="7"></rect>
-                  <rect x="14" y="14" width="7" height="7"></rect>
-                </svg>
-              </span>
-              Grid
-            </button>
-            <button className="bg-white text-gray-700 px-4 py-2 rounded-md border flex items-center gap-2">
-              <span className="grid place-items-center w-5 h-5">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="8" y1="6" x2="21" y2="6"></line>
-                  <line x1="8" y1="12" x2="21" y2="12"></line>
-                  <line x1="8" y1="18" x2="21" y2="18"></line>
-                  <line x1="3" y1="6" x2="3.01" y2="6"></line>
-                  <line x1="3" y1="12" x2="3.01" y2="12"></line>
-                  <line x1="3" y1="18" x2="3.01" y2="18"></line>
-                </svg>
-              </span>
-              List
-            </button>
+          <div className="mb-8 flex items-center justify-start">
+            <div className="bg-white border rounded-lg flex overflow-hidden">
+              <button
+                className={`p-2 ${view === 'grid' ? 'bg-blue-500 text-white' : 'bg-white text-gray-600'}`}
+                onClick={() => setView('grid')}
+              >
+                <Grid className="h-5 w-5" />
+              </button>
+              <button
+                className={`p-2 ${view === 'list' ? 'bg-blue-500 text-white' : 'bg-white text-gray-600'}`}
+                onClick={() => setView('list')}
+              >
+                <List className="h-5 w-5" />
+              </button>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {archetypes.map((archetype) => (
-              <Card key={archetype.id} className={`border-t-4 ${archetype.color}`}>
-                <CardContent className="pt-6">
-                  <div className="flex gap-2 mb-4">
-                    <span className="bg-blue-500 text-white text-xs px-3 py-1 rounded-full">Family {archetype.family}</span>
-                    <span className={`text-xs px-3 py-1 rounded-full border ${
-                      archetype.id === 'a1' ? 'border-orange-400 text-orange-600' : 
-                      archetype.id === 'a2' ? 'border-teal-400 text-teal-600' : 
-                      'border-yellow-400 text-yellow-600'
-                    }`}>{archetype.id}</span>
-                  </div>
-                  
-                  <h3 className="text-xl font-bold mb-4">{archetype.title}</h3>
-                  <p className="text-gray-600 mb-6">{archetype.description}</p>
-                  
-                  <div className="mb-6">
-                    <h4 className="font-semibold mb-3">Key Characteristics:</h4>
-                    <ul className="space-y-2">
-                      {archetype.characteristics.map((characteristic, index) => (
-                        <li key={index} className="flex items-start gap-2">
-                          <span className={`mt-1 rounded-full w-4 h-4 ${
-                            archetype.id === 'a1' ? 'bg-orange-500' : 
-                            archetype.id === 'a2' ? 'bg-teal-500' : 
-                            'bg-yellow-500'
-                          }`}></span>
-                          <span className="text-gray-600">{characteristic}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  
-                  <button className="w-full border border-gray-200 py-3 flex items-center justify-center gap-2 rounded-md hover:bg-gray-50 transition-colors">
-                    Learn More <ArrowRight size={16} />
-                  </button>
-                </CardContent>
-              </Card>
+          <div className={`grid ${view === 'grid' ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1'} gap-6`}>
+            {archetypeSummaries.map(archetype => (
+              <ArchetypeCard 
+                key={archetype.id}
+                id={archetype.id}
+                title={archetype.name}
+                category={`Family ${archetype.familyId}`}
+                color={archetype.color}
+                description={archetype.description}
+                characteristics={archetype.keyCharacteristics}
+              />
             ))}
           </div>
         </div>
@@ -202,7 +141,11 @@ const Index = () => {
           </div>
           
           <div className="flex justify-center">
-            {/* Gnome image removed */}
+            <img 
+              src="/lovable-uploads/207a4c72-eb25-4e20-9794-c53fdbb4ea68.png" 
+              alt="Gnome Mascot" 
+              className="h-auto w-32"
+            />
           </div>
         </div>
       </section>
