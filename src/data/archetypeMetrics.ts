@@ -1,0 +1,137 @@
+
+import { ArchetypeMetrics } from '../types/archetype';
+
+export const archetypeMetrics: ArchetypeMetrics[] = [
+  // Family A: Strategists
+  {
+    archetypeId: 'a1',
+    paidPEPY: 12850,
+    paidPEPYVariance: 15,
+    paidPMPY: 6425,
+    paidPMPYVariance: 12,
+    paidAllowedRatio: 0.82,
+    averageFamilySize: 2.1,
+    specialistVisitsPer1K: 3850,
+    inpatientAdmitsPer1K: 48,
+    emergencyVisitsPer1K: 110,
+    sdohScore: 8.2,
+    riskCostRatio: 1.05
+  },
+  {
+    archetypeId: 'a2',
+    paidPEPY: 14200,
+    paidPEPYVariance: 28,
+    paidPMPY: 7100,
+    paidPMPYVariance: 25,
+    paidAllowedRatio: 0.84,
+    averageFamilySize: 2.3,
+    specialistVisitsPer1K: 4200,
+    inpatientAdmitsPer1K: 62,
+    emergencyVisitsPer1K: 135,
+    sdohScore: 7.5,
+    riskCostRatio: 0.95
+  },
+  {
+    archetypeId: 'a3',
+    paidPEPY: 11500,
+    paidPEPYVariance: 4,
+    paidPMPY: 4600,
+    paidPMPYVariance: -5,
+    paidAllowedRatio: 0.80,
+    averageFamilySize: 3.0,
+    specialistVisitsPer1K: 3100,
+    inpatientAdmitsPer1K: 42,
+    emergencyVisitsPer1K: 95,
+    sdohScore: 8.5,
+    riskCostRatio: 1.10
+  },
+  
+  // Family B: Pragmatists
+  {
+    archetypeId: 'b1',
+    paidPEPY: 10800,
+    paidPEPYVariance: -3,
+    paidPMPY: 5400,
+    paidPMPYVariance: -2,
+    paidAllowedRatio: 0.76,
+    averageFamilySize: 2.0,
+    specialistVisitsPer1K: 2900,
+    inpatientAdmitsPer1K: 51,
+    emergencyVisitsPer1K: 130,
+    sdohScore: 6.8,
+    riskCostRatio: 1.02
+  },
+  {
+    archetypeId: 'b2',
+    paidPEPY: 11100,
+    paidPEPYVariance: 0,
+    paidPMPY: 5550,
+    paidPMPYVariance: 0,
+    paidAllowedRatio: 0.78,
+    averageFamilySize: 2.2,
+    specialistVisitsPer1K: 3200,
+    inpatientAdmitsPer1K: 54,
+    emergencyVisitsPer1K: 125,
+    sdohScore: 7.0,
+    riskCostRatio: 1.00
+  },
+  {
+    archetypeId: 'b3',
+    paidPEPY: 10500,
+    paidPEPYVariance: -5,
+    paidPMPY: 5250,
+    paidPMPYVariance: -5,
+    paidAllowedRatio: 0.77,
+    averageFamilySize: 2.1,
+    specialistVisitsPer1K: 2800,
+    inpatientAdmitsPer1K: 49,
+    emergencyVisitsPer1K: 120,
+    sdohScore: 6.5,
+    riskCostRatio: 1.03
+  },
+
+  // Family C: Logisticians
+  {
+    archetypeId: 'c1',
+    paidPEPY: 11900,
+    paidPEPYVariance: 7,
+    paidPMPY: 5950,
+    paidPMPYVariance: 7,
+    paidAllowedRatio: 0.79,
+    averageFamilySize: 2.2,
+    specialistVisitsPer1K: 3400,
+    inpatientAdmitsPer1K: 53,
+    emergencyVisitsPer1K: 115,
+    sdohScore: 7.3,
+    riskCostRatio: 0.98
+  },
+  {
+    archetypeId: 'c2',
+    paidPEPY: 12200,
+    paidPEPYVariance: 10,
+    paidPMPY: 6100,
+    paidPMPYVariance: 10,
+    paidAllowedRatio: 0.81,
+    averageFamilySize: 2.1,
+    specialistVisitsPer1K: 3600,
+    inpatientAdmitsPer1K: 55,
+    emergencyVisitsPer1K: 118,
+    sdohScore: 7.8,
+    riskCostRatio: 0.97
+  },
+  {
+    archetypeId: 'c3',
+    paidPEPY: 11400,
+    paidPEPYVariance: 3,
+    paidPMPY: 5700,
+    paidPMPYVariance: 3,
+    paidAllowedRatio: 0.80,
+    averageFamilySize: 2.0,
+    specialistVisitsPer1K: 3300,
+    inpatientAdmitsPer1K: 50,
+    emergencyVisitsPer1K: 122,
+    sdohScore: 7.1,
+    riskCostRatio: 1.01
+  }
+];
+
