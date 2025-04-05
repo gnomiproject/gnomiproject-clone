@@ -34,6 +34,10 @@ const Results = () => {
   const handleRetakeAssessment = () => {
     navigate('/assessment');
   };
+
+  const handleViewReport = () => {
+    navigate('/insights', { state: { selectedArchetype: archetypeData.id } });
+  };
   
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-6 md:px-12">
@@ -60,13 +64,20 @@ const Results = () => {
               {archetypeData.summary.description}
             </p>
 
-            <div className="flex justify-center mb-8">
+            <div className="flex justify-center gap-4 mb-8">
               <Button
                 onClick={handleRetakeAssessment}
                 variant="outline"
                 className="flex items-center"
               >
                 <RefreshCw className="mr-2 h-4 w-4" /> Retake Assessment
+              </Button>
+              
+              <Button
+                onClick={handleViewReport}
+                className={`bg-${archetypeData.color}-500 hover:bg-${archetypeData.color}-600 flex items-center`}
+              >
+                View Full Report
               </Button>
             </div>
 
