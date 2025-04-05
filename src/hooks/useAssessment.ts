@@ -12,6 +12,7 @@ export const useAssessment = () => {
   const [currentQuestion, setCurrentQuestion] = useState(1);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [result, setResult] = useState<AssessmentResult | null>(null);
+  const [isCalculating, setIsCalculating] = useState(false);
   const navigate = useNavigate();
 
   const questions = getAssessmentQuestions();
@@ -33,7 +34,7 @@ export const useAssessment = () => {
     if (currentQuestion < totalQuestions) {
       setCurrentQuestion(prev => prev + 1);
     } else {
-      // Calculate results
+      // Show calculating state and delay results
       calculateResults();
     }
   };
@@ -51,11 +52,17 @@ export const useAssessment = () => {
    * Calculate and set the assessment results
    */
   const calculateResults = () => {
-    const assessmentResult = calculateArchetypeMatch(answers);
-    setResult(assessmentResult);
+    setIsCalculating(true);
     
-    // Navigate to results page with the results
-    navigate('/results', { state: { result: assessmentResult } });
+    // Simulate calculation time - 7 seconds
+    setTimeout(() => {
+      const assessmentResult = calculateArchetypeMatch(answers);
+      setResult(assessmentResult);
+      
+      // Navigate to results page with the results
+      navigate('/results', { state: { result: assessmentResult } });
+      setIsCalculating(false);
+    }, 7000);
   };
 
   /**
@@ -73,6 +80,7 @@ export const useAssessment = () => {
     questions,
     answers,
     result,
+    isCalculating,
     setAnswer,
     goToNext,
     goToPrevious,
