@@ -89,7 +89,7 @@ export const archetypesDetailed: ArchetypeDetailedData[] = [
         {
           number: '2',
           title: 'Preventive Care Enhancement',
-          description: 'Strengthen preventive care pathways to maintain your population's low emergency utilization.'
+          description: 'Strengthen preventive care pathways to maintain your population\'s low emergency utilization.'
         },
         {
           number: '3',
@@ -379,7 +379,7 @@ export const archetypesDetailed: ArchetypeDetailedData[] = [
         {
           number: '4',
           title: 'Preventive Care Coordination',
-          description: 'Strengthen preventive care pathways to maintain your population's low emergency utilization.'
+          description: 'Strengthen preventive care pathways to maintain your population\'s low emergency utilization.'
         }
       ],
       swot: {
