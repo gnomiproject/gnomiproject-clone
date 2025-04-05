@@ -9,10 +9,11 @@ const Navbar = () => {
   return (
     <nav className="w-full py-4 px-6 md:px-12 flex justify-between items-center border-b">
       <Link to="/" className="flex items-center">
-        <span className="text-3xl font-bold">
-          <span className="text-gray-800">g</span>
-          <span className="text-black">nomi</span>
-        </span>
+        <img 
+          src="/lovable-uploads/1cc408c3-b095-48b1-8087-b96fa079c8be.png" 
+          alt="gnomi logo" 
+          className="h-10"
+        />
       </Link>
       <div className="flex items-center gap-8">
         <NavLink to="/">Home</NavLink>
