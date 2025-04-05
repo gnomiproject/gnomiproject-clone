@@ -1,4 +1,3 @@
-
 export type ArchetypeFamily = {
   id: 'a' | 'b' | 'c';
   name: string;
@@ -129,6 +128,7 @@ export interface ArchetypeDetailedData {
     costSavings: Array<{
       title: string;
       description: string;
+      potentialSavings?: string;
     }>;
   };
 }

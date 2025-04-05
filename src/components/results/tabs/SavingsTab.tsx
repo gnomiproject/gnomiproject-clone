@@ -1,0 +1,39 @@
+
+import React from 'react';
+import { ArchetypeDetailedData } from '@/types/archetype';
+
+interface SavingsTabProps {
+  archetypeData: ArchetypeDetailedData;
+}
+
+const SavingsTab = ({ archetypeData }: SavingsTabProps) => {
+  const color = `archetype-${archetypeData.id}`;
+
+  return (
+    <div className="py-6">
+      <h4 className="text-2xl font-bold mb-6">Cost Saving Opportunities</h4>
+      <p className="mb-6">Potential savings opportunities for {archetypeData.name} organizations:</p>
+      
+      <div className="space-y-8">
+        {archetypeData.enhanced?.costSavings?.map((saving, index) => (
+          <div key={index} className="bg-white border rounded-lg p-6">
+            <h5 className="text-lg font-bold mb-4 flex items-center gap-2">
+              <span className={`inline-flex h-6 w-6 rounded-full bg-${color}/10 text-${color} items-center justify-center font-bold`}>{index + 1}</span>
+              {saving.title}
+            </h5>
+            <p className="text-gray-700 mb-4">{saving.description}</p>
+            
+            {'potentialSavings' in saving && saving.potentialSavings && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center justify-between">
+                <span className="font-medium">Potential Savings:</span>
+                <span className="text-green-700 font-bold">{saving.potentialSavings}</span>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default SavingsTab;
