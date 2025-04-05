@@ -12,7 +12,7 @@ const Insights = () => {
   const [selectedArchetype, setSelectedArchetype] = useState<ArchetypeId | null>(null);
   const location = useLocation();
   const { getAllArchetypes } = useArchetypes();
-  const archetypes = getAllArchetypes();
+  const archetypes = getAllArchetypes; // Fixed: use as a value, not as a function
   
   useEffect(() => {
     // Check if an archetype was selected from Results page
@@ -80,8 +80,8 @@ const Insights = () => {
                   title={archetype.name}
                   category={`Family ${archetype.familyId}`}
                   color={getColorName(archetype.color)}
-                  description={archetype.summary.description}
-                  characteristics={archetype.summary.keyCharacteristics}
+                  description={archetype.shortDescription}
+                  characteristics={archetype.characteristics.slice(0, 3)}
                   onSelect={() => setSelectedArchetype(archetype.id)}
                 />
               ))}
@@ -252,7 +252,7 @@ const ArchetypeCard = ({ id, title, category, color, description, characteristic
 
 // Helper function to map color values to valid colors in the ArchetypeCardProps
 function getColorName(color: string): 'orange' | 'teal' | 'yellow' | 'blue' | 'purple' | 'green' {
-  const validColors = {
+  const validColors: Record<string, 'orange' | 'teal' | 'yellow' | 'blue' | 'purple' | 'green'> = {
     orange: 'orange',
     teal: 'teal',
     yellow: 'yellow',
@@ -264,7 +264,7 @@ function getColorName(color: string): 'orange' | 'teal' | 'yellow' | 'blue' | 'p
     pink: 'purple'    // Fallback mapping
   };
   
-  return validColors[color as keyof typeof validColors] || 'blue';
+  return validColors[color] || 'blue';
 }
 
 export default Insights;
