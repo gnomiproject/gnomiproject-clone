@@ -8,6 +8,7 @@ import RetakeButton from '@/components/results/RetakeButton';
 import ArchetypeHeader from '@/components/results/ArchetypeHeader';
 import DetailedAnalysisTabs from '@/components/results/DetailedAnalysisTabs';
 import PremiumReport from '@/components/results/PremiumReport';
+import { ArrowDown } from 'lucide-react';
 
 const Results = () => {
   const location = useLocation();
@@ -61,11 +62,14 @@ const Results = () => {
               <RetakeButton onClick={handleRetakeAssessment} />
             </div>
 
-            {/* Prompt to check detailed analysis */}
+            {/* Prompt to check detailed analysis with bouncing arrow */}
             <div className="text-center mb-8">
               <p className="text-gray-600">
                 Scroll down to explore your detailed analysis results below.
               </p>
+              <div className="flex justify-center mt-4 animate-bounce">
+                <ArrowDown className={`h-8 w-8 text-${color}`} />
+              </div>
             </div>
           </div>
 
