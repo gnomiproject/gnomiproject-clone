@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Button from '@/components/shared/Button';
@@ -61,8 +60,8 @@ const Index = () => {
       {/* DNA Section */}
       <section className="py-16 px-6 md:px-12 bg-blue-50">
         <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col items-center gap-8">
-            <div className="w-full">
+          <div className="flex flex-col items-start gap-8">
+            <div className="w-full text-left">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
                 Archetypes Unlock Your Healthcare Program's Hidden Potential
               </h2>
