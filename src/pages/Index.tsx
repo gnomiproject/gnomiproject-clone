@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Button from '@/components/shared/Button';
@@ -26,11 +27,11 @@ const Index = () => {
               />
             </div>
             
-            {/* Title - Each line matches the width of text below */}
+            {/* Title - "What's Your Company's Healthcare" on the same line */}
             <div className="mb-5 text-left w-full">
               <h1 className="text-4xl md:text-5xl font-bold">
-                <span className="block">What's Your Company's</span>
-                <span className="block text-blue-500">Healthcare Personality?</span>
+                <span className="inline">What's Your Company's </span>
+                <span className="inline text-blue-500">Healthcare Personality?</span>
               </h1>
             </div>
             
