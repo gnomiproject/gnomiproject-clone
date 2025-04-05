@@ -23,19 +23,20 @@ const ArchetypeCard = ({ id, title, category, color, description, characteristic
   const openDetails = () => setShowDetails(true);
   const closeDetails = () => setShowDetails(false);
   
-  // Determine if this is a family or archetype color
-  const isFamily = category.toLowerCase().includes('family');
-  const colorClass = isFamily ? `family-${id.charAt(0)}` : `archetype-${id}`;
+  // Always use archetype color for the card border
+  const archetypeColorClass = `archetype-${id}`;
+  // Use family color for category tag
+  const familyColorClass = `family-${id.charAt(0)}`;
   
   return (
     <>
-      <div className={`bg-white rounded-lg shadow-sm border-l-4 border-${colorClass} overflow-hidden`}>
+      <div className={`bg-white rounded-lg shadow-sm border-l-4 border-${archetypeColorClass} overflow-hidden`}>
         <div className="p-6">
           <div className="mb-4 flex items-center">
-            <span className={`text-xs font-medium px-2 py-1 rounded-full bg-${colorClass}/10 text-${colorClass} mr-2`}>
+            <span className={`text-xs font-medium px-2 py-1 rounded-full bg-${familyColorClass}/10 text-${familyColorClass} mr-2`}>
               {category.toLowerCase()}
             </span>
-            <span className={`text-xs font-medium px-2 py-1 rounded-full bg-${colorClass}/20 text-${colorClass}`}>
+            <span className={`text-xs font-medium px-2 py-1 rounded-full bg-${archetypeColorClass}/20 text-${archetypeColorClass}`}>
               {id}
             </span>
           </div>
@@ -51,7 +52,7 @@ const ArchetypeCard = ({ id, title, category, color, description, characteristic
             <ul className="space-y-2">
               {characteristics.slice(0, 3).map((item, index) => (
                 <li key={index} className="flex items-center">
-                  <span className={`mr-2 flex-shrink-0 text-${colorClass}`}>●</span>
+                  <span className={`mr-2 flex-shrink-0 text-${archetypeColorClass}`}>●</span>
                   <span className="text-sm">{item}</span>
                 </li>
               ))}
@@ -60,7 +61,7 @@ const ArchetypeCard = ({ id, title, category, color, description, characteristic
           
           <button 
             onClick={openDetails}
-            className={`inline-flex items-center text-sm font-medium text-gray-700 hover:text-${colorClass}`}
+            className={`inline-flex items-center text-sm font-medium text-gray-700 hover:text-${archetypeColorClass}`}
           >
             View Details 
             <ArrowRight className="w-4 h-4 ml-1" />
