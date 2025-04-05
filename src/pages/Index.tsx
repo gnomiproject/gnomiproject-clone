@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Button from '@/components/shared/Button';
@@ -73,24 +74,29 @@ const Index = () => {
             className="mb-12"
           />
 
-          <div className="mb-8 flex items-center justify-start">
-            <div className="bg-white border rounded-lg flex overflow-hidden">
+          <div className="flex justify-between items-center mb-8">
+            <h3 className="text-xl font-medium text-gray-700">
+              {archetypeSummaries.length} Archetypes
+            </h3>
+            <div className="bg-white border rounded-lg flex overflow-hidden shadow-sm">
               <button
-                className={`p-2 ${view === 'grid' ? 'bg-blue-500 text-white' : 'bg-white text-gray-600'}`}
+                className={`p-2.5 transition-colors ${view === 'grid' ? 'bg-blue-500 text-white' : 'bg-white text-gray-600 hover:bg-gray-100'}`}
                 onClick={() => setView('grid')}
+                aria-label="Grid view"
               >
                 <Grid className="h-5 w-5" />
               </button>
               <button
-                className={`p-2 ${view === 'list' ? 'bg-blue-500 text-white' : 'bg-white text-gray-600'}`}
+                className={`p-2.5 transition-colors ${view === 'list' ? 'bg-blue-500 text-white' : 'bg-white text-gray-600 hover:bg-gray-100'}`}
                 onClick={() => setView('list')}
+                aria-label="List view"
               >
                 <List className="h-5 w-5" />
               </button>
             </div>
           </div>
 
-          <div className={`grid ${view === 'grid' ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1'} gap-6`}>
+          <div className={`grid ${view === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'} gap-6`}>
             {archetypeSummaries.map(archetype => (
               <ArchetypeCard 
                 key={archetype.id}
