@@ -26,8 +26,8 @@ const Index = () => {
               />
             </div>
             
-            {/* Title - left aligned */}
-            <div className="mb-5 text-left">
+            {/* Title - left aligned with max width matching text below */}
+            <div className="mb-5 text-left max-w-4xl">
               <h1 className="text-4xl md:text-5xl font-bold">
                 <span className="block">What's Your Company's</span>
                 <span className="block text-blue-500">Healthcare Personality?</span>
