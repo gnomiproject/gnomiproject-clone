@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Button from '@/components/shared/Button';
@@ -14,38 +13,37 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section */}
-      <section className="pt-20 pb-32 px-6 md:px-12 bg-gradient-to-br from-blue-50/50 to-white relative overflow-hidden">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col items-start relative">
-            <div className="w-full md:w-3/5 z-10">
-              {/* Gnome character positioned absolutely */}
-              <div className="absolute left-0 -top-8 md:left-0 md:-top-6">
-                <img 
-                  src="/lovable-uploads/3efcc8b7-0e2d-4a2b-bb23-fa686f18c691.png" 
-                  alt="Gnome character" 
-                  className="h-36 md:h-44 animate-fade-in"
-                />
-              </div>
-              
-              {/* Title with larger spacing from image */}
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mt-32 md:mt-40">
-                What's Your Company's <span className="text-blue-500">Healthcare <br className="hidden md:block" />Personality?</span>
-              </h1>
-              
-              <p className="text-lg md:text-xl text-gray-700 mt-8 mb-4 max-w-3xl">
+      {/* Hero Section with light blue background */}
+      <section className="pt-16 pb-32 bg-blue-50/50 relative overflow-hidden">
+        <div className="max-w-6xl mx-auto px-6 md:px-12">
+          <div className="flex flex-col items-center text-center">
+            {/* Gnome character centered */}
+            <div className="mb-6">
+              <img 
+                src="/lovable-uploads/3efcc8b7-0e2d-4a2b-bb23-fa686f18c691.png" 
+                alt="Gnome character" 
+                className="h-44 md:h-52"
+              />
+            </div>
+            
+            {/* Title with centered text */}
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-12 max-w-3xl">
+              <span className="block">What's Your</span>
+              <span className="block">Company's</span>
+              <span className="block text-blue-500">Healthcare</span>
+              <span className="block text-blue-500">Personality?</span>
+            </h1>
+            
+            <div className="max-w-4xl">
+              <p className="text-lg md:text-xl text-gray-700 mb-4">
                 Curious why your healthcare program differs from similar companies? Wonder which strategies would work best for your unique workforce?
               </p>
               
-              <p className="text-lg md:text-xl text-gray-700 mb-4 max-w-3xl">
+              <p className="text-lg md:text-xl text-gray-700 mb-8">
                 In just 3 minutes, discover which of our nine healthcare archetypes matches your organization. Based on data from 400+ companies and 7+ million members, these archetypes reveal insights that typical industry benchmarks miss.
               </p>
               
-              <p className="text-lg md:text-xl text-gray-700 mb-8 max-w-3xl">
-                Give it a try! Uncover your organization's true healthcare identity and learn what strategies work best for companies just like yours.
-              </p>
-              
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex flex-col sm:flex-row justify-center gap-4">
                 <Link to="/assessment">
                   <Button size="lg">Find Your Archetype</Button>
                 </Link>
@@ -54,13 +52,11 @@ const Index = () => {
                 </Link>
               </div>
             </div>
-            
-            {/* Light blue curved shape background */}
-            <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-blue-50/30 rounded-l-full transform translate-x-1/4 z-0 hidden md:block"></div>
           </div>
         </div>
       </section>
 
+      {/* Rest of the content */}
       {/* DNA Section */}
       <section className="py-16 px-6 md:px-12 bg-blue-50">
         <div className="max-w-6xl mx-auto">

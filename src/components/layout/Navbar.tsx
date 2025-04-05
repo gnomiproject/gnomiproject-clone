@@ -4,18 +4,12 @@ import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
 const Navbar = () => {
-  const location = useLocation();
-  
   return (
-    <nav className="w-full py-5 px-6 md:px-12 flex justify-between items-center border-b">
+    <nav className="w-full py-5 px-6 md:px-12 flex justify-between items-center">
       <Link to="/" className="flex items-center">
-        <img 
-          src="/lovable-uploads/1cc408c3-b095-48b1-8087-b96fa079c8be.png" 
-          alt="gnomi logo" 
-          className="h-10"
-        />
+        <span className="text-2xl font-bold">g nomi</span>
       </Link>
-      <div className="flex items-center gap-10">
+      <div className="flex items-center gap-8">
         <NavLink to="/">Home</NavLink>
         <NavLink to="/assessment">Assessment</NavLink>
         <NavLink to="/insights">Insights</NavLink>
