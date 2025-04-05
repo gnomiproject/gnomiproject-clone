@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Button from '@/components/shared/Button';
@@ -18,12 +17,12 @@ const Index = () => {
       {/* Hero Section */}
       <section className="py-16 px-6 md:px-12 bg-gradient-to-br from-blue-50 to-white">
         <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col md:flex-row items-center">
-            <div className="md:w-1/4 flex justify-center mb-6 md:mb-0 md:-mt-12 relative">
+          <div className="flex flex-col md:flex-row items-center relative">
+            <div className="md:w-1/4 flex justify-center mb-6 md:mb-0">
               <img 
                 src="/lovable-uploads/3efcc8b7-0e2d-4a2b-bb23-fa686f18c691.png" 
                 alt="Gnome character" 
-                className="h-28 md:h-32 animate-fade-in absolute md:static top-0"
+                className="h-28 md:h-32 animate-fade-in absolute md:absolute -top-16 md:-top-28"
               />
             </div>
             <div className="md:w-3/4">
