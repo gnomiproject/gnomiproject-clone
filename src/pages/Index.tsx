@@ -19,14 +19,14 @@ const Index = () => {
       <section className="py-16 px-6 md:px-12 bg-gradient-to-br from-blue-50 to-white">
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row items-center">
-            <div className="md:w-full">
-              <div className="flex justify-center mb-4">
-                <img 
-                  src="/lovable-uploads/19e8a6cb-e6bc-4ac1-ae57-2a0eb169284c.png" 
-                  alt="Gnome character" 
-                  className="h-36 md:h-48 animate-fade-in"
-                />
-              </div>
+            <div className="md:w-1/4 flex justify-center mb-6 md:mb-0">
+              <img 
+                src="/lovable-uploads/3efcc8b7-0e2d-4a2b-bb23-fa686f18c691.png" 
+                alt="Gnome character" 
+                className="h-28 md:h-32 animate-fade-in"
+              />
+            </div>
+            <div className="md:w-3/4">
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
                 What's Your Company's <span className="text-blue-500">Healthcare Personality?</span>
               </h1>
