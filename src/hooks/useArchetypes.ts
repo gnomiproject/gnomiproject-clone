@@ -66,26 +66,79 @@ export const useArchetypes = () => {
   };
 
   /**
-   * Get detailed data for an archetype
-   * @param archetypeId The archetype to get detailed data for
+   * Get summary data (Level 1) for an archetype
+   * @param archetypeId The archetype to get summary data for
    */
-  const getDetailedArchetype = (archetypeId: ArchetypeId): ArchetypeDetailedData | undefined => {
-    return archetypesDetailed.find(archetype => archetype.id === archetypeId);
+  const getArchetypeSummary = (archetypeId: ArchetypeId) => {
+    const archetype = archetypesDetailed.find(a => a.id === archetypeId);
+    if (!archetype) return null;
+    
+    return {
+      id: archetype.id,
+      familyId: archetype.familyId,
+      name: archetype.name,
+      familyName: archetype.familyName,
+      color: archetype.color,
+      ...archetype.summary
+    };
   };
 
   /**
-   * Get all detailed archetypes
+   * Get standard data (Level 2) for an archetype
+   * @param archetypeId The archetype to get standard data for
    */
-  const getAllDetailedArchetypes = useMemo(() => {
-    return archetypesDetailed;
+  const getArchetypeStandard = (archetypeId: ArchetypeId) => {
+    const archetype = archetypesDetailed.find(a => a.id === archetypeId);
+    if (!archetype) return null;
+    
+    return {
+      id: archetype.id,
+      familyId: archetype.familyId,
+      name: archetype.name,
+      familyName: archetype.familyName,
+      color: archetype.color,
+      ...archetype.summary,
+      ...archetype.standard
+    };
+  };
+
+  /**
+   * Get enhanced data (Level 3 - full data) for an archetype
+   * @param archetypeId The archetype to get complete data for
+   */
+  const getArchetypeEnhanced = (archetypeId: ArchetypeId) => {
+    return archetypesDetailed.find(a => a.id === archetypeId);
+  };
+
+  /**
+   * Get summary data for all archetypes
+   */
+  const getAllArchetypeSummaries = useMemo(() => {
+    return archetypesDetailed.map(archetype => ({
+      id: archetype.id,
+      familyId: archetype.familyId,
+      name: archetype.name,
+      familyName: archetype.familyName,
+      color: archetype.color,
+      ...archetype.summary
+    }));
   }, []);
 
   /**
-   * Get detailed archetypes by family
+   * Get summary data for archetypes in a specific family
    * @param familyId The family ID to filter by
    */
-  const getDetailedArchetypesByFamily = (familyId: 'a' | 'b' | 'c') => {
-    return archetypesDetailed.filter(archetype => archetype.familyId === familyId);
+  const getArchetypeSummariesByFamily = (familyId: 'a' | 'b' | 'c') => {
+    return archetypesDetailed
+      .filter(archetype => archetype.familyId === familyId)
+      .map(archetype => ({
+        id: archetype.id,
+        familyId: archetype.familyId,
+        name: archetype.name,
+        familyName: archetype.familyName,
+        color: archetype.color,
+        ...archetype.summary
+      }));
   };
 
   return {
@@ -96,9 +149,16 @@ export const useArchetypes = () => {
     getFamilyById,
     getMetricsForArchetype,
     getTraitsForArchetype,
-    // New functions for the detailed data
-    getDetailedArchetype,
-    getAllDetailedArchetypes,
-    getDetailedArchetypesByFamily
+    // Old detailed data functions
+    getDetailedArchetype: getArchetypeEnhanced,
+    getAllDetailedArchetypes: useMemo(() => archetypesDetailed, []),
+    getDetailedArchetypesByFamily: (familyId: 'a' | 'b' | 'c') => 
+      archetypesDetailed.filter(archetype => archetype.familyId === familyId),
+    // New hierarchical data access functions
+    getArchetypeSummary,
+    getArchetypeStandard,
+    getArchetypeEnhanced,
+    getAllArchetypeSummaries,
+    getArchetypeSummariesByFamily
   };
 };
