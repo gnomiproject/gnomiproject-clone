@@ -6,12 +6,16 @@ import SectionTitle from '@/components/shared/SectionTitle';
 import { useArchetypes } from '@/hooks/useArchetypes';
 import { ArchetypeId } from '@/types/archetype';
 import ArchetypeReport from '@/components/insights/ArchetypeReport';
+import { Badge } from '@/components/ui/badge';
+import { ChevronDown, RefreshCw } from 'lucide-react';
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
 
 const Insights = () => {
   const [selectedArchetype, setSelectedArchetype] = useState<ArchetypeId | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { getAllArchetypeSummaries } = useArchetypes();
+  const { getAllArchetypeSummaries, getArchetypeEnhanced, getFamilyById } = useArchetypes();
   
   // Fix: getAllArchetypeSummaries is returning an array, not a function
   const archetypeSummaries = getAllArchetypeSummaries;
@@ -25,34 +29,87 @@ const Insights = () => {
     }
   }, [location.state]);
 
-  // Handle clicking on an archetype card
-  const handleSelectArchetype = (archetypeId: ArchetypeId) => {
-    setSelectedArchetype(archetypeId);
-  };
-
   // Handle retaking the assessment
   const handleRetakeAssessment = () => {
     navigate('/assessment');
   };
 
+  // Get the archetype data if one is selected
+  const archetypeData = selectedArchetype ? getArchetypeEnhanced(selectedArchetype) : null;
+  const familyData = archetypeData?.familyId ? getFamilyById(archetypeData.familyId) : null;
+
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-6 md:px-12">
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-12">
-          <SectionTitle
-            title="Healthcare Archetype Insights"
-            subtitle="Discover strategies tailored to your organization's unique healthcare profile"
-            center
-          />
-        </div>
+      <div className="max-w-5xl mx-auto">
+        {/* Show assessment results if an archetype is selected */}
+        {selectedArchetype && archetypeData ? (
+          <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-12 border">
+            {/* Orange top border - using the archetype-specific color */}
+            <div className={`h-2 bg-${`archetype-${archetypeData.id}`}`}></div>
+            
+            <div className="p-8">
+              <div className="text-center mb-8">
+                <h1 className="text-3xl font-bold mb-2">Assessment Results</h1>
+                <p className="text-gray-600">The best match for your organization is:</p>
+              </div>
+              
+              <div className="text-center mb-6">
+                <Badge className={`bg-family-${archetypeData.familyId}/10 text-family-${archetypeData.familyId} hover:bg-family-${archetypeData.familyId}/20 border-0 px-4 py-2 rounded-full text-sm`}>
+                  Family {archetypeData.familyId}: {familyData?.name}
+                </Badge>
+              </div>
 
-        {/* No assessment results message (only show if no archetype is selected) */}
-        {!selectedArchetype && (
+              <h2 className="text-3xl md:text-4xl font-bold text-center flex items-center justify-center gap-3 mb-6">
+                {archetypeData.name}
+                <span className={`inline-flex items-center justify-center bg-${`archetype-${archetypeData.id}`}/10 text-${`archetype-${archetypeData.id}`} border border-${`archetype-${archetypeData.id}`}/30 rounded-full px-3 py-1 text-sm font-medium`}>
+                  {archetypeData.id}
+                </span>
+              </h2>
+
+              <p className="text-gray-700 text-lg text-center max-w-3xl mx-auto mb-8">
+                {archetypeData.summary.description}
+              </p>
+
+              <div className="flex justify-center">
+                <Button
+                  onClick={handleRetakeAssessment}
+                  variant="outline"
+                  className="flex items-center"
+                >
+                  <RefreshCw className="mr-2 h-4 w-4" /> Retake Assessment
+                </Button>
+              </div>
+            </div>
+            
+            {/* Collapsible section for detailed analysis */}
+            <Collapsible
+              open={isOpen}
+              onOpenChange={setIsOpen}
+              className="w-full"
+            >
+              <div className="border-t py-4 px-8 text-center">
+                <CollapsibleTrigger className="flex items-center justify-center text-gray-600 hover:text-gray-800 w-full">
+                  Explore the detailed sections below to see KPIs, strategic priorities, risk profiles, and cost-saving opportunities
+                  <ChevronDown className={`ml-2 h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                </CollapsibleTrigger>
+              </div>
+              
+              <CollapsibleContent>
+                <div className="border-t">
+                  <div className="p-8">
+                    <h2 className="text-2xl font-bold mb-8">Detailed Analysis</h2>
+                    <ArchetypeReport archetypeId={selectedArchetype} />
+                  </div>
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+          </div>
+        ) : (
           <div className="max-w-3xl mx-auto">
             <div className="bg-white rounded-lg shadow-sm p-8 mb-12">
               <div className="flex flex-col items-center">
                 <h2 className="text-2xl font-bold mb-4">No Assessment Results Found</h2>
-                <p className="text-gray-600 mb-6 max-w-xl">
+                <p className="text-gray-600 mb-6 max-w-xl text-center">
                   To access personalized insights about your organization's healthcare archetype, 
                   you'll need to complete our quick 3-minute assessment.
                 </p>
@@ -99,51 +156,6 @@ const Insights = () => {
               <Link to="/assessment">
                 <Button className="mx-auto">Start My Assessment</Button>
               </Link>
-            </div>
-          </div>
-        )}
-
-        {/* Show selected archetype report with retake assessment button */}
-        {selectedArchetype && (
-          <div>
-            <div className="mb-8 flex justify-end">
-              <Button 
-                variant="outline" 
-                onClick={handleRetakeAssessment}
-              >
-                Retake Assessment
-              </Button>
-            </div>
-            <ArchetypeReport archetypeId={selectedArchetype} />
-          </div>
-        )}
-
-        {/* Show all archetype cards if no assessment has been taken */}
-        {!selectedArchetype && (
-          <div className="mt-20">
-            <h2 className="text-2xl font-bold mb-6 text-center">Explore Healthcare Archetypes</h2>
-            <p className="text-gray-600 text-center max-w-3xl mx-auto mb-10">
-              Even without taking the assessment, you can explore each healthcare archetype to learn 
-              about different organizational profiles and strategies.
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {archetypeSummaries.map((archetype) => (
-                <div 
-                  key={archetype.id}
-                  onClick={() => handleSelectArchetype(archetype.id)}
-                  className={`bg-white border rounded-lg p-6 cursor-pointer transition-all duration-200 hover:shadow-md hover:border-${`archetype-${archetype.id}`}/50`}
-                >
-                  <div className={`w-12 h-12 rounded-full bg-${"archetype-" + archetype.id}/10 flex items-center justify-center mb-4`}>
-                    <span className={`text-${"archetype-" + archetype.id} text-xl font-bold`}>{archetype.id}</span>
-                  </div>
-                  <h3 className="text-lg font-bold mb-2">{archetype.name}</h3>
-                  <p className="text-gray-600 mb-4 text-sm">Family {archetype.familyId.toUpperCase()}</p>
-                  <p className="text-gray-700 mb-4">{archetype.description}</p>
-                  <Button className={`w-full bg-${"archetype-" + archetype.id} hover:bg-${"archetype-" + archetype.id}/90 text-white`}>
-                    View Report
-                  </Button>
-                </div>
-              ))}
             </div>
           </div>
         )}
