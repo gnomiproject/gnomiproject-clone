@@ -5,7 +5,7 @@ export const archetypeFamilies: ArchetypeFamily[] = [
   {
     id: 'a',
     name: 'Strategists',
-    description: 'Organizations that focus on strategic healthcare management through proactive planning and targeted interventions. They leverage data analytics and innovative approaches to optimize healthcare outcomes.',
+    description: 'Organizations characterized by high healthcare literacy and strategic care management. They excel at directing members to specialists rather than emergency rooms, finding pathways that prevent costly hospitalizations while ensuring quality care.',
     commonTraits: [
       'Technology-forward approach to healthcare',
       'Emphasis on preventive services',
@@ -36,4 +36,3 @@ export const archetypeFamilies: ArchetypeFamily[] = [
     ]
   }
 ];
-
