@@ -25,7 +25,7 @@ const ArchetypeCard = ({ id, title, category, color, description, characteristic
   
   return (
     <>
-      <div className={`bg-white rounded-lg shadow-sm border-l-4 border-l-${color} overflow-hidden`}>
+      <div className={`bg-white rounded-lg shadow-sm border-l-4 border-${color} overflow-hidden`}>
         <div className="p-6">
           <div className="mb-4 flex items-center">
             <span className={`text-xs font-medium px-2 py-1 rounded-full bg-${color}/10 text-${color} mr-2`}>
@@ -70,10 +70,10 @@ const ArchetypeCard = ({ id, title, category, color, description, characteristic
             <>
               <DialogHeader>
                 <div className="flex items-center gap-2 mb-2">
-                  <span className={`text-xs font-medium px-2 py-1 rounded-full bg-${color}/10 text-${color}`}>
-                    {detailedData.familyName.toLowerCase()}
+                  <span className={`text-xs font-medium px-2 py-1 rounded-full bg-family-${detailedData.familyId}/10 text-family-${detailedData.familyId}`}>
+                    family {detailedData.familyId}
                   </span>
-                  <span className={`text-xs font-medium px-2 py-1 rounded-full bg-${color}/20 text-${color}`}>
+                  <span className={`text-xs font-medium px-2 py-1 rounded-full bg-archetype-${detailedData.id}/20 text-archetype-${detailedData.id}`}>
                     {detailedData.id}
                   </span>
                 </div>
@@ -88,7 +88,7 @@ const ArchetypeCard = ({ id, title, category, color, description, characteristic
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
                     {detailedData.keyCharacteristics.map((characteristic, index) => (
                       <div key={index} className="flex items-center gap-3 p-3 rounded-md bg-gray-50">
-                        <div className={`h-2 w-2 rounded-full bg-${color}`}></div>
+                        <div className={`h-2 w-2 rounded-full bg-archetype-${detailedData.id}`}></div>
                         <span>{characteristic}</span>
                       </div>
                     ))}
@@ -125,7 +125,7 @@ const ArchetypeCard = ({ id, title, category, color, description, characteristic
                   <ul className="space-y-2 mb-8">
                     {detailedData.keyInsights.map((insight, index) => (
                       <li key={index} className="flex items-center gap-2">
-                        <div className={`h-2 w-2 rounded-full bg-${color} flex-shrink-0`}></div>
+                        <div className={`h-2 w-2 rounded-full bg-archetype-${detailedData.id} flex-shrink-0`}></div>
                         <span>{insight}</span>
                       </li>
                     ))}

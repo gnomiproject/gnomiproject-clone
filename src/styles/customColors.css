@@ -1,0 +1,70 @@
+
+/* Custom archetype family colors */
+.bg-family-a { background-color: #00B0F0; }
+.bg-family-b { background-color: #00B2B1; }
+.bg-family-c { background-color: #FF8B91; }
+
+.text-family-a { color: #00B0F0; }
+.text-family-b { color: #00B2B1; }
+.text-family-c { color: #FF8B91; }
+
+/* Custom archetype colors */
+.bg-archetype-a1 { background-color: #EC7500; }
+.bg-archetype-a2 { background-color: #46E0D3; }
+.bg-archetype-a3 { background-color: #FFC600; }
+.bg-archetype-b1 { background-color: #7030A0; }
+.bg-archetype-b2 { background-color: #FF8C91; }
+.bg-archetype-b3 { background-color: #0D41C0; }
+.bg-archetype-c1 { background-color: #E40032; }
+.bg-archetype-c2 { background-color: #00B0F0; }
+.bg-archetype-c3 { background-color: #870C0C; }
+
+.text-archetype-a1 { color: #EC7500; }
+.text-archetype-a2 { color: #46E0D3; }
+.text-archetype-a3 { color: #FFC600; }
+.text-archetype-b1 { color: #7030A0; }
+.text-archetype-b2 { color: #FF8C91; }
+.text-archetype-b3 { color: #0D41C0; }
+.text-archetype-c1 { color: #E40032; }
+.text-archetype-c2 { color: #00B0F0; }
+.text-archetype-c3 { color: #870C0C; }
+
+/* Border colors */
+.border-archetype-a1 { border-color: #EC7500; }
+.border-archetype-a2 { border-color: #46E0D3; }
+.border-archetype-a3 { border-color: #FFC600; }
+.border-archetype-b1 { border-color: #7030A0; }
+.border-archetype-b2 { border-color: #FF8C91; }
+.border-archetype-b3 { border-color: #0D41C0; }
+.border-archetype-c1 { border-color: #E40032; }
+.border-archetype-c2 { border-color: #00B0F0; }
+.border-archetype-c3 { border-color: #870C0C; }
+
+/* Opacity variants */
+.bg-archetype-a1\/10 { background-color: rgba(236, 117, 0, 0.1); }
+.bg-archetype-a2\/10 { background-color: rgba(70, 224, 211, 0.1); }
+.bg-archetype-a3\/10 { background-color: rgba(255, 198, 0, 0.1); }
+.bg-archetype-b1\/10 { background-color: rgba(112, 48, 160, 0.1); }
+.bg-archetype-b2\/10 { background-color: rgba(255, 140, 145, 0.1); }
+.bg-archetype-b3\/10 { background-color: rgba(13, 65, 192, 0.1); }
+.bg-archetype-c1\/10 { background-color: rgba(228, 0, 50, 0.1); }
+.bg-archetype-c2\/10 { background-color: rgba(0, 176, 240, 0.1); }
+.bg-archetype-c3\/10 { background-color: rgba(135, 12, 12, 0.1); }
+
+.bg-archetype-a1\/20 { background-color: rgba(236, 117, 0, 0.2); }
+.bg-archetype-a2\/20 { background-color: rgba(70, 224, 211, 0.2); }
+.bg-archetype-a3\/20 { background-color: rgba(255, 198, 0, 0.2); }
+.bg-archetype-b1\/20 { background-color: rgba(112, 48, 160, 0.2); }
+.bg-archetype-b2\/20 { background-color: rgba(255, 140, 145, 0.2); }
+.bg-archetype-b3\/20 { background-color: rgba(13, 65, 192, 0.2); }
+.bg-archetype-c1\/20 { background-color: rgba(228, 0, 50, 0.2); }
+.bg-archetype-c2\/20 { background-color: rgba(0, 176, 240, 0.2); }
+.bg-archetype-c3\/20 { background-color: rgba(135, 12, 12, 0.2); }
+
+.bg-family-a\/10 { background-color: rgba(0, 176, 240, 0.1); }
+.bg-family-b\/10 { background-color: rgba(0, 178, 177, 0.1); }
+.bg-family-c\/10 { background-color: rgba(255, 139, 145, 0.1); }
+
+.bg-family-a\/20 { background-color: rgba(0, 176, 240, 0.2); }
+.bg-family-b\/20 { background-color: rgba(0, 178, 177, 0.2); }
+.bg-family-c\/20 { background-color: rgba(255, 139, 145, 0.2); }
