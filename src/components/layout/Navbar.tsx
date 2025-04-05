@@ -1,9 +1,11 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
 const Navbar = () => {
+  const location = useLocation();
+  
   return (
     <nav className="w-full py-4 px-6 md:px-12 flex justify-between items-center border-b">
       <Link to="/" className="flex items-center">
@@ -14,7 +16,6 @@ const Navbar = () => {
       </Link>
       <div className="flex items-center gap-8">
         <NavLink to="/">Home</NavLink>
-        <NavLink to="/about">About</NavLink>
         <NavLink to="/assessment">Assessment</NavLink>
         <NavLink to="/insights">Insights</NavLink>
       </div>
@@ -23,8 +24,8 @@ const Navbar = () => {
 };
 
 const NavLink = ({ to, children }: { to: string; children: React.ReactNode }) => {
-  // Check if current path matches the link
-  const isActive = window.location.pathname === to;
+  const location = useLocation();
+  const isActive = location.pathname === to;
   
   return (
     <Link
