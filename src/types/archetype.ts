@@ -57,3 +57,71 @@ export type DistinctiveTraits = {
   uniqueInsights: string[];
 };
 
+// New detailed data structure with three levels
+export interface ArchetypeDetailedData {
+  id: ArchetypeId;
+  familyId: 'a' | 'b' | 'c';
+  name: string;
+  familyName: string;
+  color: 'orange' | 'teal' | 'yellow' | 'blue' | 'purple' | 'green' | 'red' | 'indigo' | 'pink';
+  
+  // Level 1: Home page card (minimal)
+  summary: {
+    description: string;
+    keyCharacteristics: string[];
+  };
+  
+  // Level 2: Archetype detail page (medium detail)
+  standard: {
+    fullDescription: string;
+    keyCharacteristics: string[];
+    overview: string;
+    keyStatistics: {
+      emergencyUtilization: {
+        value: string;
+        trend: 'up' | 'down' | 'neutral';
+      };
+      specialistUtilization: {
+        value: string;
+        trend: 'up' | 'down' | 'neutral';
+      };
+      healthcareSpend: {
+        value: string;
+        trend: 'up' | 'down' | 'neutral';
+      };
+      [key: string]: {
+        value: string;
+        trend: 'up' | 'down' | 'neutral';
+      };
+    };
+    keyInsights: string[];
+  };
+  
+  // Level 3: Full report (comprehensive detail)
+  enhanced: {
+    riskProfile: {
+      score: string;
+      comparison: string;
+      conditions: Array<{
+        name: string;
+        value: string;
+        barWidth: string;
+      }>;
+    };
+    strategicPriorities: Array<{
+      number: string;
+      title: string;
+      description: string;
+    }>;
+    swot: {
+      strengths: string[];
+      weaknesses: string[];
+      opportunities: string[];
+      threats: string[];
+    };
+    costSavings: Array<{
+      title: string;
+      description: string;
+    }>;
+  };
+}

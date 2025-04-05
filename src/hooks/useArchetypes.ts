@@ -4,7 +4,8 @@ import { archetypes } from '../data/archetypes';
 import { archetypeFamilies } from '../data/archetypeFamilies';
 import { archetypeMetrics } from '../data/archetypeMetrics';
 import { distinctiveTraits } from '../data/distinctiveTraits';
-import { Archetype, ArchetypeId, ArchetypeFamily } from '../types/archetype';
+import { archetypesDetailed } from '../data/archetypesDetailed';
+import { Archetype, ArchetypeId, ArchetypeFamily, ArchetypeDetailedData } from '../types/archetype';
 
 /**
  * Hook to access and filter archetype data
@@ -64,6 +65,29 @@ export const useArchetypes = () => {
     return distinctiveTraits.find(traits => traits.archetypeId === archetypeId);
   };
 
+  /**
+   * Get detailed data for an archetype
+   * @param archetypeId The archetype to get detailed data for
+   */
+  const getDetailedArchetype = (archetypeId: ArchetypeId): ArchetypeDetailedData | undefined => {
+    return archetypesDetailed.find(archetype => archetype.id === archetypeId);
+  };
+
+  /**
+   * Get all detailed archetypes
+   */
+  const getAllDetailedArchetypes = useMemo(() => {
+    return archetypesDetailed;
+  }, []);
+
+  /**
+   * Get detailed archetypes by family
+   * @param familyId The family ID to filter by
+   */
+  const getDetailedArchetypesByFamily = (familyId: 'a' | 'b' | 'c') => {
+    return archetypesDetailed.filter(archetype => archetype.familyId === familyId);
+  };
+
   return {
     getAllArchetypes,
     getArchetypeById,
@@ -71,7 +95,10 @@ export const useArchetypes = () => {
     getAllFamilies,
     getFamilyById,
     getMetricsForArchetype,
-    getTraitsForArchetype
+    getTraitsForArchetype,
+    // New functions for the detailed data
+    getDetailedArchetype,
+    getAllDetailedArchetypes,
+    getDetailedArchetypesByFamily
   };
 };
-
