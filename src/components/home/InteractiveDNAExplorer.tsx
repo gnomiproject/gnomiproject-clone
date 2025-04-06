@@ -2,8 +2,7 @@
 import React, { useState } from 'react';
 import { useArchetypes } from '@/hooks/useArchetypes';
 import DNAHelix from './DNAHelix';
-import { ArrowRight, ExternalLink } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { ExternalLink } from 'lucide-react';
 import SectionTitle from '@/components/shared/SectionTitle';
 import { ArchetypeId } from '@/types/archetype';
 import { 
@@ -112,24 +111,6 @@ const InteractiveDNAExplorer = () => {
                   </h3>
                   
                   <p className="text-gray-600 mb-4">{selectedArchetypeSummary.description}</p>
-                  
-                  <div className="flex flex-wrap gap-3">
-                    <button 
-                      onClick={() => setShowDetailDialog(true)}
-                      className={`inline-flex items-center px-4 py-2 rounded text-white bg-archetype-${selectedArchetypeSummary.id} hover:opacity-90 transition-opacity`}
-                    >
-                      Learn More
-                      <ExternalLink className="ml-2 h-4 w-4" />
-                    </button>
-
-                    <Link 
-                      to={`/insights/${selectedArchetype}`} 
-                      className={`inline-flex items-center px-4 py-2 rounded border border-current text-archetype-${selectedArchetypeSummary.id} hover:bg-archetype-${selectedArchetypeSummary.id}/10 transition-colors`}
-                    >
-                      View Full Profile
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Link>
-                  </div>
                 </div>
 
                 {/* Key Characteristics Section - Level 1 */}
@@ -145,6 +126,17 @@ const InteractiveDNAExplorer = () => {
                         <span className="text-gray-700">{trait}</span>
                       </div>
                     ))}
+                  </div>
+                  
+                  {/* Learn More button moved to the bottom */}
+                  <div className="flex justify-end mt-6">
+                    <button 
+                      onClick={() => setShowDetailDialog(true)}
+                      className={`inline-flex items-center px-4 py-2 rounded text-white bg-archetype-${selectedArchetypeSummary.id} hover:opacity-90 transition-opacity`}
+                    >
+                      Learn More
+                      <ExternalLink className="ml-2 h-4 w-4" />
+                    </button>
                   </div>
                 </div>
               </div>
@@ -270,17 +262,6 @@ const InteractiveDNAExplorer = () => {
                   ))}
                 </ul>
               </div>
-
-              {/* View Full Profile Link */}
-              <div className="flex justify-end pt-2">
-                <Link 
-                  to={`/insights/${selectedArchetype}`} 
-                  className={`inline-flex items-center px-4 py-2 rounded text-white bg-archetype-${selectedArchetypeDetail.id} hover:opacity-90 transition-opacity`}
-                >
-                  View Full Profile
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </div>
             </div>
           </DialogContent>
         </Dialog>
@@ -290,3 +271,4 @@ const InteractiveDNAExplorer = () => {
 };
 
 export default InteractiveDNAExplorer;
+
