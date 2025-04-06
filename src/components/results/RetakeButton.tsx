@@ -12,10 +12,10 @@ const RetakeButton = ({ onClick }: RetakeButtonProps) => {
     <Button
       onClick={onClick}
       variant="outline"
-      className="flex items-center text-sm"
+      className="flex items-center text-sm text-gray-500 border-gray-300 hover:bg-gray-50"
       size="sm"
     >
-      <RefreshCw className="mr-2 h-4 w-4" /> Retake Assessment
+      <RefreshCw className="mr-2 h-3 w-3" /> Retake Assessment
     </Button>
   );
 };

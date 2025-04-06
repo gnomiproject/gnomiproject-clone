@@ -43,7 +43,7 @@ const DetailedAnalysisTabs = ({ archetypeData }: DetailedAnalysisTabsProps) => {
         {isMobile ? (
           <div className="mb-6">
             <Sheet>
-              <SheetTrigger className={`w-full flex items-center justify-between p-3 border rounded-md text-${color}`}>
+              <SheetTrigger className={`w-full flex items-center justify-between p-3 border rounded-md text-${color} bg-${color}/5`}>
                 <span className="font-medium">{getActiveTabLabel()}</span>
                 <ChevronDown size={18} />
               </SheetTrigger>
@@ -72,7 +72,7 @@ const DetailedAnalysisTabs = ({ archetypeData }: DetailedAnalysisTabsProps) => {
               <TabsTrigger 
                 key={tab.value}
                 value={tab.value} 
-                className={`flex-1 data-[state=active]:bg-white data-[state=active]:text-${color} data-[state=active]:border-b-2 data-[state=active]:border-${color}`}
+                className={`flex-1 data-[state=active]:bg-${color}/10 data-[state=active]:text-${color} data-[state=active]:border-b-2 data-[state=active]:border-${color} hover:bg-${color}/5`}
               >
                 {tab.label}
               </TabsTrigger>
