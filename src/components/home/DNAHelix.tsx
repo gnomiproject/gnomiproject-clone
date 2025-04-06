@@ -9,8 +9,8 @@ const DNAHelix: React.FC<DNAHelixProps> = ({
   className, 
   onStepClick, 
   selectedArchetypeId,
-  onFamilyClick, // New prop for family click
-  selectedFamilyId // New prop for selected family
+  onFamilyClick, 
+  selectedFamilyId 
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [stepPositions, setStepPositions] = useState<StepPosition[]>([]);
@@ -61,26 +61,26 @@ const DNAHelix: React.FC<DNAHelixProps> = ({
     };
   }, [selectedArchetypeId, selectedFamilyId]);
 
-  // Group step positions by family for calculating average Y position
+  // Get y positions for second step of each family (a2, b2, c2)
   const getFamilyYPositions = () => {
     if (stepPositions.length === 0) return [];
     
-    // Group steps by family ID (we know a1-a3 are first 3, b1-b3 are next 3, etc.)
+    // Find positions for a2, b2, c2 (indices 1, 4, 7)
     const familyPositions = [
       {
         id: 'a',
         name: 'Strategists',
-        yPos: stepPositions.slice(0, 3).reduce((sum, pos) => sum + pos.y, 0) / 3
+        yPos: stepPositions[1]?.y || 0 // a2 is at index 1
       },
       {
         id: 'b',
         name: 'Pragmatists',
-        yPos: stepPositions.slice(3, 6).reduce((sum, pos) => sum + pos.y, 0) / 3
+        yPos: stepPositions[4]?.y || 0 // b2 is at index 4
       },
       {
         id: 'c',
         name: 'Logisticians',
-        yPos: stepPositions.slice(6, 9).reduce((sum, pos) => sum + pos.y, 0) / 3
+        yPos: stepPositions[7]?.y || 0 // c2 is at index 7
       }
     ];
     
@@ -104,8 +104,8 @@ const DNAHelix: React.FC<DNAHelixProps> = ({
             onClick={() => onFamilyClick && onFamilyClick(family.id as 'a' | 'b' | 'c')}
             style={{ 
               position: 'absolute',
-              top: Math.max(0, family.yPos - 20),
-              transform: 'translateY(-50%)'
+              top: family.yPos, // Position exactly at the y coordinate of the step
+              transform: 'translateY(-50%)' // Center vertically
             }}
           >
             Family {family.id.toUpperCase()}
