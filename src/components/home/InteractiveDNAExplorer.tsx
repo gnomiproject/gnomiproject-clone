@@ -4,6 +4,9 @@ import { useArchetypes } from '@/hooks/useArchetypes';
 import DNAHelix from './DNAHelix';
 import SectionTitle from '@/components/shared/SectionTitle';
 import { ArchetypeId } from '@/types/archetype';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { ArrowDown } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 // Import the new component files
 import ArchetypeDetailView from './ArchetypeDetailView';
@@ -15,6 +18,7 @@ const InteractiveDNAExplorer = () => {
   const { getAllArchetypeSummaries, getAllFamilies, getArchetypeSummary, getArchetypeStandard } = useArchetypes();
   const archetypeSummaries = getAllArchetypeSummaries;
   const families = getAllFamilies;
+  const isMobile = useIsMobile();
 
   const [selectedFamily, setSelectedFamily] = useState<string | null>(null);
   const [selectedArchetype, setSelectedArchetype] = useState<ArchetypeId | null>(null);
@@ -54,6 +58,33 @@ const InteractiveDNAExplorer = () => {
   const selectedFamilyInfo = selectedFamily ?
     families.find(family => family.id === selectedFamily) :
     null;
+
+  // Mobile alternative content
+  if (isMobile) {
+    return (
+      <section className="py-12 px-6 bg-white scroll-mt-16" id="dna-explorer">
+        <div className="max-w-6xl mx-auto">
+          <SectionTitle 
+            title="Explore the DNA of Employer Healthcare" 
+            subtitle="We've identified 9 distinct employer archetypes, grouped into 3 families based on how organizations manage healthcare."
+            center
+            className="mb-6"
+          />
+          
+          <div className="bg-blue-50/50 rounded-lg border border-blue-100 p-6 shadow-sm text-center">
+            <h3 className="text-xl font-bold text-blue-700 mb-3">For Best Experience</h3>
+            <p className="text-gray-600 mb-4">
+              Our interactive DNA explorer works best on desktop devices. 
+              Please scroll down to browse all archetypes in card format.
+            </p>
+            <Link to="#archetype-section" className="inline-flex items-center text-blue-600 font-medium">
+              View All Archetypes <ArrowDown className="ml-1 h-4 w-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-16 px-6 md:px-12 bg-white scroll-mt-16" id="dna-explorer">
