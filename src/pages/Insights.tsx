@@ -193,11 +193,7 @@ const Insights = () => {
               </div>
             </div>
             
-            <div className="mt-12">
-              <Link to="/assessment">
-                <Button className="mx-auto">Start My Assessment</Button>
-              </Link>
-            </div>
+            {/* Removed the redundant "Start My Assessment" button that was here */}
           </div>
         )}
       </div>
