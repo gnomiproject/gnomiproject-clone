@@ -55,9 +55,9 @@ const InteractiveDNAExplorer = () => {
           className="mb-10"
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
-          {/* Left side: DNA Helix Visualization */}
-          <div className="md:col-span-1 order-2 md:order-1">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+          {/* Left side: DNA Helix Visualization - Fixed height container */}
+          <div className="md:col-span-1 order-2 md:order-1 sticky top-24">
             <DNAHelix 
               className="h-[500px] mx-auto" 
               onStepClick={handleStepClick}
@@ -65,9 +65,6 @@ const InteractiveDNAExplorer = () => {
               onFamilyClick={handleFamilyClick}
               selectedFamilyId={selectedFamily as 'a' | 'b' | 'c' | null}
             />
-            <div className="mt-4 text-center text-sm text-gray-500">
-              Click on a step or family button to explore
-            </div>
           </div>
 
           {/* Right side: Content display area */}
