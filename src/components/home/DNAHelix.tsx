@@ -2,7 +2,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ArchetypeId } from '@/types/archetype';
 import { DNAHelixProps, StepPosition } from './types/dnaHelix';
-import { drawDNAHelix, detectStepClick } from './utils/dnaHelixUtils';
+import { drawDNAHelix } from './utils/dna';
+import { detectStepClick } from './utils/dna/interactions';
 
 const DNAHelix: React.FC<DNAHelixProps> = ({ className, onStepClick, selectedArchetypeId }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
