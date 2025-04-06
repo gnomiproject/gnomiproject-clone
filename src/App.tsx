@@ -9,6 +9,7 @@ import Insights from './pages/Insights';
 import Results from './pages/Results';
 import NotFound from './pages/NotFound';
 import ColorSafelist from './components/utils/ColorSafelist';
+import { Toaster } from './components/ui/toaster';
 import './App.css';
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
         </main>
         {/* Hidden component to ensure color classes are included in the build */}
         <ColorSafelist />
+        <Toaster />
       </div>
     </Router>
   );
