@@ -60,7 +60,7 @@ const InteractiveDNAExplorer = () => {
       <div className="max-w-6xl mx-auto">
         <SectionTitle 
           title="Explore the DNA of Employer Healthcare" 
-          subtitle="Our proprietary research has identified distinct patterns in how organizations manage healthcare. Click on the steps in the DNA structure to learn about each archetype."
+          subtitle="We've identified 9 distinct employer archetypes, grouped into 3 families based on how organizations manage healthcare."
           center
           className="mb-10"
         />
