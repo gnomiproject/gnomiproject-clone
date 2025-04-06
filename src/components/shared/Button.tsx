@@ -7,7 +7,7 @@ type ButtonSize = 'default' | 'sm' | 'lg';
 
 interface ButtonProps {
   children: React.ReactNode;
-  onClick?: () => void;
+  onClick?: (e?: React.MouseEvent) => void;  // Updated to accept MouseEvent parameter
   variant?: ButtonVariant;
   className?: string;
   type?: 'button' | 'submit' | 'reset';
