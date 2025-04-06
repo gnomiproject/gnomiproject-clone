@@ -20,7 +20,7 @@ export const drawDNAHelix = (
   // Set some rendering parameters
   const centerX = width * 0.5; // Center X position
   const amplitude = width * 0.15; // Wave amplitude (15% of width)
-  const frequency = 0.02; // Adjusted frequency for 4 waves
+  const frequency = 0.018; // Adjusted frequency for waves
   const numberOfSteps = 9; // We only show 9 steps (3 per family)
   const strandWidth = 6; // Width of DNA strands
   
