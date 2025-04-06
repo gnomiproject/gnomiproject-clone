@@ -1,10 +1,9 @@
 
 import React from 'react';
-import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
 import { ArchetypeDetailedData, ArchetypeId } from '@/types/archetype';
 import ArchetypeReport from '@/components/insights/ArchetypeReport';
 import AssessmentResultsHeader from '@/components/insights/AssessmentResultsHeader';
-import DetailedAnalysisTabs from '@/components/results/DetailedAnalysisTabs';
+import PremiumReport from '@/components/results/PremiumReport';
 
 interface AssessmentResultsCardProps {
   archetypeData: ArchetypeDetailedData;
@@ -37,6 +36,9 @@ const AssessmentResultsCard = ({
           <ArchetypeReport archetypeId={selectedArchetype} />
         </div>
       </div>
+      
+      {/* Premium Report section */}
+      <PremiumReport archetypeData={archetypeData} />
     </div>
   );
 };
