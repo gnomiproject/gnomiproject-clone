@@ -6,9 +6,10 @@ import DetailedAnalysisTabs from '@/components/results/DetailedAnalysisTabs';
 
 interface DetailedArchetypeReportProps {
   archetypeId: ArchetypeId;
+  onRetakeAssessment: () => void;
 }
 
-const DetailedArchetypeReport = ({ archetypeId }: DetailedArchetypeReportProps) => {
+const DetailedArchetypeReport = ({ archetypeId, onRetakeAssessment }: DetailedArchetypeReportProps) => {
   const { getArchetypeEnhanced } = useArchetypes();
   const archetypeData = getArchetypeEnhanced(archetypeId);
   
@@ -18,7 +19,10 @@ const DetailedArchetypeReport = ({ archetypeId }: DetailedArchetypeReportProps) 
   
   return (
     <div className="text-left">
-      <DetailedAnalysisTabs archetypeData={archetypeData} />
+      <DetailedAnalysisTabs 
+        archetypeData={archetypeData} 
+        onRetakeAssessment={onRetakeAssessment}
+      />
     </div>
   );
 };

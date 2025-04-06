@@ -33,7 +33,10 @@ const AssessmentResultsCard = ({
       <div className="border-t">
         <div className="p-8">
           <h2 className="text-2xl font-bold mb-8 text-left">Detailed Analysis</h2>
-          <DetailedArchetypeReport archetypeId={selectedArchetype} />
+          <DetailedArchetypeReport 
+            archetypeId={selectedArchetype}
+            onRetakeAssessment={onRetakeAssessment}
+          />
         </div>
       </div>
       

@@ -7,6 +7,7 @@ import KpiRiskTab from './tabs/KpiRiskTab';
 import PrioritiesTab from './tabs/PrioritiesTab';
 import SwotTab from './tabs/SwotTab';
 import SavingsTab from './tabs/SavingsTab';
+import RetakeButton from './RetakeButton';
 import {
   Sheet,
   SheetContent,
@@ -17,9 +18,10 @@ import { useIsMobile } from '@/hooks/use-mobile';
 
 interface DetailedAnalysisTabsProps {
   archetypeData: ArchetypeDetailedData;
+  onRetakeAssessment: () => void;
 }
 
-const DetailedAnalysisTabs = ({ archetypeData }: DetailedAnalysisTabsProps) => {
+const DetailedAnalysisTabs = ({ archetypeData, onRetakeAssessment }: DetailedAnalysisTabsProps) => {
   const color = `archetype-${archetypeData.id}`;
   const [activeTab, setActiveTab] = useState("overview");
   const isMobile = useIsMobile();
@@ -100,6 +102,11 @@ const DetailedAnalysisTabs = ({ archetypeData }: DetailedAnalysisTabsProps) => {
           <SavingsTab archetypeData={archetypeData} />
         </TabsContent>
       </Tabs>
+      
+      {/* Retake assessment link at the bottom */}
+      <div className="mt-12 text-center">
+        <RetakeButton onClick={onRetakeAssessment} />
+      </div>
     </div>
   );
 };

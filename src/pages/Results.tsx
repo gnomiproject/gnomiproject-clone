@@ -4,7 +4,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import SectionTitle from '@/components/shared/SectionTitle';
 import { useArchetypes } from '../hooks/useArchetypes';
 import { AssessmentResult } from '../types/assessment';
-import RetakeButton from '@/components/results/RetakeButton';
 import ArchetypeHeader from '@/components/results/ArchetypeHeader';
 import DetailedAnalysisTabs from '@/components/results/DetailedAnalysisTabs';
 import PremiumReport from '@/components/results/PremiumReport';
@@ -76,11 +75,6 @@ const Results = () => {
               familyData={familyData}
             />
 
-            {/* Retake Button Component */}
-            <div className="flex justify-center mb-8">
-              <RetakeButton onClick={handleRetakeAssessment} />
-            </div>
-
             {/* Prompt to check detailed analysis with bouncing arrow */}
             <div className="text-center mb-8">
               <p className="text-gray-600">
@@ -94,7 +88,10 @@ const Results = () => {
 
           {/* Detailed Analysis Tabs (always visible) */}
           <div className="border-t">
-            <DetailedAnalysisTabs archetypeData={archetypeData} />
+            <DetailedAnalysisTabs 
+              archetypeData={archetypeData} 
+              onRetakeAssessment={handleRetakeAssessment} 
+            />
           </div>
           
           {/* Premium Report Component */}
