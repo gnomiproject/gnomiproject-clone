@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Button from '@/components/shared/Button';
@@ -5,6 +6,7 @@ import SectionTitle from '@/components/shared/SectionTitle';
 import { ArrowRight, Grid, List } from 'lucide-react';
 import { useArchetypes } from '@/hooks/useArchetypes';
 import ArchetypeCard from '@/components/home/ArchetypeCard';
+import InteractiveDNAExplorer from '@/components/home/InteractiveDNAExplorer';
 
 const Index = () => {
   const [view, setView] = useState<'grid' | 'list'>('grid');
@@ -56,7 +58,9 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Rest of the content */}
+      {/* Interactive DNA Explorer Section */}
+      <InteractiveDNAExplorer />
+
       {/* DNA Section */}
       <section className="py-16 px-6 md:px-12 bg-blue-50">
         <div className="max-w-6xl mx-auto">
