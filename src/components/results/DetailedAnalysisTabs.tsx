@@ -39,8 +39,6 @@ const DetailedAnalysisTabs = ({ archetypeData }: DetailedAnalysisTabsProps) => {
   
   return (
     <div className="bg-white px-4 md:px-8 py-6">
-      <h3 className="text-2xl font-bold mb-6 text-left">Detailed Analysis</h3>
-      
       <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="w-full">
         {isMobile ? (
           <div className="mb-6">
