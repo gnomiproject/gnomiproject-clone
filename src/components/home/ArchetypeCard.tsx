@@ -54,7 +54,7 @@ const ArchetypeCard = ({ id, title, category, color, description, characteristic
             <h4 className="font-semibold text-gray-700 mb-3">Key Characteristics:</h4>
             <ul className="space-y-2.5">
               {characteristics.slice(0, 3).map((item, index) => (
-                <li key={index} className="flex items-start">
+                <li key={index} className="flex items-start text-left">
                   <span className={`mr-2 mt-1 flex-shrink-0 text-${archetypeColorClass} text-lg leading-none`}>•</span>
                   <span className="text-sm text-gray-700">{item}</span>
                 </li>
@@ -95,7 +95,7 @@ const ArchetypeCard = ({ id, title, category, color, description, characteristic
                   <h3 className={`font-bold text-xl mb-5 ${archetypeColorClass === 'archetype-c3' ? 'text-black' : `text-${archetypeColorClass}/90`}`}>Key Characteristics</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
                     {detailedData.keyCharacteristics.map((characteristic, index) => (
-                      <div key={index} className={`flex items-start gap-3 p-4 rounded-md bg-${archetypeColorClass}/5 border-l-3 border-${archetypeColorClass}`}>
+                      <div key={index} className={`flex items-start gap-3 p-4 rounded-md bg-${archetypeColorClass}/5 border-l-3 border-${archetypeColorClass} text-left`}>
                         <div className={`h-2.5 w-2.5 mt-1.5 rounded-full bg-${archetypeColorClass} flex-shrink-0`}></div>
                         <span className="text-gray-700">{characteristic}</span>
                       </div>
@@ -130,7 +130,7 @@ const ArchetypeCard = ({ id, title, category, color, description, characteristic
                   </div>
 
                   <h3 className={`font-bold text-xl mb-5 ${archetypeColorClass === 'archetype-c3' ? 'text-black' : `text-${archetypeColorClass}/90`}`}>Key Insights</h3>
-                  <div className="space-y-3 mb-4">
+                  <div className="space-y-3 mb-4 text-left">
                     {detailedData.keyInsights.map((insight, index) => (
                       <div key={index} className="flex items-start gap-3">
                         <div className={`h-3 w-3 mt-1 rounded-full bg-${archetypeColorClass} flex-shrink-0`}></div>
