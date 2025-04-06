@@ -78,10 +78,10 @@ const DNAHelix: React.FC<DNAHelixProps> = ({ className, onStepClick, selectedArc
 
     // Constants for the helix
     const centerX = width / 2;
-    const amplitude = width * 0.2; // Increased from 0.15 to 0.2 to make the helix wider
+    const amplitude = width * 0.25; // Increased from 0.2 to 0.25 to make the helix even wider
     const frequency = Math.PI * 3 / height; // How many cycles to fit in the height
     const strandWidth = 10;
-    const numberOfSteps = 9; // Reduce to 9 steps for the 9 archetypes
+    const numberOfSteps = 9; // Using 9 steps for the 9 archetypes
     
     // Store positions for click detection
     const newStepPositions: {x1: number, x2: number, y: number, archetypeId: ArchetypeId}[] = [];
@@ -124,10 +124,15 @@ const DNAHelix: React.FC<DNAHelixProps> = ({ className, onStepClick, selectedArc
     ctx.strokeStyle = orangeGradient;
     ctx.stroke();
 
-    // Draw the connecting steps (thin lines) - evenly spaced from top to bottom
+    // Draw the connecting steps (thin lines) - with adjusted spacing from top to bottom
+    // Start a bit lower from the top and end a bit higher from the bottom
+    const topMargin = height * 0.1; // 10% margin from the top
+    const bottomMargin = height * 0.1; // 10% margin from the bottom
+    const usableHeight = height - topMargin - bottomMargin;
+
     for (let i = 0; i < numberOfSteps; i++) {
-      // Calculate y position to distribute steps from very top to very bottom
-      const y = i * (height / (numberOfSteps - 1));
+      // Calculate y position with margins to distribute steps more evenly
+      const y = topMargin + (i * (usableHeight / (numberOfSteps - 1)));
       const x1 = centerX + amplitude * Math.sin(frequency * y);
       const x2 = centerX + amplitude * Math.sin(frequency * y + Math.PI);
       

@@ -8,7 +8,7 @@ import SectionTitle from '@/components/shared/SectionTitle';
 import { ArchetypeId } from '@/types/archetype';
 
 const InteractiveDNAExplorer = () => {
-  const { getAllArchetypeSummaries, getAllFamilies, getArchetypeStandard } = useArchetypes();
+  const { getAllArchetypeSummaries, getAllFamilies } = useArchetypes();
   const archetypeSummaries = getAllArchetypeSummaries;
   const families = getAllFamilies;
 
@@ -24,8 +24,10 @@ const InteractiveDNAExplorer = () => {
     setSelectedFamily(familyId);
   };
 
-  // Get the selected archetype's detailed information
-  const selectedArchetypeDetails = selectedArchetype ? getArchetypeStandard(selectedArchetype) : null;
+  // Get the selected archetype's summary information (level 1)
+  const selectedArchetypeSummary = selectedArchetype ? 
+    archetypeSummaries.find(archetype => archetype.id === selectedArchetype) : 
+    null;
 
   return (
     <section className="py-16 px-6 md:px-12 bg-white">
@@ -93,37 +95,30 @@ const InteractiveDNAExplorer = () => {
             </Link>
           </div>
 
-          {/* Right side: Selected Archetype Detail or Archetype examples */}
+          {/* Right side: Selected Archetype Summary (Level 1) or Archetype examples */}
           <div className="md:col-span-1 order-3">
             <div className="bg-gray-50 p-6 rounded-lg shadow-sm h-full">
-              {selectedArchetypeDetails ? (
+              {selectedArchetypeSummary ? (
                 <div className="animate-fade-in">
-                  <div className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium mb-2 bg-archetype-${selectedArchetypeDetails.id}/20 text-archetype-${selectedArchetypeDetails.id}`}>
-                    Family {selectedArchetypeDetails.familyId.toUpperCase()}
+                  <div className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium mb-2 bg-archetype-${selectedArchetypeSummary.id}/20 text-archetype-${selectedArchetypeSummary.id}`}>
+                    Family {selectedArchetypeSummary.familyId.toUpperCase()}
                   </div>
-                  <h3 className={`text-xl font-bold mb-3 text-archetype-${selectedArchetypeDetails.id}`}>
-                    {selectedArchetypeDetails.name}
+                  <h3 className={`text-xl font-bold mb-3 text-archetype-${selectedArchetypeSummary.id}`}>
+                    {selectedArchetypeSummary.name}
                   </h3>
                   
-                  <p className="text-gray-600 mb-4">{selectedArchetypeDetails.fullDescription}</p>
+                  <p className="text-gray-600 mb-4">{selectedArchetypeSummary.description}</p>
                   
                   <h4 className="font-semibold text-gray-700 mb-2">Key Characteristics:</h4>
                   <ul className="list-disc list-inside text-sm text-gray-600 mb-4">
-                    {selectedArchetypeDetails.keyCharacteristics.slice(0, 3).map((trait, index) => (
+                    {selectedArchetypeSummary.keyCharacteristics.slice(0, 3).map((trait, index) => (
                       <li key={index}>{trait}</li>
-                    ))}
-                  </ul>
-                  
-                  <h4 className="font-semibold text-gray-700 mb-2">Key Insights:</h4>
-                  <ul className="list-disc list-inside text-sm text-gray-600 mb-4">
-                    {selectedArchetypeDetails.keyInsights.slice(0, 2).map((insight, index) => (
-                      <li key={index}>{insight}</li>
                     ))}
                   </ul>
                   
                   <Link 
                     to={`/insights/${selectedArchetype}`} 
-                    className={`inline-block mt-4 px-4 py-2 rounded text-white bg-archetype-${selectedArchetypeDetails.id} hover:opacity-90 transition-opacity`}
+                    className={`inline-block mt-4 px-4 py-2 rounded text-white bg-archetype-${selectedArchetypeSummary.id} hover:opacity-90 transition-opacity`}
                   >
                     View Full Profile
                   </Link>
