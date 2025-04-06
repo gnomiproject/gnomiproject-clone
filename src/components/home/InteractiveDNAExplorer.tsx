@@ -6,7 +6,6 @@ import SectionTitle from '@/components/shared/SectionTitle';
 import { ArchetypeId } from '@/types/archetype';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { ArrowDown } from 'lucide-react';
-import { Link } from 'react-router-dom';
 
 // Import the new component files
 import ArchetypeDetailView from './ArchetypeDetailView';
@@ -58,6 +57,13 @@ const InteractiveDNAExplorer = () => {
   const selectedFamilyInfo = selectedFamily ?
     families.find(family => family.id === selectedFamily) :
     null;
+    
+  // Scroll to archetypes section
+  const scrollToArchetypes = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const archetypeSection = document.getElementById('archetype-section');
+    archetypeSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   // Mobile alternative content
   if (isMobile) {
@@ -77,9 +83,12 @@ const InteractiveDNAExplorer = () => {
               Our interactive DNA explorer works best on desktop devices. 
               Please scroll down to browse all archetypes in card format.
             </p>
-            <Link to="#archetype-section" className="inline-flex items-center text-blue-600 font-medium">
+            <button 
+              onClick={scrollToArchetypes}
+              className="inline-flex items-center text-blue-600 font-medium"
+            >
               View All Archetypes <ArrowDown className="ml-1 h-4 w-4" />
-            </Link>
+            </button>
           </div>
         </div>
       </section>
