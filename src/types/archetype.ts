@@ -132,3 +132,14 @@ export interface ArchetypeDetailedData {
     }>;
   };
 }
+
+// Add this new type for the archetype summary
+export type ArchetypeSummary = {
+  id: ArchetypeId;
+  familyId: 'a' | 'b' | 'c';
+  name: string;
+  familyName: string;
+  description: string;
+  keyCharacteristics: string[];
+  color: ArchetypeColor;
+};
