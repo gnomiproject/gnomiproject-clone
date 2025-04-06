@@ -1,15 +1,15 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
-import { ArchetypeDetailedData } from '@/types/archetype';
+import { ArchetypeDetailedData, ArchetypeId } from '@/types/archetype';
 import ArchetypeReport from '@/components/insights/ArchetypeReport';
 import AssessmentResultsHeader from '@/components/insights/AssessmentResultsHeader';
-import DetailedAnalysisTrigger from '@/components/insights/DetailedAnalysisTrigger';
+import DetailedAnalysisTabs from '@/components/results/DetailedAnalysisTabs';
 
 interface AssessmentResultsCardProps {
   archetypeData: ArchetypeDetailedData;
   familyData: { name: string } | undefined;
-  selectedArchetype: string;
+  selectedArchetype: ArchetypeId;
   onRetakeAssessment: () => void;
 }
 
@@ -19,8 +19,6 @@ const AssessmentResultsCard = ({
   selectedArchetype, 
   onRetakeAssessment 
 }: AssessmentResultsCardProps) => {
-  const [isOpen, setIsOpen] = useState(true);
-
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-12 border">
       {/* Orange top border - using the archetype-specific color */}
@@ -32,26 +30,13 @@ const AssessmentResultsCard = ({
         onRetakeAssessment={onRetakeAssessment}
       />
       
-      {/* Detailed analysis section - now with a more prominent toggle button */}
-      <Collapsible
-        open={isOpen}
-        onOpenChange={setIsOpen}
-        className="w-full"
-      >
-        <DetailedAnalysisTrigger 
-          isOpen={isOpen} 
-          archetypeColor={`archetype-${archetypeData.id}`} 
-        />
-        
-        <CollapsibleContent>
-          <div className="border-t">
-            <div className="p-8">
-              <h2 className="text-2xl font-bold mb-8">Detailed Analysis</h2>
-              <ArchetypeReport archetypeId={selectedArchetype} />
-            </div>
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
+      {/* Detailed analysis section - now without a toggle button */}
+      <div className="border-t">
+        <div className="p-8">
+          <h2 className="text-2xl font-bold mb-8 text-left">Detailed Analysis</h2>
+          <ArchetypeReport archetypeId={selectedArchetype} />
+        </div>
+      </div>
     </div>
   );
 };
