@@ -19,17 +19,24 @@ export const drawDNAStrands = (
     c: { startY: 2 * height / 3, endY: height }
   };
 
+  // Define family colors based on the provided specifications
+  const familyColors = {
+    a: '#00B0F0', // Strategists
+    b: '#00B2B1', // Pragmatists
+    c: '#FF8B91'  // Logisticians
+  };
+  
   // Create gradient for left strand (blue to teal to deeper blue)
   const leftStrandGradient = ctx.createLinearGradient(0, 0, 0, height);
-  leftStrandGradient.addColorStop(0, '#33C3F0');  // Sky blue at top
-  leftStrandGradient.addColorStop(0.5, '#00B2B1'); // Teal in middle
-  leftStrandGradient.addColorStop(1, '#0D41C0');  // Deep blue at bottom
+  leftStrandGradient.addColorStop(0, '#00B0F0');  // Family a color at top
+  leftStrandGradient.addColorStop(0.5, '#00B2B1'); // Family b color in middle
+  leftStrandGradient.addColorStop(1, '#FF8B91');  // Family c color at bottom
   
   // Create gradient for right strand (orange to yellow to pink)
   const rightStrandGradient = ctx.createLinearGradient(0, 0, 0, height);
-  rightStrandGradient.addColorStop(0, '#F97316');  // Orange at top
-  rightStrandGradient.addColorStop(0.5, '#FFC600');  // Yellow in middle
-  rightStrandGradient.addColorStop(1, '#FF8B91');  // Pink at bottom
+  rightStrandGradient.addColorStop(0, '#EC7500');  // a1 color at top
+  rightStrandGradient.addColorStop(0.5, '#7030A0');  // b1 color in middle
+  rightStrandGradient.addColorStop(1, '#E40032');  // c1 color at bottom
   
   // Draw first DNA strand (left sine wave)
   ctx.beginPath();
@@ -78,6 +85,7 @@ export const drawDNAStrands = (
   // If a family is selected, highlight its section on both strands
   if (selectedFamilyId) {
     const section = familySections[selectedFamilyId];
+    const familyColor = familyColors[selectedFamilyId];
     
     // Left strand highlight
     ctx.beginPath();
@@ -91,7 +99,7 @@ export const drawDNAStrands = (
       }
     }
     ctx.lineWidth = strandWidth + 3;
-    ctx.strokeStyle = leftStrandGradient;
+    ctx.strokeStyle = familyColor;
     ctx.stroke();
     
     // Add glow effect to selected section
@@ -121,7 +129,7 @@ export const drawDNAStrands = (
       }
     }
     ctx.lineWidth = strandWidth + 3;
-    ctx.strokeStyle = rightStrandGradient;
+    ctx.strokeStyle = familyColor;
     ctx.stroke();
     
     // Add glow effect to selected section

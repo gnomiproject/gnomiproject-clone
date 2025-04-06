@@ -124,17 +124,17 @@ const DNAHelix: React.FC<DNAHelixProps> = ({
     const familyPositions = [
       {
         id: 'a',
-        name: 'Strategists',
+        name: 'strategists',
         yPos: stepPositions[1]?.y || 0 // a2 is at index 1
       },
       {
         id: 'b',
-        name: 'Pragmatists',
+        name: 'pragmatists',
         yPos: stepPositions[4]?.y || 0 // b2 is at index 4
       },
       {
         id: 'c',
-        name: 'Logisticians',
+        name: 'logisticians',
         yPos: stepPositions[7]?.y || 0 // c2 is at index 7
       }
     ];
@@ -164,7 +164,7 @@ const DNAHelix: React.FC<DNAHelixProps> = ({
             }}
             title={`Family ${family.id}: ${family.name}`}
           >
-            Family {family.id.toUpperCase()}
+            family {family.id}
           </button>
         ))}
       </div>

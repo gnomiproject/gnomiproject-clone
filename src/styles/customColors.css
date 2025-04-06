@@ -10,9 +10,9 @@
 
 /* Family color RGB values for canvas usage */
 :root {
-  --family-a-rgb: 0, 176, 240;
-  --family-b-rgb: 0, 178, 177;
-  --family-c-rgb: 255, 139, 145;
+  --family-a-rgb: 0, 176, 240;   /* #00B0F0 */
+  --family-b-rgb: 0, 178, 177;   /* #00B2B1 */
+  --family-c-rgb: 255, 139, 145; /* #FF8B91 */
 }
 
 /* Custom archetype colors */

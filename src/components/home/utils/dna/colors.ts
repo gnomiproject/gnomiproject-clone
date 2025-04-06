@@ -26,15 +26,15 @@ export const createDNAGradients = (ctx: CanvasRenderingContext2D, height: number
 export const getArchetypeColor = (archetypeId: ArchetypeId): string => {
   // Map archetype IDs to colors
   const colorMap: Record<ArchetypeId, string> = {
-    'a1': '#EC7500', // orange
-    'a2': '#00B2B1', // teal
-    'a3': '#FFC600', // yellow
-    'b1': '#00B0F0', // blue
-    'b2': '#7030A0', // purple
-    'b3': '#0D41C0', // blue
-    'c1': '#00B050', // green
-    'c2': '#C00000', // red
-    'c3': '#5B2D90'  // indigo
+    'a1': '#EC7500', // Savvy Healthcare Navigators
+    'a2': '#46E0D3', // Complex Condition Managers
+    'a3': '#FFC600', // Proactive Care Consumers
+    'b1': '#7030A0', // Resourceful Adapters
+    'b2': '#FF8C91', // Healthcare Pragmatists
+    'b3': '#0D41C0', // Care Channel Optimizers
+    'c1': '#E40032', // Scalable Access Architects
+    'c2': '#00B0F0', // Care Adherence Advocates
+    'c3': '#870C0C'  // Engaged Healthcare Consumers
   };
   
   return colorMap[archetypeId] || '#888888';
