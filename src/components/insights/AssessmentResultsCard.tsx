@@ -1,8 +1,9 @@
 
 import React from 'react';
 import { ArchetypeDetailedData, ArchetypeId } from '@/types/archetype';
-import ArchetypeReport from '@/components/insights/ArchetypeReport';
+import DetailedArchetypeReport from '@/components/insights/DetailedArchetypeReport';
 import AssessmentResultsHeader from '@/components/insights/AssessmentResultsHeader';
+import PremiumReport from '@/components/results/PremiumReport';
 
 interface AssessmentResultsCardProps {
   archetypeData: ArchetypeDetailedData;
@@ -32,9 +33,12 @@ const AssessmentResultsCard = ({
       <div className="border-t">
         <div className="p-8">
           <h2 className="text-2xl font-bold mb-8 text-left">Detailed Analysis</h2>
-          <ArchetypeReport archetypeId={selectedArchetype} />
+          <DetailedArchetypeReport archetypeId={selectedArchetype} />
         </div>
       </div>
+      
+      {/* Premium Report section */}
+      <PremiumReport archetypeData={archetypeData} />
     </div>
   );
 };
