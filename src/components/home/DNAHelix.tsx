@@ -108,7 +108,7 @@ const DNAHelix: React.FC<DNAHelixProps> = ({
               transform: 'translateY(-50%)' // Center vertically
             }}
           >
-            Family {family.id.toUpperCase()}
+            Family {family.id.toLowerCase()}
           </button>
         ))}
       </div>

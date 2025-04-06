@@ -87,7 +87,7 @@ const InteractiveDNAExplorer = () => {
                   onClick={() => setSelectedFamily(family.id === selectedFamily ? null : family.id)}
                 >
                   <h4 className={`font-semibold ${selectedFamily === family.id ? `text-family-${family.id}` : ''}`}>
-                    Family {family.id.toUpperCase()}: {family.name}
+                    Family {family.id.toLowerCase()}: {family.name}
                   </h4>
                   {selectedFamily === family.id && (
                     <div className="mt-2 animate-fade-in">
@@ -114,7 +114,7 @@ const InteractiveDNAExplorer = () => {
               {selectedArchetypeSummary ? (
                 <div className="animate-fade-in">
                   <div className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium mb-2 bg-archetype-${selectedArchetypeSummary.id}/20 text-archetype-${selectedArchetypeSummary.id}`}>
-                    Family {selectedArchetypeSummary.familyId.toUpperCase()}
+                    Family {selectedArchetypeSummary.familyId.toLowerCase()}
                   </div>
                   <h3 className={`text-xl font-bold mb-3 text-archetype-${selectedArchetypeSummary.id}`}>
                     {selectedArchetypeSummary.name}
