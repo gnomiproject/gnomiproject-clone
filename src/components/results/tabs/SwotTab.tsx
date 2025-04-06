@@ -15,11 +15,11 @@ const SwotTab = ({ archetypeData }: SwotTabProps) => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-green-50 border border-green-200 rounded-lg p-6">
           <h5 className="text-lg font-bold text-green-700 mb-4">Strengths</h5>
-          <ul className="space-y-2">
+          <ul className="space-y-2 text-left">
             {archetypeData.enhanced?.swot?.strengths.map((strength, index) => (
-              <li key={index} className="flex items-center gap-2">
-                <div className="h-2 w-2 rounded-full bg-green-500"></div>
-                <span>{strength}</span>
+              <li key={index} className="flex items-start gap-2">
+                <div className="h-2 w-2 rounded-full bg-green-500 mt-2 flex-shrink-0"></div>
+                <span className="text-left">{strength}</span>
               </li>
             ))}
           </ul>
@@ -27,11 +27,11 @@ const SwotTab = ({ archetypeData }: SwotTabProps) => {
         
         <div className="bg-red-50 border border-red-200 rounded-lg p-6">
           <h5 className="text-lg font-bold text-red-700 mb-4">Weaknesses</h5>
-          <ul className="space-y-2">
+          <ul className="space-y-2 text-left">
             {archetypeData.enhanced?.swot?.weaknesses.map((weakness, index) => (
-              <li key={index} className="flex items-center gap-2">
-                <div className="h-2 w-2 rounded-full bg-red-500"></div>
-                <span>{weakness}</span>
+              <li key={index} className="flex items-start gap-2">
+                <div className="h-2 w-2 rounded-full bg-red-500 mt-2 flex-shrink-0"></div>
+                <span className="text-left">{weakness}</span>
               </li>
             ))}
           </ul>
@@ -39,11 +39,11 @@ const SwotTab = ({ archetypeData }: SwotTabProps) => {
         
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
           <h5 className="text-lg font-bold text-blue-700 mb-4">Opportunities</h5>
-          <ul className="space-y-2">
+          <ul className="space-y-2 text-left">
             {archetypeData.enhanced?.swot?.opportunities.map((opportunity, index) => (
-              <li key={index} className="flex items-center gap-2">
-                <div className="h-2 w-2 rounded-full bg-blue-500"></div>
-                <span>{opportunity}</span>
+              <li key={index} className="flex items-start gap-2">
+                <div className="h-2 w-2 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div>
+                <span className="text-left">{opportunity}</span>
               </li>
             ))}
           </ul>
@@ -51,11 +51,11 @@ const SwotTab = ({ archetypeData }: SwotTabProps) => {
         
         <div className="bg-amber-50 border border-amber-200 rounded-lg p-6">
           <h5 className="text-lg font-bold text-amber-700 mb-4">Threats</h5>
-          <ul className="space-y-2">
+          <ul className="space-y-2 text-left">
             {archetypeData.enhanced?.swot?.threats.map((threat, index) => (
-              <li key={index} className="flex items-center gap-2">
-                <div className="h-2 w-2 rounded-full bg-amber-500"></div>
-                <span>{threat}</span>
+              <li key={index} className="flex items-start gap-2">
+                <div className="h-2 w-2 rounded-full bg-amber-500 mt-2 flex-shrink-0"></div>
+                <span className="text-left">{threat}</span>
               </li>
             ))}
           </ul>

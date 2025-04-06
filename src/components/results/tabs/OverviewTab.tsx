@@ -19,14 +19,14 @@ const OverviewTab = ({ archetypeData }: OverviewTabProps) => {
             </div>
             <h4 className="text-2xl font-bold mb-4">{archetypeData.name}</h4>
             <h5 className="text-xl font-bold mb-4">What Makes {archetypeData.name} Unique</h5>
-            <p className="text-gray-600 mb-6">
+            <p className="text-gray-600 mb-6 text-left">
               Organizations in the {archetypeData.name} archetype have a distinctive approach to healthcare benefits and management strategies. Here's what sets them apart:
             </p>
           </div>
         </div>
         <div className="w-full md:w-2/3 md:pl-8 mt-8 md:mt-0">
           <h4 className="text-2xl font-bold mb-6">Recommended Strategies</h4>
-          <p className="mb-6 text-gray-700">
+          <p className="mb-6 text-gray-700 text-left">
             Based on extensive analysis of similar organizations, these are the most effective healthcare strategies for the {archetypeData.name} archetype:
           </p>
 
@@ -39,7 +39,7 @@ const OverviewTab = ({ archetypeData }: OverviewTabProps) => {
                       {index === 0 ? '🧠' : index === 1 ? '💎' : '📈'}
                     </span>
                   </div>
-                  <div>
+                  <div className="text-left">
                     <h5 className="font-bold mb-2">{priority.title}</h5>
                     <p className="text-gray-600">
                       {priority.description}
