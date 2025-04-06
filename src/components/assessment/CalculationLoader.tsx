@@ -52,31 +52,31 @@ const CalculationLoader: React.FC<CalculationLoaderProps> = ({ isVisible }) => {
     <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50">
       <div className="bg-white dark:bg-gray-900 rounded-xl p-8 max-w-md w-full mx-4 shadow-2xl border border-gray-100 dark:border-gray-800 animate-fade-in">
         <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold mb-2 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Analyzing Your Responses</h2>
-          <p className="text-gray-600 dark:text-gray-400">Please wait while we determine your organizational archetype</p>
+          <h2 className="text-2xl font-bold mb-2 bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">Analyzing Your Responses</h2>
+          <p className="text-muted-foreground">Please wait while we determine your organizational archetype</p>
         </div>
         
         <div className="flex justify-center mb-6">
           <div className="relative">
             <div 
-              className="w-20 h-20 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 opacity-20 animate-pulse"
+              className="w-20 h-20 rounded-full bg-primary/20 animate-pulse"
             ></div>
             <div 
-              className="absolute inset-0 w-20 h-20 border-4 border-t-blue-600 border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin" 
+              className="absolute inset-0 w-20 h-20 border-4 border-t-primary border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin" 
               style={{ animationDuration: '1s' }}
             ></div>
           </div>
         </div>
         
-        <div className="h-2 bg-gray-100 dark:bg-gray-800 rounded-full mb-6 overflow-hidden">
+        <div className="h-2 bg-secondary rounded-full mb-6 overflow-hidden">
           <div 
-            className="h-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full transition-all duration-500 ease-out"
+            className="h-2 bg-gradient-to-r from-primary to-blue-600 rounded-full transition-all duration-500 ease-out"
             style={{ width: `${progress}%` }}
           />
         </div>
         
         <div className="text-center h-8">
-          <div className="text-lg font-medium text-gray-800 dark:text-gray-200 marquee-text">
+          <div className="text-lg font-medium text-foreground marquee-text">
             {loadingMessages[currentMessage]}
           </div>
         </div>
