@@ -90,8 +90,23 @@ export const drawDNAStrands = (
         ctx.lineTo(x, y);
       }
     }
-    ctx.lineWidth = strandWidth + 2;
-    ctx.strokeStyle = `rgba(var(--family-${selectedFamilyId}-rgb), 0.8)`;
+    ctx.lineWidth = strandWidth + 3;
+    ctx.strokeStyle = leftStrandGradient;
+    ctx.stroke();
+    
+    // Add glow effect to selected section
+    ctx.beginPath();
+    for (let y = section.startY; y <= section.endY; y++) {
+      const x = centerX + amplitude * Math.sin(frequency * y);
+      
+      if (y === section.startY) {
+        ctx.moveTo(x, y);
+      } else {
+        ctx.lineTo(x, y);
+      }
+    }
+    ctx.lineWidth = strandWidth + 8;
+    ctx.strokeStyle = `rgba(var(--family-${selectedFamilyId}-rgb), 0.3)`;
     ctx.stroke();
     
     // Right strand highlight
@@ -105,8 +120,23 @@ export const drawDNAStrands = (
         ctx.lineTo(x, y);
       }
     }
-    ctx.lineWidth = strandWidth + 2;
-    ctx.strokeStyle = `rgba(var(--family-${selectedFamilyId}-rgb), 0.8)`;
+    ctx.lineWidth = strandWidth + 3;
+    ctx.strokeStyle = rightStrandGradient;
+    ctx.stroke();
+    
+    // Add glow effect to selected section
+    ctx.beginPath();
+    for (let y = section.startY; y <= section.endY; y++) {
+      const x = centerX + amplitude * Math.sin(frequency * y + Math.PI);
+      
+      if (y === section.startY) {
+        ctx.moveTo(x, y);
+      } else {
+        ctx.lineTo(x, y);
+      }
+    }
+    ctx.lineWidth = strandWidth + 8;
+    ctx.strokeStyle = `rgba(var(--family-${selectedFamilyId}-rgb), 0.3)`;
     ctx.stroke();
   }
 };

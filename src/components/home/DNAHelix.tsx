@@ -153,7 +153,7 @@ const DNAHelix: React.FC<DNAHelixProps> = ({
             key={family.id}
             className={`pointer-events-auto py-2 px-3 rounded-l-lg text-sm font-medium transition-all transform ${
               selectedFamilyId === family.id 
-                ? `bg-family-${family.id} text-white shadow-md scale-105`
+                ? `bg-family-${family.id} text-white shadow-md scale-110`
                 : `bg-family-${family.id}/20 hover:bg-family-${family.id}/40 hover:scale-105 text-gray-700`
             }`}
             onClick={() => onFamilyClick && onFamilyClick(family.id as 'a' | 'b' | 'c')}
@@ -167,13 +167,6 @@ const DNAHelix: React.FC<DNAHelixProps> = ({
             Family {family.id.toUpperCase()}
           </button>
         ))}
-      </div>
-
-      {/* Visual cue to show clickable area */}
-      <div className="absolute left-0 right-0 top-0 pointer-events-none flex justify-center">
-        <div className="bg-blue-50/70 text-blue-600 text-xs rounded-b-md px-3 py-1 shadow-sm">
-          Click on DNA steps or circles to explore archetypes
-        </div>
       </div>
 
       {/* Main canvas */}
