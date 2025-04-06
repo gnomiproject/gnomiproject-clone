@@ -5,8 +5,9 @@ import { calculateArchetypeMatch, getAssessmentQuestions } from '../utils/assess
 import { AssessmentResult } from '../types/assessment';
 import { ArchetypeId } from '../types/archetype';
 
-// Storage key for insights - must match the one in Insights.tsx
+// Storage keys for assessment data
 const INSIGHTS_STORAGE_KEY = 'healthcareArchetypeInsights';
+const SESSION_RESULTS_KEY = 'healthcareArchetypeSessionResults';
 
 /**
  * Hook to manage the assessment process
@@ -65,6 +66,9 @@ export const useAssessment = () => {
       // Clear previous archetype insights when a new assessment is completed
       localStorage.removeItem(INSIGHTS_STORAGE_KEY);
       
+      // Save results to sessionStorage to persist during the session
+      sessionStorage.setItem(SESSION_RESULTS_KEY, JSON.stringify(assessmentResult));
+      
       // Navigate to results page with the results
       navigate('/results', { state: { result: assessmentResult } });
       setIsCalculating(false);
@@ -81,6 +85,7 @@ export const useAssessment = () => {
     
     // Clear stored insights when assessment is reset
     localStorage.removeItem(INSIGHTS_STORAGE_KEY);
+    sessionStorage.removeItem(SESSION_RESULTS_KEY);
   };
 
   return {

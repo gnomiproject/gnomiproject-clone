@@ -9,13 +9,16 @@ import ArchetypeReport from '@/components/insights/ArchetypeReport';
 import { Badge } from '@/components/ui/badge';
 import { ChevronDown, RefreshCw } from 'lucide-react';
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
+import { AssessmentResult } from '@/types/assessment';
 
-// Storage key for insights
+// Storage keys
 const INSIGHTS_STORAGE_KEY = 'healthcareArchetypeInsights';
+const SESSION_RESULTS_KEY = 'healthcareArchetypeSessionResults';
 
 const Insights = () => {
   const [selectedArchetype, setSelectedArchetype] = useState<ArchetypeId | null>(null);
   const [isOpen, setIsOpen] = useState(true);
+  const [sessionResults, setSessionResults] = useState<AssessmentResult | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
   const { getAllArchetypeSummaries, getArchetypeEnhanced, getFamilyById } = useArchetypes();
@@ -24,8 +27,13 @@ const Insights = () => {
   const archetypeSummaries = getAllArchetypeSummaries;
   
   useEffect(() => {
-    // Check if an archetype was selected from Results page
+    // Check sources for archetype in this priority order:
+    // 1. Location state (direct navigation from Results)
+    // 2. Session storage (user has taken assessment this session)
+    // 3. Local storage (persisted preference)
+    
     if (location.state?.selectedArchetype) {
+      // Source 1: Direct navigation from Results
       const newArchetype = location.state.selectedArchetype;
       setSelectedArchetype(newArchetype);
       
@@ -35,15 +43,26 @@ const Insights = () => {
       // Clear the location state to avoid persisting the selection on refresh
       window.history.replaceState({}, document.title);
     } else {
-      // Try to retrieve from localStorage if no state is present
-      const storedArchetype = localStorage.getItem(INSIGHTS_STORAGE_KEY);
-      if (storedArchetype) {
-        setSelectedArchetype(storedArchetype as ArchetypeId);
+      // Source 2: Check sessionStorage for results from current session
+      const sessionResultsStr = sessionStorage.getItem(SESSION_RESULTS_KEY);
+      if (sessionResultsStr) {
+        try {
+          const parsedResults = JSON.parse(sessionResultsStr) as AssessmentResult;
+          setSessionResults(parsedResults);
+          setSelectedArchetype(parsedResults.primaryArchetype);
+        } catch (error) {
+          console.error('Error parsing session results:', error);
+        }
+      } else {
+        // Source 3: Try to retrieve from localStorage if no state is present
+        const storedArchetype = localStorage.getItem(INSIGHTS_STORAGE_KEY);
+        if (storedArchetype) {
+          setSelectedArchetype(storedArchetype as ArchetypeId);
+        }
       }
     }
     
-    // Clean up function - we don't clear localStorage here
-    // as we want to persist it for the session
+    // Clean up function
     return () => {
       // No cleanup needed
     };
@@ -51,7 +70,7 @@ const Insights = () => {
 
   // Handle retaking the assessment
   const handleRetakeAssessment = () => {
-    // Navigate to assessment without clearing localStorage
+    // Navigate to assessment without clearing localStorage or sessionStorage
     // This allows the user to come back to insights with their previous results
     navigate('/assessment');
   };

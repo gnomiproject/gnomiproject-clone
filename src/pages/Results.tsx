@@ -10,6 +10,9 @@ import DetailedAnalysisTabs from '@/components/results/DetailedAnalysisTabs';
 import PremiumReport from '@/components/results/PremiumReport';
 import { ArrowDown } from 'lucide-react';
 
+// Storage key for session results
+const SESSION_RESULTS_KEY = 'healthcareArchetypeSessionResults';
+
 const Results = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -20,7 +23,23 @@ const Results = () => {
   
   React.useEffect(() => {
     if (!result) {
-      navigate('/assessment');
+      // Try to get results from sessionStorage
+      const sessionResultsStr = sessionStorage.getItem(SESSION_RESULTS_KEY);
+      if (sessionResultsStr) {
+        // If found in sessionStorage, update the location state
+        try {
+          const sessionResults = JSON.parse(sessionResultsStr) as AssessmentResult;
+          navigate('/results', { state: { result: sessionResults }, replace: true });
+        } catch (error) {
+          console.error('Error parsing session results:', error);
+          navigate('/assessment');
+        }
+      } else {
+        navigate('/assessment');
+      }
+    } else {
+      // Save to sessionStorage for persistence during session
+      sessionStorage.setItem(SESSION_RESULTS_KEY, JSON.stringify(result));
     }
   }, [result, navigate]);
   
