@@ -1,9 +1,6 @@
-
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { ArchetypeDetailedData } from '@/types/archetype';
-import Button from '@/components/shared/Button';
-import { RefreshCw } from 'lucide-react';
 
 interface AssessmentResultsHeaderProps {
   archetypeData: ArchetypeDetailedData;
@@ -14,6 +11,7 @@ interface AssessmentResultsHeaderProps {
 const AssessmentResultsHeader = ({ 
   archetypeData, 
   familyData, 
+  // We keep the prop even though we don't use it, to avoid breaking the API
   onRetakeAssessment 
 }: AssessmentResultsHeaderProps) => {
   return (
@@ -36,19 +34,9 @@ const AssessmentResultsHeader = ({
         </span>
       </h2>
 
-      <p className="text-gray-700 text-lg text-center max-w-3xl mx-auto mb-8">
+      <p className="text-gray-700 text-lg text-center max-w-3xl mx-auto">
         {archetypeData.summary.description}
       </p>
-
-      <div className="flex justify-center">
-        <Button
-          onClick={onRetakeAssessment}
-          variant="outline"
-          className="flex items-center"
-        >
-          <RefreshCw className="mr-2 h-4 w-4" /> Retake Assessment
-        </Button>
-      </div>
     </div>
   );
 };
