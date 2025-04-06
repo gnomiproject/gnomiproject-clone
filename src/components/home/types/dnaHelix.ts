@@ -12,6 +12,8 @@ export interface StepPosition {
   x2: number;
   y: number;
   archetypeId: ArchetypeId;
+  circleX?: number;
+  circleRadius?: number;
 }
 
 // Map step positions to archetype IDs

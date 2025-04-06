@@ -1,4 +1,3 @@
-
 import { ArchetypeId } from '@/types/archetype';
 import { StepPosition, stepToArchetypeMap } from '../types/dnaHelix';
 
@@ -178,6 +177,84 @@ export const drawSteps = (
 };
 
 /**
+ * Returns the appropriate color for an archetype circle
+ */
+export const getArchetypeColor = (archetypeId: ArchetypeId): string => {
+  // Map archetype IDs to colors
+  const colorMap: Record<ArchetypeId, string> = {
+    'a1': '#EC7500', // orange
+    'a2': '#00B2B1', // teal
+    'a3': '#FFC600', // yellow
+    'b1': '#00B0F0', // blue
+    'b2': '#7030A0', // purple
+    'c1': '#00B050', // green
+    'c2': '#C00000', // red
+    'c3': '#5B2D90', // indigo
+    'b3': '#FF8B91'  // pink
+  };
+  
+  return colorMap[archetypeId] || '#888888';
+};
+
+/**
+ * Draws leader lines and archetype circles
+ */
+export const drawLeaderLinesAndCircles = (
+  ctx: CanvasRenderingContext2D,
+  stepPositions: StepPosition[],
+  width: number,
+  selectedArchetypeId: ArchetypeId | null | undefined
+) => {
+  const circleRadius = 16;
+  const leaderLineLength = width * 0.15; // 15% of canvas width
+  const circlesX = width * 0.85; // Position circles at 85% of canvas width
+  
+  stepPositions.forEach(step => {
+    const { x2, y, archetypeId } = step;
+    
+    // Draw leader line
+    ctx.beginPath();
+    ctx.moveTo(x2, y);
+    ctx.lineTo(circlesX - circleRadius, y);
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = selectedArchetypeId && archetypeId === selectedArchetypeId ? 
+      '#ffffff' : 'rgba(224, 224, 224, 0.7)';
+    ctx.stroke();
+    
+    // Draw circle
+    ctx.beginPath();
+    ctx.arc(circlesX, y, circleRadius, 0, Math.PI * 2);
+    ctx.fillStyle = getArchetypeColor(archetypeId);
+    if (selectedArchetypeId && archetypeId === selectedArchetypeId) {
+      // Add glow effect for selected archetype
+      ctx.shadowColor = 'white';
+      ctx.shadowBlur = 10;
+    }
+    ctx.fill();
+    ctx.shadowBlur = 0; // Reset shadow
+    
+    // Draw circle border
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = selectedArchetypeId && archetypeId === selectedArchetypeId ? 
+      '#ffffff' : 'rgba(255, 255, 255, 0.5)';
+    ctx.stroke();
+    
+    // Draw archetype ID text
+    ctx.font = 'bold 14px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(archetypeId, circlesX, y);
+  });
+  
+  // Return the circle positions for click detection
+  return {
+    x: circlesX,
+    radius: circleRadius
+  };
+};
+
+/**
  * Main function to draw the entire DNA helix
  */
 export const drawDNAHelix = (
@@ -204,11 +281,20 @@ export const drawDNAHelix = (
   // Draw the connecting steps
   drawSteps(ctx, stepPositions, selectedArchetypeId);
   
+  // Draw leader lines and archetype circles
+  const circleInfo = drawLeaderLinesAndCircles(ctx, stepPositions, width, selectedArchetypeId);
+  
+  // Add circle info to step positions for click detection
+  stepPositions.forEach(pos => {
+    pos.circleX = circleInfo.x;
+    pos.circleRadius = circleInfo.radius;
+  });
+  
   return stepPositions;
 };
 
 /**
- * Checks if a click is on a step and returns the corresponding archetype ID
+ * Checks if a click is on a step or circle and returns the corresponding archetype ID
  */
 export const detectStepClick = (
   event: React.MouseEvent<HTMLCanvasElement>, 
@@ -220,7 +306,19 @@ export const detectStepClick = (
   const x = event.clientX - rect.left;
   const y = event.clientY - rect.top;
   
-  // Check if click is near any step
+  // Check if click is on any circle first (higher priority than step clicks)
+  const clickedCircle = stepPositions.find(step => {
+    if (!step.circleX || !step.circleRadius) return false;
+    
+    const distance = Math.sqrt(Math.pow(step.circleX - x, 2) + Math.pow(step.y - y, 2));
+    return distance <= step.circleRadius;
+  });
+  
+  if (clickedCircle) {
+    return clickedCircle.archetypeId;
+  }
+  
+  // If no circle was clicked, check if click is near any step
   const clickedStep = stepPositions.find(step => {
     // Calculate if click is within range of the step line
     const distance = Math.abs(step.y - y);
