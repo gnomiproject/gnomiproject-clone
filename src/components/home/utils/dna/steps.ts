@@ -10,7 +10,8 @@ export const drawSteps = (
   ctx: CanvasRenderingContext2D,
   stepPositions: StepPosition[],
   selectedArchetypeId: ArchetypeId | null | undefined,
-  selectedFamilyId: 'a' | 'b' | 'c' | null | undefined
+  selectedFamilyId: 'a' | 'b' | 'c' | null | undefined,
+  hoveredStepIndex: number | null = null
 ) => {
   stepPositions.forEach((step, index) => {
     const { x1, x2, y, archetypeId } = step;
@@ -18,6 +19,7 @@ export const drawSteps = (
     // Determine if this step belongs to the selected family
     const stepFamilyId = archetypeId.charAt(0) as 'a' | 'b' | 'c';
     const isSelectedFamily = selectedFamilyId && stepFamilyId === selectedFamilyId;
+    const isHovered = hoveredStepIndex === index;
     
     // Get the archetype color for this step
     const stepColor = getArchetypeColor(archetypeId);
@@ -35,7 +37,7 @@ export const drawSteps = (
     
     if (selectedArchetypeId && archetypeId === selectedArchetypeId) {
       // Highlight selected step
-      ctx.lineWidth = 4;
+      ctx.lineWidth = 5;
       ctx.strokeStyle = '#ffffff';
       ctx.stroke();
       
@@ -43,16 +45,28 @@ export const drawSteps = (
       ctx.beginPath();
       ctx.moveTo(x1, y);
       ctx.lineTo(x2, y);
-      ctx.lineWidth = 8;
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+      ctx.lineWidth = 10;
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
       ctx.stroke();
       
       // Draw the actual line
       ctx.beginPath();
       ctx.moveTo(x1, y);
       ctx.lineTo(x2, y);
-      ctx.lineWidth = 2;
+      ctx.lineWidth = 3;
       ctx.strokeStyle = '#ffffff';
+      ctx.stroke();
+    } else if (isHovered) {
+      // Hover effect for step
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+      ctx.stroke();
+      
+      ctx.beginPath();
+      ctx.moveTo(x1, y);
+      ctx.lineTo(x2, y);
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = stepColor;
       ctx.stroke();
     } else if (isSelectedFamily) {
       // Highlight step in selected family (but not as prominent as selected archetype)
@@ -84,18 +98,20 @@ export const drawLeaderLinesAndCircles = (
   stepPositions: StepPosition[],
   width: number,
   selectedArchetypeId: ArchetypeId | null | undefined,
-  selectedFamilyId: 'a' | 'b' | 'c' | null | undefined
+  selectedFamilyId: 'a' | 'b' | 'c' | null | undefined,
+  hoveredStepIndex: number | null = null
 ) => {
   const circleRadius = 16;
   const leaderLineLength = width * 0.15; // 15% of canvas width
   const circlesX = width * 0.85; // Position circles at 85% of canvas width
   
-  stepPositions.forEach(step => {
+  stepPositions.forEach((step, index) => {
     const { x2, y, archetypeId } = step;
     
     // Determine if this step belongs to the selected family
     const stepFamilyId = archetypeId.charAt(0) as 'a' | 'b' | 'c';
     const isSelectedFamily = selectedFamilyId && stepFamilyId === selectedFamilyId;
+    const isHovered = hoveredStepIndex === index;
     
     // Get the archetype color for this leader line
     const archetypeColor = getArchetypeColor(archetypeId);
@@ -104,14 +120,18 @@ export const drawLeaderLinesAndCircles = (
     ctx.beginPath();
     ctx.moveTo(x2, y);
     ctx.lineTo(circlesX - circleRadius, y);
-    ctx.lineWidth = 2; // Match the step thickness
     
     if (selectedArchetypeId && archetypeId === selectedArchetypeId) {
+      ctx.lineWidth = 3;
       ctx.strokeStyle = '#ffffff';
+    } else if (isHovered) {
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
     } else if (isSelectedFamily) {
       ctx.strokeStyle = archetypeColor;
       ctx.lineWidth = 2.5;
     } else {
+      ctx.lineWidth = 2;
       ctx.strokeStyle = archetypeColor;
     }
     
@@ -120,16 +140,25 @@ export const drawLeaderLinesAndCircles = (
     // Draw circle
     ctx.beginPath();
     ctx.arc(circlesX, y, circleRadius, 0, Math.PI * 2);
-    ctx.fillStyle = archetypeColor;
     
+    // Define fill style based on state
     if (selectedArchetypeId && archetypeId === selectedArchetypeId) {
+      ctx.fillStyle = '#ffffff';
       // Add glow effect for selected archetype
+      ctx.shadowColor = archetypeColor;
+      ctx.shadowBlur = 15;
+    } else if (isHovered) {
+      ctx.fillStyle = archetypeColor;
+      // Hover glow
       ctx.shadowColor = 'white';
       ctx.shadowBlur = 10;
     } else if (isSelectedFamily) {
+      ctx.fillStyle = archetypeColor;
       // Subtle glow for selected family
       ctx.shadowColor = 'white';
       ctx.shadowBlur = 5;
+    } else {
+      ctx.fillStyle = archetypeColor;
     }
     
     ctx.fill();
@@ -139,7 +168,10 @@ export const drawLeaderLinesAndCircles = (
     ctx.lineWidth = 2;
     
     if (selectedArchetypeId && archetypeId === selectedArchetypeId) {
-      ctx.strokeStyle = '#ffffff';
+      ctx.strokeStyle = archetypeColor;
+    } else if (isHovered) {
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+      ctx.lineWidth = 3;
     } else if (isSelectedFamily) {
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
     } else {
@@ -152,7 +184,16 @@ export const drawLeaderLinesAndCircles = (
     ctx.font = 'bold 14px Arial';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillStyle = '#ffffff';
+    
+    if (selectedArchetypeId && archetypeId === selectedArchetypeId) {
+      ctx.fillStyle = archetypeColor;
+    } else if (isHovered) {
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 15px Arial'; // Slightly larger font for hover
+    } else {
+      ctx.fillStyle = '#ffffff';
+    }
+    
     ctx.fillText(archetypeId, circlesX, y);
   });
   

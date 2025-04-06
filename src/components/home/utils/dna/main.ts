@@ -13,7 +13,8 @@ export const drawDNAHelix = (
   width: number,
   height: number,
   selectedArchetypeId?: ArchetypeId | null,
-  selectedFamilyId?: 'a' | 'b' | 'c' | null
+  selectedFamilyId?: 'a' | 'b' | 'c' | null,
+  hoveredStepIndex?: number | null
 ): StepPosition[] => {
   // Clear the canvas first
   ctx.clearRect(0, 0, width, height);
@@ -32,10 +33,10 @@ export const drawDNAHelix = (
   const stepPositions = calculateStepPositions(width, height, centerX, amplitude, frequency, numberOfSteps);
   
   // Draw the steps connecting the strands
-  drawSteps(ctx, stepPositions, selectedArchetypeId, selectedFamilyId);
+  drawSteps(ctx, stepPositions, selectedArchetypeId, selectedFamilyId, hoveredStepIndex);
   
   // Draw the leader lines and archetype circles
-  const { x: circlesX, radius: circleRadius } = drawLeaderLinesAndCircles(ctx, stepPositions, width, selectedArchetypeId, selectedFamilyId);
+  const { x: circlesX, radius: circleRadius } = drawLeaderLinesAndCircles(ctx, stepPositions, width, selectedArchetypeId, selectedFamilyId, hoveredStepIndex);
   
   // Update step positions with circle information (for click detection)
   stepPositions.forEach(step => {

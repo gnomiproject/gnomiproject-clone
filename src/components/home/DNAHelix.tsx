@@ -14,6 +14,7 @@ const DNAHelix: React.FC<DNAHelixProps> = ({
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [stepPositions, setStepPositions] = useState<StepPosition[]>([]);
+  const [hoveredStepIndex, setHoveredStepIndex] = useState<number | null>(null);
   
   // Handle click on canvas
   const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
@@ -26,6 +27,60 @@ const DNAHelix: React.FC<DNAHelixProps> = ({
     
     if (clickedArchetypeId) {
       onStepClick(clickedArchetypeId);
+    }
+  };
+  
+  // Handle mouse move for hover effects
+  const handleCanvasMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (!canvas || stepPositions.length === 0) return;
+    
+    // Get mouse position
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    
+    // Check if mouse is near any step or circle
+    let foundHoverIndex: number | null = null;
+    
+    for (let i = 0; i < stepPositions.length; i++) {
+      const step = stepPositions[i];
+      
+      // Check if over circle
+      if (step.circleX && step.circleRadius) {
+        const distance = Math.sqrt(Math.pow(step.circleX - x, 2) + Math.pow(step.y - y, 2));
+        if (distance <= step.circleRadius * 1.2) { // Slightly larger than actual radius for better UX
+          foundHoverIndex = i;
+          break;
+        }
+      }
+      
+      // Check if over step
+      const distance = Math.abs(step.y - y);
+      if (distance < 10 && x >= Math.min(step.x1, step.x2) - 15 && x <= Math.max(step.x1, step.x2) + 15) {
+        foundHoverIndex = i;
+        break;
+      }
+    }
+    
+    // Update hover state if changed
+    if (foundHoverIndex !== hoveredStepIndex) {
+      setHoveredStepIndex(foundHoverIndex);
+      
+      // Update cursor style based on hover state
+      if (canvas) {
+        canvas.style.cursor = foundHoverIndex !== null ? 'pointer' : 'default';
+      }
+    }
+  };
+  
+  // Handle mouse leave
+  const handleCanvasMouseLeave = () => {
+    setHoveredStepIndex(null);
+    
+    const canvas = canvasRef.current;
+    if (canvas) {
+      canvas.style.cursor = 'default';
     }
   };
 
@@ -44,7 +99,7 @@ const DNAHelix: React.FC<DNAHelixProps> = ({
         canvas.height = Math.min(600, window.innerHeight * 0.6);
         
         // Force a redraw when the canvas size changes or selection changes
-        const newStepPositions = drawDNAHelix(ctx, canvas.width, canvas.height, selectedArchetypeId, selectedFamilyId);
+        const newStepPositions = drawDNAHelix(ctx, canvas.width, canvas.height, selectedArchetypeId, selectedFamilyId, hoveredStepIndex);
         setStepPositions(newStepPositions);
       }
     };
@@ -59,7 +114,7 @@ const DNAHelix: React.FC<DNAHelixProps> = ({
     return () => {
       window.removeEventListener('resize', resizeCanvas);
     };
-  }, [selectedArchetypeId, selectedFamilyId]);
+  }, [selectedArchetypeId, selectedFamilyId, hoveredStepIndex]);
 
   // Get y positions for second step of each family (a2, b2, c2)
   const getFamilyYPositions = () => {
@@ -98,27 +153,37 @@ const DNAHelix: React.FC<DNAHelixProps> = ({
             key={family.id}
             className={`pointer-events-auto py-2 px-3 rounded-l-lg text-sm font-medium transition-all transform ${
               selectedFamilyId === family.id 
-                ? `bg-family-${family.id} text-white shadow-md`
-                : `bg-family-${family.id}/20 hover:bg-family-${family.id}/40 text-gray-700`
+                ? `bg-family-${family.id} text-white shadow-md scale-105`
+                : `bg-family-${family.id}/20 hover:bg-family-${family.id}/40 hover:scale-105 text-gray-700`
             }`}
             onClick={() => onFamilyClick && onFamilyClick(family.id as 'a' | 'b' | 'c')}
             style={{ 
               position: 'absolute',
               top: family.yPos, // Position exactly at the y coordinate of the step
-              transform: 'translateY(-50%)' // Center vertically
+              transform: 'translateY(-50%)', // Center vertically
             }}
+            title={`Family ${family.id}: ${family.name}`}
           >
-            Family {family.id.toLowerCase()}
+            Family {family.id.toUpperCase()}
           </button>
         ))}
+      </div>
+
+      {/* Visual cue to show clickable area */}
+      <div className="absolute left-0 right-0 top-0 pointer-events-none flex justify-center">
+        <div className="bg-blue-50/70 text-blue-600 text-xs rounded-b-md px-3 py-1 shadow-sm">
+          Click on DNA steps or circles to explore archetypes
+        </div>
       </div>
 
       {/* Main canvas */}
       <canvas 
         ref={canvasRef} 
-        className={`w-full cursor-pointer ${className || ''}`}
+        className={`w-full ${className || ''}`}
         style={{ maxHeight: '600px' }}
         onClick={handleCanvasClick}
+        onMouseMove={handleCanvasMouseMove}
+        onMouseLeave={handleCanvasMouseLeave}
       />
     </div>
   );

@@ -69,13 +69,15 @@ const InteractiveDNAExplorer = () => {
           {/* Left side: DNA Helix Visualization - Fixed height container */}
           <div className="md:col-span-1 order-2 md:order-1 sticky top-24">
             <h3 className="text-xl font-bold text-center mb-4 text-gray-800">3 Families, 9 Archetypes</h3>
-            <DNAHelix 
-              className="h-[500px] mx-auto" 
-              onStepClick={handleStepClick}
-              selectedArchetypeId={selectedArchetype}
-              onFamilyClick={handleFamilyClick}
-              selectedFamilyId={selectedFamily as 'a' | 'b' | 'c' | null}
-            />
+            <div className="relative bg-gradient-to-b from-transparent to-blue-50/30 rounded-lg p-4 shadow-sm">
+              <DNAHelix 
+                className="h-[500px] mx-auto" 
+                onStepClick={handleStepClick}
+                selectedArchetypeId={selectedArchetype}
+                onFamilyClick={handleFamilyClick}
+                selectedFamilyId={selectedFamily as 'a' | 'b' | 'c' | null}
+              />
+            </div>
           </div>
 
           {/* Right side: Content display area */}

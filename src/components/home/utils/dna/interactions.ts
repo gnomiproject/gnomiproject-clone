@@ -32,8 +32,41 @@ export const detectStepClick = (
   const clickedStep = stepPositions.find(step => {
     // Calculate if click is within range of the step line
     const distance = Math.abs(step.y - y);
-    return distance < 10 && x >= Math.min(step.x1, step.x2) - 10 && x <= Math.max(step.x1, step.x2) + 10;
+    return distance < 12 && x >= Math.min(step.x1, step.x2) - 12 && x <= Math.max(step.x1, step.x2) + 12;
   });
   
   return clickedStep ? clickedStep.archetypeId : null;
+};
+
+/**
+ * Checks if mouse is hovering over a step or circle and returns the index
+ */
+export const detectStepHover = (
+  x: number,
+  y: number,
+  stepPositions: StepPosition[]
+): number | null => {
+  // Check if hover is on any circle first
+  for (let i = 0; i < stepPositions.length; i++) {
+    const step = stepPositions[i];
+    
+    if (step.circleX && step.circleRadius) {
+      const distance = Math.sqrt(Math.pow(step.circleX - x, 2) + Math.pow(step.y - y, 2));
+      if (distance <= step.circleRadius * 1.2) { // Slightly larger than actual radius for better UX
+        return i;
+      }
+    }
+  }
+  
+  // If not hovering over a circle, check for steps
+  for (let i = 0; i < stepPositions.length; i++) {
+    const step = stepPositions[i];
+    const distance = Math.abs(step.y - y);
+    
+    if (distance < 12 && x >= Math.min(step.x1, step.x2) - 12 && x <= Math.max(step.x1, step.x2) + 12) {
+      return i;
+    }
+  }
+  
+  return null;
 };
