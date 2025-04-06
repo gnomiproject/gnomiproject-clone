@@ -120,6 +120,26 @@ export const calculateStepPositions = (
 };
 
 /**
+ * Returns the appropriate color for an archetype circle
+ */
+export const getArchetypeColor = (archetypeId: ArchetypeId): string => {
+  // Map archetype IDs to colors
+  const colorMap: Record<ArchetypeId, string> = {
+    'a1': '#EC7500', // orange
+    'a2': '#00B2B1', // teal
+    'a3': '#FFC600', // yellow
+    'b1': '#00B0F0', // blue
+    'b2': '#7030A0', // purple
+    'c1': '#00B050', // green
+    'c2': '#C00000', // red
+    'c3': '#5B2D90', // indigo
+    'b3': '#FF8B91'  // pink
+  };
+  
+  return colorMap[archetypeId] || '#888888';
+};
+
+/**
  * Draws the steps connecting the DNA strands
  */
 export const drawSteps = (
@@ -129,6 +149,9 @@ export const drawSteps = (
 ) => {
   stepPositions.forEach(step => {
     const { x1, x2, y, archetypeId } = step;
+    
+    // Get the archetype color for this step
+    const stepColor = getArchetypeColor(archetypeId);
     
     // Draw the step with visual cue if it's selected
     ctx.beginPath();
@@ -157,43 +180,14 @@ export const drawSteps = (
       ctx.strokeStyle = '#ffffff';
       ctx.stroke();
     } else {
-      // Normal step
+      // Normal step with archetype color
       ctx.lineWidth = 2;
-      ctx.strokeStyle = '#e0e0e0';
+      ctx.strokeStyle = stepColor;
       ctx.stroke();
     }
     
-    // Add a subtle circle at each end of the step to indicate it's clickable
-    ctx.beginPath();
-    ctx.arc(x1, y, 4, 0, Math.PI * 2);
-    ctx.fillStyle = selectedArchetypeId && archetypeId === selectedArchetypeId ? '#ffffff' : '#e0e0e0';
-    ctx.fill();
-    
-    ctx.beginPath();
-    ctx.arc(x2, y, 4, 0, Math.PI * 2);
-    ctx.fillStyle = selectedArchetypeId && archetypeId === selectedArchetypeId ? '#ffffff' : '#e0e0e0';
-    ctx.fill();
+    // Removed the circles at the ends of steps as requested
   });
-};
-
-/**
- * Returns the appropriate color for an archetype circle
- */
-export const getArchetypeColor = (archetypeId: ArchetypeId): string => {
-  // Map archetype IDs to colors
-  const colorMap: Record<ArchetypeId, string> = {
-    'a1': '#EC7500', // orange
-    'a2': '#00B2B1', // teal
-    'a3': '#FFC600', // yellow
-    'b1': '#00B0F0', // blue
-    'b2': '#7030A0', // purple
-    'c1': '#00B050', // green
-    'c2': '#C00000', // red
-    'c3': '#5B2D90', // indigo
-    'b3': '#FF8B91'  // pink
-  };
-  
-  return colorMap[archetypeId] || '#888888';
 };
 
 /**
