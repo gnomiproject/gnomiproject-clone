@@ -12,7 +12,7 @@ const KpiRiskTab = ({ archetypeData }: KpiRiskTabProps) => {
   return (
     <div className="py-6">
       <div className="space-y-6">
-        <h4 className="text-2xl font-bold mb-4">Key Performance Indicators</h4>
+        <h4 className="text-2xl font-bold mb-4 text-left">Key Performance Indicators</h4>
         <p className="mb-6 text-left">KPIs specific to {archetypeData.name} organizations:</p>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -33,7 +33,7 @@ const KpiRiskTab = ({ archetypeData }: KpiRiskTabProps) => {
           ))}
         </div>
         
-        <h4 className="text-2xl font-bold mb-4 mt-8">Risk Assessment</h4>
+        <h4 className="text-2xl font-bold mb-4 mt-8 text-left">Risk Assessment</h4>
         <p className="mb-6 text-left">The risk profile for {archetypeData.name} organizations:</p>
         
         <div className="bg-white border rounded-lg p-6">

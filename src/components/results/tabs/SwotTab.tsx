@@ -9,12 +9,12 @@ interface SwotTabProps {
 const SwotTab = ({ archetypeData }: SwotTabProps) => {
   return (
     <div className="py-6">
-      <h4 className="text-2xl font-bold mb-6">SWOT Analysis</h4>
-      <p className="mb-6">Strategic analysis for {archetypeData.name} organizations:</p>
+      <h4 className="text-2xl font-bold mb-6 text-left">SWOT Analysis</h4>
+      <p className="mb-6 text-left">Strategic analysis for {archetypeData.name} organizations:</p>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-          <h5 className="text-lg font-bold text-green-700 mb-4">Strengths</h5>
+          <h5 className="text-lg font-bold text-green-700 mb-4 text-left">Strengths</h5>
           <ul className="space-y-2 text-left">
             {archetypeData.enhanced?.swot?.strengths.map((strength, index) => (
               <li key={index} className="flex items-start gap-2">
@@ -26,7 +26,7 @@ const SwotTab = ({ archetypeData }: SwotTabProps) => {
         </div>
         
         <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-          <h5 className="text-lg font-bold text-red-700 mb-4">Weaknesses</h5>
+          <h5 className="text-lg font-bold text-red-700 mb-4 text-left">Weaknesses</h5>
           <ul className="space-y-2 text-left">
             {archetypeData.enhanced?.swot?.weaknesses.map((weakness, index) => (
               <li key={index} className="flex items-start gap-2">
@@ -38,7 +38,7 @@ const SwotTab = ({ archetypeData }: SwotTabProps) => {
         </div>
         
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-          <h5 className="text-lg font-bold text-blue-700 mb-4">Opportunities</h5>
+          <h5 className="text-lg font-bold text-blue-700 mb-4 text-left">Opportunities</h5>
           <ul className="space-y-2 text-left">
             {archetypeData.enhanced?.swot?.opportunities.map((opportunity, index) => (
               <li key={index} className="flex items-start gap-2">
@@ -50,7 +50,7 @@ const SwotTab = ({ archetypeData }: SwotTabProps) => {
         </div>
         
         <div className="bg-amber-50 border border-amber-200 rounded-lg p-6">
-          <h5 className="text-lg font-bold text-amber-700 mb-4">Threats</h5>
+          <h5 className="text-lg font-bold text-amber-700 mb-4 text-left">Threats</h5>
           <ul className="space-y-2 text-left">
             {archetypeData.enhanced?.swot?.threats.map((threat, index) => (
               <li key={index} className="flex items-start gap-2">

@@ -11,7 +11,7 @@ const SavingsTab = ({ archetypeData }: SavingsTabProps) => {
 
   return (
     <div className="py-6">
-      <h4 className="text-2xl font-bold mb-6">Cost Saving Opportunities</h4>
+      <h4 className="text-2xl font-bold mb-6 text-left">Cost Saving Opportunities</h4>
       <p className="mb-6 text-left">Potential savings opportunities for {archetypeData.name} organizations:</p>
       
       <div className="space-y-8">

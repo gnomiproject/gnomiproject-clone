@@ -11,7 +11,7 @@ const PrioritiesTab = ({ archetypeData }: PrioritiesTabProps) => {
 
   return (
     <div className="py-6">
-      <h4 className="text-2xl font-bold mb-6">Strategic Priorities</h4>
+      <h4 className="text-2xl font-bold mb-6 text-left">Strategic Priorities</h4>
       <p className="mb-6 text-left">Based on benchmarking data, these are the recommended priorities for {archetypeData.name} organizations:</p>
       
       <div className="space-y-6">
