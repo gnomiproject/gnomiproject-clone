@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import { ArchetypeId } from '@/types/archetype';
 
@@ -128,29 +129,19 @@ const DNAHelix: React.FC<DNAHelixProps> = ({ className, onStepClick, selectedArc
     const topMargin = height * 0.1; // 10% margin from the top
     const bottomMargin = height * 0.1; // 10% margin from the bottom
     const usableHeight = height - topMargin - bottomMargin;
+    
+    // Calculate even spacing for all steps
+    const stepSpacing = usableHeight / (numberOfSteps - 1);
 
     for (let i = 0; i < numberOfSteps; i++) {
-      // Calculate y position with special adjustments for first three steps
-      let y;
+      // Calculate y position with proper spacing
+      let y = topMargin + (i * stepSpacing);
       
-      if (i < 3) {
-        // Adjusted positions for the first three steps to fit in the first twist
-        // Position them at 5%, 15%, and 25% of the way down the first twist
-        const firstTwistHeight = height / 3; // Height of the first twist (approx)
-        
-        if (i === 0) {
-          // First step - positioned a bit higher, around 12% down the first twist
-          y = topMargin + (firstTwistHeight * 0.12);
-        } else if (i === 1) {
-          // Second step - centered at the widest part of first twist (25% down)
-          y = topMargin + (firstTwistHeight * 0.25); 
-        } else {
-          // Third step - positioned around 38% down the first twist
-          y = topMargin + (firstTwistHeight * 0.38);
-        }
-      } else {
-        // Keep the original positions for the remaining steps
-        y = topMargin + ((i) * (usableHeight / (numberOfSteps - 1)));
+      // For step 2, ensure it's positioned at the widest part of the helix
+      if (i === 1) {
+        // Slightly adjust to ensure step 2 is at a wide part
+        const firstTwistHeight = height / 3;
+        y = topMargin + (firstTwistHeight * 0.25);
       }
       
       const x1 = centerX + amplitude * Math.sin(frequency * y);
