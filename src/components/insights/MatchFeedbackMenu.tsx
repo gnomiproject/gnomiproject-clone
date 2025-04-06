@@ -45,36 +45,38 @@ const MatchFeedbackMenu = ({ archetypeId, onClose }: MatchFeedbackMenuProps) => 
     <div className="p-4 bg-white shadow-lg border rounded-lg max-w-xs relative">
       <button 
         onClick={onClose} 
-        className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+        className="absolute top-3 right-3 p-1 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
         aria-label="Close feedback menu"
       >
-        <X className="h-4 w-4" />
+        <X className="h-5 w-5" />
       </button>
       
-      <p className="text-sm font-medium mb-3">Did we get it right?</p>
+      <div className="pr-6">
+        <p className="text-sm font-medium mb-4 mt-1">Did we get it right?</p>
       
-      <RadioGroup 
-        value={selectedFeedback || ""} 
-        onValueChange={setSelectedFeedback}
-        className="space-y-1"
-      >
-        <div className="flex items-center gap-2">
-          <RadioGroupItem value="great" id="great" />
-          <Label htmlFor="great" className="cursor-pointer text-sm">Spot on!</Label>
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <RadioGroupItem value="good" id="good" />
-          <Label htmlFor="good" className="cursor-pointer text-sm">Pretty close</Label>
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <RadioGroupItem value="wrong" id="wrong" />
-          <Label htmlFor="wrong" className="cursor-pointer text-sm">Not quite</Label>
-        </div>
-      </RadioGroup>
+        <RadioGroup 
+          value={selectedFeedback || ""} 
+          onValueChange={setSelectedFeedback}
+          className="space-y-3 mb-4"
+        >
+          <div className="flex items-center gap-2">
+            <RadioGroupItem value="great" id="great" />
+            <Label htmlFor="great" className="cursor-pointer text-sm">Spot on!</Label>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <RadioGroupItem value="good" id="good" />
+            <Label htmlFor="good" className="cursor-pointer text-sm">Pretty close</Label>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <RadioGroupItem value="wrong" id="wrong" />
+            <Label htmlFor="wrong" className="cursor-pointer text-sm">Not quite</Label>
+          </div>
+        </RadioGroup>
+      </div>
       
-      <div className="mt-3 flex justify-end">
+      <div className="flex justify-end">
         <Button 
           onClick={handleSubmitFeedback} 
           disabled={!selectedFeedback}
