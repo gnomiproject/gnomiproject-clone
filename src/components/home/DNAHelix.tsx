@@ -137,8 +137,17 @@ const DNAHelix: React.FC<DNAHelixProps> = ({ className, onStepClick, selectedArc
         // Adjusted positions for the first three steps to fit in the first twist
         // Position them at 5%, 15%, and 25% of the way down the first twist
         const firstTwistHeight = height / 3; // Height of the first twist (approx)
-        const stepSpacing = firstTwistHeight * 0.3; // Space between steps within first twist
-        y = topMargin * 0.5 + (i * stepSpacing); // Start higher and space them more closely
+        
+        if (i === 0) {
+          // First step - positioned a bit higher, around 12% down the first twist
+          y = topMargin + (firstTwistHeight * 0.12);
+        } else if (i === 1) {
+          // Second step - centered at the widest part of first twist (25% down)
+          y = topMargin + (firstTwistHeight * 0.25); 
+        } else {
+          // Third step - positioned around 38% down the first twist
+          y = topMargin + (firstTwistHeight * 0.38);
+        }
       } else {
         // Keep the original positions for the remaining steps
         y = topMargin + ((i) * (usableHeight / (numberOfSteps - 1)));
