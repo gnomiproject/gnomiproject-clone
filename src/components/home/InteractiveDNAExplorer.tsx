@@ -35,9 +35,14 @@ const InteractiveDNAExplorer = () => {
     }
   };
 
-  // Get the selected archetype's summary information (level 1)
+  // Get the selected archetype's summary information
   const selectedArchetypeSummary = selectedArchetype ? 
     archetypeSummaries.find(archetype => archetype.id === selectedArchetype) : 
+    null;
+
+  // Get the selected family information
+  const selectedFamilyInfo = selectedFamily ?
+    families.find(family => family.id === selectedFamily) :
     null;
 
   return (
@@ -65,118 +70,82 @@ const InteractiveDNAExplorer = () => {
             </div>
           </div>
 
-          {/* Middle: Family descriptions */}
-          <div className="md:col-span-1 order-1 md:order-2 flex flex-col justify-center">
-            <div className="text-center md:text-left mb-8">
-              <h3 className="text-xl font-bold mb-4">Archetype Families</h3>
-              <p className="text-gray-600 mb-6">
-                Each of our nine healthcare archetypes belongs to one of three distinct families. 
-                Click on a family to learn more.
-              </p>
-            </div>
-
-            <div className="space-y-4">
-              {families.map((family) => (
-                <div 
-                  key={family.id}
-                  className={`p-4 rounded-lg transition-all cursor-pointer border-l-4 hover:shadow-md ${
-                    selectedFamily === family.id 
-                      ? `bg-family-${family.id}/10 border-family-${family.id} shadow-md` 
-                      : 'border-transparent bg-gray-50'
-                  }`}
-                  onClick={() => setSelectedFamily(family.id === selectedFamily ? null : family.id)}
+          {/* Right side: Content display area */}
+          <div className="md:col-span-2 order-1 md:order-2 space-y-6">
+            {/* Display selected content or default message */}
+            {!selectedArchetype && !selectedFamily ? (
+              <div className="flex flex-col items-center justify-center h-full p-10 bg-gray-50 rounded-lg border border-gray-100 text-center">
+                <img 
+                  src="/lovable-uploads/3efcc8b7-0e2d-4a2b-bb23-fa686f18c691.png" 
+                  alt="Interactive guide" 
+                  className="h-16 mb-4 opacity-60"
+                />
+                <h3 className="text-xl font-bold text-gray-700 mb-2">Explore the Healthcare Archetypes</h3>
+                <p className="text-gray-600 max-w-md">
+                  Click on any step in the DNA helix or family button to learn more about our healthcare archetypes.
+                </p>
+              </div>
+            ) : selectedArchetypeSummary ? (
+              <div className="animate-fade-in p-6 bg-white rounded-lg shadow-sm border border-gray-100">
+                <div className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium mb-2 bg-archetype-${selectedArchetypeSummary.id}/20 text-archetype-${selectedArchetypeSummary.id}`}>
+                  Family {selectedArchetypeSummary.familyId}
+                </div>
+                <h3 className={`text-2xl font-bold mb-3 text-archetype-${selectedArchetypeSummary.id}`}>
+                  {selectedArchetypeSummary.name}
+                </h3>
+                
+                <p className="text-gray-600 mb-4">{selectedArchetypeSummary.description}</p>
+                
+                <h4 className="font-semibold text-gray-700 mb-2">Key Characteristics:</h4>
+                <ul className="list-disc list-inside text-gray-600 mb-4 space-y-1">
+                  {selectedArchetypeSummary.keyCharacteristics.map((trait, index) => (
+                    <li key={index}>{trait}</li>
+                  ))}
+                </ul>
+                
+                <Link 
+                  to={`/insights/${selectedArchetype}`} 
+                  className={`inline-flex items-center mt-4 px-4 py-2 rounded text-white bg-archetype-${selectedArchetypeSummary.id} hover:opacity-90 transition-opacity`}
                 >
-                  <h4 className={`font-semibold ${selectedFamily === family.id ? `text-family-${family.id}` : ''}`}>
-                    Family {family.id.toLowerCase()}: {family.name}
-                  </h4>
-                  {selectedFamily === family.id && (
-                    <div className="mt-2 animate-fade-in">
-                      <p className="text-gray-700 mb-2">{family.description}</p>
-                      <ul className="list-disc list-inside text-sm text-gray-600">
-                        {family.commonTraits.slice(0, 2).map((trait, index) => (
-                          <li key={index}>{trait}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            <Link to="/assessment" className="mt-8 flex items-center justify-center md:justify-start text-blue-500 hover:underline">
-              Find your archetype <ArrowRight className="h-4 w-4 ml-1" />
-            </Link>
-          </div>
-
-          {/* Right side: Selected Archetype Summary (Level 1) or Archetype examples */}
-          <div className="md:col-span-1 order-3">
-            <div className="bg-gray-50 p-6 rounded-lg shadow-sm h-full">
-              {selectedArchetypeSummary ? (
-                <div className="animate-fade-in">
-                  <div className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium mb-2 bg-archetype-${selectedArchetypeSummary.id}/20 text-archetype-${selectedArchetypeSummary.id}`}>
-                    Family {selectedArchetypeSummary.familyId.toLowerCase()}
-                  </div>
-                  <h3 className={`text-xl font-bold mb-3 text-archetype-${selectedArchetypeSummary.id}`}>
-                    {selectedArchetypeSummary.name}
-                  </h3>
-                  
-                  <p className="text-gray-600 mb-4">{selectedArchetypeSummary.description}</p>
-                  
-                  <h4 className="font-semibold text-gray-700 mb-2">Key Characteristics:</h4>
-                  <ul className="list-disc list-inside text-sm text-gray-600 mb-4">
-                    {selectedArchetypeSummary.keyCharacteristics.slice(0, 3).map((trait, index) => (
-                      <li key={index}>{trait}</li>
-                    ))}
-                  </ul>
-                  
-                  <Link 
-                    to={`/insights/${selectedArchetype}`} 
-                    className={`inline-block mt-4 px-4 py-2 rounded text-white bg-archetype-${selectedArchetypeSummary.id} hover:opacity-90 transition-opacity`}
-                  >
-                    View Full Profile
-                  </Link>
-                </div>
-              ) : (
-                <>
-                  <h3 className="text-xl font-bold mb-4">Featured Archetypes</h3>
-                  
-                  <div className="space-y-4">
-                    {selectedFamily 
-                      ? archetypeSummaries
-                          .filter(archetype => archetype.familyId === selectedFamily)
-                          .slice(0, 3)
-                          .map(archetype => (
-                            <div 
-                              key={archetype.id} 
-                              className={`p-3 bg-white rounded border-l-3 border-archetype-${archetype.id} shadow-sm cursor-pointer hover:shadow-md transition-shadow`}
-                              onClick={() => setSelectedArchetype(archetype.id)}
-                            >
-                              <h4 className={`font-semibold text-archetype-${archetype.id}`}>{archetype.name}</h4>
-                              <p className="text-sm text-gray-600 mt-1">{archetype.description.substring(0, 100)}...</p>
-                            </div>
-                          ))
-                      : archetypeSummaries
-                          .filter((_, index) => index % 3 === 0)
-                          .slice(0, 3)
-                          .map(archetype => (
-                            <div 
-                              key={archetype.id} 
-                              className={`p-3 bg-white rounded border-l-3 border-archetype-${archetype.id} shadow-sm cursor-pointer hover:shadow-md transition-shadow`}
-                              onClick={() => setSelectedArchetype(archetype.id)}
-                            >
-                              <h4 className={`font-semibold text-archetype-${archetype.id}`}>{archetype.name}</h4>
-                              <p className="text-sm text-gray-600 mt-1">{archetype.description.substring(0, 100)}...</p>
-                            </div>
-                          ))
+                  View Full Profile
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </div>
+            ) : selectedFamilyInfo ? (
+              <div className={`animate-fade-in p-6 bg-white rounded-lg shadow-sm border-l-4 border-family-${selectedFamilyInfo.id}`}>
+                <h3 className={`text-2xl font-bold mb-3 text-family-${selectedFamilyInfo.id}`}>
+                  Family {selectedFamilyInfo.id}: {selectedFamilyInfo.name}
+                </h3>
+                
+                <p className="text-gray-600 mb-4">{selectedFamilyInfo.description}</p>
+                
+                <h4 className="font-semibold text-gray-700 mb-2">Common Traits:</h4>
+                <ul className="list-disc list-inside text-gray-600 mb-4 space-y-1">
+                  {selectedFamilyInfo.commonTraits.map((trait, index) => (
+                    <li key={index}>{trait}</li>
+                  ))}
+                </ul>
+                
+                <div className="mt-6 space-y-4">
+                  <h4 className="font-semibold text-gray-700">Archetypes in this family:</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {archetypeSummaries
+                      .filter(archetype => archetype.familyId === selectedFamilyInfo.id)
+                      .map(archetype => (
+                        <div 
+                          key={archetype.id} 
+                          className={`p-3 bg-gray-50 rounded border-l-3 border-archetype-${archetype.id} cursor-pointer hover:shadow-md transition-shadow`}
+                          onClick={() => setSelectedArchetype(archetype.id)}
+                        >
+                          <h5 className={`font-semibold text-archetype-${archetype.id}`}>{archetype.name}</h5>
+                          <p className="text-sm text-gray-600 mt-1">{archetype.description.substring(0, 75)}...</p>
+                        </div>
+                      ))
                     }
                   </div>
-                  
-                  <Link to="#archetype-section" className="mt-4 flex items-center text-blue-500 hover:underline">
-                    View all archetypes <ArrowRight className="h-4 w-4 ml-1" />
-                  </Link>
-                </>
-              )}
-            </div>
+                </div>
+              </div>
+            ) : null}
           </div>
         </div>
       </div>
