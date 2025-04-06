@@ -3,6 +3,8 @@ import React from 'react';
 import { useAssessment } from '../hooks/useAssessment';
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import CalculationLoader from '../components/assessment/CalculationLoader';
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 
 const Assessment = () => {
   const { 
@@ -19,28 +21,27 @@ const Assessment = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-6">
       <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-md p-8">
-        <h1 className="text-3xl font-semibold text-center mb-8">Assessment</h1>
+        <h1 className="text-3xl font-semibold text-left mb-8">Assessment</h1>
         
         {questions.length > 0 && (
           <div>
-            <h2 className="text-2xl font-semibold mb-4">Question {currentQuestion} of {totalQuestions}</h2>
-            <p className="mb-4">{questions[currentQuestion - 1].text}</p>
+            <h2 className="text-2xl font-semibold text-left mb-4">Question {currentQuestion} of {totalQuestions}</h2>
+            <p className="mb-6 text-left">{questions[currentQuestion - 1].text}</p>
             
-            <div className="space-y-4">
+            <RadioGroup
+              value={answers[questions[currentQuestion - 1].id] || ""}
+              onValueChange={(value) => setAnswer(questions[currentQuestion - 1].id, value)}
+              className="space-y-4"
+            >
               {questions[currentQuestion - 1].options.map(option => (
-                <label key={option.id} className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    name={`question-${currentQuestion}`}
-                    value={option.id}
-                    checked={answers[questions[currentQuestion - 1].id] === option.id}
-                    onChange={() => setAnswer(questions[currentQuestion - 1].id, option.id)}
-                    className="form-radio h-5 w-5 text-blue-600"
-                  />
-                  <span>{option.text}</span>
-                </label>
+                <div key={option.id} className="flex items-center space-x-3 text-left">
+                  <RadioGroupItem id={option.id} value={option.id} />
+                  <Label htmlFor={option.id} className="text-base font-normal cursor-pointer">
+                    {option.text}
+                  </Label>
+                </div>
               ))}
-            </div>
+            </RadioGroup>
             
             <div className="flex justify-between mt-8">
               <button
