@@ -131,10 +131,10 @@ export const getArchetypeColor = (archetypeId: ArchetypeId): string => {
     'a3': '#FFC600', // yellow
     'b1': '#00B0F0', // blue
     'b2': '#7030A0', // purple
+    'b3': '#0D41C0', // blue
     'c1': '#00B050', // green
     'c2': '#C00000', // red
-    'c3': '#5B2D90', // indigo
-    'b3': '#FF8B91'  // pink
+    'c3': '#5B2D90'  // indigo
   };
   
   return colorMap[archetypeId] || '#888888';
@@ -153,6 +153,12 @@ export const drawSteps = (
     
     // Get the archetype color for this step
     const stepColor = getArchetypeColor(archetypeId);
+    
+    // Create gradient for the step to fade on the left side
+    const stepGradient = ctx.createLinearGradient(x1, y, x2, y);
+    stepGradient.addColorStop(0, 'rgba(255, 255, 255, 0.6)'); // Start with semi-transparent white
+    stepGradient.addColorStop(0.15, stepColor); // Fade to the archetype color
+    stepGradient.addColorStop(1, stepColor); // Full archetype color for most of the step
     
     // Draw the step with visual cue if it's selected
     ctx.beginPath();
@@ -181,13 +187,11 @@ export const drawSteps = (
       ctx.strokeStyle = '#ffffff';
       ctx.stroke();
     } else {
-      // Normal step with archetype color
+      // Normal step with gradient color
       ctx.lineWidth = 2;
-      ctx.strokeStyle = stepColor;
+      ctx.strokeStyle = stepGradient;
       ctx.stroke();
     }
-    
-    // Removed the circles at the ends of steps as requested
   });
 };
 
@@ -214,7 +218,7 @@ export const drawLeaderLinesAndCircles = (
     ctx.beginPath();
     ctx.moveTo(x2, y);
     ctx.lineTo(circlesX - circleRadius, y);
-    ctx.lineWidth = 1;
+    ctx.lineWidth = 2; // Match the step thickness
     ctx.strokeStyle = selectedArchetypeId && archetypeId === selectedArchetypeId ? 
       '#ffffff' : archetypeColor;
     ctx.stroke();
