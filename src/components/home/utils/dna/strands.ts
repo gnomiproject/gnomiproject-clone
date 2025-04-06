@@ -19,9 +19,17 @@ export const drawDNAStrands = (
     c: { startY: 2 * height / 3, endY: height }
   };
 
-  // Set up strand colors
-  const strandColor1 = 'rgba(0, 176, 240, 0.5)'; // Blue tone
-  const strandColor2 = 'rgba(0, 176, 240, 0.5)'; // Blue tone
+  // Create gradient for left strand (blue to teal to deeper blue)
+  const leftStrandGradient = ctx.createLinearGradient(0, 0, 0, height);
+  leftStrandGradient.addColorStop(0, '#33C3F0');  // Sky blue at top
+  leftStrandGradient.addColorStop(0.5, '#00B2B1'); // Teal in middle
+  leftStrandGradient.addColorStop(1, '#0D41C0');  // Deep blue at bottom
+  
+  // Create gradient for right strand (orange to yellow to pink)
+  const rightStrandGradient = ctx.createLinearGradient(0, 0, 0, height);
+  rightStrandGradient.addColorStop(0, '#F97316');  // Orange at top
+  rightStrandGradient.addColorStop(0.5, '#FFC600');  // Yellow in middle
+  rightStrandGradient.addColorStop(1, '#FF8B91');  // Pink at bottom
   
   // Draw first DNA strand (left sine wave)
   ctx.beginPath();
@@ -42,7 +50,7 @@ export const drawDNAStrands = (
     }
   }
   ctx.lineWidth = strandWidth;
-  ctx.strokeStyle = strandColor1;
+  ctx.strokeStyle = leftStrandGradient;
   ctx.stroke();
   
   // Draw second DNA strand (right sine wave, phase-shifted by π)
@@ -64,7 +72,7 @@ export const drawDNAStrands = (
     }
   }
   ctx.lineWidth = strandWidth;
-  ctx.strokeStyle = strandColor2;
+  ctx.strokeStyle = rightStrandGradient;
   ctx.stroke();
   
   // If a family is selected, highlight its section on both strands

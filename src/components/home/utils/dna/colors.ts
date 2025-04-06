@@ -5,17 +5,17 @@ import { ArchetypeId } from '@/types/archetype';
  * Creates gradients for DNA strands
  */
 export const createDNAGradients = (ctx: CanvasRenderingContext2D, height: number) => {
-  // Create the left strand gradient (blue to teal)
+  // Create the left strand gradient (blue to teal to deep blue)
   const blueGradient = ctx.createLinearGradient(0, 0, 0, height);
-  blueGradient.addColorStop(0, '#00B0F0'); // Family A color (top)
-  blueGradient.addColorStop(0.5, '#0D41C0'); // Family B3 color (middle)
-  blueGradient.addColorStop(1, '#00B2B1'); // Family B color (bottom)
+  blueGradient.addColorStop(0, '#33C3F0'); // Sky blue at top
+  blueGradient.addColorStop(0.5, '#00B2B1'); // Teal in middle
+  blueGradient.addColorStop(1, '#0D41C0'); // Deep blue at bottom
 
-  // Create the right strand gradient (orange to pink)
+  // Create the right strand gradient (orange to yellow to pink)
   const orangeGradient = ctx.createLinearGradient(0, 0, 0, height);
-  orangeGradient.addColorStop(0, '#EC7500'); // Archetype A1 (top)
-  orangeGradient.addColorStop(0.5, '#FFC600'); // Archetype A3 (middle)
-  orangeGradient.addColorStop(1, '#FF8B91'); // Family C color (bottom)
+  orangeGradient.addColorStop(0, '#F97316'); // Orange at top
+  orangeGradient.addColorStop(0.5, '#FFC600'); // Yellow in middle
+  orangeGradient.addColorStop(1, '#FF8B91'); // Pink at bottom
 
   return { blueGradient, orangeGradient };
 };
