@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Button from '@/components/shared/Button';
@@ -10,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { ChevronDown, RefreshCw } from 'lucide-react';
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
 import { AssessmentResult } from '@/types/assessment';
+import MatchFeedbackMenu from '@/components/insights/MatchFeedbackMenu';
 
 // Storage keys
 const INSIGHTS_STORAGE_KEY = 'healthcareArchetypeInsights';
@@ -80,7 +80,7 @@ const Insights = () => {
   const familyData = archetypeData?.familyId ? getFamilyById(archetypeData.familyId) : null;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-6 md:px-12">
+    <div className="min-h-screen bg-gray-50 py-12 px-6 md:px-12 pb-24 relative">
       <div className="max-w-5xl mx-auto">
         {/* Show assessment results if an archetype is selected */}
         {selectedArchetype && archetypeData ? (
@@ -197,6 +197,13 @@ const Insights = () => {
           </div>
         )}
       </div>
+
+      {/* Sticky feedback menu - only show if archetype is selected */}
+      {selectedArchetype && archetypeData && (
+        <div className="fixed bottom-0 left-0 right-0 z-10">
+          <MatchFeedbackMenu archetypeId={selectedArchetype} />
+        </div>
+      )}
     </div>
   );
 };
