@@ -19,6 +19,8 @@ const Insights = () => {
   const [selectedArchetype, setSelectedArchetype] = useState<ArchetypeId | null>(null);
   const [isOpen, setIsOpen] = useState(true);
   const [sessionResults, setSessionResults] = useState<AssessmentResult | null>(null);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [hasFeedbackBeenClosed, setHasFeedbackBeenClosed] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { getAllArchetypeSummaries, getArchetypeEnhanced, getFamilyById } = useArchetypes();
@@ -68,11 +70,31 @@ const Insights = () => {
     };
   }, [location.state]);
 
+  // Add scroll event listener to show feedback menu when scrolling
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!hasFeedbackBeenClosed && window.scrollY > 100) {
+        setShowFeedback(true);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [hasFeedbackBeenClosed]);
+
   // Handle retaking the assessment
   const handleRetakeAssessment = () => {
     // Navigate to assessment without clearing localStorage or sessionStorage
     // This allows the user to come back to insights with their previous results
     navigate('/assessment');
+  };
+
+  // Handle closing the feedback menu
+  const handleCloseFeedback = () => {
+    setShowFeedback(false);
+    setHasFeedbackBeenClosed(true);
   };
 
   // Get the archetype data if one is selected
@@ -192,16 +214,17 @@ const Insights = () => {
                 </div>
               </div>
             </div>
-            
-            {/* Removed the redundant "Start My Assessment" button that was here */}
           </div>
         )}
       </div>
 
-      {/* Feedback menu in bottom right corner - only show if archetype is selected */}
-      {selectedArchetype && archetypeData && (
-        <div className="fixed bottom-6 right-6 z-10">
-          <MatchFeedbackMenu archetypeId={selectedArchetype} />
+      {/* Feedback menu in bottom right corner - only show if archetype is selected and user has scrolled */}
+      {selectedArchetype && archetypeData && showFeedback && (
+        <div className="fixed bottom-6 right-6 z-10 animate-slide-in-from-bottom">
+          <MatchFeedbackMenu 
+            archetypeId={selectedArchetype} 
+            onClose={handleCloseFeedback}
+          />
         </div>
       )}
     </div>
