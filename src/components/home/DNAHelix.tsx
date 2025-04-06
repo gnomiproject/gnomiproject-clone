@@ -1,12 +1,48 @@
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { ArchetypeId } from '@/types/archetype';
 
 interface DNAHelixProps {
   className?: string;
+  onStepClick?: (archetypeId: ArchetypeId) => void;
+  selectedArchetypeId?: ArchetypeId | null;
 }
 
-const DNAHelix: React.FC<DNAHelixProps> = ({ className }) => {
+// Map step positions to archetype IDs
+const stepToArchetypeMap: ArchetypeId[] = [
+  'a1', 'a2', 'a3',
+  'b1', 'b2', 'b3',
+  'c1', 'c2', 'c3',
+  'a1', 'a2', 'a3', 'b1' // Adding extras to fill all 13 steps (we'll only use first 9)
+];
+
+const DNAHelix: React.FC<DNAHelixProps> = ({ className, onStepClick, selectedArchetypeId }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [stepPositions, setStepPositions] = useState<{x1: number, x2: number, y: number, archetypeId: ArchetypeId}[]>([]);
+  
+  // Handle click on canvas
+  const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!onStepClick || stepPositions.length === 0) return;
+    
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    // Get click position relative to canvas
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    
+    // Check if click is near any step
+    const clickedStep = stepPositions.find(step => {
+      // Calculate if click is within range of the step line
+      const distance = Math.abs(step.y - y);
+      return distance < 10 && x >= Math.min(step.x1, step.x2) - 10 && x <= Math.max(step.x1, step.x2) + 10;
+    });
+    
+    if (clickedStep) {
+      onStepClick(clickedStep.archetypeId);
+    }
+  };
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -35,7 +71,7 @@ const DNAHelix: React.FC<DNAHelixProps> = ({ className }) => {
     return () => {
       window.removeEventListener('resize', resizeCanvas);
     };
-  }, []);
+  }, [selectedArchetypeId]);
 
   const drawDNAHelix = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
     ctx.clearRect(0, 0, width, height);
@@ -45,7 +81,10 @@ const DNAHelix: React.FC<DNAHelixProps> = ({ className }) => {
     const amplitude = width * 0.2; // Increased from 0.15 to 0.2 to make the helix wider
     const frequency = Math.PI * 3 / height; // How many cycles to fit in the height
     const strandWidth = 10;
-    const numberOfSteps = 13;
+    const numberOfSteps = 9; // Reduce to 9 steps for the 9 archetypes
+    
+    // Store positions for click detection
+    const newStepPositions: {x1: number, x2: number, y: number, archetypeId: ArchetypeId}[] = [];
 
     // Draw the left strand (blue to teal gradient)
     const blueGradient = ctx.createLinearGradient(0, 0, 0, height);
@@ -86,28 +125,72 @@ const DNAHelix: React.FC<DNAHelixProps> = ({ className }) => {
     ctx.stroke();
 
     // Draw the connecting steps (thin lines) - evenly spaced from top to bottom
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = '#e0e0e0';
-    
     for (let i = 0; i < numberOfSteps; i++) {
-      // Adjust the calculation to distribute steps from very top to very bottom
+      // Calculate y position to distribute steps from very top to very bottom
       const y = i * (height / (numberOfSteps - 1));
       const x1 = centerX + amplitude * Math.sin(frequency * y);
       const x2 = centerX + amplitude * Math.sin(frequency * y + Math.PI);
       
+      // Store the position for click detection
+      const archetypeId = stepToArchetypeMap[i];
+      newStepPositions.push({ x1, x2, y, archetypeId });
+      
+      // Draw the step with visual cue if it's selected
       ctx.beginPath();
       ctx.moveTo(x1, y);
       ctx.lineTo(x2, y);
-      ctx.stroke();
+      
+      if (selectedArchetypeId && archetypeId === selectedArchetypeId) {
+        // Highlight selected step
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = '#ffffff';
+        ctx.stroke();
+        
+        // Draw a glow effect
+        ctx.beginPath();
+        ctx.moveTo(x1, y);
+        ctx.lineTo(x2, y);
+        ctx.lineWidth = 8;
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+        ctx.stroke();
+        
+        // Draw the actual line
+        ctx.beginPath();
+        ctx.moveTo(x1, y);
+        ctx.lineTo(x2, y);
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#ffffff';
+        ctx.stroke();
+      } else {
+        // Normal step
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#e0e0e0';
+        ctx.stroke();
+      }
+      
+      // Add a subtle circle at each end of the step to indicate it's clickable
+      ctx.beginPath();
+      ctx.arc(x1, y, 4, 0, Math.PI * 2);
+      ctx.fillStyle = selectedArchetypeId && archetypeId === selectedArchetypeId ? '#ffffff' : '#e0e0e0';
+      ctx.fill();
+      
+      ctx.beginPath();
+      ctx.arc(x2, y, 4, 0, Math.PI * 2);
+      ctx.fillStyle = selectedArchetypeId && archetypeId === selectedArchetypeId ? '#ffffff' : '#e0e0e0';
+      ctx.fill();
     }
+    
+    // Update step positions for click detection
+    setStepPositions(newStepPositions);
   };
 
   return (
     <div className={`dna-helix-container ${className || ''}`}>
       <canvas 
         ref={canvasRef} 
-        className="w-full"
+        className="w-full cursor-pointer"
         style={{ maxHeight: '600px' }}
+        onClick={handleCanvasClick}
       />
     </div>
   );
