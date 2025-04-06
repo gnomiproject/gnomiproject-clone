@@ -77,7 +77,7 @@
 @keyframes messageSlideIn {
   0% {
     opacity: 0;
-    transform: translateX(-10px);
+    transform: translateX(5px);
   }
   100% {
     opacity: 1;
@@ -85,7 +85,29 @@
   }
 }
 
+@keyframes marqueeEffect {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  10% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  90% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
 .animate-slide-in-from-bottom {
   animation: slideInFromBottom 0.3s ease-out forwards;
 }
 
+.marquee-container .text-lg {
+  animation: marqueeEffect 0.8s ease-out forwards;
+}
