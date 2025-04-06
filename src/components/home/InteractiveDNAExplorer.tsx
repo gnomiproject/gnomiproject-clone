@@ -8,7 +8,7 @@ import SectionTitle from '@/components/shared/SectionTitle';
 import { ArchetypeId } from '@/types/archetype';
 
 const InteractiveDNAExplorer = () => {
-  const { getAllArchetypeSummaries, getAllFamilies } = useArchetypes();
+  const { getAllArchetypeSummaries, getAllFamilies, getArchetypeStandard } = useArchetypes();
   const archetypeSummaries = getAllArchetypeSummaries;
   const families = getAllFamilies;
 
@@ -35,9 +35,9 @@ const InteractiveDNAExplorer = () => {
     }
   };
 
-  // Get the selected archetype's summary information
-  const selectedArchetypeSummary = selectedArchetype ? 
-    archetypeSummaries.find(archetype => archetype.id === selectedArchetype) : 
+  // Get the selected archetype's detailed information (level 2)
+  const selectedArchetypeData = selectedArchetype ? 
+    getArchetypeStandard(selectedArchetype) : 
     null;
 
   // Get the selected family information
@@ -82,31 +82,92 @@ const InteractiveDNAExplorer = () => {
                   Click on any step in the DNA helix or family button to learn more about our healthcare archetypes.
                 </p>
               </div>
-            ) : selectedArchetypeSummary ? (
-              <div className="animate-fade-in p-6 bg-white rounded-lg shadow-sm border border-gray-100">
-                <div className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium mb-2 bg-archetype-${selectedArchetypeSummary.id}/20 text-archetype-${selectedArchetypeSummary.id}`}>
-                  Family {selectedArchetypeSummary.familyId}
+            ) : selectedArchetypeData ? (
+              <div className="animate-fade-in space-y-6">
+                {/* Archetype header */}
+                <div className={`p-6 bg-white rounded-lg shadow-sm border border-gray-100`}>
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    <div className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium bg-family-${selectedArchetypeData.familyId}/20 text-family-${selectedArchetypeData.familyId}`}>
+                      Family {selectedArchetypeData.familyId}: {selectedArchetypeData.familyName}
+                    </div>
+                    <div className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium bg-archetype-${selectedArchetypeData.id}/20 text-archetype-${selectedArchetypeData.id}`}>
+                      {selectedArchetypeData.id}
+                    </div>
+                  </div>
+                  
+                  <h3 className={`text-2xl font-bold mb-3 text-archetype-${selectedArchetypeData.id}`}>
+                    {selectedArchetypeData.name}
+                  </h3>
+                  
+                  <p className="text-gray-600 mb-4">{selectedArchetypeData.fullDescription}</p>
+                  
+                  <Link 
+                    to={`/insights/${selectedArchetype}`} 
+                    className={`inline-flex items-center mt-2 px-4 py-2 rounded text-white bg-archetype-${selectedArchetypeData.id} hover:opacity-90 transition-opacity`}
+                  >
+                    View Full Profile
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
                 </div>
-                <h3 className={`text-2xl font-bold mb-3 text-archetype-${selectedArchetypeSummary.id}`}>
-                  {selectedArchetypeSummary.name}
-                </h3>
+
+                {/* Key Statistics Section */}
+                <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-100">
+                  <h4 className="font-semibold text-gray-700 mb-4 text-lg">Key Statistics:</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {Object.entries(selectedArchetypeData.keyStatistics).map(([key, stat]) => (
+                      <div key={key} className={`bg-archetype-${selectedArchetypeData.id}/5 rounded-lg p-4 border border-archetype-${selectedArchetypeData.id}/20`}>
+                        <h5 className="font-medium text-gray-600 text-sm mb-1">
+                          {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                        </h5>
+                        <div className="flex items-center">
+                          <span className={`text-xl font-bold ${
+                            stat.trend === 'up' ? 'text-orange-600' : 
+                            stat.trend === 'down' ? 'text-green-600' : 
+                            `text-archetype-${selectedArchetypeData.id}`
+                          }`}>
+                            {stat.value}
+                          </span>
+                          <span className={`ml-2 ${
+                            stat.trend === 'up' ? 'text-orange-600' : 
+                            stat.trend === 'down' ? 'text-green-600' : 
+                            'text-gray-600'
+                          }`}>
+                            {stat.trend === 'up' ? '↑' : stat.trend === 'down' ? '↓' : '–'}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
                 
-                <p className="text-gray-600 mb-4">{selectedArchetypeSummary.description}</p>
-                
-                <h4 className="font-semibold text-gray-700 mb-2">Key Characteristics:</h4>
-                <ul className="list-disc list-inside text-gray-600 mb-4 space-y-1">
-                  {selectedArchetypeSummary.keyCharacteristics.map((trait, index) => (
-                    <li key={index}>{trait}</li>
-                  ))}
-                </ul>
-                
-                <Link 
-                  to={`/insights/${selectedArchetype}`} 
-                  className={`inline-flex items-center mt-4 px-4 py-2 rounded text-white bg-archetype-${selectedArchetypeSummary.id} hover:opacity-90 transition-opacity`}
-                >
-                  View Full Profile
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
+                {/* Key Characteristics Section */}
+                <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-100">
+                  <h4 className="font-semibold text-gray-700 mb-4 text-lg">Key Characteristics:</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {selectedArchetypeData.keyCharacteristics.map((trait, index) => (
+                      <div 
+                        key={index} 
+                        className={`flex items-start gap-3 p-4 rounded-md bg-archetype-${selectedArchetypeData.id}/5 border-l-3 border-archetype-${selectedArchetypeData.id}`}
+                      >
+                        <div className={`h-2.5 w-2.5 mt-1.5 rounded-full bg-archetype-${selectedArchetypeData.id} flex-shrink-0`}></div>
+                        <span className="text-gray-700">{trait}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Key Insights Section */}
+                <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-100">
+                  <h4 className="font-semibold text-gray-700 mb-4 text-lg">Key Insights:</h4>
+                  <ul className="space-y-3">
+                    {selectedArchetypeData.keyInsights.map((insight, index) => (
+                      <li key={index} className="flex items-start gap-3">
+                        <div className={`h-3 w-3 mt-1 rounded-full bg-archetype-${selectedArchetypeData.id} flex-shrink-0`}></div>
+                        <span className="text-gray-600">{insight}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
             ) : selectedFamilyInfo ? (
               <div className={`animate-fade-in p-6 bg-white rounded-lg shadow-sm border-l-4 border-family-${selectedFamilyInfo.id}`}>
