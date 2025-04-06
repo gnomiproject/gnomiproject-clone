@@ -78,7 +78,7 @@ const DNAHelix: React.FC<DNAHelixProps> = ({ className, onStepClick, selectedArc
 
     // Constants for the helix
     const centerX = width / 2;
-    const amplitude = width * 0.25; // Increased from 0.2 to 0.25 to make the helix even wider
+    const amplitude = width * 0.25; // Width of the helix
     const frequency = Math.PI * 3 / height; // How many cycles to fit in the height
     const strandWidth = 10;
     const numberOfSteps = 9; // Using 9 steps for the 9 archetypes
@@ -124,44 +124,42 @@ const DNAHelix: React.FC<DNAHelixProps> = ({ className, onStepClick, selectedArc
     ctx.strokeStyle = orangeGradient;
     ctx.stroke();
 
-    // Calculate basic parameters for steps
-    const topMargin = height * 0.1; // 10% margin from the top
-    const bottomMargin = height * 0.1; // 10% margin from the bottom
-    const usableHeight = height - topMargin - bottomMargin;
+    // Calculate positions based on the sine wave phase
+    // We want steps to be at specific phases of the sine wave for visual consistency
     
-    // Reference step spacing from steps 4-6 that look good
-    const midSectionSpacing = usableHeight / (numberOfSteps - 1);
+    // Define the phases where we want our steps (in radians)
+    // We'll use phases that correspond to the widest gaps in the helix
+    const stepPhases = [
+      Math.PI * 0.5,   // Step 1: at first quarter cycle (maximum width)
+      Math.PI * 1.5,   // Step 2: at third quarter cycle (maximum width)
+      Math.PI * 2.5,   // Step 3: at fifth quarter cycle (maximum width)
+      Math.PI * 3.5,   // Step 4: at seventh quarter cycle (maximum width)
+      Math.PI * 4.5,   // Step 5: at ninth quarter cycle (maximum width)
+      Math.PI * 5.5,   // Step 6: at eleventh quarter cycle (maximum width)
+      Math.PI * 6.5,   // Step 7: at thirteenth quarter cycle (maximum width)
+      Math.PI * 7.5,   // Step 8: at fifteenth quarter cycle (maximum width)
+      Math.PI * 8.5    // Step 9: at seventeenth quarter cycle (maximum width)
+    ];
     
-    // Calculate y positions for all steps to better match the helix pattern
-    const stepYPositions = [];
+    // Calculate y positions from phases
+    const stepYPositions = stepPhases.map(phase => phase / frequency);
     
-    // For steps 1-3, position them in the first helix twist with the same spacing as 4-6
-    // but adjusted to flow with the helix
-    const firstTwistHeight = height / 3;
+    // Adjust y positions to fit within the visible area
+    const minY = Math.min(...stepYPositions);
+    const maxY = Math.max(...stepYPositions);
     
-    // Step 1 - top position, following the helix curve
-    stepYPositions[0] = topMargin + (firstTwistHeight * 0.15);
+    // Scale to fit within the available height with margins
+    const topMargin = height * 0.05;
+    const bottomMargin = height * 0.05;
+    const availableHeight = height - topMargin - bottomMargin;
     
-    // Step 2 - centered at the widest part of the first twist
-    stepYPositions[1] = topMargin + (firstTwistHeight * 0.25);
-    
-    // Step 3 - bottom of first section, before the crossover
-    stepYPositions[2] = topMargin + (firstTwistHeight * 0.5);
-    
-    // Steps 4-6 - maintain their good positioning based on even spacing
-    stepYPositions[3] = topMargin + (midSectionSpacing * 3);
-    stepYPositions[4] = topMargin + (midSectionSpacing * 4);
-    stepYPositions[5] = topMargin + (midSectionSpacing * 5);
-    
-    // Steps 7-9 - position in the bottom third of the helix, matching the natural curve
-    const lastTwistStart = height * 0.65;
-    stepYPositions[6] = lastTwistStart + (usableHeight * 0.1);
-    stepYPositions[7] = lastTwistStart + (usableHeight * 0.2);
-    stepYPositions[8] = lastTwistStart + (usableHeight * 0.3);
+    const scaledStepYPositions = stepYPositions.map(y => 
+      topMargin + ((y - minY) / (maxY - minY)) * availableHeight
+    );
     
     // Draw the connecting steps
     for (let i = 0; i < numberOfSteps; i++) {
-      const y = stepYPositions[i];
+      const y = scaledStepYPositions[i];
       const x1 = centerX + amplitude * Math.sin(frequency * y);
       const x2 = centerX + amplitude * Math.sin(frequency * y + Math.PI);
       
