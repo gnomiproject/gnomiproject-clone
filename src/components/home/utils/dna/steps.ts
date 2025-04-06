@@ -9,10 +9,15 @@ import { getArchetypeColor } from './colors';
 export const drawSteps = (
   ctx: CanvasRenderingContext2D,
   stepPositions: StepPosition[],
-  selectedArchetypeId: ArchetypeId | null | undefined
+  selectedArchetypeId: ArchetypeId | null | undefined,
+  selectedFamilyId: 'a' | 'b' | 'c' | null | undefined
 ) => {
-  stepPositions.forEach(step => {
+  stepPositions.forEach((step, index) => {
     const { x1, x2, y, archetypeId } = step;
+    
+    // Determine if this step belongs to the selected family
+    const stepFamilyId = archetypeId.charAt(0) as 'a' | 'b' | 'c';
+    const isSelectedFamily = selectedFamilyId && stepFamilyId === selectedFamilyId;
     
     // Get the archetype color for this step
     const stepColor = getArchetypeColor(archetypeId);
@@ -49,6 +54,19 @@ export const drawSteps = (
       ctx.lineWidth = 2;
       ctx.strokeStyle = '#ffffff';
       ctx.stroke();
+    } else if (isSelectedFamily) {
+      // Highlight step in selected family (but not as prominent as selected archetype)
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = stepColor;
+      ctx.stroke();
+      
+      // Draw the actual line
+      ctx.beginPath();
+      ctx.moveTo(x1, y);
+      ctx.lineTo(x2, y);
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = stepGradient;
+      ctx.stroke();
     } else {
       // Normal step with gradient color
       ctx.lineWidth = 2;
@@ -65,7 +83,8 @@ export const drawLeaderLinesAndCircles = (
   ctx: CanvasRenderingContext2D,
   stepPositions: StepPosition[],
   width: number,
-  selectedArchetypeId: ArchetypeId | null | undefined
+  selectedArchetypeId: ArchetypeId | null | undefined,
+  selectedFamilyId: 'a' | 'b' | 'c' | null | undefined
 ) => {
   const circleRadius = 16;
   const leaderLineLength = width * 0.15; // 15% of canvas width
@@ -73,6 +92,10 @@ export const drawLeaderLinesAndCircles = (
   
   stepPositions.forEach(step => {
     const { x2, y, archetypeId } = step;
+    
+    // Determine if this step belongs to the selected family
+    const stepFamilyId = archetypeId.charAt(0) as 'a' | 'b' | 'c';
+    const isSelectedFamily = selectedFamilyId && stepFamilyId === selectedFamilyId;
     
     // Get the archetype color for this leader line
     const archetypeColor = getArchetypeColor(archetypeId);
@@ -82,26 +105,47 @@ export const drawLeaderLinesAndCircles = (
     ctx.moveTo(x2, y);
     ctx.lineTo(circlesX - circleRadius, y);
     ctx.lineWidth = 2; // Match the step thickness
-    ctx.strokeStyle = selectedArchetypeId && archetypeId === selectedArchetypeId ? 
-      '#ffffff' : archetypeColor;
+    
+    if (selectedArchetypeId && archetypeId === selectedArchetypeId) {
+      ctx.strokeStyle = '#ffffff';
+    } else if (isSelectedFamily) {
+      ctx.strokeStyle = archetypeColor;
+      ctx.lineWidth = 2.5;
+    } else {
+      ctx.strokeStyle = archetypeColor;
+    }
+    
     ctx.stroke();
     
     // Draw circle
     ctx.beginPath();
     ctx.arc(circlesX, y, circleRadius, 0, Math.PI * 2);
     ctx.fillStyle = archetypeColor;
+    
     if (selectedArchetypeId && archetypeId === selectedArchetypeId) {
       // Add glow effect for selected archetype
       ctx.shadowColor = 'white';
       ctx.shadowBlur = 10;
+    } else if (isSelectedFamily) {
+      // Subtle glow for selected family
+      ctx.shadowColor = 'white';
+      ctx.shadowBlur = 5;
     }
+    
     ctx.fill();
     ctx.shadowBlur = 0; // Reset shadow
     
     // Draw circle border
     ctx.lineWidth = 2;
-    ctx.strokeStyle = selectedArchetypeId && archetypeId === selectedArchetypeId ? 
-      '#ffffff' : 'rgba(255, 255, 255, 0.5)';
+    
+    if (selectedArchetypeId && archetypeId === selectedArchetypeId) {
+      ctx.strokeStyle = '#ffffff';
+    } else if (isSelectedFamily) {
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+    } else {
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+    }
+    
     ctx.stroke();
     
     // Draw archetype ID text

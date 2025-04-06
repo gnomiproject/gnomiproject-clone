@@ -5,6 +5,8 @@ export interface DNAHelixProps {
   className?: string;
   onStepClick?: (archetypeId: ArchetypeId) => void;
   selectedArchetypeId?: ArchetypeId | null;
+  onFamilyClick?: (familyId: 'a' | 'b' | 'c') => void;
+  selectedFamilyId?: 'a' | 'b' | 'c' | null;
 }
 
 export interface StepPosition {

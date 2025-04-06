@@ -24,6 +24,17 @@ const InteractiveDNAExplorer = () => {
     setSelectedFamily(familyId);
   };
 
+  // Handle family button click
+  const handleFamilyClick = (familyId: 'a' | 'b' | 'c') => {
+    // Toggle selection if clicking the same family again
+    setSelectedFamily(familyId === selectedFamily ? null : familyId);
+    
+    // Clear selected archetype if we're changing families
+    if (selectedArchetype && selectedArchetype.charAt(0) !== familyId) {
+      setSelectedArchetype(null);
+    }
+  };
+
   // Get the selected archetype's summary information (level 1)
   const selectedArchetypeSummary = selectedArchetype ? 
     archetypeSummaries.find(archetype => archetype.id === selectedArchetype) : 
@@ -46,9 +57,11 @@ const InteractiveDNAExplorer = () => {
               className="h-[500px] mx-auto" 
               onStepClick={handleStepClick}
               selectedArchetypeId={selectedArchetype}
+              onFamilyClick={handleFamilyClick}
+              selectedFamilyId={selectedFamily as 'a' | 'b' | 'c' | null}
             />
             <div className="mt-4 text-center text-sm text-gray-500">
-              Click on a step to explore an archetype
+              Click on a step or family button to explore
             </div>
           </div>
 

@@ -8,6 +8,13 @@
 .text-family-b { color: #00B2B1; }
 .text-family-c { color: #FF8B91; }
 
+/* Family color RGB values for canvas usage */
+:root {
+  --family-a-rgb: 0, 176, 240;
+  --family-b-rgb: 0, 178, 177;
+  --family-c-rgb: 255, 139, 145;
+}
+
 /* Custom archetype colors */
 .bg-archetype-a1 { background-color: #EC7500; }
 .bg-archetype-a2 { background-color: #46E0D3; }
@@ -68,3 +75,7 @@
 .bg-family-a\/20 { background-color: rgba(0, 176, 240, 0.2); }
 .bg-family-b\/20 { background-color: rgba(0, 178, 177, 0.2); }
 .bg-family-c\/20 { background-color: rgba(255, 139, 145, 0.2); }
+
+.bg-family-a\/40 { background-color: rgba(0, 176, 240, 0.4); }
+.bg-family-b\/40 { background-color: rgba(0, 178, 177, 0.4); }
+.bg-family-c\/40 { background-color: rgba(255, 139, 145, 0.4); }
