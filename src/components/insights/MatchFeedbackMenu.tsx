@@ -33,7 +33,7 @@ const MatchFeedbackMenu = ({ archetypeId }: MatchFeedbackMenuProps) => {
 
   if (submitted) {
     return (
-      <div className="flex items-center justify-center py-3 px-4 gap-2 text-green-600">
+      <div className="flex items-center justify-center py-3 px-4 gap-2 text-green-600 bg-white rounded-lg shadow-lg border">
         <Check className="h-4 w-4" />
         <span className="text-sm font-medium">Thanks for your feedback!</span>
       </div>
@@ -41,40 +41,38 @@ const MatchFeedbackMenu = ({ archetypeId }: MatchFeedbackMenuProps) => {
   }
 
   return (
-    <div className="p-4 bg-white shadow-lg border-t">
-      <div className="max-w-2xl mx-auto">
-        <p className="text-sm font-medium mb-3 text-center">How well does this archetype match your organization?</p>
-        
-        <RadioGroup 
-          value={selectedFeedback || ""} 
-          onValueChange={setSelectedFeedback}
-          className="flex flex-wrap justify-center gap-3"
-        >
-          <div className="flex items-center gap-2">
-            <RadioGroupItem value="great" id="great" />
-            <Label htmlFor="great" className="cursor-pointer">Looks great!</Label>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <RadioGroupItem value="good" id="good" />
-            <Label htmlFor="good" className="cursor-pointer">Pretty good</Label>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <RadioGroupItem value="wrong" id="wrong" />
-            <Label htmlFor="wrong" className="cursor-pointer">Not quite right</Label>
-          </div>
-        </RadioGroup>
-        
-        <div className="mt-3 flex justify-center">
-          <Button 
-            onClick={handleSubmitFeedback} 
-            disabled={!selectedFeedback}
-            size="sm"
-          >
-            Submit Feedback
-          </Button>
+    <div className="p-4 bg-white shadow-lg border rounded-lg max-w-xs">
+      <p className="text-sm font-medium mb-3">Match feedback?</p>
+      
+      <RadioGroup 
+        value={selectedFeedback || ""} 
+        onValueChange={setSelectedFeedback}
+        className="space-y-1"
+      >
+        <div className="flex items-center gap-2">
+          <RadioGroupItem value="great" id="great" />
+          <Label htmlFor="great" className="cursor-pointer text-sm">Looks great!</Label>
         </div>
+        
+        <div className="flex items-center gap-2">
+          <RadioGroupItem value="good" id="good" />
+          <Label htmlFor="good" className="cursor-pointer text-sm">Pretty good</Label>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <RadioGroupItem value="wrong" id="wrong" />
+          <Label htmlFor="wrong" className="cursor-pointer text-sm">Not quite right</Label>
+        </div>
+      </RadioGroup>
+      
+      <div className="mt-3 flex justify-end">
+        <Button 
+          onClick={handleSubmitFeedback} 
+          disabled={!selectedFeedback}
+          size="sm"
+        >
+          Submit
+        </Button>
       </div>
     </div>
   );

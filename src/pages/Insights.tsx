@@ -198,9 +198,9 @@ const Insights = () => {
         )}
       </div>
 
-      {/* Sticky feedback menu - only show if archetype is selected */}
+      {/* Feedback menu in bottom right corner - only show if archetype is selected */}
       {selectedArchetype && archetypeData && (
-        <div className="fixed bottom-0 left-0 right-0 z-10">
+        <div className="fixed bottom-6 right-6 z-10">
           <MatchFeedbackMenu archetypeId={selectedArchetype} />
         </div>
       )}
