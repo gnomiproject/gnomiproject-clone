@@ -42,7 +42,7 @@ const DNAHelix: React.FC<DNAHelixProps> = ({ className }) => {
 
     // Constants for the helix
     const centerX = width / 2;
-    const amplitude = width * 0.15; // Width of the helix
+    const amplitude = width * 0.2; // Increased from 0.15 to 0.2 to make the helix wider
     const frequency = Math.PI * 3 / height; // How many cycles to fit in the height
     const strandWidth = 10;
     const numberOfSteps = 13;
@@ -85,12 +85,13 @@ const DNAHelix: React.FC<DNAHelixProps> = ({ className }) => {
     ctx.strokeStyle = orangeGradient;
     ctx.stroke();
 
-    // Draw the connecting steps (thin lines)
+    // Draw the connecting steps (thin lines) - evenly spaced from top to bottom
     ctx.lineWidth = 2;
     ctx.strokeStyle = '#e0e0e0';
     
     for (let i = 0; i < numberOfSteps; i++) {
-      const y = (i + 0.5) * (height / numberOfSteps);
+      // Adjust the calculation to distribute steps from very top to very bottom
+      const y = i * (height / (numberOfSteps - 1));
       const x1 = centerX + amplitude * Math.sin(frequency * y);
       const x2 = centerX + amplitude * Math.sin(frequency * y + Math.PI);
       
