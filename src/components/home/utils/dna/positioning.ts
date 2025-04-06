@@ -1,6 +1,6 @@
 
 import { ArchetypeId } from '@/types/archetype';
-import { StepPosition, stepToArchetypeMap } from '../types/dnaHelix';
+import { StepPosition, stepToArchetypeMap } from '../../types/dnaHelix';
 
 /**
  * Calculates step positions based on sine wave phases

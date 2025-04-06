@@ -1,44 +1,45 @@
 
 import { ArchetypeId } from '@/types/archetype';
-import { StepPosition } from '../types/dnaHelix';
+import { StepPosition } from '../../types/dnaHelix';
 import { drawDNAStrands } from './strands';
 import { calculateStepPositions } from './positioning';
 import { drawSteps, drawLeaderLinesAndCircles } from './steps';
 
 /**
- * Main function to draw the entire DNA helix
+ * Main function to draw the entire DNA helix visualization
  */
 export const drawDNAHelix = (
-  ctx: CanvasRenderingContext2D, 
-  width: number, 
-  height: number, 
-  selectedArchetypeId: ArchetypeId | null | undefined
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  selectedArchetypeId?: ArchetypeId | null
 ): StepPosition[] => {
+  // Clear the canvas first
   ctx.clearRect(0, 0, width, height);
-
-  // Constants for the helix
-  const centerX = width / 2;
-  const amplitude = width * 0.25; // Width of the helix
-  const frequency = Math.PI * 3 / height; // How many cycles to fit in the height
-  const strandWidth = 10;
-  const numberOfSteps = 9; // Using 9 steps for the 9 archetypes
+  
+  // Set some rendering parameters
+  const centerX = width * 0.5; // Center X position
+  const amplitude = width * 0.15; // Wave amplitude (15% of width)
+  const frequency = 0.03; // Wave frequency
+  const numberOfSteps = 9; // We only show 9 steps (3 per family)
+  const strandWidth = 6; // Width of DNA strands
   
   // Draw the DNA strands
   drawDNAStrands(ctx, width, height, centerX, amplitude, frequency, strandWidth);
   
-  // Calculate and store step positions
+  // Calculate all step positions
   const stepPositions = calculateStepPositions(width, height, centerX, amplitude, frequency, numberOfSteps);
   
-  // Draw the connecting steps
+  // Draw the steps connecting the strands
   drawSteps(ctx, stepPositions, selectedArchetypeId);
   
-  // Draw leader lines and archetype circles
-  const circleInfo = drawLeaderLinesAndCircles(ctx, stepPositions, width, selectedArchetypeId);
+  // Draw the leader lines and archetype circles
+  const { x: circlesX, radius: circleRadius } = drawLeaderLinesAndCircles(ctx, stepPositions, width, selectedArchetypeId);
   
-  // Add circle info to step positions for click detection
-  stepPositions.forEach(pos => {
-    pos.circleX = circleInfo.x;
-    pos.circleRadius = circleInfo.radius;
+  // Update step positions with circle information (for click detection)
+  stepPositions.forEach(step => {
+    step.circleX = circlesX;
+    step.circleRadius = circleRadius;
   });
   
   return stepPositions;

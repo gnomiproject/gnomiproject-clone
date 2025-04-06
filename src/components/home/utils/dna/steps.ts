@@ -1,6 +1,6 @@
 
 import { ArchetypeId } from '@/types/archetype';
-import { StepPosition } from '../types/dnaHelix';
+import { StepPosition } from '../../types/dnaHelix';
 import { getArchetypeColor } from './colors';
 
 /**

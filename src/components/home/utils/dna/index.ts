@@ -5,3 +5,4 @@ export * from './strands';
 export * from './steps';
 export * from './positioning';
 export * from './interactions';
+export * from './main';

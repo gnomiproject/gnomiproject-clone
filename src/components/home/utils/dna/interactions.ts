@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { ArchetypeId } from '@/types/archetype';
-import { StepPosition } from '../types/dnaHelix';
+import { StepPosition } from '../../types/dnaHelix';
 
 /**
  * Checks if a click is on a step or circle and returns the corresponding archetype ID
