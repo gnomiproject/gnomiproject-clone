@@ -1,4 +1,3 @@
-
 import { ArchetypeId } from '../types/archetype';
 import { assessmentQuestions } from '../data/assessmentQuestions';
 import { AssessmentResult } from '../types/assessment';
@@ -66,72 +65,58 @@ export const mapToArchetype = (answers: Record<string, string>): ArchetypeId => 
     mappedIndustry = 'Retail Trade';
   } else if (['Education & Healthcare'].includes(industry)) {
     mappedIndustry = 'Educational Services';
-    // Also map to Health Care and Social Assistance for exact methodology match
+    // Also map Health Care and Social Assistance for some cases
     if (mappedIndustry === 'Educational Services') {
       mappedIndustry = 'Health Care and Social Assistance';
     }
   }
 
-  // Implement the exact methodology provided as a SQL CASE statement
-  // When industry in ('Administrative and Support and Waste Management and Remediation Services', 'Retail Trade','Other Services (except Public Administration)', 'Accommodation and Food Services') and tot_states < 16 then 'c2'
+  // Implement the exact CASE statement logic provided
   if (['Administrative and Support and Waste Management and Remediation Services', 'Retail Trade', 'Other Services (except Public Administration)', 'Accommodation and Food Services'].includes(mappedIndustry) && tot_states < 16) {
     return 'c2';
   } 
-  // When industry in ('Administrative and Support and Waste Management and Remediation Services', 'Retail Trade','Other Services (except Public Administration)', 'Accommodation and Food Services') and tot_states >= 16 then 'c1'
   else if (['Administrative and Support and Waste Management and Remediation Services', 'Retail Trade', 'Other Services (except Public Administration)', 'Accommodation and Food Services'].includes(mappedIndustry) && tot_states >= 16) {
     return 'c1';
   } 
-  // When industry in ('Educational Services', 'Health Care and Social Assistance') and tot_states <= 29 then 'c3'
   else if (['Educational Services', 'Health Care and Social Assistance'].includes(mappedIndustry) && tot_states <= 29) {
     return 'c3';
   } 
-  // When industry in ('Educational Services', 'Health Care and Social Assistance') and tot_states > 29 then 'b3'
   else if (['Educational Services', 'Health Care and Social Assistance'].includes(mappedIndustry) && tot_states > 29) {
     return 'b3';
   } 
-  // When industry in ('Construction', 'Real Estate and Rental and Leasing') and tot_states <= 19 then 'b2'
   else if (['Construction', 'Real Estate and Rental and Leasing'].includes(mappedIndustry) && tot_states <= 19) {
     return 'b2';
   } 
-  // When industry in ('Construction', 'Real Estate and Rental and Leasing') and tot_states > 19 then 'b3'
   else if (['Construction', 'Real Estate and Rental and Leasing'].includes(mappedIndustry) && tot_states > 19) {
     return 'b3';
   } 
-  // When industry in ('Wholesale Trade') and tot_states <= 20 and pct_female <= 0.49 and employees >= 100000 then 'a3'
   else if (['Wholesale Trade'].includes(mappedIndustry) && tot_states <= 20 && pct_female <= 0.49 && employees >= 100000) {
     return 'a3';
   } 
-  // When industry in ('Manufacturing','Transportation and Warehousing','Utilities','Wholesale Trade') and tot_states <= 20 and pct_female <= 0.49 then 'b1'
   else if (['Manufacturing', 'Transportation and Warehousing', 'Utilities', 'Wholesale Trade'].includes(mappedIndustry) && tot_states <= 20 && pct_female <= 0.49) {
     return 'b1';
   } 
-  // When industry in ('Manufacturing','Transportation and Warehousing','Utilities','Wholesale Trade') and tot_states <= 20 and pct_female > 0.49 then 'c3'
   else if (['Manufacturing', 'Transportation and Warehousing', 'Utilities', 'Wholesale Trade'].includes(mappedIndustry) && tot_states <= 20 && pct_female > 0.49) {
     return 'c3';
   } 
-  // When industry in ('Manufacturing','Transportation and Warehousing','Utilities','Wholesale Trade') and tot_states > 20 then 'b3'
   else if (['Manufacturing', 'Transportation and Warehousing', 'Utilities', 'Wholesale Trade'].includes(mappedIndustry) && tot_states > 20) {
     return 'b3';
   } 
-  // When industry in ('Information') and employees >= 250 then 'a3'
   else if (['Information'].includes(mappedIndustry) && employees >= 250) {
     return 'a3';
   } 
-  // When industry in ('Professional, Scientific, and Technical Services', 'Information') and tot_states < 31 then 'a1'
   else if (['Professional, Scientific, and Technical Services', 'Information'].includes(mappedIndustry) && tot_states < 31) {
     return 'a1';
   } 
-  // When industry in ('Professional, Scientific, and Technical Services', 'Information') and tot_states >= 31 then 'a3'
   else if (['Professional, Scientific, and Technical Services', 'Information'].includes(mappedIndustry) && tot_states >= 31) {
     return 'a3';
   } 
-  // When industry = 'Finance and Insurance' then 'a2'
   else if (mappedIndustry === 'Finance and Insurance') {
     return 'a2';
   }
   
-  // Default case (else 'unknown')
-  // For compatibility with our app, we'll return 'c3' instead of 'unknown'
+  // Default case - unknown (as specified in the SQL statement)
+  // For compatibility with our app, we'll return 'c3' instead of throwing an error
   return 'c3';
 };
 
@@ -178,4 +163,3 @@ export const calculateArchetypeMatch = (answers: Record<string, string>): Assess
 export const getAssessmentQuestions = () => {
   return assessmentQuestions;
 };
-

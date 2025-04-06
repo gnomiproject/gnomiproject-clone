@@ -12,7 +12,7 @@ const ArchetypeHeader = ({ archetypeData, familyData }: ArchetypeHeaderProps) =>
   const familyColor = `family-${archetypeData.familyId}`;
 
   return (
-    <React.Fragment>
+    <>
       <div className="text-center mb-6">
         <span className={`inline-block bg-${familyColor}/10 text-${familyColor} rounded-full px-4 py-1 text-sm font-medium`}>
           family {archetypeData.familyId}: {familyData?.name || ''}
@@ -26,7 +26,7 @@ const ArchetypeHeader = ({ archetypeData, familyData }: ArchetypeHeaderProps) =>
       <p className="text-gray-700 text-lg text-center mb-8">
         {archetypeData.summary.description}
       </p>
-    </React.Fragment>
+    </>
   );
 };
 

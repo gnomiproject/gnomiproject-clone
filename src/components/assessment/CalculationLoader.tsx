@@ -3,14 +3,10 @@ import React, { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
 const loadingMessages = [
-  "Comparing your responses to 400+ companies...",
-  "Analyzing industry-specific benchmarks...",
-  "Evaluating geographic distribution patterns...",
-  "Calculating healthcare cost implications...",
-  "Identifying strategic priority matches...",
-  "Determining organizational archetype alignment...",
-  "Finalizing your personalized healthcare strategy profile...",
-  "Preparing your custom archetype report..."
+  "Analyzing your organization profile...",
+  "Comparing to industry benchmarks...",
+  "Identifying strategic patterns...",
+  "Determining your healthcare archetype..."
 ];
 
 interface CalculationLoaderProps {
@@ -41,7 +37,7 @@ const CalculationLoader: React.FC<CalculationLoaderProps> = ({ isVisible }) => {
       setProgress(prev => {
         return Math.min(prev + (100 / loadingMessages.length), 95);
       });
-    }, 850);
+    }, 1200);
     
     return () => clearInterval(interval);
   }, [isVisible]);
