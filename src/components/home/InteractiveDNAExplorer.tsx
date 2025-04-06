@@ -68,6 +68,7 @@ const InteractiveDNAExplorer = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
           {/* Left side: DNA Helix Visualization - Fixed height container */}
           <div className="md:col-span-1 order-2 md:order-1 sticky top-24">
+            <h3 className="text-xl font-bold text-center mb-4 text-gray-800">3 Families, 9 Archetypes</h3>
             <DNAHelix 
               className="h-[500px] mx-auto" 
               onStepClick={handleStepClick}
