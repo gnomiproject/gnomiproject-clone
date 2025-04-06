@@ -124,26 +124,44 @@ const DNAHelix: React.FC<DNAHelixProps> = ({ className, onStepClick, selectedArc
     ctx.strokeStyle = orangeGradient;
     ctx.stroke();
 
-    // Draw the connecting steps (thin lines) - with adjusted spacing from top to bottom
-    // Start a bit lower from the top and end a bit higher from the bottom
+    // Calculate basic parameters for steps
     const topMargin = height * 0.1; // 10% margin from the top
     const bottomMargin = height * 0.1; // 10% margin from the bottom
     const usableHeight = height - topMargin - bottomMargin;
     
-    // Calculate even spacing for all steps
-    const stepSpacing = usableHeight / (numberOfSteps - 1);
-
+    // Reference step spacing from steps 4-6 that look good
+    const midSectionSpacing = usableHeight / (numberOfSteps - 1);
+    
+    // Calculate y positions for all steps to better match the helix pattern
+    const stepYPositions = [];
+    
+    // For steps 1-3, position them in the first helix twist with the same spacing as 4-6
+    // but adjusted to flow with the helix
+    const firstTwistHeight = height / 3;
+    
+    // Step 1 - top position, following the helix curve
+    stepYPositions[0] = topMargin + (firstTwistHeight * 0.15);
+    
+    // Step 2 - centered at the widest part of the first twist
+    stepYPositions[1] = topMargin + (firstTwistHeight * 0.25);
+    
+    // Step 3 - bottom of first section, before the crossover
+    stepYPositions[2] = topMargin + (firstTwistHeight * 0.5);
+    
+    // Steps 4-6 - maintain their good positioning based on even spacing
+    stepYPositions[3] = topMargin + (midSectionSpacing * 3);
+    stepYPositions[4] = topMargin + (midSectionSpacing * 4);
+    stepYPositions[5] = topMargin + (midSectionSpacing * 5);
+    
+    // Steps 7-9 - position in the bottom third of the helix, matching the natural curve
+    const lastTwistStart = height * 0.65;
+    stepYPositions[6] = lastTwistStart + (usableHeight * 0.1);
+    stepYPositions[7] = lastTwistStart + (usableHeight * 0.2);
+    stepYPositions[8] = lastTwistStart + (usableHeight * 0.3);
+    
+    // Draw the connecting steps
     for (let i = 0; i < numberOfSteps; i++) {
-      // Calculate y position with proper spacing
-      let y = topMargin + (i * stepSpacing);
-      
-      // For step 2, ensure it's positioned at the widest part of the helix
-      if (i === 1) {
-        // Slightly adjust to ensure step 2 is at a wide part
-        const firstTwistHeight = height / 3;
-        y = topMargin + (firstTwistHeight * 0.25);
-      }
-      
+      const y = stepYPositions[i];
       const x1 = centerX + amplitude * Math.sin(frequency * y);
       const x2 = centerX + amplitude * Math.sin(frequency * y + Math.PI);
       
