@@ -35,6 +35,8 @@ const DNAHelix: React.FC<DNAHelixProps> = ({ className, onStepClick, selectedArc
       if (container) {
         canvas.width = container.clientWidth;
         canvas.height = Math.min(600, window.innerHeight * 0.6);
+        
+        // Force a redraw when the canvas size changes or selection changes
         const newStepPositions = drawDNAHelix(ctx, canvas.width, canvas.height, selectedArchetypeId);
         setStepPositions(newStepPositions);
       }
