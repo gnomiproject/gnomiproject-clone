@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import Button from '@/components/shared/Button';
 
 const EmptyExplorerState: React.FC = () => {
   return (
@@ -20,13 +19,8 @@ const EmptyExplorerState: React.FC = () => {
         <h3 className="text-2xl font-bold text-blue-700 mb-2">Come Play with the DNA!</h3>
         <p className="text-gray-600 mb-4">
           Click around the helix to explore what makes each archetype unique.
-          Then take the assessment to discover which one matches your organization.
+          Then <Link to="/assessment" className="text-blue-600 hover:text-blue-800 font-medium underline">take the assessment</Link> to discover which one matches your organization.
         </p>
-        <div className="mt-2">
-          <Link to="/assessment">
-            <Button size="sm">Take the Assessment</Button>
-          </Link>
-        </div>
       </div>
     </div>
   );
