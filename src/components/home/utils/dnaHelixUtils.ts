@@ -1,3 +1,4 @@
+
 import { ArchetypeId } from '@/types/archetype';
 import { StepPosition, stepToArchetypeMap } from '../types/dnaHelix';
 
@@ -206,19 +207,22 @@ export const drawLeaderLinesAndCircles = (
   stepPositions.forEach(step => {
     const { x2, y, archetypeId } = step;
     
-    // Draw leader line
+    // Get the archetype color for this leader line
+    const archetypeColor = getArchetypeColor(archetypeId);
+    
+    // Draw leader line with the archetype color
     ctx.beginPath();
     ctx.moveTo(x2, y);
     ctx.lineTo(circlesX - circleRadius, y);
     ctx.lineWidth = 1;
     ctx.strokeStyle = selectedArchetypeId && archetypeId === selectedArchetypeId ? 
-      '#ffffff' : 'rgba(224, 224, 224, 0.7)';
+      '#ffffff' : archetypeColor;
     ctx.stroke();
     
     // Draw circle
     ctx.beginPath();
     ctx.arc(circlesX, y, circleRadius, 0, Math.PI * 2);
-    ctx.fillStyle = getArchetypeColor(archetypeId);
+    ctx.fillStyle = archetypeColor;
     if (selectedArchetypeId && archetypeId === selectedArchetypeId) {
       // Add glow effect for selected archetype
       ctx.shadowColor = 'white';
