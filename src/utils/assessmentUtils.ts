@@ -1,3 +1,4 @@
+
 import { ArchetypeId } from '../types/archetype';
 import { assessmentQuestions } from '../data/assessmentQuestions';
 import { AssessmentResult } from '../types/assessment';
@@ -13,7 +14,6 @@ export const mapToArchetype = (answers: Record<string, string>): ArchetypeId => 
   const geography = answers['geography'] || '';
   const size = answers['size'] || '';
   const gender = answers['gender'] || '';
-  const priorities = answers['priorities'] || '';
   
   // Parse the geography selection to determine state count
   let tot_states = 0;
@@ -49,33 +49,52 @@ export const mapToArchetype = (answers: Record<string, string>): ArchetypeId => 
     pct_female = 0.75;
   }
   
-  // Map the industry categories to match the provided logic
+  // Map industry selections to the categories in the SQL logic
+  const industriesMapped: Record<string, string[]> = {
+    'Administrative and Support and Waste Management and Remediation Services': ['Administrative & Support Services'],
+    'Retail Trade': ['Retail & Services'],
+    'Other Services (except Public Administration)': ['Other'],
+    'Accommodation and Food Services': ['Hospitality & Food Service'],
+    'Educational Services': ['Education & Healthcare'],
+    'Health Care and Social Assistance': ['Education & Healthcare', 'Healthcare'],
+    'Construction': ['Construction & Real Estate'],
+    'Real Estate and Rental and Leasing': ['Construction & Real Estate'],
+    'Wholesale Trade': ['Wholesale Trade'],
+    'Manufacturing': ['Manufacturing & Production'],
+    'Transportation and Warehousing': ['Transportation & Logistics'],
+    'Utilities': ['Utilities'],
+    'Information': ['Technology & Information'],
+    'Professional, Scientific, and Technical Services': ['Professional Services (Legal, Consulting, Architecture)'],
+    'Finance and Insurance': ['Finance & Insurance']
+  };
+  
+  // Find which SQL category the selected industry falls into
   let mappedIndustry = '';
-  if (['Professional Services (Legal, Consulting, Architecture)'].includes(industry)) {
-    mappedIndustry = 'Professional, Scientific, and Technical Services';
-  } else if (['Finance & Insurance'].includes(industry)) {
-    mappedIndustry = 'Finance and Insurance';
-  } else if (['Technology & Information'].includes(industry)) {
-    mappedIndustry = 'Information';
-  } else if (['Manufacturing & Production'].includes(industry)) {
-    mappedIndustry = 'Manufacturing';
-  } else if (['Construction & Real Estate'].includes(industry)) {
-    mappedIndustry = 'Construction';
-  } else if (['Retail & Services'].includes(industry)) {
-    mappedIndustry = 'Retail Trade';
-  } else if (['Education & Healthcare'].includes(industry)) {
-    mappedIndustry = 'Educational Services';
-    // Also map Health Care and Social Assistance for some cases
-    if (mappedIndustry === 'Educational Services') {
-      mappedIndustry = 'Health Care and Social Assistance';
+  for (const [sqlCategory, possibleSelections] of Object.entries(industriesMapped)) {
+    if (possibleSelections.includes(industry)) {
+      mappedIndustry = sqlCategory;
+      break;
     }
   }
-
-  // Implement the exact CASE statement logic provided
-  if (['Administrative and Support and Waste Management and Remediation Services', 'Retail Trade', 'Other Services (except Public Administration)', 'Accommodation and Food Services'].includes(mappedIndustry) && tot_states < 16) {
+  
+  // Handle special case for Education & Healthcare which could map to either category
+  if (industry === 'Education & Healthcare') {
+    // For simplicity, we'll default to Health Care and Social Assistance
+    // A more sophisticated approach would be to ask more specific questions
+    mappedIndustry = 'Health Care and Social Assistance';
+  }
+  
+  // Now implement the exact CASE logic from the SQL statement
+  if (['Administrative and Support and Waste Management and Remediation Services', 
+       'Retail Trade', 
+       'Other Services (except Public Administration)', 
+       'Accommodation and Food Services'].includes(mappedIndustry) && tot_states < 16) {
     return 'c2';
   } 
-  else if (['Administrative and Support and Waste Management and Remediation Services', 'Retail Trade', 'Other Services (except Public Administration)', 'Accommodation and Food Services'].includes(mappedIndustry) && tot_states >= 16) {
+  else if (['Administrative and Support and Waste Management and Remediation Services', 
+            'Retail Trade', 
+            'Other Services (except Public Administration)', 
+            'Accommodation and Food Services'].includes(mappedIndustry) && tot_states >= 16) {
     return 'c1';
   } 
   else if (['Educational Services', 'Health Care and Social Assistance'].includes(mappedIndustry) && tot_states <= 29) {
@@ -93,13 +112,16 @@ export const mapToArchetype = (answers: Record<string, string>): ArchetypeId => 
   else if (['Wholesale Trade'].includes(mappedIndustry) && tot_states <= 20 && pct_female <= 0.49 && employees >= 100000) {
     return 'a3';
   } 
-  else if (['Manufacturing', 'Transportation and Warehousing', 'Utilities', 'Wholesale Trade'].includes(mappedIndustry) && tot_states <= 20 && pct_female <= 0.49) {
+  else if (['Manufacturing', 'Transportation and Warehousing', 'Utilities', 'Wholesale Trade'].includes(mappedIndustry) && 
+           tot_states <= 20 && pct_female <= 0.49) {
     return 'b1';
   } 
-  else if (['Manufacturing', 'Transportation and Warehousing', 'Utilities', 'Wholesale Trade'].includes(mappedIndustry) && tot_states <= 20 && pct_female > 0.49) {
+  else if (['Manufacturing', 'Transportation and Warehousing', 'Utilities', 'Wholesale Trade'].includes(mappedIndustry) && 
+           tot_states <= 20 && pct_female > 0.49) {
     return 'c3';
   } 
-  else if (['Manufacturing', 'Transportation and Warehousing', 'Utilities', 'Wholesale Trade'].includes(mappedIndustry) && tot_states > 20) {
+  else if (['Manufacturing', 'Transportation and Warehousing', 'Utilities', 'Wholesale Trade'].includes(mappedIndustry) && 
+           tot_states > 20) {
     return 'b3';
   } 
   else if (['Information'].includes(mappedIndustry) && employees >= 250) {
@@ -115,8 +137,8 @@ export const mapToArchetype = (answers: Record<string, string>): ArchetypeId => 
     return 'a2';
   }
   
-  // Default case - unknown (as specified in the SQL statement)
-  // For compatibility with our app, we'll return 'c3' instead of throwing an error
+  // Default case - if no match is found, return 'c3' as a fallback
+  console.log(`No archetype match found for industry: ${industry} (mapped to: ${mappedIndustry}), states: ${tot_states}, employees: ${employees}, female %: ${pct_female}`);
   return 'c3';
 };
 

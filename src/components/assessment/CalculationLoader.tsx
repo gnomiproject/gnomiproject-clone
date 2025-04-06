@@ -1,11 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
-import { useToast } from '@/hooks/use-toast';
 
 const loadingMessages = [
-  "Analyzing your organization profile...",
-  "Comparing to industry benchmarks...",
-  "Identifying strategic patterns...",
+  "Analyzing your responses...",
   "Determining your healthcare archetype..."
 ];
 
@@ -16,7 +13,6 @@ interface CalculationLoaderProps {
 const CalculationLoader: React.FC<CalculationLoaderProps> = ({ isVisible }) => {
   const [currentMessage, setCurrentMessage] = useState(0);
   const [progress, setProgress] = useState(0);
-  const { toast } = useToast();
   
   useEffect(() => {
     if (!isVisible) return;
@@ -37,7 +33,7 @@ const CalculationLoader: React.FC<CalculationLoaderProps> = ({ isVisible }) => {
       setProgress(prev => {
         return Math.min(prev + (100 / loadingMessages.length), 95);
       });
-    }, 1200);
+    }, 3000);
     
     return () => clearInterval(interval);
   }, [isVisible]);
@@ -49,10 +45,9 @@ const CalculationLoader: React.FC<CalculationLoaderProps> = ({ isVisible }) => {
       <div className="bg-white dark:bg-gray-900 rounded-xl p-8 max-w-md w-full mx-4 shadow-2xl border border-gray-100 dark:border-gray-800 animate-fade-in">
         <div className="text-center mb-8">
           <h2 className="text-2xl font-bold mb-2 bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">Analyzing Your Responses</h2>
-          <p className="text-muted-foreground">Please wait while we determine your organizational archetype</p>
         </div>
         
-        <div className="flex justify-center mb-6">
+        <div className="flex justify-center mb-8">
           <div className="relative">
             <div 
               className="w-20 h-20 rounded-full bg-primary/20 animate-pulse"
@@ -71,10 +66,10 @@ const CalculationLoader: React.FC<CalculationLoaderProps> = ({ isVisible }) => {
           />
         </div>
         
-        <div className="text-center h-8">
-          <div className="text-lg font-medium text-foreground marquee-text">
+        <div className="text-center">
+          <p className="text-lg font-medium text-foreground animate-fade-in">
             {loadingMessages[currentMessage]}
-          </div>
+          </p>
         </div>
       </div>
     </div>
