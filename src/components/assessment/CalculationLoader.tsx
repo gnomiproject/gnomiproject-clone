@@ -56,7 +56,7 @@ const CalculationLoader: React.FC<CalculationLoaderProps> = ({ isVisible }) => {
           <p className="text-gray-600 dark:text-gray-400">Please wait while we determine your organizational archetype</p>
         </div>
         
-        <div className="flex justify-center mb-8">
+        <div className="flex justify-center mb-6">
           <div className="relative">
             <div 
               className="w-20 h-20 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 opacity-20 animate-pulse"
@@ -75,11 +75,9 @@ const CalculationLoader: React.FC<CalculationLoaderProps> = ({ isVisible }) => {
           />
         </div>
         
-        <div className="h-16 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden px-4 flex items-center">
-          <div className="marquee-container w-full overflow-hidden">
-            <div className="text-lg font-medium text-gray-800 dark:text-gray-200 transition-all duration-300 ease-out">
-              {loadingMessages[currentMessage]}
-            </div>
+        <div className="text-center h-8">
+          <div className="text-lg font-medium text-gray-800 dark:text-gray-200 marquee-text">
+            {loadingMessages[currentMessage]}
           </div>
         </div>
       </div>
