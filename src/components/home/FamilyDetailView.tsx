@@ -27,7 +27,7 @@ const FamilyDetailView: React.FC<FamilyDetailViewProps> = ({
       <p className="text-gray-600 mb-4">{familyInfo.description}</p>
       
       <h4 className="font-semibold text-gray-700 mb-2">Common Traits:</h4>
-      <ul className="list-disc list-inside text-gray-600 mb-4 space-y-1">
+      <ul className="list-disc list-inside text-gray-600 mb-4 space-y-1 text-left">
         {familyInfo.commonTraits.map((trait, index) => (
           <li key={index}>{trait}</li>
         ))}

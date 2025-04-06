@@ -96,7 +96,7 @@ const ArchetypeDetailDialog: React.FC<ArchetypeDetailDialogProps> = ({
               {archetypeDetail.keyCharacteristics.map((trait, index) => (
                 <div 
                   key={index} 
-                  className={`flex items-start gap-3 p-4 rounded-md bg-archetype-${archetypeDetail.id}/5 border-l-3 border-archetype-${archetypeDetail.id}`}
+                  className={`flex items-start gap-3 p-4 rounded-md bg-archetype-${archetypeDetail.id}/5 border-l-3 border-archetype-${archetypeDetail.id} text-left`}
                 >
                   <div className={`h-2.5 w-2.5 mt-1.5 rounded-full bg-archetype-${archetypeDetail.id} flex-shrink-0`}></div>
                   <span className="text-gray-700">{trait}</span>
@@ -108,7 +108,7 @@ const ArchetypeDetailDialog: React.FC<ArchetypeDetailDialogProps> = ({
           {/* Key Insights Section */}
           <div>
             <h3 className={`font-bold text-xl mb-5 text-archetype-${archetypeDetail.id}`}>Key Insights</h3>
-            <ul className="space-y-3 mb-6">
+            <ul className="space-y-3 mb-6 text-left">
               {archetypeDetail.keyInsights.map((insight, index) => (
                 <li key={index} className="flex items-start gap-3">
                   <div className={`h-3 w-3 mt-1 rounded-full bg-archetype-${archetypeDetail.id} flex-shrink-0`}></div>

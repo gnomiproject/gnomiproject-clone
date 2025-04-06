@@ -46,7 +46,7 @@ const ArchetypeDetailView: React.FC<ArchetypeDetailViewProps> = ({
           {archetypeSummary.keyCharacteristics.map((trait, index) => (
             <div 
               key={index} 
-              className={`flex items-start gap-3 p-4 rounded-md bg-archetype-${archetypeSummary.id}/5 border-l-3 border-archetype-${archetypeSummary.id}`}
+              className={`flex items-start gap-3 p-4 rounded-md bg-archetype-${archetypeSummary.id}/5 border-l-3 border-archetype-${archetypeSummary.id} text-left`}
             >
               <div className={`h-2.5 w-2.5 mt-1.5 rounded-full bg-archetype-${archetypeSummary.id} flex-shrink-0`}></div>
               <span className="text-gray-700">{trait}</span>
