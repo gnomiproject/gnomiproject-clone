@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import Button from '@/components/shared/Button';
 import SectionTitle from '@/components/shared/SectionTitle';
@@ -12,6 +11,15 @@ const Index = () => {
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const { getAllArchetypeSummaries } = useArchetypes();
   const archetypeSummaries = getAllArchetypeSummaries;
+  const dnaExplorerRef = useRef<HTMLDivElement>(null);
+
+  const scrollToDNAExplorer = (e: React.MouseEvent) => {
+    e.preventDefault();
+    dnaExplorerRef.current?.scrollIntoView({ 
+      behavior: 'smooth',
+      block: 'start' 
+    });
+  };
 
   return (
     <div className="min-h-screen">
@@ -49,17 +57,23 @@ const Index = () => {
                 <Link to="/assessment">
                   <Button size="lg">Find Your Archetype</Button>
                 </Link>
-                <Link to="#archetype-section">
-                  <Button variant="secondary" size="lg">Explore All Archetypes</Button>
-                </Link>
+                <Button 
+                  variant="secondary" 
+                  size="lg" 
+                  onClick={scrollToDNAExplorer}
+                >
+                  Explore All Archetypes
+                </Button>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Interactive DNA Explorer Section */}
-      <InteractiveDNAExplorer />
+      {/* Interactive DNA Explorer Section with ref */}
+      <div ref={dnaExplorerRef}>
+        <InteractiveDNAExplorer />
+      </div>
 
       {/* DNA Section */}
       <section className="py-16 px-6 md:px-12 bg-blue-50">

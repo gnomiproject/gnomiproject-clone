@@ -56,7 +56,7 @@ const InteractiveDNAExplorer = () => {
     null;
 
   return (
-    <section className="py-16 px-6 md:px-12 bg-white">
+    <section className="py-16 px-6 md:px-12 bg-white scroll-mt-16" id="dna-explorer">
       <div className="max-w-6xl mx-auto">
         <SectionTitle 
           title="Explore the DNA of Employer Healthcare" 
