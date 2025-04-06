@@ -16,39 +16,41 @@ const PremiumReport = ({ archetypeData }: PremiumReportProps) => {
       <div className="max-w-4xl mx-auto">
         <h2 className="text-3xl font-bold text-center mb-4">Want to go deeper on your archetype?</h2>
         
-        <p className="text-gray-600 text-center text-lg mb-10">
-          Get your free, personalized 15+ page report
-        </p>
-
         <div className="bg-white rounded-lg border p-8">
           <div className="flex items-center gap-3 mb-6">
             <FileText className={`text-${color} h-6 w-6`} />
-            <h3 className="text-xl font-bold">Complete {archetypeData.name} Analysis</h3>
+            <h3 className="text-xl font-bold">
+              Get the Full Engaged {archetypeData.name} Report
+            </h3>
             <span className={`bg-${color}/10 text-${color} text-xs px-3 py-1 rounded-full font-medium`}>FREE</span>
           </div>
+          
+          <p className="text-gray-700 mb-6 text-left">
+            Deep Dive into This Archetype
+          </p>
 
           <div className="flex flex-col lg:flex-row gap-8">
             <div className="flex-1">
-              <ul className="space-y-4">
+              <ul className="space-y-4 text-left">
                 <li className="flex items-start">
                   <span className={`text-${color} mr-2`}>✓</span>
-                  <span>In-depth profile of the {archetypeData.name} archetype</span>
+                  <span>Comprehensive profile of the {archetypeData.name} archetype</span>
                 </li>
                 <li className="flex items-start">
                   <span className={`text-${color} mr-2`}>✓</span>
-                  <span>Key cost drivers and healthcare behaviors specific to your organization</span>
+                  <span>Detailed analysis of healthcare utilization, cost trends, and condition prevalence</span>
                 </li>
                 <li className="flex items-start">
                   <span className={`text-${color} mr-2`}>✓</span>
-                  <span>How your utilization patterns compare across all nine archetypes</span>
+                  <span>Key behaviors, strengths, and blind spots that define this group</span>
                 </li>
                 <li className="flex items-start">
                   <span className={`text-${color} mr-2`}>✓</span>
-                  <span>Strategic recommendations tailored to your archetype's strengths and blind spots</span>
+                  <span>Strategic opportunities to optimize care, access, and spend</span>
                 </li>
                 <li className="flex items-start">
                   <span className={`text-${color} mr-2`}>✓</span>
-                  <span>A detailed look at disease prevalence, care access, and spending trends</span>
+                  <span>Insight into the methodology behind the archetype model</span>
                 </li>
               </ul>
             </div>
