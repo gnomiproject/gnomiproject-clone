@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { ArchetypeId } from '@/types/archetype';
 
@@ -131,8 +130,20 @@ const DNAHelix: React.FC<DNAHelixProps> = ({ className, onStepClick, selectedArc
     const usableHeight = height - topMargin - bottomMargin;
 
     for (let i = 0; i < numberOfSteps; i++) {
-      // Calculate y position with margins to distribute steps more evenly
-      const y = topMargin + (i * (usableHeight / (numberOfSteps - 1)));
+      // Calculate y position with special adjustments for first three steps
+      let y;
+      
+      if (i < 3) {
+        // Adjusted positions for the first three steps to fit in the first twist
+        // Position them at 5%, 15%, and 25% of the way down the first twist
+        const firstTwistHeight = height / 3; // Height of the first twist (approx)
+        const stepSpacing = firstTwistHeight * 0.3; // Space between steps within first twist
+        y = topMargin * 0.5 + (i * stepSpacing); // Start higher and space them more closely
+      } else {
+        // Keep the original positions for the remaining steps
+        y = topMargin + ((i) * (usableHeight / (numberOfSteps - 1)));
+      }
+      
       const x1 = centerX + amplitude * Math.sin(frequency * y);
       const x2 = centerX + amplitude * Math.sin(frequency * y + Math.PI);
       
