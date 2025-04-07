@@ -1,3 +1,4 @@
+
 import { AssessmentQuestion } from '../types/assessment';
 
 export const assessmentQuestions: AssessmentQuestion[] = [
@@ -7,7 +8,7 @@ export const assessmentQuestions: AssessmentQuestion[] = [
     options: [
       {
         id: 'accommodation',
-        text: 'Accommodation and Food Services',
+        text: 'Accommodation and Food Services (NAICS 72)',
         archetypeWeights: {
           'a1': 0.2, 'a2': 0.2, 'a3': 0.2,
           'b1': 0.2, 'b2': 0.2, 'b3': 0.2,
@@ -16,7 +17,7 @@ export const assessmentQuestions: AssessmentQuestion[] = [
       },
       {
         id: 'administrative',
-        text: 'Administrative and Support and Waste Management and Remediation Services',
+        text: 'Administrative and Support Services (NAICS 561)',
         archetypeWeights: {
           'a1': 0.2, 'a2': 0.2, 'a3': 0.2,
           'b1': 0.2, 'b2': 0.2, 'b3': 0.2,
@@ -25,7 +26,7 @@ export const assessmentQuestions: AssessmentQuestion[] = [
       },
       {
         id: 'construction',
-        text: 'Construction',
+        text: 'Construction (NAICS 23)',
         archetypeWeights: {
           'a1': 0.2, 'a2': 0.2, 'a3': 0.2,
           'b1': 0.4, 'b2': 0.7, 'b3': 0.5,
@@ -34,7 +35,7 @@ export const assessmentQuestions: AssessmentQuestion[] = [
       },
       {
         id: 'education',
-        text: 'Educational Services',
+        text: 'Educational Services (NAICS 61)',
         archetypeWeights: {
           'a1': 0.2, 'a2': 0.2, 'a3': 0.2,
           'b1': 0.2, 'b2': 0.2, 'b3': 0.5,
@@ -43,7 +44,7 @@ export const assessmentQuestions: AssessmentQuestion[] = [
       },
       {
         id: 'finance_insurance',
-        text: 'Finance and Insurance',
+        text: 'Finance and Insurance (NAICS 52)',
         archetypeWeights: {
           'a1': 0.2, 'a2': 0.9, 'a3': 0.2,
           'b1': 0.2, 'b2': 0.2, 'b3': 0.2,
@@ -52,7 +53,7 @@ export const assessmentQuestions: AssessmentQuestion[] = [
       },
       {
         id: 'healthcare',
-        text: 'Health Care and Social Assistance',
+        text: 'Health Care and Social Assistance (NAICS 62)',
         archetypeWeights: {
           'a1': 0.2, 'a2': 0.2, 'a3': 0.2,
           'b1': 0.2, 'b2': 0.2, 'b3': 0.5,
@@ -61,7 +62,7 @@ export const assessmentQuestions: AssessmentQuestion[] = [
       },
       {
         id: 'information',
-        text: 'Information',
+        text: 'Information (NAICS 51)',
         archetypeWeights: {
           'a1': 0.6, 'a2': 0.2, 'a3': 0.7,
           'b1': 0.2, 'b2': 0.2, 'b3': 0.2,
@@ -70,7 +71,7 @@ export const assessmentQuestions: AssessmentQuestion[] = [
       },
       {
         id: 'manufacturing',
-        text: 'Manufacturing',
+        text: 'Manufacturing (NAICS 31-33)',
         archetypeWeights: {
           'a1': 0.2, 'a2': 0.2, 'a3': 0.2,
           'b1': 0.7, 'b2': 0.2, 'b3': 0.5,
@@ -79,7 +80,7 @@ export const assessmentQuestions: AssessmentQuestion[] = [
       },
       {
         id: 'professional',
-        text: 'Professional, Scientific, and Technical Services',
+        text: 'Professional, Scientific, and Technical Services (NAICS 54)',
         archetypeWeights: {
           'a1': 0.8, 'a2': 0.2, 'a3': 0.5,
           'b1': 0.2, 'b2': 0.2, 'b3': 0.2,
@@ -88,7 +89,7 @@ export const assessmentQuestions: AssessmentQuestion[] = [
       },
       {
         id: 'real_estate',
-        text: 'Real Estate and Rental and Leasing',
+        text: 'Real Estate and Rental and Leasing (NAICS 53)',
         archetypeWeights: {
           'a1': 0.2, 'a2': 0.2, 'a3': 0.2,
           'b1': 0.4, 'b2': 0.7, 'b3': 0.5,
@@ -97,7 +98,7 @@ export const assessmentQuestions: AssessmentQuestion[] = [
       },
       {
         id: 'retail',
-        text: 'Retail Trade',
+        text: 'Retail Trade (NAICS 44-45)',
         archetypeWeights: {
           'a1': 0.2, 'a2': 0.2, 'a3': 0.2,
           'b1': 0.2, 'b2': 0.2, 'b3': 0.2,
@@ -106,7 +107,7 @@ export const assessmentQuestions: AssessmentQuestion[] = [
       },
       {
         id: 'transportation',
-        text: 'Transportation and Warehousing',
+        text: 'Transportation and Warehousing (NAICS 48-49)',
         archetypeWeights: {
           'a1': 0.2, 'a2': 0.2, 'a3': 0.2,
           'b1': 0.7, 'b2': 0.2, 'b3': 0.5,
@@ -115,7 +116,7 @@ export const assessmentQuestions: AssessmentQuestion[] = [
       },
       {
         id: 'utilities',
-        text: 'Utilities',
+        text: 'Utilities (NAICS 22)',
         archetypeWeights: {
           'a1': 0.2, 'a2': 0.2, 'a3': 0.2,
           'b1': 0.7, 'b2': 0.2, 'b3': 0.5,
@@ -123,8 +124,17 @@ export const assessmentQuestions: AssessmentQuestion[] = [
         }
       },
       {
+        id: 'waste_management',
+        text: 'Waste Management and Remediation Services (NAICS 562)',
+        archetypeWeights: {
+          'a1': 0.2, 'a2': 0.2, 'a3': 0.2,
+          'b1': 0.2, 'b2': 0.2, 'b3': 0.2,
+          'c1': 0.5, 'c2': 0.8, 'c3': 0.2
+        }
+      },
+      {
         id: 'wholesale',
-        text: 'Wholesale Trade',
+        text: 'Wholesale Trade (NAICS 42)',
         archetypeWeights: {
           'a1': 0.2, 'a2': 0.2, 'a3': 0.5,
           'b1': 0.7, 'b2': 0.2, 'b3': 0.5,
@@ -133,7 +143,7 @@ export const assessmentQuestions: AssessmentQuestion[] = [
       },
       {
         id: 'other_services',
-        text: 'Other Services (except Public Administration)',
+        text: 'Other Services (except Public Administration) (NAICS 81)',
         archetypeWeights: {
           'a1': 0.2, 'a2': 0.2, 'a3': 0.2,
           'b1': 0.2, 'b2': 0.2, 'b3': 0.2,

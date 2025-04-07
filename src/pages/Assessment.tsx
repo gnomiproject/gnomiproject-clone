@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useAssessment } from '../hooks/useAssessment';
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -21,6 +20,7 @@ import {
 import { Check, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const Assessment = () => {
   const { 
@@ -62,24 +62,33 @@ const Assessment = () => {
               <CommandList>
                 <CommandEmpty>No industry found.</CommandEmpty>
                 <CommandGroup className="max-h-64 overflow-auto">
-                  {currentQ.options.map((option) => (
-                    <CommandItem
-                      key={option.id}
-                      value={option.id}
-                      onSelect={(value) => {
-                        setAnswer(currentQ.id, value);
-                        setOpen(false);
-                      }}
-                    >
-                      <Check
-                        className={cn(
-                          "mr-2 h-4 w-4",
-                          answers[currentQ.id] === option.id ? "opacity-100" : "opacity-0"
-                        )}
-                      />
-                      {option.text}
-                    </CommandItem>
-                  ))}
+                  {/* Sort options alphabetically, but keep "Other Services" last */}
+                  {[...currentQ.options]
+                    .sort((a, b) => {
+                      // Keep "Other Services" last
+                      if (a.id === 'other_services') return 1;
+                      if (b.id === 'other_services') return -1;
+                      // Sort the rest alphabetically
+                      return a.text.localeCompare(b.text);
+                    })
+                    .map((option) => (
+                      <CommandItem
+                        key={option.id}
+                        value={option.id}
+                        onSelect={(value) => {
+                          setAnswer(currentQ.id, value);
+                          setOpen(false);
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            answers[currentQ.id] === option.id ? "opacity-100" : "opacity-0"
+                          )}
+                        />
+                        {option.text}
+                      </CommandItem>
+                    ))}
                 </CommandGroup>
               </CommandList>
             </Command>
@@ -88,7 +97,49 @@ const Assessment = () => {
       );
     }
     
-    // Standard radio group for other questions
+    // Geography question with dropdown (second question)
+    if (currentQ.id === 'geography') {
+      return (
+        <Select
+          value={answers[currentQ.id] || ""}
+          onValueChange={(value) => setAnswer(currentQ.id, value)}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Select number of states..." />
+          </SelectTrigger>
+          <SelectContent>
+            {currentQ.options.map(option => (
+              <SelectItem key={option.id} value={option.id}>
+                {option.text}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      );
+    }
+    
+    // Organization size with dropdown (third question)
+    if (currentQ.id === 'size') {
+      return (
+        <Select
+          value={answers[currentQ.id] || ""}
+          onValueChange={(value) => setAnswer(currentQ.id, value)}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Select organization size..." />
+          </SelectTrigger>
+          <SelectContent>
+            {currentQ.options.map(option => (
+              <SelectItem key={option.id} value={option.id}>
+                {option.text}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      );
+    }
+    
+    // Standard radio group for other questions (like gender)
     return (
       <RadioGroup
         value={answers[currentQ.id] || ""}
@@ -110,7 +161,7 @@ const Assessment = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-6">
       <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-md p-8">
-        <h1 className="text-3xl font-semibold text-left mb-8">Assessment</h1>
+        <h1 className="text-3xl font-semibold text-left mb-8">gNomi Archetype Assessment</h1>
         
         {questions.length > 0 && (
           <div>
@@ -120,20 +171,21 @@ const Assessment = () => {
             {renderQuestionContent()}
             
             <div className="flex justify-between mt-8">
-              <button
+              <Button
                 onClick={goToPrevious}
                 disabled={currentQuestion === 1}
-                className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 px-4 rounded disabled:opacity-50"
+                variant="outline"
+                className="font-semibold py-2 px-4"
               >
                 Previous
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={goToNext}
                 disabled={!answers[questions[currentQuestion - 1].id]}
-                className="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded disabled:opacity-50"
+                className="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-4"
               >
                 {currentQuestion === totalQuestions ? 'Submit' : 'Next'}
-              </button>
+              </Button>
             </div>
           </div>
         )}

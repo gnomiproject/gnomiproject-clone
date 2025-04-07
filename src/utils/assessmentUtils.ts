@@ -17,10 +17,13 @@ export const mapToArchetype = (answers: Record<string, string>): ArchetypeId => 
   
   console.log(`Selected values: Industry="${industry}", States="${stateCount}", Employees="${employeeCount}", Gender="${percentFemale}"`);
 
-  // Do a direct check for Finance and Insurance first
-  if (industry === "Finance and Insurance") {
-    console.log("Match: Finance and Insurance -> a2 (Complex Condition Managers)");
-    return "a2";
+  // Standardize industry for logic processing
+  let processingIndustry = industry;
+  
+  // Handle the split Administrative/Waste Management categories
+  if (industry === "Administrative and Support Services (NAICS 561)" || 
+      industry === "Waste Management and Remediation Services (NAICS 562)") {
+    processingIndustry = "Administrative and Support and Waste Management and Remediation Services";
   }
 
   // Convert state count to numerical range
@@ -50,68 +53,73 @@ export const mapToArchetype = (answers: Record<string, string>): ArchetypeId => 
   else if (percentFemale === "Greater than 49%") pct_female = 0.50;
   
   console.log(`Converted values: tot_states=${tot_states}, employees=${employees}, pct_female=${pct_female}`);
+  console.log(`Processing industry: ${processingIndustry}`);
 
   // Follow the exact decision tree logic as specified
   if (["Administrative and Support and Waste Management and Remediation Services", 
-       "Retail Trade", "Other Services (except Public Administration)", 
-       "Accommodation and Food Services"].includes(industry) && tot_states < 16) {
-    console.log(`Match: ${industry} with <16 states -> c2 (Care Adherence Advocates)`);
+       "Retail Trade (NAICS 44-45)", "Other Services (except Public Administration) (NAICS 81)", 
+       "Accommodation and Food Services (NAICS 72)"].includes(processingIndustry) && tot_states < 16) {
+    console.log(`Match: ${processingIndustry} with <16 states -> c2 (Care Adherence Advocates)`);
     return "c2";
   } 
   else if (["Administrative and Support and Waste Management and Remediation Services", 
-            "Retail Trade", "Other Services (except Public Administration)", 
-            "Accommodation and Food Services"].includes(industry) && tot_states >= 16) {
-    console.log(`Match: ${industry} with >=16 states -> c1 (Scalable Access Architects)`);
+            "Retail Trade (NAICS 44-45)", "Other Services (except Public Administration) (NAICS 81)", 
+            "Accommodation and Food Services (NAICS 72)"].includes(processingIndustry) && tot_states >= 16) {
+    console.log(`Match: ${processingIndustry} with >=16 states -> c1 (Scalable Access Architects)`);
     return "c1";
   } 
-  else if (["Educational Services", "Health Care and Social Assistance"].includes(industry) && tot_states <= 29) {
+  else if (["Educational Services (NAICS 61)", "Health Care and Social Assistance (NAICS 62)"].includes(industry) && tot_states <= 29) {
     console.log(`Match: ${industry} with <=29 states -> c3 (Engaged Healthcare Consumers)`);
     return "c3";
   } 
-  else if (["Educational Services", "Health Care and Social Assistance"].includes(industry) && tot_states > 29) {
+  else if (["Educational Services (NAICS 61)", "Health Care and Social Assistance (NAICS 62)"].includes(industry) && tot_states > 29) {
     console.log(`Match: ${industry} with >29 states -> b3 (Care Channel Optimizers)`);
     return "b3";
   } 
-  else if (["Construction", "Real Estate and Rental and Leasing"].includes(industry) && tot_states <= 19) {
+  else if (["Construction (NAICS 23)", "Real Estate and Rental and Leasing (NAICS 53)"].includes(industry) && tot_states <= 19) {
     console.log(`Match: ${industry} with <=19 states -> b2 (Healthcare Pragmatists)`);
     return "b2";
   } 
-  else if (["Construction", "Real Estate and Rental and Leasing"].includes(industry) && tot_states > 19) {
+  else if (["Construction (NAICS 23)", "Real Estate and Rental and Leasing (NAICS 53)"].includes(industry) && tot_states > 19) {
     console.log(`Match: ${industry} with >19 states -> b3 (Care Channel Optimizers)`);
     return "b3";
   } 
-  else if (industry === "Wholesale Trade" && tot_states <= 20 && pct_female <= 0.49 && employees >= 100000) {
+  else if (industry === "Wholesale Trade (NAICS 42)" && tot_states <= 20 && pct_female <= 0.49 && employees >= 100000) {
     console.log(`Match: ${industry} with <=20 states, <=49% female, >=100k employees -> a3 (Proactive Care Consumers)`);
     return "a3";
   } 
-  else if (["Manufacturing", "Transportation and Warehousing", 
-            "Utilities", "Wholesale Trade"].includes(industry) && 
+  else if (["Manufacturing (NAICS 31-33)", "Transportation and Warehousing (NAICS 48-49)", 
+            "Utilities (NAICS 22)", "Wholesale Trade (NAICS 42)"].includes(industry) && 
            tot_states <= 20 && pct_female <= 0.49) {
     console.log(`Match: ${industry} with <=20 states, <=49% female -> b1 (Resourceful Adapters)`);
     return "b1";
   } 
-  else if (["Manufacturing", "Transportation and Warehousing", 
-            "Utilities", "Wholesale Trade"].includes(industry) && 
+  else if (["Manufacturing (NAICS 31-33)", "Transportation and Warehousing (NAICS 48-49)", 
+            "Utilities (NAICS 22)", "Wholesale Trade (NAICS 42)"].includes(industry) && 
            tot_states <= 20 && pct_female > 0.49) {
     console.log(`Match: ${industry} with <=20 states, >49% female -> c3 (Engaged Healthcare Consumers)`);
     return "c3";
   } 
-  else if (["Manufacturing", "Transportation and Warehousing", 
-            "Utilities", "Wholesale Trade"].includes(industry) && tot_states > 20) {
+  else if (["Manufacturing (NAICS 31-33)", "Transportation and Warehousing (NAICS 48-49)", 
+            "Utilities (NAICS 22)", "Wholesale Trade (NAICS 42)"].includes(industry) && tot_states > 20) {
     console.log(`Match: ${industry} with >20 states -> b3 (Care Channel Optimizers)`);
     return "b3";
   } 
-  else if (industry === "Information" && employees >= 250) {
+  else if (industry === "Information (NAICS 51)" && employees >= 250) {
     console.log(`Match: ${industry} with >=250 employees -> a3 (Proactive Care Consumers)`);
     return "a3";
   } 
-  else if (["Professional, Scientific, and Technical Services", "Information"].includes(industry) && tot_states < 31) {
+  else if (["Professional, Scientific, and Technical Services (NAICS 54)", "Information (NAICS 51)"].includes(industry) && tot_states < 31) {
     console.log(`Match: ${industry} with <31 states -> a1 (Savvy Healthcare Navigators)`);
     return "a1";
   } 
-  else if (["Professional, Scientific, and Technical Services", "Information"].includes(industry) && tot_states >= 31) {
+  else if (["Professional, Scientific, and Technical Services (NAICS 54)", "Information (NAICS 51)"].includes(industry) && tot_states >= 31) {
     console.log(`Match: ${industry} with >=31 states -> a3 (Proactive Care Consumers)`);
     return "a3";
+  }
+  else if (industry === "Finance and Insurance (NAICS 52)") {
+    console.log(`Match: Finance and Insurance -> a2 (Complex Condition Managers)`);
+    return "a2";
   }
   
   // Fallback case
