@@ -71,23 +71,19 @@ const CalculationLoader: React.FC<CalculationLoaderProps> = ({ isVisible }) => {
         
         <div className="flex justify-center mb-8">
           <div className="relative">
-            {/* Gnome image in the center - now bigger and with immediate display */}
+            {/* Gnome image in the center */}
             <div className="w-32 h-32 flex items-center justify-center">
               <img 
                 src="/lovable-uploads/20fcecdc-95a8-43d0-bfbd-c979000e58e5.png" 
                 alt="Analysis Gnome" 
-                className={`w-32 h-32 object-contain z-10 absolute inset-0 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+                className={`w-32 h-32 object-contain z-10 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
                 style={{ transition: 'opacity 0.3s ease' }}
               />
               {!imageLoaded && (
                 <div className="w-32 h-32 bg-gray-200 rounded-full animate-pulse"></div>
               )}
             </div>
-            {/* Background circle - now bigger */}
-            <div 
-              className="w-32 h-32 rounded-full bg-primary/20"
-            ></div>
-            {/* Spinning border - now bigger */}
+            {/* Spinning border */}
             <div 
               className="absolute inset-0 w-32 h-32 border-4 border-t-primary border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin" 
               style={{ animationDuration: '1s' }}
