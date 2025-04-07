@@ -1,9 +1,11 @@
+
 import React from 'react';
 import { useAssessment } from '../hooks/useAssessment';
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import CalculationLoader from '../components/assessment/CalculationLoader';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { useIsMobile } from '@/hooks/use-mobile';
 import {
   Command,
   CommandEmpty,
@@ -37,6 +39,7 @@ const Assessment = () => {
   } = useAssessment();
   
   const [open, setOpen] = React.useState(false);
+  const isMobile = useIsMobile();
   
   const renderQuestionContent = () => {
     const currentQ = questions[currentQuestion - 1];
@@ -80,12 +83,14 @@ const Assessment = () => {
               variant="outline"
               role="combobox"
               aria-expanded={open}
-              className="w-full justify-between text-left font-normal"
+              className="w-full justify-between text-left font-normal overflow-hidden text-ellipsis"
             >
-              {answers[currentQ.id] 
-                ? currentQ.options.find(option => option.id === answers[currentQ.id])?.text 
-                : "Select industry..."}
-              <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              <span className="truncate block">
+                {answers[currentQ.id] 
+                  ? currentQ.options.find(option => option.id === answers[currentQ.id])?.text 
+                  : "Select industry..."}
+              </span>
+              <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50 flex-none" />
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-full p-0" align="start">
@@ -209,30 +214,30 @@ const Assessment = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-6">
-      <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-md p-8">
-        <h1 className="text-3xl font-semibold text-left mb-8">gNomi Archetype Assessment</h1>
+    <div className="min-h-screen bg-gray-50 py-6 sm:py-12 px-4 sm:px-6">
+      <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-md p-5 sm:p-8">
+        <h1 className="text-2xl sm:text-3xl font-semibold text-left mb-6 sm:mb-8">gNomi Archetype Assessment</h1>
         
         {questions.length > 0 && (
           <div>
-            <h2 className="text-2xl font-semibold text-left mb-4">Question {currentQuestion} of {totalQuestions}</h2>
-            <p className="mb-6 text-left">{questions[currentQuestion - 1].text}</p>
+            <h2 className="text-xl sm:text-2xl font-semibold text-left mb-3 sm:mb-4">Question {currentQuestion} of {totalQuestions}</h2>
+            <p className="mb-5 sm:mb-6 text-left">{questions[currentQuestion - 1].text}</p>
             
             {renderQuestionContent()}
             
-            <div className="flex justify-between mt-8">
+            <div className="flex justify-between mt-6 sm:mt-8">
               <Button
                 onClick={goToPrevious}
                 disabled={currentQuestion === 1}
                 variant="outline"
-                className="font-semibold py-2 px-4"
+                className="font-semibold py-2 px-3 sm:px-4"
               >
                 Previous
               </Button>
               <Button
                 onClick={goToNext}
                 disabled={!isCurrentQuestionValid()}
-                className="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-4"
+                className="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-3 sm:px-4"
               >
                 {currentQuestion === totalQuestions ? 'Submit' : 'Next'}
               </Button>
