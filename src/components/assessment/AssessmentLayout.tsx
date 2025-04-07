@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { AssessmentQuestion } from '@/types/assessment';
 import QuestionContent from './QuestionContent';
 import QuestionNavigation from './QuestionNavigation';
+import QuestionTransition from './QuestionTransition';
 
 interface AssessmentLayoutProps {
   currentQuestion: number;
@@ -30,38 +31,30 @@ const AssessmentLayout = ({
   
   const currentQ = questions[currentQuestion - 1];
   const [animationDirection, setAnimationDirection] = useState<'forward' | 'backward' | null>(null);
-  const [isAnimating, setIsAnimating] = useState(false);
   
-  // Handle animations when the current question changes
-  useEffect(() => {
-    if (animationDirection) {
-      setIsAnimating(true);
-      const timer = setTimeout(() => {
-        setIsAnimating(false);
-        setAnimationDirection(null);
-      }, 500); // Animation duration
-      
-      return () => clearTimeout(timer);
-    }
-  }, [currentQuestion, animationDirection]);
-  
+  // Handle next button click
   const handleNext = () => {
     setAnimationDirection('forward');
-    goToNext();
+    setTimeout(() => {
+      goToNext();
+    }, 50); // Small delay to ensure state updates before navigation
   };
   
+  // Handle previous button click
   const handlePrevious = () => {
     setAnimationDirection('backward');
-    goToPrevious();
+    setTimeout(() => {
+      goToPrevious();
+    }, 50); // Small delay to ensure state updates before navigation
   };
   
-  const getAnimationClass = () => {
-    if (!animationDirection) return 'animate-fade-in';
-    
-    return animationDirection === 'forward' 
-      ? 'animate-slide-in-right' 
-      : 'animate-slide-out-right';
-  };
+  // Reset animation direction after animation completes
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setAnimationDirection(null);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [currentQuestion]);
   
   return (
     <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-md p-5 sm:p-8">
@@ -71,8 +64,11 @@ const AssessmentLayout = ({
         <div>
           <h2 className="text-xl sm:text-2xl font-semibold text-left mb-3 sm:mb-4">Question {currentQuestion} of {totalQuestions}</h2>
           
-          <div className="overflow-hidden">
-            <div key={currentQuestion} className={getAnimationClass()}>
+          <div className="min-h-[200px] overflow-hidden">
+            <QuestionTransition 
+              questionKey={currentQuestion}
+              animationDirection={animationDirection}
+            >
               <p className="mb-5 sm:mb-6 text-left">{currentQ.text}</p>
               
               <QuestionContent 
@@ -81,7 +77,7 @@ const AssessmentLayout = ({
                 setAnswer={setAnswer}
                 setMultipleAnswers={setMultipleAnswers}
               />
-            </div>
+            </QuestionTransition>
           </div>
           
           <QuestionNavigation 
