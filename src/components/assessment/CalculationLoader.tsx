@@ -9,6 +9,10 @@ const loadingMessages = [
   "Preparing your personalized healthcare insights..."
 ];
 
+// Preload the gnome image
+const gnomeImage = new Image();
+gnomeImage.src = "/lovable-uploads/20fcecdc-95a8-43d0-bfbd-c979000e58e5.png";
+
 interface CalculationLoaderProps {
   isVisible: boolean;
 }
@@ -16,6 +20,16 @@ interface CalculationLoaderProps {
 const CalculationLoader: React.FC<CalculationLoaderProps> = ({ isVisible }) => {
   const [progress, setProgress] = useState(0);
   const [messageIndex, setMessageIndex] = useState(0);
+  const [imageLoaded, setImageLoaded] = useState(false);
+  
+  useEffect(() => {
+    // Check if the image is already loaded
+    if (gnomeImage.complete) {
+      setImageLoaded(true);
+    } else {
+      gnomeImage.onload = () => setImageLoaded(true);
+    }
+  }, []);
   
   useEffect(() => {
     if (!isVisible) return;
@@ -57,19 +71,25 @@ const CalculationLoader: React.FC<CalculationLoaderProps> = ({ isVisible }) => {
         
         <div className="flex justify-center mb-8">
           <div className="relative">
-            {/* Gnome image in the center */}
-            <img 
-              src="/lovable-uploads/20fcecdc-95a8-43d0-bfbd-c979000e58e5.png" 
-              alt="Analysis Gnome" 
-              className="w-20 h-20 object-contain z-10 absolute inset-0"
-            />
-            {/* Background circle */}
+            {/* Gnome image in the center - now bigger and with immediate display */}
+            <div className="w-32 h-32 flex items-center justify-center">
+              <img 
+                src="/lovable-uploads/20fcecdc-95a8-43d0-bfbd-c979000e58e5.png" 
+                alt="Analysis Gnome" 
+                className={`w-32 h-32 object-contain z-10 absolute inset-0 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+                style={{ transition: 'opacity 0.3s ease' }}
+              />
+              {!imageLoaded && (
+                <div className="w-32 h-32 bg-gray-200 rounded-full animate-pulse"></div>
+              )}
+            </div>
+            {/* Background circle - now bigger */}
             <div 
-              className="w-20 h-20 rounded-full bg-primary/20"
+              className="w-32 h-32 rounded-full bg-primary/20"
             ></div>
-            {/* Spinning border */}
+            {/* Spinning border - now bigger */}
             <div 
-              className="absolute inset-0 w-20 h-20 border-4 border-t-primary border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin" 
+              className="absolute inset-0 w-32 h-32 border-4 border-t-primary border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin" 
               style={{ animationDuration: '1s' }}
             ></div>
           </div>
