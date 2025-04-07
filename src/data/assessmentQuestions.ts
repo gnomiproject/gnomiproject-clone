@@ -7,375 +7,239 @@ export const assessmentQuestions: AssessmentQuestion[] = [
     text: 'Which industry best describes your organization?',
     options: [
       {
+        id: 'finance_insurance',
+        text: 'Finance and Insurance',
+        archetypeWeights: {
+          'a1': 0.2, 'a2': 0.9, 'a3': 0.2,
+          'b1': 0.2, 'b2': 0.2, 'b3': 0.2,
+          'c1': 0.2, 'c2': 0.2, 'c3': 0.2
+        }
+      },
+      {
         id: 'professional',
-        text: 'Professional Services (Legal, Consulting, Architecture)',
+        text: 'Professional, Scientific, and Technical Services',
         archetypeWeights: {
-          'a1': 0.8,
-          'a2': 0.5,
-          'a3': 0.3,
-          'b1': 0.3,
-          'b2': 0.4,
-          'b3': 0.3,
-          'c1': 0.3,
-          'c2': 0.6,
-          'c3': 0.4
+          'a1': 0.8, 'a2': 0.2, 'a3': 0.5,
+          'b1': 0.2, 'b2': 0.2, 'b3': 0.2,
+          'c1': 0.2, 'c2': 0.2, 'c3': 0.2
         }
       },
       {
-        id: 'finance',
-        text: 'Finance & Insurance',
+        id: 'information',
+        text: 'Information',
         archetypeWeights: {
-          'a1': 0.6,
-          'a2': 0.4,
-          'a3': 0.3,
-          'b1': 0.5,
-          'b2': 0.5,
-          'b3': 0.3,
-          'c1': 0.4,
-          'c2': 0.7,
-          'c3': 0.6
-        }
-      },
-      {
-        id: 'technology',
-        text: 'Technology & Information',
-        archetypeWeights: {
-          'a1': 0.9,
-          'a2': 0.4,
-          'a3': 0.5,
-          'b1': 0.4,
-          'b2': 0.3,
-          'b3': 0.2,
-          'c1': 0.3,
-          'c2': 0.8,
-          'c3': 0.3
+          'a1': 0.6, 'a2': 0.2, 'a3': 0.7,
+          'b1': 0.2, 'b2': 0.2, 'b3': 0.2,
+          'c1': 0.2, 'c2': 0.2, 'c3': 0.2
         }
       },
       {
         id: 'manufacturing',
-        text: 'Manufacturing & Production',
+        text: 'Manufacturing',
         archetypeWeights: {
-          'a1': 0.3,
-          'a2': 0.5,
-          'a3': 0.4,
-          'b1': 0.7,
-          'b2': 0.6,
-          'b3': 0.8,
-          'c1': 0.6,
-          'c2': 0.4,
-          'c3': 0.5
+          'a1': 0.2, 'a2': 0.2, 'a3': 0.2,
+          'b1': 0.7, 'b2': 0.2, 'b3': 0.5,
+          'c1': 0.2, 'c2': 0.2, 'c3': 0.5
+        }
+      },
+      {
+        id: 'transportation',
+        text: 'Transportation and Warehousing',
+        archetypeWeights: {
+          'a1': 0.2, 'a2': 0.2, 'a3': 0.2,
+          'b1': 0.7, 'b2': 0.2, 'b3': 0.5,
+          'c1': 0.2, 'c2': 0.2, 'c3': 0.5
+        }
+      },
+      {
+        id: 'utilities',
+        text: 'Utilities',
+        archetypeWeights: {
+          'a1': 0.2, 'a2': 0.2, 'a3': 0.2,
+          'b1': 0.7, 'b2': 0.2, 'b3': 0.5,
+          'c1': 0.2, 'c2': 0.2, 'c3': 0.5
+        }
+      },
+      {
+        id: 'wholesale',
+        text: 'Wholesale Trade',
+        archetypeWeights: {
+          'a1': 0.2, 'a2': 0.2, 'a3': 0.5,
+          'b1': 0.7, 'b2': 0.2, 'b3': 0.5,
+          'c1': 0.2, 'c2': 0.2, 'c3': 0.5
         }
       },
       {
         id: 'construction',
-        text: 'Construction & Real Estate',
+        text: 'Construction',
         archetypeWeights: {
-          'a1': 0.2,
-          'a2': 0.4,
-          'a3': 0.5,
-          'b1': 0.6,
-          'b2': 0.6,
-          'b3': 0.8,
-          'c1': 0.5,
-          'c2': 0.3,
-          'c3': 0.4
+          'a1': 0.2, 'a2': 0.2, 'a3': 0.2,
+          'b1': 0.4, 'b2': 0.7, 'b3': 0.5,
+          'c1': 0.2, 'c2': 0.2, 'c3': 0.2
         }
       },
       {
-        id: 'retail',
-        text: 'Retail & Services',
+        id: 'real_estate',
+        text: 'Real Estate and Rental and Leasing',
         archetypeWeights: {
-          'a1': 0.3,
-          'a2': 0.3,
-          'a3': 0.6,
-          'b1': 0.8,
-          'b2': 0.7,
-          'b3': 0.6,
-          'c1': 0.5,
-          'c2': 0.4,
-          'c3': 0.4
+          'a1': 0.2, 'a2': 0.2, 'a3': 0.2,
+          'b1': 0.4, 'b2': 0.7, 'b3': 0.5,
+          'c1': 0.2, 'c2': 0.2, 'c3': 0.2
         }
       },
       {
         id: 'education',
-        text: 'Education & Healthcare',
+        text: 'Educational Services',
         archetypeWeights: {
-          'a1': 0.5,
-          'a2': 0.7,
-          'a3': 0.8,
-          'b1': 0.3,
-          'b2': 0.4,
-          'b3': 0.4,
-          'c1': 0.6,
-          'c2': 0.5,
-          'c3': 0.7
+          'a1': 0.2, 'a2': 0.2, 'a3': 0.2,
+          'b1': 0.2, 'b2': 0.2, 'b3': 0.5,
+          'c1': 0.2, 'c2': 0.2, 'c3': 0.8
+        }
+      },
+      {
+        id: 'healthcare',
+        text: 'Health Care and Social Assistance',
+        archetypeWeights: {
+          'a1': 0.2, 'a2': 0.2, 'a3': 0.2,
+          'b1': 0.2, 'b2': 0.2, 'b3': 0.5,
+          'c1': 0.2, 'c2': 0.2, 'c3': 0.8
+        }
+      },
+      {
+        id: 'administrative',
+        text: 'Administrative and Support and Waste Management and Remediation Services',
+        archetypeWeights: {
+          'a1': 0.2, 'a2': 0.2, 'a3': 0.2,
+          'b1': 0.2, 'b2': 0.2, 'b3': 0.2,
+          'c1': 0.5, 'c2': 0.8, 'c3': 0.2
+        }
+      },
+      {
+        id: 'retail',
+        text: 'Retail Trade',
+        archetypeWeights: {
+          'a1': 0.2, 'a2': 0.2, 'a3': 0.2,
+          'b1': 0.2, 'b2': 0.2, 'b3': 0.2,
+          'c1': 0.5, 'c2': 0.8, 'c3': 0.2
+        }
+      },
+      {
+        id: 'other_services',
+        text: 'Other Services (except Public Administration)',
+        archetypeWeights: {
+          'a1': 0.2, 'a2': 0.2, 'a3': 0.2,
+          'b1': 0.2, 'b2': 0.2, 'b3': 0.2,
+          'c1': 0.5, 'c2': 0.8, 'c3': 0.2
+        }
+      },
+      {
+        id: 'accommodation',
+        text: 'Accommodation and Food Services',
+        archetypeWeights: {
+          'a1': 0.2, 'a2': 0.2, 'a3': 0.2,
+          'b1': 0.2, 'b2': 0.2, 'b3': 0.2,
+          'c1': 0.5, 'c2': 0.8, 'c3': 0.2
         }
       }
     ]
   },
   {
     id: 'geography',
-    text: 'How would you describe your organization\'s geographic footprint?',
+    text: 'In how many states does your organization operate?',
     options: [
       {
-        id: 'single_state',
-        text: 'Single state or limited regional presence (1-5 states)',
+        id: '1_to_15',
+        text: '1-15 states',
         archetypeWeights: {
-          'a1': 0.4,
-          'a2': 0.5,
-          'a3': 0.6,
-          'b1': 0.6,
-          'b2': 0.7,
-          'b3': 0.6,
-          'c1': 0.5,
-          'c2': 0.3,
-          'c3': 0.5
+          'a1': 0.4, 'a2': 0.5, 'a3': 0.3,
+          'b1': 0.7, 'b2': 0.7, 'b3': 0.3,
+          'c1': 0.3, 'c2': 0.8, 'c3': 0.5
         }
       },
       {
-        id: 'regional',
-        text: 'Regional presence (6-15 states)',
+        id: '16_to_19',
+        text: '16-19 states',
         archetypeWeights: {
-          'a1': 0.6,
-          'a2': 0.6,
-          'a3': 0.5,
-          'b1': 0.7,
-          'b2': 0.6,
-          'b3': 0.5,
-          'c1': 0.6,
-          'c2': 0.5,
-          'c3': 0.6
+          'a1': 0.6, 'a2': 0.5, 'a3': 0.4,
+          'b1': 0.5, 'b2': 0.7, 'b3': 0.4,
+          'c1': 0.7, 'c2': 0.4, 'c3': 0.5
         }
       },
       {
-        id: 'national',
-        text: 'National presence (16-30 states)',
+        id: '20_to_29',
+        text: '20-29 states',
         archetypeWeights: {
-          'a1': 0.8,
-          'a2': 0.7,
-          'a3': 0.5,
-          'b1': 0.5,
-          'b2': 0.5,
-          'b3': 0.4,
-          'c1': 0.7,
-          'c2': 0.7,
-          'c3': 0.7
+          'a1': 0.7, 'a2': 0.6, 'a3': 0.4,
+          'b1': 0.4, 'b2': 0.3, 'b3': 0.7,
+          'c1': 0.6, 'c2': 0.3, 'c3': 0.6
         }
       },
       {
-        id: 'multi_national',
-        text: 'Multi-regional/national presence (31+ states)',
+        id: '30_plus',
+        text: '30+ states',
         archetypeWeights: {
-          'a1': 0.9,
-          'a2': 0.6,
-          'a3': 0.4,
-          'b1': 0.4,
-          'b2': 0.4,
-          'b3': 0.3,
-          'c1': 0.6,
-          'c2': 0.8,
-          'c3': 0.8
+          'a1': 0.3, 'a2': 0.6, 'a3': 0.8,
+          'b1': 0.2, 'b2': 0.2, 'b3': 0.8,
+          'c1': 0.7, 'c2': 0.2, 'c3': 0.3
         }
       }
     ]
   },
   {
     id: 'size',
-    text: 'Approximately how many employees does your organization have?',
+    text: 'What is the approximate size of your organization?',
     options: [
       {
-        id: 'small',
-        text: 'Small (Under 500)',
+        id: 'less_than_250',
+        text: 'Less than 250 employees',
         archetypeWeights: {
-          'a1': 0.3,
-          'a2': 0.3,
-          'a3': 0.5,
-          'b1': 0.8,
-          'b2': 0.7,
-          'b3': 0.5,
-          'c1': 0.4,
-          'c2': 0.3,
-          'c3': 0.4
+          'a1': 0.3, 'a2': 0.3, 'a3': 0.3,
+          'b1': 0.7, 'b2': 0.6, 'b3': 0.3,
+          'c1': 0.4, 'c2': 0.7, 'c3': 0.5
         }
       },
       {
-        id: 'medium',
-        text: 'Medium (500-2,499)',
+        id: '250_to_99999',
+        text: '250-99,999 employees',
         archetypeWeights: {
-          'a1': 0.5,
-          'a2': 0.5,
-          'a3': 0.6,
-          'b1': 0.7,
-          'b2': 0.8,
-          'b3': 0.7,
-          'c1': 0.6,
-          'c2': 0.5,
-          'c3': 0.6
+          'a1': 0.6, 'a2': 0.6, 'a3': 0.7,
+          'b1': 0.5, 'b2': 0.5, 'b3': 0.6,
+          'c1': 0.5, 'c2': 0.5, 'c3': 0.5
         }
       },
       {
-        id: 'large',
-        text: 'Large (2,500-9,999)',
+        id: '100000_plus',
+        text: '100,000+ employees',
         archetypeWeights: {
-          'a1': 0.7,
-          'a2': 0.7,
-          'a3': 0.5,
-          'b1': 0.5,
-          'b2': 0.6,
-          'b3': 0.8,
-          'c1': 0.8,
-          'c2': 0.7,
-          'c3': 0.7
-        }
-      },
-      {
-        id: 'enterprise',
-        text: 'Enterprise (10,000+)',
-        archetypeWeights: {
-          'a1': 0.9,
-          'a2': 0.8,
-          'a3': 0.4,
-          'b1': 0.3,
-          'b2': 0.4,
-          'b3': 0.5,
-          'c1': 0.7,
-          'c2': 0.9,
-          'c3': 0.8
+          'a1': 0.8, 'a2': 0.8, 'a3': 0.8,
+          'b1': 0.3, 'b2': 0.3, 'b3': 0.5,
+          'c1': 0.6, 'c2': 0.3, 'c3': 0.4
         }
       }
     ]
   },
   {
     id: 'gender',
-    text: 'Which best describes your workforce gender distribution?',
+    text: 'What percentage of your workforce is female?',
     options: [
       {
-        id: 'male_dominated',
-        text: 'Predominantly male (less than 35% female)',
+        id: 'less_than_equal_49',
+        text: 'Less than or equal to 49%',
         archetypeWeights: {
-          'a1': 0.5,
-          'a2': 0.4,
-          'a3': 0.3,
-          'b1': 0.6,
-          'b2': 0.5,
-          'b3': 0.8,
-          'c1': 0.6,
-          'c2': 0.5,
-          'c3': 0.5
+          'a1': 0.5, 'a2': 0.5, 'a3': 0.5,
+          'b1': 0.8, 'b2': 0.6, 'b3': 0.5,
+          'c1': 0.5, 'c2': 0.5, 'c3': 0.4
         }
       },
       {
-        id: 'balanced',
-        text: 'Mixed (35-65% female)',
+        id: 'greater_than_49',
+        text: 'Greater than 49%',
         archetypeWeights: {
-          'a1': 0.7,
-          'a2': 0.6,
-          'a3': 0.6,
-          'b1': 0.5,
-          'b2': 0.7,
-          'b3': 0.5,
-          'c1': 0.5,
-          'c2': 0.7,
-          'c3': 0.6
-        }
-      },
-      {
-        id: 'female_dominated',
-        text: 'Predominantly female (more than 65% female)',
-        archetypeWeights: {
-          'a1': 0.4,
-          'a2': 0.7,
-          'a3': 0.9,
-          'b1': 0.3,
-          'b2': 0.4,
-          'b3': 0.3,
-          'c1': 0.4,
-          'c2': 0.5,
-          'c3': 0.7
-        }
-      }
-    ]
-  },
-  {
-    id: 'priorities',
-    text: 'What is your organization\'s primary focus in healthcare benefits?',
-    options: [
-      {
-        id: 'cost',
-        text: 'Cost containment and efficiency',
-        archetypeWeights: {
-          'a1': 0.3,
-          'a2': 0.2,
-          'a3': 0.3,
-          'b1': 0.9,
-          'b2': 0.7,
-          'b3': 0.6,
-          'c1': 0.5,
-          'c2': 0.6,
-          'c3': 0.5
-        }
-      },
-      {
-        id: 'access',
-        text: 'Comprehensive access to care options',
-        archetypeWeights: {
-          'a1': 0.9,
-          'a2': 0.7,
-          'a3': 0.6,
-          'b1': 0.3,
-          'b2': 0.5,
-          'b3': 0.4,
-          'c1': 0.6,
-          'c2': 0.5,
-          'c3': 0.4
-        }
-      },
-      {
-        id: 'quality',
-        text: 'Quality outcomes and condition management',
-        archetypeWeights: {
-          'a1': 0.6,
-          'a2': 0.9,
-          'a3': 0.5,
-          'b1': 0.4,
-          'b2': 0.6,
-          'b3': 0.5,
-          'c1': 0.8,
-          'c2': 0.7,
-          'c3': 0.6
-        }
-      },
-      {
-        id: 'experience',
-        text: 'Employee experience and satisfaction',
-        archetypeWeights: {
-          'a1': 0.7,
-          'a2': 0.5,
-          'a3': 0.8,
-          'b1': 0.5,
-          'b2': 0.8,
-          'b3': 0.7,
-          'c1': 0.4,
-          'c2': 0.4,
-          'c3': 0.5
-        }
-      },
-      {
-        id: 'balanced',
-        text: 'Balancing multiple priorities equally',
-        archetypeWeights: {
-          'a1': 0.5,
-          'a2': 0.6,
-          'a3': 0.5,
-          'b1': 0.5,
-          'b2': 0.6,
-          'b3': 0.6,
-          'c1': 0.7,
-          'c2': 0.6,
-          'c3': 0.8
+          'a1': 0.5, 'a2': 0.5, 'a3': 0.5,
+          'b1': 0.3, 'b2': 0.5, 'b3': 0.5,
+          'c1': 0.5, 'c2': 0.5, 'c3': 0.7
         }
       }
     ]
   }
 ];
-

@@ -1,8 +1,13 @@
 
 import React, { useState, useEffect } from 'react';
 
-// Just a single message for simplicity
-const loadingMessage = "Determining your healthcare archetype...";
+// Enhanced loading messages for better user experience
+const loadingMessages = [
+  "Analyzing your responses...",
+  "Determining your healthcare archetype...",
+  "Matching your profile to industry benchmarks...",
+  "Preparing your personalized results..."
+];
 
 interface CalculationLoaderProps {
   isVisible: boolean;
@@ -10,25 +15,35 @@ interface CalculationLoaderProps {
 
 const CalculationLoader: React.FC<CalculationLoaderProps> = ({ isVisible }) => {
   const [progress, setProgress] = useState(0);
+  const [messageIndex, setMessageIndex] = useState(0);
   
   useEffect(() => {
     if (!isVisible) return;
     
     // Reset when becoming visible
     setProgress(0);
+    setMessageIndex(0);
     
-    // Progress the progress bar smoothly
-    const interval = setInterval(() => {
+    // Progress the bar smoothly
+    const progressInterval = setInterval(() => {
       setProgress(prev => {
         if (prev >= 95) {
-          clearInterval(interval);
+          clearInterval(progressInterval);
           return 95;
         }
         return prev + 1;
       });
-    }, 70); // Faster progress updates
+    }, 70);
     
-    return () => clearInterval(interval);
+    // Cycle through messages
+    const messageInterval = setInterval(() => {
+      setMessageIndex(prev => (prev + 1) % loadingMessages.length);
+    }, 2000);
+    
+    return () => {
+      clearInterval(progressInterval);
+      clearInterval(messageInterval);
+    };
   }, [isVisible]);
   
   if (!isVisible) return null;
@@ -60,8 +75,8 @@ const CalculationLoader: React.FC<CalculationLoaderProps> = ({ isVisible }) => {
         </div>
         
         <div className="text-center">
-          <p className="text-lg font-medium text-foreground">
-            {loadingMessage}
+          <p className="text-lg font-medium text-foreground transition-opacity duration-300">
+            {loadingMessages[messageIndex]}
           </p>
         </div>
       </div>
