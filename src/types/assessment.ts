@@ -4,6 +4,7 @@ import { ArchetypeId } from './archetype';
 export type AssessmentQuestion = {
   id: string;
   text: string;
+  type?: 'single-select' | 'multi-select'; // Added type property as optional
   options: {
     id: string;
     text: string;
@@ -21,4 +22,3 @@ export type AssessmentResult = {
   percentageMatch: number;
   resultTier: 'Basic' | 'Detailed' | 'Comprehensive';
 };
-

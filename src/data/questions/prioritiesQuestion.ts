@@ -4,7 +4,7 @@ import { AssessmentQuestion } from '../../types/assessment';
 export const prioritiesQuestion: AssessmentQuestion = {
   id: 'priorities',
   text: 'Which of the following are priorities for your organization\'s healthcare strategy? Select all that apply.',
-  type: 'multi-select', // Adding a type field to distinguish from single-select questions
+  type: 'multi-select',
   options: [
     {
       id: 'reduce_costs',
