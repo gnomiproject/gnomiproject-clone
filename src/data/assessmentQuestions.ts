@@ -199,12 +199,30 @@ export const assessmentQuestions: AssessmentQuestion[] = [
         }
       },
       {
-        id: '250_to_99999',
-        text: '250-99,999 employees',
+        id: '250_to_999',
+        text: '250-999 employees',
         archetypeWeights: {
-          'a1': 0.6, 'a2': 0.6, 'a3': 0.7,
+          'a1': 0.5, 'a2': 0.5, 'a3': 0.5,
+          'b1': 0.6, 'b2': 0.5, 'b3': 0.5,
+          'c1': 0.5, 'c2': 0.5, 'c3': 0.5
+        }
+      },
+      {
+        id: '1000_to_9999',
+        text: '1,000-9,999 employees',
+        archetypeWeights: {
+          'a1': 0.6, 'a2': 0.6, 'a3': 0.6,
           'b1': 0.5, 'b2': 0.5, 'b3': 0.6,
           'c1': 0.5, 'c2': 0.5, 'c3': 0.5
+        }
+      },
+      {
+        id: '10000_to_99999',
+        text: '10,000-99,999 employees',
+        archetypeWeights: {
+          'a1': 0.7, 'a2': 0.7, 'a3': 0.7,
+          'b1': 0.4, 'b2': 0.4, 'b3': 0.6,
+          'c1': 0.5, 'c2': 0.4, 'c3': 0.5
         }
       },
       {

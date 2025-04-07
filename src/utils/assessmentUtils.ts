@@ -17,6 +17,12 @@ export const mapToArchetype = (answers: Record<string, string>): ArchetypeId => 
   
   console.log(`Selected values: Industry="${industry}", States="${stateCount}", Employees="${employeeCount}", Gender="${percentFemale}"`);
 
+  // Do a direct check for Finance and Insurance first
+  if (industry === "Finance and Insurance") {
+    console.log("Match: Finance and Insurance -> a2 (Complex Condition Managers)");
+    return "a2";
+  }
+
   // Convert state count to numerical range
   let tot_states = 0;
   if (stateCount === "1-15 states") tot_states = 15;
@@ -26,9 +32,17 @@ export const mapToArchetype = (answers: Record<string, string>): ArchetypeId => 
   
   // Convert employee count to number
   let employees = 0;
-  if (employeeCount === "Less than 250 employees") employees = 249;
-  else if (employeeCount === "250-99,999 employees") employees = 50000;
-  else if (employeeCount === "100,000+ employees") employees = 100000;
+  if (employeeCount === "Less than 250 employees") {
+    employees = 249;
+  } 
+  else if (employeeCount === "250-999 employees" || 
+           employeeCount === "1,000-9,999 employees" || 
+           employeeCount === "10,000-99,999 employees") {
+    employees = 250; // Any value between 250-99,999 works for the logic
+  }
+  else if (employeeCount === "100,000+ employees") {
+    employees = 100000;
+  }
   
   // Convert percent female to decimal
   let pct_female = 0;
@@ -37,77 +51,71 @@ export const mapToArchetype = (answers: Record<string, string>): ArchetypeId => 
   
   console.log(`Converted values: tot_states=${tot_states}, employees=${employees}, pct_female=${pct_female}`);
 
-  // Always check Finance and Insurance first, it's the simplest direct match
-  if (industry === "Finance and Insurance") {
-    console.log("Match: Finance and Insurance -> a2");
-    return "a2";
-  }
-  
-  // Follow the exact order of the decision tree as specified
+  // Follow the exact decision tree logic as specified
   if (["Administrative and Support and Waste Management and Remediation Services", 
        "Retail Trade", "Other Services (except Public Administration)", 
        "Accommodation and Food Services"].includes(industry) && tot_states < 16) {
-    console.log(`Match: ${industry} with <16 states -> c2`);
+    console.log(`Match: ${industry} with <16 states -> c2 (Care Adherence Advocates)`);
     return "c2";
   } 
   else if (["Administrative and Support and Waste Management and Remediation Services", 
             "Retail Trade", "Other Services (except Public Administration)", 
             "Accommodation and Food Services"].includes(industry) && tot_states >= 16) {
-    console.log(`Match: ${industry} with >=16 states -> c1`);
+    console.log(`Match: ${industry} with >=16 states -> c1 (Scalable Access Architects)`);
     return "c1";
   } 
   else if (["Educational Services", "Health Care and Social Assistance"].includes(industry) && tot_states <= 29) {
-    console.log(`Match: ${industry} with <=29 states -> c3`);
+    console.log(`Match: ${industry} with <=29 states -> c3 (Engaged Healthcare Consumers)`);
     return "c3";
   } 
   else if (["Educational Services", "Health Care and Social Assistance"].includes(industry) && tot_states > 29) {
-    console.log(`Match: ${industry} with >29 states -> b3`);
+    console.log(`Match: ${industry} with >29 states -> b3 (Care Channel Optimizers)`);
     return "b3";
   } 
   else if (["Construction", "Real Estate and Rental and Leasing"].includes(industry) && tot_states <= 19) {
-    console.log(`Match: ${industry} with <=19 states -> b2`);
+    console.log(`Match: ${industry} with <=19 states -> b2 (Healthcare Pragmatists)`);
     return "b2";
   } 
   else if (["Construction", "Real Estate and Rental and Leasing"].includes(industry) && tot_states > 19) {
-    console.log(`Match: ${industry} with >19 states -> b3`);
+    console.log(`Match: ${industry} with >19 states -> b3 (Care Channel Optimizers)`);
     return "b3";
   } 
   else if (industry === "Wholesale Trade" && tot_states <= 20 && pct_female <= 0.49 && employees >= 100000) {
-    console.log(`Match: ${industry} with <=20 states, <=49% female, >=100k employees -> a3`);
+    console.log(`Match: ${industry} with <=20 states, <=49% female, >=100k employees -> a3 (Proactive Care Consumers)`);
     return "a3";
   } 
   else if (["Manufacturing", "Transportation and Warehousing", 
             "Utilities", "Wholesale Trade"].includes(industry) && 
            tot_states <= 20 && pct_female <= 0.49) {
-    console.log(`Match: ${industry} with <=20 states, <=49% female -> b1`);
+    console.log(`Match: ${industry} with <=20 states, <=49% female -> b1 (Resourceful Adapters)`);
     return "b1";
   } 
   else if (["Manufacturing", "Transportation and Warehousing", 
             "Utilities", "Wholesale Trade"].includes(industry) && 
            tot_states <= 20 && pct_female > 0.49) {
-    console.log(`Match: ${industry} with <=20 states, >49% female -> c3`);
+    console.log(`Match: ${industry} with <=20 states, >49% female -> c3 (Engaged Healthcare Consumers)`);
     return "c3";
   } 
   else if (["Manufacturing", "Transportation and Warehousing", 
             "Utilities", "Wholesale Trade"].includes(industry) && tot_states > 20) {
-    console.log(`Match: ${industry} with >20 states -> b3`);
+    console.log(`Match: ${industry} with >20 states -> b3 (Care Channel Optimizers)`);
     return "b3";
   } 
   else if (industry === "Information" && employees >= 250) {
-    console.log(`Match: ${industry} with >=250 employees -> a3`);
+    console.log(`Match: ${industry} with >=250 employees -> a3 (Proactive Care Consumers)`);
     return "a3";
   } 
   else if (["Professional, Scientific, and Technical Services", "Information"].includes(industry) && tot_states < 31) {
-    console.log(`Match: ${industry} with <31 states -> a1`);
+    console.log(`Match: ${industry} with <31 states -> a1 (Savvy Healthcare Navigators)`);
     return "a1";
   } 
   else if (["Professional, Scientific, and Technical Services", "Information"].includes(industry) && tot_states >= 31) {
-    console.log(`Match: ${industry} with >=31 states -> a3`);
+    console.log(`Match: ${industry} with >=31 states -> a3 (Proactive Care Consumers)`);
     return "a3";
   }
   
-  // Default case - if no match is found, return 'c3' as a fallback
-  console.log(`No direct match found for combination. Using fallback -> c3`);
+  // Fallback case
+  console.log(`No direct match found for combination. Using fallback -> c3 (Engaged Healthcare Consumers)`);
   return "c3";
 };
 

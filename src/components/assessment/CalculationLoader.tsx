@@ -4,9 +4,9 @@ import React, { useState, useEffect } from 'react';
 // Enhanced loading messages for better user experience
 const loadingMessages = [
   "Analyzing your responses...",
-  "Determining your healthcare archetype...",
-  "Matching your profile to industry benchmarks...",
-  "Preparing your personalized results..."
+  "Identifying your healthcare archetype...",
+  "Matching organization characteristics to archetypes...",
+  "Preparing your personalized healthcare insights..."
 ];
 
 interface CalculationLoaderProps {
