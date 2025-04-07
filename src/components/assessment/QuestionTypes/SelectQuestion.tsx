@@ -12,21 +12,23 @@ interface SelectQuestionProps {
 
 const SelectQuestion = ({ question, selectedAnswer, onAnswerChange, placeholder }: SelectQuestionProps) => {
   return (
-    <Select
-      value={selectedAnswer || ""}
-      onValueChange={(value) => onAnswerChange(question.id, value)}
-    >
-      <SelectTrigger className="w-full">
-        <SelectValue placeholder={placeholder} />
-      </SelectTrigger>
-      <SelectContent>
-        {question.options.map(option => (
-          <SelectItem key={option.id} value={option.id}>
-            {option.text}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+    <div className="transition-all duration-300 ease-in-out">
+      <Select
+        value={selectedAnswer || ""}
+        onValueChange={(value) => onAnswerChange(question.id, value)}
+      >
+        <SelectTrigger className="w-full">
+          <SelectValue placeholder={placeholder} />
+        </SelectTrigger>
+        <SelectContent>
+          {question.options.map(option => (
+            <SelectItem key={option.id} value={option.id}>
+              {option.text}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
   );
 };
 
