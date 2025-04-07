@@ -1,39 +1,32 @@
 
 import React, { useState, useEffect } from 'react';
 
-const loadingMessages = [
-  "Analyzing your responses...",
-  "Determining your healthcare archetype..."
-];
+// Just a single message for simplicity
+const loadingMessage = "Determining your healthcare archetype...";
 
 interface CalculationLoaderProps {
   isVisible: boolean;
 }
 
 const CalculationLoader: React.FC<CalculationLoaderProps> = ({ isVisible }) => {
-  const [currentMessage, setCurrentMessage] = useState(0);
   const [progress, setProgress] = useState(0);
   
   useEffect(() => {
     if (!isVisible) return;
     
     // Reset when becoming visible
-    setCurrentMessage(0);
     setProgress(0);
     
-    // Progress the message and progress bar
+    // Progress the progress bar smoothly
     const interval = setInterval(() => {
-      setCurrentMessage(prev => {
-        if (prev < loadingMessages.length - 1) {
-          return prev + 1;
-        }
-        return prev;
-      });
-      
       setProgress(prev => {
-        return Math.min(prev + (100 / loadingMessages.length), 95);
+        if (prev >= 95) {
+          clearInterval(interval);
+          return 95;
+        }
+        return prev + 1;
       });
-    }, 3000);
+    }, 70); // Faster progress updates
     
     return () => clearInterval(interval);
   }, [isVisible]);
@@ -50,7 +43,7 @@ const CalculationLoader: React.FC<CalculationLoaderProps> = ({ isVisible }) => {
         <div className="flex justify-center mb-8">
           <div className="relative">
             <div 
-              className="w-20 h-20 rounded-full bg-primary/20 animate-pulse"
+              className="w-20 h-20 rounded-full bg-primary/20"
             ></div>
             <div 
               className="absolute inset-0 w-20 h-20 border-4 border-t-primary border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin" 
@@ -59,16 +52,16 @@ const CalculationLoader: React.FC<CalculationLoaderProps> = ({ isVisible }) => {
           </div>
         </div>
         
-        <div className="h-2 bg-secondary rounded-full mb-6 overflow-hidden">
+        <div className="h-2 bg-secondary/30 rounded-full mb-6 overflow-hidden">
           <div 
-            className="h-2 bg-gradient-to-r from-primary to-blue-600 rounded-full transition-all duration-500 ease-out"
+            className="h-2 bg-gradient-to-r from-primary to-blue-600 rounded-full transition-all duration-300 ease-out"
             style={{ width: `${progress}%` }}
           />
         </div>
         
         <div className="text-center">
-          <p className="text-lg font-medium text-foreground animate-fade-in">
-            {loadingMessages[currentMessage]}
+          <p className="text-lg font-medium text-foreground">
+            {loadingMessage}
           </p>
         </div>
       </div>

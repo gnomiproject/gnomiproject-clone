@@ -1,4 +1,3 @@
-
 import { ArchetypeId } from '../types/archetype';
 import { assessmentQuestions } from '../data/assessmentQuestions';
 import { AssessmentResult } from '../types/assessment';
@@ -49,39 +48,42 @@ export const mapToArchetype = (answers: Record<string, string>): ArchetypeId => 
     pct_female = 0.75;
   }
   
-  // Map industry selections to the categories in the SQL logic
-  const industriesMapped: Record<string, string[]> = {
-    'Administrative and Support and Waste Management and Remediation Services': ['Administrative & Support Services'],
-    'Retail Trade': ['Retail & Services'],
-    'Other Services (except Public Administration)': ['Other'],
-    'Accommodation and Food Services': ['Hospitality & Food Service'],
-    'Educational Services': ['Education & Healthcare'],
-    'Health Care and Social Assistance': ['Education & Healthcare', 'Healthcare'],
-    'Construction': ['Construction & Real Estate'],
-    'Real Estate and Rental and Leasing': ['Construction & Real Estate'],
-    'Wholesale Trade': ['Wholesale Trade'],
-    'Manufacturing': ['Manufacturing & Production'],
-    'Transportation and Warehousing': ['Transportation & Logistics'],
-    'Utilities': ['Utilities'],
-    'Information': ['Technology & Information'],
-    'Professional, Scientific, and Technical Services': ['Professional Services (Legal, Consulting, Architecture)'],
-    'Finance and Insurance': ['Finance & Insurance']
-  };
+  console.log(`Industry selected: "${industry}"`);
   
-  // Find which SQL category the selected industry falls into
-  let mappedIndustry = '';
-  for (const [sqlCategory, possibleSelections] of Object.entries(industriesMapped)) {
-    if (possibleSelections.includes(industry)) {
-      mappedIndustry = sqlCategory;
-      break;
-    }
+  // Direct mapping for exact industry names - this is the most critical part for the Finance & Insurance case
+  if (industry === 'Finance & Insurance') {
+    console.log('Direct match: Finance & Insurance -> a2');
+    return 'a2';
   }
   
-  // Handle special case for Education & Healthcare which could map to either category
-  if (industry === 'Education & Healthcare') {
-    // For simplicity, we'll default to Health Care and Social Assistance
-    // A more sophisticated approach would be to ask more specific questions
-    mappedIndustry = 'Health Care and Social Assistance';
+  // Map industry selections to the categories in the SQL logic
+  let mappedIndustry = '';
+  
+  // Define the mapping between UI selection options and SQL categories
+  const industryMapping: Record<string, string> = {
+    'Administrative & Support Services': 'Administrative and Support and Waste Management and Remediation Services',
+    'Retail & Services': 'Retail Trade',
+    'Other': 'Other Services (except Public Administration)',
+    'Hospitality & Food Service': 'Accommodation and Food Services',
+    'Education & Healthcare': 'Educational Services', // Default mapping, may be overridden below
+    'Healthcare': 'Health Care and Social Assistance',
+    'Construction & Real Estate': 'Construction', // Default mapping, may be chosen based on specifics
+    'Wholesale Trade': 'Wholesale Trade',
+    'Manufacturing & Production': 'Manufacturing',
+    'Transportation & Logistics': 'Transportation and Warehousing',
+    'Utilities': 'Utilities',
+    'Technology & Information': 'Information',
+    'Professional Services (Legal, Consulting, Architecture)': 'Professional, Scientific, and Technical Services',
+    'Finance & Insurance': 'Finance and Insurance' // This should ensure Finance & Insurance maps correctly
+  };
+  
+  mappedIndustry = industryMapping[industry] || '';
+  console.log(`Mapped industry: "${industry}" -> "${mappedIndustry}"`);
+  
+  // If no mapping found, try to match directly with SQL industry names
+  if (!mappedIndustry) {
+    console.log(`No mapping found for "${industry}", using as-is`);
+    mappedIndustry = industry;
   }
   
   // Now implement the exact CASE logic from the SQL statement
@@ -134,6 +136,7 @@ export const mapToArchetype = (answers: Record<string, string>): ArchetypeId => 
     return 'a3';
   } 
   else if (mappedIndustry === 'Finance and Insurance') {
+    console.log('Matched Finance and Insurance -> returning a2');
     return 'a2';
   }
   
