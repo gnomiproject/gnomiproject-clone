@@ -31,28 +31,49 @@ const AssessmentLayout = ({
   
   const currentQ = questions[currentQuestion - 1];
   const [animationDirection, setAnimationDirection] = useState<'forward' | 'backward' | null>(null);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   
-  // Handle next button click
+  // Handle next button click with proper animation timing
   const handleNext = () => {
+    if (isTransitioning) return;
+    
+    setIsTransitioning(true);
     setAnimationDirection('forward');
+    
+    // Wait for animation to start before navigating
     setTimeout(() => {
       goToNext();
-    }, 50); // Small delay to ensure state updates before navigation
+      
+      // Reset transition state after navigation completes
+      setTimeout(() => {
+        setIsTransitioning(false);
+      }, 600);
+    }, 100);
   };
   
-  // Handle previous button click
+  // Handle previous button click with proper animation timing
   const handlePrevious = () => {
+    if (isTransitioning) return;
+    
+    setIsTransitioning(true);
     setAnimationDirection('backward');
+    
+    // Wait for animation to start before navigating
     setTimeout(() => {
       goToPrevious();
-    }, 50); // Small delay to ensure state updates before navigation
+      
+      // Reset transition state after navigation completes
+      setTimeout(() => {
+        setIsTransitioning(false);
+      }, 600);
+    }, 100);
   };
   
   // Reset animation direction after animation completes
   useEffect(() => {
     const timer = setTimeout(() => {
       setAnimationDirection(null);
-    }, 500);
+    }, 800);
     return () => clearTimeout(timer);
   }, [currentQuestion]);
   
@@ -64,7 +85,7 @@ const AssessmentLayout = ({
         <div>
           <h2 className="text-xl sm:text-2xl font-semibold text-left mb-3 sm:mb-4">Question {currentQuestion} of {totalQuestions}</h2>
           
-          <div className="min-h-[200px] overflow-hidden">
+          <div className="min-h-[300px] overflow-hidden">
             <QuestionTransition 
               questionKey={currentQuestion}
               animationDirection={animationDirection}
@@ -86,6 +107,7 @@ const AssessmentLayout = ({
             isQuestionValid={isCurrentQuestionValid}
             onPrevious={handlePrevious}
             onNext={handleNext}
+            isTransitioning={isTransitioning}
           />
         </div>
       )}

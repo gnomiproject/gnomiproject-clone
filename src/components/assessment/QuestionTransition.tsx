@@ -1,5 +1,5 @@
 
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useEffect, useState } from 'react';
 
 interface QuestionTransitionProps {
   children: ReactNode;
@@ -15,7 +15,21 @@ const QuestionTransition = ({
   animationDirection, 
   questionKey 
 }: QuestionTransitionProps) => {
+  const [mounted, setMounted] = useState(false);
+  
+  useEffect(() => {
+    // Set mounted to true after component mounts to trigger animation
+    const timer = setTimeout(() => {
+      setMounted(true);
+    }, 50);
+    
+    return () => clearTimeout(timer);
+  }, [questionKey]);
+  
   const getAnimationClass = () => {
+    // Don't animate if component just mounted
+    if (!mounted) return 'opacity-0';
+    
     if (animationDirection === 'forward') {
       return 'animate-slide-in-right';
     } else if (animationDirection === 'backward') {
@@ -25,7 +39,7 @@ const QuestionTransition = ({
   };
 
   return (
-    <div key={questionKey} className={getAnimationClass()}>
+    <div key={questionKey} className={`transition-all ${getAnimationClass()}`}>
       {children}
     </div>
   );
