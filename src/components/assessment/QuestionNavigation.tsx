@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { AssessmentQuestion } from '@/types/assessment';
 
 interface QuestionNavigationProps {
   currentQuestion: number;
@@ -9,7 +9,6 @@ interface QuestionNavigationProps {
   isQuestionValid: boolean;
   onPrevious: () => void;
   onNext: () => void;
-  isTransitioning?: boolean; // Added prop to handle transition state
 }
 
 const QuestionNavigation = ({
@@ -17,31 +16,24 @@ const QuestionNavigation = ({
   totalQuestions,
   isQuestionValid,
   onPrevious,
-  onNext,
-  isTransitioning = false
+  onNext
 }: QuestionNavigationProps) => {
-  const isFirstQuestion = currentQuestion === 1;
-  const isLastQuestion = currentQuestion === totalQuestions;
-  
   return (
-    <div className="flex justify-between mt-8">
+    <div className="flex justify-between mt-6 sm:mt-8">
       <Button
-        variant="outline"
         onClick={onPrevious}
-        disabled={isFirstQuestion || isTransitioning}
-        className="flex items-center gap-1"
+        disabled={currentQuestion === 1}
+        variant="outline"
+        className="font-semibold py-2 px-3 sm:px-4"
       >
-        <ChevronLeft className="w-4 h-4" />
         Previous
       </Button>
-      
       <Button
         onClick={onNext}
-        disabled={!isQuestionValid || isTransitioning}
-        className="flex items-center gap-1"
+        disabled={!isQuestionValid}
+        className="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-3 sm:px-4"
       >
-        {isLastQuestion ? 'Submit' : 'Next'}
-        {!isLastQuestion && <ChevronRight className="w-4 h-4" />}
+        {currentQuestion === totalQuestions ? 'Submit' : 'Next'}
       </Button>
     </div>
   );
