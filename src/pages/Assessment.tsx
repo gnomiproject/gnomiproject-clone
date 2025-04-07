@@ -21,6 +21,7 @@ import { Check, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from "@/components/ui/checkbox";
 
 const Assessment = () => {
   const { 
@@ -30,6 +31,7 @@ const Assessment = () => {
     answers, 
     isCalculating,
     setAnswer, 
+    setMultipleAnswers,
     goToNext, 
     goToPrevious 
   } = useAssessment();
@@ -38,6 +40,36 @@ const Assessment = () => {
   
   const renderQuestionContent = () => {
     const currentQ = questions[currentQuestion - 1];
+    
+    // Handle multiple-select questions (checkboxes)
+    if (currentQ.type === 'multi-select') {
+      const selectedValues = answers[currentQ.id] ? answers[currentQ.id].split(',') : [];
+      
+      return (
+        <div className="space-y-4">
+          {currentQ.options.map(option => (
+            <div key={option.id} className="flex items-start space-x-3 text-left">
+              <Checkbox 
+                id={option.id} 
+                checked={selectedValues.includes(option.id)}
+                onCheckedChange={(checked) => {
+                  let newValues;
+                  if (checked) {
+                    newValues = [...selectedValues, option.id];
+                  } else {
+                    newValues = selectedValues.filter(value => value !== option.id);
+                  }
+                  setMultipleAnswers(currentQ.id, newValues);
+                }}
+              />
+              <Label htmlFor={option.id} className="text-base font-normal cursor-pointer">
+                {option.text}
+              </Label>
+            </div>
+          ))}
+        </div>
+      );
+    }
     
     // Special handling for industry question (first question)
     if (currentQ.id === 'industry') {
@@ -158,6 +190,24 @@ const Assessment = () => {
     );
   };
 
+  // Determine if the current question is valid for navigation
+  const isCurrentQuestionValid = () => {
+    const currentQ = questions[currentQuestion - 1];
+    
+    // For multi-select questions, allow proceeding as long as at least one option is selected
+    // or allow skipping (since it's just informational)
+    if (currentQ.type === 'multi-select') {
+      // For the priorities question, make it optional
+      if (currentQ.id === 'priorities') return true;
+      
+      const selectedValues = answers[currentQ.id] ? answers[currentQ.id].split(',') : [];
+      return selectedValues.length > 0;
+    }
+    
+    // For single-select questions, require an answer
+    return !!answers[questions[currentQuestion - 1].id];
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-6">
       <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-md p-8">
@@ -181,7 +231,7 @@ const Assessment = () => {
               </Button>
               <Button
                 onClick={goToNext}
-                disabled={!answers[questions[currentQuestion - 1].id]}
+                disabled={!isCurrentQuestionValid()}
                 className="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-4"
               >
                 {currentQuestion === totalQuestions ? 'Submit' : 'Next'}

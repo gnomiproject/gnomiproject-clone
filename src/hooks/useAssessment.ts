@@ -32,6 +32,15 @@ export const useAssessment = () => {
   };
 
   /**
+   * Set multiple answers for a multi-select question
+   * @param questionId The question ID to set the answers for
+   * @param answerIds Array of selected answer IDs
+   */
+  const setMultipleAnswers = (questionId: string, answerIds: string[]) => {
+    setAnswers(prev => ({ ...prev, [questionId]: answerIds.join(',') }));
+  };
+
+  /**
    * Move to the next question
    */
   const goToNext = () => {
@@ -96,6 +105,7 @@ export const useAssessment = () => {
     result,
     isCalculating,
     setAnswer,
+    setMultipleAnswers,
     goToNext,
     goToPrevious,
     calculateResults,
