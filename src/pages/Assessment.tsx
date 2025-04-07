@@ -11,6 +11,7 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
+  CommandList,
 } from "@/components/ui/command";
 import {
   Popover,
@@ -58,27 +59,29 @@ const Assessment = () => {
           <PopoverContent className="w-full p-0" align="start">
             <Command>
               <CommandInput placeholder="Search industry..." className="h-10" />
-              <CommandEmpty>No industry found.</CommandEmpty>
-              <CommandGroup className="max-h-64 overflow-auto">
-                {currentQ.options.map((option) => (
-                  <CommandItem
-                    key={option.id}
-                    value={option.id}
-                    onSelect={(value) => {
-                      setAnswer(currentQ.id, value);
-                      setOpen(false);
-                    }}
-                  >
-                    <Check
-                      className={cn(
-                        "mr-2 h-4 w-4",
-                        answers[currentQ.id] === option.id ? "opacity-100" : "opacity-0"
-                      )}
-                    />
-                    {option.text}
-                  </CommandItem>
-                ))}
-              </CommandGroup>
+              <CommandList>
+                <CommandEmpty>No industry found.</CommandEmpty>
+                <CommandGroup className="max-h-64 overflow-auto">
+                  {currentQ.options.map((option) => (
+                    <CommandItem
+                      key={option.id}
+                      value={option.id}
+                      onSelect={(value) => {
+                        setAnswer(currentQ.id, value);
+                        setOpen(false);
+                      }}
+                    >
+                      <Check
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          answers[currentQ.id] === option.id ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                      {option.text}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </CommandList>
             </Command>
           </PopoverContent>
         </Popover>
