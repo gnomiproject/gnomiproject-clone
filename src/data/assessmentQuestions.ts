@@ -1,4 +1,3 @@
-
 import { AssessmentQuestion } from '../types/assessment';
 
 export const assessmentQuestions: AssessmentQuestion[] = [
@@ -6,6 +5,42 @@ export const assessmentQuestions: AssessmentQuestion[] = [
     id: 'industry',
     text: 'Which industry best describes your organization?',
     options: [
+      {
+        id: 'accommodation',
+        text: 'Accommodation and Food Services',
+        archetypeWeights: {
+          'a1': 0.2, 'a2': 0.2, 'a3': 0.2,
+          'b1': 0.2, 'b2': 0.2, 'b3': 0.2,
+          'c1': 0.5, 'c2': 0.8, 'c3': 0.2
+        }
+      },
+      {
+        id: 'administrative',
+        text: 'Administrative and Support and Waste Management and Remediation Services',
+        archetypeWeights: {
+          'a1': 0.2, 'a2': 0.2, 'a3': 0.2,
+          'b1': 0.2, 'b2': 0.2, 'b3': 0.2,
+          'c1': 0.5, 'c2': 0.8, 'c3': 0.2
+        }
+      },
+      {
+        id: 'construction',
+        text: 'Construction',
+        archetypeWeights: {
+          'a1': 0.2, 'a2': 0.2, 'a3': 0.2,
+          'b1': 0.4, 'b2': 0.7, 'b3': 0.5,
+          'c1': 0.2, 'c2': 0.2, 'c3': 0.2
+        }
+      },
+      {
+        id: 'education',
+        text: 'Educational Services',
+        archetypeWeights: {
+          'a1': 0.2, 'a2': 0.2, 'a3': 0.2,
+          'b1': 0.2, 'b2': 0.2, 'b3': 0.5,
+          'c1': 0.2, 'c2': 0.2, 'c3': 0.8
+        }
+      },
       {
         id: 'finance_insurance',
         text: 'Finance and Insurance',
@@ -16,12 +51,12 @@ export const assessmentQuestions: AssessmentQuestion[] = [
         }
       },
       {
-        id: 'professional',
-        text: 'Professional, Scientific, and Technical Services',
+        id: 'healthcare',
+        text: 'Health Care and Social Assistance',
         archetypeWeights: {
-          'a1': 0.8, 'a2': 0.2, 'a3': 0.5,
-          'b1': 0.2, 'b2': 0.2, 'b3': 0.2,
-          'c1': 0.2, 'c2': 0.2, 'c3': 0.2
+          'a1': 0.2, 'a2': 0.2, 'a3': 0.2,
+          'b1': 0.2, 'b2': 0.2, 'b3': 0.5,
+          'c1': 0.2, 'c2': 0.2, 'c3': 0.8
         }
       },
       {
@@ -40,6 +75,33 @@ export const assessmentQuestions: AssessmentQuestion[] = [
           'a1': 0.2, 'a2': 0.2, 'a3': 0.2,
           'b1': 0.7, 'b2': 0.2, 'b3': 0.5,
           'c1': 0.2, 'c2': 0.2, 'c3': 0.5
+        }
+      },
+      {
+        id: 'professional',
+        text: 'Professional, Scientific, and Technical Services',
+        archetypeWeights: {
+          'a1': 0.8, 'a2': 0.2, 'a3': 0.5,
+          'b1': 0.2, 'b2': 0.2, 'b3': 0.2,
+          'c1': 0.2, 'c2': 0.2, 'c3': 0.2
+        }
+      },
+      {
+        id: 'real_estate',
+        text: 'Real Estate and Rental and Leasing',
+        archetypeWeights: {
+          'a1': 0.2, 'a2': 0.2, 'a3': 0.2,
+          'b1': 0.4, 'b2': 0.7, 'b3': 0.5,
+          'c1': 0.2, 'c2': 0.2, 'c3': 0.2
+        }
+      },
+      {
+        id: 'retail',
+        text: 'Retail Trade',
+        archetypeWeights: {
+          'a1': 0.2, 'a2': 0.2, 'a3': 0.2,
+          'b1': 0.2, 'b2': 0.2, 'b3': 0.2,
+          'c1': 0.5, 'c2': 0.8, 'c3': 0.2
         }
       },
       {
@@ -70,71 +132,8 @@ export const assessmentQuestions: AssessmentQuestion[] = [
         }
       },
       {
-        id: 'construction',
-        text: 'Construction',
-        archetypeWeights: {
-          'a1': 0.2, 'a2': 0.2, 'a3': 0.2,
-          'b1': 0.4, 'b2': 0.7, 'b3': 0.5,
-          'c1': 0.2, 'c2': 0.2, 'c3': 0.2
-        }
-      },
-      {
-        id: 'real_estate',
-        text: 'Real Estate and Rental and Leasing',
-        archetypeWeights: {
-          'a1': 0.2, 'a2': 0.2, 'a3': 0.2,
-          'b1': 0.4, 'b2': 0.7, 'b3': 0.5,
-          'c1': 0.2, 'c2': 0.2, 'c3': 0.2
-        }
-      },
-      {
-        id: 'education',
-        text: 'Educational Services',
-        archetypeWeights: {
-          'a1': 0.2, 'a2': 0.2, 'a3': 0.2,
-          'b1': 0.2, 'b2': 0.2, 'b3': 0.5,
-          'c1': 0.2, 'c2': 0.2, 'c3': 0.8
-        }
-      },
-      {
-        id: 'healthcare',
-        text: 'Health Care and Social Assistance',
-        archetypeWeights: {
-          'a1': 0.2, 'a2': 0.2, 'a3': 0.2,
-          'b1': 0.2, 'b2': 0.2, 'b3': 0.5,
-          'c1': 0.2, 'c2': 0.2, 'c3': 0.8
-        }
-      },
-      {
-        id: 'administrative',
-        text: 'Administrative and Support and Waste Management and Remediation Services',
-        archetypeWeights: {
-          'a1': 0.2, 'a2': 0.2, 'a3': 0.2,
-          'b1': 0.2, 'b2': 0.2, 'b3': 0.2,
-          'c1': 0.5, 'c2': 0.8, 'c3': 0.2
-        }
-      },
-      {
-        id: 'retail',
-        text: 'Retail Trade',
-        archetypeWeights: {
-          'a1': 0.2, 'a2': 0.2, 'a3': 0.2,
-          'b1': 0.2, 'b2': 0.2, 'b3': 0.2,
-          'c1': 0.5, 'c2': 0.8, 'c3': 0.2
-        }
-      },
-      {
         id: 'other_services',
         text: 'Other Services (except Public Administration)',
-        archetypeWeights: {
-          'a1': 0.2, 'a2': 0.2, 'a3': 0.2,
-          'b1': 0.2, 'b2': 0.2, 'b3': 0.2,
-          'c1': 0.5, 'c2': 0.8, 'c3': 0.2
-        }
-      },
-      {
-        id: 'accommodation',
-        text: 'Accommodation and Food Services',
         archetypeWeights: {
           'a1': 0.2, 'a2': 0.2, 'a3': 0.2,
           'b1': 0.2, 'b2': 0.2, 'b3': 0.2,
