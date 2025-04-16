@@ -60,68 +60,69 @@ export const useArchetypes = () => {
           commonTraits: item.common_traits as string[]
         }));
         
-        const detailedArchetypes = detailedArchetypesResponse.data.map(item => ({
-          id: item.id as ArchetypeId,
-          familyId: item.family_id as 'a' | 'b' | 'c',
-          name: item.name,
-          familyName: item.family_name,
-          color: item.color as ArchetypeColor,
-          summary: item.summary as {
-            description: string;
-            keyCharacteristics: string[];
-          },
-          standard: item.standard as {
-            fullDescription: string;
-            keyCharacteristics: string[];
-            overview: string;
-            keyStatistics: {
-              emergencyUtilization: {
-                value: string;
-                trend: 'up' | 'down' | 'neutral';
-              };
-              specialistUtilization: {
-                value: string;
-                trend: 'up' | 'down' | 'neutral';
-              };
-              healthcareSpend: {
-                value: string;
-                trend: 'up' | 'down' | 'neutral';
-              };
-              [key: string]: {
-                value: string;
-                trend: 'up' | 'down' | 'neutral';
-              };
-            };
-            keyInsights: string[];
-          },
-          enhanced: item.enhanced as {
-            riskProfile: {
-              score: string;
-              comparison: string;
-              conditions: Array<{
-                name: string;
-                value: string;
-                barWidth: string;
-              }>;
-            };
-            strategicPriorities: Array<{
-              number: string;
-              title: string;
-              description: string;
-            }>;
-            swot: {
-              strengths: string[];
-              weaknesses: string[];
-              opportunities: string[];
-              threats: string[];
-            };
-            costSavings: Array<{
-              title: string;
-              description: string;
-              potentialSavings?: string;
-            }>;
-          }
-        }));
+        const detailedArchetypes = detailedArchetypesResponse.data.map(item => {
+          // Type cast the nested objects for better safety
+          const standardData = typeof item.standard === 'string' 
+            ? JSON.parse(item.standard) 
+            : item.standard as Record<string, any>;
+            
+          const summaryData = typeof item.summary === 'string'
+            ? JSON.parse(item.summary)
+            : item.summary as Record<string, any>;
+            
+          const enhancedData = typeof item.enhanced === 'string'
+            ? JSON.parse(item.enhanced)
+            : item.enhanced as Record<string, any>;
+          
+          // Build the properly typed object
+          return {
+            id: item.id as ArchetypeId,
+            familyId: item.family_id as 'a' | 'b' | 'c',
+            name: item.name,
+            familyName: item.family_name,
+            color: item.color as ArchetypeColor,
+            summary: {
+              description: summaryData.description,
+              keyCharacteristics: summaryData.keyCharacteristics as string[]
+            },
+            standard: {
+              fullDescription: standardData.fullDescription,
+              keyCharacteristics: standardData.keyCharacteristics as string[],
+              overview: standardData.overview,
+              keyStatistics: {
+                ...(standardData.keyStatistics || {}),
+                emergencyUtilization: standardData.keyStatistics?.emergencyUtilization || {
+                  value: "N/A",
+                  trend: "neutral" as "up" | "down" | "neutral"
+                },
+                specialistUtilization: standardData.keyStatistics?.specialistUtilization || {
+                  value: "N/A",
+                  trend: "neutral" as "up" | "down" | "neutral"
+                },
+                healthcareSpend: standardData.keyStatistics?.healthcareSpend || {
+                  value: "N/A",
+                  trend: "neutral" as "up" | "down" | "neutral"
+                }
+              },
+              keyInsights: standardData.keyInsights as string[]
+            },
+            enhanced: {
+              riskProfile: {
+                score: enhancedData.riskProfile?.score,
+                comparison: enhancedData.riskProfile?.comparison,
+                conditions: enhancedData.riskProfile?.conditions || []
+              },
+              strategicPriorities: enhancedData.strategicPriorities || [],
+              swot: {
+                strengths: enhancedData.swot?.strengths || [],
+                weaknesses: enhancedData.swot?.weaknesses || [],
+                opportunities: enhancedData.swot?.opportunities || [],
+                threats: enhancedData.swot?.threats || []
+              },
+              costSavings: enhancedData.costSavings || []
+            }
+          } as ArchetypeDetailedData;
+        });
         
         // Create archetype summaries
         const summaries: ArchetypeSummary[] = detailedArchetypes.map(archetype => ({
@@ -166,6 +167,21 @@ export const useArchetypes = () => {
           return;
         }
         
+        if (!data) return;
+
+        // Safely parse and type JSON data
+        const standardData = typeof data.standard === 'string' 
+          ? JSON.parse(data.standard) 
+          : data.standard as Record<string, any>;
+        
+        const summaryData = typeof data.summary === 'string'
+          ? JSON.parse(data.summary)
+          : data.summary as Record<string, any>;
+          
+        const enhancedData = typeof data.enhanced === 'string'
+          ? JSON.parse(data.enhanced)
+          : data.enhanced as Record<string, any>;
+        
         // Transform data to match our interface
         const transformedData: ArchetypeDetailedData = {
           id: data.id as ArchetypeId,
@@ -173,58 +189,45 @@ export const useArchetypes = () => {
           name: data.name,
           familyName: data.family_name,
           color: data.color as ArchetypeColor,
-          summary: data.summary as {
-            description: string;
-            keyCharacteristics: string[];
+          summary: {
+            description: summaryData.description,
+            keyCharacteristics: summaryData.keyCharacteristics as string[]
           },
           standard: {
-            ...data.standard,
+            fullDescription: standardData.fullDescription,
+            keyCharacteristics: standardData.keyCharacteristics as string[],
+            overview: standardData.overview,
             keyStatistics: {
-              ...(data.standard.keyStatistics || {}),
-              emergencyUtilization: data.standard.keyStatistics?.emergencyUtilization || {
+              ...(standardData.keyStatistics || {}),
+              emergencyUtilization: standardData.keyStatistics?.emergencyUtilization || {
                 value: "N/A",
-                trend: "neutral" 
+                trend: "neutral" as "up" | "down" | "neutral"
               },
-              specialistUtilization: data.standard.keyStatistics?.specialistUtilization || {
+              specialistUtilization: standardData.keyStatistics?.specialistUtilization || {
                 value: "N/A",
-                trend: "neutral"
+                trend: "neutral" as "up" | "down" | "neutral"
               },
-              healthcareSpend: data.standard.keyStatistics?.healthcareSpend || {
+              healthcareSpend: standardData.keyStatistics?.healthcareSpend || {
                 value: "N/A",
-                trend: "neutral"
+                trend: "neutral" as "up" | "down" | "neutral"
               }
             },
-            fullDescription: data.standard.fullDescription,
-            keyCharacteristics: data.standard.keyCharacteristics,
-            overview: data.standard.overview,
-            keyInsights: data.standard.keyInsights
+            keyInsights: standardData.keyInsights as string[]
           },
-          enhanced: data.enhanced as {
+          enhanced: {
             riskProfile: {
-              score: string;
-              comparison: string;
-              conditions: Array<{
-                name: string;
-                value: string;
-                barWidth: string;
-              }>;
-            };
-            strategicPriorities: Array<{
-              number: string;
-              title: string;
-              description: string;
-            }>;
+              score: enhancedData.riskProfile?.score,
+              comparison: enhancedData.riskProfile?.comparison,
+              conditions: enhancedData.riskProfile?.conditions || []
+            },
+            strategicPriorities: enhancedData.strategicPriorities || [],
             swot: {
-              strengths: string[];
-              weaknesses: string[];
-              opportunities: string[];
-              threats: string[];
-            };
-            costSavings: Array<{
-              title: string;
-              description: string;
-              potentialSavings?: string;
-            }>;
+              strengths: enhancedData.swot?.strengths || [],
+              weaknesses: enhancedData.swot?.weaknesses || [],
+              opportunities: enhancedData.swot?.opportunities || [],
+              threats: enhancedData.swot?.threats || []
+            },
+            costSavings: enhancedData.costSavings || []
           }
         };
         
@@ -298,8 +301,10 @@ export const useArchetypes = () => {
           return;
         }
         
+        if (!data?.length) return;
+        
         // Transform data to match our interface
-        const transformedData: Archetype[] = data.map(item => ({
+        const transformedData = data.map(item => ({
           id: item.id as ArchetypeId,
           name: item.name,
           familyId: item.family_id as 'a' | 'b' | 'c',
@@ -376,67 +381,71 @@ export const useArchetypes = () => {
           return;
         }
 
+        if (!data?.length) return;
+
         // Transform data to match our interface
-        const transformedData: ArchetypeDetailedData[] = data.map(item => ({
-          id: item.id as ArchetypeId,
-          familyId: item.family_id as 'a' | 'b' | 'c',
-          name: item.name,
-          familyName: item.family_name,
-          color: item.color as ArchetypeColor,
-          summary: item.summary as {
-            description: string;
-            keyCharacteristics: string[];
-          },
-          standard: {
-            ...item.standard,
-            keyStatistics: {
-              ...(item.standard.keyStatistics || {}),
-              emergencyUtilization: item.standard.keyStatistics?.emergencyUtilization || {
-                value: "N/A",
-                trend: "neutral" 
-              },
-              specialistUtilization: item.standard.keyStatistics?.specialistUtilization || {
-                value: "N/A",
-                trend: "neutral"
-              },
-              healthcareSpend: item.standard.keyStatistics?.healthcareSpend || {
-                value: "N/A",
-                trend: "neutral"
-              }
+        const transformedData: ArchetypeDetailedData[] = data.map(item => {
+          // Safely parse and type JSON data
+          const standardData = typeof item.standard === 'string' 
+            ? JSON.parse(item.standard) 
+            : item.standard as Record<string, any>;
+            
+          const summaryData = typeof item.summary === 'string'
+            ? JSON.parse(item.summary)
+            : item.summary as Record<string, any>;
+            
+          const enhancedData = typeof item.enhanced === 'string'
+            ? JSON.parse(item.enhanced)
+            : item.enhanced as Record<string, any>;
+          
+          return {
+            id: item.id as ArchetypeId,
+            familyId: item.family_id as 'a' | 'b' | 'c',
+            name: item.name,
+            familyName: item.family_name,
+            color: item.color as ArchetypeColor,
+            summary: {
+              description: summaryData.description,
+              keyCharacteristics: summaryData.keyCharacteristics as string[]
             },
-            fullDescription: item.standard.fullDescription,
-            keyCharacteristics: item.standard.keyCharacteristics,
-            overview: item.standard.overview,
-            keyInsights: item.standard.keyInsights
-          },
-          enhanced: item.enhanced as {
-            riskProfile: {
-              score: string;
-              comparison: string;
-              conditions: Array<{
-                name: string;
-                value: string;
-                barWidth: string;
-              }>;
-            };
-            strategicPriorities: Array<{
-              number: string;
-              title: string;
-              description: string;
-            }>;
-            swot: {
-              strengths: string[];
-              weaknesses: string[];
-              opportunities: string[];
-              threats: string[];
-            };
-            costSavings: Array<{
-              title: string;
-              description: string;
-              potentialSavings?: string;
-            }>;
-          }
-        }));
+            standard: {
+              fullDescription: standardData.fullDescription,
+              keyCharacteristics: standardData.keyCharacteristics as string[],
+              overview: standardData.overview,
+              keyStatistics: {
+                ...(standardData.keyStatistics || {}),
+                emergencyUtilization: standardData.keyStatistics?.emergencyUtilization || {
+                  value: "N/A",
+                  trend: "neutral" as "up" | "down" | "neutral"
+                },
+                specialistUtilization: standardData.keyStatistics?.specialistUtilization || {
+                  value: "N/A",
+                  trend: "neutral" as "up" | "down" | "neutral"
+                },
+                healthcareSpend: standardData.keyStatistics?.healthcareSpend || {
+                  value: "N/A",
+                  trend: "neutral" as "up" | "down" | "neutral"
+                }
+              },
+              keyInsights: standardData.keyInsights as string[]
+            },
+            enhanced: {
+              riskProfile: {
+                score: enhancedData.riskProfile?.score,
+                comparison: enhancedData.riskProfile?.comparison,
+                conditions: enhancedData.riskProfile?.conditions || []
+              },
+              strategicPriorities: enhancedData.strategicPriorities || [],
+              swot: {
+                strengths: enhancedData.swot?.strengths || [],
+                weaknesses: enhancedData.swot?.weaknesses || [],
+                opportunities: enhancedData.swot?.opportunities || [],
+                threats: enhancedData.swot?.threats || []
+              },
+              costSavings: enhancedData.costSavings || []
+            }
+          };
+        });
 
         setArchetypes(transformedData);
       };
