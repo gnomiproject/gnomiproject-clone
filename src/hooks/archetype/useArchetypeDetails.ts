@@ -111,94 +111,10 @@ export const useArchetypeDetails = () => {
     fetchDetailedArchetypes();
   }, []);
 
-  // Get detailed archetype by ID
+  // Get detailed archetype by ID - FIXED to not use hooks inside the function
   const getArchetypeDetailedById = (archetypeId: ArchetypeId) => {
-    const [archetypeData, setArchetypeData] = useState<ArchetypeDetailedData | null>(null);
-    
-    useEffect(() => {
-      const fetchDetailedArchetype = async () => {
-        const { data, error } = await supabase
-          .from('archetypes_detailed')
-          .select('*')
-          .eq('id', archetypeId)
-          .single();
-        
-        if (error) {
-          console.error('Error fetching detailed archetype:', error);
-          return;
-        }
-        
-        if (!data) return;
-
-        // Safely parse and type JSON data
-        const standardData = typeof data.standard === 'string' 
-          ? JSON.parse(data.standard) 
-          : data.standard as Record<string, any>;
-        
-        const summaryData = typeof data.summary === 'string'
-          ? JSON.parse(data.summary)
-          : data.summary as Record<string, any>;
-          
-        const enhancedData = typeof data.enhanced === 'string'
-          ? JSON.parse(data.enhanced)
-          : data.enhanced as Record<string, any>;
-        
-        // Transform data to match our interface
-        const transformedData: ArchetypeDetailedData = {
-          id: data.id as ArchetypeId,
-          familyId: data.family_id as 'a' | 'b' | 'c',
-          name: data.name,
-          familyName: data.family_name,
-          color: data.color as ArchetypeColor,
-          summary: {
-            description: summaryData?.description || '',
-            keyCharacteristics: summaryData?.keyCharacteristics as string[] || []
-          },
-          standard: {
-            fullDescription: standardData?.fullDescription || '',
-            keyCharacteristics: standardData?.keyCharacteristics as string[] || [],
-            overview: standardData?.overview || '',
-            keyStatistics: {
-              ...(standardData?.keyStatistics || {}),
-              emergencyUtilization: standardData?.keyStatistics?.emergencyUtilization || {
-                value: "N/A",
-                trend: "neutral" as "up" | "down" | "neutral"
-              },
-              specialistUtilization: standardData?.keyStatistics?.specialistUtilization || {
-                value: "N/A",
-                trend: "neutral" as "up" | "down" | "neutral"
-              },
-              healthcareSpend: standardData?.keyStatistics?.healthcareSpend || {
-                value: "N/A",
-                trend: "neutral" as "up" | "down" | "neutral"
-              }
-            },
-            keyInsights: standardData?.keyInsights as string[] || []
-          },
-          enhanced: {
-            riskProfile: {
-              score: enhancedData?.riskProfile?.score || '',
-              comparison: enhancedData?.riskProfile?.comparison || '',
-              conditions: enhancedData?.riskProfile?.conditions || []
-            },
-            strategicPriorities: enhancedData?.strategicPriorities || [],
-            swot: {
-              strengths: enhancedData?.swot?.strengths || [],
-              weaknesses: enhancedData?.swot?.weaknesses || [],
-              opportunities: enhancedData?.swot?.opportunities || [],
-              threats: enhancedData?.swot?.threats || []
-            },
-            costSavings: enhancedData?.costSavings || []
-          }
-        };
-        
-        setArchetypeData(transformedData);
-      };
-
-      fetchDetailedArchetype();
-    }, [archetypeId]);
-
-    return archetypeData;
+    // Return the archetype data directly from allDetailedArchetypes
+    return allDetailedArchetypes.find(archetype => archetype.id === archetypeId) || null;
   };
 
   // Get detailed archetype summaries by family
@@ -239,7 +155,7 @@ export const useArchetypeDetails = () => {
     getArchetypeSummary,
     getArchetypeStandard,
     getDetailedArchetypesByFamily,
-    getArchetypeDetailedById: getArchetypeDetailedById,
+    getArchetypeDetailedById,
     getArchetypeSummariesByFamily,
     isLoading: loading
   };

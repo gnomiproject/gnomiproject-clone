@@ -10,8 +10,8 @@ interface DetailedArchetypeReportProps {
 }
 
 const DetailedArchetypeReport = ({ archetypeId, onRetakeAssessment }: DetailedArchetypeReportProps) => {
-  const { getArchetypeEnhanced } = useArchetypes();
-  const archetypeData = getArchetypeEnhanced(archetypeId);
+  const { allDetailedArchetypes } = useArchetypes();
+  const archetypeData = allDetailedArchetypes.find(archetype => archetype.id === archetypeId);
   
   if (!archetypeData) {
     return <div>No detailed data available for this archetype.</div>;

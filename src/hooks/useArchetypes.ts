@@ -55,6 +55,7 @@ export const useArchetypes = () => {
     
     // From useArchetypeDetails
     getAllDetailedArchetypes: allDetailedArchetypes,
+    allDetailedArchetypes, // Expose directly for components to access
     getDetailedArchetypesByFamily,
     getArchetypeSummary,
     getArchetypeStandard,
