@@ -7,11 +7,12 @@ type ButtonSize = 'default' | 'sm' | 'lg';
 
 interface ButtonProps {
   children: React.ReactNode;
-  onClick?: (e?: React.MouseEvent) => void;  // Updated to accept MouseEvent parameter
+  onClick?: (e?: React.MouseEvent) => void;
   variant?: ButtonVariant;
   className?: string;
   type?: 'button' | 'submit' | 'reset';
   size?: ButtonSize;
+  disabled?: boolean; // Added disabled property
 }
 
 const Button = ({ 
@@ -20,7 +21,8 @@ const Button = ({
   variant = 'primary', 
   className,
   type = 'button',
-  size = 'default'
+  size = 'default',
+  disabled = false // Default value for disabled
 }: ButtonProps) => {
   const baseStyles = "px-6 py-3 rounded-full font-medium text-center transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2";
   
@@ -40,7 +42,14 @@ const Button = ({
     <button
       type={type}
       onClick={onClick}
-      className={cn(baseStyles, variantStyles[variant], sizeStyles[size], className)}
+      disabled={disabled}
+      className={cn(
+        baseStyles, 
+        variantStyles[variant], 
+        sizeStyles[size], 
+        disabled && "opacity-50 cursor-not-allowed",
+        className
+      )}
     >
       {children}
     </button>
