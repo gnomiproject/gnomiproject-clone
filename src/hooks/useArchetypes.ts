@@ -6,7 +6,8 @@ import {
   ArchetypeId, 
   ArchetypeFamily, 
   ArchetypeDetailedData,
-  ArchetypeSummary
+  ArchetypeSummary,
+  ArchetypeColor
 } from '../types/archetype';
 
 export const useArchetypes = () => {
@@ -49,7 +50,7 @@ export const useArchetypes = () => {
           riskScore: item.risk_score,
           riskVariance: item.risk_variance,
           primaryRiskDriver: item.primary_risk_driver,
-          color: item.color
+          color: item.color as ArchetypeColor
         }));
         
         const families = familiesResponse.data.map(item => ({
@@ -64,7 +65,7 @@ export const useArchetypes = () => {
           familyId: item.family_id as 'a' | 'b' | 'c',
           name: item.name,
           familyName: item.family_name,
-          color: item.color,
+          color: item.color as ArchetypeColor,
           summary: item.summary as {
             description: string;
             keyCharacteristics: string[];
@@ -74,6 +75,18 @@ export const useArchetypes = () => {
             keyCharacteristics: string[];
             overview: string;
             keyStatistics: {
+              emergencyUtilization: {
+                value: string;
+                trend: 'up' | 'down' | 'neutral';
+              };
+              specialistUtilization: {
+                value: string;
+                trend: 'up' | 'down' | 'neutral';
+              };
+              healthcareSpend: {
+                value: string;
+                trend: 'up' | 'down' | 'neutral';
+              };
               [key: string]: {
                 value: string;
                 trend: 'up' | 'down' | 'neutral';
@@ -159,22 +172,32 @@ export const useArchetypes = () => {
           familyId: data.family_id as 'a' | 'b' | 'c',
           name: data.name,
           familyName: data.family_name,
-          color: data.color,
+          color: data.color as ArchetypeColor,
           summary: data.summary as {
             description: string;
             keyCharacteristics: string[];
           },
-          standard: data.standard as {
-            fullDescription: string;
-            keyCharacteristics: string[];
-            overview: string;
+          standard: {
+            ...data.standard,
             keyStatistics: {
-              [key: string]: {
-                value: string;
-                trend: 'up' | 'down' | 'neutral';
-              };
-            };
-            keyInsights: string[];
+              ...(data.standard.keyStatistics || {}),
+              emergencyUtilization: data.standard.keyStatistics?.emergencyUtilization || {
+                value: "N/A",
+                trend: "neutral" 
+              },
+              specialistUtilization: data.standard.keyStatistics?.specialistUtilization || {
+                value: "N/A",
+                trend: "neutral"
+              },
+              healthcareSpend: data.standard.keyStatistics?.healthcareSpend || {
+                value: "N/A",
+                trend: "neutral"
+              }
+            },
+            fullDescription: data.standard.fullDescription,
+            keyCharacteristics: data.standard.keyCharacteristics,
+            overview: data.standard.overview,
+            keyInsights: data.standard.keyInsights
           },
           enhanced: data.enhanced as {
             riskProfile: {
@@ -247,7 +270,7 @@ export const useArchetypes = () => {
           riskScore: data.risk_score,
           riskVariance: data.risk_variance,
           primaryRiskDriver: data.primary_risk_driver,
-          color: data.color
+          color: data.color as ArchetypeColor
         };
         
         setArchetype(transformedData);
@@ -291,7 +314,7 @@ export const useArchetypes = () => {
           riskScore: item.risk_score,
           riskVariance: item.risk_variance,
           primaryRiskDriver: item.primary_risk_driver,
-          color: item.color
+          color: item.color as ArchetypeColor
         }));
         
         setArchetypes(transformedData);
@@ -354,27 +377,37 @@ export const useArchetypes = () => {
         }
 
         // Transform data to match our interface
-        const transformedData = data.map(item => ({
+        const transformedData: ArchetypeDetailedData[] = data.map(item => ({
           id: item.id as ArchetypeId,
           familyId: item.family_id as 'a' | 'b' | 'c',
           name: item.name,
           familyName: item.family_name,
-          color: item.color,
+          color: item.color as ArchetypeColor,
           summary: item.summary as {
             description: string;
             keyCharacteristics: string[];
           },
-          standard: item.standard as {
-            fullDescription: string;
-            keyCharacteristics: string[];
-            overview: string;
+          standard: {
+            ...item.standard,
             keyStatistics: {
-              [key: string]: {
-                value: string;
-                trend: 'up' | 'down' | 'neutral';
-              };
-            };
-            keyInsights: string[];
+              ...(item.standard.keyStatistics || {}),
+              emergencyUtilization: item.standard.keyStatistics?.emergencyUtilization || {
+                value: "N/A",
+                trend: "neutral" 
+              },
+              specialistUtilization: item.standard.keyStatistics?.specialistUtilization || {
+                value: "N/A",
+                trend: "neutral"
+              },
+              healthcareSpend: item.standard.keyStatistics?.healthcareSpend || {
+                value: "N/A",
+                trend: "neutral"
+              }
+            },
+            fullDescription: item.standard.fullDescription,
+            keyCharacteristics: item.standard.keyCharacteristics,
+            overview: item.standard.overview,
+            keyInsights: item.standard.keyInsights
           },
           enhanced: item.enhanced as {
             riskProfile: {
