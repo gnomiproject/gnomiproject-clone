@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useArchetypes } from '@/hooks/useArchetypes';
 import SectionTitle from '@/components/shared/SectionTitle';
 import DetailedAnalysisTabs from '@/components/results/DetailedAnalysisTabs';
-import { ArchetypeDetailedData } from '@/types/archetype';
+import { ArchetypeDetailedData, ArchetypeId } from '@/types/archetype';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -21,7 +21,7 @@ const DeepReport = () => {
     id: string;
     name: string;
     organization: string;
-    archetype_id: string;
+    archetype_id: ArchetypeId; // Fixed: explicitly using ArchetypeId type
     assessment_answers: any;
     assessment_result: any;
   } | null>(null);
@@ -61,18 +61,23 @@ const DeepReport = () => {
           });
           setValidToken(false);
         } else {
-          setReportData(data);
+          // Ensure archetype_id is treated as ArchetypeId type
+          const archetypeId = data.archetype_id as ArchetypeId;
+          setReportData({
+            ...data,
+            archetype_id: archetypeId
+          });
           setValidToken(true);
           
-          // Load archetype data
-          if (data.archetype_id) {
-            const archetype = getArchetypeEnhanced(data.archetype_id);
+          // Load archetype data with properly typed archetypeId
+          if (archetypeId) {
+            const archetype = getArchetypeEnhanced(archetypeId);
             if (archetype) {
               setArchetypeData(archetype);
             }
             
             // Fetch archetype metrics from Supabase
-            fetchArchetypeMetrics(data.archetype_id);
+            fetchArchetypeMetrics(archetypeId);
           }
         }
       } catch (error) {
@@ -92,7 +97,7 @@ const DeepReport = () => {
   }, [accessToken, toast, getArchetypeEnhanced]);
 
   // Fetch archetype metrics from Supabase
-  const fetchArchetypeMetrics = async (archetypeId: string) => {
+  const fetchArchetypeMetrics = async (archetypeId: ArchetypeId) => {
     try {
       const { data, error } = await supabase
         .from('archetype_distinctive_metrics')
@@ -209,7 +214,7 @@ const DeepReport = () => {
                         <span className="font-medium">
                           {typeof value === 'string' 
                             ? value.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
-                            : JSON.stringify(value)}
+                            : String(value)} {/* Fixed: Ensuring value is rendered as string */}
                         </span>
                       </div>
                     );
