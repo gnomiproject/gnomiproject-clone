@@ -19,8 +19,17 @@ export type Archetype = {
   id: ArchetypeId;
   familyId: 'a' | 'b' | 'c';
   name: string;
-  familyName: string;
-  description: string;
+  shortDescription: string;
+  longDescription: string;
+  characteristics: string[];
+  strategicPriorities: {
+    primaryFocus: string;
+    secondaryPriorities: string[];
+    keyOpportunities: string[];
+  };
+  riskScore: number;
+  riskVariance: number;
+  primaryRiskDriver: string;
   color: ArchetypeColor;
   hexColor?: string;
 };
@@ -43,7 +52,7 @@ export type KeyStatistic = {
 
 // Structure for strategic priorities
 export type StrategicPriority = {
-  number: number;
+  number: number | string;
   title: string;
   description: string;
 };
@@ -76,7 +85,7 @@ export type SwotAnalysis = {
 
 // Enhanced data for detailed archetype information
 export type EnhancedArchetypeData = {
-  overview: string;
+  overview?: string;
   strategicPriorities: StrategicPriority[];
   costSavings: CostSaving[];
   riskProfile: RiskProfile;
@@ -95,6 +104,7 @@ export type StandardArchetypeData = {
 // Summary archetype data
 export type SummaryArchetypeData = {
   description: string;
+  keyCharacteristics?: string[];
 };
 
 // Full detailed archetype data
@@ -112,31 +122,23 @@ export type ArchetypeDetailedData = {
 
 // Metrics for archetypes
 export type ArchetypeMetrics = {
-  id: ArchetypeId;
-  metrics: {
-    utilization: {
-      emergencyCare: number;
-      specialistVisits: number;
-      preventiveCare: number;
-      virtualCare: number;
-    };
-    costs: {
-      annualSpendPerMember: number;
-      hospitalAdmissions: number;
-      prescriptionCosts: number;
-      outOfNetworkUtilization: number;
-    };
-    outcomes: {
-      chronicConditionManagement: number;
-      memberSatisfaction: number;
-      preventableAdmissions: number;
-    };
-  };
+  archetypeId: ArchetypeId;
+  paidPEPY: number;
+  paidPEPYVariance: number;
+  paidPMPY: number;
+  paidPMPYVariance: number;
+  paidAllowedRatio: number;
+  averageFamilySize: number;
+  specialistVisitsPer1K: number;
+  inpatientAdmitsPer1K: number;
+  emergencyVisitsPer1K: number;
+  sdohScore: number;
+  riskCostRatio: number;
 };
 
 // Distinctive traits for archetypes
 export type DistinctiveTraits = {
-  id: ArchetypeId;
+  archetypeId: ArchetypeId;
   diseasePatterns: Array<{ condition: string; variance: number }>;
   utilizationPatterns: Array<{ category: string; variance: number }>;
   uniqueInsights: string[];

@@ -18,7 +18,7 @@ export const useArchetypeBasics = () => {
         if (error) throw error;
         
         // Transform data to match our interface
-        const archetypes = data.map(item => ({
+        const archetypes: Archetype[] = data.map(item => ({
           id: item.id as ArchetypeId,
           name: item.name,
           familyId: item.family_id as 'a' | 'b' | 'c',
@@ -33,7 +33,8 @@ export const useArchetypeBasics = () => {
           riskScore: item.risk_score,
           riskVariance: item.risk_variance,
           primaryRiskDriver: item.primary_risk_driver,
-          color: item.color as ArchetypeColor
+          color: item.color as ArchetypeColor,
+          hexColor: item.hex_color
         }));
         
         setAllArchetypes(archetypes);
@@ -80,7 +81,8 @@ export const useArchetypeBasics = () => {
           riskScore: data.risk_score,
           riskVariance: data.risk_variance,
           primaryRiskDriver: data.primary_risk_driver,
-          color: data.color as ArchetypeColor
+          color: data.color as ArchetypeColor,
+          hexColor: data.hex_color
         };
         
         setArchetype(transformedData);
@@ -111,7 +113,7 @@ export const useArchetypeBasics = () => {
         if (!data?.length) return;
         
         // Transform data to match our interface
-        const transformedData = data.map(item => ({
+        const transformedData: Archetype[] = data.map(item => ({
           id: item.id as ArchetypeId,
           name: item.name,
           familyId: item.family_id as 'a' | 'b' | 'c',
@@ -126,7 +128,8 @@ export const useArchetypeBasics = () => {
           riskScore: item.risk_score,
           riskVariance: item.risk_variance,
           primaryRiskDriver: item.primary_risk_driver,
-          color: item.color as ArchetypeColor
+          color: item.color as ArchetypeColor,
+          hexColor: item.hex_color
         }));
         
         setArchetypes(transformedData);
