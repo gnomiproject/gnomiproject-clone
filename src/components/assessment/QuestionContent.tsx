@@ -5,19 +5,24 @@ import CheckboxQuestion from './QuestionTypes/CheckboxQuestion';
 import IndustryQuestion from './QuestionTypes/IndustryQuestion';
 import SelectQuestion from './QuestionTypes/SelectQuestion';
 import RadioQuestion from './QuestionTypes/RadioQuestion';
+import SizeQuestion from './QuestionTypes/SizeQuestion';
 
 interface QuestionContentProps {
   question: AssessmentQuestion;
   answers: Record<string, string>;
   setAnswer: (questionId: string, value: string) => void;
   setMultipleAnswers: (questionId: string, values: string[]) => void;
+  exactEmployeeCount?: number | null;
+  setExactEmployeeCount?: (count: number | null) => void;
 }
 
 const QuestionContent = ({ 
   question, 
   answers, 
   setAnswer, 
-  setMultipleAnswers 
+  setMultipleAnswers,
+  exactEmployeeCount,
+  setExactEmployeeCount
 }: QuestionContentProps) => {
   
   // Handle multiple-select questions (checkboxes)
@@ -56,14 +61,15 @@ const QuestionContent = ({
     );
   }
   
-  // Organization size with dropdown (third question)
+  // Organization size with numeric input (third question)
   if (question.id === 'size') {
     return (
-      <SelectQuestion
+      <SizeQuestion
         question={question}
         selectedAnswer={answers[question.id]}
         onAnswerChange={setAnswer}
-        placeholder="Select organization size..."
+        exactEmployeeCount={exactEmployeeCount}
+        setExactEmployeeCount={setExactEmployeeCount}
       />
     );
   }

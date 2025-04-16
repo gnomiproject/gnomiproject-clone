@@ -13,8 +13,10 @@ const Assessment = () => {
     questions, 
     answers, 
     isCalculating,
+    exactEmployeeCount,
     setAnswer, 
     setMultipleAnswers,
+    setExactEmployeeCount,
     goToNext, 
     goToPrevious 
   } = useAssessment();
@@ -33,6 +35,8 @@ const Assessment = () => {
         goToNext={goToNext}
         goToPrevious={goToPrevious}
         isCurrentQuestionValid={isCurrentQuestionValid()}
+        exactEmployeeCount={exactEmployeeCount}
+        setExactEmployeeCount={setExactEmployeeCount}
       />
       <CalculationLoader isVisible={isCalculating} />
     </div>

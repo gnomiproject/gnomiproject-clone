@@ -14,6 +14,8 @@ interface AssessmentLayoutProps {
   goToNext: () => void;
   goToPrevious: () => void;
   isCurrentQuestionValid: boolean;
+  exactEmployeeCount?: number | null;
+  setExactEmployeeCount?: (count: number | null) => void;
 }
 
 const AssessmentLayout = ({
@@ -25,7 +27,9 @@ const AssessmentLayout = ({
   setMultipleAnswers,
   goToNext,
   goToPrevious,
-  isCurrentQuestionValid
+  isCurrentQuestionValid,
+  exactEmployeeCount,
+  setExactEmployeeCount
 }: AssessmentLayoutProps) => {
   
   const currentQ = questions[currentQuestion - 1];
@@ -44,6 +48,8 @@ const AssessmentLayout = ({
             answers={answers}
             setAnswer={setAnswer}
             setMultipleAnswers={setMultipleAnswers}
+            exactEmployeeCount={exactEmployeeCount}
+            setExactEmployeeCount={setExactEmployeeCount}
           />
           
           <QuestionNavigation 
