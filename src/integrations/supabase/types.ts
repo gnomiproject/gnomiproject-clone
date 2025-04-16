@@ -48,6 +48,39 @@ export type Database = {
         }
         Relationships: []
       }
+      report_requests: {
+        Row: {
+          archetype_id: string
+          comments: string | null
+          created_at: string
+          email: string
+          id: string
+          name: string
+          organization: string
+          status: string
+        }
+        Insert: {
+          archetype_id: string
+          comments?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          organization: string
+          status?: string
+        }
+        Update: {
+          archetype_id?: string
+          comments?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          organization?: string
+          status?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

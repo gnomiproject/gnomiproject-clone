@@ -1,9 +1,9 @@
-
 import React, { useState } from 'react';
 import Button from '@/components/shared/Button';
 import { ArchetypeDetailedData } from '@/types/archetype';
 import { FileText } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import { 
   Dialog,
   DialogContent,
@@ -42,6 +42,7 @@ const PremiumReport = ({ archetypeData }: PremiumReportProps) => {
   const color = `archetype-${archetypeData.id}`;
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
   const form = useForm<FormValues>({
@@ -54,17 +55,36 @@ const PremiumReport = ({ archetypeData }: PremiumReportProps) => {
     },
   });
 
-  const onSubmit = (data: FormValues) => {
-    console.log("Form submitted with data:", data);
-    
-    // Simulate form submission delay
-    setTimeout(() => {
+  const onSubmit = async (data: FormValues) => {
+    setIsSubmitting(true);
+    try {
+      const { error } = await supabase
+        .from('report_requests')
+        .insert({
+          name: data.name,
+          email: data.email,
+          organization: data.organization,
+          comments: data.comments,
+          archetype_id: archetypeData.id
+        });
+
+      if (error) throw error;
+
       setIsSubmitted(true);
       toast({
         title: "Report Request Submitted",
         description: "We'll send your full archetype report to your email shortly.",
       });
-    }, 1000);
+    } catch (error) {
+      console.error('Error submitting report request:', error);
+      toast({
+        title: "Error",
+        description: "There was a problem submitting your request. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const resetForm = () => {
@@ -243,8 +263,9 @@ const PremiumReport = ({ archetypeData }: PremiumReportProps) => {
                   <Button 
                     type="submit"
                     className={`bg-${color} hover:bg-${color}/90 text-white`}
+                    disabled={isSubmitting}
                   >
-                    Submit Request
+                    {isSubmitting ? "Submitting..." : "Submit Request"}
                   </Button>
                 </div>
               </form>
