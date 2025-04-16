@@ -1,40 +1,40 @@
-
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Navbar from './components/layout/Navbar';
-import Index from './pages/Index';
-import About from './pages/About';
-import Assessment from './pages/Assessment';
-import Insights from './pages/Insights';
-import Results from './pages/Results';
-import DeepReport from './pages/DeepReport';
-import NotFound from './pages/NotFound';
-import ColorSafelist from './components/utils/ColorSafelist';
-import { Toaster } from './components/ui/toaster';
-import './App.css';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
+import Navbar from '@/components/shared/Navbar';
+import Index from '@/pages/Index';
+import Assessment from '@/pages/Assessment';
+import Results from '@/pages/Results';
+import DeepReport from '@/pages/DeepReport';
+import Insights from '@/pages/Insights';
+import About from '@/pages/About';
+import NotFound from '@/pages/NotFound';
+import Admin from '@/pages/Admin';
+
+const version = "0.0.1";
 
 function App() {
   return (
-    <Router>
-      <div className="flex flex-col min-h-screen">
+    <BrowserRouter>
+      <div className="app">
         <Navbar />
-        <main className="flex-grow">
+        <main>
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/about" element={<About />} />
             <Route path="/assessment" element={<Assessment />} />
-            <Route path="/insights" element={<Insights />} />
             <Route path="/results" element={<Results />} />
-            <Route path="/deep-report" element={<DeepReport />} />
+            <Route path="/deep-report/:accessToken" element={<DeepReport />} />
+            <Route path="/insights" element={<Insights />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/admin" element={<Admin />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
-        {/* Hidden component to ensure color classes are included in the build */}
-        <ColorSafelist />
         <Toaster />
       </div>
-    </Router>
+    </BrowserRouter>
   );
 }
 
 export default App;
+export { version };

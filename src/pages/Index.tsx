@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import Button from '@/components/shared/Button';
@@ -9,7 +10,7 @@ import InteractiveDNAExplorer from '@/components/home/InteractiveDNAExplorer';
 
 const Index = () => {
   const [view, setView] = useState<'grid' | 'list'>('grid');
-  const { getAllArchetypeSummaries } = useArchetypes();
+  const { getAllArchetypeSummaries, isLoading } = useArchetypes();
   const archetypeSummaries = getAllArchetypeSummaries;
   const dnaExplorerRef = useRef<HTMLDivElement>(null);
 
@@ -106,7 +107,7 @@ const Index = () => {
 
           <div className="flex justify-between items-center mb-8">
             <h3 className="text-xl font-medium text-gray-700">
-              {archetypeSummaries.length} Archetypes
+              {isLoading ? "Loading..." : `${archetypeSummaries.length} Archetypes`}
             </h3>
             <div className="bg-white border rounded-lg flex overflow-hidden shadow-sm">
               <button
@@ -126,19 +127,25 @@ const Index = () => {
             </div>
           </div>
 
-          <div className={`grid ${view === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'} gap-6`}>
-            {archetypeSummaries.map(archetype => (
-              <ArchetypeCard 
-                key={archetype.id}
-                id={archetype.id}
-                title={archetype.name}
-                category={`Family ${archetype.familyId}`}
-                color={archetype.color}
-                description={archetype.description}
-                characteristics={archetype.keyCharacteristics}
-              />
-            ))}
-          </div>
+          {isLoading ? (
+            <div className="flex justify-center py-12">
+              <div className="animate-pulse text-blue-500">Loading archetypes...</div>
+            </div>
+          ) : (
+            <div className={`grid ${view === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'} gap-6`}>
+              {archetypeSummaries.map(archetype => (
+                <ArchetypeCard 
+                  key={archetype.id}
+                  id={archetype.id}
+                  title={archetype.name}
+                  category={`Family ${archetype.familyId}`}
+                  color={archetype.color}
+                  description={archetype.description}
+                  characteristics={archetype.keyCharacteristics}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

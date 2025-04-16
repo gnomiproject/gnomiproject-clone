@@ -7,14 +7,20 @@ import { ArchetypeId } from '@/types/archetype';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { ArrowDown } from 'lucide-react';
 
-// Import the new component files
+// Import the component files
 import ArchetypeDetailView from './ArchetypeDetailView';
 import FamilyDetailView from './FamilyDetailView';
 import ArchetypeDetailDialog from './ArchetypeDetailDialog';
 import EmptyExplorerState from './EmptyExplorerState';
 
 const InteractiveDNAExplorer = () => {
-  const { getAllArchetypeSummaries, getAllFamilies, getArchetypeSummary, getArchetypeStandard } = useArchetypes();
+  const { 
+    getAllArchetypeSummaries, 
+    getAllFamilies, 
+    getArchetypeSummary, 
+    getArchetypeStandard 
+  } = useArchetypes();
+  
   const archetypeSummaries = getAllArchetypeSummaries;
   const families = getAllFamilies;
   const isMobile = useIsMobile();
@@ -142,11 +148,13 @@ const InteractiveDNAExplorer = () => {
       </div>
 
       {/* Level 2 Detail Dialog */}
-      <ArchetypeDetailDialog 
-        open={showDetailDialog}
-        onOpenChange={setShowDetailDialog}
-        archetypeDetail={selectedArchetypeDetail}
-      />
+      {selectedArchetypeDetail && (
+        <ArchetypeDetailDialog 
+          open={showDetailDialog}
+          onOpenChange={setShowDetailDialog}
+          archetypeDetail={selectedArchetypeDetail}
+        />
+      )}
     </section>
   );
 };
