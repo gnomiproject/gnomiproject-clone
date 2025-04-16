@@ -51,6 +51,8 @@ export type Database = {
       report_requests: {
         Row: {
           archetype_id: string
+          assessment_answers: Json | null
+          assessment_result: Json | null
           comments: string | null
           created_at: string
           email: string
@@ -61,6 +63,8 @@ export type Database = {
         }
         Insert: {
           archetype_id: string
+          assessment_answers?: Json | null
+          assessment_result?: Json | null
           comments?: string | null
           created_at?: string
           email: string
@@ -71,6 +75,8 @@ export type Database = {
         }
         Update: {
           archetype_id?: string
+          assessment_answers?: Json | null
+          assessment_result?: Json | null
           comments?: string | null
           created_at?: string
           email?: string

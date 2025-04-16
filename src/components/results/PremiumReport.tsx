@@ -1,9 +1,11 @@
+
 import React, { useState } from 'react';
 import Button from '@/components/shared/Button';
 import { ArchetypeDetailedData } from '@/types/archetype';
 import { FileText } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useLocation } from 'react-router-dom';
 import { 
   Dialog,
   DialogContent,
@@ -44,6 +46,7 @@ const PremiumReport = ({ archetypeData }: PremiumReportProps) => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const location = useLocation();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -58,6 +61,11 @@ const PremiumReport = ({ archetypeData }: PremiumReportProps) => {
   const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true);
     try {
+      // Get assessment result from location state
+      const assessmentResult = location.state?.result;
+      // Get assessment answers from sessionStorage
+      const answers = JSON.parse(sessionStorage.getItem('healthcareArchetypeAnswers') || '{}');
+
       const { error } = await supabase
         .from('report_requests')
         .insert({
@@ -65,7 +73,9 @@ const PremiumReport = ({ archetypeData }: PremiumReportProps) => {
           email: data.email,
           organization: data.organization,
           comments: data.comments,
-          archetype_id: archetypeData.id
+          archetype_id: archetypeData.id,
+          assessment_answers: answers,
+          assessment_result: assessmentResult
         });
 
       if (error) throw error;
