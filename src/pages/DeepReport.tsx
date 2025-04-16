@@ -163,6 +163,17 @@ const DeepReport = () => {
   // If we have valid data, show the report
   const color = `archetype-${archetypeData.id}`;
 
+  // Helper function to safely display any value as a string
+  const formatValue = (value: unknown): string => {
+    if (value === null || value === undefined) {
+      return "";
+    }
+    if (typeof value === 'string') {
+      return value.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    }
+    return String(value);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-6 md:px-12">
       <div className="max-w-5xl mx-auto">
@@ -200,7 +211,7 @@ const DeepReport = () => {
                             Employee Count
                           </span>
                           <span className="font-medium">
-                            {value} employees
+                            {formatValue(value)} employees
                           </span>
                         </div>
                       );
@@ -212,9 +223,7 @@ const DeepReport = () => {
                           {key.replace(/([A-Z])/g, ' $1').trim()}
                         </span>
                         <span className="font-medium">
-                          {typeof value === 'string' 
-                            ? value.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
-                            : String(value)} {/* Fixed: Ensuring value is rendered as string */}
+                          {formatValue(value)}
                         </span>
                       </div>
                     );
