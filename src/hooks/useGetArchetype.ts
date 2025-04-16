@@ -1,12 +1,10 @@
 
 import { useState, useEffect } from 'react';
 import { useArchetypes } from './useArchetypes';
-import { ArchetypeId, ArchetypeDetailedData } from '@/types/archetype';
+import { ArchetypeId, ArchetypeDetailedData, ArchetypeColor } from '@/types/archetype';
 import { supabase } from "@/integrations/supabase/client";
+import { getArchetypeColor } from '@/components/home/utils/dna/colors'; // We'll use this existing utility
 
-/**
- * Hook to get a single archetype with full details by ID
- */
 export const useGetArchetype = (archetypeId: ArchetypeId) => {
   const { getFamilyById } = useArchetypes();
   const [archetypeData, setArchetypeData] = useState<ArchetypeDetailedData | null>(null);
@@ -37,7 +35,8 @@ export const useGetArchetype = (archetypeId: ArchetypeId) => {
             familyId: data.family_id as 'a' | 'b' | 'c',
             name: data.name,
             familyName: data.family_name,
-            color: data.color,
+            // Map the color to a valid ArchetypeColor using the existing utility function
+            color: getArchetypeColor(archetypeId) as ArchetypeColor,
             summary: typeof data.summary === 'string' ? JSON.parse(data.summary) : data.summary,
             standard: typeof data.standard === 'string' ? JSON.parse(data.standard) : data.standard,
             enhanced: typeof data.enhanced === 'string' ? JSON.parse(data.enhanced) : data.enhanced,
