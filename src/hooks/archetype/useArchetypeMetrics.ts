@@ -1,33 +1,93 @@
 
 import { useState, useEffect } from 'react';
-import { supabase } from "@/integrations/supabase/client";
 import { ArchetypeId } from '@/types/archetype';
+import { supabase } from "@/integrations/supabase/client";
 
 export const useArchetypeMetrics = () => {
-  // Get metrics for archetype
-  const getMetricsForArchetype = (archetypeId: ArchetypeId) => {
-    const [metrics, setMetrics] = useState(null);
-    
-    useEffect(() => {
-      const fetchMetrics = async () => {
+  const [metricsData, setMetricsData] = useState<Record<string, any[]>>({});
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch all metrics data on component mount
+  useEffect(() => {
+    const fetchAllMetricsData = async () => {
+      setIsLoading(true);
+      try {
         const { data, error } = await supabase
-          .from('archetype_metrics')
-          .select('*')
-          .eq('archetype_id', archetypeId)
-          .single();
+          .from('archetype_data_041624bw')
+          .select('*');
 
         if (error) {
-          console.error('Error fetching metrics:', error);
+          console.error('Error fetching metrics data:', error);
           return;
         }
-        
-        setMetrics(data);
-      };
 
-      fetchMetrics();
-    }, [archetypeId]);
+        // Group data by archetype_ID
+        const groupedData = data.reduce((acc: Record<string, any[]>, item) => {
+          const archetypeId = item.archetype_ID;
+          if (!archetypeId) return acc;
+          
+          if (!acc[archetypeId]) {
+            acc[archetypeId] = [];
+          }
+          acc[archetypeId].push(item);
+          return acc;
+        }, {});
 
-    return metrics;
+        setMetricsData(groupedData);
+      } catch (err) {
+        console.error('Unexpected error fetching metrics:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAllMetricsData();
+  }, []);
+
+  // Get metrics for archetype
+  const getMetricsForArchetype = (archetypeId: ArchetypeId) => {
+    const metrics = metricsData[archetypeId] || [];
+    
+    // Process metrics into a more usable format if needed
+    return {
+      metrics,
+      isLoading
+    };
+  };
+
+  // Get distinctive metrics for archetype (top differentiating metrics)
+  const getDistinctiveMetricsForArchetype = (archetypeId: ArchetypeId) => {
+    const allMetrics = metricsData[archetypeId] || [];
+    
+    // Sort by absolute difference to get most distinctive metrics
+    const sortedMetrics = [...allMetrics].sort((a, b) => 
+      Math.abs(b.Difference || 0) - Math.abs(a.Difference || 0)
+    ).slice(0, 10); // Get top 10
+    
+    return {
+      distinctiveMetrics: sortedMetrics,
+      isLoading
+    };
+  };
+
+  // Get metrics grouped by category for archetype
+  const getCategorizedMetricsForArchetype = (archetypeId: ArchetypeId) => {
+    const allMetrics = metricsData[archetypeId] || [];
+    
+    // Group by Category
+    const categorized = allMetrics.reduce((acc: Record<string, any[]>, item) => {
+      const category = item.Category || 'Uncategorized';
+      if (!acc[category]) {
+        acc[category] = [];
+      }
+      acc[category].push(item);
+      return acc;
+    }, {});
+    
+    return {
+      categorizedMetrics: categorized,
+      isLoading
+    };
   };
 
   // Get traits for archetype
@@ -58,6 +118,9 @@ export const useArchetypeMetrics = () => {
 
   return {
     getMetricsForArchetype,
-    getTraitsForArchetype
+    getDistinctiveMetricsForArchetype,
+    getCategorizedMetricsForArchetype,
+    getTraitsForArchetype,
+    isLoading
   };
 };

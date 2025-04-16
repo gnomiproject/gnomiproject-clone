@@ -1,19 +1,66 @@
 
+import { useState, useEffect } from 'react';
 import { useArchetypes } from './useArchetypes';
-import { ArchetypeId } from '@/types/archetype';
+import { ArchetypeId, ArchetypeDetailedData } from '@/types/archetype';
+import { supabase } from "@/integrations/supabase/client";
 
 /**
- * Simple hook to get a single archetype with full details by ID
+ * Hook to get a single archetype with full details by ID
  */
 export const useGetArchetype = (archetypeId: ArchetypeId) => {
-  const { getArchetypeEnhanced, getFamilyById, isLoading } = useArchetypes();
-  
-  const archetypeData = getArchetypeEnhanced(archetypeId);
-  const familyData = archetypeData ? getFamilyById(archetypeData.familyId) : undefined;
+  const { getFamilyById } = useArchetypes();
+  const [archetypeData, setArchetypeData] = useState<ArchetypeDetailedData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    const fetchArchetypeData = async () => {
+      setIsLoading(true);
+      setError(null);
+      
+      try {
+        // Fetch detailed archetype data from Supabase
+        const { data, error } = await supabase
+          .from('archetypes_detailed')
+          .select('*')
+          .eq('id', archetypeId)
+          .maybeSingle();
+
+        if (error) {
+          throw new Error(`Error fetching archetype data: ${error.message}`);
+        }
+
+        if (data) {
+          setArchetypeData(data as ArchetypeDetailedData);
+        } else {
+          // Fallback to existing method if not found in database
+          const { getArchetypeEnhanced } = useArchetypes();
+          const localArchetypeData = getArchetypeEnhanced(archetypeId);
+          setArchetypeData(localArchetypeData);
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err : new Error(String(err)));
+        console.error('Error in useGetArchetype:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (archetypeId) {
+      fetchArchetypeData();
+    } else {
+      setIsLoading(false);
+      setArchetypeData(null);
+    }
+  }, [archetypeId]);
+
+  // Get family data if we have an archetype
+  const familyData = archetypeData?.familyId ? getFamilyById(archetypeData.familyId) : undefined;
 
   return {
     archetypeData,
     familyData,
-    isLoading
+    isLoading,
+    error
   };
 };

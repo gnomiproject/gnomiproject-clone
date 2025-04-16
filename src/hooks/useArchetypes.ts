@@ -3,6 +3,7 @@ import { useArchetypeBasics } from './archetype/useArchetypeBasics';
 import { useArchetypeDetails } from './archetype/useArchetypeDetails';
 import { useArchetypeFamilies } from './archetype/useArchetypeFamilies';
 import { useArchetypeMetrics } from './archetype/useArchetypeMetrics';
+import { useDistinctiveMetrics } from './archetype/useDistinctiveMetrics';
 
 /**
  * Main hook that combines all archetype-related hooks
@@ -35,7 +36,10 @@ export const useArchetypes = () => {
   
   const {
     getMetricsForArchetype,
-    getTraitsForArchetype
+    getDistinctiveMetricsForArchetype,
+    getCategorizedMetricsForArchetype,
+    getTraitsForArchetype,
+    isLoading: isLoadingMetrics
   } = useArchetypeMetrics();
   
   return {
@@ -59,9 +63,11 @@ export const useArchetypes = () => {
     
     // From useArchetypeMetrics
     getMetricsForArchetype,
+    getDistinctiveMetricsForArchetype,
+    getCategorizedMetricsForArchetype,
     getTraitsForArchetype,
     
     // Loading state
-    isLoading: isLoadingBasics || isLoadingFamilies || isLoadingDetails
+    isLoading: isLoadingBasics || isLoadingFamilies || isLoadingDetails || isLoadingMetrics
   };
 };
