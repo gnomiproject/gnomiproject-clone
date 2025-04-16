@@ -42,6 +42,8 @@ export type ArchetypeSummary = {
   familyName: string;
   description: string;
   keyCharacteristics: string[];
+  color: ArchetypeColor; // Add color property
+  hexColor?: string; // Add optional hexColor property
 };
 
 // Structure for key statistics

@@ -96,9 +96,9 @@ export const useArchetypeDetails = () => {
           name: archetype.name,
           familyName: archetype.familyName,
           description: archetype.summary.description,
-          keyCharacteristics: archetype.summary.keyCharacteristics,
+          keyCharacteristics: archetype.summary.keyCharacteristics || [],
           color: archetype.color,
-          hexColor: archetype.hexColor // Add the hex color to summaries
+          hexColor: archetype.hexColor // Include the hexColor in the summaries
         }));
         
         setAllDetailedArchetypes(detailedArchetypes);
