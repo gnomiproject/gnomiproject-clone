@@ -5,6 +5,8 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Check, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Textarea } from "@/components/ui/textarea";
+import { supabase } from "@/integrations/supabase/client";
 
 interface MatchFeedbackMenuProps {
   archetypeId: string;
@@ -13,23 +15,56 @@ interface MatchFeedbackMenuProps {
 
 const MatchFeedbackMenu = ({ archetypeId, onClose }: MatchFeedbackMenuProps) => {
   const [selectedFeedback, setSelectedFeedback] = useState<string | null>(null);
+  const [userComments, setUserComments] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const { toast } = useToast();
 
-  const handleSubmitFeedback = () => {
+  const handleSubmitFeedback = async () => {
     if (!selectedFeedback) return;
     
-    // Here we would typically send this feedback to an API
-    console.log(`Feedback submitted for archetype ${archetypeId}: ${selectedFeedback}`);
+    setIsSubmitting(true);
     
-    // For now, just show a toast confirmation
-    toast({
-      title: "Feedback Received",
-      description: "Thank you for helping us improve our archetype matching!",
-      duration: 3000,
-    });
-    
-    setSubmitted(true);
+    try {
+      // Save feedback to Supabase
+      const { error } = await supabase
+        .from('archetype_feedback')
+        .insert({
+          archetype_id: archetypeId,
+          feedback: selectedFeedback,
+          user_comments: userComments.trim() !== '' ? userComments : null
+        });
+      
+      if (error) {
+        console.error('Error submitting feedback:', error);
+        toast({
+          title: "Error Submitting Feedback",
+          description: "There was a problem submitting your feedback. Please try again.",
+          variant: "destructive",
+          duration: 3000,
+        });
+        return;
+      }
+      
+      // Show success toast
+      toast({
+        title: "Feedback Received",
+        description: "Thank you for helping us improve our archetype matching!",
+        duration: 3000,
+      });
+      
+      setSubmitted(true);
+    } catch (err) {
+      console.error('Error in feedback submission:', err);
+      toast({
+        title: "Error Submitting Feedback",
+        description: "There was a problem submitting your feedback. Please try again.",
+        variant: "destructive",
+        duration: 3000,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (submitted) {
@@ -74,15 +109,28 @@ const MatchFeedbackMenu = ({ archetypeId, onClose }: MatchFeedbackMenuProps) => 
             <Label htmlFor="wrong" className="cursor-pointer text-sm">Not quite</Label>
           </div>
         </RadioGroup>
+        
+        <div className="mb-4">
+          <Label htmlFor="comments" className="text-xs text-gray-500 mb-1 block">
+            Additional comments (optional)
+          </Label>
+          <Textarea 
+            id="comments"
+            placeholder="Tell us more about your experience..."
+            value={userComments}
+            onChange={(e) => setUserComments(e.target.value)}
+            className="text-sm min-h-[60px]"
+          />
+        </div>
       </div>
       
       <div className="flex justify-end">
         <Button 
           onClick={handleSubmitFeedback} 
-          disabled={!selectedFeedback}
+          disabled={!selectedFeedback || isSubmitting}
           size="sm"
         >
-          Submit
+          {isSubmitting ? "Submitting..." : "Submit"}
         </Button>
       </div>
     </div>

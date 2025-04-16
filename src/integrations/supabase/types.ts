@@ -72,6 +72,30 @@ export type Database = {
         }
         Relationships: []
       }
+      archetype_feedback: {
+        Row: {
+          archetype_id: string
+          created_at: string
+          feedback: string
+          id: string
+          user_comments: string | null
+        }
+        Insert: {
+          archetype_id: string
+          created_at?: string
+          feedback: string
+          id?: string
+          user_comments?: string | null
+        }
+        Update: {
+          archetype_id?: string
+          created_at?: string
+          feedback?: string
+          id?: string
+          user_comments?: string | null
+        }
+        Relationships: []
+      }
       archetype_metrics: {
         Row: {
           archetype_id: string
