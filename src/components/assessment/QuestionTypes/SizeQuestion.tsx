@@ -18,7 +18,7 @@ const SizeQuestion = ({
   exactEmployeeCount,
   setExactEmployeeCount
 }: SizeQuestionProps) => {
-  const [employeeCount, setEmployeeCount] = useState<string>(exactEmployeeCount?.toString() || '');
+  const [employeeCount, setEmployeeCount] = useState<string>(exactEmployeeCount?.toLocaleString() || '');
 
   // Map employee count to the appropriate range option
   const mapEmployeeCountToOption = (count: number): string => {
@@ -36,32 +36,29 @@ const SizeQuestion = ({
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setEmployeeCount(value);
+    const value = e.target.value.replace(/,/g, '');
     
     // Only update if we have a valid number
-    if (value && !isNaN(Number(value))) {
-      const count = Number(value);
-      if (setExactEmployeeCount) {
+    if (value === '' || !isNaN(Number(value))) {
+      const formattedValue = value ? Number(value).toLocaleString() : '';
+      setEmployeeCount(formattedValue);
+      
+      if (setExactEmployeeCount && value) {
+        const count = Number(value);
         setExactEmployeeCount(count);
+        const optionId = mapEmployeeCountToOption(count);
+        onAnswerChange(question.id, optionId);
+      } else if (setExactEmployeeCount) {
+        setExactEmployeeCount(null);
       }
-      const optionId = mapEmployeeCountToOption(count);
-      onAnswerChange(question.id, optionId);
     }
-  };
-
-  // Format the number with commas for readability
-  const formatNumber = (value: string): string => {
-    const numberValue = Number(value.replace(/,/g, ''));
-    if (isNaN(numberValue)) return value;
-    return numberValue.toLocaleString();
   };
 
   return (
     <div className="space-y-4">
       <div className="space-y-2">
         <label htmlFor="employeeCount" className="text-sm font-medium">
-          Enter the exact number of employees
+          Enter the number of employees at your company
         </label>
         <Input
           id="employeeCount"
@@ -69,16 +66,10 @@ const SizeQuestion = ({
           inputMode="numeric"
           value={employeeCount}
           onChange={handleInputChange}
-          placeholder="e.g., 5200"
+          placeholder="e.g., 5,200"
           className="w-full"
         />
       </div>
-
-      {employeeCount && !isNaN(Number(employeeCount.replace(/,/g, ''))) && (
-        <div className="mt-2 text-sm text-muted-foreground">
-          Size category: {question.options.find(opt => opt.id === selectedAnswer)?.text || 'Not specified'}
-        </div>
-      )}
     </div>
   );
 };
