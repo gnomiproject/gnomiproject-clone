@@ -1,3 +1,4 @@
+
 import { ArchetypeId } from '@/types/archetype';
 import { ARCHETYPE_COLORS } from '@/data/colors';
 
@@ -30,5 +31,12 @@ export const getArchetypeColor = (archetypeId: ArchetypeId, hexColor?: string): 
   }
   
   // Otherwise, get from our centralized colors
+  return ARCHETYPE_COLORS[archetypeId] || '#888888';
+};
+
+/**
+ * Get the hex color for an archetype
+ */
+export const getArchetypeHexColor = (archetypeId: ArchetypeId): string => {
   return ARCHETYPE_COLORS[archetypeId] || '#888888';
 };
