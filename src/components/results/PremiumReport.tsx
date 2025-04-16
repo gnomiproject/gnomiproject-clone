@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import Button from '@/components/shared/Button';
 import { ArchetypeDetailedData } from '@/types/archetype';
@@ -28,6 +29,7 @@ import * as z from "zod";
 
 // Storage key for assessment answers
 const SESSION_ANSWERS_KEY = 'healthcareArchetypeAnswers';
+const SESSION_EXACT_EMPLOYEE_COUNT_KEY = 'healthcareArchetypeExactEmployeeCount';
 
 interface PremiumReportProps {
   archetypeData: ArchetypeDetailedData;
@@ -69,8 +71,13 @@ const PremiumReport = ({ archetypeData }: PremiumReportProps) => {
       const answersString = sessionStorage.getItem(SESSION_ANSWERS_KEY);
       const answers = answersString ? JSON.parse(answersString) : {};
       
+      // Get exact employee count from sessionStorage
+      const exactEmployeeCountString = sessionStorage.getItem(SESSION_EXACT_EMPLOYEE_COUNT_KEY);
+      const exactEmployeeCount = exactEmployeeCountString ? Number(exactEmployeeCountString) : null;
+      
       console.log('Submitting report request with answers:', answers);
       console.log('Assessment result:', assessmentResult);
+      console.log('Exact employee count:', exactEmployeeCount);
 
       const { error } = await supabase
         .from('report_requests')
@@ -80,7 +87,10 @@ const PremiumReport = ({ archetypeData }: PremiumReportProps) => {
           organization: data.organization,
           comments: data.comments,
           archetype_id: archetypeData.id,
-          assessment_answers: answers,
+          assessment_answers: {
+            ...answers,
+            exactEmployeeCount: exactEmployeeCount
+          },
           assessment_result: assessmentResult
         });
 
