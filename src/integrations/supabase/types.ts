@@ -48,6 +48,207 @@ export type Database = {
         }
         Relationships: []
       }
+      archetype_families: {
+        Row: {
+          common_traits: Json
+          description: string
+          id: string
+          name: string
+        }
+        Insert: {
+          common_traits: Json
+          description: string
+          id: string
+          name: string
+        }
+        Update: {
+          common_traits?: Json
+          description?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      archetype_metrics: {
+        Row: {
+          archetype_id: string
+          average_family_size: number
+          emergency_visits_per_1k: number
+          inpatient_admits_per_1k: number
+          paid_allowed_ratio: number
+          paid_pepy: number
+          paid_pepy_variance: number
+          paid_pmpy: number
+          paid_pmpy_variance: number
+          risk_cost_ratio: number
+          sdoh_score: number
+          specialist_visits_per_1k: number
+        }
+        Insert: {
+          archetype_id: string
+          average_family_size: number
+          emergency_visits_per_1k: number
+          inpatient_admits_per_1k: number
+          paid_allowed_ratio: number
+          paid_pepy: number
+          paid_pepy_variance: number
+          paid_pmpy: number
+          paid_pmpy_variance: number
+          risk_cost_ratio: number
+          sdoh_score: number
+          specialist_visits_per_1k: number
+        }
+        Update: {
+          archetype_id?: string
+          average_family_size?: number
+          emergency_visits_per_1k?: number
+          inpatient_admits_per_1k?: number
+          paid_allowed_ratio?: number
+          paid_pepy?: number
+          paid_pepy_variance?: number
+          paid_pmpy?: number
+          paid_pmpy_variance?: number
+          risk_cost_ratio?: number
+          sdoh_score?: number
+          specialist_visits_per_1k?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "archetype_metrics_archetype_id_fkey"
+            columns: ["archetype_id"]
+            isOneToOne: true
+            referencedRelation: "archetypes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      archetypes: {
+        Row: {
+          characteristics: Json
+          color: string
+          family_id: string
+          id: string
+          long_description: string
+          name: string
+          primary_risk_driver: string
+          risk_score: number
+          risk_variance: number
+          short_description: string
+          strategic_priorities: Json
+        }
+        Insert: {
+          characteristics: Json
+          color: string
+          family_id: string
+          id: string
+          long_description: string
+          name: string
+          primary_risk_driver: string
+          risk_score: number
+          risk_variance: number
+          short_description: string
+          strategic_priorities: Json
+        }
+        Update: {
+          characteristics?: Json
+          color?: string
+          family_id?: string
+          id?: string
+          long_description?: string
+          name?: string
+          primary_risk_driver?: string
+          risk_score?: number
+          risk_variance?: number
+          short_description?: string
+          strategic_priorities?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "archetypes_family_id_fkey"
+            columns: ["family_id"]
+            isOneToOne: false
+            referencedRelation: "archetype_families"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      archetypes_detailed: {
+        Row: {
+          color: string
+          enhanced: Json
+          family_id: string
+          family_name: string
+          id: string
+          name: string
+          standard: Json
+          summary: Json
+        }
+        Insert: {
+          color: string
+          enhanced: Json
+          family_id: string
+          family_name: string
+          id: string
+          name: string
+          standard: Json
+          summary: Json
+        }
+        Update: {
+          color?: string
+          enhanced?: Json
+          family_id?: string
+          family_name?: string
+          id?: string
+          name?: string
+          standard?: Json
+          summary?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "archetypes_detailed_family_id_fkey"
+            columns: ["family_id"]
+            isOneToOne: false
+            referencedRelation: "archetype_families"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "archetypes_detailed_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "archetypes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      distinctive_traits: {
+        Row: {
+          archetype_id: string
+          disease_patterns: Json
+          unique_insights: Json
+          utilization_patterns: Json
+        }
+        Insert: {
+          archetype_id: string
+          disease_patterns: Json
+          unique_insights: Json
+          utilization_patterns: Json
+        }
+        Update: {
+          archetype_id?: string
+          disease_patterns?: Json
+          unique_insights?: Json
+          utilization_patterns?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "distinctive_traits_archetype_id_fkey"
+            columns: ["archetype_id"]
+            isOneToOne: true
+            referencedRelation: "archetypes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       report_requests: {
         Row: {
           access_token: string

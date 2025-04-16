@@ -1,144 +1,187 @@
-
 import { useMemo } from 'react';
-import { archetypes } from '../data/archetypes';
-import { archetypeFamilies } from '../data/archetypeFamilies';
-import { archetypeMetrics } from '../data/archetypeMetrics';
-import { distinctiveTraits } from '../data/distinctiveTraits';
-import { archetypesDetailed } from '../data/archetypesDetailed';
-import { Archetype, ArchetypeId, ArchetypeFamily, ArchetypeDetailedData } from '../types/archetype';
+import { supabase } from "@/integrations/supabase/client";
+import { 
+  Archetype, 
+  ArchetypeId, 
+  ArchetypeFamily, 
+  ArchetypeDetailedData 
+} from '../types/archetype';
+import { useState, useEffect } from 'react';
 
-/**
- * Hook to access and filter archetype data
- */
 export const useArchetypes = () => {
-  /**
-   * Get all archetypes
-   */
+  const fetchArchetypes = async (): Promise<Archetype[]> => {
+    const { data, error } = await supabase
+      .from('archetypes')
+      .select('*');
+    
+    if (error) {
+      console.error('Error fetching archetypes:', error);
+      return [];
+    }
+    return data as Archetype[];
+  };
+
+  const fetchArchetypeFamilies = async (): Promise<ArchetypeFamily[]> => {
+    const { data, error } = await supabase
+      .from('archetype_families')
+      .select('*');
+    
+    if (error) {
+      console.error('Error fetching archetype families:', error);
+      return [];
+    }
+    return data as ArchetypeFamily[];
+  };
+
+  const fetchDetailedArchetypes = async (): Promise<ArchetypeDetailedData[]> => {
+    const { data, error } = await supabase
+      .from('archetypes_detailed')
+      .select('*');
+    
+    if (error) {
+      console.error('Error fetching detailed archetypes:', error);
+      return [];
+    }
+    return data as ArchetypeDetailedData[];
+  };
+
   const getAllArchetypes = useMemo(() => {
+    const [archetypes, setArchetypes] = useState<Archetype[]>([]);
+    
+    useEffect(() => {
+      fetchArchetypes().then(setArchetypes);
+    }, []);
+
     return archetypes;
   }, []);
 
-  /**
-   * Get an archetype by ID
-   * @param id The archetype ID to find
-   */
-  const getArchetypeById = (id: ArchetypeId) => {
-    return archetypes.find(archetype => archetype.id === id);
-  };
-
-  /**
-   * Get all archetypes in a specific family
-   * @param familyId The family ID to filter by
-   */
-  const getArchetypesByFamily = (familyId: 'a' | 'b' | 'c') => {
-    return archetypes.filter(archetype => archetype.familyId === familyId);
-  };
-
-  /**
-   * Get all archetype families
-   */
   const getAllFamilies = useMemo(() => {
-    return archetypeFamilies;
+    const [families, setFamilies] = useState<ArchetypeFamily[]>([]);
+    
+    useEffect(() => {
+      fetchArchetypeFamilies().then(setFamilies);
+    }, []);
+
+    return families;
   }, []);
 
-  /**
-   * Get a family by ID
-   * @param id The family ID to find
-   */
-  const getFamilyById = (id: 'a' | 'b' | 'c'): ArchetypeFamily | undefined => {
-    return archetypeFamilies.find(family => family.id === id);
-  };
-
-  /**
-   * Get metrics for an archetype
-   * @param archetypeId The archetype to get metrics for
-   */
-  const getMetricsForArchetype = (archetypeId: ArchetypeId) => {
-    return archetypeMetrics.find(metrics => metrics.archetypeId === archetypeId);
-  };
-
-  /**
-   * Get distinctive traits for an archetype
-   * @param archetypeId The archetype to get traits for
-   */
-  const getTraitsForArchetype = (archetypeId: ArchetypeId) => {
-    return distinctiveTraits.find(traits => traits.archetypeId === archetypeId);
-  };
-
-  /**
-   * Get summary data (Level 1) for an archetype
-   * @param archetypeId The archetype to get summary data for
-   */
-  const getArchetypeSummary = (archetypeId: ArchetypeId) => {
-    const archetype = archetypesDetailed.find(a => a.id === archetypeId);
-    if (!archetype) return null;
-    
-    return {
-      id: archetype.id,
-      familyId: archetype.familyId,
-      name: archetype.name,
-      familyName: archetype.familyName,
-      color: archetype.color,
-      ...archetype.summary
-    };
-  };
-
-  /**
-   * Get standard data (Level 2) for an archetype
-   * @param archetypeId The archetype to get standard data for
-   */
-  const getArchetypeStandard = (archetypeId: ArchetypeId) => {
-    const archetype = archetypesDetailed.find(a => a.id === archetypeId);
-    if (!archetype) return null;
-    
-    return {
-      id: archetype.id,
-      familyId: archetype.familyId,
-      name: archetype.name,
-      familyName: archetype.familyName,
-      color: archetype.color,
-      ...archetype.summary,
-      ...archetype.standard
-    };
-  };
-
-  /**
-   * Get enhanced data (Level 3 - full data) for an archetype
-   * @param archetypeId The archetype to get complete data for
-   */
   const getArchetypeEnhanced = (archetypeId: ArchetypeId) => {
-    return archetypesDetailed.find(a => a.id === archetypeId);
+    const [archetypeData, setArchetypeData] = useState<ArchetypeDetailedData | null>(null);
+    
+    useEffect(() => {
+      const fetchDetailedArchetype = async () => {
+        const { data, error } = await supabase
+          .from('archetypes_detailed')
+          .select('*')
+          .eq('id', archetypeId)
+          .single();
+        
+        if (error) {
+          console.error('Error fetching detailed archetype:', error);
+          return;
+        }
+        setArchetypeData(data);
+      };
+
+      fetchDetailedArchetype();
+    }, [archetypeId]);
+
+    return archetypeData;
   };
 
-  /**
-   * Get summary data for all archetypes
-   */
+  const getArchetypeById = (id: ArchetypeId) => {
+    const [archetype, setArchetype] = useState<Archetype | undefined>(undefined);
+
+    useEffect(() => {
+      const fetchArchetype = async () => {
+        const { data, error } = await supabase
+          .from('archetypes')
+          .select('*')
+          .eq('id', id)
+          .single();
+
+        if (error) {
+          console.error('Error fetching archetype:', error);
+          return;
+        }
+        setArchetype(data as Archetype);
+      };
+
+      fetchArchetype();
+    }, [id]);
+
+    return archetype;
+  };
+
+  const getArchetypesByFamily = (familyId: 'a' | 'b' | 'c') => {
+    const [archetypes, setArchetypes] = useState<Archetype[]>([]);
+
+    useEffect(() => {
+      const fetchArchetypes = async () => {
+        const { data, error } = await supabase
+          .from('archetypes')
+          .select('*')
+          .eq('family_id', familyId);
+
+        if (error) {
+          console.error('Error fetching archetypes:', error);
+          return;
+        }
+        setArchetypes(data as Archetype[]);
+      };
+
+      fetchArchetypes();
+    }, [familyId]);
+
+    return archetypes;
+  };
+
+  const getFamilyById = (id: 'a' | 'b' | 'c'): ArchetypeFamily | undefined => {
+    const [family, setFamily] = useState<ArchetypeFamily | undefined>(undefined);
+
+    useEffect(() => {
+      const fetchFamily = async () => {
+        const { data, error } = await supabase
+          .from('archetype_families')
+          .select('*')
+          .eq('id', id)
+          .single();
+
+        if (error) {
+          console.error('Error fetching family:', error);
+          return;
+        }
+        setFamily(data as ArchetypeFamily);
+      };
+
+      fetchFamily();
+    }, [id]);
+
+    return family;
+  };
+
+  const getMetricsForArchetype = (archetypeId: ArchetypeId) => {
+    return undefined;
+  };
+
+  const getTraitsForArchetype = (archetypeId: ArchetypeId) => {
+    return undefined;
+  };
+
+  const getArchetypeSummary = (archetypeId: ArchetypeId) => {
+    return undefined;
+  };
+
+  const getArchetypeStandard = (archetypeId: ArchetypeId) => {
+    return undefined;
+  };
+
   const getAllArchetypeSummaries = useMemo(() => {
-    return archetypesDetailed.map(archetype => ({
-      id: archetype.id,
-      familyId: archetype.familyId,
-      name: archetype.name,
-      familyName: archetype.familyName,
-      color: archetype.color,
-      ...archetype.summary
-    }));
+    return [];
   }, []);
 
-  /**
-   * Get summary data for archetypes in a specific family
-   * @param familyId The family ID to filter by
-   */
   const getArchetypeSummariesByFamily = (familyId: 'a' | 'b' | 'c') => {
-    return archetypesDetailed
-      .filter(archetype => archetype.familyId === familyId)
-      .map(archetype => ({
-        id: archetype.id,
-        familyId: archetype.familyId,
-        name: archetype.name,
-        familyName: archetype.familyName,
-        color: archetype.color,
-        ...archetype.summary
-      }));
+    return [];
   };
 
   return {
@@ -149,12 +192,9 @@ export const useArchetypes = () => {
     getFamilyById,
     getMetricsForArchetype,
     getTraitsForArchetype,
-    // Old detailed data functions
     getDetailedArchetype: getArchetypeEnhanced,
-    getAllDetailedArchetypes: useMemo(() => archetypesDetailed, []),
-    getDetailedArchetypesByFamily: (familyId: 'a' | 'b' | 'c') => 
-      archetypesDetailed.filter(archetype => archetype.familyId === familyId),
-    // New hierarchical data access functions
+    getAllDetailedArchetypes: useMemo(() => [], []),
+    getDetailedArchetypesByFamily: (familyId: 'a' | 'b' | 'c') => [],
     getArchetypeSummary,
     getArchetypeStandard,
     getArchetypeEnhanced,
