@@ -1,5 +1,5 @@
-
 import { Archetype } from '../types/archetype';
+import { getArchetypeColorHex } from './colors';
 
 export const archetypes: Archetype[] = [
   // Family a: Strategists
@@ -30,7 +30,8 @@ export const archetypes: Archetype[] = [
     riskScore: 7.2,
     riskVariance: 10,
     primaryRiskDriver: 'Specialty condition prevalence',
-    color: 'archetype-a1'
+    color: 'archetype-a1',
+    hexColor: getArchetypeColorHex('a1')
   },
   {
     id: 'a2',
@@ -59,7 +60,8 @@ export const archetypes: Archetype[] = [
     riskScore: 8.5,
     riskVariance: 25,
     primaryRiskDriver: 'Chronic condition prevalence',
-    color: 'archetype-a2'
+    color: 'archetype-a2',
+    hexColor: getArchetypeColorHex('a2')
   },
   {
     id: 'a3',
@@ -88,7 +90,8 @@ export const archetypes: Archetype[] = [
     riskScore: 5.8,
     riskVariance: -5,
     primaryRiskDriver: 'Family health management',
-    color: 'archetype-a3'
+    color: 'archetype-a3',
+    hexColor: getArchetypeColorHex('a3')
   },
   
   // Family b: Pragmatists
@@ -119,7 +122,8 @@ export const archetypes: Archetype[] = [
     riskScore: 6.4,
     riskVariance: -2,
     primaryRiskDriver: 'Utilization variance',
-    color: 'archetype-b1'
+    color: 'archetype-b1',
+    hexColor: getArchetypeColorHex('b1')
   },
   {
     id: 'b2',
@@ -148,7 +152,8 @@ export const archetypes: Archetype[] = [
     riskScore: 6.0,
     riskVariance: 0,
     primaryRiskDriver: 'Demographic distribution',
-    color: 'archetype-b2'
+    color: 'archetype-b2',
+    hexColor: getArchetypeColorHex('b2')
   },
   {
     id: 'b3',
@@ -177,7 +182,8 @@ export const archetypes: Archetype[] = [
     riskScore: 5.9,
     riskVariance: -3,
     primaryRiskDriver: 'Occupational risk factors',
-    color: 'archetype-b3'
+    color: 'archetype-b3',
+    hexColor: getArchetypeColorHex('b3')
   },
 
   // Family c: Logisticians
@@ -208,7 +214,8 @@ export const archetypes: Archetype[] = [
     riskScore: 6.7,
     riskVariance: 5,
     primaryRiskDriver: 'Care coordination complexity',
-    color: 'archetype-c1'
+    color: 'archetype-c1',
+    hexColor: getArchetypeColorHex('c1')
   },
   {
     id: 'c2',
@@ -237,7 +244,8 @@ export const archetypes: Archetype[] = [
     riskScore: 7.1,
     riskVariance: 8,
     primaryRiskDriver: 'Population health complexities',
-    color: 'archetype-c2'
+    color: 'archetype-c2',
+    hexColor: getArchetypeColorHex('c2')
   },
   {
     id: 'c3',
@@ -266,6 +274,7 @@ export const archetypes: Archetype[] = [
     riskScore: 6.3,
     riskVariance: 2,
     primaryRiskDriver: 'Regulatory complexity',
-    color: 'archetype-c3'
+    color: 'archetype-c3',
+    hexColor: getArchetypeColorHex('c3')
   }
 ];
