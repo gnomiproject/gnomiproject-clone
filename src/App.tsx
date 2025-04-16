@@ -7,6 +7,7 @@ import About from './pages/About';
 import Assessment from './pages/Assessment';
 import Insights from './pages/Insights';
 import Results from './pages/Results';
+import DeepReport from './pages/DeepReport';
 import NotFound from './pages/NotFound';
 import ColorSafelist from './components/utils/ColorSafelist';
 import { Toaster } from './components/ui/toaster';
@@ -24,6 +25,7 @@ function App() {
             <Route path="/assessment" element={<Assessment />} />
             <Route path="/insights" element={<Insights />} />
             <Route path="/results" element={<Results />} />
+            <Route path="/deep-report" element={<DeepReport />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>

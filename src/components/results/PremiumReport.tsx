@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import Button from '@/components/shared/Button';
 import { ArchetypeDetailedData } from '@/types/archetype';
-import { FileText } from 'lucide-react';
+import { FileText, Link as LinkIcon } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useLocation } from 'react-router-dom';
@@ -49,6 +49,7 @@ const PremiumReport = ({ archetypeData }: PremiumReportProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
   const { toast } = useToast();
   const location = useLocation();
 
@@ -79,7 +80,7 @@ const PremiumReport = ({ archetypeData }: PremiumReportProps) => {
       console.log('Assessment result:', assessmentResult);
       console.log('Exact employee count:', exactEmployeeCount);
 
-      const { error } = await supabase
+      const { data: insertedData, error } = await supabase
         .from('report_requests')
         .insert({
           name: data.name,
@@ -92,9 +93,16 @@ const PremiumReport = ({ archetypeData }: PremiumReportProps) => {
             exactEmployeeCount: exactEmployeeCount
           },
           assessment_result: assessmentResult
-        });
+        })
+        .select('access_token')
+        .single();
 
       if (error) throw error;
+      
+      // Store the access token for displaying the link
+      if (insertedData && insertedData.access_token) {
+        setAccessToken(insertedData.access_token);
+      }
 
       setIsSubmitted(true);
       toast({
@@ -116,7 +124,15 @@ const PremiumReport = ({ archetypeData }: PremiumReportProps) => {
   const resetForm = () => {
     form.reset();
     setIsSubmitted(false);
+    setAccessToken(null);
     setIsDialogOpen(false);
+  };
+
+  // Generate deep report URL (for development purposes)
+  const getDeepReportUrl = () => {
+    if (!accessToken) return '';
+    const baseUrl = window.location.origin;
+    return `${baseUrl}/deep-report?token=${accessToken}`;
   };
 
   return (
@@ -208,6 +224,25 @@ const PremiumReport = ({ archetypeData }: PremiumReportProps) => {
               <p className="text-center text-gray-600 mb-6">
                 Thanks for your interest in the {archetypeData.name} archetype! We'll email your report to you shortly.
               </p>
+              
+              {/* For development: Show secure access link */}
+              {accessToken && (
+                <div className="w-full bg-gray-50 p-4 rounded-lg mb-6 border border-dashed">
+                  <p className="text-sm text-gray-500 mb-2">For development purposes only:</p>
+                  <div className="flex items-center gap-2">
+                    <LinkIcon className="h-4 w-4 text-blue-500" />
+                    <a 
+                      href={getDeepReportUrl()}
+                      className="text-blue-500 hover:underline text-sm break-all"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {getDeepReportUrl()}
+                    </a>
+                  </div>
+                </div>
+              )}
+              
               <Button 
                 className={`bg-${color} hover:bg-${color}/90 text-white px-8`}
                 onClick={resetForm}

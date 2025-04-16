@@ -50,36 +50,42 @@ export type Database = {
       }
       report_requests: {
         Row: {
+          access_token: string
           archetype_id: string
           assessment_answers: Json | null
           assessment_result: Json | null
           comments: string | null
           created_at: string
           email: string
+          expires_at: string
           id: string
           name: string
           organization: string
           status: string
         }
         Insert: {
+          access_token?: string
           archetype_id: string
           assessment_answers?: Json | null
           assessment_result?: Json | null
           comments?: string | null
           created_at?: string
           email: string
+          expires_at?: string
           id?: string
           name: string
           organization: string
           status?: string
         }
         Update: {
+          access_token?: string
           archetype_id?: string
           assessment_answers?: Json | null
           assessment_result?: Json | null
           comments?: string | null
           created_at?: string
           email?: string
+          expires_at?: string
           id?: string
           name?: string
           organization?: string
