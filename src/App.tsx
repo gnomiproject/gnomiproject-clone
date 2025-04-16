@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { Toaster } from 'react-hot-toast';
+import { Toaster } from '@/components/ui/sonner';
 import Navbar from '@/components/shared/Navbar';
 import Index from '@/pages/Index';
 import Assessment from '@/pages/Assessment';
