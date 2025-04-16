@@ -1,7 +1,5 @@
-
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowRightCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import { ArchetypeId, ArchetypeColor } from '@/types/archetype';
 
 interface ArchetypeCardProps {
@@ -163,13 +161,6 @@ const ArchetypeCard: React.FC<ArchetypeCardProps> = ({
               <>Show More <ChevronDown size={16} className="ml-1" /></>
             )}
           </button>
-          
-          <Link 
-            to={`/assessment?quickAssess=${id}`}
-            className={`flex items-center text-sm font-medium text-archetype-${id} hover:underline`}
-          >
-            Assess Match <ArrowRightCircle size={16} className="ml-1" />
-          </Link>
         </div>
       </div>
     </div>
