@@ -11,12 +11,13 @@ interface ArchetypeHeaderProps {
 const ArchetypeHeader = ({ archetypeData, familyData }: ArchetypeHeaderProps) => {
   const color = `archetype-${archetypeData.id}`;
   const familyColor = `family-${archetypeData.familyId}`;
+  const familyName = familyData?.name || archetypeData.familyName || '';
 
   return (
     <div>
       <div className="text-center mb-6">
         <span className={cn(`inline-block bg-${familyColor}/10 text-${familyColor} rounded-full px-4 py-1 text-sm font-medium`)}>
-          family {archetypeData.familyId}: {familyData?.name || ''}
+          family {archetypeData.familyId}: {familyName}
         </span>
       </div>
 

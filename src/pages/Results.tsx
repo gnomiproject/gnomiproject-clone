@@ -15,7 +15,7 @@ const SESSION_RESULTS_KEY = 'healthcareArchetypeSessionResults';
 const Results = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { getArchetypeEnhanced, getFamilyById } = useArchetypes();
+  const { getArchetypeEnhanced, allFamilies } = useArchetypes();
   
   // Get the result from location state or redirect to assessment
   const result = location.state?.result as AssessmentResult | undefined;
@@ -46,17 +46,18 @@ const Results = () => {
   
   // Get the archetype data
   const archetypeData = getArchetypeEnhanced(result.primaryArchetype);
-  const familyId = archetypeData?.familyId;
-  const familyData = familyId ? getFamilyById(familyId) : undefined;
-  
   if (!archetypeData) return null;
+  
+  const familyId = archetypeData?.familyId;
+  // Find family data from allFamilies instead of calling a function that uses hooks
+  const familyData = familyId && allFamilies ? allFamilies.find(family => family.id === familyId) : undefined;
+  
+  // Using the custom color based on archetype.id
+  const color = `archetype-${archetypeData.id}`;
   
   const handleRetakeAssessment = () => {
     navigate('/assessment');
   };
-  
-  // Using the custom color based on archetype.id
-  const color = `archetype-${archetypeData.id}`;
   
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-6 md:px-12">

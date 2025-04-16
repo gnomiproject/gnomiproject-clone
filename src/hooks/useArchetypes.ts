@@ -50,6 +50,7 @@ export const useArchetypes = () => {
     
     // From useArchetypeFamilies
     getAllFamilies: allFamilies,
+    allFamilies, // Expose directly for components to access
     getFamilyById,
     
     // From useArchetypeDetails

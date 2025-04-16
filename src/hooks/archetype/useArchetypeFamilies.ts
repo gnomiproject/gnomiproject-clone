@@ -36,38 +36,10 @@ export const useArchetypeFamilies = () => {
     fetchFamilies();
   }, []);
 
-  // Get family by ID
+  // Get family by ID - Fixed to not use hooks inside the function
   const getFamilyById = (id: 'a' | 'b' | 'c') => {
-    const [family, setFamily] = useState<ArchetypeFamily | undefined>(undefined);
-
-    useEffect(() => {
-      const fetchFamily = async () => {
-        const { data, error } = await supabase
-          .from('archetype_families')
-          .select('*')
-          .eq('id', id)
-          .single();
-
-        if (error) {
-          console.error('Error fetching family:', error);
-          return;
-        }
-        
-        // Transform data to match our interface
-        const transformedData: ArchetypeFamily = {
-          id: data.id as 'a' | 'b' | 'c',
-          name: data.name,
-          description: data.description,
-          commonTraits: data.common_traits as string[]
-        };
-        
-        setFamily(transformedData);
-      };
-
-      fetchFamily();
-    }, [id]);
-
-    return family;
+    // Return the family data directly from allFamilies
+    return allFamilies.find(family => family.id === id);
   };
 
   return {
