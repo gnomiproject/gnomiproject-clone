@@ -1,3 +1,4 @@
+
 export type ArchetypeFamily = {
   id: 'a' | 'b' | 'c';
   name: string;
@@ -33,6 +34,7 @@ export type Archetype = {
   riskVariance: number; // Percentage variance from average
   primaryRiskDriver: string;
   color: ArchetypeColor;
+  hexColor?: string; // New field for precise hex color
 };
 
 export type ArchetypeMetrics = {
@@ -70,6 +72,7 @@ export interface ArchetypeDetailedData {
   name: string;
   familyName: string;
   color: ArchetypeColor;
+  hexColor?: string; // New field for precise hex color
   
   // Level 1: Home page card (minimal)
   summary: {
@@ -142,4 +145,5 @@ export type ArchetypeSummary = {
   description: string;
   keyCharacteristics: string[];
   color: ArchetypeColor;
+  hexColor?: string; // New field for precise hex color
 };

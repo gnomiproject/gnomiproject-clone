@@ -45,6 +45,7 @@ export const useArchetypeDetails = () => {
             name: item.name,
             familyName: item.family_name,
             color: item.color as ArchetypeColor,
+            hexColor: item.hex_color, // Add the new hex_color field
             summary: {
               description: summaryData?.description || '',
               keyCharacteristics: summaryData?.keyCharacteristics as string[] || []
@@ -96,7 +97,8 @@ export const useArchetypeDetails = () => {
           familyName: archetype.familyName,
           description: archetype.summary.description,
           keyCharacteristics: archetype.summary.keyCharacteristics,
-          color: archetype.color
+          color: archetype.color,
+          hexColor: archetype.hexColor // Add the hex color to summaries
         }));
         
         setAllDetailedArchetypes(detailedArchetypes);

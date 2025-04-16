@@ -127,6 +127,7 @@ export type Database = {
           characteristics: Json
           color: string
           family_id: string
+          hex_color: string | null
           id: string
           long_description: string
           name: string
@@ -140,6 +141,7 @@ export type Database = {
           characteristics: Json
           color: string
           family_id: string
+          hex_color?: string | null
           id: string
           long_description: string
           name: string
@@ -153,6 +155,7 @@ export type Database = {
           characteristics?: Json
           color?: string
           family_id?: string
+          hex_color?: string | null
           id?: string
           long_description?: string
           name?: string
@@ -178,6 +181,7 @@ export type Database = {
           enhanced: Json
           family_id: string
           family_name: string
+          hex_color: string | null
           id: string
           name: string
           standard: Json
@@ -188,6 +192,7 @@ export type Database = {
           enhanced: Json
           family_id: string
           family_name: string
+          hex_color?: string | null
           id: string
           name: string
           standard: Json
@@ -198,6 +203,7 @@ export type Database = {
           enhanced?: Json
           family_id?: string
           family_name?: string
+          hex_color?: string | null
           id?: string
           name?: string
           standard?: Json

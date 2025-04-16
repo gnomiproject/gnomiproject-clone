@@ -17,12 +17,22 @@ const DetailedArchetypeReport = ({ archetypeId, onRetakeAssessment }: DetailedAr
     return <div>No detailed data available for this archetype.</div>;
   }
   
+  // Use the hex color if available, otherwise fall back to the Tailwind class naming convention
+  const colorStyle = archetypeData.hexColor 
+    ? { borderColor: archetypeData.hexColor } 
+    : undefined;
+  
   return (
     <div className="text-left">
-      <DetailedAnalysisTabs 
-        archetypeData={archetypeData} 
-        onRetakeAssessment={onRetakeAssessment}
-      />
+      <div 
+        className={`border-t-4 ${!colorStyle ? `border-archetype-${archetypeId}` : ''}`} 
+        style={colorStyle}
+      >
+        <DetailedAnalysisTabs 
+          archetypeData={archetypeData} 
+          onRetakeAssessment={onRetakeAssessment}
+        />
+      </div>
     </div>
   );
 };
