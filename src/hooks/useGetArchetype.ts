@@ -31,7 +31,19 @@ export const useGetArchetype = (archetypeId: ArchetypeId) => {
         }
 
         if (data) {
-          setArchetypeData(data as ArchetypeDetailedData);
+          // Transform the database data to match our TypeScript type structure
+          const transformedData: ArchetypeDetailedData = {
+            id: data.id as ArchetypeId,
+            familyId: data.family_id as 'a' | 'b' | 'c',
+            name: data.name,
+            familyName: data.family_name,
+            color: data.color,
+            summary: typeof data.summary === 'string' ? JSON.parse(data.summary) : data.summary,
+            standard: typeof data.standard === 'string' ? JSON.parse(data.standard) : data.standard,
+            enhanced: typeof data.enhanced === 'string' ? JSON.parse(data.enhanced) : data.enhanced,
+          };
+          
+          setArchetypeData(transformedData);
         } else {
           // Fallback to existing method if not found in database
           const { getArchetypeEnhanced } = useArchetypes();
