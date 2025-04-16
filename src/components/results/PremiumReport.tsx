@@ -1,15 +1,77 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import Button from '@/components/shared/Button';
 import { ArchetypeDetailedData } from '@/types/archetype';
 import { FileText } from 'lucide-react';
+import { useToast } from "@/hooks/use-toast";
+import { 
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription
+} from "@/components/ui/dialog";
+import { 
+  Form, 
+  FormControl, 
+  FormField, 
+  FormItem, 
+  FormLabel, 
+  FormMessage 
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
 
 interface PremiumReportProps {
   archetypeData: ArchetypeDetailedData;
 }
 
+const formSchema = z.object({
+  name: z.string().min(2, { message: "Name must be at least 2 characters." }),
+  email: z.string().email({ message: "Please enter a valid email address." }),
+  organization: z.string().min(2, { message: "Organization name must be at least 2 characters." }),
+  comments: z.string().optional(),
+});
+
+type FormValues = z.infer<typeof formSchema>;
+
 const PremiumReport = ({ archetypeData }: PremiumReportProps) => {
   const color = `archetype-${archetypeData.id}`;
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const { toast } = useToast();
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      organization: "",
+      comments: "",
+    },
+  });
+
+  const onSubmit = (data: FormValues) => {
+    console.log("Form submitted with data:", data);
+    
+    // Simulate form submission delay
+    setTimeout(() => {
+      setIsSubmitted(true);
+      toast({
+        title: "Report Request Submitted",
+        description: "We'll send your full archetype report to your email shortly.",
+      });
+    }, 1000);
+  };
+
+  const resetForm = () => {
+    form.reset();
+    setIsSubmitted(false);
+    setIsDialogOpen(false);
+  };
 
   return (
     <div className="bg-gray-50 px-8 py-12 border-t">
@@ -60,6 +122,7 @@ const PremiumReport = ({ archetypeData }: PremiumReportProps) => {
               
               <Button 
                 className={`bg-${color} hover:bg-${color}/90 text-white w-full lg:w-auto px-8`}
+                onClick={() => setIsDialogOpen(true)}
               >
                 Request your full report now
               </Button>
@@ -75,6 +138,120 @@ const PremiumReport = ({ archetypeData }: PremiumReportProps) => {
           </div>
         </div>
       </div>
+
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold">
+              {isSubmitted ? "Thank You!" : `Request Your Full ${archetypeData.name} Report`}
+            </DialogTitle>
+            <DialogDescription>
+              {isSubmitted 
+                ? "Your report request has been received. We'll send it to your email shortly." 
+                : "Please fill out the form below to receive your comprehensive archetype report."}
+            </DialogDescription>
+          </DialogHeader>
+          
+          {isSubmitted ? (
+            <div className="flex flex-col items-center justify-center py-6">
+              <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mb-4">
+                <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <p className="text-center text-gray-600 mb-6">
+                Thanks for your interest in the {archetypeData.name} archetype! We'll email your report to you shortly.
+              </p>
+              <Button 
+                className={`bg-${color} hover:bg-${color}/90 text-white px-8`}
+                onClick={resetForm}
+              >
+                Close
+              </Button>
+            </div>
+          ) : (
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Full Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Your name" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input type="email" placeholder="your.email@company.com" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="organization"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Organization</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Your company or organization" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="comments"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Additional Comments (Optional)</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Any specific aspects of the archetype you're interested in..."
+                          className="resize-none"
+                          {...field}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                
+                <div className="flex justify-end pt-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsDialogOpen(false)}
+                    className="mr-2"
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    type="submit"
+                    className={`bg-${color} hover:bg-${color}/90 text-white`}
+                  >
+                    Submit Request
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
