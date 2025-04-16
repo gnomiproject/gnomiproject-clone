@@ -1,11 +1,11 @@
-
 // Define the archetype families and their properties
 export type ArchetypeFamily = {
   id: 'a' | 'b' | 'c';
   name: string;
   description: string;
   commonTraits: string[];
-  hexColor?: string; // Optional field for precise hex color
+  hexColor: string; // Make this required instead of optional
+  rgbValues?: string; // Add RGB values for specialized cases
 };
 
 // Define valid archetype IDs
@@ -31,7 +31,7 @@ export type Archetype = {
   riskVariance: number;
   primaryRiskDriver: string;
   color: ArchetypeColor;
-  hexColor?: string;
+  hexColor: string; // Make this required instead of optional
 };
 
 // Archetype summary for overview displays
@@ -42,8 +42,8 @@ export type ArchetypeSummary = {
   familyName: string;
   description: string;
   keyCharacteristics: string[];
-  color: ArchetypeColor; // Add color property
-  hexColor?: string; // Add optional hexColor property
+  color: ArchetypeColor; 
+  hexColor: string; // Make this required instead of optional
 };
 
 // Structure for key statistics
@@ -116,7 +116,7 @@ export type ArchetypeDetailedData = {
   name: string;
   familyName: string;
   color: ArchetypeColor;
-  hexColor?: string;
+  hexColor: string;
   summary: SummaryArchetypeData;
   standard: StandardArchetypeData;
   enhanced?: EnhancedArchetypeData;

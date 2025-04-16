@@ -7,6 +7,7 @@ import {
   ArchetypeSummary,
   ArchetypeColor
 } from '@/types/archetype';
+import { getArchetypeColorHex } from '@/data/colors';
 
 export const useArchetypeDetails = () => {
   const [allDetailedArchetypes, setAllDetailedArchetypes] = useState<ArchetypeDetailedData[]>([]);
@@ -38,6 +39,9 @@ export const useArchetypeDetails = () => {
             ? JSON.parse(item.enhanced)
             : item.enhanced as Record<string, any>;
           
+          // Get the hex color from database or fallback to our centralized color system
+          const hexColor = item.hex_color || getArchetypeColorHex(item.id as ArchetypeId);
+          
           // Build the properly typed object
           return {
             id: item.id as ArchetypeId,
@@ -45,7 +49,7 @@ export const useArchetypeDetails = () => {
             name: item.name,
             familyName: item.family_name,
             color: item.color as ArchetypeColor,
-            hexColor: item.hex_color, // Add the new hex_color field
+            hexColor: hexColor,
             summary: {
               description: summaryData?.description || '',
               keyCharacteristics: summaryData?.keyCharacteristics as string[] || []
@@ -98,7 +102,7 @@ export const useArchetypeDetails = () => {
           description: archetype.summary.description,
           keyCharacteristics: archetype.summary.keyCharacteristics || [],
           color: archetype.color,
-          hexColor: archetype.hexColor // Include the hexColor in the summaries
+          hexColor: archetype.hexColor
         }));
         
         setAllDetailedArchetypes(detailedArchetypes);

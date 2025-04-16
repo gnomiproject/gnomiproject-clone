@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { ArchetypeFamily } from '@/types/archetype';
+import { getFamilyColorHex } from '@/data/colors';
 
 export const useArchetypeFamilies = () => {
   const [allFamilies, setAllFamilies] = useState<ArchetypeFamily[]>([]);
@@ -23,7 +24,7 @@ export const useArchetypeFamilies = () => {
           name: item.name,
           description: item.description,
           commonTraits: item.common_traits as string[],
-          hexColor: item.hex_color // Add the new hex_color field
+          hexColor: item.hex_color || getFamilyColorHex(item.id as 'a' | 'b' | 'c') // Use database value or fallback to our defined colors
         }));
         
         setAllFamilies(families);
