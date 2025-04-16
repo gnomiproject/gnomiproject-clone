@@ -5,6 +5,7 @@ import { archetypeMetrics } from "../data/archetypeMetrics";
 import { distinctiveTraits } from "../data/distinctiveTraits";
 import { archetypesDetailed } from "../data/archetypesDetailed";
 import { archetypeFamilies } from "../data/archetypeFamilies";
+import { toast } from "@/components/ui/use-toast";
 
 // This utility can be used to migrate all the client-side data to Supabase
 // You can run this function once to seed your database
@@ -25,7 +26,15 @@ export const migrateDataToSupabase = async () => {
       .from('archetype_families')
       .upsert(formattedFamilies, { onConflict: 'id' });
       
-    if (familiesError) throw new Error(`Error migrating families: ${familiesError.message}`);
+    if (familiesError) {
+      console.error('Error migrating families:', familiesError);
+      toast({
+        title: "Migration Error",
+        description: `Error migrating families: ${familiesError.message}`,
+        variant: "destructive"
+      });
+      throw new Error(`Error migrating families: ${familiesError.message}`);
+    }
     
     // Step 2: Insert archetypes
     console.log('Migrating archetypes...');
@@ -47,7 +56,15 @@ export const migrateDataToSupabase = async () => {
       .from('archetypes')
       .upsert(formattedArchetypes, { onConflict: 'id' });
       
-    if (archetypesError) throw new Error(`Error migrating archetypes: ${archetypesError.message}`);
+    if (archetypesError) {
+      console.error('Error migrating archetypes:', archetypesError);
+      toast({
+        title: "Migration Error",
+        description: `Error migrating archetypes: ${archetypesError.message}`,
+        variant: "destructive"
+      });
+      throw new Error(`Error migrating archetypes: ${archetypesError.message}`);
+    }
     
     // Step 3: Insert archetype metrics
     console.log('Migrating archetype metrics...');
@@ -70,7 +87,15 @@ export const migrateDataToSupabase = async () => {
       .from('archetype_metrics')
       .upsert(formattedMetrics, { onConflict: 'archetype_id' });
       
-    if (metricsError) throw new Error(`Error migrating metrics: ${metricsError.message}`);
+    if (metricsError) {
+      console.error('Error migrating metrics:', metricsError);
+      toast({
+        title: "Migration Error",
+        description: `Error migrating metrics: ${metricsError.message}`,
+        variant: "destructive"
+      });
+      throw new Error(`Error migrating metrics: ${metricsError.message}`);
+    }
     
     // Step 4: Insert distinctive traits
     console.log('Migrating distinctive traits...');
@@ -85,7 +110,15 @@ export const migrateDataToSupabase = async () => {
       .from('distinctive_traits')
       .upsert(formattedTraits, { onConflict: 'archetype_id' });
       
-    if (traitsError) throw new Error(`Error migrating traits: ${traitsError.message}`);
+    if (traitsError) {
+      console.error('Error migrating traits:', traitsError);
+      toast({
+        title: "Migration Error",
+        description: `Error migrating traits: ${traitsError.message}`,
+        variant: "destructive"
+      });
+      throw new Error(`Error migrating traits: ${traitsError.message}`);
+    }
     
     // Step 5: Insert detailed archetype data
     console.log('Migrating detailed archetype data...');
@@ -107,9 +140,21 @@ export const migrateDataToSupabase = async () => {
       .from('archetypes_detailed')
       .upsert(formattedDetailedData, { onConflict: 'id' });
       
-    if (detailedError) throw new Error(`Error migrating detailed data: ${detailedError.message}`);
+    if (detailedError) {
+      console.error('Error migrating detailed data:', detailedError);
+      toast({
+        title: "Migration Error",
+        description: `Error migrating detailed data: ${detailedError.message}`,
+        variant: "destructive"
+      });
+      throw new Error(`Error migrating detailed data: ${detailedError.message}`);
+    }
     
     console.log('Data migration completed successfully!');
+    toast({
+      title: "Migration Successful",
+      description: "All data has been successfully migrated to your Supabase database.",
+    });
     return true;
     
   } catch (error) {

@@ -2,12 +2,14 @@
 import React, { useState, useEffect } from 'react';
 import { migrateDataToSupabase, checkDataInSupabase } from '@/utils/migrationUtil';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from "@/hooks/use-toast";
 
 const DataMigrationTool = () => {
   const [migrationStatus, setMigrationStatus] = useState<'idle' | 'checking' | 'migrating' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState<string>('');
   const [dataExists, setDataExists] = useState<boolean>(false);
   const [archCount, setArchCount] = useState<number>(0);
+  const [errorDetails, setErrorDetails] = useState<string>('');
 
   useEffect(() => {
     checkData();
@@ -15,6 +17,7 @@ const DataMigrationTool = () => {
 
   const checkData = async () => {
     setMigrationStatus('checking');
+    setErrorDetails('');
     try {
       // Check if data exists in Supabase
       const { exists, count } = await checkDataInSupabase();
@@ -30,6 +33,7 @@ const DataMigrationTool = () => {
     } catch (error) {
       console.error('Error checking data:', error);
       setMessage('Failed to check data. There might be a connection issue or the required tables might not exist.');
+      setErrorDetails(error instanceof Error ? error.message : String(error));
       setMigrationStatus('error');
     }
   };
@@ -37,6 +41,7 @@ const DataMigrationTool = () => {
   const handleMigration = async () => {
     setMigrationStatus('migrating');
     setMessage('Migrating data to Supabase...');
+    setErrorDetails('');
     
     try {
       const success = await migrateDataToSupabase();
@@ -44,15 +49,30 @@ const DataMigrationTool = () => {
       if (success) {
         setMessage('Data migration completed successfully! The database now contains all the archetype data.');
         setMigrationStatus('success');
+        toast({
+          title: "Migration Successful",
+          description: "Data has been successfully migrated to your Supabase database.",
+        });
         checkData(); // Refresh the data status
       } else {
         setMessage('Data migration failed. Check the console for detailed error messages.');
         setMigrationStatus('error');
+        toast({
+          title: "Migration Failed",
+          description: "There was an error during migration. Check the console for details.",
+          variant: "destructive"
+        });
       }
     } catch (error) {
       console.error('Migration error:', error);
       setMessage(`Migration error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setErrorDetails(error instanceof Error ? error.stack || error.message : String(error));
       setMigrationStatus('error');
+      toast({
+        title: "Migration Failed",
+        description: error instanceof Error ? error.message : "Unknown error occurred",
+        variant: "destructive"
+      });
     }
   };
 
@@ -66,6 +86,12 @@ const DataMigrationTool = () => {
         'bg-blue-50 text-blue-800'
       }`}>
         <p>{message}</p>
+        {errorDetails && (
+          <div className="mt-2 p-3 bg-red-100 rounded text-red-900 text-sm font-mono overflow-auto">
+            <p className="font-semibold mb-1">Error Details:</p>
+            <p className="whitespace-pre-wrap">{errorDetails}</p>
+          </div>
+        )}
       </div>
       
       <div className="flex flex-col gap-4">
@@ -112,6 +138,7 @@ const DataMigrationTool = () => {
           <li>Make sure you have created all the necessary tables in your Supabase database before running the migration.</li>
           <li>The migration will upsert data (insert if not exists, update if exists) based on ID.</li>
           <li>After successful migration, your application will use the database data instead of the client-side data files.</li>
+          <li><strong>Important:</strong> If you're seeing RLS policy errors, you might need to disable Row Level Security on your tables in Supabase or create appropriate policies.</li>
         </ul>
       </div>
     </div>
