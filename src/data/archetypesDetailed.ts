@@ -1,3 +1,4 @@
+
 import { ArchetypeDetailedData } from '../types/archetype';
 import { getArchetypeColorHex } from './colors';
 
@@ -1032,4 +1033,251 @@ export const archetypesDetailed: ArchetypeDetailedData[] = [
           trend: 'down'
         },
         specialistUtilization: {
-          value:
+          value: '-2.1%',
+          trend: 'down'
+        },
+        healthcareSpend: {
+          value: '-18.2%',
+          trend: 'down'
+        },
+        familySize: {
+          value: '-8.3%',
+          trend: 'down'
+        }
+      },
+      keyInsights: [
+        'Exceptional cost efficiency achieved through systematic healthcare management',
+        'Strong medication adherence protocols demonstrate effectiveness of structured approaches',
+        'Digital health engagement focused on chronic condition management shows high ROI',
+        'Lower specialist utilization reflects effective primary care coordination'
+      ]
+    },
+    
+    enhanced: {
+      riskProfile: {
+        score: '0.89',
+        comparison: '-5.8% below archetype average',
+        conditions: [
+          {
+            name: 'Hypertension',
+            value: '+8%',
+            barWidth: '2%'
+          },
+          {
+            name: 'Diabetes',
+            value: '+6%',
+            barWidth: '1.5%'
+          },
+          {
+            name: 'Depression',
+            value: '-12%',
+            barWidth: '3%'
+          }
+        ]
+      },
+      strategicPriorities: [
+        {
+          number: '1',
+          title: 'Medication Adherence Optimization',
+          description: 'Enhance medication adherence programs for chronic conditions like hypertension and diabetes.'
+        },
+        {
+          number: '2',
+          title: 'Protocol Standardization',
+          description: 'Implement standardized care protocols across healthcare delivery channels.'
+        },
+        {
+          number: '3',
+          title: 'Digital Health Engagement',
+          description: 'Expand digital health tools for condition monitoring and management.'
+        },
+        {
+          number: '4',
+          title: 'Primary Care Optimization',
+          description: 'Strengthen primary care coordination and preventive health programs.'
+        }
+      ],
+      swot: {
+        strengths: [
+          'Lower healthcare spend (-18.2%)',
+          'Strong medication adherence rates',
+          'Lower emergency utilization (-4.3%)',
+          'Effective protocol compliance'
+        ],
+        weaknesses: [
+          'Limited specialist engagement (-2.1%)',
+          'Elevated hypertension prevalence (+8%)',
+          'Elevated diabetes prevalence (+6%)',
+          'Smaller family sizes (-8.3%)'
+        ],
+        opportunities: [
+          'Digital health optimization',
+          'Remote monitoring expansion',
+          'Integrated condition management',
+          'Primary care coordination enhancement'
+        ],
+        threats: [
+          'Care fragmentation risks',
+          'Medication adherence sustainability',
+          'Complex condition management challenges',
+          'Provider protocol adoption variations'
+        ]
+      },
+      costSavings: [
+        {
+          title: 'Medication Optimization Programs',
+          description: 'Implement comprehensive medication management and adherence programs.'
+        },
+        {
+          title: 'Digital Health Platform Integration',
+          description: 'Leverage digital tools for condition monitoring and early intervention.'
+        },
+        {
+          title: 'Care Pathway Standardization',
+          description: 'Develop standardized pathways for common conditions to reduce variation.'
+        }
+      ]
+    }
+  },
+  
+  // Engaged Healthcare Consumers (c3)
+  {
+    id: 'c3',
+    familyId: 'c',
+    name: 'Engaged Healthcare Consumers',
+    familyName: 'Logisticians',
+    color: 'maroon',
+    hexColor: getArchetypeColorHex('c3'),
+    
+    summary: {
+      description: 'Organizations that prioritize healthcare regulatory compliance while maintaining effective benefit structures.',
+      keyCharacteristics: [
+        'Strong compliance orientation',
+        'Standardized healthcare processes'
+      ]
+    },
+    
+    standard: {
+      fullDescription: 'Organizations that prioritize healthcare regulatory compliance while implementing effective benefits programs, focusing on quality standards and documentation throughout the healthcare delivery system.',
+      keyCharacteristics: [
+        'Strong compliance orientation',
+        'Standardized healthcare processes',
+        'Quality assurance focus',
+        'Comprehensive documentation',
+        'Systematic program implementation',
+        'Regular audit procedures'
+      ],
+      overview: 'Engaged Healthcare Consumers excel at maintaining compliance with healthcare regulations while implementing effective benefits programs. They focus on quality standards and documentation throughout the healthcare delivery system, ensuring consistent performance and regulatory alignment.',
+      keyStatistics: {
+        emergencyUtilization: {
+          value: '+3.2%',
+          trend: 'neutral'
+        },
+        specialistUtilization: {
+          value: '+1.8%',
+          trend: 'neutral'
+        },
+        healthcareSpend: {
+          value: '-3.6%',
+          trend: 'down'
+        },
+        familySize: {
+          value: '-1.7%',
+          trend: 'neutral'
+        }
+      },
+      keyInsights: [
+        'Moderate healthcare costs demonstrate effective regulatory compliance approaches',
+        'Comprehensive documentation and quality assurance drive consistent outcomes',
+        'Systematic program implementation ensures consistent member experience',
+        'Regular audit procedures maintain quality standards and identify improvement opportunities'
+      ]
+    },
+    
+    enhanced: {
+      riskProfile: {
+        score: '0.93',
+        comparison: '-0.8% below archetype average',
+        conditions: [
+          {
+            name: 'Hypertension',
+            value: '+9%',
+            barWidth: '2.25%'
+          },
+          {
+            name: 'Diabetes',
+            value: '+7%',
+            barWidth: '1.75%'
+          },
+          {
+            name: 'Musculoskeletal Conditions',
+            value: '+5%',
+            barWidth: '1.25%'
+          }
+        ]
+      },
+      strategicPriorities: [
+        {
+          number: '1',
+          title: 'Quality Measurement Enhancement',
+          description: 'Strengthen quality measurement systems and documentation protocols.'
+        },
+        {
+          number: '2',
+          title: 'Regulatory Compliance Optimization',
+          description: 'Streamline processes for maintaining healthcare regulatory compliance.'
+        },
+        {
+          number: '3',
+          title: 'Chronic Condition Management',
+          description: 'Implement standardized approaches for prevalent conditions.'
+        },
+        {
+          number: '4',
+          title: 'Documentation Excellence',
+          description: 'Enhance clinical documentation to support quality initiatives.'
+        }
+      ],
+      swot: {
+        strengths: [
+          'Strong compliance orientation',
+          'Standardized healthcare processes',
+          'Quality assurance focus',
+          'Moderate healthcare spend (-3.6%)'
+        ],
+        weaknesses: [
+          'Average emergency utilization (+3.2%)',
+          'Average specialist utilization (+1.8%)',
+          'Elevated hypertension prevalence (+9%)',
+          'Elevated diabetes prevalence (+7%)'
+        ],
+        opportunities: [
+          'Quality measurement enhancement',
+          'Clinical documentation improvement',
+          'Regulatory compliance automation',
+          'Program standardization'
+        ],
+        threats: [
+          'Increasing regulatory complexity',
+          'Documentation burden impacts',
+          'Workforce compliance education needs',
+          'Evolving quality standards'
+        ]
+      },
+      costSavings: [
+        {
+          title: 'Regulatory Compliance Automation',
+          description: 'Implement digital solutions to streamline compliance management and reporting.'
+        },
+        {
+          title: 'Chronic Condition Management',
+          description: 'Deploy standardized programs for key conditions like hypertension and diabetes.'
+        },
+        {
+          title: 'Quality Measurement Optimization',
+          description: 'Enhance quality tracking systems to identify improvement opportunities.'
+        }
+      ]
+    }
+  }
+];
