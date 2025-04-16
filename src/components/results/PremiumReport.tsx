@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Button from '@/components/shared/Button';
 import { ArchetypeDetailedData } from '@/types/archetype';
@@ -26,6 +25,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+
+// Storage key for assessment answers
+const SESSION_ANSWERS_KEY = 'healthcareArchetypeAnswers';
 
 interface PremiumReportProps {
   archetypeData: ArchetypeDetailedData;
@@ -63,8 +65,12 @@ const PremiumReport = ({ archetypeData }: PremiumReportProps) => {
     try {
       // Get assessment result from location state
       const assessmentResult = location.state?.result;
-      // Get assessment answers from sessionStorage
-      const answers = JSON.parse(sessionStorage.getItem('healthcareArchetypeAnswers') || '{}');
+      // Get assessment answers from sessionStorage using the correct key
+      const answersString = sessionStorage.getItem(SESSION_ANSWERS_KEY);
+      const answers = answersString ? JSON.parse(answersString) : {};
+      
+      console.log('Submitting report request with answers:', answers);
+      console.log('Assessment result:', assessmentResult);
 
       const { error } = await supabase
         .from('report_requests')

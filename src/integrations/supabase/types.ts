@@ -89,7 +89,69 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      archetype_distinctive_metrics: {
+        Row: {
+          "Archetype Average": number | null
+          "Archetype Value": number | null
+          archetype_ID: string | null
+          Category: string | null
+          Difference: number | null
+          Metric: string | null
+        }
+        Insert: {
+          "Archetype Average"?: number | null
+          "Archetype Value"?: number | null
+          archetype_ID?: string | null
+          Category?: string | null
+          Difference?: number | null
+          Metric?: string | null
+        }
+        Update: {
+          "Archetype Average"?: number | null
+          "Archetype Value"?: number | null
+          archetype_ID?: string | null
+          Category?: string | null
+          Difference?: number | null
+          Metric?: string | null
+        }
+        Relationships: []
+      }
+      archetype_info: {
+        Row: {
+          achetype_family: string | null
+          archetype_name: string | null
+          industries: string | null
+          key: number | null
+        }
+        Relationships: []
+      }
+      archetype_key_metrics: {
+        Row: {
+          "Archetype Average": number | null
+          "Archetype Value": number | null
+          archetype_ID: string | null
+          Category: string | null
+          Difference: number | null
+          Metric: string | null
+        }
+        Insert: {
+          "Archetype Average"?: number | null
+          "Archetype Value"?: number | null
+          archetype_ID?: string | null
+          Category?: string | null
+          Difference?: number | null
+          Metric?: string | null
+        }
+        Update: {
+          "Archetype Average"?: number | null
+          "Archetype Value"?: number | null
+          archetype_ID?: string | null
+          Category?: string | null
+          Difference?: number | null
+          Metric?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never

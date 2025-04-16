@@ -8,6 +8,7 @@ import { ArchetypeId } from '../types/archetype';
 // Storage keys for assessment data
 const INSIGHTS_STORAGE_KEY = 'healthcareArchetypeInsights';
 const SESSION_RESULTS_KEY = 'healthcareArchetypeSessionResults';
+const SESSION_ANSWERS_KEY = 'healthcareArchetypeAnswers';
 
 /**
  * Hook to manage the assessment process
@@ -22,13 +23,28 @@ export const useAssessment = () => {
   const questions = getAssessmentQuestions();
   const totalQuestions = questions.length;
 
+  // Load answers from sessionStorage if available
+  useEffect(() => {
+    const storedAnswers = sessionStorage.getItem(SESSION_ANSWERS_KEY);
+    if (storedAnswers) {
+      try {
+        setAnswers(JSON.parse(storedAnswers));
+      } catch (error) {
+        console.error('Error parsing stored answers:', error);
+      }
+    }
+  }, []);
+
   /**
    * Set answer for a specific question
    * @param questionId The question ID to set the answer for
    * @param answerId The selected answer ID
    */
   const setAnswer = (questionId: string, answerId: string) => {
-    setAnswers(prev => ({ ...prev, [questionId]: answerId }));
+    const updatedAnswers = { ...answers, [questionId]: answerId };
+    setAnswers(updatedAnswers);
+    // Save answers to sessionStorage
+    sessionStorage.setItem(SESSION_ANSWERS_KEY, JSON.stringify(updatedAnswers));
   };
 
   /**
@@ -37,7 +53,10 @@ export const useAssessment = () => {
    * @param answerIds Array of selected answer IDs
    */
   const setMultipleAnswers = (questionId: string, answerIds: string[]) => {
-    setAnswers(prev => ({ ...prev, [questionId]: answerIds.join(',') }));
+    const updatedAnswers = { ...answers, [questionId]: answerIds.join(',') };
+    setAnswers(updatedAnswers);
+    // Save answers to sessionStorage
+    sessionStorage.setItem(SESSION_ANSWERS_KEY, JSON.stringify(updatedAnswers));
   };
 
   /**
@@ -95,6 +114,7 @@ export const useAssessment = () => {
     // Clear stored insights when assessment is reset
     localStorage.removeItem(INSIGHTS_STORAGE_KEY);
     sessionStorage.removeItem(SESSION_RESULTS_KEY);
+    sessionStorage.removeItem(SESSION_ANSWERS_KEY);
   };
 
   return {
