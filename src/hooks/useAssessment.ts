@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { calculateArchetypeMatch, getAssessmentQuestions } from '../utils/assessmentUtils';
@@ -30,7 +29,9 @@ export const useAssessment = () => {
     const storedAnswers = sessionStorage.getItem(SESSION_ANSWERS_KEY);
     if (storedAnswers) {
       try {
-        setAnswers(JSON.parse(storedAnswers));
+        const parsedAnswers = JSON.parse(storedAnswers);
+        console.log('Loaded stored answers:', parsedAnswers);
+        setAnswers(parsedAnswers);
       } catch (error) {
         console.error('Error parsing stored answers:', error);
       }
