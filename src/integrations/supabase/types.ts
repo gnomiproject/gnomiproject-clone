@@ -52,18 +52,21 @@ export type Database = {
         Row: {
           common_traits: Json
           description: string
+          hex_color: string | null
           id: string
           name: string
         }
         Insert: {
           common_traits: Json
           description: string
+          hex_color?: string | null
           id: string
           name: string
         }
         Update: {
           common_traits?: Json
           description?: string
+          hex_color?: string | null
           id?: string
           name?: string
         }

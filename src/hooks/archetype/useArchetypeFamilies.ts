@@ -22,7 +22,8 @@ export const useArchetypeFamilies = () => {
           id: item.id as 'a' | 'b' | 'c',
           name: item.name,
           description: item.description,
-          commonTraits: item.common_traits as string[]
+          commonTraits: item.common_traits as string[],
+          hexColor: item.hex_color // Add the new hex_color field
         }));
         
         setAllFamilies(families);
@@ -36,9 +37,8 @@ export const useArchetypeFamilies = () => {
     fetchFamilies();
   }, []);
 
-  // Get family by ID - Fixed to not use hooks inside the function
+  // Get family by ID
   const getFamilyById = (id: 'a' | 'b' | 'c') => {
-    // Return the family data directly from allFamilies
     return allFamilies.find(family => family.id === id);
   };
 
