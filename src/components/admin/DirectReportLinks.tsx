@@ -6,13 +6,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
 const DirectReportLinks = () => {
-  const { allArchetypes } = useArchetypes();
+  const { getAllArchetypes } = useArchetypes();
   const [archetypes, setArchetypes] = useState<any[]>([]);
 
   useEffect(() => {
     // Set archetypes from the hook result
-    setArchetypes(allArchetypes || []);
-  }, [allArchetypes]);
+    setArchetypes(getAllArchetypes || []);
+  }, [getAllArchetypes]);
 
   return (
     <Card className="mb-8">
