@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast";
@@ -110,9 +109,9 @@ const ArchetypeDeepReport = () => {
           setStrategicRecommendations(recommendationsData);
         }
         
-        // Fetch distinctive metrics
+        // Fix: Using the correct table name from the database schema
         const { data: metricsData, error: metricsError } = await supabase
-          .from('archetype_distinctive_metrics')
+          .from('archetype_distinctive_metrics_table')
           .select('*')
           .eq('archetype_ID', archetypeId)
           .order('Difference', { ascending: false });

@@ -16,9 +16,9 @@ export const useDistinctiveMetrics = (archetypeId?: ArchetypeId) => {
       setError(null);
       
       try {
-        // Use the view that already exists in Supabase
+        // Fix: Using the correct table name from the database schema
         const { data, error } = await supabase
-          .from('archetype_distinctive_metrics')
+          .from('archetype_distinctive_metrics_table')
           .select('*')
           .eq('archetype_ID', archetypeId)
           .order('Difference', { ascending: false })

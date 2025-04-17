@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { DeepReportData } from '@/pages/ArchetypeDeepReport';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -140,7 +139,13 @@ const DeepReportDetailedMetrics = ({ reportData }: DeepReportDetailedMetricsProp
                               tick={{ fontSize: 12 }}
                             />
                             <Tooltip 
-                              formatter={(value, name) => [value.toFixed(2), name === 'archetypeValue' ? 'Archetype' : 'Average']}
+                              formatter={(value, name) => {
+                                // Add type checking before calling toFixed
+                                const formattedValue = typeof value === 'number' 
+                                  ? value.toFixed(2) 
+                                  : value;
+                                return [formattedValue, name === 'archetypeValue' ? 'Archetype' : 'Average'];
+                              }}
                               labelFormatter={(label) => {
                                 const dataItem = getChartData(category).find(item => item.name === label);
                                 return dataItem?.fullName || label;
