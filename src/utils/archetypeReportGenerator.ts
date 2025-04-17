@@ -262,17 +262,44 @@ async function insertReportContent(
     
     console.log(`Inserting report with data_details:`, typeof safeDataDetails);
     
-    const { error: reportError } = await supabase
+    // Check if report already exists
+    const { data: existingReport } = await supabase
       .from('archetype_deep_dive_reports')
-      .upsert({
-        archetype_id: archetypeId,
-        title: reportContent.title,
-        introduction: reportContent.introduction,
-        summary_analysis: reportContent.summary_analysis,
-        distinctive_metrics_summary: reportContent.distinctive_metrics_summary,
-        data_details: safeDataDetails,
-        last_updated: new Date().toISOString()
-      }, { onConflict: 'archetype_id' });
+      .select('id')
+      .eq('archetype_id', archetypeId)
+      .maybeSingle();
+    
+    // Insert or update based on existence
+    let reportError;
+    if (existingReport?.id) {
+      // Update existing report
+      const { error } = await supabase
+        .from('archetype_deep_dive_reports')
+        .update({
+          title: reportContent.title,
+          introduction: reportContent.introduction,
+          summary_analysis: reportContent.summary_analysis,
+          distinctive_metrics_summary: reportContent.distinctive_metrics_summary,
+          data_details: safeDataDetails,
+          last_updated: new Date().toISOString()
+        })
+        .eq('archetype_id', archetypeId);
+      reportError = error;
+    } else {
+      // Insert new report
+      const { error } = await supabase
+        .from('archetype_deep_dive_reports')
+        .insert({
+          archetype_id: archetypeId,
+          title: reportContent.title,
+          introduction: reportContent.introduction,
+          summary_analysis: reportContent.summary_analysis,
+          distinctive_metrics_summary: reportContent.distinctive_metrics_summary,
+          data_details: safeDataDetails,
+          last_updated: new Date().toISOString()
+        });
+      reportError = error;
+    }
 
     if (reportError) {
       console.error(`Error inserting report for ${archetypeId}:`, reportError);
@@ -284,18 +311,40 @@ async function insertReportContent(
     
     console.log(`Successfully inserted deep dive report for ${archetypeId}`);
 
-    // Insert or update SWOT analysis
-    console.log(`Inserting SWOT analysis for ${archetypeId}...`);
-    const { error: swotError } = await supabase
+    // Insert or update SWOT analysis - same pattern as above
+    const { data: existingSwot } = await supabase
       .from('archetype_swot_analyses')
-      .upsert({
-        archetype_id: archetypeId,
-        strengths: swotAnalysis.strengths,
-        weaknesses: swotAnalysis.weaknesses,
-        opportunities: swotAnalysis.opportunities,
-        threats: swotAnalysis.threats,
-        last_updated: new Date().toISOString()
-      }, { onConflict: 'archetype_id' });
+      .select('id')
+      .eq('archetype_id', archetypeId)
+      .maybeSingle();
+    
+    // Insert or update based on existence
+    let swotError;
+    if (existingSwot?.id) {
+      const { error } = await supabase
+        .from('archetype_swot_analyses')
+        .update({
+          strengths: swotAnalysis.strengths,
+          weaknesses: swotAnalysis.weaknesses,
+          opportunities: swotAnalysis.opportunities,
+          threats: swotAnalysis.threats,
+          last_updated: new Date().toISOString()
+        })
+        .eq('archetype_id', archetypeId);
+      swotError = error;
+    } else {
+      const { error } = await supabase
+        .from('archetype_swot_analyses')
+        .insert({
+          archetype_id: archetypeId,
+          strengths: swotAnalysis.strengths,
+          weaknesses: swotAnalysis.weaknesses,
+          opportunities: swotAnalysis.opportunities,
+          threats: swotAnalysis.threats,
+          last_updated: new Date().toISOString()
+        });
+      swotError = error;
+    }
 
     if (swotError) {
       console.error(`Error inserting SWOT analysis for ${archetypeId}:`, swotError);
@@ -307,22 +356,47 @@ async function insertReportContent(
     
     console.log(`Successfully inserted SWOT analysis for ${archetypeId}`);
 
-    // Insert strategic recommendations
+    // Insert strategic recommendations - similar approach for each recommendation
     console.log(`Inserting ${strategicRecommendations.length} recommendations for ${archetypeId}...`);
+    
     for (let i = 0; i < strategicRecommendations.length; i++) {
       const rec = strategicRecommendations[i];
       console.log(`Inserting recommendation ${i + 1}: ${rec.title}`);
       
-      const { error: recommendationError } = await supabase
+      // Check if recommendation exists
+      const { data: existingRec } = await supabase
         .from('archetype_strategic_recommendations')
-        .upsert({
-          archetype_id: archetypeId,
-          recommendation_number: i + 1,
-          title: rec.title,
-          description: rec.description,
-          metrics_references: rec.metrics_references,
-          last_updated: new Date().toISOString()
-        }, { onConflict: 'archetype_id, recommendation_number' });
+        .select('id')
+        .eq('archetype_id', archetypeId)
+        .eq('recommendation_number', i + 1)
+        .maybeSingle();
+      
+      let recommendationError;
+      if (existingRec?.id) {
+        const { error } = await supabase
+          .from('archetype_strategic_recommendations')
+          .update({
+            title: rec.title,
+            description: rec.description,
+            metrics_references: rec.metrics_references,
+            last_updated: new Date().toISOString()
+          })
+          .eq('archetype_id', archetypeId)
+          .eq('recommendation_number', i + 1);
+        recommendationError = error;
+      } else {
+        const { error } = await supabase
+          .from('archetype_strategic_recommendations')
+          .insert({
+            archetype_id: archetypeId,
+            recommendation_number: i + 1,
+            title: rec.title,
+            description: rec.description,
+            metrics_references: rec.metrics_references,
+            last_updated: new Date().toISOString()
+          });
+        recommendationError = error;
+      }
 
       if (recommendationError) {
         console.error(`Error inserting recommendation ${i+1} for ${archetypeId}:`, recommendationError);

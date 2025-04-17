@@ -20,6 +20,7 @@ const ReportGenerator: React.FC = () => {
     errors?: string[];
   }>(null);
   const [error, setError] = useState<string | null>(null);
+  const [databaseStatus, setDatabaseStatus] = useState<'unchecked' | 'checking' | 'connected' | 'error'>('unchecked');
   const { toast } = useToast();
 
   const handleGenerateReports = async () => {
@@ -97,6 +98,7 @@ const ReportGenerator: React.FC = () => {
   };
 
   const handleTestDatabaseConnection = async () => {
+    setDatabaseStatus('checking');
     try {
       toast({
         title: "Testing Database Connection",
@@ -112,6 +114,7 @@ const ReportGenerator: React.FC = () => {
       
       if (error) {
         console.error("Database connection error:", error);
+        setDatabaseStatus('error');
         toast({
           title: "Database Connection Failed",
           description: error.message,
@@ -120,6 +123,7 @@ const ReportGenerator: React.FC = () => {
         });
       } else {
         console.log("Database connection successful. Sample data:", data);
+        setDatabaseStatus('connected');
         toast({
           title: "Database Connection Successful",
           description: `Connected successfully. Found ${data?.length || 0} archetypes.`,
@@ -129,6 +133,7 @@ const ReportGenerator: React.FC = () => {
       }
     } catch (error) {
       console.error("Error testing database:", error);
+      setDatabaseStatus('error');
       toast({
         title: "Connection Test Error",
         description: typeof error === 'string' ? error : (error as Error).message || 'Unknown error testing connection',
@@ -148,6 +153,22 @@ const ReportGenerator: React.FC = () => {
       </CardHeader>
       
       <CardContent>
+        {databaseStatus === 'connected' && (
+          <Alert className="mb-4">
+            <CheckCircle className="h-4 w-4" />
+            <AlertTitle>Database Connected</AlertTitle>
+            <AlertDescription>Successfully connected to Supabase database.</AlertDescription>
+          </Alert>
+        )}
+        
+        {databaseStatus === 'error' && (
+          <Alert variant="destructive" className="mb-4">
+            <XCircle className="h-4 w-4" />
+            <AlertTitle>Database Connection Error</AlertTitle>
+            <AlertDescription>Failed to connect to the database. Please check your connection and try again.</AlertDescription>
+          </Alert>
+        )}
+        
         {error && (
           <Alert variant="destructive" className="mb-4">
             <AlertTriangle className="h-4 w-4" />
@@ -195,18 +216,28 @@ const ReportGenerator: React.FC = () => {
         )}
       </CardContent>
       
-      <CardFooter className="flex gap-2">
+      <CardFooter className="flex flex-col sm:flex-row gap-2">
         <Button 
           onClick={handleTestDatabaseConnection}
           variant="outline"
+          disabled={databaseStatus === 'checking'}
         >
-          <Database className="mr-2 h-4 w-4" />
-          Test DB Connection
+          {databaseStatus === 'checking' ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Testing Connection...
+            </>
+          ) : (
+            <>
+              <Database className="mr-2 h-4 w-4" />
+              Test DB Connection
+            </>
+          )}
         </Button>
 
         <Button 
           onClick={handleGenerateReports} 
-          disabled={isGenerating}
+          disabled={isGenerating || databaseStatus === 'error'}
         >
           {isGenerating ? (
             <>
