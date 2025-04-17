@@ -17,6 +17,7 @@ const ReportGenerator: React.FC = () => {
     succeeded: number;
     failed: number;
     archetypeIds: string[];
+    errors?: string[];
   }>(null);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
@@ -41,9 +42,14 @@ const ReportGenerator: React.FC = () => {
       
       setGenerationResult(results);
       
+      const successMessage = results.succeeded > 0 
+        ? `Processed ${results.succeeded} of ${results.total} archetypes successfully.`
+        : 'No archetypes were processed successfully.';
+      
       toast({
-        title: "Report Generation Complete",
-        description: `Processed ${results.succeeded} of ${results.total} archetypes successfully.`,
+        title: results.succeeded > 0 ? "Report Generation Complete" : "Report Generation Failed",
+        description: successMessage,
+        variant: results.succeeded > 0 ? "default" : "destructive",
         duration: 5000,
       });
       
@@ -98,6 +104,20 @@ const ReportGenerator: React.FC = () => {
                 <AlertTitle>Success</AlertTitle>
                 <AlertDescription>
                   Generated reports for archetypes: {generationResult.archetypeIds.join(', ')}
+                </AlertDescription>
+              </Alert>
+            )}
+            
+            {generationResult.errors && generationResult.errors.length > 0 && (
+              <Alert variant="destructive" className="mt-4">
+                <XCircle className="h-4 w-4" />
+                <AlertTitle>Failed Reports</AlertTitle>
+                <AlertDescription className="mt-2">
+                  <ul className="list-disc pl-5 space-y-1">
+                    {generationResult.errors.map((err, index) => (
+                      <li key={index} className="text-sm">{err}</li>
+                    ))}
+                  </ul>
                 </AlertDescription>
               </Alert>
             )}
