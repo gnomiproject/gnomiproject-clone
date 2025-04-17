@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, CheckCircle, XCircle, AlertTriangle, RefreshCw } from "lucide-react";
+import { Loader2, CheckCircle, XCircle, AlertTriangle, RefreshCw, Database } from "lucide-react";
 import { supabase } from '@/integrations/supabase/client';
 import generateArchetypeReports from '@/utils/archetypeReportGenerator';
 import { useToast } from '@/hooks/use-toast';
@@ -34,6 +34,25 @@ const ReportGenerator: React.FC = () => {
         description: "This process may take some time. Please wait...",
         duration: 5000,
       });
+      
+      // First verify we have tables
+      console.log("Checking for required tables...");
+      const { data: tables, error: tablesError } = await supabase
+        .from('pg_catalog.pg_tables')
+        .select('tablename')
+        .eq('schemaname', 'public');
+      
+      if (tablesError) {
+        console.error("Error checking tables:", tablesError);
+        toast({
+          title: "Error Checking Database Tables",
+          description: "Could not verify database structure. Check console for details.",
+          variant: "destructive",
+          duration: 5000,
+        });
+      } else {
+        console.log("Available tables:", tables);
+      }
       
       // Generate the actual reports
       console.log("Starting archetype report generation...");
@@ -68,6 +87,48 @@ const ReportGenerator: React.FC = () => {
     }
   };
 
+  const handleTestDatabaseConnection = async () => {
+    try {
+      toast({
+        title: "Testing Database Connection",
+        description: "Checking connection to Supabase...",
+        duration: 3000,
+      });
+
+      // Test simple query to confirm database connection
+      const { data, error } = await supabase
+        .from('archetypes')
+        .select('id, name')
+        .limit(1);
+      
+      if (error) {
+        console.error("Database connection error:", error);
+        toast({
+          title: "Database Connection Failed",
+          description: error.message,
+          variant: "destructive",
+          duration: 5000,
+        });
+      } else {
+        console.log("Database connection successful. Sample data:", data);
+        toast({
+          title: "Database Connection Successful",
+          description: `Connected successfully. Found ${data?.length || 0} archetypes.`,
+          variant: "default",
+          duration: 5000,
+        });
+      }
+    } catch (error) {
+      console.error("Error testing database:", error);
+      toast({
+        title: "Connection Test Error",
+        description: typeof error === 'string' ? error : (error as Error).message || 'Unknown error testing connection',
+        variant: "destructive",
+        duration: 5000,
+      });
+    }
+  };
+
   return (
     <Card className="w-full mb-6">
       <CardHeader>
@@ -82,7 +143,7 @@ const ReportGenerator: React.FC = () => {
           <Alert variant="destructive" className="mb-4">
             <AlertTriangle className="h-4 w-4" />
             <AlertTitle>Error</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
+            <AlertDescription className="mt-2 whitespace-pre-line">{error}</AlertDescription>
           </Alert>
         )}
         
@@ -125,7 +186,15 @@ const ReportGenerator: React.FC = () => {
         )}
       </CardContent>
       
-      <CardFooter>
+      <CardFooter className="flex gap-2">
+        <Button 
+          onClick={handleTestDatabaseConnection}
+          variant="outline"
+        >
+          <Database className="mr-2 h-4 w-4" />
+          Test DB Connection
+        </Button>
+
         <Button 
           onClick={handleGenerateReports} 
           disabled={isGenerating}
