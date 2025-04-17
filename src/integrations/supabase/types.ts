@@ -89,6 +89,33 @@ export type Database = {
           },
         ]
       }
+      archetype_distinctive_metrics_table: {
+        Row: {
+          "Archetype Average": number | null
+          "Archetype Value": number | null
+          archetype_ID: string | null
+          Category: string | null
+          Difference: number | null
+          Metric: string | null
+        }
+        Insert: {
+          "Archetype Average"?: number | null
+          "Archetype Value"?: number | null
+          archetype_ID?: string | null
+          Category?: string | null
+          Difference?: number | null
+          Metric?: string | null
+        }
+        Update: {
+          "Archetype Average"?: number | null
+          "Archetype Value"?: number | null
+          archetype_ID?: string | null
+          Category?: string | null
+          Difference?: number | null
+          Metric?: string | null
+        }
+        Relationships: []
+      }
       archetype_families: {
         Row: {
           common_traits: Json
@@ -446,33 +473,6 @@ export type Database = {
       }
     }
     Views: {
-      archetype_distinctive_metrics: {
-        Row: {
-          "Archetype Average": number | null
-          "Archetype Value": number | null
-          archetype_ID: string | null
-          Category: string | null
-          Difference: number | null
-          Metric: string | null
-        }
-        Insert: {
-          "Archetype Average"?: number | null
-          "Archetype Value"?: number | null
-          archetype_ID?: string | null
-          Category?: string | null
-          Difference?: number | null
-          Metric?: string | null
-        }
-        Update: {
-          "Archetype Average"?: number | null
-          "Archetype Value"?: number | null
-          archetype_ID?: string | null
-          Category?: string | null
-          Difference?: number | null
-          Metric?: string | null
-        }
-        Relationships: []
-      }
       archetype_info: {
         Row: {
           achetype_family: string | null
