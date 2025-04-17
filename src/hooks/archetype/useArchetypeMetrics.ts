@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 export const useArchetypeMetrics = () => {
   const [metricsData, setMetricsData] = useState<Record<string, any[]>>({});
   const [isLoading, setIsLoading] = useState(true);
+  const [sdohDataByArchetype, setSdohDataByArchetype] = useState<Record<string, any[]>>({});
 
   // Fetch all metrics data on component mount
   useEffect(() => {
@@ -34,6 +35,21 @@ export const useArchetypeMetrics = () => {
         }, {});
 
         setMetricsData(groupedData);
+
+        // Create a grouped version of SDOH data by archetype
+        const sdohData = data.filter(item => item.Category?.includes('SDOH'));
+        const groupedSdohData = sdohData.reduce((acc: Record<string, any[]>, item) => {
+          const archetypeId = item.archetype_ID;
+          if (!archetypeId) return acc;
+          
+          if (!acc[archetypeId]) {
+            acc[archetypeId] = [];
+          }
+          acc[archetypeId].push(item);
+          return acc;
+        }, {});
+
+        setSdohDataByArchetype(groupedSdohData);
       } catch (err) {
         console.error('Unexpected error fetching metrics:', err);
       } finally {
@@ -51,6 +67,16 @@ export const useArchetypeMetrics = () => {
     // Process metrics into a more usable format if needed
     return {
       metrics,
+      isLoading
+    };
+  };
+
+  // Get SDOH metrics specifically for an archetype
+  const getSdohMetricsForArchetype = (archetypeId: ArchetypeId) => {
+    const sdohMetrics = sdohDataByArchetype[archetypeId] || [];
+    
+    return {
+      sdohMetrics,
       isLoading
     };
   };
@@ -121,6 +147,7 @@ export const useArchetypeMetrics = () => {
     getDistinctiveMetricsForArchetype,
     getCategorizedMetricsForArchetype,
     getTraitsForArchetype,
+    getSdohMetricsForArchetype,
     isLoading
   };
 };

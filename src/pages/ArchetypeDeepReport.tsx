@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast";
@@ -26,6 +25,7 @@ export type DeepReportData = {
   distinctiveMetrics: DistinctiveMetric[];
   archetypeData: any;
   familyData: any;
+  sdohMetrics?: any[];
 };
 
 const ArchetypeDeepReport = () => {
@@ -44,6 +44,7 @@ const ArchetypeDeepReport = () => {
   const [swotAnalysis, setSwotAnalysis] = useState<any>(null);
   const [strategicRecommendations, setStrategicRecommendations] = useState<any[]>([]);
   const [distinctiveMetrics, setDistinctiveMetrics] = useState<DistinctiveMetric[]>([]);
+  const [sdohMetrics, setSdohMetrics] = useState<any[]>([]);
   const [loadingReportData, setLoadingReportData] = useState(false);
 
   useEffect(() => {
@@ -124,6 +125,20 @@ const ArchetypeDeepReport = () => {
           setDistinctiveMetrics(metricsData);
         }
         
+        // Fetch SDOH metrics specifically
+        const { data: sdohData, error: sdohError } = await supabase
+          .from('archetype_data_041624bw')
+          .select('*')
+          .eq('archetype_ID', archetypeId)
+          .ilike('Category', '%SDOH%')
+          .order('Difference', { ascending: false });
+        
+        if (sdohError) {
+          console.error('Error fetching SDOH metrics:', sdohError);
+        } else if (sdohData) {
+          setSdohMetrics(sdohData);
+        }
+        
       } catch (error) {
         console.error('Error fetching report data:', error);
         toast({
@@ -147,10 +162,10 @@ const ArchetypeDeepReport = () => {
     strategicRecommendations,
     distinctiveMetrics,
     archetypeData,
-    familyData
+    familyData,
+    sdohMetrics
   };
 
-  // Handle section navigation
   const handleSectionChange = (section: string) => {
     setActiveSection(section);
   };

@@ -50,5 +50,29 @@ export const useDistinctiveMetrics = (archetypeId?: ArchetypeId) => {
     fetchDistinctiveMetrics();
   }, [archetypeId]);
 
-  return { distinctiveMetrics, isLoading, error };
+  // New function to fetch SDOH metrics specifically
+  const fetchSdohMetrics = async (archetypeId?: ArchetypeId) => {
+    if (!archetypeId) return [];
+    
+    try {
+      const { data, error } = await supabase
+        .from('archetype_data_041624bw')
+        .select('*')
+        .eq('archetype_ID', archetypeId)
+        .ilike('Category', '%SDOH%')
+        .order('Difference', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching SDOH metrics:', error);
+        return [];
+      }
+
+      return data || [];
+    } catch (err) {
+      console.error('Error in fetchSdohMetrics:', err);
+      return [];
+    }
+  };
+
+  return { distinctiveMetrics, isLoading, error, fetchSdohMetrics };
 };

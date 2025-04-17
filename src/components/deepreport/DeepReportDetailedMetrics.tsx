@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DeepReportData } from '@/pages/ArchetypeDeepReport';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -18,6 +18,7 @@ import {
 } from 'recharts';
 import { HoverCard, HoverCardTrigger, HoverCardContent } from '@/components/ui/hover-card';
 import { Tooltip as UITooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip';
+import { useDistinctiveMetrics } from '@/hooks/archetype/useDistinctiveMetrics';
 
 interface DeepReportDetailedMetricsProps {
   reportData: DeepReportData;
@@ -26,8 +27,28 @@ interface DeepReportDetailedMetricsProps {
 const DeepReportDetailedMetrics = ({ reportData }: DeepReportDetailedMetricsProps) => {
   const { archetypeData, deepDiveReport } = reportData;
   const [selectedCategory, setSelectedCategory] = useState('Demographics');
+  const [sdohMetrics, setSdohMetrics] = useState<any[]>([]);
+  const [isLoadingSdoh, setIsLoadingSdoh] = useState(false);
   
-  if (!deepDiveReport?.data_details) {
+  // Use the hook to fetch SDOH metrics
+  const { fetchSdohMetrics } = useDistinctiveMetrics();
+
+  // Fetch SDOH metrics when component mounts
+  useEffect(() => {
+    const loadSdohMetrics = async () => {
+      if (archetypeData?.id) {
+        setIsLoadingSdoh(true);
+        const data = await fetchSdohMetrics(archetypeData.id);
+        setSdohMetrics(data);
+        setIsLoadingSdoh(false);
+      }
+    };
+    
+    loadSdohMetrics();
+  }, [archetypeData?.id, fetchSdohMetrics]);
+  
+  // Check if we have data to display
+  if (!deepDiveReport?.data_details && sdohMetrics.length === 0) {
     return (
       <div className="text-center py-12">
         <CircleAlert className="h-12 w-12 text-amber-500 mx-auto mb-4" />
@@ -37,8 +58,16 @@ const DeepReportDetailedMetrics = ({ reportData }: DeepReportDetailedMetricsProp
     );
   }
   
-  const categories = Object.keys(deepDiveReport.data_details).filter(
-    key => Array.isArray(deepDiveReport.data_details[key]) && 
+  // Create a combined data structure with both original data and sdoh metrics
+  const combinedDataDetails = { ...(deepDiveReport?.data_details || {}) };
+  
+  // Add SDOH data if not already present
+  if (sdohMetrics.length > 0 && !combinedDataDetails.SDOH) {
+    combinedDataDetails.SDOH = sdohMetrics;
+  }
+  
+  const categories = Object.keys(combinedDataDetails).filter(
+    key => Array.isArray(combinedDataDetails[key]) && 
     ['Demographics', 'Cost', 'Utilization', 'Disease', 'SDOH', 'MentalHealth'].includes(key)
   );
   
@@ -62,17 +91,17 @@ const DeepReportDetailedMetrics = ({ reportData }: DeepReportDetailedMetricsProp
   };
 
   const getChartData = (category: string) => {
-    if (!deepDiveReport.data_details[category] || !Array.isArray(deepDiveReport.data_details[category])) {
+    if (!combinedDataDetails[category] || !Array.isArray(combinedDataDetails[category])) {
       return [];
     }
 
-    return deepDiveReport.data_details[category]
+    return combinedDataDetails[category]
       .slice(0, 10)
       .map((item: any) => ({
         name: item.Metric ? (item.Metric.length > 15 ? `${item.Metric.substring(0, 15)}...` : item.Metric) : 'Unknown',
         fullName: item.Metric || 'Unknown',
-        archetypeValue: item["Archetype Value"] || 0,
-        averageValue: item["Archetype Average"] || 0,
+        archetypeValue: item["Archetype Value"] || item["Archetype_Value"] || 0,
+        averageValue: item["Archetype Average"] || item["Archetype_Average"] || 0,
         difference: item.Difference || 0,
         definition: item.definition || null,
       }));
@@ -181,57 +210,67 @@ const DeepReportDetailedMetrics = ({ reportData }: DeepReportDetailedMetricsProp
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <TooltipProvider>
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead className="min-w-[200px]">Metric</TableHead>
-                            <TableHead className="text-right">Archetype Value</TableHead>
-                            <TableHead className="text-right">Average</TableHead>
-                            <TableHead className="text-right">Difference</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {deepDiveReport.data_details[category]?.map((item: any, index: number) => (
-                            <TableRow key={index}>
-                              <TableCell className="font-medium">
-                                <div className="flex items-center">
-                                  {item.Metric}
-                                  {item.definition && (
-                                    <UITooltip>
-                                      <TooltipTrigger asChild>
-                                        <button className="ml-2 inline-flex items-center">
-                                          <InfoIcon className="h-4 w-4 text-gray-400 hover:text-gray-600" />
-                                        </button>
-                                      </TooltipTrigger>
-                                      <TooltipContent className="max-w-sm">
-                                        <p>{item.definition}</p>
-                                      </TooltipContent>
-                                    </UITooltip>
-                                  )}
-                                </div>
-                              </TableCell>
-                              <TableCell className="text-right">
-                                {typeof item["Archetype Value"] === 'number' ? 
-                                  item["Archetype Value"]?.toFixed(2) : 
-                                  item["Archetype Value"] || 'N/A'}
-                              </TableCell>
-                              <TableCell className="text-right">
-                                {typeof item["Archetype Average"] === 'number' ? 
-                                  item["Archetype Average"]?.toFixed(2) : 
-                                  item["Archetype Average"] || 'N/A'}
-                              </TableCell>
-                              <TableCell className={`text-right ${item.Difference > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                {item.Difference > 0 ? '+' : ''}
-                                {typeof item.Difference === 'number' ? 
-                                  item.Difference?.toFixed(2) : 
-                                  item.Difference || 'N/A'}%
-                              </TableCell>
+                    {isLoadingSdoh && category === 'SDOH' ? (
+                      <div className="text-center py-8">
+                        <p className="text-gray-500">Loading SDOH metrics...</p>
+                      </div>
+                    ) : (
+                      <TooltipProvider>
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="min-w-[200px]">Metric</TableHead>
+                              <TableHead className="text-right">Archetype Value</TableHead>
+                              <TableHead className="text-right">Average</TableHead>
+                              <TableHead className="text-right">Difference</TableHead>
                             </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </TooltipProvider>
+                          </TableHeader>
+                          <TableBody>
+                            {combinedDataDetails[category]?.map((item: any, index: number) => (
+                              <TableRow key={index}>
+                                <TableCell className="font-medium">
+                                  <div className="flex items-center">
+                                    {item.Metric}
+                                    {item.definition && (
+                                      <UITooltip>
+                                        <TooltipTrigger asChild>
+                                          <button className="ml-2 inline-flex items-center">
+                                            <InfoIcon className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                                          </button>
+                                        </TooltipTrigger>
+                                        <TooltipContent className="max-w-sm">
+                                          <p>{item.definition}</p>
+                                        </TooltipContent>
+                                      </UITooltip>
+                                    )}
+                                  </div>
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  {typeof item["Archetype Value"] === 'number' ? 
+                                    item["Archetype Value"]?.toFixed(2) : 
+                                    (typeof item["Archetype_Value"] === 'number' ? 
+                                      item["Archetype_Value"]?.toFixed(2) : 
+                                      item["Archetype Value"] || item["Archetype_Value"] || 'N/A')}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  {typeof item["Archetype Average"] === 'number' ? 
+                                    item["Archetype Average"]?.toFixed(2) : 
+                                    (typeof item["Archetype_Average"] === 'number' ? 
+                                      item["Archetype_Average"]?.toFixed(2) : 
+                                      item["Archetype Average"] || item["Archetype_Average"] || 'N/A')}
+                                </TableCell>
+                                <TableCell className={`text-right ${item.Difference > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                  {item.Difference > 0 ? '+' : ''}
+                                  {typeof item.Difference === 'number' ? 
+                                    item.Difference?.toFixed(2) : 
+                                    item.Difference || 'N/A'}%
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </TooltipProvider>
+                    )}
                   </CardContent>
                 </Card>
               </TabsContent>
