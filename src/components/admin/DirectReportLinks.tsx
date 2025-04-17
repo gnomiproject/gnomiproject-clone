@@ -4,13 +4,14 @@ import { Link } from 'react-router-dom';
 import { useArchetypes } from '@/hooks/useArchetypes';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { ArchetypeId } from '@/types/archetype';
 
 const DirectReportLinks = () => {
   const { getAllArchetypes } = useArchetypes();
   const [archetypes, setArchetypes] = useState<any[]>([]);
 
   useEffect(() => {
-    // Set archetypes directly without trying to call it as a function
+    // Check if getAllArchetypes is an array and use it directly
     if (getAllArchetypes && Array.isArray(getAllArchetypes)) {
       setArchetypes(getAllArchetypes);
     }
