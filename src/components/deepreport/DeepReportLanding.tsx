@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ArrowRight, ChevronDown, BarChart4, LineChart } from 'lucide-react';
+import { ArrowRight, ChevronDown, BarChart4, LineChart, PieChart, List } from 'lucide-react';
 import { DeepReportData } from '@/pages/ArchetypeDeepReport';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
