@@ -35,23 +35,32 @@ const ReportGenerator: React.FC = () => {
         duration: 5000,
       });
       
-      // First verify we have tables
-      console.log("Checking for required tables...");
-      const { data: tables, error: tablesError } = await supabase
-        .from('pg_catalog.pg_tables')
-        .select('tablename')
-        .eq('schemaname', 'public');
+      // First verify we have tables and data available
+      console.log("Checking for required tables and data...");
+      const { data: archetypesData, error: archetypesError } = await supabase
+        .from('archetypes')
+        .select('id, name')
+        .limit(5);
       
-      if (tablesError) {
-        console.error("Error checking tables:", tablesError);
+      if (archetypesError) {
+        console.error("Error checking archetypes table:", archetypesError);
         toast({
-          title: "Error Checking Database Tables",
+          title: "Error Checking Database",
           description: "Could not verify database structure. Check console for details.",
           variant: "destructive",
           duration: 5000,
         });
+        throw new Error(`Database check failed: ${archetypesError.message}`);
       } else {
-        console.log("Available tables:", tables);
+        console.log(`Available archetypes: ${archetypesData?.length || 0} found`);
+        if (archetypesData?.length === 0) {
+          toast({
+            title: "No Archetypes Found",
+            description: "No archetype data was found in the database. Please check your data.",
+            variant: "destructive",
+            duration: 5000,
+          });
+        }
       }
       
       // Generate the actual reports

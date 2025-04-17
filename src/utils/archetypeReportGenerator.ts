@@ -116,7 +116,7 @@ async function generateArchetypeReports(supabase: SupabaseClient) {
     
     if (archetypesError) {
       console.error('Error fetching archetypes:', archetypesError);
-      throw archetypesError;
+      throw new Error(`Failed to fetch archetypes: ${archetypesError.message}`);
     }
     
     console.log(`Found ${archetypes?.length || 0} archetypes to process`);
@@ -148,6 +148,7 @@ async function generateArchetypeReports(supabase: SupabaseClient) {
         
         if (metricsError) {
           console.error(`Error fetching metrics from archetype_data_041624bw for ${archetype.id}:`, metricsError);
+          console.log(`Will try alternative metrics source...`);
         }
         
         // If no metrics found in first table, try another table
@@ -177,14 +178,24 @@ async function generateArchetypeReports(supabase: SupabaseClient) {
         console.log(`Found ${metrics?.length || 0} metrics for archetype ${archetype.id}`);
         
         // Create minimal metrics data even if no metrics were found
-        const minimalMetrics = [{
-          Category: 'Cost',
-          Metric: 'PEPY',
-          Archetype_Value: 0,
-          Archetype_Average: 0,
-          Difference: 0,
-          archetype_ID: archetype.id
-        }];
+        const minimalMetrics = [
+          {
+            Category: 'Cost',
+            Metric: 'PEPY',
+            Archetype_Value: 0,
+            Archetype_Average: 0,
+            Difference: 0,
+            archetype_ID: archetype.id
+          },
+          {
+            Category: 'Utilization',
+            Metric: 'Office Visits',
+            Archetype_Value: 0,
+            Archetype_Average: 0,
+            Difference: 0,
+            archetype_ID: archetype.id
+          }
+        ];
         
         const metricsToUse = metrics && metrics.length > 0 ? metrics : minimalMetrics;
         
@@ -244,8 +255,12 @@ async function insertReportContent(
   try {
     // Insert or update the deep dive report
     console.log(`Inserting deep dive report for ${archetypeId}...`);
-    console.log(`Report data_details type: ${typeof reportContent.data_details}`);
-    console.log('Report structure:', Object.keys(reportContent));
+    console.log(`Report data structure:`, Object.keys(reportContent));
+    
+    // Ensure data_details is properly formatted as a valid JSON object
+    const safeDataDetails = reportContent.data_details || {};
+    
+    console.log(`Inserting report with data_details:`, typeof safeDataDetails);
     
     const { error: reportError } = await supabase
       .from('archetype_deep_dive_reports')
@@ -255,9 +270,9 @@ async function insertReportContent(
         introduction: reportContent.introduction,
         summary_analysis: reportContent.summary_analysis,
         distinctive_metrics_summary: reportContent.distinctive_metrics_summary,
-        data_details: reportContent.data_details,
+        data_details: safeDataDetails,
         last_updated: new Date().toISOString()
-      });
+      }, { onConflict: 'archetype_id' });
 
     if (reportError) {
       console.error(`Error inserting report for ${archetypeId}:`, reportError);
@@ -280,7 +295,7 @@ async function insertReportContent(
         opportunities: swotAnalysis.opportunities,
         threats: swotAnalysis.threats,
         last_updated: new Date().toISOString()
-      });
+      }, { onConflict: 'archetype_id' });
 
     if (swotError) {
       console.error(`Error inserting SWOT analysis for ${archetypeId}:`, swotError);
@@ -307,7 +322,7 @@ async function insertReportContent(
           description: rec.description,
           metrics_references: rec.metrics_references,
           last_updated: new Date().toISOString()
-        });
+        }, { onConflict: 'archetype_id, recommendation_number' });
 
       if (recommendationError) {
         console.error(`Error inserting recommendation ${i+1} for ${archetypeId}:`, recommendationError);
