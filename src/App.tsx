@@ -12,6 +12,7 @@ import About from '@/pages/About';
 import NotFound from '@/pages/NotFound';
 import Admin from '@/pages/Admin';
 import DirectReport from '@/pages/DirectReport';
+import ArchetypeDeepReport from '@/pages/ArchetypeDeepReport';
 
 const version = "0.0.1";
 
@@ -27,6 +28,7 @@ function App() {
             <Route path="/results" element={<Results />} />
             <Route path="/deep-report" element={<DeepReport />} />
             <Route path="/direct-report/:archetypeId" element={<DirectReport />} />
+            <Route path="/archetype-report/:archetypeId" element={<ArchetypeDeepReport />} />
             <Route path="/insights" element={<Insights />} />
             <Route path="/about" element={<About />} />
             <Route path="/admin" element={<Admin />} />
