@@ -1,8 +1,9 @@
+
 import { SupabaseClient } from '@supabase/supabase-js';
 
 // Helper function to organize metrics by category
 function organizeMetricsByCategory(metrics: any[]) {
-  const organized: { [key: string]: any[] } = {};
+  const organized: { [key: string]: any } = {};
   metrics.forEach(metric => {
     if (!organized[metric.Category]) {
       organized[metric.Category] = [];
@@ -76,6 +77,8 @@ function generateStrategicRecommendations(archetype: any, organizedMetrics: any)
 
 // Full function to generate archetype reports
 async function generateArchetypeReports(supabase: SupabaseClient) {
+  console.log('Starting report generation process...');
+  
   // 1. Fetch all archetypes
   const { data: archetypes, error: archetypesError } = await supabase
     .from('archetypes')
@@ -86,40 +89,64 @@ async function generateArchetypeReports(supabase: SupabaseClient) {
     throw archetypesError;
   }
   
+  console.log(`Found ${archetypes.length} archetypes to process`);
+  
+  const results = {
+    total: archetypes.length,
+    processed: 0,
+    succeeded: 0,
+    failed: 0,
+    archetypeIds: [] as string[]
+  };
+  
   // 2. Process each archetype
   for (const archetype of archetypes) {
-    console.log(`Processing archetype ${archetype.id}: ${archetype.name}`);
-    
-    // 3. Fetch metrics data for this archetype
-    const { data: metrics, error: metricsError } = await supabase
-      .from('archetype_data_041624bw')
-      .select('*')
-      .eq('archetype_ID', archetype.id);
-    
-    if (metricsError) {
-      console.error(`Error fetching metrics for ${archetype.id}:`, metricsError);
-      continue;
+    try {
+      console.log(`Processing archetype ${archetype.id}: ${archetype.name}`);
+      
+      // 3. Fetch metrics data for this archetype
+      const { data: metrics, error: metricsError } = await supabase
+        .from('archetype_data_041624bw')
+        .select('*')
+        .eq('archetype_ID', archetype.id);
+      
+      if (metricsError) {
+        console.error(`Error fetching metrics for ${archetype.id}:`, metricsError);
+        results.failed++;
+        continue;
+      }
+      
+      console.log(`Found ${metrics.length} metrics for archetype ${archetype.id}`);
+      
+      // 4. Organize metrics by category
+      const organizedMetrics = organizeMetricsByCategory(metrics);
+      
+      // 5. Generate report content based on metrics
+      const reportContent = generateReportContent(archetype, organizedMetrics);
+      
+      // 6. Generate SWOT analysis
+      const swotAnalysis = generateSwotAnalysis(archetype, organizedMetrics);
+      
+      // 7. Generate strategic recommendations
+      const strategicRecommendations = generateStrategicRecommendations(archetype, organizedMetrics);
+      
+      // 8. Insert report content
+      await insertReportContent(supabase, archetype.id, reportContent, swotAnalysis, strategicRecommendations);
+      
+      console.log(`Completed processing for ${archetype.id}`);
+      results.processed++;
+      results.succeeded++;
+      results.archetypeIds.push(archetype.id);
+      
+    } catch (error) {
+      console.error(`Error processing archetype ${archetype.id}:`, error);
+      results.processed++;
+      results.failed++;
     }
-    
-    // 4. Organize metrics by category
-    const organizedMetrics = organizeMetricsByCategory(metrics);
-    
-    // 5. Generate report content based on metrics
-    const reportContent = generateReportContent(archetype, organizedMetrics);
-    
-    // 6. Generate SWOT analysis
-    const swotAnalysis = generateSwotAnalysis(archetype, organizedMetrics);
-    
-    // 7. Generate strategic recommendations
-    const strategicRecommendations = generateStrategicRecommendations(archetype, organizedMetrics);
-    
-    // 8. Insert report content
-    await insertReportContent(supabase, archetype.id, reportContent, swotAnalysis, strategicRecommendations);
-    
-    console.log(`Completed processing for ${archetype.id}`);
   }
   
-  console.log('Report generation complete!');
+  console.log('Report generation complete!', results);
+  return results;
 }
 
 // Utility function to insert report content into Supabase
@@ -130,59 +157,74 @@ async function insertReportContent(
   swotAnalysis: any, 
   strategicRecommendations: any
 ) {
-  // Insert or update the deep dive report
-  const { error: reportError } = await supabase
-    .from('archetype_deep_dive_reports')
-    .upsert({
-      archetype_id: archetypeId,
-      title: reportContent.title,
-      introduction: reportContent.introduction,
-      summary_analysis: reportContent.summary_analysis,
-      distinctive_metrics_summary: reportContent.distinctive_metrics_summary,
-      data_details: reportContent.data_details
-    }, { 
-      onConflict: 'archetype_id' 
-    });
-
-  if (reportError) {
-    console.error(`Error inserting report for ${archetypeId}:`, reportError);
-  }
-
-  // Insert or update SWOT analysis
-  const { error: swotError } = await supabase
-    .from('archetype_swot_analyses')
-    .upsert({
-      archetype_id: archetypeId,
-      strengths: swotAnalysis.strengths,
-      weaknesses: swotAnalysis.weaknesses,
-      opportunities: swotAnalysis.opportunities,
-      threats: swotAnalysis.threats
-    }, { 
-      onConflict: 'archetype_id' 
-    });
-
-  if (swotError) {
-    console.error(`Error inserting SWOT analysis for ${archetypeId}:`, swotError);
-  }
-
-  // Insert strategic recommendations
-  const { error: recommendationError } = await supabase
-    .from('archetype_strategic_recommendations')
-    .upsert(
-      strategicRecommendations.map((rec: any, index: number) => ({
+  console.log(`Inserting report content for archetype ${archetypeId}`);
+  
+  try {
+    // Insert or update the deep dive report
+    const { error: reportError } = await supabase
+      .from('archetype_deep_dive_reports')
+      .upsert({
         archetype_id: archetypeId,
-        recommendation_number: index + 1,
-        title: rec.title,
-        description: rec.description,
-        metrics_references: rec.metrics_references
-      })),
-      { 
-        onConflict: 'archetype_id, recommendation_number' 
-      }
-    );
+        title: reportContent.title,
+        introduction: reportContent.introduction,
+        summary_analysis: reportContent.summary_analysis,
+        distinctive_metrics_summary: reportContent.distinctive_metrics_summary,
+        data_details: JSON.parse(reportContent.data_details),
+        last_updated: new Date().toISOString()
+      }, { 
+        onConflict: 'archetype_id' 
+      });
 
-  if (recommendationError) {
-    console.error(`Error inserting recommendations for ${archetypeId}:`, recommendationError);
+    if (reportError) {
+      console.error(`Error inserting report for ${archetypeId}:`, reportError);
+      throw reportError;
+    }
+
+    // Insert or update SWOT analysis
+    const { error: swotError } = await supabase
+      .from('archetype_swot_analyses')
+      .upsert({
+        archetype_id: archetypeId,
+        strengths: swotAnalysis.strengths,
+        weaknesses: swotAnalysis.weaknesses,
+        opportunities: swotAnalysis.opportunities,
+        threats: swotAnalysis.threats,
+        last_updated: new Date().toISOString()
+      }, { 
+        onConflict: 'archetype_id' 
+      });
+
+    if (swotError) {
+      console.error(`Error inserting SWOT analysis for ${archetypeId}:`, swotError);
+      throw swotError;
+    }
+
+    // Insert strategic recommendations
+    for (let i = 0; i < strategicRecommendations.length; i++) {
+      const rec = strategicRecommendations[i];
+      const { error: recommendationError } = await supabase
+        .from('archetype_strategic_recommendations')
+        .upsert({
+          archetype_id: archetypeId,
+          recommendation_number: i + 1,
+          title: rec.title,
+          description: rec.description,
+          metrics_references: rec.metrics_references,
+          last_updated: new Date().toISOString()
+        }, { 
+          onConflict: 'archetype_id, recommendation_number' 
+        });
+
+      if (recommendationError) {
+        console.error(`Error inserting recommendation ${i+1} for ${archetypeId}:`, recommendationError);
+        throw recommendationError;
+      }
+    }
+    
+    console.log(`Successfully inserted all data for archetype ${archetypeId}`);
+  } catch (error) {
+    console.error(`Error in insertReportContent for ${archetypeId}:`, error);
+    throw error;
   }
 }
 

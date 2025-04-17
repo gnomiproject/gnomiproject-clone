@@ -34,23 +34,16 @@ const ReportGenerator: React.FC = () => {
         duration: 5000,
       });
       
-      // Implement the actual report generation logic
-      await generateArchetypeReports(supabase);
+      // Generate the actual reports
+      console.log("Starting archetype report generation...");
+      const results = await generateArchetypeReports(supabase);
+      console.log("Report generation completed with results:", results);
       
-      // Simulate a result for UI feedback
-      const mockResult = {
-        total: 9,  // assuming 9 archetypes
-        processed: 9,
-        succeeded: 9,
-        failed: 0,
-        archetypeIds: ['a1', 'a2', 'a3', 'b1', 'b2', 'b3', 'c1', 'c2', 'c3']
-      };
-      
-      setGenerationResult(mockResult);
+      setGenerationResult(results);
       
       toast({
         title: "Report Generation Complete",
-        description: `Processed ${mockResult.succeeded} of ${mockResult.total} archetypes successfully.`,
+        description: `Processed ${results.succeeded} of ${results.total} archetypes successfully.`,
         duration: 5000,
       });
       
