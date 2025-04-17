@@ -12,6 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LockIcon, UnlockIcon, FileText, LineChart, ListChecks, BarChart4, CircleAlert } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Json } from '@/integrations/supabase/types';
 
 interface DeepDiveReport {
   id: string;
@@ -168,7 +169,11 @@ const DeepReport = () => {
       if (reportError) {
         console.error('Error fetching deep dive report:', reportError);
       } else if (reportData) {
-        setDeepDiveReport(reportData);
+        // Convert JSON data to expected type
+        setDeepDiveReport({
+          ...reportData,
+          data_details: reportData.data_details as Record<string, any>
+        });
       }
       
       // Fetch SWOT analysis
@@ -181,7 +186,14 @@ const DeepReport = () => {
       if (swotError) {
         console.error('Error fetching SWOT analysis:', swotError);
       } else if (swotData) {
-        setSwotAnalysis(swotData);
+        // Convert JSON arrays to string arrays
+        setSwotAnalysis({
+          ...swotData,
+          strengths: swotData.strengths as unknown as string[],
+          weaknesses: swotData.weaknesses as unknown as string[],
+          opportunities: swotData.opportunities as unknown as string[],
+          threats: swotData.threats as unknown as string[]
+        });
       }
       
       // Fetch strategic recommendations
@@ -194,7 +206,14 @@ const DeepReport = () => {
       if (recommendationsError) {
         console.error('Error fetching strategic recommendations:', recommendationsError);
       } else if (recommendationsData) {
-        setStrategicRecommendations(recommendationsData);
+        // Convert metrics_references JSON to string
+        const typedRecommendations: StrategicRecommendation[] = recommendationsData.map(rec => ({
+          ...rec,
+          metrics_references: typeof rec.metrics_references === 'string' 
+            ? rec.metrics_references 
+            : JSON.stringify(rec.metrics_references)
+        }));
+        setStrategicRecommendations(typedRecommendations);
       }
       
     } catch (error) {
