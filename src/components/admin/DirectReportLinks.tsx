@@ -10,8 +10,10 @@ const DirectReportLinks = () => {
   const [archetypes, setArchetypes] = useState<any[]>([]);
 
   useEffect(() => {
-    // Set archetypes from the hook result
-    setArchetypes(getAllArchetypes || []);
+    // Set archetypes directly without trying to call it as a function
+    if (getAllArchetypes && Array.isArray(getAllArchetypes)) {
+      setArchetypes(getAllArchetypes);
+    }
   }, [getAllArchetypes]);
 
   return (
@@ -26,18 +28,22 @@ const DirectReportLinks = () => {
         </p>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {archetypes.map((archetype) => (
-            <Button 
-              key={archetype.id}
-              variant="outline"
-              asChild
-              className={`bg-archetype-${archetype.id}/10 hover:bg-archetype-${archetype.id}/20 border-archetype-${archetype.id}`}
-            >
-              <Link to={`/direct-report/${archetype.id}`}>
-                {archetype.name}
-              </Link>
-            </Button>
-          ))}
+          {archetypes.length > 0 ? (
+            archetypes.map((archetype) => (
+              <Button 
+                key={archetype.id}
+                variant="outline"
+                asChild
+                className={`bg-archetype-${archetype.id}/10 hover:bg-archetype-${archetype.id}/20 border-archetype-${archetype.id}`}
+              >
+                <Link to={`/direct-report/${archetype.id}`}>
+                  {archetype.name}
+                </Link>
+              </Button>
+            ))
+          ) : (
+            <p>Loading archetypes...</p>
+          )}
         </div>
       </CardContent>
     </Card>
