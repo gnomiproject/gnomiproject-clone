@@ -3,8 +3,18 @@ import { useState, useEffect } from 'react';
 import { ArchetypeId } from '@/types/archetype';
 import { supabase } from "@/integrations/supabase/client";
 
+export interface DistinctiveMetric {
+  Metric: string;
+  archetype_ID: string;
+  Difference: number;
+  "Archetype Average": number;
+  "Archetype Value": number;
+  Category: string;
+  definition?: string;
+}
+
 export const useDistinctiveMetrics = (archetypeId?: ArchetypeId) => {
-  const [distinctiveMetrics, setDistinctiveMetrics] = useState<any[]>([]);
+  const [distinctiveMetrics, setDistinctiveMetrics] = useState<DistinctiveMetric[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 

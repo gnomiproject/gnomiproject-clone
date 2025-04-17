@@ -3,9 +3,11 @@ import React from 'react';
 import { DeepReportData } from '@/pages/ArchetypeDeepReport';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getArchetypeColorHex } from '@/data/colors';
-import { BarChart4, CircleAlert, LineChart, TrendingDown, TrendingUp } from 'lucide-react';
+import { BarChart4, CircleAlert, LineChart, TrendingDown, TrendingUp, InfoIcon } from 'lucide-react';
 import { ChartContainer } from '@/components/ui/chart';
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend } from 'recharts';
+import { HoverCard, HoverCardTrigger, HoverCardContent } from '@/components/ui/hover-card';
+import { DistinctiveMetric } from '@/hooks/archetype/useDistinctiveMetrics';
 
 interface DeepReportKeyFindingsProps {
   reportData: DeepReportData;
@@ -79,11 +81,28 @@ const DeepReportKeyFindings: React.FC<DeepReportKeyFindingsProps> = ({ reportDat
               <ol className="list-decimal pl-8 space-y-4 mb-8">
                 {distinctiveMetrics.slice(0, 5).map((metric, i) => (
                   <li key={`key-finding-${i}`} className="text-gray-700">
-                    <span className="font-medium">{metric.Metric}:</span>{" "}
-                    {metric.Difference > 0 ? 
-                      `${metric.Difference.toFixed(1)}% higher than average (${metric["Archetype Value"].toFixed(1)} vs ${metric["Archetype Average"].toFixed(1)})` : 
-                      `${Math.abs(metric.Difference).toFixed(1)}% lower than average (${metric["Archetype Value"].toFixed(1)} vs ${metric["Archetype Average"].toFixed(1)})`
-                    }
+                    <div className="flex items-center">
+                      <span className="font-medium">{metric.Metric}:</span>{" "}
+                      {metric.Difference > 0 ? 
+                        `${metric.Difference.toFixed(1)}% higher than average (${metric["Archetype Value"].toFixed(1)} vs ${metric["Archetype Average"].toFixed(1)})` : 
+                        `${Math.abs(metric.Difference).toFixed(1)}% lower than average (${metric["Archetype Value"].toFixed(1)} vs ${metric["Archetype Average"].toFixed(1)})`
+                      }
+                      {metric.definition && (
+                        <HoverCard>
+                          <HoverCardTrigger asChild>
+                            <button className="ml-2 inline-flex items-center">
+                              <InfoIcon className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                            </button>
+                          </HoverCardTrigger>
+                          <HoverCardContent className="w-80 p-4">
+                            <div className="space-y-1">
+                              <h4 className="text-sm font-semibold">{metric.Metric}</h4>
+                              <p className="text-sm text-gray-500">{metric.definition}</p>
+                            </div>
+                          </HoverCardContent>
+                        </HoverCard>
+                      )}
+                    </div>
                   </li>
                 ))}
               </ol>
@@ -145,16 +164,31 @@ const DeepReportKeyFindings: React.FC<DeepReportKeyFindingsProps> = ({ reportDat
               <Card key={index} className="border-t-4" style={{ borderTopColor: archetypeColor }}>
                 <CardContent className="pt-6">
                   <div className="flex justify-between items-start">
-                    <div>
+                    <div className="flex items-center">
                       <div className="text-gray-500 text-sm">{metric.Metric}</div>
-                      <div className="text-2xl font-bold mt-1">
-                        {Number(metric["Archetype Value"]).toFixed(1)}
-                      </div>
+                      {metric.definition && (
+                        <HoverCard>
+                          <HoverCardTrigger asChild>
+                            <button className="ml-1 inline-flex items-center">
+                              <InfoIcon className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                            </button>
+                          </HoverCardTrigger>
+                          <HoverCardContent className="w-80 p-4">
+                            <div className="space-y-1">
+                              <h4 className="text-sm font-semibold">{metric.Metric}</h4>
+                              <p className="text-sm text-gray-500">{metric.definition}</p>
+                            </div>
+                          </HoverCardContent>
+                        </HoverCard>
+                      )}
                     </div>
                     <div className={`flex items-center ${trendColor}`}>
                       <TrendIcon className="h-5 w-5 mr-1" />
                       <span>{metric.Difference > 0 ? '+' : ''}{Number(metric.Difference).toFixed(1)}%</span>
                     </div>
+                  </div>
+                  <div className="text-2xl font-bold mt-1">
+                    {Number(metric["Archetype Value"]).toFixed(1)}
                   </div>
                   <div className="mt-4 text-sm text-gray-600">
                     vs. archetype average: {Number(metric["Archetype Average"]).toFixed(1)}

@@ -16,12 +16,13 @@ import DeepReportNextSteps from '@/components/deepreport/DeepReportNextSteps';
 import DeepReportSidebar from '@/components/deepreport/DeepReportSidebar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CircleAlert } from 'lucide-react';
+import { DistinctiveMetric } from '@/hooks/archetype/useDistinctiveMetrics';
 
 export type DeepReportData = {
   deepDiveReport: any;
   swotAnalysis: any;
   strategicRecommendations: any[];
-  distinctiveMetrics: any[];
+  distinctiveMetrics: DistinctiveMetric[];
   archetypeData: any;
   familyData: any;
 };
@@ -41,7 +42,7 @@ const ArchetypeDeepReport = () => {
   const [deepDiveReport, setDeepDiveReport] = useState<any>(null);
   const [swotAnalysis, setSwotAnalysis] = useState<any>(null);
   const [strategicRecommendations, setStrategicRecommendations] = useState<any[]>([]);
-  const [distinctiveMetrics, setDistinctiveMetrics] = useState<any[]>([]);
+  const [distinctiveMetrics, setDistinctiveMetrics] = useState<DistinctiveMetric[]>([]);
   const [loadingReportData, setLoadingReportData] = useState(false);
 
   useEffect(() => {

@@ -1,9 +1,10 @@
+
 import React, { useState } from 'react';
 import { DeepReportData } from '@/pages/ArchetypeDeepReport';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { BarChart, LineChart, CircleAlert, PieChart, Users, Building } from 'lucide-react';
+import { BarChart, LineChart, CircleAlert, PieChart, Users, Building, InfoIcon } from 'lucide-react';
 import {
   Bar,
   BarChart as RechartsBarChart,
@@ -15,6 +16,8 @@ import {
   ResponsiveContainer,
   Cell,
 } from 'recharts';
+import { HoverCard, HoverCardTrigger, HoverCardContent } from '@/components/ui/hover-card';
+import { Tooltip as UITooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip';
 
 interface DeepReportDetailedMetricsProps {
   reportData: DeepReportData;
@@ -71,6 +74,7 @@ const DeepReportDetailedMetrics = ({ reportData }: DeepReportDetailedMetricsProp
         archetypeValue: item["Archetype Value"] || 0,
         averageValue: item["Archetype Average"] || 0,
         difference: item.Difference || 0,
+        definition: item.definition || null,
       }));
   };
 
@@ -177,39 +181,57 @@ const DeepReportDetailedMetrics = ({ reportData }: DeepReportDetailedMetricsProp
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="min-w-[200px]">Metric</TableHead>
-                          <TableHead className="text-right">Archetype Value</TableHead>
-                          <TableHead className="text-right">Average</TableHead>
-                          <TableHead className="text-right">Difference</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {deepDiveReport.data_details[category]?.map((item: any, index: number) => (
-                          <TableRow key={index}>
-                            <TableCell className="font-medium">{item.Metric}</TableCell>
-                            <TableCell className="text-right">
-                              {typeof item["Archetype Value"] === 'number' ? 
-                                item["Archetype Value"]?.toFixed(2) : 
-                                item["Archetype Value"] || 'N/A'}
-                            </TableCell>
-                            <TableCell className="text-right">
-                              {typeof item["Archetype Average"] === 'number' ? 
-                                item["Archetype Average"]?.toFixed(2) : 
-                                item["Archetype Average"] || 'N/A'}
-                            </TableCell>
-                            <TableCell className={`text-right ${item.Difference > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                              {item.Difference > 0 ? '+' : ''}
-                              {typeof item.Difference === 'number' ? 
-                                item.Difference?.toFixed(2) : 
-                                item.Difference || 'N/A'}%
-                            </TableCell>
+                    <TooltipProvider>
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="min-w-[200px]">Metric</TableHead>
+                            <TableHead className="text-right">Archetype Value</TableHead>
+                            <TableHead className="text-right">Average</TableHead>
+                            <TableHead className="text-right">Difference</TableHead>
                           </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
+                        </TableHeader>
+                        <TableBody>
+                          {deepDiveReport.data_details[category]?.map((item: any, index: number) => (
+                            <TableRow key={index}>
+                              <TableCell className="font-medium">
+                                <div className="flex items-center">
+                                  {item.Metric}
+                                  {item.definition && (
+                                    <UITooltip>
+                                      <TooltipTrigger asChild>
+                                        <button className="ml-2 inline-flex items-center">
+                                          <InfoIcon className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                                        </button>
+                                      </TooltipTrigger>
+                                      <TooltipContent className="max-w-sm">
+                                        <p>{item.definition}</p>
+                                      </TooltipContent>
+                                    </UITooltip>
+                                  )}
+                                </div>
+                              </TableCell>
+                              <TableCell className="text-right">
+                                {typeof item["Archetype Value"] === 'number' ? 
+                                  item["Archetype Value"]?.toFixed(2) : 
+                                  item["Archetype Value"] || 'N/A'}
+                              </TableCell>
+                              <TableCell className="text-right">
+                                {typeof item["Archetype Average"] === 'number' ? 
+                                  item["Archetype Average"]?.toFixed(2) : 
+                                  item["Archetype Average"] || 'N/A'}
+                              </TableCell>
+                              <TableCell className={`text-right ${item.Difference > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                {item.Difference > 0 ? '+' : ''}
+                                {typeof item.Difference === 'number' ? 
+                                  item.Difference?.toFixed(2) : 
+                                  item.Difference || 'N/A'}%
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </TooltipProvider>
                   </CardContent>
                 </Card>
               </TabsContent>
