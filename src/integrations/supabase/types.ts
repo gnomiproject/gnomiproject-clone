@@ -48,6 +48,47 @@ export type Database = {
         }
         Relationships: []
       }
+      archetype_deep_dive_reports: {
+        Row: {
+          archetype_id: string
+          data_details: Json
+          distinctive_metrics_summary: string
+          id: string
+          introduction: string
+          last_updated: string | null
+          summary_analysis: string
+          title: string
+        }
+        Insert: {
+          archetype_id: string
+          data_details: Json
+          distinctive_metrics_summary: string
+          id?: string
+          introduction: string
+          last_updated?: string | null
+          summary_analysis: string
+          title: string
+        }
+        Update: {
+          archetype_id?: string
+          data_details?: Json
+          distinctive_metrics_summary?: string
+          id?: string
+          introduction?: string
+          last_updated?: string | null
+          summary_analysis?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "archetype_deep_dive_reports_archetype_id_fkey"
+            columns: ["archetype_id"]
+            isOneToOne: false
+            referencedRelation: "archetypes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       archetype_families: {
         Row: {
           common_traits: Json
@@ -144,6 +185,82 @@ export type Database = {
             foreignKeyName: "archetype_metrics_archetype_id_fkey"
             columns: ["archetype_id"]
             isOneToOne: true
+            referencedRelation: "archetypes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      archetype_strategic_recommendations: {
+        Row: {
+          archetype_id: string
+          description: string
+          id: string
+          last_updated: string | null
+          metrics_references: Json | null
+          recommendation_number: number
+          title: string
+        }
+        Insert: {
+          archetype_id: string
+          description: string
+          id?: string
+          last_updated?: string | null
+          metrics_references?: Json | null
+          recommendation_number: number
+          title: string
+        }
+        Update: {
+          archetype_id?: string
+          description?: string
+          id?: string
+          last_updated?: string | null
+          metrics_references?: Json | null
+          recommendation_number?: number
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "archetype_strategic_recommendations_archetype_id_fkey"
+            columns: ["archetype_id"]
+            isOneToOne: false
+            referencedRelation: "archetypes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      archetype_swot_analyses: {
+        Row: {
+          archetype_id: string
+          id: string
+          last_updated: string | null
+          opportunities: Json
+          strengths: Json
+          threats: Json
+          weaknesses: Json
+        }
+        Insert: {
+          archetype_id: string
+          id?: string
+          last_updated?: string | null
+          opportunities: Json
+          strengths: Json
+          threats: Json
+          weaknesses: Json
+        }
+        Update: {
+          archetype_id?: string
+          id?: string
+          last_updated?: string | null
+          opportunities?: Json
+          strengths?: Json
+          threats?: Json
+          weaknesses?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "archetype_swot_analyses_archetype_id_fkey"
+            columns: ["archetype_id"]
+            isOneToOne: false
             referencedRelation: "archetypes"
             referencedColumns: ["id"]
           },
