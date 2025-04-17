@@ -24,7 +24,7 @@ function App() {
             <Route path="/" element={<Index />} />
             <Route path="/assessment" element={<Assessment />} />
             <Route path="/results" element={<Results />} />
-            <Route path="/deep-report/:accessToken" element={<DeepReport />} />
+            <Route path="/deep-report" element={<DeepReport />} />
             <Route path="/insights" element={<Insights />} />
             <Route path="/about" element={<About />} />
             <Route path="/admin" element={<Admin />} />
