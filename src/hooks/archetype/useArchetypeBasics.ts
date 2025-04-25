@@ -1,150 +1,48 @@
 
-import { useState, useEffect } from 'react';
-import { supabase } from "@/integrations/supabase/client";
-import { Archetype, ArchetypeId, ArchetypeColor } from '@/types/archetype';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 export const useArchetypeBasics = () => {
-  const [allArchetypes, setAllArchetypes] = useState<Archetype[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: archetypeData, isLoading, error } = useQuery({
+    queryKey: ['archetype-basics'],
+    queryFn: async () => {
+      // Get basic archetype information
+      const { data: archetypeBasics, error: archetypeError } = await supabase
+        .from('Core_Archetype_Overview')
+        .select('*');
 
-  // Fetch all archetypes on mount
-  useEffect(() => {
-    const fetchArchetypes = async () => {
-      try {
-        setLoading(true);
+      if (archetypeError) throw archetypeError;
+      
+      // Get archetype summaries from full reports
+      const { data: archetypeSummaries, error: summariesError } = await supabase
+        .from('Analysis_Archetype_Full_Reports')
+        .select('archetype_id, key_findings');
         
-        const { data, error } = await supabase.from('archetypes').select('*');
-        
-        if (error) throw error;
-        
-        // Transform data to match our interface
-        const archetypes: Archetype[] = data.map(item => ({
-          id: item.id as ArchetypeId,
-          name: item.name,
-          familyId: item.family_id as 'a' | 'b' | 'c',
-          shortDescription: item.short_description,
-          longDescription: item.long_description, 
-          characteristics: item.characteristics as string[],
-          strategicPriorities: item.strategic_priorities as {
-            primaryFocus: string;
-            secondaryPriorities: string[];
-            keyOpportunities: string[];
-          },
-          riskScore: item.risk_score,
-          riskVariance: item.risk_variance,
-          primaryRiskDriver: item.primary_risk_driver,
-          color: item.color as ArchetypeColor,
-          hexColor: item.hex_color
-        }));
-        
-        setAllArchetypes(archetypes);
-      } catch (error) {
-        console.error('Error fetching archetype data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchArchetypes();
-  }, []);
+      if (summariesError) throw summariesError;
 
-  // Get archetype by ID
-  const getArchetypeById = (id: ArchetypeId) => {
-    const [archetype, setArchetype] = useState<Archetype | undefined>(undefined);
-
-    useEffect(() => {
-      const fetchArchetype = async () => {
-        const { data, error } = await supabase
-          .from('archetypes')
-          .select('*')
-          .eq('id', id)
-          .single();
-
-        if (error) {
-          console.error('Error fetching archetype:', error);
-          return;
-        }
+      // Combine the data
+      const combinedData = archetypeBasics.map(archetype => {
+        const summary = archetypeSummaries.find(
+          summary => summary.archetype_id === archetype.id
+        );
         
-        // Transform data to match our interface
-        const transformedData: Archetype = {
-          id: data.id as ArchetypeId,
-          name: data.name,
-          familyId: data.family_id as 'a' | 'b' | 'c',
-          shortDescription: data.short_description,
-          longDescription: data.long_description,
-          characteristics: data.characteristics as string[],
-          strategicPriorities: data.strategic_priorities as {
-            primaryFocus: string;
-            secondaryPriorities: string[];
-            keyOpportunities: string[];
-          },
-          riskScore: data.risk_score,
-          riskVariance: data.risk_variance,
-          primaryRiskDriver: data.primary_risk_driver,
-          color: data.color as ArchetypeColor,
-          hexColor: data.hex_color
+        return {
+          id: archetype.id,
+          name: archetype.name,
+          familyId: archetype.family_id,
+          description: archetype.short_description,
+          color: archetype.hex_color,
+          keyCharacteristics: summary?.key_findings || []
         };
-        
-        setArchetype(transformedData);
-      };
+      });
 
-      fetchArchetype();
-    }, [id]);
-
-    return archetype;
-  };
-
-  // Get archetypes by family
-  const getArchetypesByFamily = (familyId: 'a' | 'b' | 'c') => {
-    const [archetypes, setArchetypes] = useState<Archetype[]>([]);
-
-    useEffect(() => {
-      const fetchArchetypes = async () => {
-        const { data, error } = await supabase
-          .from('archetypes')
-          .select('*')
-          .eq('family_id', familyId);
-
-        if (error) {
-          console.error('Error fetching archetypes:', error);
-          return;
-        }
-        
-        if (!data?.length) return;
-        
-        // Transform data to match our interface
-        const transformedData: Archetype[] = data.map(item => ({
-          id: item.id as ArchetypeId,
-          name: item.name,
-          familyId: item.family_id as 'a' | 'b' | 'c',
-          shortDescription: item.short_description,
-          longDescription: item.long_description,
-          characteristics: item.characteristics as string[],
-          strategicPriorities: item.strategic_priorities as {
-            primaryFocus: string;
-            secondaryPriorities: string[];
-            keyOpportunities: string[];
-          },
-          riskScore: item.risk_score,
-          riskVariance: item.risk_variance,
-          primaryRiskDriver: item.primary_risk_driver,
-          color: item.color as ArchetypeColor,
-          hexColor: item.hex_color
-        }));
-        
-        setArchetypes(transformedData);
-      };
-
-      fetchArchetypes();
-    }, [familyId]);
-
-    return archetypes;
-  };
+      return combinedData;
+    }
+  });
 
   return {
-    allArchetypes,
-    getArchetypeById,
-    getArchetypesByFamily,
-    isLoading: loading
+    archetypes: archetypeData || [],
+    isLoading,
+    error
   };
 };

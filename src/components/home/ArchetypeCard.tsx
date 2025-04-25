@@ -1,6 +1,7 @@
+
 import React, { useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
-import { ArchetypeId, ArchetypeColor } from '@/types/archetype';
+import { ArchetypeId } from '@/types/archetype';
 
 interface ArchetypeCardProps {
   id: ArchetypeId;
@@ -9,20 +10,6 @@ interface ArchetypeCardProps {
   color: string;
   description: string;
   characteristics: string[];
-  keyMetrics?: {
-    emergencyUtilization?: {
-      value: string;
-      trend: 'up' | 'down' | 'neutral';
-    },
-    specialistUtilization?: {
-      value: string;
-      trend: 'up' | 'down' | 'neutral';
-    },
-    healthcareSpend?: {
-      value: string;
-      trend: 'up' | 'down' | 'neutral';
-    }
-  };
 }
 
 const ArchetypeCard: React.FC<ArchetypeCardProps> = ({
@@ -31,8 +18,7 @@ const ArchetypeCard: React.FC<ArchetypeCardProps> = ({
   category,
   color,
   description,
-  characteristics,
-  keyMetrics
+  characteristics
 }) => {
   const [expanded, setExpanded] = useState(false);
   const toggleExpand = () => setExpanded(!expanded);
@@ -47,16 +33,28 @@ const ArchetypeCard: React.FC<ArchetypeCardProps> = ({
   return (
     <div className={`relative bg-white border border-gray-200 rounded-lg overflow-hidden transition-all duration-200 shadow-sm hover:shadow-md`}>
       {/* Colored top bar */}
-      <div className={`h-2 w-full bg-archetype-${id}`}></div>
+      <div 
+        className="h-2 w-full" 
+        style={{ backgroundColor: color }}
+      ></div>
       
       <div className="p-6">
         {/* Category badge */}
-        <div className={`inline-block text-xs font-medium mb-2 px-2 py-0.5 rounded-full bg-family-${familyId}/20 text-family-${familyId}`}>
+        <div 
+          className={`inline-block text-xs font-medium mb-2 px-2 py-0.5 rounded-full`}
+          style={{ 
+            backgroundColor: `${color}20`,
+            color: color
+          }}
+        >
           {category}
         </div>
         
         {/* Title */}
-        <h3 className={`text-xl font-bold mb-3 text-archetype-${id}`}>
+        <h3 
+          className={`text-xl font-bold mb-3`}
+          style={{ color: color }}
+        >
           {title}
         </h3>
         
@@ -64,7 +62,7 @@ const ArchetypeCard: React.FC<ArchetypeCardProps> = ({
         <p className="text-gray-600 mb-4">{truncatedDescription}</p>
         
         {/* Characteristics */}
-        {expanded && (
+        {expanded && characteristics && characteristics.length > 0 && (
           <div className="mb-6">
             <h4 className="font-semibold text-gray-700 mb-2">Key Characteristics:</h4>
             <ul className="list-disc list-inside text-gray-600 mb-4 space-y-1 text-left">
@@ -72,80 +70,6 @@ const ArchetypeCard: React.FC<ArchetypeCardProps> = ({
                 <li key={index} className="text-sm">{trait}</li>
               ))}
             </ul>
-          </div>
-        )}
-        
-        {/* Key Metrics (if available) */}
-        {expanded && keyMetrics && (
-          <div className="mb-6">
-            <h4 className="font-semibold text-gray-700 mb-3">Key Metrics:</h4>
-            <div className="grid grid-cols-3 gap-2">
-              {keyMetrics.emergencyUtilization && (
-                <div className="p-2 bg-gray-50 rounded">
-                  <p className="text-xs text-gray-500">ER Utilization</p>
-                  <div className="flex items-center mt-1">
-                    <span className={`text-base font-medium ${
-                      keyMetrics.emergencyUtilization.trend === 'up' ? 'text-orange-600' : 
-                      keyMetrics.emergencyUtilization.trend === 'down' ? 'text-green-600' : 
-                      'text-gray-700'
-                    }`}>
-                      {keyMetrics.emergencyUtilization.value}
-                    </span>
-                    <span className={`ml-1 ${
-                      keyMetrics.emergencyUtilization.trend === 'up' ? 'text-orange-600' : 
-                      keyMetrics.emergencyUtilization.trend === 'down' ? 'text-green-600' : 
-                      'text-gray-500'
-                    }`}>
-                      {keyMetrics.emergencyUtilization.trend === 'up' ? '↑' : keyMetrics.emergencyUtilization.trend === 'down' ? '↓' : '–'}
-                    </span>
-                  </div>
-                </div>
-              )}
-              
-              {keyMetrics.specialistUtilization && (
-                <div className="p-2 bg-gray-50 rounded">
-                  <p className="text-xs text-gray-500">Specialist Use</p>
-                  <div className="flex items-center mt-1">
-                    <span className={`text-base font-medium ${
-                      keyMetrics.specialistUtilization.trend === 'up' ? 'text-orange-600' : 
-                      keyMetrics.specialistUtilization.trend === 'down' ? 'text-green-600' : 
-                      'text-gray-700'
-                    }`}>
-                      {keyMetrics.specialistUtilization.value}
-                    </span>
-                    <span className={`ml-1 ${
-                      keyMetrics.specialistUtilization.trend === 'up' ? 'text-orange-600' : 
-                      keyMetrics.specialistUtilization.trend === 'down' ? 'text-green-600' : 
-                      'text-gray-500'
-                    }`}>
-                      {keyMetrics.specialistUtilization.trend === 'up' ? '↑' : keyMetrics.specialistUtilization.trend === 'down' ? '↓' : '–'}
-                    </span>
-                  </div>
-                </div>
-              )}
-              
-              {keyMetrics.healthcareSpend && (
-                <div className="p-2 bg-gray-50 rounded">
-                  <p className="text-xs text-gray-500">HC Spend</p>
-                  <div className="flex items-center mt-1">
-                    <span className={`text-base font-medium ${
-                      keyMetrics.healthcareSpend.trend === 'up' ? 'text-orange-600' : 
-                      keyMetrics.healthcareSpend.trend === 'down' ? 'text-green-600' : 
-                      'text-gray-700'
-                    }`}>
-                      {keyMetrics.healthcareSpend.value}
-                    </span>
-                    <span className={`ml-1 ${
-                      keyMetrics.healthcareSpend.trend === 'up' ? 'text-orange-600' : 
-                      keyMetrics.healthcareSpend.trend === 'down' ? 'text-green-600' : 
-                      'text-gray-500'
-                    }`}>
-                      {keyMetrics.healthcareSpend.trend === 'up' ? '↑' : keyMetrics.healthcareSpend.trend === 'down' ? '↓' : '–'}
-                    </span>
-                  </div>
-                </div>
-              )}
-            </div>
           </div>
         )}
         

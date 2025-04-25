@@ -1,17 +1,16 @@
-
 import React, { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import Button from '@/components/shared/Button';
 import SectionTitle from '@/components/shared/SectionTitle';
 import { ArrowRight, Grid, List } from 'lucide-react';
-import { useArchetypes } from '@/hooks/useArchetypes';
+import { useArchetypeBasics } from '@/hooks/archetype/useArchetypeBasics';
 import ArchetypeCard from '@/components/home/ArchetypeCard';
 import InteractiveDNAExplorer from '@/components/home/InteractiveDNAExplorer';
+import { ArchetypeId } from '@/types/archetype';
 
 const Index = () => {
   const [view, setView] = useState<'grid' | 'list'>('grid');
-  const { getAllArchetypeSummaries, isLoading } = useArchetypes();
-  const archetypeSummaries = getAllArchetypeSummaries;
+  const { archetypes, isLoading } = useArchetypeBasics();
   const dnaExplorerRef = useRef<HTMLDivElement>(null);
 
   const scrollToDNAExplorer = (e: React.MouseEvent) => {
@@ -107,7 +106,7 @@ const Index = () => {
 
           <div className="flex justify-between items-center mb-8">
             <h3 className="text-xl font-medium text-gray-700">
-              {isLoading ? "Loading..." : `${archetypeSummaries.length} Archetypes`}
+              {isLoading ? "Loading..." : `${archetypes.length} Archetypes`}
             </h3>
             <div className="bg-white border rounded-lg flex overflow-hidden shadow-sm">
               <button
@@ -133,12 +132,12 @@ const Index = () => {
             </div>
           ) : (
             <div className={`grid ${view === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'} gap-6`}>
-              {archetypeSummaries.map(archetype => (
+              {archetypes.map(archetype => (
                 <ArchetypeCard 
                   key={archetype.id}
-                  id={archetype.id}
+                  id={archetype.id as ArchetypeId}
                   title={archetype.name}
-                  category={`Family ${archetype.familyId}`}
+                  category={`Family ${archetype.familyId.toUpperCase()}`}
                   color={archetype.color}
                   description={archetype.description}
                   characteristics={archetype.keyCharacteristics}
