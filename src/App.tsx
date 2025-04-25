@@ -2,6 +2,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from '@/components/ui/sonner';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import Navbar from '@/components/layout/Navbar';
 import Index from '@/pages/Index';
 import Assessment from '@/pages/Assessment';
@@ -36,6 +37,7 @@ function App() {
           </Routes>
         </main>
         <Toaster />
+        {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
       </div>
     </BrowserRouter>
   );
