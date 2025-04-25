@@ -12,6 +12,16 @@ interface ArchetypeReportProps {
   archetypeId: ArchetypeId;
 }
 
+// Define types for the statistics to fix the TypeScript errors
+interface KeyStatistic {
+  value: string;
+  trend: 'up' | 'down' | 'neutral';
+}
+
+interface KeyStatistics {
+  [key: string]: KeyStatistic;
+}
+
 const ArchetypeReport = ({ archetypeId }: ArchetypeReportProps) => {
   const { getArchetypeEnhanced, getFamilyById, getTraitsForArchetype, getMetricsForArchetype } = useArchetypes();
   
@@ -25,6 +35,9 @@ const ArchetypeReport = ({ archetypeId }: ArchetypeReportProps) => {
   // Using proper archetype-specific color classes
   const archetypeColor = `archetype-${archetype.id}`;
   const familyColor = `family-${archetype.familyId}`;
+  
+  // Ensure keyStatistics has the correct type
+  const keyStatistics: KeyStatistics = archetype.standard?.keyStatistics || {};
   
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-12">
@@ -43,7 +56,7 @@ const ArchetypeReport = ({ archetypeId }: ArchetypeReportProps) => {
         </div>
         
         <p className="text-lg text-gray-700 mb-8 text-left">
-          {archetype.standard.fullDescription}
+          {archetype.standard?.fullDescription || ''}
         </p>
         
         <Tabs defaultValue="overview" className="w-full">
@@ -74,7 +87,7 @@ const ArchetypeReport = ({ archetypeId }: ArchetypeReportProps) => {
                   <span className={`text-3xl font-bold text-${archetypeColor}`}>{archetype.id}</span>
                 </div>
                 <h3 className="text-xl font-bold mb-4 text-left">About {archetype.name}</h3>
-                <p className="text-gray-700 text-left">{archetype.standard.overview}</p>
+                <p className="text-gray-700 text-left">{archetype.standard?.overview || ''}</p>
                 
                 <div className="mt-6 text-left">
                   <h4 className="font-bold mb-3">Family Background</h4>
@@ -85,7 +98,7 @@ const ArchetypeReport = ({ archetypeId }: ArchetypeReportProps) => {
               <div className="md:col-span-2">
                 <h3 className="text-xl font-bold mb-4 text-left">Key Characteristics</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                  {archetype.standard.keyCharacteristics.map((characteristic, index) => (
+                  {(archetype.standard?.keyCharacteristics || []).map((characteristic, index) => (
                     <div key={index} className="flex items-center gap-3 p-3 rounded-md bg-gray-50 text-left">
                       <div className={`h-2 w-2 rounded-full bg-${archetypeColor}`}></div>
                       <span>{characteristic}</span>
@@ -95,7 +108,7 @@ const ArchetypeReport = ({ archetypeId }: ArchetypeReportProps) => {
                 
                 <h3 className="text-xl font-bold mb-4 text-left">Key Statistics</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {Object.entries(archetype.standard.keyStatistics).map(([key, stat]) => (
+                  {Object.entries(keyStatistics).map(([key, stat]) => (
                     <div key={key} className="bg-gray-50 rounded-lg p-4 text-left">
                       <h4 className="font-medium text-gray-600 mb-1">
                         {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
@@ -119,7 +132,7 @@ const ArchetypeReport = ({ archetypeId }: ArchetypeReportProps) => {
           <TabsContent value="priorities" className="mt-6">
             <h3 className="text-xl font-bold mb-6 text-left">Strategic Priorities for {archetype.name}</h3>
             <div className="space-y-6">
-              {archetype.enhanced?.strategicPriorities?.map((priority, index) => (
+              {(archetype.enhanced?.strategicPriorities || []).map((priority, index) => (
                 <div key={index} className="bg-white border rounded-lg p-6 shadow-sm">
                   <div className="flex items-start gap-4">
                     <div className={`bg-${archetypeColor}/10 rounded-lg p-4 flex-shrink-0`}>
@@ -136,7 +149,7 @@ const ArchetypeReport = ({ archetypeId }: ArchetypeReportProps) => {
             
             <div className="mt-8 text-left">
               <h3 className="text-xl font-bold mb-4">Cost Saving Opportunities</h3>
-              {archetype.enhanced?.costSavings?.map((saving, index) => (
+              {(archetype.enhanced?.costSavings || []).map((saving, index) => (
                 <div key={index} className="mb-6">
                   <h4 className="font-bold mb-2">{saving.title}</h4>
                   <p className="text-gray-700">{saving.description}</p>
@@ -153,23 +166,23 @@ const ArchetypeReport = ({ archetypeId }: ArchetypeReportProps) => {
                 <div className="bg-white border rounded-lg p-6 mb-6">
                   <div className="flex items-baseline justify-between mb-2 text-left">
                     <h4 className="font-bold">Risk Score</h4>
-                    <span className={`text-${archetypeColor} text-lg font-bold`}>{archetype.enhanced?.riskProfile.score}</span>
+                    <span className={`text-${archetypeColor} text-lg font-bold`}>{archetype.enhanced?.riskProfile?.score || 'N/A'}</span>
                   </div>
-                  <p className="text-sm text-gray-600 mb-4 text-left">{archetype.enhanced?.riskProfile.comparison}</p>
+                  <p className="text-sm text-gray-600 mb-4 text-left">{archetype.enhanced?.riskProfile?.comparison || ''}</p>
                   
                   <h5 className="font-bold mb-3 text-left">Top Conditions</h5>
                   <div className="space-y-4">
-                    {archetype.enhanced?.riskProfile.conditions.map((condition, index) => (
+                    {(archetype.enhanced?.riskProfile?.conditions || []).map((condition, index) => (
                       <div key={index} className="text-left">
                         <div className="flex justify-between text-sm mb-1">
                           <span>{condition.name}</span>
-                          <span className={condition.value.startsWith('+') ? 'text-orange-600' : 'text-green-600'}>
+                          <span className={(condition.value || '').startsWith('+') ? 'text-orange-600' : 'text-green-600'}>
                             {condition.value}
                           </span>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2">
                           <div 
-                            className={`h-2 rounded-full ${condition.value.startsWith('+') ? `bg-orange-500` : `bg-green-500`}`}
+                            className={`h-2 rounded-full ${(condition.value || '').startsWith('+') ? `bg-orange-500` : `bg-green-500`}`}
                             style={{ width: condition.barWidth }}
                           ></div>
                         </div>
@@ -244,7 +257,7 @@ const ArchetypeReport = ({ archetypeId }: ArchetypeReportProps) => {
               <div className="bg-green-50 border border-green-200 rounded-lg p-6">
                 <h4 className="text-lg font-bold text-green-700 mb-4 text-left">Strengths</h4>
                 <ul className="space-y-2">
-                  {archetype.enhanced?.swot.strengths.map((strength, index) => (
+                  {(archetype.enhanced?.swot?.strengths || []).map((strength, index) => (
                     <li key={index} className="flex items-center gap-2 text-left">
                       <div className="h-2 w-2 rounded-full bg-green-500"></div>
                       <span>{strength}</span>
@@ -256,7 +269,7 @@ const ArchetypeReport = ({ archetypeId }: ArchetypeReportProps) => {
               <div className="bg-red-50 border border-red-200 rounded-lg p-6">
                 <h4 className="text-lg font-bold text-red-700 mb-4 text-left">Weaknesses</h4>
                 <ul className="space-y-2">
-                  {archetype.enhanced?.swot.weaknesses.map((weakness, index) => (
+                  {(archetype.enhanced?.swot?.weaknesses || []).map((weakness, index) => (
                     <li key={index} className="flex items-center gap-2 text-left">
                       <div className="h-2 w-2 rounded-full bg-red-500"></div>
                       <span>{weakness}</span>
@@ -268,7 +281,7 @@ const ArchetypeReport = ({ archetypeId }: ArchetypeReportProps) => {
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
                 <h4 className="text-lg font-bold text-blue-700 mb-4 text-left">Opportunities</h4>
                 <ul className="space-y-2">
-                  {archetype.enhanced?.swot.opportunities.map((opportunity, index) => (
+                  {(archetype.enhanced?.swot?.opportunities || []).map((opportunity, index) => (
                     <li key={index} className="flex items-center gap-2 text-left">
                       <div className="h-2 w-2 rounded-full bg-blue-500"></div>
                       <span>{opportunity}</span>
@@ -280,7 +293,7 @@ const ArchetypeReport = ({ archetypeId }: ArchetypeReportProps) => {
               <div className="bg-amber-50 border border-amber-200 rounded-lg p-6">
                 <h4 className="text-lg font-bold text-amber-700 mb-4 text-left">Threats</h4>
                 <ul className="space-y-2">
-                  {archetype.enhanced?.swot.threats.map((threat, index) => (
+                  {(archetype.enhanced?.swot?.threats || []).map((threat, index) => (
                     <li key={index} className="flex items-center gap-2 text-left">
                       <div className="h-2 w-2 rounded-full bg-amber-500"></div>
                       <span>{threat}</span>

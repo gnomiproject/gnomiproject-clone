@@ -48,7 +48,8 @@ export const useArchetypeDetails = () => {
               if (typeof report.key_findings === 'string') {
                 keyFindings = JSON.parse(report.key_findings);
               } else if (Array.isArray(report.key_findings)) {
-                keyFindings = report.key_findings;
+                // Ensure each item is cast to a string to satisfy TypeScript
+                keyFindings = report.key_findings.map(item => String(item));
               }
             } catch (e) {
               console.warn(`Failed to parse key_findings for ${archetype.id}:`, e);
@@ -65,10 +66,10 @@ export const useArchetypeDetails = () => {
             fullDescription: archetype.long_description,
             keyFindings: keyFindings,
             swot: swot ? {
-              strengths: swot.strengths || [],
-              weaknesses: swot.weaknesses || [],
-              opportunities: swot.opportunities || [],
-              threats: swot.threats || []
+              strengths: swot.strengths ? swot.strengths.map(s => String(s)) : [],
+              weaknesses: swot.weaknesses ? swot.weaknesses.map(w => String(w)) : [],
+              opportunities: swot.opportunities ? swot.opportunities.map(o => String(o)) : [],
+              threats: swot.threats ? swot.threats.map(t => String(t)) : []
             } : null
           };
         });
