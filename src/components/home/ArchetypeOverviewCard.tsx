@@ -7,6 +7,7 @@ interface ArchetypeOverviewCardProps {
   name: string;
   id: string;
   familyId: string;
+  familyName?: string;  // Make family name optional
   shortDescription: string;
   hexColor: string;
 }
@@ -15,6 +16,7 @@ const ArchetypeOverviewCard = ({
   name, 
   id, 
   familyId,
+  familyName,
   shortDescription,
   hexColor 
 }: ArchetypeOverviewCardProps) => {
@@ -29,7 +31,9 @@ const ArchetypeOverviewCard = ({
         
         <CardHeader>
           <CardTitle>{name}</CardTitle>
-          <CardDescription>Family {familyId.toUpperCase()}</CardDescription>
+          <CardDescription>
+            {familyName ? `Family ${familyName}` : `Family ${familyId.toUpperCase()}`}
+          </CardDescription>
         </CardHeader>
         
         <CardContent>

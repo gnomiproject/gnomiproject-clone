@@ -12,7 +12,12 @@ export const useArchetypeBasics = () => {
         .from('Core_Archetype_Overview')
         .select('*');
 
-      if (archetypeError) throw archetypeError;
+      // Get family names from Core_Archetype_Families
+      const { data: familyData, error: familyError } = await supabase
+        .from('Core_Archetype_Families')
+        .select('*');
+
+      if (archetypeError || familyError) throw (archetypeError || familyError);
       
       // Get archetype summaries from Analysis_Archetype_Full_Reports
       const { data: archetypeSummaries, error: summariesError } = await supabase
@@ -27,10 +32,14 @@ export const useArchetypeBasics = () => {
           summary => summary.archetype_id === archetype.id
         );
         
+        // Find the corresponding family name
+        const family = familyData?.find(f => f.id === archetype.family_id);
+        
         return {
           id: archetype.id,
           name: archetype.name,
           familyId: archetype.family_id,
+          familyName: family?.name || '', // Add family name
           description: archetype.short_description,
           color: archetype.hex_color,
           keyCharacteristics: summary?.key_findings || []

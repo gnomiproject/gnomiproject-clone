@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from "@/integrations/supabase/client";
@@ -9,41 +8,10 @@ import ArchetypeOverviewCard from './ArchetypeOverviewCard';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { migrateDataToSupabase } from '@/utils/migrationUtil';
+import { useArchetypeBasics } from '@/hooks/archetype/useArchetypeBasics';
 
 const ArchetypesGridSection = () => {
-  // Fetch archetypes from Core_Archetype_Overview with better error handling
-  const { data: archetypes, isLoading, error, refetch } = useQuery({
-    queryKey: ['archetypes-overview'],
-    queryFn: async () => {
-      try {
-        console.log("Attempting to fetch archetypes from Supabase...");
-        
-        const { data, error } = await supabase
-          .from('Core_Archetype_Overview')
-          .select('*');
-          
-        if (error) {
-          console.error('Error fetching archetypes:', error);
-          toast.error(`Failed to load archetypes: ${error.message}`);
-          throw error;
-        }
-        
-        console.log('Fetched archetypes:', data);
-        
-        if (!data || data.length === 0) {
-          console.warn('No archetypes found in the database');
-        }
-        
-        return data || [];
-      } catch (err) {
-        console.error('Exception in archetype query:', err);
-        throw err;
-      }
-    },
-    refetchOnWindowFocus: false,
-    staleTime: 60000, // 1 minute
-    retry: 2
-  });
+  const { archetypes, isLoading, error, refetch } = useArchetypeBasics();
 
   // Check for database data and offer migration if needed
   const [isMigrating, setIsMigrating] = React.useState(false);
@@ -109,9 +77,10 @@ const ArchetypesGridSection = () => {
                 key={archetype.id}
                 id={archetype.id}
                 name={archetype.name}
-                familyId={archetype.family_id}
-                shortDescription={archetype.short_description}
-                hexColor={archetype.hex_color}
+                familyId={archetype.familyId}
+                familyName={archetype.familyName}  // Pass family name
+                shortDescription={archetype.description}
+                hexColor={archetype.color}
               />
             ))
           ) : (
