@@ -5,12 +5,13 @@ import { Button } from "@/components/ui/button";
 import SectionTitle from '@/components/shared/SectionTitle';
 import InteractiveDNAExplorer from '@/components/home/InteractiveDNAExplorer';
 import ArchetypesGridSection from '@/components/home/ArchetypesGridSection';
+import { Section } from '@/components/shared/Section';
 
 const Index = () => {
   return (
     <>
       {/* Hero Section */}
-      <section className="bg-white py-24">
+      <Section className="bg-white py-24">
         <div className="container mx-auto text-center">
           <SectionTitle
             title="Unlock the DNA of Your Organization's Healthcare Strategy"
@@ -21,7 +22,7 @@ const Index = () => {
             <Link to="/assessment">Take the Free Assessment</Link>
           </Button>
         </div>
-      </section>
+      </Section>
 
       {/* Interactive DNA Explorer */}
       <InteractiveDNAExplorer />
