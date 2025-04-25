@@ -139,6 +139,7 @@ const ArchetypeDeepReport = () => {
             "Archetype Average": item.archetype_average || 0,
             "Archetype Value": item.archetype_value || 0,
             Category: item.category || '',
+            Significance: item.significance || '',
             definition: item.significance || ''
           }));
           

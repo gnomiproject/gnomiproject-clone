@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ArchetypeDetailedData } from '@/types/archetype';
@@ -87,7 +86,7 @@ const DetailedAnalysisTabs = ({ archetypeData, onRetakeAssessment }: DetailedAna
         </TabsContent>
         
         <TabsContent value="kpi">
-          <KpiRiskTab archetypeData={archetypeData} />
+          <KpiRiskTab archetype={archetypeData} />
         </TabsContent>
         
         <TabsContent value="priorities">
