@@ -106,7 +106,7 @@ const ReportGenerator: React.FC = () => {
 
       // Test simple query to confirm database connection
       const { data, error } = await supabase
-        .from('archetypes')
+        .from('Core_Archetype_Overview')
         .select('id, name')
         .limit(1);
       

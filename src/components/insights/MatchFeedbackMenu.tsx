@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
@@ -6,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Check, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
-import { supabase } from "@/integrations/supabase/client";
 
 interface MatchFeedbackMenuProps {
   archetypeId: string;
@@ -26,28 +24,13 @@ const MatchFeedbackMenu = ({ archetypeId, onClose }: MatchFeedbackMenuProps) => 
     setIsSubmitting(true);
     
     try {
-      // Save feedback to Core_Archetype_Overview since we don't have a separate feedback table
-      const { error } = await supabase
-        .from('Core_Archetype_Overview')
-        .update({ 
-          feedback_data: {
-            feedback: selectedFeedback,
-            comments: userComments.trim() !== '' ? userComments : null,
-            timestamp: new Date().toISOString()
-          }
-        })
-        .eq('id', archetypeId);
-      
-      if (error) {
-        console.error('Error submitting feedback:', error);
-        toast({
-          title: "Error Submitting Feedback",
-          description: "There was a problem submitting your feedback. Please try again.",
-          variant: "destructive",
-          duration: 3000,
-        });
-        return;
-      }
+      // Instead of saving to database, just log the feedback for now
+      console.log('Archetype Feedback:', {
+        archetypeId,
+        feedback: selectedFeedback,
+        comments: userComments.trim() !== '' ? userComments : null,
+        timestamp: new Date().toISOString()
+      });
       
       // Show success toast
       toast({

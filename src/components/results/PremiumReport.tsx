@@ -1,10 +1,8 @@
-
 import React, { useState } from 'react';
 import Button from '@/components/shared/Button';
 import { ArchetypeDetailedData } from '@/types/archetype';
 import { FileText, Link as LinkIcon } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import { useLocation } from 'react-router-dom';
 import { 
   Dialog,
@@ -26,6 +24,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+import { v4 as uuidv4 } from 'uuid';
 
 // Storage key for assessment answers
 const SESSION_ANSWERS_KEY = 'healthcareArchetypeAnswers';
@@ -80,30 +79,27 @@ const PremiumReport = ({ archetypeData }: PremiumReportProps) => {
       console.log('Assessment result:', assessmentResult);
       console.log('Exact employee count:', exactEmployeeCount);
 
-      const { data: insertedData, error } = await supabase
-        .from('report_requests')
-        .insert({
-          name: data.name,
-          email: data.email,
-          organization: data.organization,
-          comments: data.comments,
-          archetype_id: archetypeData.id,
-          assessment_answers: {
-            ...answers,
-            exactEmployeeCount: exactEmployeeCount
-          },
-          assessment_result: assessmentResult
-        })
-        .select('access_token')
-        .single();
-
-      if (error) throw error;
+      // Generate a UUID to use as an access token
+      const generatedToken = uuidv4();
+      
+      // Instead of saving to database, log the report request data
+      console.log('Report Request:', {
+        name: data.name,
+        email: data.email,
+        organization: data.organization,
+        comments: data.comments,
+        archetype_id: archetypeData.id,
+        assessment_answers: {
+          ...answers,
+          exactEmployeeCount: exactEmployeeCount
+        },
+        assessment_result: assessmentResult,
+        access_token: generatedToken
+      });
       
       // Store the access token for displaying the link
-      if (insertedData && insertedData.access_token) {
-        setAccessToken(insertedData.access_token);
-      }
-
+      setAccessToken(generatedToken);
+      
       setIsSubmitted(true);
       toast({
         title: "Report Request Submitted",

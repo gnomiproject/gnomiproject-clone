@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useArchetypes } from './useArchetypes';
 import { ArchetypeId, ArchetypeDetailedData, ArchetypeColor } from '@/types/archetype';
 import { supabase } from "@/integrations/supabase/client";
-import { getArchetypeColor, getArchetypeHexColor } from '@/components/home/utils/dna/colors'; // Using both color utilities
+import { getArchetypeColor, getArchetypeHexColor } from '@/components/home/utils/dna/colors';
 
 export const useGetArchetype = (archetypeId: ArchetypeId) => {
   const { getFamilyById } = useArchetypes();
@@ -17,9 +17,9 @@ export const useGetArchetype = (archetypeId: ArchetypeId) => {
       setError(null);
       
       try {
-        // Fetch detailed archetype data from Supabase
+        // Fetch detailed archetype data from Core_Archetype_Overview
         const { data, error } = await supabase
-          .from('archetypes_detailed')
+          .from('Core_Archetype_Overview')
           .select('*')
           .eq('id', archetypeId)
           .maybeSingle();
@@ -28,27 +28,64 @@ export const useGetArchetype = (archetypeId: ArchetypeId) => {
           throw new Error(`Error fetching archetype data: ${error.message}`);
         }
 
+        // Get SWOT analysis data
+        const { data: swotData, error: swotError } = await supabase
+          .from('Analysis_Archetype_SWOT')
+          .select('*')
+          .eq('archetype_id', archetypeId)
+          .maybeSingle();
+          
+        if (swotError) {
+          console.warn(`Warning: Could not fetch SWOT data for archetype ${archetypeId}: ${swotError.message}`);
+        }
+
         if (data) {
           // Transform the database data to match our TypeScript type structure
           const transformedData: ArchetypeDetailedData = {
             id: data.id as ArchetypeId,
             familyId: data.family_id as 'a' | 'b' | 'c',
             name: data.name,
-            familyName: data.family_name,
+            familyName: '', // Will be populated later using getFamilyById
             // Map the color to a valid ArchetypeColor using the existing utility function
             color: getArchetypeColor(archetypeId) as ArchetypeColor,
             hexColor: data.hex_color || getArchetypeHexColor(archetypeId),
-            summary: typeof data.summary === 'string' ? JSON.parse(data.summary) : data.summary,
-            standard: typeof data.standard === 'string' ? JSON.parse(data.standard) : data.standard,
-            enhanced: typeof data.enhanced === 'string' ? JSON.parse(data.enhanced) : data.enhanced,
+            summary: {
+              description: data.short_description,
+              keyCharacteristics: []
+            },
+            standard: {
+              fullDescription: data.long_description,
+              keyCharacteristics: [],
+              overview: '',
+              keyStatistics: {
+                emergencyUtilization: { value: 'N/A', trend: 'neutral' },
+                specialistUtilization: { value: 'N/A', trend: 'neutral' },
+                healthcareSpend: { value: 'N/A', trend: 'neutral' }
+              },
+              keyInsights: []
+            },
+            enhanced: {
+              riskProfile: {
+                score: '',
+                comparison: '',
+                conditions: []
+              },
+              strategicPriorities: [],
+              swot: {
+                strengths: swotData?.strengths || [],
+                weaknesses: swotData?.weaknesses || [],
+                opportunities: swotData?.opportunities || [],
+                threats: swotData?.threats || []
+              },
+              costSavings: []
+            }
           };
           
           setArchetypeData(transformedData);
         } else {
-          // Fallback to existing method if not found in database
-          const { getArchetypeEnhanced } = useArchetypes();
-          const localArchetypeData = getArchetypeEnhanced(archetypeId);
-          setArchetypeData(localArchetypeData);
+          // If archetype not found, set null
+          setArchetypeData(null);
+          setError(new Error(`Archetype ${archetypeId} not found`));
         }
       } catch (err) {
         setError(err instanceof Error ? err : new Error(String(err)));

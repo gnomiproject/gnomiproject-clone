@@ -14,7 +14,7 @@ export const useArchetypeFamilies = () => {
       try {
         setLoading(true);
         
-        const { data, error } = await supabase.from('archetype_families').select('*');
+        const { data, error } = await supabase.from('Core_Archetype_Families').select('*');
         
         if (error) throw error;
         
@@ -22,8 +22,8 @@ export const useArchetypeFamilies = () => {
         const families = data.map(item => ({
           id: item.id as 'a' | 'b' | 'c',
           name: item.name,
-          description: item.description,
-          commonTraits: item.common_traits as string[],
+          description: item.short_description || '',
+          commonTraits: item.common_traits as string[] || [],
           hexColor: item.hex_color || getFamilyColorHex(item.id as 'a' | 'b' | 'c') // Use database value or fallback to our defined colors
         }));
         

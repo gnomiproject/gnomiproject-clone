@@ -1,6 +1,8 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { ArchetypeId, ArchetypeDetailedData, ArchetypeSummary, ArchetypeColor } from '@/types/archetype';
+import { getArchetypeColor, getArchetypeHexColor } from '@/components/home/utils/dna/colors';
 
 export const useArchetypeDetails = () => {
   const [allDetailedArchetypes, setAllDetailedArchetypes] = useState<ArchetypeDetailedData[]>([]);
@@ -35,8 +37,8 @@ export const useArchetypeDetails = () => {
             familyId: archetype.family_id as 'a' | 'b' | 'c',
             name: archetype.name,
             familyName: '', // Will be populated by family data join
-            color: 'primary' as ArchetypeColor,
-            hexColor: archetype.hex_color,
+            color: getArchetypeColor(archetype.id as ArchetypeId) as ArchetypeColor,
+            hexColor: archetype.hex_color || getArchetypeHexColor(archetype.id as ArchetypeId),
             summary: {
               description: archetype.short_description,
               keyCharacteristics: []
@@ -94,17 +96,28 @@ export const useArchetypeDetails = () => {
 
   // Get archetype summary
   const getArchetypeSummary = (archetypeId: ArchetypeId) => {
-    return null;
+    const archetype = allDetailedArchetypes.find(a => a.id === archetypeId);
+    return archetype ? archetype.summary : null;
   };
 
   // Get archetype standard info
   const getArchetypeStandard = (archetypeId: ArchetypeId) => {
-    return null;
+    const archetype = allDetailedArchetypes.find(a => a.id === archetypeId);
+    return archetype ? archetype.standard : null;
   };
 
   // Get archetype summaries by family
   const getArchetypeSummariesByFamily = (familyId: 'a' | 'b' | 'c') => {
-    return [];
+    return allDetailedArchetypes
+      .filter(archetype => archetype.familyId === familyId)
+      .map(archetype => ({
+        id: archetype.id,
+        name: archetype.name,
+        description: archetype.summary.description || '',
+        color: archetype.color,
+        hexColor: archetype.hexColor,
+        keyCharacteristics: archetype.summary.keyCharacteristics || []
+      }));
   };
 
   return {
@@ -115,6 +128,13 @@ export const useArchetypeDetails = () => {
     getDetailedArchetypesByFamily,
     getArchetypeDetailedById,
     getArchetypeSummariesByFamily,
-    allArchetypeSummaries: []
+    allArchetypeSummaries: allDetailedArchetypes.map(a => ({
+      id: a.id,
+      name: a.name,
+      description: a.summary.description || '',
+      color: a.color,
+      hexColor: a.hexColor,
+      keyCharacteristics: a.summary.keyCharacteristics || []
+    }))
   };
 };
