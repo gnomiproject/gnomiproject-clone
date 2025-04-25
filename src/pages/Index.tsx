@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -54,7 +55,7 @@ const Index = () => {
             <img 
               src="/lovable-uploads/12da516f-6471-47a3-9861-9c4d50ab9415.png" 
               alt="Healthcare Gnome" 
-              className="w-40 h-40 ml-0 md:ml-[5px] mb-[-5] object-contain self-start"
+              className="w-32 h-32 mx-auto md:mx-0 md:ml-[-50px] mb-[-10px] object-contain self-start"
             />
             
             <h1 className="text-5xl md:text-6xl font-bold tracking-tight">
