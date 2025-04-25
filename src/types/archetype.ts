@@ -1,31 +1,12 @@
 
 export type ArchetypeId = 'a1' | 'a2' | 'a3' | 'b1' | 'b2' | 'b3' | 'c1' | 'c2' | 'c3';
+export type FamilyId = 'a' | 'b' | 'c';
 
-export type ArchetypeColor = 'archetype-a1' | 'archetype-a2' | 'archetype-a3' | 'archetype-b1' | 'archetype-b2' | 'archetype-b3' | 'archetype-c1' | 'archetype-c2' | 'archetype-c3';
-
+// Basic archetype interface matching Core_Archetype_Overview
 export interface Archetype {
   id: ArchetypeId;
-  familyId: 'a' | 'b' | 'c';
   name: string;
-  description?: string;
-  color?: string;
-  characteristics?: string[];
-  hexColor?: string;
-}
-
-export interface ArchetypeFamily {
-  id: 'a' | 'b' | 'c';
-  name: string;
-  hexColor: string;
-  description: string;
-  commonTraits: string[];
-}
-
-// Interface for Core_Archetype_Overview table data
-export interface ArchetypeOverview {
-  id: ArchetypeId;
-  name: string;
-  family_id: 'a' | 'b' | 'c';
+  family_id: FamilyId;
   short_description?: string;
   long_description?: string;
   hex_color?: string;
@@ -33,86 +14,49 @@ export interface ArchetypeOverview {
   industries?: string;
 }
 
-// Add ArchetypeSummary for FamilyDetailView
-export interface ArchetypeSummary {
-  id: ArchetypeId;
-  familyId: 'a' | 'b' | 'c';
+// Family interface matching Core_Archetype_Families
+export interface ArchetypeFamily {
+  id: FamilyId;
   name: string;
-  description: string;
-  color?: string;
-  hexColor?: string;
-  familyName?: string;
-  key_characteristics?: string[];
-}
-
-// Add ArchetypeDetailedData for components that need detailed data
-export interface ArchetypeDetailedData {
-  id: ArchetypeId;
-  familyId: 'a' | 'b' | 'c';
-  name: string;
-  familyName?: string;
-  color?: string;
-  hexColor?: string;
-  short_description?: string;
+  short_description: string;
+  hex_color?: string;
+  common_traits?: string[];
+  industries?: string;
   long_description?: string;
-  key_characteristics?: string[];
-  
-  // For backward compatibility with existing components
-  summary?: {
-    description: string;
-    keyCharacteristics?: string[];
-  };
-  standard?: {
-    fullDescription?: string;
-    keyCharacteristics?: string[];
-    overview?: string;
-    keyStatistics?: Record<string, { value: string; trend?: 'up' | 'down' | 'neutral' }>;
-    keyInsights?: string[];
-  };
-  enhanced?: {
-    swot?: {
-      strengths: string[];
-      weaknesses: string[];
-      opportunities: string[];
-      threats: string[];
-    };
-    strategicPriorities?: Array<{
-      number: number;
-      title: string;
-      description: string;
-    }>;
-    costSavings?: Array<{
-      title: string;
-      description: string;
-      potentialSavings?: string;
-    }>;
-    riskProfile?: {
-      score: string;
-      comparison: string;
-      conditions: Array<{
-        name: string;
-        value: string;
-        barWidth: string;
-      }>;
-    };
-  };
 }
 
-// Add this for backward compatibility
-export interface ArchetypeMetrics {
-  id: string;
-  metrics: Record<string, number>;
-}
-
-// Add this for backward compatibility
-export interface DistinctiveTraits {
-  archetypeId: string;
-  traits: Array<{
+// Detailed archetype data from Analysis tables
+export interface ArchetypeDetailed extends Archetype {
+  swot?: {
+    strengths: string[];
+    weaknesses: string[];
+    opportunities: string[];
+    threats: string[];
+  };
+  distinctive_metrics?: Array<{
     metric: string;
-    value: number;
-    average: number;
+    category: string;
+    archetype_value: number;
+    archetype_average: number;
     difference: number;
-    category?: string;
-    definition?: string;
+    significance?: string;
   }>;
+  strategic_recommendations?: Array<{
+    recommendation_number: number;
+    title: string;
+    description: string;
+    metrics_references?: any[];
+  }>;
+}
+
+// Premium deep dive report interface
+export interface ArchetypeDeepDive {
+  archetype_id: ArchetypeId;
+  cost_analysis?: string;
+  utilization_patterns?: string;
+  care_gaps?: string;
+  recommendations?: string;
+  benefits_structure?: string;
+  demographic_insights?: string;
+  disease_prevalence?: string;
 }

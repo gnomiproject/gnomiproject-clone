@@ -1,61 +1,86 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { ArchetypeId } from '@/types/archetype';
+import { Archetype, ArchetypeFamily, ArchetypeId } from '@/types/archetype';
 
 export const useArchetypeBasics = () => {
-  const { data: archetypeData, isLoading, error, refetch } = useQuery({
+  const { data: archetypeData, isLoading: isLoadingArchetypes, error: archetypeError } = useQuery({
     queryKey: ['archetype-basics'],
     queryFn: async () => {
       // Get basic archetype information from Core_Archetype_Overview
-      const { data: archetypeBasics, error: archetypeError } = await supabase
+      const { data: archetypes, error } = await supabase
         .from('Core_Archetype_Overview')
         .select('*');
 
-      // Get family names from Core_Archetype_Families
-      const { data: familyData, error: familyError } = await supabase
+      if (error) throw error;
+
+      // Transform data to match our types
+      return archetypes.map((archetype): Archetype => ({
+        id: archetype.id as ArchetypeId,
+        name: archetype.name,
+        family_id: archetype.family_id as 'a' | 'b' | 'c',
+        short_description: archetype.short_description,
+        long_description: archetype.long_description,
+        hex_color: archetype.hex_color,
+        key_characteristics: Array.isArray(archetype.key_characteristics) 
+          ? archetype.key_characteristics 
+          : typeof archetype.key_characteristics === 'string'
+          ? archetype.key_characteristics.split('\n')
+          : [],
+        industries: archetype.industries
+      }));
+    }
+  });
+
+  const { data: familyData, isLoading: isLoadingFamilies, error: familyError } = useQuery({
+    queryKey: ['family-basics'],
+    queryFn: async () => {
+      const { data: families, error } = await supabase
         .from('Core_Archetype_Families')
         .select('*');
 
-      if (archetypeError || familyError) throw (archetypeError || familyError);
-      
-      // Combine the data
-      const combinedData = archetypeBasics.map(archetype => {
-        // Find the corresponding family name
-        const family = familyData?.find(f => f.id === archetype.family_id);
-        
-        return {
-          id: archetype.id,
-          name: archetype.name,
-          familyId: archetype.family_id,
-          familyName: family?.name || '', 
-          description: archetype.short_description,
-          color: archetype.hex_color,
-          keyCharacteristics: archetype.key_characteristics || []
-        };
-      });
+      if (error) throw error;
 
-      return combinedData;
+      // Transform data to match our types
+      return families.map((family): ArchetypeFamily => ({
+        id: family.id as 'a' | 'b' | 'c',
+        name: family.name,
+        short_description: family.short_description || '',
+        hex_color: family.hex_color,
+        common_traits: Array.isArray(family.common_traits) 
+          ? family.common_traits 
+          : [],
+        industries: family.industries,
+        long_description: family.long_description
+      }));
     }
   });
 
   // Helper function to get archetype by ID
-  const getArchetypeById = (id: string) => {
+  const getArchetypeById = (id: ArchetypeId) => {
     return archetypeData?.find(archetype => archetype.id === id) || null;
   };
 
   // Helper function to get archetypes by family
   const getArchetypesByFamily = (familyId: string) => {
-    return archetypeData?.filter(archetype => archetype.familyId === familyId) || [];
+    return archetypeData?.filter(archetype => archetype.family_id === familyId) || [];
   };
+
+  // Helper function to get family by ID
+  const getFamilyById = (id: 'a' | 'b' | 'c') => {
+    return familyData?.find(family => family.id === id) || null;
+  };
+
+  const error = archetypeError || familyError;
+  const isLoading = isLoadingArchetypes || isLoadingFamilies;
 
   return {
     archetypes: archetypeData || [],
-    allArchetypes: archetypeData || [],
+    families: familyData || [],
     getArchetypeById,
     getArchetypesByFamily,
+    getFamilyById,
     isLoading,
-    error,
-    refetch
+    error
   };
 };
