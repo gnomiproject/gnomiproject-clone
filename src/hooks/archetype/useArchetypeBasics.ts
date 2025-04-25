@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { ArchetypeId } from '@/types/archetype';
 
 export const useArchetypeBasics = () => {
-  const { data: archetypeData, isLoading, error } = useQuery({
+  const { data: archetypeData, isLoading, error, refetch } = useQuery({
     queryKey: ['archetype-basics'],
     queryFn: async () => {
       // Get basic archetype information from Core_Archetype_Overview
@@ -66,6 +66,7 @@ export const useArchetypeBasics = () => {
     getArchetypeById,
     getArchetypesByFamily,
     isLoading,
-    error
+    error,
+    refetch // Export the refetch function
   };
 };
