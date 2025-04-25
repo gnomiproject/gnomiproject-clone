@@ -11,6 +11,13 @@ export const archetypesDetailed: ArchetypeDetailedData[] = [
     familyName: 'Strategists',
     color: 'orange',
     hexColor: getArchetypeColorHex('a1'),
+    fullDescription: 'Effective at directing care appropriately, these are organizations that reduce emergency visits and hospital admissions by connecting members with timely specialist care.',
+    keyFindings: [
+      'Lower emergency utilization (-18.2%)',
+      'Higher specialist utilization (+14.3%)',
+      'Technology-forward approach',
+      'Comprehensive specialist networks'
+    ],
     
     // Level 1: Summary for home page cards
     summary: {
@@ -155,6 +162,13 @@ export const archetypesDetailed: ArchetypeDetailedData[] = [
     familyName: 'Strategists',
     color: 'teal',
     hexColor: getArchetypeColorHex('a2'),
+    fullDescription: 'Adept at managing clinical complexity, these are organizations that face populations with elevated risk scores and high-cost specialty conditions.',
+    keyFindings: [
+      'Lower emergency utilization (-17.0%)',
+      'Higher specialist utilization (+9.8%)',
+      'Higher risk population',
+      'Strong care coordination'
+    ],
     
     summary: {
       description: 'Adept at managing clinical complexity, these are organizations that face populations with elevated risk scores and high-cost specialty conditions.',
@@ -296,6 +310,13 @@ export const archetypesDetailed: ArchetypeDetailedData[] = [
     familyName: 'Strategists',
     color: 'yellow',
     hexColor: getArchetypeColorHex('a3'),
+    fullDescription: 'Focused on prevention and early intervention, these are organizations with younger populations, larger families, and high specialty care demand.',
+    keyFindings: [
+      'Lower emergency utilization (-24.3%)',
+      'Higher specialist utilization (+21.8%)',
+      'Larger family sizes (+12.9%)',
+      'Strong preventive care engagement'
+    ],
     
     summary: {
       description: 'Focused on prevention and early intervention, these are organizations with younger populations, larger families, and high specialty care demand.',
@@ -437,8 +458,14 @@ export const archetypesDetailed: ArchetypeDetailedData[] = [
     familyName: 'Pragmatists',
     color: 'blue',
     hexColor: getArchetypeColorHex('b1'),
+    fullDescription: 'Skilled at overcoming access barriers, these are organizations operating in environments with significant socioeconomic factors.',
+    keyFindings: [
+      'Higher emergency utilization (+18.2%)',
+      'Lower specialist utilization (-16.2%)',
+      'Average healthcare costs',
+      'Strong adaptability to constraints'
+    ],
     
-    // Level 1: Summary for home page cards
     summary: {
       description: 'Skilled at overcoming access barriers, these are organizations operating in environments with significant socioeconomic factors.',
       keyCharacteristics: [
@@ -581,6 +608,13 @@ export const archetypesDetailed: ArchetypeDetailedData[] = [
     familyName: 'Pragmatists',
     color: 'purple',
     hexColor: getArchetypeColorHex('b2'),
+    fullDescription: 'Cost-effective and practical, these are organizations balancing populations with elevated substance use disorder rates.',
+    keyFindings: [
+      'Higher emergency utilization (+19.8%)',
+      'Lower specialist utilization (-16.3%)',
+      'Lower healthcare spend (-11.0%)',
+      'Practical benefits design'
+    ],
     
     summary: {
       description: 'Cost-effective and practical, these are organizations balancing populations with elevated substance use disorder rates.',
@@ -722,6 +756,13 @@ export const archetypesDetailed: ArchetypeDetailedData[] = [
     familyName: 'Pragmatists',
     color: 'green',
     hexColor: getArchetypeColorHex('b3'),
+    fullDescription: 'Effective across geographic boundaries, these are organizations skilled at creating consistent experiences in multiple regions.',
+    keyFindings: [
+      'Moderate emergency utilization (+8.3%)',
+      'Average specialist utilization (-0.3%)',
+      'Average healthcare costs',
+      'Strong multi-region coordination'
+    ],
     
     summary: {
       description: 'Effective across geographic boundaries, these are organizations skilled at creating consistent experiences in multiple regions.',
@@ -863,8 +904,14 @@ export const archetypesDetailed: ArchetypeDetailedData[] = [
     familyName: 'Logisticians',
     color: 'red',
     hexColor: getArchetypeColorHex('c1'),
+    fullDescription: 'Adaptable to varying schedules, these are organizations managing workforces with variable schedules and smaller household sizes.',
+    keyFindings: [
+      'Moderate emergency utilization (+7.1%)',
+      'Lower specialist utilization (-8.4%)',
+      'Lower healthcare spend (-15.0%)',
+      'Smaller household sizes (-12.6%)'
+    ],
     
-    // Level 1: Summary for home page cards
     summary: {
       description: 'Adaptable to varying schedules, these are organizations managing workforces with variable schedules and smaller household sizes.',
       keyCharacteristics: [
@@ -1007,6 +1054,13 @@ export const archetypesDetailed: ArchetypeDetailedData[] = [
     familyName: 'Logisticians',
     color: 'indigo',
     hexColor: getArchetypeColorHex('c2'),
+    fullDescription: 'Systematic in their approach, these are organizations achieving remarkable cost efficiency despite moderate risk profiles.',
+    keyFindings: [
+      'Lower emergency utilization (-4.3%)',
+      'Lower specialist utilization (-2.1%)',
+      'Lower healthcare spend (-18.2%)',
+      'Strong medication adherence'
+    ],
     
     summary: {
       description: 'Systematic in their approach, these are organizations achieving remarkable cost efficiency despite moderate risk profiles.',
@@ -1148,6 +1202,13 @@ export const archetypesDetailed: ArchetypeDetailedData[] = [
     familyName: 'Logisticians',
     color: 'maroon',
     hexColor: getArchetypeColorHex('c3'),
+    fullDescription: 'Organizations that prioritize healthcare regulatory compliance while implementing effective benefits programs, focusing on quality standards and documentation throughout the healthcare delivery system.',
+    keyFindings: [
+      'Average emergency utilization (+3.2%)',
+      'Average specialist utilization (+1.8%)',
+      'Lower healthcare spend (-3.6%)',
+      'Strong compliance orientation'
+    ],
     
     summary: {
       description: 'Organizations that prioritize healthcare regulatory compliance while maintaining effective benefit structures.',

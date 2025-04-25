@@ -8,7 +8,6 @@ export interface ArchetypeSummary {
   familyId: 'a' | 'b' | 'c';
   name: string;
   description?: string;
-  color?: string;
   key_characteristics?: string[];
 }
 
@@ -30,9 +29,9 @@ export interface ArchetypeDetailedData {
     keyCharacteristics: string[];
     overview: string;
     keyStatistics: {
-      emergencyUtilization: { value: string; trend: 'up' | 'down' | 'neutral' };
-      specialistUtilization: { value: string; trend: 'up' | 'down' | 'neutral' };
-      healthcareSpend: { value: string; trend: 'up' | 'down' | 'neutral' };
+      emergencyUtilization?: { value: string; trend: 'up' | 'down' | 'neutral' };
+      specialistUtilization?: { value: string; trend: 'up' | 'down' | 'neutral' };
+      healthcareSpend?: { value: string; trend: 'up' | 'down' | 'neutral' };
       familySize?: { value: string; trend: 'up' | 'down' | 'neutral' };
       [key: string]: { value: string; trend: 'up' | 'down' | 'neutral' } | undefined;
     };
@@ -80,9 +79,6 @@ export interface Archetype {
   familyId: 'a' | 'b' | 'c';
   name: string;
   description?: string;
-  shortDescription?: string;
-  longDescription?: string;
-  hexColor?: string;
   color?: string;
   characteristics?: string[];
   strategicPriorities?: {
