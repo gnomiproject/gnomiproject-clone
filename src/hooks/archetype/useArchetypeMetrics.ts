@@ -1,185 +1,115 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { ArchetypeId } from '@/types/archetype';
-import { supabase } from "@/integrations/supabase/client";
-
-// Extended return type to include the missing pattern properties
-type TraitsReturn = {
-  archetypeId: ArchetypeId;
-  positive_traits: string[];
-  neutral_traits: string[];
-  negative_traits: string[];
-  // Add these missing properties
-  diseasePatterns: Array<{ condition: string; variance: number }>;
-  utilizationPatterns: Array<{ category: string; variance: number }>;
-  uniqueInsights: string[];
-};
+import { supabase } from '@/integrations/supabase/client';
 
 export const useArchetypeMetrics = () => {
-  const [metricsData, setMetricsData] = useState<Record<string, any[]>>({});
-  const [isLoading, setIsLoading] = useState(true);
-  const [sdohDataByArchetype, setSdohDataByArchetype] = useState<Record<string, any[]>>({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
 
-  // Fetch all metrics data on component mount
-  useEffect(() => {
-    const fetchAllMetricsData = async () => {
-      setIsLoading(true);
-      try {
-        // Using Core_Archetypes_Metrics instead of the non-existent table
-        const { data, error } = await supabase
-          .from('Core_Archetypes_Metrics')
-          .select('*');
+  // Helper function to get metrics for an archetype
+  const getMetricsForArchetype = async (archetypeId: ArchetypeId) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      // Get metrics for the archetype
+      const { data, error } = await supabase
+        .from('Core_Archetypes_Metrics')
+        .select('*')
+        .eq('id', archetypeId)
+        .single();
 
-        if (error) {
-          console.error('Error fetching metrics data:', error);
-          return;
-        }
+      if (error) throw error;
+      return data;
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Unknown error'));
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-        // Group data by archetype id (note: the column name is likely different)
-        const groupedData = data.reduce((acc: Record<string, any[]>, item) => {
-          const archetypeId = item.id; // Using 'id' instead of 'archetype_ID'
-          if (!archetypeId) return acc;
-          
-          if (!acc[archetypeId]) {
-            acc[archetypeId] = [];
-          }
-          acc[archetypeId].push(item);
-          return acc;
-        }, {});
+  // Helper function to get distinctive metrics for an archetype
+  const getDistinctiveMetricsForArchetype = async (archetypeId: ArchetypeId) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const { data, error } = await supabase
+        .from('Analysis_Archetype_Distinctive_Metrics')
+        .select('*')
+        .eq('archetype_id', archetypeId);
 
-        setMetricsData(groupedData);
+      if (error) throw error;
+      
+      return data.map((metric) => ({
+        metric: metric.metric,
+        category: metric.category,
+        archetypeValue: metric.archetype_value,
+        archetypeAverage: metric.archetype_average,
+        difference: metric.difference,
+        significance: metric.significance
+      }));
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Unknown error'));
+      return [];
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-        // Create mock SDOH data since we don't have that specific column
-        const mockSdohData: Record<string, any[]> = {};
-        const archetypeIds = Object.keys(groupedData);
-        
-        archetypeIds.forEach(id => {
-          mockSdohData[id] = data
-            .filter(item => item.id === id)
-            .filter(item => Object.keys(item).some(key => key.includes('SDOH')))
-            .map(item => {
-              // Transform the data to have expected fields
-              return {
-                metric: 'SDOH Metric',
-                category: 'SDOH',
-                archetype_ID: id,
-                Difference: 0,
-                "Archetype Average": 0,
-                "Archetype Value": 0
-              };
-            });
-        });
+  // Helper function to get categorized metrics for an archetype (grouped by category)
+  const getCategorizedMetricsForArchetype = async (archetypeId: ArchetypeId) => {
+    const metrics = await getMetricsForArchetype(archetypeId);
+    if (!metrics) return {};
 
-        setSdohDataByArchetype(mockSdohData);
-      } catch (err) {
-        console.error('Unexpected error fetching metrics:', err);
-      } finally {
-        setIsLoading(false);
+    // Group metrics by category (based on prefix like Cost_, Demo_, etc.)
+    const categorized: Record<string, any> = {};
+    Object.entries(metrics).forEach(([key, value]) => {
+      // Skip the id and Archetype fields
+      if (key === 'id' || key === 'Archetype' || key === 'Data Date') return;
+
+      // Extract category from key (e.g., "Cost_Medical Paid Amount PMPM" -> "Cost")
+      const category = key.split('_')[0];
+      
+      if (!categorized[category]) {
+        categorized[category] = {};
       }
-    };
-
-    fetchAllMetricsData();
-  }, []);
-
-  // Get metrics for archetype
-  const getMetricsForArchetype = (archetypeId: ArchetypeId) => {
-    const metrics = metricsData[archetypeId] || [];
-    
-    // Process metrics into a more usable format if needed
-    return {
-      metrics,
-      isLoading
-    };
-  };
-
-  // Get SDOH metrics specifically for an archetype
-  const getSdohMetricsForArchetype = (archetypeId: ArchetypeId) => {
-    const sdohMetrics = sdohDataByArchetype[archetypeId] || [];
-    
-    return {
-      sdohMetrics,
-      isLoading
-    };
-  };
-
-  // Get distinctive metrics for archetype (top differentiating metrics)
-  const getDistinctiveMetricsForArchetype = (archetypeId: ArchetypeId) => {
-    const allMetrics = metricsData[archetypeId] || [];
-    
-    // Since we don't have actual difference metrics, create mock data
-    const mockDistinctiveMetrics = allMetrics.slice(0, 10).map(metric => ({
-      ...metric,
-      Difference: Math.random() * 2 - 1, // Random value between -1 and 1
-      "Archetype Average": Math.random() * 100,
-      "Archetype Value": Math.random() * 100
-    }));
-    
-    return {
-      distinctiveMetrics: mockDistinctiveMetrics,
-      isLoading
-    };
-  };
-
-  // Get metrics grouped by category for archetype
-  const getCategorizedMetricsForArchetype = (archetypeId: ArchetypeId) => {
-    const allMetrics = metricsData[archetypeId] || [];
-    
-    // Create categories based on metric name prefixes like Demo_, Cost_, etc.
-    const categorized: Record<string, any[]> = {};
-    
-    allMetrics.forEach(metric => {
-      // Try to find a category by looking at keys with underscores
-      const categoryKeys = Object.keys(metric).filter(k => k.includes('_'));
-      if (categoryKeys.length > 0) {
-        const firstKey = categoryKeys[0];
-        const categoryMatch = firstKey.match(/^([^_]+)_/);
-        const category = categoryMatch ? categoryMatch[1] : 'Uncategorized';
-        
-        if (!categorized[category]) {
-          categorized[category] = [];
-        }
-        
-        categorized[category].push(metric);
-      } else {
-        // If no category found, put in Uncategorized
-        if (!categorized['Uncategorized']) {
-          categorized['Uncategorized'] = [];
-        }
-        categorized['Uncategorized'].push(metric);
-      }
+      
+      // Store the metric without the category prefix
+      const metricName = key.substring(key.indexOf('_') + 1);
+      categorized[category][metricName] = value;
     });
-    
-    return {
-      categorizedMetrics: categorized,
-      isLoading
-    };
+
+    return categorized;
   };
 
-  // Get traits for archetype - using a regular function instead of hook
-  const getTraitsForArchetype = (archetypeId: ArchetypeId): TraitsReturn => {
-    // Return mock traits with all the required fields
-    return {
-      archetypeId,
-      positive_traits: ["Data-driven", "Analytical", "Structured"],
-      neutral_traits: ["Methodical", "Process-oriented"],
-      negative_traits: ["Risk-averse", "Slow to adapt"],
-      // Add the missing fields
-      diseasePatterns: [
-        { condition: "Diabetes", variance: 0.2 },
-        { condition: "Hypertension", variance: 0.15 },
-        { condition: "Anxiety", variance: 0.1 }
-      ],
-      utilizationPatterns: [
-        { category: "Emergency Visits", variance: -0.1 },
-        { category: "Specialist Visits", variance: 0.25 },
-        { category: "Telehealth", variance: 0.4 }
-      ],
-      uniqueInsights: [
-        "Higher than average specialist utilization",
-        "Lower emergency room visits",
-        "Strong adoption of preventative care"
-      ]
-    };
+  // Helper function to get traits for an archetype
+  const getTraitsForArchetype = async (archetypeId: ArchetypeId) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const { data, error } = await supabase
+        .from('Core_Archetype_Overview')
+        .select('key_characteristics')
+        .eq('id', archetypeId)
+        .single();
+
+      if (error) throw error;
+      
+      // Handle different formats of key_characteristics
+      if (Array.isArray(data.key_characteristics)) {
+        return data.key_characteristics.map(String);
+      } else if (typeof data.key_characteristics === 'string') {
+        return data.key_characteristics.split('\n').filter(item => item.trim() !== '');
+      }
+      
+      return [];
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Unknown error'));
+      return [];
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return {
@@ -187,7 +117,7 @@ export const useArchetypeMetrics = () => {
     getDistinctiveMetricsForArchetype,
     getCategorizedMetricsForArchetype,
     getTraitsForArchetype,
-    getSdohMetricsForArchetype,
-    isLoading
+    isLoading,
+    error
   };
 };

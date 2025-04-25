@@ -32,7 +32,7 @@ export const useGetArchetype = (archetypeId: ArchetypeId) => {
           let keyCharacteristics: string[] = [];
           if (data.key_characteristics) {
             if (Array.isArray(data.key_characteristics)) {
-              keyCharacteristics = data.key_characteristics;
+              keyCharacteristics = data.key_characteristics.map(String);
             } else if (typeof data.key_characteristics === 'string') {
               // Split by newline if it's a string
               keyCharacteristics = data.key_characteristics.split('\n').filter(item => item.trim() !== '');
@@ -41,7 +41,7 @@ export const useGetArchetype = (archetypeId: ArchetypeId) => {
 
           const transformedData: ArchetypeDetailedData = {
             id: data.id as ArchetypeId,
-            familyId: data.family_id as 'a' | 'b' | 'c',
+            familyId: data.family_id as any,
             name: data.name,
             familyName: '', // Will be populated using getFamilyById
             color: getArchetypeColor(archetypeId),
@@ -49,6 +49,7 @@ export const useGetArchetype = (archetypeId: ArchetypeId) => {
             short_description: data.short_description || '',
             long_description: data.long_description || '',
             key_characteristics: keyCharacteristics,
+            family_id: data.family_id as any,
             
             // Add compatibility with components using these properties
             summary: {

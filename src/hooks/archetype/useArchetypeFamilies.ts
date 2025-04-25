@@ -1,60 +1,48 @@
 
-import { useState, useEffect } from 'react';
-import { supabase } from "@/integrations/supabase/client";
-import { ArchetypeFamily } from '@/types/archetype';
-import { getFamilyColorHex } from '@/data/colors';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { ArchetypeFamily, FamilyId } from '@/types/archetype';
 
 export const useArchetypeFamilies = () => {
-  const [allFamilies, setAllFamilies] = useState<ArchetypeFamily[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: familyData, isLoading, error } = useQuery({
+    queryKey: ['archetype-families'],
+    queryFn: async () => {
+      const { data: families, error } = await supabase
+        .from('Core_Archetype_Families')
+        .select('*');
 
-  // Fetch all families on mount
-  useEffect(() => {
-    const fetchFamilies = async () => {
-      try {
-        setLoading(true);
-        console.log("Fetching archetype families from Supabase...");
-        
-        const { data, error } = await supabase.from('Core_Archetype_Families').select('*');
-        
-        if (error) {
-          console.error('Error fetching family data:', error);
-          throw error;
-        }
-        
-        console.log("Retrieved families data:", data);
-        
-        // Transform data to match our interface and ensure proper type conversion
-        const families = data.map(item => ({
-          id: item.id as 'a' | 'b' | 'c',
-          name: item.name || '',
-          description: item.short_description || '', // Map from short_description to description
-          // Ensure commonTraits is always a string array
-          commonTraits: Array.isArray(item.common_traits) 
-            ? item.common_traits.map(trait => String(trait)) 
-            : [],
-          hexColor: item.hex_color || getFamilyColorHex(item.id as 'a' | 'b' | 'c') // Use database value or fallback
-        }));
-        
-        setAllFamilies(families);
-      } catch (error) {
-        console.error('Error fetching family data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchFamilies();
-  }, []);
+      if (error) throw error;
 
-  // Get family by ID
-  const getFamilyById = (id: 'a' | 'b' | 'c') => {
-    return allFamilies.find(family => family.id === id);
+      return families.map((family): ArchetypeFamily => ({
+        id: family.id as FamilyId,
+        name: family.name,
+        short_description: family.short_description || '',
+        hex_color: family.hex_color,
+        common_traits: Array.isArray(family.common_traits) 
+          ? family.common_traits.map(String)
+          : [],
+        industries: family.industries,
+        long_description: family.long_description,
+        // Add compatibility with component prop expectations
+        description: family.short_description || family.long_description || '',
+        commonTraits: Array.isArray(family.common_traits) 
+          ? family.common_traits.map(String)
+          : []
+      }));
+    }
+  });
+
+  // Helper function to get family by ID
+  const getFamilyById = (id: FamilyId) => {
+    return familyData?.find(family => family.id === id) || null;
   };
 
   return {
-    allFamilies,
+    families: familyData || [],
     getFamilyById,
-    isLoading: loading
+    isLoading,
+    error,
+    // Add for backward compatibility
+    allFamilies: familyData || []
   };
 };

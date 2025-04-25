@@ -22,10 +22,69 @@ export interface ArchetypeFamily {
   common_traits?: string[];
   industries?: string;
   long_description?: string;
+  // Add alias properties to support existing component use
+  description?: string;
+  commonTraits?: string[];
 }
 
 // Analysis table interfaces
 export interface ArchetypeDetailed extends Archetype {
+  swot?: {
+    strengths: string[];
+    weaknesses: string[];
+    opportunities: string[];
+    threats: string[];
+  };
+  distinctive_metrics?: Array<{
+    metric: string;
+    category: string;
+    archetype_value: number;
+    archetype_average: number;
+    difference: number;
+    significance?: string;
+  }>;
+  strategic_recommendations?: Array<{
+    recommendation_number: number;
+    title: string;
+    description: string;
+    metrics_references?: any[];
+  }>;
+}
+
+// For backward compatibility with existing components
+export interface ArchetypeDetailedData {
+  id: ArchetypeId;
+  name: string;
+  familyId: FamilyId;
+  familyName?: string;
+  color?: string;
+  hexColor?: string;
+  short_description?: string;
+  long_description?: string;
+  key_characteristics?: string[];
+  summary?: {
+    description: string;
+    keyCharacteristics: string[];
+  };
+  standard?: {
+    fullDescription: string;
+    keyCharacteristics: string[];
+    overview: string;
+    keyStatistics: Record<string, any>;
+    keyInsights: any[];
+  };
+  enhanced?: {
+    swot: {
+      strengths: string[];
+      weaknesses: string[];
+      opportunities: string[];
+      threats: string[];
+    };
+    strategicPriorities: any[];
+    costSavings: any[];
+  };
+  // Add full compatibility with ArchetypeDetailed
+  family_id?: FamilyId;
   swot?: {
     strengths: string[];
     weaknesses: string[];
@@ -57,4 +116,19 @@ export interface ArchetypeDeepDive {
   benefits_structure?: string;
   demographic_insights?: string;
   disease_prevalence?: string;
+}
+
+// Add missing ArchetypeSummary type for components that need it
+export interface ArchetypeSummary {
+  id: ArchetypeId;
+  name: string;
+  familyId: FamilyId;
+  familyName?: string;
+  description?: string;
+  keyCharacteristics?: string[];
+  color?: string;
+  hexColor?: string;
+  short_description?: string;
+  key_characteristics?: string[];
+  family_id?: FamilyId;
 }

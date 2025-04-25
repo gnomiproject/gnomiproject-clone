@@ -21,10 +21,12 @@ export const useArchetypeBasics = () => {
         short_description: archetype.short_description,
         long_description: archetype.long_description,
         hex_color: archetype.hex_color,
-        key_characteristics: Array.isArray(archetype.key_characteristics) 
-          ? archetype.key_characteristics 
-          : typeof archetype.key_characteristics === 'string'
-          ? archetype.key_characteristics.split('\n')
+        key_characteristics: archetype.key_characteristics ? 
+          (Array.isArray(archetype.key_characteristics) 
+            ? archetype.key_characteristics.map(item => String(item))
+            : typeof archetype.key_characteristics === 'string'
+              ? archetype.key_characteristics.split('\n')
+              : []) 
           : [],
         industries: archetype.industries
       }));
@@ -46,10 +48,15 @@ export const useArchetypeBasics = () => {
         short_description: family.short_description || '',
         hex_color: family.hex_color,
         common_traits: Array.isArray(family.common_traits) 
-          ? family.common_traits 
+          ? family.common_traits.map(item => String(item))
           : [],
         industries: family.industries,
-        long_description: family.long_description
+        long_description: family.long_description,
+        // Add compatibility with component prop expectations
+        description: family.short_description || family.long_description || '',
+        commonTraits: Array.isArray(family.common_traits) 
+          ? family.common_traits.map(item => String(item))
+          : []
       }));
     }
   });
@@ -79,6 +86,8 @@ export const useArchetypeBasics = () => {
     getArchetypesByFamily,
     getFamilyById,
     isLoading,
-    error
+    error,
+    // Add for backward compatibility with useArchetypes hook
+    allArchetypes: archetypeData || []
   };
 };
