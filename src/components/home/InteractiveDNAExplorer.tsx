@@ -15,14 +15,14 @@ import EmptyExplorerState from './EmptyExplorerState';
 
 const InteractiveDNAExplorer = () => {
   const { 
-    getAllArchetypeSummaries, 
-    getAllFamilies, 
+    allArchetypeSummaries, 
+    allFamilies, 
     getArchetypeSummary, 
     getArchetypeStandard 
   } = useArchetypes();
   
-  const archetypeSummaries = getAllArchetypeSummaries;
-  const families = getAllFamilies;
+  const archetypeSummaries = allArchetypeSummaries || [];
+  const families = allFamilies || [];
   const isMobile = useIsMobile();
 
   const [selectedFamily, setSelectedFamily] = useState<string | null>(null);
@@ -50,12 +50,12 @@ const InteractiveDNAExplorer = () => {
   };
 
   // Get the selected archetype's summary information (level 1)
-  const selectedArchetypeSummary = selectedArchetype ? 
+  const selectedArchetypeSummaryData = selectedArchetype ? 
     getArchetypeSummary(selectedArchetype) : 
     null;
   
   // Get the selected archetype's detailed information (level 2)
-  const selectedArchetypeDetail = selectedArchetype ? 
+  const selectedArchetypeDetailData = selectedArchetype ? 
     getArchetypeStandard(selectedArchetype) : 
     null;
 
@@ -64,6 +64,40 @@ const InteractiveDNAExplorer = () => {
     families.find(family => family.id === selectedFamily) :
     null;
     
+  // Create a properly formatted archetype summary object that matches expected props
+  const selectedArchetypeSummary = selectedArchetype && selectedArchetypeSummaryData ? {
+    id: selectedArchetype,
+    familyId: selectedArchetype.charAt(0) as 'a' | 'b' | 'c',
+    name: archetypeSummaries.find(a => a.id === selectedArchetype)?.name || 'Unknown Archetype',
+    familyName: selectedFamilyInfo?.name || 'Unknown Family',
+    description: selectedArchetypeSummaryData.description || '',
+    keyCharacteristics: selectedArchetypeSummaryData.keyCharacteristics || []
+  } : null;
+  
+  // Create a properly formatted archetype detail object that matches expected props
+  const selectedArchetypeDetail = selectedArchetype && selectedArchetypeDetailData ? {
+    id: selectedArchetype,
+    familyId: selectedArchetype.charAt(0) as 'a' | 'b' | 'c',
+    name: archetypeSummaries.find(a => a.id === selectedArchetype)?.name || 'Unknown Archetype',
+    familyName: selectedFamilyInfo?.name || 'Unknown Family',
+    fullDescription: selectedArchetypeDetailData.fullDescription || '',
+    keyCharacteristics: selectedArchetypeDetailData.keyCharacteristics || [],
+    keyInsights: selectedArchetypeDetailData.keyInsights || [],
+    keyStatistics: selectedArchetypeDetailData.keyStatistics || {}
+  } : null;
+  
+  // Convert archetype summaries to the expected format for FamilyDetailView
+  const formattedArchetypeSummaries = archetypeSummaries.map(summary => ({
+    id: summary.id,
+    familyId: summary.id.charAt(0) as 'a' | 'b' | 'c',
+    name: summary.name,
+    familyName: families.find(f => f.id === summary.id.charAt(0))?.name || '',
+    description: summary.description,
+    keyCharacteristics: Array.isArray(summary.keyCharacteristics) ? summary.keyCharacteristics : [],
+    color: summary.color,
+    hexColor: summary.hexColor
+  }));
+
   // Scroll to archetypes section
   const scrollToArchetypes = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -139,7 +173,7 @@ const InteractiveDNAExplorer = () => {
             ) : selectedFamilyInfo ? (
               <FamilyDetailView 
                 familyInfo={selectedFamilyInfo} 
-                archetypes={archetypeSummaries} 
+                archetypes={formattedArchetypeSummaries} 
                 onSelectArchetype={(id) => setSelectedArchetype(id as ArchetypeId)} 
               />
             ) : null}

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
@@ -24,7 +25,7 @@ const MatchFeedbackMenu = ({ archetypeId, onClose }: MatchFeedbackMenuProps) => 
     setIsSubmitting(true);
     
     try {
-      // Instead of saving to database, just log the feedback for now
+      // Instead of saving to database, just log the feedback since we don't have the appropriate table
       console.log('Archetype Feedback:', {
         archetypeId,
         feedback: selectedFeedback,

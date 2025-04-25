@@ -3,6 +3,18 @@ import { useState, useEffect } from 'react';
 import { ArchetypeId } from '@/types/archetype';
 import { supabase } from "@/integrations/supabase/client";
 
+// Extended return type to include the missing pattern properties
+type TraitsReturn = {
+  archetypeId: ArchetypeId;
+  positive_traits: string[];
+  neutral_traits: string[];
+  negative_traits: string[];
+  // Add these missing properties
+  diseasePatterns: Array<{ condition: string; variance: number }>;
+  utilizationPatterns: Array<{ category: string; variance: number }>;
+  uniqueInsights: string[];
+};
+
 export const useArchetypeMetrics = () => {
   const [metricsData, setMetricsData] = useState<Record<string, any[]>>({});
   const [isLoading, setIsLoading] = useState(true);
@@ -144,13 +156,29 @@ export const useArchetypeMetrics = () => {
   };
 
   // Get traits for archetype - using a regular function instead of hook
-  const getTraitsForArchetype = (archetypeId: ArchetypeId) => {
-    // Return mock traits since we don't have this data
+  const getTraitsForArchetype = (archetypeId: ArchetypeId): TraitsReturn => {
+    // Return mock traits with all the required fields
     return {
       archetypeId,
       positive_traits: ["Data-driven", "Analytical", "Structured"],
       neutral_traits: ["Methodical", "Process-oriented"],
-      negative_traits: ["Risk-averse", "Slow to adapt"]
+      negative_traits: ["Risk-averse", "Slow to adapt"],
+      // Add the missing fields
+      diseasePatterns: [
+        { condition: "Diabetes", variance: 0.2 },
+        { condition: "Hypertension", variance: 0.15 },
+        { condition: "Anxiety", variance: 0.1 }
+      ],
+      utilizationPatterns: [
+        { category: "Emergency Visits", variance: -0.1 },
+        { category: "Specialist Visits", variance: 0.25 },
+        { category: "Telehealth", variance: 0.4 }
+      ],
+      uniqueInsights: [
+        "Higher than average specialist utilization",
+        "Lower emergency room visits",
+        "Strong adoption of preventative care"
+      ]
     };
   };
 

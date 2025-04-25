@@ -1,6 +1,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { ArchetypeId } from '@/types/archetype';
 
 export const useArchetypeBasics = () => {
   const { data: archetypeData, isLoading, error } = useQuery({
@@ -40,8 +41,21 @@ export const useArchetypeBasics = () => {
     }
   });
 
+  // Helper function to get archetype by ID
+  const getArchetypeById = (id: string) => {
+    return archetypeData?.find(archetype => archetype.id === id) || null;
+  };
+
+  // Helper function to get archetypes by family
+  const getArchetypesByFamily = (familyId: string) => {
+    return archetypeData?.filter(archetype => archetype.familyId === familyId) || [];
+  };
+
   return {
     archetypes: archetypeData || [],
+    allArchetypes: archetypeData || [],
+    getArchetypeById,
+    getArchetypesByFamily,
     isLoading,
     error
   };

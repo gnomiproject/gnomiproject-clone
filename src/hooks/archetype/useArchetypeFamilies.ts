@@ -21,9 +21,9 @@ export const useArchetypeFamilies = () => {
         // Transform data to match our interface
         const families = data.map(item => ({
           id: item.id as 'a' | 'b' | 'c',
-          name: item.name,
+          name: item.name || '',
           description: item.short_description || '',
-          commonTraits: item.common_traits as string[] || [],
+          commonTraits: (item.common_traits as string[]) || [],
           hexColor: item.hex_color || getFamilyColorHex(item.id as 'a' | 'b' | 'c') // Use database value or fallback to our defined colors
         }));
         

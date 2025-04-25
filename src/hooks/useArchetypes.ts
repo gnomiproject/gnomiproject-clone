@@ -12,6 +12,7 @@ import { useDistinctiveMetrics } from './archetype/useDistinctiveMetrics';
 export const useArchetypes = () => {
   const { 
     allArchetypes, 
+    archetypes,
     getArchetypeById, 
     getArchetypesByFamily, 
     isLoading: isLoadingBasics 
@@ -44,23 +45,25 @@ export const useArchetypes = () => {
   
   return {
     // From useArchetypeBasics
-    getAllArchetypes: allArchetypes,
+    getAllArchetypes: () => allArchetypes,
     getArchetypeById,
     getArchetypesByFamily,
+    allArchetypes,
     
     // From useArchetypeFamilies
-    getAllFamilies: allFamilies,
+    getAllFamilies: () => allFamilies,
     allFamilies, // Expose directly for components to access
     getFamilyById,
     
     // From useArchetypeDetails
-    getAllDetailedArchetypes: allDetailedArchetypes,
+    getAllDetailedArchetypes: () => allDetailedArchetypes,
     allDetailedArchetypes, // Expose directly for components to access
     getDetailedArchetypesByFamily,
     getArchetypeSummary,
     getArchetypeStandard,
     getArchetypeEnhanced: getArchetypeDetailedById,
-    getAllArchetypeSummaries: allArchetypeSummaries,
+    getAllArchetypeSummaries: () => allArchetypeSummaries,
+    allArchetypeSummaries,
     getArchetypeSummariesByFamily,
     
     // From useArchetypeMetrics
