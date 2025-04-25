@@ -12,7 +12,7 @@ export const useArchetypeDeepDive = (archetypeId: ArchetypeId) => {
         .from('Analysis_Archetype_Deep_Dive_Reports')
         .select('*')
         .eq('archetype_id', archetypeId)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
 

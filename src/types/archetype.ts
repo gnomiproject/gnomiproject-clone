@@ -2,7 +2,7 @@
 export type ArchetypeId = 'a1' | 'a2' | 'a3' | 'b1' | 'b2' | 'b3' | 'c1' | 'c2' | 'c3';
 export type FamilyId = 'a' | 'b' | 'c';
 
-// Basic archetype interface matching Core_Archetype_Overview
+// Core table interfaces
 export interface Archetype {
   id: ArchetypeId;
   name: string;
@@ -14,7 +14,6 @@ export interface Archetype {
   industries?: string;
 }
 
-// Family interface matching Core_Archetype_Families
 export interface ArchetypeFamily {
   id: FamilyId;
   name: string;
@@ -25,7 +24,7 @@ export interface ArchetypeFamily {
   long_description?: string;
 }
 
-// Detailed archetype data from Analysis tables
+// Analysis table interfaces
 export interface ArchetypeDetailed extends Archetype {
   swot?: {
     strengths: string[];
@@ -49,7 +48,6 @@ export interface ArchetypeDetailed extends Archetype {
   }>;
 }
 
-// Premium deep dive report interface
 export interface ArchetypeDeepDive {
   archetype_id: ArchetypeId;
   cost_analysis?: string;

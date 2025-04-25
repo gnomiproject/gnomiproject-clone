@@ -41,6 +41,14 @@ export const useArchetypeDetails = (archetypeId: ArchetypeId) => {
 
       if (recsError) throw recsError;
 
+      // Transform swot data to ensure string arrays
+      const transformedSwot = swotData ? {
+        strengths: (swotData.strengths || []).map(String),
+        weaknesses: (swotData.weaknesses || []).map(String),
+        opportunities: (swotData.opportunities || []).map(String),
+        threats: (swotData.threats || []).map(String)
+      } : undefined;
+
       // Combine all data
       const detailedData: ArchetypeDetailed = {
         ...baseData,
@@ -50,12 +58,7 @@ export const useArchetypeDetails = (archetypeId: ArchetypeId) => {
           : typeof baseData.key_characteristics === 'string'
           ? baseData.key_characteristics.split('\n')
           : [],
-        swot: swotData ? {
-          strengths: Array.isArray(swotData.strengths) ? swotData.strengths : [],
-          weaknesses: Array.isArray(swotData.weaknesses) ? swotData.weaknesses : [],
-          opportunities: Array.isArray(swotData.opportunities) ? swotData.opportunities : [],
-          threats: Array.isArray(swotData.threats) ? swotData.threats : []
-        } : undefined,
+        swot: transformedSwot,
         distinctive_metrics: metricsData?.map(m => ({
           metric: m.metric,
           category: m.category,
@@ -68,7 +71,7 @@ export const useArchetypeDetails = (archetypeId: ArchetypeId) => {
           recommendation_number: r.recommendation_number,
           title: r.title,
           description: r.description,
-          metrics_references: r.metrics_references
+          metrics_references: Array.isArray(r.metrics_references) ? r.metrics_references : []
         }))
       };
 

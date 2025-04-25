@@ -1,13 +1,12 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Archetype, ArchetypeFamily, ArchetypeId } from '@/types/archetype';
+import { Archetype, ArchetypeFamily } from '@/types/archetype';
 
 export const useArchetypeBasics = () => {
   const { data: archetypeData, isLoading: isLoadingArchetypes, error: archetypeError } = useQuery({
     queryKey: ['archetype-basics'],
     queryFn: async () => {
-      // Get basic archetype information from Core_Archetype_Overview
       const { data: archetypes, error } = await supabase
         .from('Core_Archetype_Overview')
         .select('*');
@@ -16,9 +15,9 @@ export const useArchetypeBasics = () => {
 
       // Transform data to match our types
       return archetypes.map((archetype): Archetype => ({
-        id: archetype.id as ArchetypeId,
+        id: archetype.id,
         name: archetype.name,
-        family_id: archetype.family_id as 'a' | 'b' | 'c',
+        family_id: archetype.family_id,
         short_description: archetype.short_description,
         long_description: archetype.long_description,
         hex_color: archetype.hex_color,
@@ -41,9 +40,8 @@ export const useArchetypeBasics = () => {
 
       if (error) throw error;
 
-      // Transform data to match our types
       return families.map((family): ArchetypeFamily => ({
-        id: family.id as 'a' | 'b' | 'c',
+        id: family.id,
         name: family.name,
         short_description: family.short_description || '',
         hex_color: family.hex_color,
@@ -67,7 +65,7 @@ export const useArchetypeBasics = () => {
   };
 
   // Helper function to get family by ID
-  const getFamilyById = (id: 'a' | 'b' | 'c') => {
+  const getFamilyById = (id: FamilyId) => {
     return familyData?.find(family => family.id === id) || null;
   };
 
