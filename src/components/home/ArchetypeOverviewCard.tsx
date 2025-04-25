@@ -35,7 +35,7 @@ const ArchetypeOverviewCard = ({
       <CardHeader>
         <CardTitle>{name}</CardTitle>
         <CardDescription>
-          Family {familyId.toLowerCase()}{familyName ? `: ${familyName}` : ''}
+          family {familyId.toLowerCase()}{familyName ? `: ${familyName}` : ''}
         </CardDescription>
       </CardHeader>
       

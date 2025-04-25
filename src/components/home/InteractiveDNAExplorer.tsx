@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useArchetypes } from '@/hooks/useArchetypes';
 import DNAHelix from './DNAHelix';
@@ -17,8 +16,7 @@ const InteractiveDNAExplorer = () => {
   const { 
     allArchetypeSummaries, 
     allFamilies, 
-    getArchetypeSummary, 
-    getArchetypeStandard 
+    getArchetypeDetailedById
   } = useArchetypes();
   
   const archetypeSummaries = allArchetypeSummaries || [];
@@ -49,14 +47,9 @@ const InteractiveDNAExplorer = () => {
     }
   };
 
-  // Get the selected archetype's summary information (level 1)
-  const selectedArchetypeSummaryData = selectedArchetype ? 
-    getArchetypeSummary(selectedArchetype) : 
-    null;
-  
-  // Get the selected archetype's detailed information (level 2)
-  const selectedArchetypeDetailData = selectedArchetype ? 
-    getArchetypeStandard(selectedArchetype) : 
+  // Get the selected archetype's full data
+  const selectedArchetypeDetail = selectedArchetype ? 
+    getArchetypeDetailedById(selectedArchetype) : 
     null;
 
   // Get the selected family information
@@ -65,25 +58,13 @@ const InteractiveDNAExplorer = () => {
     null;
     
   // Create a properly formatted archetype summary object that matches expected props
-  const selectedArchetypeSummary = selectedArchetype && selectedArchetypeSummaryData ? {
+  const selectedArchetypeSummary = selectedArchetype && selectedArchetypeDetail ? {
     id: selectedArchetype,
     familyId: selectedArchetype.charAt(0) as 'a' | 'b' | 'c',
     name: archetypeSummaries.find(a => a.id === selectedArchetype)?.name || 'Unknown Archetype',
     familyName: selectedFamilyInfo?.name || 'Unknown Family',
-    description: selectedArchetypeSummaryData.description || '',
-    keyCharacteristics: selectedArchetypeSummaryData.keyCharacteristics || []
-  } : null;
-  
-  // Create a properly formatted archetype detail object that matches expected props
-  const selectedArchetypeDetail = selectedArchetype && selectedArchetypeDetailData ? {
-    id: selectedArchetype,
-    familyId: selectedArchetype.charAt(0) as 'a' | 'b' | 'c',
-    name: archetypeSummaries.find(a => a.id === selectedArchetype)?.name || 'Unknown Archetype',
-    familyName: selectedFamilyInfo?.name || 'Unknown Family',
-    fullDescription: selectedArchetypeDetailData.fullDescription || '',
-    keyCharacteristics: selectedArchetypeDetailData.keyCharacteristics || [],
-    keyInsights: selectedArchetypeDetailData.keyInsights || [],
-    keyStatistics: selectedArchetypeDetailData.keyStatistics || {}
+    description: selectedArchetypeDetail.fullDescription || '',
+    keyCharacteristics: selectedArchetypeDetail.keyFindings || []
   } : null;
   
   // Convert archetype summaries to the expected format for FamilyDetailView

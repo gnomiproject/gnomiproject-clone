@@ -18,17 +18,8 @@ interface ArchetypeDetailDialogProps {
     familyName: string;
     color?: string;
     hexColor?: string;
-    standard: {
-      fullDescription: string;
-      keyCharacteristics: string[];
-      keyInsights: string[];
-      keyStatistics: {
-        [key: string]: {
-          value: string;
-          trend: 'up' | 'down' | 'neutral';
-        };
-      };
-    }
+    keyFindings?: string[];
+    fullDescription?: string;
   } | null;
 }
 
@@ -38,9 +29,6 @@ const ArchetypeDetailDialog: React.FC<ArchetypeDetailDialogProps> = ({
   archetypeDetail
 }) => {
   if (!archetypeDetail) return null;
-  
-  // Safely access keyStatistics with a default empty object to avoid Object.entries error
-  const keyStatistics = archetypeDetail.standard?.keyStatistics || {};
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -62,68 +50,29 @@ const ArchetypeDetailDialog: React.FC<ArchetypeDetailDialogProps> = ({
         
         <div className="mt-6 space-y-8">
           {/* Full Description */}
-          <div>
-            <p className="text-gray-700 text-lg leading-relaxed">{archetypeDetail.standard?.fullDescription}</p>
-          </div>
+          {archetypeDetail.fullDescription && (
+            <div>
+              <p className="text-gray-700 text-lg leading-relaxed">{archetypeDetail.fullDescription}</p>
+            </div>
+          )}
           
-          {/* Key Statistics Section */}
-          <div>
-            <h3 className={`font-bold text-xl mb-5 text-archetype-${archetypeDetail.id}`}>Key Statistics</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-              {Object.entries(keyStatistics).map(([key, stat]) => (
-                <div key={key} className={`bg-archetype-${archetypeDetail.id}/5 rounded-lg p-5 border border-archetype-${archetypeDetail.id}/20`}>
-                  <h4 className="font-medium text-gray-600 text-sm mb-1">
-                    {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
-                  </h4>
-                  <div className="flex items-center">
-                    <span className={`text-xl font-bold ${
-                      stat.trend === 'up' ? 'text-orange-600' : 
-                      stat.trend === 'down' ? 'text-green-600' : 
-                      `text-archetype-${archetypeDetail.id}`
-                    }`}>
-                      {stat.value}
-                    </span>
-                    <span className={`ml-2 ${
-                      stat.trend === 'up' ? 'text-orange-600' : 
-                      stat.trend === 'down' ? 'text-green-600' : 
-                      'text-gray-600'
-                    }`}>
-                      {stat.trend === 'up' ? '↑' : stat.trend === 'down' ? '↓' : '–'}
-                    </span>
+          {/* Key Findings Section */}
+          {archetypeDetail.keyFindings && archetypeDetail.keyFindings.length > 0 && (
+            <div>
+              <h3 className={`font-bold text-xl mb-5 text-archetype-${archetypeDetail.id}`}>Key Findings</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                {archetypeDetail.keyFindings.map((finding, index) => (
+                  <div 
+                    key={index} 
+                    className={`flex items-start gap-3 p-4 rounded-md bg-archetype-${archetypeDetail.id}/5 border-l-3 border-archetype-${archetypeDetail.id} text-left`}
+                  >
+                    <div className={`h-2.5 w-2.5 mt-1.5 rounded-full bg-archetype-${archetypeDetail.id} flex-shrink-0`}></div>
+                    <span className="text-gray-700">{finding}</span>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
-            
-          {/* Key Characteristics Section */}
-          <div>
-            <h3 className={`font-bold text-xl mb-5 text-archetype-${archetypeDetail.id}`}>Key Characteristics</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-              {archetypeDetail.standard?.keyCharacteristics?.map((trait, index) => (
-                <div 
-                  key={index} 
-                  className={`flex items-start gap-3 p-4 rounded-md bg-archetype-${archetypeDetail.id}/5 border-l-3 border-archetype-${archetypeDetail.id} text-left`}
-                >
-                  <div className={`h-2.5 w-2.5 mt-1.5 rounded-full bg-archetype-${archetypeDetail.id} flex-shrink-0`}></div>
-                  <span className="text-gray-700">{trait}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Key Insights Section */}
-          <div>
-            <h3 className={`font-bold text-xl mb-5 text-archetype-${archetypeDetail.id}`}>Key Insights</h3>
-            <ul className="space-y-3 mb-6 text-left">
-              {archetypeDetail.standard?.keyInsights?.map((insight, index) => (
-                <li key={index} className="flex items-start gap-3">
-                  <div className={`h-3 w-3 mt-1 rounded-full bg-archetype-${archetypeDetail.id} flex-shrink-0`}></div>
-                  <span className="text-gray-700">{insight}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>

@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -10,9 +10,9 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { migrateDataToSupabase } from '@/utils/migrationUtil';
 import { useArchetypeBasics } from '@/hooks/archetype/useArchetypeBasics';
-import ArchetypeDetailDialog from './ArchetypeDetailDialog'; // Fixed import
+import ArchetypeDetailDialog from './ArchetypeDetailDialog';
 import { useArchetypeDetails } from '@/hooks/archetype/useArchetypeDetails';
-import { ArchetypeId } from '@/types/archetype'; // Import ArchetypeId type
+import { ArchetypeId } from '@/types/archetype';
 
 const ArchetypesGridSection = () => {
   const { archetypes, isLoading, error, refetch } = useArchetypeBasics();
