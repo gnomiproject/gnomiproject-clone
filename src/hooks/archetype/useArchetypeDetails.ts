@@ -4,52 +4,52 @@ import { supabase } from "@/integrations/supabase/client";
 import { ArchetypeId, ArchetypeColor } from '@/types/archetype';
 import { getArchetypeColor, getArchetypeHexColor } from '@/components/home/utils/dna/colors';
 
+interface SwotData {
+  archetype_id: string;
+  strengths: string[];
+  weaknesses: string[];
+  opportunities: string[];
+  threats: string[];
+}
+
 export const useArchetypeDetails = () => {
   const [allDetailedArchetypes, setAllDetailedArchetypes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch all detailed archetype data on mount
   useEffect(() => {
     const fetchDetailedArchetypes = async () => {
       try {
         setLoading(true);
         
-        // Get base archetype data from Core_Archetype_Overview
         const { data: archetypes, error: archetypesError } = await supabase
           .from('Core_Archetype_Overview')
           .select('*');
         
         if (archetypesError) throw archetypesError;
 
-        // Get detailed reports data from Analysis_Archetype_Full_Reports
         const { data: reports, error: reportsError } = await supabase
           .from('Analysis_Archetype_Full_Reports')
           .select('*');
         
         if (reportsError) throw reportsError;
 
-        // Get SWOT analysis data from Analysis_Archetype_SWOT
         const { data: swotData, error: swotError } = await supabase
           .from('Analysis_Archetype_SWOT')
           .select('*');
         
         if (swotError) throw swotError;
 
-        // Transform the data to match our interface
         const detailedArchetypes = archetypes.map(archetype => {
           const report = reports?.find(r => r.archetype_id === archetype.id);
-          const swot = swotData?.find(s => s.archetype_id === archetype.id);
+          const swot = swotData?.find(s => s.archetype_id === archetype.id) as SwotData | undefined;
           
-          // Parse key_findings from the report
           let keyFindings: string[] = [];
-          if (report && report.key_findings) {
+          if (report?.key_findings) {
             try {
-              // Handle different formats (JSON string or already parsed JSON object)
-              if (typeof report.key_findings === 'string') {
+              if (Array.isArray(report.key_findings)) {
+                keyFindings = report.key_findings.map(String);
+              } else if (typeof report.key_findings === 'string') {
                 keyFindings = JSON.parse(report.key_findings);
-              } else if (Array.isArray(report.key_findings)) {
-                // Ensure each item is cast to a string to satisfy TypeScript
-                keyFindings = report.key_findings.map(item => String(item));
               }
             } catch (e) {
               console.warn(`Failed to parse key_findings for ${archetype.id}:`, e);
@@ -64,12 +64,12 @@ export const useArchetypeDetails = () => {
             color: getArchetypeColor(archetype.id as ArchetypeId) as ArchetypeColor,
             hexColor: archetype.hex_color || getArchetypeHexColor(archetype.id as ArchetypeId),
             fullDescription: archetype.long_description,
-            keyFindings: keyFindings,
+            keyFindings,
             swot: swot ? {
-              strengths: swot.strengths ? swot.strengths.map(s => String(s)) : [],
-              weaknesses: swot.weaknesses ? swot.weaknesses.map(w => String(w)) : [],
-              opportunities: swot.opportunities ? swot.opportunities.map(o => String(o)) : [],
-              threats: swot.threats ? swot.threats.map(t => String(t)) : []
+              strengths: Array.isArray(swot.strengths) ? swot.strengths.map(String) : [],
+              weaknesses: Array.isArray(swot.weaknesses) ? swot.weaknesses.map(String) : [],
+              opportunities: Array.isArray(swot.opportunities) ? swot.opportunities.map(String) : [],
+              threats: Array.isArray(swot.threats) ? swot.threats.map(String) : []
             } : null
           };
         });

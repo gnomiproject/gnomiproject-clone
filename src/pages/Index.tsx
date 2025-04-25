@@ -1,8 +1,6 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import SectionTitle from '@/components/shared/SectionTitle';
 import InteractiveDNAExplorer from '@/components/home/InteractiveDNAExplorer';
 import ArchetypesGridSection from '@/components/home/ArchetypesGridSection';
 import { Section } from '@/components/shared/Section';
@@ -12,7 +10,7 @@ import { toast } from 'sonner';
 const Index = () => {
   const [isMigrating, setIsMigrating] = React.useState(false);
   const [dataExists, setDataExists] = React.useState<boolean | null>(null);
-  
+
   // Check if data exists in Supabase
   React.useEffect(() => {
     const checkDatabase = async () => {
@@ -43,32 +41,65 @@ const Index = () => {
     }
   };
 
+  const scrollToArchetypes = () => {
+    document.getElementById('archetype-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   return (
     <>
       {/* Hero Section */}
-      <Section className="bg-white py-24">
-        <div className="container mx-auto text-center">
-          <SectionTitle
-            title="Unlock the DNA of Your Organization's Healthcare Strategy"
-            subtitle="Discover how your approach to healthcare benefits compares to other employers and gain actionable insights to optimize your strategy."
-            center
-          />
-          <Button size="lg" asChild>
-            <Link to="/assessment">Take the Free Assessment</Link>
-          </Button>
-          
-          {dataExists === false && (
-            <div className="mt-6">
-              <p className="text-amber-600 mb-2">No archetype data found in database.</p>
+      <Section className="bg-gradient-to-b from-blue-50 to-white min-h-[90vh] flex items-center">
+        <div className="container mx-auto max-w-5xl px-4">
+          <div className="text-center space-y-8">
+            <img 
+              src="/lovable-uploads/f7575a7e-44d5-4d7c-878a-31198ecb910a.png" 
+              alt="Healthcare Gnome" 
+              className="w-32 h-32 mx-auto mb-6"
+            />
+            
+            <h1 className="text-5xl md:text-6xl font-bold tracking-tight">
+              What's Your Company's{' '}
+              <span className="text-blue-500">Healthcare Personality?</span>
+            </h1>
+            
+            <div className="max-w-3xl mx-auto space-y-6">
+              <p className="text-xl text-gray-600">
+                Curious why your healthcare program differs from similar companies? Wonder which strategies would work best for your unique workforce?
+              </p>
+              
+              <p className="text-lg text-gray-600">
+                In just 3 minutes, discover which of our nine healthcare archetypes matches your organization. Based on data from 400+ companies and 7+ million members, these archetypes reveal insights that typical industry benchmarks miss.
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
+              <Button asChild size="lg" className="text-lg px-8">
+                <Link to="/assessment">Find Your Archetype</Link>
+              </Button>
+              
               <Button 
-                variant="outline" 
-                onClick={handleMigrateData} 
-                disabled={isMigrating}
+                variant="secondary" 
+                size="lg" 
+                onClick={scrollToArchetypes}
+                className="text-lg px-8 bg-blue-100 text-blue-600 hover:bg-blue-200"
               >
-                {isMigrating ? 'Migrating Data...' : 'Migrate Data to Database'}
+                Explore All Archetypes
               </Button>
             </div>
-          )}
+
+            {dataExists === false && (
+              <div className="mt-6">
+                <p className="text-amber-600 mb-2">No archetype data found in database.</p>
+                <Button 
+                  variant="outline" 
+                  onClick={handleMigrateData} 
+                  disabled={isMigrating}
+                >
+                  {isMigrating ? 'Migrating Data...' : 'Migrate Data to Database'}
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
       </Section>
 
