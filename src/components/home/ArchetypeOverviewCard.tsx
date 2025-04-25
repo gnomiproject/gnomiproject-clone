@@ -12,12 +12,12 @@ interface ArchetypeOverviewCardProps {
   hex_color?: string;
 }
 
-const ArchetypeOverviewCard = ({ 
-  id, 
-  name, 
+const ArchetypeOverviewCard = ({
+  id,
+  name,
   family_id,
   short_description,
-  hex_color 
+  hex_color
 }: ArchetypeOverviewCardProps) => {
   return (
     <Link to={`/archetype/${id}`}>

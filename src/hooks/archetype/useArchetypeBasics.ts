@@ -1,7 +1,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Archetype, ArchetypeFamily } from '@/types/archetype';
+import { Archetype, ArchetypeFamily, ArchetypeId, FamilyId } from '@/types/archetype';
 
 export const useArchetypeBasics = () => {
   const { data: archetypeData, isLoading: isLoadingArchetypes, error: archetypeError } = useQuery({
@@ -15,9 +15,9 @@ export const useArchetypeBasics = () => {
 
       // Transform data to match our types
       return archetypes.map((archetype): Archetype => ({
-        id: archetype.id,
+        id: archetype.id as ArchetypeId,
         name: archetype.name,
-        family_id: archetype.family_id,
+        family_id: archetype.family_id as FamilyId,
         short_description: archetype.short_description,
         long_description: archetype.long_description,
         hex_color: archetype.hex_color,
@@ -41,7 +41,7 @@ export const useArchetypeBasics = () => {
       if (error) throw error;
 
       return families.map((family): ArchetypeFamily => ({
-        id: family.id,
+        id: family.id as FamilyId,
         name: family.name,
         short_description: family.short_description || '',
         hex_color: family.hex_color,

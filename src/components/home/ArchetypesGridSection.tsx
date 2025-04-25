@@ -11,7 +11,7 @@ import { useArchetypeBasics } from '@/hooks/archetype/useArchetypeBasics';
 import { ArchetypeId } from '@/types/archetype';
 
 const ArchetypesGridSection = () => {
-  const { archetypes, isLoading, error, refetch } = useArchetypeBasics();
+  const { archetypes, isLoading, error } = useArchetypeBasics();
   const [isMigrating, setIsMigrating] = React.useState(false);
   
   const handleMigrateData = async () => {
@@ -20,7 +20,6 @@ const ArchetypesGridSection = () => {
       const success = await migrateDataToSupabase();
       if (success) {
         toast.success('Data successfully migrated!');
-        refetch();
       }
     } catch (error) {
       console.error('Migration error:', error);
@@ -35,7 +34,6 @@ const ArchetypesGridSection = () => {
       <div className="p-8 text-center">
         <p className="text-red-500">Failed to load archetypes. Please try again later.</p>
         <p className="text-sm text-gray-500 mt-2">Error: {(error as Error).message}</p>
-        <Button onClick={() => refetch()} className="mt-4">Retry</Button>
       </div>
     );
   }
@@ -75,10 +73,9 @@ const ArchetypesGridSection = () => {
                 key={archetype.id}
                 id={archetype.id}
                 name={archetype.name}
-                familyId={archetype.familyId}
-                familyName={archetype.familyName}
-                shortDescription={archetype.description}
-                hexColor={archetype.color}
+                family_id={archetype.family_id}
+                short_description={archetype.short_description}
+                hex_color={archetype.hex_color}
               />
             ))
           ) : (

@@ -43,16 +43,17 @@ export const useArchetypeDetails = (archetypeId: ArchetypeId) => {
 
       // Transform swot data to ensure string arrays
       const transformedSwot = swotData ? {
-        strengths: (swotData.strengths || []).map(String),
-        weaknesses: (swotData.weaknesses || []).map(String),
-        opportunities: (swotData.opportunities || []).map(String),
-        threats: (swotData.threats || []).map(String)
+        strengths: Array.isArray(swotData.strengths) ? swotData.strengths.map(String) : [],
+        weaknesses: Array.isArray(swotData.weaknesses) ? swotData.weaknesses.map(String) : [],
+        opportunities: Array.isArray(swotData.opportunities) ? swotData.opportunities.map(String) : [],
+        threats: Array.isArray(swotData.threats) ? swotData.threats.map(String) : []
       } : undefined;
 
       // Combine all data
       const detailedData: ArchetypeDetailed = {
         ...baseData,
         id: archetypeId,
+        family_id: baseData.family_id,
         key_characteristics: Array.isArray(baseData.key_characteristics) 
           ? baseData.key_characteristics 
           : typeof baseData.key_characteristics === 'string'
