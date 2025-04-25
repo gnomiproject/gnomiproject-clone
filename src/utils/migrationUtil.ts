@@ -49,15 +49,13 @@ export function normalizeArchetype(archetype: Archetype): Record<string, any> {
     id: archetype.id,
     family_id: archetype.familyId,
     name: archetype.name,
-    short_description: archetype.description || archetype.shortDescription,
-    long_description: archetype.description || archetype.longDescription,
-    hex_color: archetype.hexColor,
+    short_description: archetype.description || '',
+    hex_color: archetype.hexColor || '',
     key_characteristics: archetype.characteristics || [],
-    // Add more fields as needed
   };
 }
 
-// Add the missing data migration functions
+// Simplify the data migration function to only use Core_Archetype_Overview
 export async function migrateDataToSupabase(): Promise<boolean> {
   try {
     // Insert archetypes into the database

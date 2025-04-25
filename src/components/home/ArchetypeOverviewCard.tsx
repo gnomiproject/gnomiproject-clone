@@ -1,8 +1,6 @@
 
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ExternalLink } from 'lucide-react';
 
 interface ArchetypeOverviewCardProps {
   name: string;
@@ -20,8 +18,7 @@ const ArchetypeOverviewCard = ({
   familyId,
   familyName,
   shortDescription,
-  hexColor,
-  onShowDetailDialog
+  hexColor
 }: ArchetypeOverviewCardProps) => {
   return (
     <Card className="relative h-full transition-all hover:shadow-lg">
@@ -43,22 +40,8 @@ const ArchetypeOverviewCard = ({
         </CardDescription>
       </CardHeader>
       
-      <CardContent className="space-y-4">
+      <CardContent>
         <p className="text-gray-600">{shortDescription}</p>
-        
-        {onShowDetailDialog && (
-          <div className="flex justify-end">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={onShowDetailDialog}
-              className="gap-2"
-            >
-              Learn More
-              <ExternalLink className="h-4 w-4" />
-            </Button>
-          </div>
-        )}
       </CardContent>
     </Card>
   );

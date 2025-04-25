@@ -19,19 +19,8 @@ export const useArchetypeBasics = () => {
 
       if (archetypeError || familyError) throw (archetypeError || familyError);
       
-      // Get archetype summaries from Analysis_Archetype_Full_Reports
-      const { data: archetypeSummaries, error: summariesError } = await supabase
-        .from('Analysis_Archetype_Full_Reports')
-        .select('archetype_id, key_findings');
-        
-      if (summariesError) throw summariesError;
-
       // Combine the data
       const combinedData = archetypeBasics.map(archetype => {
-        const summary = archetypeSummaries?.find(
-          summary => summary.archetype_id === archetype.id
-        );
-        
         // Find the corresponding family name
         const family = familyData?.find(f => f.id === archetype.family_id);
         
@@ -39,10 +28,10 @@ export const useArchetypeBasics = () => {
           id: archetype.id,
           name: archetype.name,
           familyId: archetype.family_id,
-          familyName: family?.name || '', // Add family name
+          familyName: family?.name || '', 
           description: archetype.short_description,
           color: archetype.hex_color,
-          keyCharacteristics: summary?.key_findings || []
+          keyCharacteristics: archetype.key_characteristics || []
         };
       });
 
@@ -67,6 +56,6 @@ export const useArchetypeBasics = () => {
     getArchetypesByFamily,
     isLoading,
     error,
-    refetch // Export the refetch function
+    refetch
   };
 };

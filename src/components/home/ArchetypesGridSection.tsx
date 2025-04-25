@@ -1,7 +1,5 @@
 
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
 import SectionTitle from '@/components/shared/SectionTitle';
@@ -10,17 +8,10 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { migrateDataToSupabase } from '@/utils/migrationUtil';
 import { useArchetypeBasics } from '@/hooks/archetype/useArchetypeBasics';
-import ArchetypeDetailDialog from './ArchetypeDetailDialog';
-import { useArchetypes } from '@/hooks/useArchetypes';
 import { ArchetypeId } from '@/types/archetype';
 
 const ArchetypesGridSection = () => {
   const { archetypes, isLoading, error, refetch } = useArchetypeBasics();
-  const [showDetailDialog, setShowDetailDialog] = useState(false);
-  const [selectedArchetype, setSelectedArchetype] = useState<string | null>(null);
-  const { getArchetypeDetailedById } = useArchetypes();
-
-  // Check for database data and offer migration if needed
   const [isMigrating, setIsMigrating] = React.useState(false);
   
   const handleMigrateData = async () => {
@@ -88,10 +79,6 @@ const ArchetypesGridSection = () => {
                 familyName={archetype.familyName}
                 shortDescription={archetype.description}
                 hexColor={archetype.color}
-                onShowDetailDialog={() => {
-                  setSelectedArchetype(archetype.id);
-                  setShowDetailDialog(true);
-                }}
               />
             ))
           ) : (
@@ -108,15 +95,6 @@ const ArchetypesGridSection = () => {
           )}
         </div>
       </div>
-
-      {/* Add Level 2 Detail Dialog */}
-      {selectedArchetype && (
-        <ArchetypeDetailDialog
-          open={showDetailDialog}
-          onOpenChange={setShowDetailDialog}
-          archetypeDetail={getArchetypeDetailedById(selectedArchetype as ArchetypeId)}
-        />
-      )}
     </section>
   );
 };
