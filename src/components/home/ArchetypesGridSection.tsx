@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
@@ -57,6 +56,14 @@ const ArchetypesGridSection = () => {
     );
   }
 
+  // Sort archetypes by family_id and numerical part of id
+  const sortedArchetypes = [...(archetypes || [])].sort((a, b) => {
+    if (a.family_id !== b.family_id) {
+      return a.family_id.localeCompare(b.family_id);
+    }
+    return a.id.localeCompare(b.id);
+  });
+
   return (
     <section className="bg-white py-16" id="archetype-section">
       <div className="container mx-auto">
@@ -67,8 +74,8 @@ const ArchetypesGridSection = () => {
         />
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-          {archetypes && archetypes.length > 0 ? (
-            archetypes.map((archetype) => (
+          {sortedArchetypes && sortedArchetypes.length > 0 ? (
+            sortedArchetypes.map((archetype) => (
               <ArchetypeOverviewCard
                 key={archetype.id}
                 id={archetype.id}
