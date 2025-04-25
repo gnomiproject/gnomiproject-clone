@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useArchetypes } from '@/hooks/useArchetypes';
 import DNAHelix from './DNAHelix';
@@ -16,7 +17,7 @@ const InteractiveDNAExplorer = () => {
   const { 
     allArchetypeSummaries, 
     allFamilies, 
-    getArchetypeDetailedById
+    getArchetypeDetailedById 
   } = useArchetypes();
   
   const archetypeSummaries = allArchetypeSummaries || [];

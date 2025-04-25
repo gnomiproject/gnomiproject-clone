@@ -61,7 +61,8 @@ export const useArchetypes = () => {
     getDetailedArchetypesByFamily,
     getArchetypeSummary,
     getArchetypeStandard,
-    getArchetypeEnhanced: getArchetypeDetailedById,
+    getArchetypeDetailedById, // Make sure this function is properly exposed
+    getArchetypeEnhanced: getArchetypeDetailedById, // Keep for backward compatibility
     getAllArchetypeSummaries: () => allArchetypeSummaries,
     allArchetypeSummaries,
     getArchetypeSummariesByFamily,

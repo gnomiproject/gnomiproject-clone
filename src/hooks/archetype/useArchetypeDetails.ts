@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { ArchetypeId, ArchetypeColor } from '@/types/archetype';
@@ -39,6 +40,21 @@ export const useArchetypeDetails = () => {
           const report = reports?.find(r => r.archetype_id === archetype.id);
           const swot = swotData?.find(s => s.archetype_id === archetype.id);
           
+          // Parse key_findings from the report
+          let keyFindings: string[] = [];
+          if (report && report.key_findings) {
+            try {
+              // Handle different formats (JSON string or already parsed JSON object)
+              if (typeof report.key_findings === 'string') {
+                keyFindings = JSON.parse(report.key_findings);
+              } else if (Array.isArray(report.key_findings)) {
+                keyFindings = report.key_findings;
+              }
+            } catch (e) {
+              console.warn(`Failed to parse key_findings for ${archetype.id}:`, e);
+            }
+          }
+          
           return {
             id: archetype.id as ArchetypeId,
             familyId: archetype.family_id as 'a' | 'b' | 'c',
@@ -47,7 +63,7 @@ export const useArchetypeDetails = () => {
             color: getArchetypeColor(archetype.id as ArchetypeId) as ArchetypeColor,
             hexColor: archetype.hex_color || getArchetypeHexColor(archetype.id as ArchetypeId),
             fullDescription: archetype.long_description,
-            keyFindings: report?.key_findings || [],
+            keyFindings: keyFindings,
             swot: swot ? {
               strengths: swot.strengths || [],
               weaknesses: swot.weaknesses || [],

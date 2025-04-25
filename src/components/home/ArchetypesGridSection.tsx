@@ -11,14 +11,14 @@ import { Button } from '@/components/ui/button';
 import { migrateDataToSupabase } from '@/utils/migrationUtil';
 import { useArchetypeBasics } from '@/hooks/archetype/useArchetypeBasics';
 import ArchetypeDetailDialog from './ArchetypeDetailDialog';
-import { useArchetypeDetails } from '@/hooks/archetype/useArchetypeDetails';
+import { useArchetypes } from '@/hooks/useArchetypes';
 import { ArchetypeId } from '@/types/archetype';
 
 const ArchetypesGridSection = () => {
   const { archetypes, isLoading, error, refetch } = useArchetypeBasics();
   const [showDetailDialog, setShowDetailDialog] = useState(false);
   const [selectedArchetype, setSelectedArchetype] = useState<string | null>(null);
-  const { getArchetypeDetailedById } = useArchetypeDetails();
+  const { getArchetypeDetailedById } = useArchetypes();
 
   // Check for database data and offer migration if needed
   const [isMigrating, setIsMigrating] = React.useState(false);
