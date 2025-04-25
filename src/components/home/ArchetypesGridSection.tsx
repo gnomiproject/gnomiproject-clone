@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -9,9 +9,14 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { migrateDataToSupabase } from '@/utils/migrationUtil';
 import { useArchetypeBasics } from '@/hooks/archetype/useArchetypeBasics';
+import { ArchetypeDetailDialog } from './ArchetypeDetailDialog';
+import { useArchetypeDetails } from '@/hooks/archetype/useArchetypeDetails';
 
 const ArchetypesGridSection = () => {
   const { archetypes, isLoading, error, refetch } = useArchetypeBasics();
+  const [showDetailDialog, setShowDetailDialog] = useState(false);
+  const [selectedArchetype, setSelectedArchetype] = useState<string | null>(null);
+  const { getArchetypeDetailedById } = useArchetypeDetails();
 
   // Check for database data and offer migration if needed
   const [isMigrating, setIsMigrating] = React.useState(false);
@@ -78,9 +83,13 @@ const ArchetypesGridSection = () => {
                 id={archetype.id}
                 name={archetype.name}
                 familyId={archetype.familyId}
-                familyName={archetype.familyName}  // Pass family name
+                familyName={archetype.familyName}
                 shortDescription={archetype.description}
                 hexColor={archetype.color}
+                onShowDetailDialog={() => {
+                  setSelectedArchetype(archetype.id);
+                  setShowDetailDialog(true);
+                }}
               />
             ))
           ) : (
@@ -97,6 +106,15 @@ const ArchetypesGridSection = () => {
           )}
         </div>
       </div>
+
+      {/* Add Level 2 Detail Dialog */}
+      {selectedArchetype && (
+        <ArchetypeDetailDialog
+          open={showDetailDialog}
+          onOpenChange={setShowDetailDialog}
+          archetypeDetail={getArchetypeDetailedById(selectedArchetype)}
+        />
+      )}
     </section>
   );
 };
