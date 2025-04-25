@@ -1,137 +1,217 @@
+
 import React, { useState } from 'react';
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Loader2, Send, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { ArchetypeDetailedData } from '@/types/archetype';
+import { v4 as uuidv4 } from 'uuid';  // Add uuid import
+import { 
+  PhoneCall, 
+  Mail, 
+  CalendarDays, 
+  FileText, 
+  Share2,
+  Download
+} from 'lucide-react';
 
 interface DeepReportNextStepsProps {
-  archetypeData: ArchetypeDetailedData;
+  archetypeData: any;
 }
 
 const DeepReportNextSteps = ({ archetypeData }: DeepReportNextStepsProps) => {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [message, setMessage] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
   const { toast } = useToast();
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [shareLink, setShareLink] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleContactRequest = (type: string) => {
+    // Mock contact request
+    toast({
+      title: "Contact Request Sent",
+      description: `Your ${type} request has been sent to our team.`,
+    });
+  };
+
+  const handleDownloadPDF = () => {
+    setIsGenerating(true);
     
-    if (!name || !email) {
+    // Mock PDF generation
+    setTimeout(() => {
       toast({
-        title: "Missing information",
-        description: "Please provide your name and email.",
-        variant: "destructive"
+        title: "PDF Generated",
+        description: "Your PDF report has been generated and downloaded.",
       });
-      return;
-    }
-    
-    setIsSubmitting(true);
-    
+      setIsGenerating(false);
+    }, 2000);
+  };
+
+  const handleShareReport = async () => {
     try {
-      // In a real implementation, this would be saved to a database table like report_requests
-      // Since we don't have that table, we'll just log the request
-      console.log('Consultation Request:', {
-        name,
-        email,
-        message,
-        archetypeId: archetypeData.id,
-        archetypeName: archetypeData.name,
-        timestamp: new Date().toISOString()
-      });
+      // Generate a unique token for sharing
+      const shareToken = uuidv4(); 
       
-      // Simulate a successful submission
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Instead of accessing the database directly, we'll log the intention
+      // and generate a mock share link
+      console.log('Generating shareable report link with token:', shareToken);
       
-      setIsSubmitted(true);
+      // Create a shareable link based on the current URL
+      const baseUrl = window.location.origin;
+      const newShareLink = `${baseUrl}/shared-report/${archetypeData.id}?token=${shareToken}`;
+      
+      setShareLink(newShareLink);
+      
       toast({
-        title: "Request Sent",
-        description: "Your consultation request has been received. We'll be in touch soon!",
+        title: "Share Link Generated",
+        description: "A shareable link has been created. Copy it to share with others.",
       });
     } catch (error) {
-      console.error('Error submitting request:', error);
+      console.error("Error generating share link:", error);
       toast({
-        title: "Submission Error",
-        description: "There was a problem sending your request. Please try again later.",
-        variant: "destructive"
+        title: "Error",
+        description: "Failed to generate a share link. Please try again later.",
+        variant: "destructive",
       });
-    } finally {
-      setIsSubmitting(false);
+    }
+  };
+
+  const copyShareLink = () => {
+    if (shareLink) {
+      navigator.clipboard.writeText(shareLink);
+      toast({
+        title: "Copied",
+        description: "The share link has been copied to your clipboard.",
+      });
     }
   };
 
   return (
-    <Card>
-      <CardContent className="grid gap-4">
-        {isSubmitted ? (
-          <div className="flex flex-col items-center justify-center space-y-4">
-            <Check className="h-12 w-12 text-green-500" />
-            <p className="text-lg font-medium text-green-600">
-              Your request has been submitted!
+    <div className="space-y-6">
+      <h2 className="text-3xl font-bold mb-6">Next Steps</h2>
+      
+      <p className="text-gray-600 mb-8">
+        Now that you've reviewed your archetype analysis, take action to optimize your healthcare strategy:
+      </p>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Discuss With Our Team</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="mb-6 text-gray-600">
+              Schedule a consultation with our healthcare experts to discuss how to apply these insights.
             </p>
-            <p className="text-sm text-gray-500">
-              We will get in touch with you soon.
-            </p>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="grid gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="name">Name</Label>
-              <Input
-                id="name"
-                placeholder="Your Name"
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                disabled={isSubmitting}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                placeholder="you@example.com"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                disabled={isSubmitting}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="message">Message</Label>
-              <Textarea
-                id="message"
-                placeholder="How can we help you?"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                disabled={isSubmitting}
-              />
-            </div>
-            <CardFooter>
-              <Button disabled={isSubmitting}>
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Sending...
-                  </>
-                ) : (
-                  <>
-                    Send Request
-                    <Send className="ml-2 h-4 w-4" />
-                  </>
-                )}
+            <div className="space-y-3">
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={() => handleContactRequest('call')}
+              >
+                <PhoneCall className="mr-2 h-4 w-4" />
+                Request a Call
               </Button>
-            </CardFooter>
-          </form>
-        )}
-      </CardContent>
-    </Card>
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={() => handleContactRequest('email')}
+              >
+                <Mail className="mr-2 h-4 w-4" />
+                Email Consultation
+              </Button>
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={() => handleContactRequest('meeting')}
+              >
+                <CalendarDays className="mr-2 h-4 w-4" />
+                Schedule Meeting
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Export & Share</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="mb-6 text-gray-600">
+              Download this report or share it with your team members.
+            </p>
+            <div className="space-y-3">
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={handleDownloadPDF}
+                disabled={isGenerating}
+              >
+                <Download className="mr-2 h-4 w-4" />
+                {isGenerating ? "Generating PDF..." : "Download PDF Report"}
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={handleShareReport}
+              >
+                <Share2 className="mr-2 h-4 w-4" />
+                Create Share Link
+              </Button>
+              
+              {shareLink && (
+                <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+                  <p className="text-sm text-gray-500 mb-2">Share link:</p>
+                  <div className="flex">
+                    <input 
+                      type="text"
+                      readOnly 
+                      value={shareLink}
+                      className="flex-1 text-xs p-2 border rounded-l-md focus:outline-none bg-white"
+                    />
+                    <Button 
+                      size="sm"
+                      className="rounded-l-none"
+                      onClick={copyShareLink}
+                    >
+                      Copy
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+      
+      <Card className="mt-8">
+        <CardHeader>
+          <CardTitle>Additional Resources</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="p-4 border rounded-lg">
+              <FileText className="h-8 w-8 text-blue-500 mb-2" />
+              <h3 className="font-semibold mb-1">Archetype Case Studies</h3>
+              <p className="text-sm text-gray-600">
+                Read how similar organizations have implemented strategies for {archetypeData.name}.
+              </p>
+              <Button variant="link" className="p-0 mt-2" size="sm">
+                View Case Studies
+              </Button>
+            </div>
+            
+            <div className="p-4 border rounded-lg">
+              <FileText className="h-8 w-8 text-green-500 mb-2" />
+              <h3 className="font-semibold mb-1">Implementation Guide</h3>
+              <p className="text-sm text-gray-600">
+                Step-by-step guide to implement recommendations for your organization.
+              </p>
+              <Button variant="link" className="p-0 mt-2" size="sm">
+                Download Guide
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 

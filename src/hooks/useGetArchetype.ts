@@ -72,10 +72,11 @@ export const useGetArchetype = (archetypeId: ArchetypeId) => {
               },
               strategicPriorities: [],
               swot: {
-                strengths: swotData?.strengths || [],
-                weaknesses: swotData?.weaknesses || [],
-                opportunities: swotData?.opportunities || [],
-                threats: swotData?.threats || []
+                // Convert JSON values to string arrays or provide empty arrays as fallbacks
+                strengths: swotData?.strengths ? Array.isArray(swotData.strengths) ? swotData.strengths : [] : [],
+                weaknesses: swotData?.weaknesses ? Array.isArray(swotData.weaknesses) ? swotData.weaknesses : [] : [],
+                opportunities: swotData?.opportunities ? Array.isArray(swotData.opportunities) ? swotData.opportunities : [] : [],
+                threats: swotData?.threats ? Array.isArray(swotData.threats) ? swotData.threats : [] : []
               },
               costSavings: []
             }

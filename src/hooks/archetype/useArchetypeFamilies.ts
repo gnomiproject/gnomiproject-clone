@@ -23,7 +23,7 @@ export const useArchetypeFamilies = () => {
           id: item.id as 'a' | 'b' | 'c',
           name: item.name || '',
           description: item.short_description || '',
-          commonTraits: (item.common_traits as string[]) || [],
+          commonTraits: Array.isArray(item.common_traits) ? item.common_traits : [],
           hexColor: item.hex_color || getFamilyColorHex(item.id as 'a' | 'b' | 'c') // Use database value or fallback to our defined colors
         }));
         

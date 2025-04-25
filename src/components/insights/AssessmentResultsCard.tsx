@@ -41,7 +41,10 @@ const AssessmentResultsCard = ({
       </div>
       
       {/* Premium Report section */}
-      <PremiumReport archetypeData={archetypeData} />
+      <PremiumReport 
+        archetypeId={selectedArchetype} 
+        archetypeData={archetypeData} 
+      />
     </div>
   );
 };

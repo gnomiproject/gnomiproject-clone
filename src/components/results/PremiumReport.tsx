@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,12 +11,13 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { v4 as uuidv4 } from 'uuid';  // Ensure this import is correct
+import { v4 as uuidv4 } from 'uuid';
 
 interface PremiumReportProps {
   archetypeId: string;
   assessmentResult?: any;
   assessmentAnswers?: any;
+  archetypeData?: any;  // Adding archetypeData prop to match usage in AssessmentResultsCard
 }
 
 const formSchema = z.object({
@@ -31,7 +33,7 @@ const formSchema = z.object({
   comments: z.string().optional(),
 });
 
-const PremiumReport = ({ archetypeId, assessmentResult, assessmentAnswers }: PremiumReportProps) => {
+const PremiumReport = ({ archetypeId, assessmentResult, assessmentAnswers, archetypeData }: PremiumReportProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [accessLink, setAccessLink] = useState<string | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
