@@ -8,6 +8,9 @@ interface SavingsTabProps {
 
 const SavingsTab = ({ archetypeData }: SavingsTabProps) => {
   const color = `archetype-${archetypeData.id}`;
+  
+  // Get cost savings or provide an empty array if it doesn't exist
+  const costSavings = archetypeData.enhanced?.costSavings || [];
 
   return (
     <div className="py-6">
@@ -15,7 +18,7 @@ const SavingsTab = ({ archetypeData }: SavingsTabProps) => {
       <p className="mb-6 text-left">Potential savings opportunities for {archetypeData.name} organizations:</p>
       
       <div className="space-y-8">
-        {archetypeData.enhanced?.costSavings?.map((saving, index) => (
+        {costSavings.map((saving, index) => (
           <div key={index} className="bg-white border rounded-lg p-6">
             <h5 className="text-lg font-bold mb-4 flex items-start gap-2 text-left">
               <span className={`inline-flex h-6 w-6 rounded-full bg-${color}/10 text-${color} items-center justify-center font-bold flex-shrink-0`}>{index + 1}</span>
@@ -23,7 +26,7 @@ const SavingsTab = ({ archetypeData }: SavingsTabProps) => {
             </h5>
             <p className="text-gray-700 mb-4 text-left">{saving.description}</p>
             
-            {'potentialSavings' in saving && saving.potentialSavings && (
+            {saving.potentialSavings && (
               <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center justify-between">
                 <span className="font-medium">Potential Savings:</span>
                 <span className="text-green-700 font-bold">{saving.potentialSavings}</span>

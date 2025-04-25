@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { archetypes } from "../data/archetypes";
 import { archetypeMetrics } from "../data/archetypeMetrics";
@@ -38,9 +39,9 @@ export const migrateDataToSupabase = async () => {
       id: archetype.id,
       name: archetype.name,
       family_id: archetype.familyId,
-      short_description: archetype.shortDescription,
-      long_description: archetype.longDescription,
-      hex_color: archetype.hexColor
+      short_description: archetype.shortDescription || archetype.description,
+      long_description: archetype.longDescription || archetype.description,
+      hex_color: archetype.hexColor || ''
     }));
     
     const { error: archetypesError } = await supabase

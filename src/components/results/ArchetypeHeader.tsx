@@ -13,9 +13,10 @@ const ArchetypeHeader = ({ archetypeData, familyData }: ArchetypeHeaderProps) =>
   const familyColor = `family-${archetypeData.familyId}`;
   const familyName = familyData?.name || archetypeData.familyName || '';
 
-  // Use the description from standard or fall back to a default message
+  // Use the description from summary, standard or fall back to fullDescription
   const description = archetypeData.summary?.description || 
                       archetypeData.standard?.overview || 
+                      archetypeData.fullDescription || 
                       'No detailed description available for this archetype.';
 
   return (

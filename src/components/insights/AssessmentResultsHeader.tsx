@@ -15,9 +15,10 @@ const AssessmentResultsHeader = ({
   // We keep the prop even though we don't use it, to avoid breaking the API
   onRetakeAssessment 
 }: AssessmentResultsHeaderProps) => {
-  // Use the description from standard or fall back to a default message
+  // Use the description from summary, standard or fall back to fullDescription
   const description = archetypeData.summary?.description || 
                       archetypeData.standard?.overview || 
+                      archetypeData.fullDescription || 
                       'No detailed description available for this archetype.';
   
   return (

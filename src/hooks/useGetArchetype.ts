@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useArchetypes } from './useArchetypes';
-import { ArchetypeId, ArchetypeDetailedData, ArchetypeColor } from '@/types/archetype';
+import { ArchetypeId, ArchetypeDetailedData } from '@/types/archetype';
 import { supabase } from "@/integrations/supabase/client";
 import { getArchetypeColor, getArchetypeHexColor } from '@/components/home/utils/dna/colors';
 
@@ -48,14 +48,16 @@ export const useGetArchetype = (archetypeId: ArchetypeId) => {
             name: data.name,
             familyName: '', // Will be populated later using getFamilyById
             // Map the color to a valid ArchetypeColor using the existing utility function
-            color: getArchetypeColor(archetypeId) as ArchetypeColor,
+            color: getArchetypeColor(archetypeId),
             hexColor: data.hex_color || getArchetypeHexColor(archetypeId),
             fullDescription: data.long_description || '',
             keyFindings: [],
             // Add the summary property for compatibility with the updated type
             summary: {
               description: data.short_description || '',
-              keyCharacteristics: []
+              keyCharacteristics: Array.isArray(data.key_characteristics) 
+                ? data.key_characteristics.map(item => String(item))
+                : []
             },
             standard: {
               fullDescription: data.long_description || '',

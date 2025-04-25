@@ -9,7 +9,7 @@ export interface ArchetypeSummary {
   name: string;
   description?: string;
   color?: string;
-  key_characteristics?: string;
+  key_characteristics?: string[];
 }
 
 export interface ArchetypeDetailedData {
@@ -21,6 +21,10 @@ export interface ArchetypeDetailedData {
   hexColor: string;
   fullDescription: string;
   keyFindings: string[];
+  summary?: {
+    description: string;
+    keyCharacteristics: string[];
+  };
   standard?: {
     fullDescription: string;
     keyCharacteristics: string[];
@@ -58,11 +62,8 @@ export interface ArchetypeDetailedData {
     costSavings?: Array<{
       title: string;
       description: string;
+      potentialSavings?: string;
     }>;
-  };
-  summary?: {
-    description: string;
-    keyCharacteristics: string[];
   };
 }
 
@@ -79,7 +80,19 @@ export interface Archetype {
   familyId: 'a' | 'b' | 'c';
   name: string;
   description?: string;
+  shortDescription?: string;
+  longDescription?: string;
+  hexColor?: string;
   color?: string;
+  characteristics?: string[];
+  strategicPriorities?: {
+    primaryFocus: string;
+    secondaryPriorities: string[];
+    keyOpportunities: string[];
+  };
+  riskScore?: number;
+  riskVariance?: number;
+  primaryRiskDriver?: string;
 }
 
 export interface ArchetypeMetrics {

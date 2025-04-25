@@ -28,10 +28,18 @@ const KpiRiskTab = ({ archetypeData }: KpiRiskTabProps) => {
                   {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
                 </h4>
                 <div className="flex items-center">
-                  <span className={`text-2xl font-bold ${stat.trend === 'up' ? 'text-orange-600' : stat.trend === 'down' ? 'text-green-600' : 'text-gray-600'}`}>
+                  <span className={`text-2xl font-bold ${
+                    stat.trend === 'up' ? 'text-orange-600' : 
+                    stat.trend === 'down' ? 'text-green-600' : 
+                    'text-gray-600'
+                  }`}>
                     {stat.value}
                   </span>
-                  <span className={`ml-2 ${stat.trend === 'up' ? 'text-orange-600' : stat.trend === 'down' ? 'text-green-600' : 'text-gray-600'}`}>
+                  <span className={`ml-2 ${
+                    stat.trend === 'up' ? 'text-orange-600' : 
+                    stat.trend === 'down' ? 'text-green-600' : 
+                    'text-gray-600'
+                  }`}>
                     {stat.trend === 'up' ? '↑' : stat.trend === 'down' ? '↓' : '–'}
                   </span>
                 </div>
