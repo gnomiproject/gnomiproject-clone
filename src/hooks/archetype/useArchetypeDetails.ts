@@ -43,6 +43,16 @@ export const useArchetypeDetails = () => {
           const report = reports?.find(r => r.archetype_id === archetype.id);
           const swot = swotData?.find(s => s.archetype_id === archetype.id) as SwotData | undefined;
           
+          // Process key_characteristics
+          let keyCharacteristics: string[] = [];
+          if (archetype.key_characteristics) {
+            if (Array.isArray(archetype.key_characteristics)) {
+              keyCharacteristics = archetype.key_characteristics.map(String);
+            } else if (typeof archetype.key_characteristics === 'string') {
+              keyCharacteristics = archetype.key_characteristics.split('\n').filter(item => item.trim() !== '');
+            }
+          }
+          
           let keyFindings: string[] = [];
           if (report?.key_findings) {
             try {
@@ -63,14 +73,38 @@ export const useArchetypeDetails = () => {
             familyName: '', // Will be populated by family data join
             color: getArchetypeColor(archetype.id as ArchetypeId) as ArchetypeColor,
             hexColor: archetype.hex_color || getArchetypeHexColor(archetype.id as ArchetypeId),
-            fullDescription: archetype.long_description,
+            short_description: archetype.short_description || '',
+            long_description: archetype.long_description || '',
+            key_characteristics: keyCharacteristics,
             keyFindings,
-            swot: swot ? {
-              strengths: Array.isArray(swot.strengths) ? swot.strengths.map(String) : [],
-              weaknesses: Array.isArray(swot.weaknesses) ? swot.weaknesses.map(String) : [],
-              opportunities: Array.isArray(swot.opportunities) ? swot.opportunities.map(String) : [],
-              threats: Array.isArray(swot.threats) ? swot.threats.map(String) : []
-            } : null
+            
+            // Add compatibility with components using these properties
+            summary: {
+              description: archetype.short_description || '',
+              keyCharacteristics: keyCharacteristics
+            },
+            standard: {
+              fullDescription: archetype.long_description || '',
+              keyCharacteristics: keyCharacteristics,
+              overview: archetype.short_description || '',
+              keyStatistics: {},
+              keyInsights: []
+            },
+            enhanced: {
+              swot: swot ? {
+                strengths: Array.isArray(swot.strengths) ? swot.strengths.map(String) : [],
+                weaknesses: Array.isArray(swot.weaknesses) ? swot.weaknesses.map(String) : [],
+                opportunities: Array.isArray(swot.opportunities) ? swot.opportunities.map(String) : [],
+                threats: Array.isArray(swot.threats) ? swot.threats.map(String) : []
+              } : {
+                strengths: [],
+                weaknesses: [],
+                opportunities: [],
+                threats: []
+              },
+              strategicPriorities: [],
+              costSavings: []
+            }
           };
         });
         

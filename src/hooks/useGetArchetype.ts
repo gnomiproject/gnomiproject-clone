@@ -28,6 +28,17 @@ export const useGetArchetype = (archetypeId: ArchetypeId) => {
         }
 
         if (data) {
+          // Process key_characteristics
+          let keyCharacteristics: string[] = [];
+          if (data.key_characteristics) {
+            if (Array.isArray(data.key_characteristics)) {
+              keyCharacteristics = data.key_characteristics;
+            } else if (typeof data.key_characteristics === 'string') {
+              // Split by newline if it's a string
+              keyCharacteristics = data.key_characteristics.split('\n').filter(item => item.trim() !== '');
+            }
+          }
+
           const transformedData: ArchetypeDetailedData = {
             id: data.id as ArchetypeId,
             familyId: data.family_id as 'a' | 'b' | 'c',
@@ -37,9 +48,30 @@ export const useGetArchetype = (archetypeId: ArchetypeId) => {
             hexColor: data.hex_color || getArchetypeHexColor(archetypeId),
             short_description: data.short_description || '',
             long_description: data.long_description || '',
-            key_characteristics: Array.isArray(data.key_characteristics) 
-              ? data.key_characteristics 
-              : data.key_characteristics?.split('\n') || []
+            key_characteristics: keyCharacteristics,
+            
+            // Add compatibility with components using these properties
+            summary: {
+              description: data.short_description || '',
+              keyCharacteristics: keyCharacteristics
+            },
+            standard: {
+              fullDescription: data.long_description || '',
+              keyCharacteristics: keyCharacteristics,
+              overview: data.short_description || '',
+              keyStatistics: {},
+              keyInsights: []
+            },
+            enhanced: {
+              swot: {
+                strengths: [],
+                weaknesses: [],
+                opportunities: [],
+                threats: []
+              },
+              strategicPriorities: [],
+              costSavings: []
+            }
           };
           
           setArchetypeData(transformedData);

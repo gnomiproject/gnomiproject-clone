@@ -8,6 +8,9 @@ interface PrioritiesTabProps {
 
 const PrioritiesTab = ({ archetypeData }: PrioritiesTabProps) => {
   const color = `archetype-${archetypeData.id}`;
+  
+  // Get strategic priorities or provide an empty array if they don't exist
+  const strategicPriorities = archetypeData.enhanced?.strategicPriorities || [];
 
   return (
     <div className="py-6">
@@ -15,7 +18,7 @@ const PrioritiesTab = ({ archetypeData }: PrioritiesTabProps) => {
       <p className="mb-6 text-left">Based on benchmarking data, these are the recommended priorities for {archetypeData.name} organizations:</p>
       
       <div className="space-y-6">
-        {archetypeData.enhanced?.strategicPriorities?.map((priority, index) => (
+        {strategicPriorities.map((priority, index) => (
           <div key={index} className="bg-white border rounded-lg p-6 shadow-sm">
             <div className="flex items-start gap-4">
               <div className={`bg-${color}/10 rounded-lg p-4 flex-shrink-0`}>

@@ -9,7 +9,7 @@ interface KpiRiskTabProps {
 const KpiRiskTab = ({ archetypeData }: KpiRiskTabProps) => {
   const color = `archetype-${archetypeData.id}`;
 
-  // Safely access statistics with proper type checking
+  // Safe access to statistics with null/undefined checks
   const keyStatistics = archetypeData.standard?.keyStatistics || {};
 
   // Helper function to render trend indicators safely
@@ -70,11 +70,15 @@ const KpiRiskTab = ({ archetypeData }: KpiRiskTabProps) => {
         <div className="bg-white border rounded-lg p-6">
           <div className="flex flex-col md:flex-row md:items-center gap-6">
             <div className={`h-24 w-24 md:h-32 md:w-32 rounded-full bg-${color}/10 flex items-center justify-center flex-shrink-0`}>
-              <span className={`text-3xl md:text-4xl font-bold text-${color}`}>{archetypeData.enhanced?.riskProfile?.score || 'N/A'}</span>
+              <span className={`text-3xl md:text-4xl font-bold text-${color}`}>
+                {archetypeData.enhanced?.riskProfile?.score || 'N/A'}
+              </span>
             </div>
             <div className="text-left">
               <h5 className="text-xl font-bold mb-2">Risk Score</h5>
-              <p className="text-gray-700">{archetypeData.enhanced?.riskProfile?.comparison || 'No risk data available'}</p>
+              <p className="text-gray-700">
+                {archetypeData.enhanced?.riskProfile?.comparison || 'No risk data available'}
+              </p>
             </div>
           </div>
         </div>

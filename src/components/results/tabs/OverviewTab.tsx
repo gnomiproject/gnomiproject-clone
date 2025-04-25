@@ -9,6 +9,9 @@ interface OverviewTabProps {
 const OverviewTab = ({ archetypeData }: OverviewTabProps) => {
   const color = `archetype-${archetypeData.id}`;
   
+  // Get strategic priorities or provide an empty array if they don't exist
+  const strategicPriorities = archetypeData.enhanced?.strategicPriorities || [];
+  
   return (
     <div className="py-6">
       <div className="flex flex-col md:flex-row">
@@ -31,7 +34,7 @@ const OverviewTab = ({ archetypeData }: OverviewTabProps) => {
           </p>
 
           <div className="space-y-6">
-            {archetypeData.enhanced?.strategicPriorities?.slice(0, 3).map((priority, index) => (
+            {strategicPriorities.slice(0, 3).map((priority, index) => (
               <div key={index} className="bg-white rounded-lg border p-6">
                 <div className="flex items-start gap-4">
                   <div className={`bg-${color}/10 rounded-full p-3`}>

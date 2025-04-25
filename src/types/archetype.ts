@@ -10,6 +10,7 @@ export interface Archetype {
   description?: string;
   color?: string;
   characteristics?: string[];
+  hexColor?: string; // Added hexColor
 }
 
 export interface ArchetypeSummary {
@@ -20,6 +21,7 @@ export interface ArchetypeSummary {
   key_characteristics?: string[];
 }
 
+// Extended interface for display in results page
 export interface ArchetypeDetailedData {
   id: ArchetypeId;
   familyId: 'a' | 'b' | 'c';
@@ -30,6 +32,53 @@ export interface ArchetypeDetailedData {
   short_description: string;
   long_description: string;
   key_characteristics: string[];
+  
+  // Add fields being used in components
+  summary?: {
+    description: string;
+    keyCharacteristics: string[];
+  };
+  
+  standard?: {
+    fullDescription: string;
+    keyCharacteristics: string[];
+    overview: string;
+    keyStatistics: {
+      [key: string]: {
+        value: string;
+        trend: 'up' | 'down' | 'neutral';
+      };
+    };
+    keyInsights: string[];
+  };
+  
+  enhanced?: {
+    riskProfile?: {
+      score: string;
+      comparison: string;
+      conditions?: {
+        name: string;
+        value: string;
+        barWidth: string;
+      }[];
+    };
+    strategicPriorities?: {
+      number: string;
+      title: string;
+      description: string;
+    }[];
+    swot?: {
+      strengths: string[];
+      weaknesses: string[];
+      opportunities: string[];
+      threats: string[];
+    };
+    costSavings?: {
+      title: string;
+      description: string;
+      potentialSavings?: string;
+    }[];
+  };
 }
 
 export interface ArchetypeFamily {
@@ -38,4 +87,19 @@ export interface ArchetypeFamily {
   hexColor: string;
   description: string;
   commonTraits: string[];
+}
+
+// Add any missing type exports used elsewhere
+export interface ArchetypeMetrics {
+  id: string;
+  metric: string;
+  value: number;
+  category: string;
+}
+
+export interface DistinctiveTraits {
+  id: string;
+  trait: string;
+  value: string;
+  category: string;
 }

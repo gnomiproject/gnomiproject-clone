@@ -7,6 +7,14 @@ interface SwotTabProps {
 }
 
 const SwotTab = ({ archetypeData }: SwotTabProps) => {
+  // Get SWOT data safely or provide empty arrays
+  const swot = archetypeData.enhanced?.swot || {
+    strengths: [],
+    weaknesses: [],
+    opportunities: [],
+    threats: []
+  };
+  
   return (
     <div className="py-6">
       <h4 className="text-2xl font-bold mb-6 text-left">SWOT Analysis</h4>
@@ -16,7 +24,7 @@ const SwotTab = ({ archetypeData }: SwotTabProps) => {
         <div className="bg-green-50 border border-green-200 rounded-lg p-6">
           <h5 className="text-lg font-bold text-green-700 mb-4 text-left">Strengths</h5>
           <ul className="space-y-2 text-left">
-            {archetypeData.enhanced?.swot?.strengths.map((strength, index) => (
+            {swot.strengths.map((strength, index) => (
               <li key={index} className="flex items-start gap-2">
                 <div className="h-2 w-2 rounded-full bg-green-500 mt-2 flex-shrink-0"></div>
                 <span className="text-left">{strength}</span>
@@ -28,7 +36,7 @@ const SwotTab = ({ archetypeData }: SwotTabProps) => {
         <div className="bg-red-50 border border-red-200 rounded-lg p-6">
           <h5 className="text-lg font-bold text-red-700 mb-4 text-left">Weaknesses</h5>
           <ul className="space-y-2 text-left">
-            {archetypeData.enhanced?.swot?.weaknesses.map((weakness, index) => (
+            {swot.weaknesses.map((weakness, index) => (
               <li key={index} className="flex items-start gap-2">
                 <div className="h-2 w-2 rounded-full bg-red-500 mt-2 flex-shrink-0"></div>
                 <span className="text-left">{weakness}</span>
@@ -40,7 +48,7 @@ const SwotTab = ({ archetypeData }: SwotTabProps) => {
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
           <h5 className="text-lg font-bold text-blue-700 mb-4 text-left">Opportunities</h5>
           <ul className="space-y-2 text-left">
-            {archetypeData.enhanced?.swot?.opportunities.map((opportunity, index) => (
+            {swot.opportunities.map((opportunity, index) => (
               <li key={index} className="flex items-start gap-2">
                 <div className="h-2 w-2 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div>
                 <span className="text-left">{opportunity}</span>
@@ -52,7 +60,7 @@ const SwotTab = ({ archetypeData }: SwotTabProps) => {
         <div className="bg-amber-50 border border-amber-200 rounded-lg p-6">
           <h5 className="text-lg font-bold text-amber-700 mb-4 text-left">Threats</h5>
           <ul className="space-y-2 text-left">
-            {archetypeData.enhanced?.swot?.threats.map((threat, index) => (
+            {swot.threats.map((threat, index) => (
               <li key={index} className="flex items-start gap-2">
                 <div className="h-2 w-2 rounded-full bg-amber-500 mt-2 flex-shrink-0"></div>
                 <span className="text-left">{threat}</span>
