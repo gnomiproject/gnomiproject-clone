@@ -979,4 +979,4 @@ export const archetypesDetailed: ArchetypeDetailedData[] = [
         'Effective scalable programs',
         'Smaller household sizes'
       ],
-      overview: 'Scalable Access Architects excel at creating healthcare frameworks that accommodate variable schedules and diverse locations. They achieve remarkable cost efficiency while maintaining necessary care quality, effectively addressing the unique challenges of workforces with fluctuating patterns and higher
+      overview: 'Scalable Access Architects excel at creating healthcare frameworks that accommodate variable schedules and diverse locations. They achieve remarkable cost efficiency while maintaining necessary care quality, effectively addressing the unique challenges of workforces with fluctuating patterns and higher turnover dynamics.',
