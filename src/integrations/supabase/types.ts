@@ -259,6 +259,7 @@ export type Database = {
           hex_color: string | null
           id: string
           industries: string | null
+          key_characteristics: string | null
           long_description: string | null
           name: string | null
           short_description: string | null
@@ -268,6 +269,7 @@ export type Database = {
           hex_color?: string | null
           id: string
           industries?: string | null
+          key_characteristics?: string | null
           long_description?: string | null
           name?: string | null
           short_description?: string | null
@@ -277,6 +279,7 @@ export type Database = {
           hex_color?: string | null
           id?: string
           industries?: string | null
+          key_characteristics?: string | null
           long_description?: string | null
           name?: string | null
           short_description?: string | null
