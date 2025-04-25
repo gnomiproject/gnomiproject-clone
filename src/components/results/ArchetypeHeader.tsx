@@ -13,12 +13,6 @@ const ArchetypeHeader = ({ archetypeData, familyData }: ArchetypeHeaderProps) =>
   const familyColor = `family-${archetypeData.familyId}`;
   const familyName = familyData?.name || archetypeData.familyName || '';
 
-  // Use the description from summary, standard or fall back to fullDescription
-  const description = archetypeData.summary?.description || 
-                      archetypeData.standard?.overview || 
-                      archetypeData.fullDescription || 
-                      'No detailed description available for this archetype.';
-
   return (
     <div>
       <div className="text-center mb-6">
@@ -32,7 +26,7 @@ const ArchetypeHeader = ({ archetypeData, familyData }: ArchetypeHeaderProps) =>
       </h2>
 
       <p className="text-gray-700 text-lg text-center mb-8">
-        {description}
+        {archetypeData.short_description}
       </p>
     </div>
   );
