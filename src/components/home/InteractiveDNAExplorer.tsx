@@ -64,8 +64,8 @@ const InteractiveDNAExplorer = () => {
     familyId: selectedArchetype.charAt(0) as 'a' | 'b' | 'c',
     name: archetypeSummaries.find(a => a.id === selectedArchetype)?.name || 'Unknown Archetype',
     familyName: selectedFamilyInfo?.name || 'Unknown Family',
-    description: selectedArchetypeDetail.fullDescription || '',
-    keyCharacteristics: selectedArchetypeDetail.keyFindings || []
+    description: selectedArchetypeDetail?.standard?.fullDescription || selectedArchetypeDetail?.long_description || '',
+    keyCharacteristics: selectedArchetypeDetail?.standard?.keyCharacteristics || selectedArchetypeDetail?.key_characteristics || []
   } : null;
   
   // Convert archetype summaries to the expected format for FamilyDetailView
@@ -117,6 +117,32 @@ const InteractiveDNAExplorer = () => {
     );
   }
 
+  // Format family info to match expected props in FamilyDetailView
+  const formatFamilyInfo = (family) => {
+    if (!family) return null;
+    return {
+      id: family.id,
+      name: family.name,
+      description: family.description || family.short_description || family.long_description || '',
+      commonTraits: family.commonTraits || family.common_traits || []
+    };
+  };
+
+  // Format archetype detail to match expected props in ArchetypeDetailDialog
+  const formatArchetypeDetail = (archetype) => {
+    if (!archetype) return null;
+    return {
+      id: archetype.id,
+      familyId: archetype.familyId || (archetype.family_id as 'a' | 'b' | 'c'),
+      name: archetype.name,
+      familyName: selectedFamilyInfo?.name || 'Unknown Family',
+      color: archetype.color,
+      hexColor: archetype.hexColor || archetype.hex_color,
+      keyFindings: archetype.standard?.keyCharacteristics || archetype.key_characteristics || [],
+      fullDescription: archetype.standard?.fullDescription || archetype.long_description || ''
+    };
+  };
+
   return (
     <section className="py-16 px-6 md:px-12 bg-white scroll-mt-16" id="dna-explorer">
       <div className="max-w-6xl mx-auto">
@@ -154,7 +180,7 @@ const InteractiveDNAExplorer = () => {
               />
             ) : selectedFamilyInfo ? (
               <FamilyDetailView 
-                familyInfo={selectedFamilyInfo} 
+                familyInfo={formatFamilyInfo(selectedFamilyInfo)} 
                 archetypes={formattedArchetypeSummaries} 
                 onSelectArchetype={(id) => setSelectedArchetype(id as ArchetypeId)} 
               />
@@ -168,7 +194,7 @@ const InteractiveDNAExplorer = () => {
         <ArchetypeDetailDialog 
           open={showDetailDialog}
           onOpenChange={setShowDetailDialog}
-          archetypeDetail={selectedArchetypeDetail}
+          archetypeDetail={formatArchetypeDetail(selectedArchetypeDetail)}
         />
       )}
     </section>

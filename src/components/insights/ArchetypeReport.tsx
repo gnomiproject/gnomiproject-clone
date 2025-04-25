@@ -22,6 +22,15 @@ interface KeyStatistics {
   [key: string]: KeyStatistic;
 }
 
+// Define a fallback risk profile for when it doesn't exist in the data
+const defaultRiskProfile = {
+  score: 'N/A',
+  comparison: 'No risk comparison data available',
+  conditions: [
+    { name: 'No Data', value: '0%', barWidth: '0%' }
+  ]
+};
+
 const ArchetypeReport = ({ archetypeId }: ArchetypeReportProps) => {
   const { getArchetypeEnhanced, getFamilyById, getTraitsForArchetype, getMetricsForArchetype } = useArchetypes();
   
@@ -38,6 +47,9 @@ const ArchetypeReport = ({ archetypeId }: ArchetypeReportProps) => {
   
   // Ensure keyStatistics has the correct type
   const keyStatistics: KeyStatistics = archetype.standard?.keyStatistics || {};
+  
+  // Get risk profile with fallback to default if it doesn't exist
+  const riskProfile = archetype.enhanced?.riskProfile || defaultRiskProfile;
   
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-12">
@@ -91,7 +103,7 @@ const ArchetypeReport = ({ archetypeId }: ArchetypeReportProps) => {
                 
                 <div className="mt-6 text-left">
                   <h4 className="font-bold mb-3">Family Background</h4>
-                  <p className="text-gray-700">{family?.description || 'No family information available'}</p>
+                  <p className="text-gray-700">{family?.description || family?.short_description || 'No family information available'}</p>
                 </div>
               </div>
               
@@ -166,13 +178,13 @@ const ArchetypeReport = ({ archetypeId }: ArchetypeReportProps) => {
                 <div className="bg-white border rounded-lg p-6 mb-6">
                   <div className="flex items-baseline justify-between mb-2 text-left">
                     <h4 className="font-bold">Risk Score</h4>
-                    <span className={`text-${archetypeColor} text-lg font-bold`}>{archetype.enhanced?.riskProfile?.score || 'N/A'}</span>
+                    <span className={`text-${archetypeColor} text-lg font-bold`}>{riskProfile.score}</span>
                   </div>
-                  <p className="text-sm text-gray-600 mb-4 text-left">{archetype.enhanced?.riskProfile?.comparison || ''}</p>
+                  <p className="text-sm text-gray-600 mb-4 text-left">{riskProfile.comparison}</p>
                   
                   <h5 className="font-bold mb-3 text-left">Top Conditions</h5>
                   <div className="space-y-4">
-                    {(archetype.enhanced?.riskProfile?.conditions || []).map((condition, index) => (
+                    {riskProfile.conditions.map((condition, index) => (
                       <div key={index} className="text-left">
                         <div className="flex justify-between text-sm mb-1">
                           <span>{condition.name}</span>

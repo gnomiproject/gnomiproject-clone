@@ -82,6 +82,15 @@ export interface ArchetypeDetailedData {
     };
     strategicPriorities: any[];
     costSavings: any[];
+    riskProfile?: {
+      score: string;
+      comparison: string;
+      conditions: Array<{
+        name: string;
+        value: string;
+        barWidth: string;
+      }>;
+    };
   };
   // Add full compatibility with ArchetypeDetailed
   family_id?: FamilyId;
@@ -105,6 +114,9 @@ export interface ArchetypeDetailedData {
     description: string;
     metrics_references?: any[];
   }>;
+  // Add missing properties needed by components
+  fullDescription?: string;
+  keyFindings?: string[];
 }
 
 export interface ArchetypeDeepDive {
