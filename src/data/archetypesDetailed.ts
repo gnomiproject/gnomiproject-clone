@@ -1,4 +1,3 @@
-
 import { ArchetypeDetailedData } from '../types/archetype';
 import { getArchetypeColorHex } from './colors';
 
@@ -11,7 +10,14 @@ export const archetypesDetailed: ArchetypeDetailedData[] = [
     familyName: 'Strategists',
     color: 'orange',
     hexColor: getArchetypeColorHex('a1'),
-    fullDescription: 'Effective at directing care appropriately, these are organizations that reduce emergency visits and hospital admissions by connecting members with timely specialist care.',
+    short_description: 'Effective at directing care appropriately, these are organizations that reduce emergency visits and hospital admissions by connecting members with timely specialist care.',
+    long_description: 'Effective at directing care appropriately, these are organizations that reduce emergency visits and hospital admissions by connecting members with timely specialist care, demonstrating sophisticated system knowledge despite relatively higher overall costs.',
+    key_characteristics: [
+      'Lower emergency utilization (-18.2%)',
+      'Higher specialist utilization (+14.3%)',
+      'Technology-forward approach',
+      'Comprehensive specialist networks'
+    ],
     keyFindings: [
       'Lower emergency utilization (-18.2%)',
       'Higher specialist utilization (+14.3%)',
@@ -162,7 +168,14 @@ export const archetypesDetailed: ArchetypeDetailedData[] = [
     familyName: 'Strategists',
     color: 'teal',
     hexColor: getArchetypeColorHex('a2'),
-    fullDescription: 'Adept at managing clinical complexity, these are organizations that face populations with elevated risk scores and high-cost specialty conditions.',
+    short_description: 'Adept at managing clinical complexity, these are organizations that face populations with elevated risk scores and high-cost specialty conditions.',
+    long_description: 'Adept at managing clinical complexity, these are organizations that face populations with elevated risk scores and high-cost specialty conditions.',
+    key_characteristics: [
+      'Lower emergency utilization (-17.0%)',
+      'Higher specialist utilization (+9.8%)',
+      'Higher risk population',
+      'Strong care coordination'
+    ],
     keyFindings: [
       'Lower emergency utilization (-17.0%)',
       'Higher specialist utilization (+9.8%)',
@@ -310,7 +323,14 @@ export const archetypesDetailed: ArchetypeDetailedData[] = [
     familyName: 'Strategists',
     color: 'yellow',
     hexColor: getArchetypeColorHex('a3'),
-    fullDescription: 'Focused on prevention and early intervention, these are organizations with younger populations, larger families, and high specialty care demand.',
+    short_description: 'Focused on prevention and early intervention, these are organizations with younger populations, larger families, and high specialty care demand.',
+    long_description: 'Focused on prevention and early intervention, these are organizations with younger populations, larger families, and high specialty care demand.',
+    key_characteristics: [
+      'Lower emergency utilization (-24.3%)',
+      'Higher specialist utilization (+21.8%)',
+      'Larger family sizes (+12.9%)',
+      'Strong preventive care engagement'
+    ],
     keyFindings: [
       'Lower emergency utilization (-24.3%)',
       'Higher specialist utilization (+21.8%)',
@@ -458,7 +478,14 @@ export const archetypesDetailed: ArchetypeDetailedData[] = [
     familyName: 'Pragmatists',
     color: 'blue',
     hexColor: getArchetypeColorHex('b1'),
-    fullDescription: 'Skilled at overcoming access barriers, these are organizations operating in environments with significant socioeconomic factors.',
+    short_description: 'Skilled at overcoming access barriers, these are organizations operating in environments with significant socioeconomic factors.',
+    long_description: 'Skilled at overcoming access barriers, these are organizations operating in environments with significant socioeconomic factors.',
+    key_characteristics: [
+      'Higher emergency utilization (+18.2%)',
+      'Lower specialist utilization (-16.2%)',
+      'Average healthcare costs',
+      'Strong adaptability to constraints'
+    ],
     keyFindings: [
       'Higher emergency utilization (+18.2%)',
       'Lower specialist utilization (-16.2%)',
@@ -608,7 +635,14 @@ export const archetypesDetailed: ArchetypeDetailedData[] = [
     familyName: 'Pragmatists',
     color: 'purple',
     hexColor: getArchetypeColorHex('b2'),
-    fullDescription: 'Cost-effective and practical, these are organizations balancing populations with elevated substance use disorder rates.',
+    short_description: 'Cost-effective and practical, these are organizations balancing populations with elevated substance use disorder rates.',
+    long_description: 'Cost-effective and practical, these are organizations balancing populations with elevated substance use disorder rates.',
+    key_characteristics: [
+      'Higher emergency utilization (+19.8%)',
+      'Lower specialist utilization (-16.3%)',
+      'Lower healthcare spend (-11.0%)',
+      'Practical benefits design'
+    ],
     keyFindings: [
       'Higher emergency utilization (+19.8%)',
       'Lower specialist utilization (-16.3%)',
@@ -756,7 +790,14 @@ export const archetypesDetailed: ArchetypeDetailedData[] = [
     familyName: 'Pragmatists',
     color: 'green',
     hexColor: getArchetypeColorHex('b3'),
-    fullDescription: 'Effective across geographic boundaries, these are organizations skilled at creating consistent experiences in multiple regions.',
+    short_description: 'Effective across geographic boundaries, these are organizations skilled at creating consistent experiences in multiple regions.',
+    long_description: 'Effective across geographic boundaries, these are organizations skilled at creating consistent experiences in multiple regions.',
+    key_characteristics: [
+      'Moderate emergency utilization (+8.3%)',
+      'Average specialist utilization (-0.3%)',
+      'Average healthcare costs',
+      'Strong multi-region coordination'
+    ],
     keyFindings: [
       'Moderate emergency utilization (+8.3%)',
       'Average specialist utilization (-0.3%)',
@@ -904,7 +945,14 @@ export const archetypesDetailed: ArchetypeDetailedData[] = [
     familyName: 'Logisticians',
     color: 'red',
     hexColor: getArchetypeColorHex('c1'),
-    fullDescription: 'Adaptable to varying schedules, these are organizations managing workforces with variable schedules and smaller household sizes.',
+    short_description: 'Adaptable to varying schedules, these are organizations managing workforces with variable schedules and smaller household sizes.',
+    long_description: 'Adaptable to varying schedules, these are organizations managing workforces with variable schedules and smaller household sizes.',
+    key_characteristics: [
+      'Moderate emergency utilization (+7.1%)',
+      'Lower specialist utilization (-8.4%)',
+      'Lower healthcare spend (-15.0%)',
+      'Smaller household sizes (-12.6%)'
+    ],
     keyFindings: [
       'Moderate emergency utilization (+7.1%)',
       'Lower specialist utilization (-8.4%)',
@@ -932,413 +980,4 @@ export const archetypesDetailed: ArchetypeDetailedData[] = [
         'Smaller household sizes'
       ],
       overview: 'Scalable Access Architects excel at creating healthcare frameworks that accommodate variable schedules and diverse locations. They achieve remarkable cost efficiency while maintaining necessary care quality, effectively addressing the unique challenges of workforces with fluctuating patterns and higher turnover dynamics.',
-      keyStatistics: {
-        emergencyUtilization: {
-          value: '+7.1%',
-          trend: 'up'
-        },
-        specialistUtilization: {
-          value: '-8.4%',
-          trend: 'down'
-        },
-        healthcareSpend: {
-          value: '-15.0%',
-          trend: 'down'
-        },
-        familySize: {
-          value: '-12.6%',
-          trend: 'down'
-        }
-      },
-      keyInsights: [
-        'Lower healthcare costs reflect efficient operations and smaller household sizes',
-        'Moderately higher emergency utilization suggests opportunity for additional access options',
-        'Depression prevalence indicates need for enhanced mental health support',
-        'Digital engagement shows strong potential for improving access and outcomes'
-      ]
-    },
-    
-    // Level 3: Enhanced for full reports
-    enhanced: {
-      riskProfile: {
-        score: '0.91',
-        comparison: '-3.2% below archetype average',
-        conditions: [
-          {
-            name: 'Depression',
-            value: '+16%',
-            barWidth: '4%'
-          },
-          {
-            name: 'Asthma',
-            value: '+12%',
-            barWidth: '3%'
-          },
-          {
-            name: 'Diabetes',
-            value: '-8%',
-            barWidth: '2%'
-          }
-        ]
-      },
-      strategicPriorities: [
-        {
-          number: '1',
-          title: 'Emergency Alternatives',
-          description: 'Implement urgent care and telehealth alternatives to reduce emergency utilization.'
-        },
-        {
-          number: '2',
-          title: 'Mental Health Support',
-          description: 'Expand mental health resources to address elevated depression prevalence.'
-        },
-        {
-          number: '3',
-          title: 'Flexible Access Solutions',
-          description: 'Create care access options that accommodate variable work schedules.'
-        },
-        {
-          number: '4',
-          title: 'Digital Health Expansion',
-          description: 'Leverage digital solutions to improve access and engagement.'
-        }
-      ],
-      swot: {
-        strengths: [
-          'Lower healthcare spend (-15.0%)',
-          'Operational efficiency across locations',
-          'Flexible access solutions',
-          'Effective scalable programs'
-        ],
-        weaknesses: [
-          'Higher emergency utilization (+7.1%)',
-          'Lower specialist utilization (-8.4%)',
-          'Elevated depression prevalence (+16%)',
-          'Smaller family sizes (-12.6%)'
-        ],
-        opportunities: [
-          'Virtual care expansion',
-          'Mental health integration',
-          'Retail clinic partnerships',
-          'Digital engagement enhancement'
-        ],
-        threats: [
-          'Workforce turnover impacts',
-          'Variable scheduling challenges',
-          'Geographic expansion challenges',
-          'Care continuity disruptions'
-        ]
-      },
-      costSavings: [
-        {
-          title: 'On-demand Care Solutions',
-          description: 'Implement flexible care options that accommodate varying work schedules and locations.'
-        },
-        {
-          title: 'Mental Health Telehealth',
-          description: 'Expand virtual mental health services to address elevated depression prevalence.'
-        },
-        {
-          title: 'Site of Care Optimization',
-          description: 'Shift care to more cost-effective settings through retail clinics and urgent care.'
-        }
-      ]
-    }
-  },
-  
-  // Care Adherence Advocates (c2)
-  {
-    id: 'c2',
-    familyId: 'c',
-    name: 'Care Adherence Advocates',
-    familyName: 'Logisticians',
-    color: 'indigo',
-    hexColor: getArchetypeColorHex('c2'),
-    fullDescription: 'Systematic in their approach, these are organizations achieving remarkable cost efficiency despite moderate risk profiles.',
-    keyFindings: [
-      'Lower emergency utilization (-4.3%)',
-      'Lower specialist utilization (-2.1%)',
-      'Lower healthcare spend (-18.2%)',
-      'Strong medication adherence'
-    ],
-    
-    summary: {
-      description: 'Systematic in their approach, these are organizations achieving remarkable cost efficiency despite moderate risk profiles.',
-      keyCharacteristics: [
-        'Exceptional cost efficiency',
-        'Strong medication adherence rates'
-      ]
-    },
-    
-    standard: {
-      fullDescription: 'Systematic in their approach, these are organizations achieving remarkable cost efficiency despite moderate risk profiles. They drive exceptional compliance with treatment guidelines and preventive care protocols, demonstrating how structured approaches maximize outcomes from available resources.',
-      keyCharacteristics: [
-        'Exceptional cost efficiency',
-        'Strong medication adherence rates',
-        'Lower emergency utilization',
-        'Effective protocol compliance',
-        'Systematic healthcare approach',
-        'Smaller household sizes'
-      ],
-      overview: 'Care Adherence Advocates excel at driving remarkable cost efficiency through systematic approaches to healthcare delivery. They achieve exceptional compliance with treatment guidelines and preventive care protocols, particularly for chronic conditions like hypertension and diabetes, demonstrating how structured management maximizes outcomes from available resources.',
-      keyStatistics: {
-        emergencyUtilization: {
-          value: '-4.3%',
-          trend: 'down'
-        },
-        specialistUtilization: {
-          value: '-2.1%',
-          trend: 'down'
-        },
-        healthcareSpend: {
-          value: '-18.2%',
-          trend: 'down'
-        },
-        familySize: {
-          value: '-8.3%',
-          trend: 'down'
-        }
-      },
-      keyInsights: [
-        'Exceptional cost efficiency achieved through systematic healthcare management',
-        'Strong medication adherence protocols demonstrate effectiveness of structured approaches',
-        'Digital health engagement focused on chronic condition management shows high ROI',
-        'Lower specialist utilization reflects effective primary care coordination'
-      ]
-    },
-    
-    enhanced: {
-      riskProfile: {
-        score: '0.89',
-        comparison: '-5.8% below archetype average',
-        conditions: [
-          {
-            name: 'Hypertension',
-            value: '+8%',
-            barWidth: '2%'
-          },
-          {
-            name: 'Diabetes',
-            value: '+6%',
-            barWidth: '1.5%'
-          },
-          {
-            name: 'Depression',
-            value: '-12%',
-            barWidth: '3%'
-          }
-        ]
-      },
-      strategicPriorities: [
-        {
-          number: '1',
-          title: 'Medication Adherence Optimization',
-          description: 'Enhance medication adherence programs for chronic conditions like hypertension and diabetes.'
-        },
-        {
-          number: '2',
-          title: 'Protocol Standardization',
-          description: 'Implement standardized care protocols across healthcare delivery channels.'
-        },
-        {
-          number: '3',
-          title: 'Digital Health Engagement',
-          description: 'Expand digital health tools for condition monitoring and management.'
-        },
-        {
-          number: '4',
-          title: 'Primary Care Optimization',
-          description: 'Strengthen primary care coordination and preventive health programs.'
-        }
-      ],
-      swot: {
-        strengths: [
-          'Lower healthcare spend (-18.2%)',
-          'Strong medication adherence rates',
-          'Lower emergency utilization (-4.3%)',
-          'Effective protocol compliance'
-        ],
-        weaknesses: [
-          'Limited specialist engagement (-2.1%)',
-          'Elevated hypertension prevalence (+8%)',
-          'Elevated diabetes prevalence (+6%)',
-          'Smaller family sizes (-8.3%)'
-        ],
-        opportunities: [
-          'Digital health optimization',
-          'Remote monitoring expansion',
-          'Integrated condition management',
-          'Primary care coordination enhancement'
-        ],
-        threats: [
-          'Care fragmentation risks',
-          'Medication adherence sustainability',
-          'Complex condition management challenges',
-          'Provider protocol adoption variations'
-        ]
-      },
-      costSavings: [
-        {
-          title: 'Medication Optimization Programs',
-          description: 'Implement comprehensive medication management and adherence programs.'
-        },
-        {
-          title: 'Digital Health Platform Integration',
-          description: 'Leverage digital tools for condition monitoring and early intervention.'
-        },
-        {
-          title: 'Care Pathway Standardization',
-          description: 'Develop standardized pathways for common conditions to reduce variation.'
-        }
-      ]
-    }
-  },
-  
-  // Engaged Healthcare Consumers (c3)
-  {
-    id: 'c3',
-    familyId: 'c',
-    name: 'Engaged Healthcare Consumers',
-    familyName: 'Logisticians',
-    color: 'maroon',
-    hexColor: getArchetypeColorHex('c3'),
-    fullDescription: 'Organizations that prioritize healthcare regulatory compliance while implementing effective benefits programs, focusing on quality standards and documentation throughout the healthcare delivery system.',
-    keyFindings: [
-      'Average emergency utilization (+3.2%)',
-      'Average specialist utilization (+1.8%)',
-      'Lower healthcare spend (-3.6%)',
-      'Strong compliance orientation'
-    ],
-    
-    summary: {
-      description: 'Organizations that prioritize healthcare regulatory compliance while maintaining effective benefit structures.',
-      keyCharacteristics: [
-        'Strong compliance orientation',
-        'Standardized healthcare processes'
-      ]
-    },
-    
-    standard: {
-      fullDescription: 'Organizations that prioritize healthcare regulatory compliance while implementing effective benefits programs, focusing on quality standards and documentation throughout the healthcare delivery system.',
-      keyCharacteristics: [
-        'Strong compliance orientation',
-        'Standardized healthcare processes',
-        'Quality assurance focus',
-        'Comprehensive documentation',
-        'Systematic program implementation',
-        'Regular audit procedures'
-      ],
-      overview: 'Engaged Healthcare Consumers excel at maintaining compliance with healthcare regulations while implementing effective benefits programs. They focus on quality standards and documentation throughout the healthcare delivery system, ensuring consistent performance and regulatory alignment.',
-      keyStatistics: {
-        emergencyUtilization: {
-          value: '+3.2%',
-          trend: 'neutral'
-        },
-        specialistUtilization: {
-          value: '+1.8%',
-          trend: 'neutral'
-        },
-        healthcareSpend: {
-          value: '-3.6%',
-          trend: 'down'
-        },
-        familySize: {
-          value: '-1.7%',
-          trend: 'neutral'
-        }
-      },
-      keyInsights: [
-        'Moderate healthcare costs demonstrate effective regulatory compliance approaches',
-        'Comprehensive documentation and quality assurance drive consistent outcomes',
-        'Systematic program implementation ensures consistent member experience',
-        'Regular audit procedures maintain quality standards and identify improvement opportunities'
-      ]
-    },
-    
-    enhanced: {
-      riskProfile: {
-        score: '0.93',
-        comparison: '-0.8% below archetype average',
-        conditions: [
-          {
-            name: 'Hypertension',
-            value: '+9%',
-            barWidth: '2.25%'
-          },
-          {
-            name: 'Diabetes',
-            value: '+7%',
-            barWidth: '1.75%'
-          },
-          {
-            name: 'Musculoskeletal Conditions',
-            value: '+5%',
-            barWidth: '1.25%'
-          }
-        ]
-      },
-      strategicPriorities: [
-        {
-          number: '1',
-          title: 'Quality Measurement Enhancement',
-          description: 'Strengthen quality measurement systems and documentation protocols.'
-        },
-        {
-          number: '2',
-          title: 'Regulatory Compliance Optimization',
-          description: 'Streamline processes for maintaining healthcare regulatory compliance.'
-        },
-        {
-          number: '3',
-          title: 'Chronic Condition Management',
-          description: 'Implement standardized approaches for prevalent conditions.'
-        },
-        {
-          number: '4',
-          title: 'Documentation Excellence',
-          description: 'Enhance clinical documentation to support quality initiatives.'
-        }
-      ],
-      swot: {
-        strengths: [
-          'Strong compliance orientation',
-          'Standardized healthcare processes',
-          'Quality assurance focus',
-          'Moderate healthcare spend (-3.6%)'
-        ],
-        weaknesses: [
-          'Average emergency utilization (+3.2%)',
-          'Average specialist utilization (+1.8%)',
-          'Elevated hypertension prevalence (+9%)',
-          'Elevated diabetes prevalence (+7%)'
-        ],
-        opportunities: [
-          'Quality measurement enhancement',
-          'Clinical documentation improvement',
-          'Regulatory compliance automation',
-          'Program standardization'
-        ],
-        threats: [
-          'Increasing regulatory complexity',
-          'Documentation burden impacts',
-          'Workforce compliance education needs',
-          'Evolving quality standards'
-        ]
-      },
-      costSavings: [
-        {
-          title: 'Regulatory Compliance Automation',
-          description: 'Implement digital solutions to streamline compliance management and reporting.'
-        },
-        {
-          title: 'Chronic Condition Management',
-          description: 'Deploy standardized programs for key conditions like hypertension and diabetes.'
-        },
-        {
-          title: 'Quality Measurement Optimization',
-          description: 'Enhance quality tracking systems to identify improvement opportunities.'
-        }
-      ]
-    }
-  }
-];
+      keyStatistics:

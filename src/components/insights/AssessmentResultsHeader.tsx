@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { ArchetypeDetailedData } from '@/types/archetype';
@@ -16,6 +17,7 @@ const AssessmentResultsHeader = ({
 }: AssessmentResultsHeaderProps) => {
   // Use different description sources with fallbacks
   const description = archetypeData.short_description || archetypeData.long_description || 
+                      (archetypeData.summary?.description) || (archetypeData.standard?.fullDescription) ||
                       'No detailed description available for this archetype.';
   
   return (

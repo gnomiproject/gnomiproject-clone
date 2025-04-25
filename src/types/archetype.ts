@@ -10,7 +10,14 @@ export interface Archetype {
   description?: string;
   color?: string;
   characteristics?: string[];
-  hexColor?: string; // Added hexColor
+  hexColor?: string;
+  shortDescription?: string;
+  longDescription?: string;
+  // Add other fields needed for archetypes.ts compatibility
+  strategicPriorities?: any;
+  riskScore?: number;
+  riskVariance?: number;
+  primaryRiskDriver?: string;
 }
 
 export interface ArchetypeSummary {
@@ -32,6 +39,8 @@ export interface ArchetypeDetailedData {
   short_description: string;
   long_description: string;
   key_characteristics: string[];
+  fullDescription?: string; // Added for compatibility with archetypesDetailed.ts
+  keyFindings?: string[]; // Added for compatibility with archetypesDetailed.ts
   
   // Add fields being used in components
   summary?: {
@@ -89,17 +98,36 @@ export interface ArchetypeFamily {
   commonTraits: string[];
 }
 
-// Add any missing type exports used elsewhere
+// Add missing ArchetypeMetrics type
 export interface ArchetypeMetrics {
   id: string;
+  archetypeId?: string; // Add for compatibility with existing data
   metric: string;
   value: number;
   category: string;
+  // Add fields used in archetypeMetrics.ts
+  paidPEPY?: number;
+  paidPEPYVariance?: number;
+  paidPMPY?: number;
+  paidPMPYVariance?: number;
+  paidAllowedRatio?: number;
+  averageFamilySize?: number;
+  specialistVisitsPer1K?: number;
+  inpatientAdmitsPer1K?: number;
+  emergencyVisitsPer1K?: number;
+  sdohScore?: number;
+  riskCostRatio?: number;
 }
 
+// Add missing DistinctiveTraits type
 export interface DistinctiveTraits {
-  id: string;
-  trait: string;
-  value: string;
-  category: string;
+  id?: string;
+  archetypeId?: string; // Add for compatibility with existing data
+  trait?: string;
+  value?: string;
+  category?: string;
+  // Fields used in distinctiveTraits.ts
+  diseasePatterns?: Array<{condition: string, variance: number}>;
+  utilizationPatterns?: Array<{category: string, variance: number}>;
+  uniqueInsights?: string[];
 }

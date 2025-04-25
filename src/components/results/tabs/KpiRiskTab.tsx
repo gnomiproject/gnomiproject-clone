@@ -8,79 +8,112 @@ interface KpiRiskTabProps {
 
 const KpiRiskTab = ({ archetypeData }: KpiRiskTabProps) => {
   const color = `archetype-${archetypeData.id}`;
-
-  // Safe access to statistics with null/undefined checks
+  
+  // Safely access key statistics or provide defaults
   const keyStatistics = archetypeData.standard?.keyStatistics || {};
-
-  // Helper function to render trend indicators safely
-  const renderTrendIndicator = (stat: any) => {
-    if (!stat || typeof stat !== 'object') return '–';
-    
-    if (stat.trend === 'up') return '↑';
-    if (stat.trend === 'down') return '↓';
-    return '–';
-  };
   
-  // Helper function to determine trend color safely
-  const getTrendColor = (stat: any) => {
-    if (!stat || typeof stat !== 'object') return 'text-gray-600';
+  // Helper function to determine trend class
+  const getTrendClass = (trend?: 'up' | 'down' | 'neutral') => {
+    if (!trend) return '';
     
-    if (stat.trend === 'up') return 'text-orange-600';
-    if (stat.trend === 'down') return 'text-green-600';
-    return 'text-gray-600';
-  };
-  
-  // Helper function to safely get value
-  const getStatValue = (stat: any) => {
-    if (!stat || typeof stat !== 'object' || !stat.value) return 'N/A';
-    return stat.value;
+    switch (trend) {
+      case 'up':
+        return 'text-green-600';
+      case 'down':
+        return 'text-red-600';
+      case 'neutral':
+        return 'text-gray-600';
+      default:
+        return '';
+    }
   };
 
+  // Helper function to get trend icon
+  const getTrendIcon = (trend?: 'up' | 'down' | 'neutral') => {
+    if (!trend) return null;
+    
+    switch (trend) {
+      case 'up':
+        return '↑';
+      case 'down':
+        return '↓';
+      case 'neutral':
+        return '→';
+      default:
+        return null;
+    }
+  };
+  
+  // Get risk profile data safely
+  const riskProfile = archetypeData.enhanced?.riskProfile;
+  
   return (
     <div className="py-6">
-      <div className="space-y-6">
-        <h4 className="text-2xl font-bold mb-4 text-left">Key Performance Indicators</h4>
-        <p className="mb-6 text-left">KPIs specific to {archetypeData.name} organizations:</p>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {Object.entries(keyStatistics).map(([key, stat]) => {
-            if (!stat) return null; // Skip if stat doesn't exist
-            
-            return (
-              <div key={key} className="bg-gray-50 rounded-lg p-4">
-                <h4 className="font-medium text-gray-600 mb-1 text-left">
-                  {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
-                </h4>
-                <div className="flex items-center">
-                  <span className={`text-2xl font-bold ${getTrendColor(stat)}`}>
-                    {getStatValue(stat)}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div>
+          <h4 className="text-2xl font-bold mb-6 text-left">Key Performance Indicators</h4>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {Object.entries(keyStatistics).map(([key, data], index) => (
+              <div key={index} className="bg-white border rounded-lg p-4">
+                <h5 className="text-sm text-gray-600 mb-1 capitalize text-left">
+                  {key.replace(/([A-Z])/g, ' $1').trim()}
+                </h5>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-2xl font-bold">
+                    {data?.value || 'N/A'}
                   </span>
-                  <span className={`ml-2 ${getTrendColor(stat)}`}>
-                    {renderTrendIndicator(stat)}
-                  </span>
+                  {data?.trend && (
+                    <span className={`${getTrendClass(data?.trend)} text-sm`}>
+                      {getTrendIcon(data?.trend)}
+                    </span>
+                  )}
                 </div>
               </div>
-            );
-          })}
+            ))}
+          </div>
         </div>
         
-        <h4 className="text-2xl font-bold mb-4 mt-8 text-left">Risk Assessment</h4>
-        <p className="mb-6 text-left">The risk profile for {archetypeData.name} organizations:</p>
-        
-        <div className="bg-white border rounded-lg p-6">
-          <div className="flex flex-col md:flex-row md:items-center gap-6">
-            <div className={`h-24 w-24 md:h-32 md:w-32 rounded-full bg-${color}/10 flex items-center justify-center flex-shrink-0`}>
-              <span className={`text-3xl md:text-4xl font-bold text-${color}`}>
-                {archetypeData.enhanced?.riskProfile?.score || 'N/A'}
-              </span>
+        <div>
+          <h4 className="text-2xl font-bold mb-6 text-left">Risk Profile</h4>
+          {riskProfile ? (
+            <div className="bg-white border rounded-lg p-6">
+              <div className="mb-4">
+                <div className="flex justify-between items-center mb-2">
+                  <h5 className="font-medium">Risk Score</h5>
+                  <span className="text-xl font-bold">{riskProfile.score}</span>
+                </div>
+                <p className="text-sm text-gray-600 text-left">{riskProfile.comparison}</p>
+              </div>
+              
+              {riskProfile.conditions && riskProfile.conditions.length > 0 && (
+                <div className="mt-6">
+                  <h5 className="font-medium mb-3 text-left">Key Condition Variances</h5>
+                  <div className="space-y-4">
+                    {riskProfile.conditions.map((condition, index) => (
+                      <div key={index} className="text-left">
+                        <div className="flex justify-between text-sm mb-1">
+                          <span>{condition.name}</span>
+                          <span className={condition.value.includes('-') ? 'text-green-600' : 'text-red-600'}>
+                            {condition.value}
+                          </span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div
+                            className={`${condition.value.includes('-') ? 'bg-green-500' : 'bg-red-500'} h-2 rounded-full`}
+                            style={{ width: condition.barWidth }}
+                          ></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-            <div className="text-left">
-              <h5 className="text-xl font-bold mb-2">Risk Score</h5>
-              <p className="text-gray-700">
-                {archetypeData.enhanced?.riskProfile?.comparison || 'No risk data available'}
-              </p>
+          ) : (
+            <div className="bg-gray-100 border rounded-lg p-6 text-center">
+              <p className="text-gray-500">No risk profile data available for this archetype.</p>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>

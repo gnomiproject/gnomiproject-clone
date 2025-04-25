@@ -1,9 +1,9 @@
-
 import { ArchetypeMetrics } from '../types/archetype';
 
 export const archetypeMetrics: ArchetypeMetrics[] = [
   // Family A: Strategists
   {
+    id: 'a1',
     archetypeId: 'a1',
     paidPEPY: 12850,
     paidPEPYVariance: 15,
@@ -15,9 +15,13 @@ export const archetypeMetrics: ArchetypeMetrics[] = [
     inpatientAdmitsPer1K: 48,
     emergencyVisitsPer1K: 110,
     sdohScore: 8.2,
-    riskCostRatio: 1.05
+    riskCostRatio: 1.05,
+    metric: '',
+    value: 0,
+    category: ''
   },
   {
+    id: 'a2',
     archetypeId: 'a2',
     paidPEPY: 14200,
     paidPEPYVariance: 28,
@@ -29,9 +33,13 @@ export const archetypeMetrics: ArchetypeMetrics[] = [
     inpatientAdmitsPer1K: 62,
     emergencyVisitsPer1K: 135,
     sdohScore: 7.5,
-    riskCostRatio: 0.95
+    riskCostRatio: 0.95,
+    metric: '',
+    value: 0,
+    category: ''
   },
   {
+    id: 'a3',
     archetypeId: 'a3',
     paidPEPY: 11500,
     paidPEPYVariance: 4,
@@ -43,11 +51,15 @@ export const archetypeMetrics: ArchetypeMetrics[] = [
     inpatientAdmitsPer1K: 42,
     emergencyVisitsPer1K: 95,
     sdohScore: 8.5,
-    riskCostRatio: 1.10
+    riskCostRatio: 1.10,
+    metric: '',
+    value: 0,
+    category: ''
   },
   
   // Family B: Pragmatists
   {
+    id: 'b1',
     archetypeId: 'b1',
     paidPEPY: 10800,
     paidPEPYVariance: -3,
@@ -59,9 +71,13 @@ export const archetypeMetrics: ArchetypeMetrics[] = [
     inpatientAdmitsPer1K: 51,
     emergencyVisitsPer1K: 130,
     sdohScore: 6.8,
-    riskCostRatio: 1.02
+    riskCostRatio: 1.02,
+    metric: '',
+    value: 0,
+    category: ''
   },
   {
+    id: 'b2',
     archetypeId: 'b2',
     paidPEPY: 11100,
     paidPEPYVariance: 0,
@@ -73,9 +89,13 @@ export const archetypeMetrics: ArchetypeMetrics[] = [
     inpatientAdmitsPer1K: 54,
     emergencyVisitsPer1K: 125,
     sdohScore: 7.0,
-    riskCostRatio: 1.00
+    riskCostRatio: 1.00,
+    metric: '',
+    value: 0,
+    category: ''
   },
   {
+    id: 'b3',
     archetypeId: 'b3',
     paidPEPY: 10500,
     paidPEPYVariance: -5,
@@ -87,11 +107,15 @@ export const archetypeMetrics: ArchetypeMetrics[] = [
     inpatientAdmitsPer1K: 49,
     emergencyVisitsPer1K: 120,
     sdohScore: 6.5,
-    riskCostRatio: 1.03
+    riskCostRatio: 1.03,
+    metric: '',
+    value: 0,
+    category: ''
   },
 
   // Family C: Logisticians
   {
+    id: 'c1',
     archetypeId: 'c1',
     paidPEPY: 11900,
     paidPEPYVariance: 7,
@@ -103,9 +127,13 @@ export const archetypeMetrics: ArchetypeMetrics[] = [
     inpatientAdmitsPer1K: 53,
     emergencyVisitsPer1K: 115,
     sdohScore: 7.3,
-    riskCostRatio: 0.98
+    riskCostRatio: 0.98,
+    metric: '',
+    value: 0,
+    category: ''
   },
   {
+    id: 'c2',
     archetypeId: 'c2',
     paidPEPY: 12200,
     paidPEPYVariance: 10,
@@ -117,9 +145,13 @@ export const archetypeMetrics: ArchetypeMetrics[] = [
     inpatientAdmitsPer1K: 55,
     emergencyVisitsPer1K: 118,
     sdohScore: 7.8,
-    riskCostRatio: 0.97
+    riskCostRatio: 0.97,
+    metric: '',
+    value: 0,
+    category: ''
   },
   {
+    id: 'c3',
     archetypeId: 'c3',
     paidPEPY: 11400,
     paidPEPYVariance: 3,
@@ -131,7 +163,9 @@ export const archetypeMetrics: ArchetypeMetrics[] = [
     inpatientAdmitsPer1K: 50,
     emergencyVisitsPer1K: 122,
     sdohScore: 7.1,
-    riskCostRatio: 1.01
+    riskCostRatio: 1.01,
+    metric: '',
+    value: 0,
+    category: ''
   }
 ];
-

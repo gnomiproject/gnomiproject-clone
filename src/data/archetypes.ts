@@ -1,3 +1,4 @@
+
 import { Archetype } from '../types/archetype';
 import { getArchetypeColorHex } from './colors';
 
@@ -7,7 +8,7 @@ export const archetypes: Archetype[] = [
     id: 'a1',
     name: 'Savvy Healthcare Navigators',
     familyId: 'a',
-    shortDescription: 'Organizations focused on innovation with knowledge workers and significant resources for benefits.',
+    description: 'Organizations focused on innovation with knowledge workers and significant resources for benefits.',
     longDescription: 'Effective at directing care appropriately, these are organizations that reduce emergency visits and hospital admissions by connecting members with timely specialist care, demonstrating sophisticated system knowledge despite relatively higher overall costs.',
     characteristics: [
       'Technology-forward approach',

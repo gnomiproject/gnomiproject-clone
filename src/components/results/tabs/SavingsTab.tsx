@@ -9,7 +9,7 @@ interface SavingsTabProps {
 const SavingsTab = ({ archetypeData }: SavingsTabProps) => {
   const color = `archetype-${archetypeData.id}`;
   
-  // Get cost savings or provide an empty array if it doesn't exist
+  // Get cost savings or provide an empty array if they don't exist
   const costSavings = archetypeData.enhanced?.costSavings || [];
 
   return (

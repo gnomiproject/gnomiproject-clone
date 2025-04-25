@@ -1,10 +1,10 @@
-
 import { DistinctiveTraits } from '../types/archetype';
 
 export const distinctiveTraits: DistinctiveTraits[] = [
   // Family A: Strategists
   {
     archetypeId: 'a1',
+    id: 'a1',
     diseasePatterns: [
       { condition: 'Mental Health Conditions', variance: 20 },
       { condition: 'Musculoskeletal Disorders', variance: 15 },
@@ -23,6 +23,7 @@ export const distinctiveTraits: DistinctiveTraits[] = [
   },
   {
     archetypeId: 'a2',
+    id: 'a2',
     diseasePatterns: [
       { condition: 'Chronic Conditions', variance: 30 },
       { condition: 'Rare Diseases', variance: 45 },
@@ -41,6 +42,7 @@ export const distinctiveTraits: DistinctiveTraits[] = [
   },
   {
     archetypeId: 'a3',
+    id: 'a3',
     diseasePatterns: [
       { condition: 'Pediatric Conditions', variance: 25 },
       { condition: 'Preventable Chronic Conditions', variance: -15 },
@@ -64,6 +66,7 @@ export const distinctiveTraits: DistinctiveTraits[] = [
   // Family B: Pragmatists (abbreviated entries)
   {
     archetypeId: 'b1',
+    id: 'b1',
     diseasePatterns: [
       { condition: 'Common Chronic Conditions', variance: 5 },
       { condition: 'Lifestyle-Related Conditions', variance: 8 },
@@ -85,6 +88,7 @@ export const distinctiveTraits: DistinctiveTraits[] = [
   // Family C: Logisticians (abbreviated entries)
   {
     archetypeId: 'c1',
+    id: 'c1',
     diseasePatterns: [
       { condition: 'Chronic Disease Management', variance: 10 },
       { condition: 'Care Coordination Needs', variance: 15 },
@@ -103,4 +107,3 @@ export const distinctiveTraits: DistinctiveTraits[] = [
   }
   // Additional Family C entries would follow
 ];
-
