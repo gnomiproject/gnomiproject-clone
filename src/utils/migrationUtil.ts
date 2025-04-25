@@ -5,7 +5,7 @@ import { archetypeMetrics } from "../data/archetypeMetrics";
 import { distinctiveTraits } from "../data/distinctiveTraits";
 import { archetypesDetailed } from "../data/archetypesDetailed";
 import { archetypeFamilies } from "../data/archetypeFamilies";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 
 // This utility can be used to migrate all the client-side data to Supabase
 // You can run this function once to seed your database
@@ -28,11 +28,7 @@ export const migrateDataToSupabase = async () => {
       
     if (familiesError) {
       console.error('Error migrating families:', familiesError);
-      toast({
-        title: "Migration Error",
-        description: `Error migrating families: ${familiesError.message}`,
-        variant: "destructive"
-      });
+      toast.error(`Error migrating families: ${familiesError.message}`);
       throw new Error(`Error migrating families: ${familiesError.message}`);
     }
     
@@ -54,11 +50,7 @@ export const migrateDataToSupabase = async () => {
       
     if (archetypesError) {
       console.error('Error migrating archetypes:', archetypesError);
-      toast({
-        title: "Migration Error",
-        description: `Error migrating archetypes: ${archetypesError.message}`,
-        variant: "destructive"
-      });
+      toast.error(`Error migrating archetypes: ${archetypesError.message}`);
       throw new Error(`Error migrating archetypes: ${archetypesError.message}`);
     }
     
@@ -84,29 +76,23 @@ export const migrateDataToSupabase = async () => {
       
     if (metricsError) {
       console.error('Error migrating metrics:', metricsError);
-      toast({
-        title: "Migration Error",
-        description: `Error migrating metrics: ${metricsError.message}`,
-        variant: "destructive"
-      });
+      toast.error(`Error migrating metrics: ${metricsError.message}`);
       throw new Error(`Error migrating metrics: ${metricsError.message}`);
     }
     
-    // Step 4: Insert distinctive traits - use correct table name or comment out if not needed
-    console.log('Migrating distinctive traits...');
-    // Instead of trying to write to tables that don't exist, just log what would happen
-    console.log('Would insert distinctive traits:', distinctiveTraits);
-    
-    // Step 5: Insert detailed archetype data - use correct table or comment out if not needed
-    console.log('Migrating detailed archetype data...');
-    // Instead of trying to write to tables that don't exist, just log what would happen
-    console.log('Would insert detailed archetype data:', archetypesDetailed);
+    // After migration, verify the data was inserted correctly
+    const { data: checkArchetypes, error: checkError } = await supabase
+      .from('Core_Archetype_Overview')
+      .select('count');
+      
+    if (checkError) {
+      console.error('Error verifying migration:', checkError);
+    } else {
+      console.log('Verification - Archetypes in database:', checkArchetypes);
+    }
     
     console.log('Data migration completed successfully!');
-    toast({
-      title: "Migration Successful",
-      description: "All data has been successfully migrated to your Supabase database.",
-    });
+    toast.success("All data has been successfully migrated to your Supabase database.");
     return true;
     
   } catch (error) {
@@ -119,14 +105,21 @@ export const migrateDataToSupabase = async () => {
 export const checkDataInSupabase = async () => {
   try {
     // Check Core_Archetype_Overview since that's a table we know exists
-    const { count, error } = await supabase
-      .from('Core_Archetype_Overview')
-      .select('*', { count: 'exact', head: true });
+    console.log('Checking if archetype data exists in Supabase...');
     
-    if (error) throw error;
-    return { exists: count && count > 0, count };
+    const { data, count, error } = await supabase
+      .from('Core_Archetype_Overview')
+      .select('*', { count: 'exact' });
+    
+    if (error) {
+      console.error('Error checking data:', error);
+      throw error;
+    }
+    
+    console.log('Data check result:', { count, dataLength: data?.length });
+    return { exists: count ? count > 0 : false, count, dataItems: data };
   } catch (error) {
     console.error('Error checking data:', error);
-    return { exists: false, count: 0 };
+    return { exists: false, count: 0, error };
   }
 };

@@ -9,23 +9,38 @@ import ArchetypeOverviewCard from './ArchetypeOverviewCard';
 import { toast } from 'sonner';
 
 const ArchetypesGridSection = () => {
-  // Fetch archetypes from Core_Archetype_Overview
+  // Fetch archetypes from Core_Archetype_Overview with better error handling
   const { data: archetypes, isLoading, error } = useQuery({
     queryKey: ['archetypes-overview'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('Core_Archetype_Overview')
-        .select('*');
+      try {
+        console.log("Attempting to fetch archetypes from Supabase...");
         
-      if (error) {
-        console.error('Error fetching archetypes:', error);
-        toast.error('Failed to load archetypes');
-        throw error;
+        const { data, error } = await supabase
+          .from('Core_Archetype_Overview')
+          .select('*');
+          
+        if (error) {
+          console.error('Error fetching archetypes:', error);
+          toast.error(`Failed to load archetypes: ${error.message}`);
+          throw error;
+        }
+        
+        console.log('Fetched archetypes:', data);
+        
+        if (!data || data.length === 0) {
+          console.warn('No archetypes found in the database');
+        }
+        
+        return data || [];
+      } catch (err) {
+        console.error('Exception in archetype query:', err);
+        throw err;
       }
-      
-      console.log('Fetched archetypes:', data);
-      return data || [];
-    }
+    },
+    refetchOnWindowFocus: false,
+    staleTime: 300000, // 5 minutes
+    retry: 2
   });
 
   if (error) {
@@ -33,18 +48,26 @@ const ArchetypesGridSection = () => {
     return (
       <div className="p-8 text-center">
         <p className="text-red-500">Failed to load archetypes. Please try again later.</p>
+        <p className="text-sm text-gray-500 mt-2">Error: {(error as Error).message}</p>
       </div>
     );
   }
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {[...Array(9)].map((_, i) => (
-          <Card key={i} className="h-[200px]">
-            <Skeleton className="h-full" />
-          </Card>
-        ))}
+      <div className="container mx-auto py-16">
+        <SectionTitle
+          title="Meet the Nine Employer Healthcare Archetypes"
+          subtitle="Dive deeper into each archetype to uncover specific strategies, strengths, and areas for improvement."
+          center
+        />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+          {[...Array(9)].map((_, i) => (
+            <Card key={i} className="h-[200px]">
+              <Skeleton className="h-full" />
+            </Card>
+          ))}
+        </div>
       </div>
     );
   }
@@ -72,7 +95,7 @@ const ArchetypesGridSection = () => {
             ))
           ) : (
             <div className="col-span-3 text-center py-10">
-              <p className="text-gray-500">No archetypes found. Please check the database.</p>
+              <p className="text-gray-500">No archetypes found. Please check the database or use the "Migrate Data" button at the top of the page.</p>
             </div>
           )}
         </div>
