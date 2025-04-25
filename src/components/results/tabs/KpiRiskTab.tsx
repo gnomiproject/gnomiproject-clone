@@ -53,23 +53,28 @@ const KpiRiskTab = ({ archetypeData }: KpiRiskTabProps) => {
         <div>
           <h4 className="text-2xl font-bold mb-6 text-left">Key Performance Indicators</h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {Object.entries(keyStatistics).map(([key, data], index) => (
-              <div key={index} className="bg-white border rounded-lg p-4">
-                <h5 className="text-sm text-gray-600 mb-1 capitalize text-left">
-                  {key.replace(/([A-Z])/g, ' $1').trim()}
-                </h5>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-bold">
-                    {data?.value || 'N/A'}
-                  </span>
-                  {data?.trend && (
-                    <span className={`${getTrendClass(data?.trend)} text-sm`}>
-                      {getTrendIcon(data?.trend)}
+            {Object.entries(keyStatistics).map(([key, data], index) => {
+              // Safely access data properties with type checking
+              const statData = data as { value?: string; trend?: 'up' | 'down' | 'neutral' } | undefined;
+              
+              return (
+                <div key={index} className="bg-white border rounded-lg p-4">
+                  <h5 className="text-sm text-gray-600 mb-1 capitalize text-left">
+                    {key.replace(/([A-Z])/g, ' $1').trim()}
+                  </h5>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-2xl font-bold">
+                      {statData?.value || 'N/A'}
                     </span>
-                  )}
+                    {statData?.trend && (
+                      <span className={`${getTrendClass(statData.trend)} text-sm`}>
+                        {getTrendIcon(statData.trend)}
+                      </span>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
         

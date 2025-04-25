@@ -1,281 +1,122 @@
 
 import { Archetype } from '../types/archetype';
-import { getArchetypeColorHex } from './colors';
 
 export const archetypes: Archetype[] = [
-  // Family a: Strategists
   {
     id: 'a1',
-    name: 'Savvy Healthcare Navigators',
     familyId: 'a',
-    description: 'Organizations focused on innovation with knowledge workers and significant resources for benefits.',
-    longDescription: 'Effective at directing care appropriately, these are organizations that reduce emergency visits and hospital admissions by connecting members with timely specialist care, demonstrating sophisticated system knowledge despite relatively higher overall costs.',
+    name: 'The Architect',
+    description: 'Strategic innovators who build comprehensive healthcare solutions with long-term vision and strong executive sponsorship.',
     characteristics: [
-      'Technology-forward approach',
-      'High percentage of knowledge workers',
-      'Comprehensive specialist networks'
+      'Holistic healthcare strategy',
+      'Strong C-suite involvement',
+      'Balances innovation and sustainability',
+      'Data-driven decision-making'
     ],
-    strategicPriorities: {
-      primaryFocus: 'Care navigation and coordination',
-      secondaryPriorities: [
-        'Specialist access optimization',
-        'Digital health integration',
-        'Preventive health programs'
-      ],
-      keyOpportunities: [
-        'Advanced digital navigation solutions',
-        'Virtual primary care integration',
-        'Specialized mental health access'
-      ]
-    },
-    riskScore: 7.2,
-    riskVariance: 10,
-    primaryRiskDriver: 'Specialty condition prevalence',
-    color: 'archetype-a1',
-    hexColor: getArchetypeColorHex('a1')
+    hexColor: '#6366F1'
   },
   {
     id: 'a2',
-    name: 'Complex Condition Managers',
     familyId: 'a',
-    shortDescription: 'Adept at managing clinical complexity, these are organizations that face populations with elevated risk scores and high-cost specialty conditions.',
-    longDescription: 'These organizations excel at condition management despite challenging population health profiles. They implement sophisticated care coordination strategies to address complex medical needs while maintaining cost efficiency.',
+    name: 'The Curator',
+    description: 'Selective healthcare program designers who carefully choose targeted high-impact initiatives.',
     characteristics: [
-      'Effectively manages populations with higher clinical risk',
-      'Coordinates care for complex specialty conditions',
-      'Sophisticated clinical management programs'
+      'Targeted intervention selection',
+      'Quality-over-quantity approach',
+      'Rigorous vendor assessment',
+      'Precision in healthcare investments'
     ],
-    strategicPriorities: {
-      primaryFocus: 'Complex condition management',
-      secondaryPriorities: [
-        'Care coordination enhancements',
-        'Specialty pharmacy optimization',
-        'Advanced care planning'
-      ],
-      keyOpportunities: [
-        'Integrated care management platforms',
-        'Specialty pharmacy case management',
-        'Predictive analytics for high-risk patients'
-      ]
-    },
-    riskScore: 8.5,
-    riskVariance: 25,
-    primaryRiskDriver: 'Chronic condition prevalence',
-    color: 'archetype-a2',
-    hexColor: getArchetypeColorHex('a2')
+    hexColor: '#8B5CF6'
   },
   {
     id: 'a3',
-    name: 'Proactive Care Consumers',
     familyId: 'a',
-    shortDescription: 'Focused on prevention and early intervention, these are organizations with younger populations, large families, and high specialty care demand.',
-    longDescription: 'These organizations prioritize preventive care and early interventions, achieving better long-term health outcomes through targeted wellness programs and comprehensive family benefits.',
+    name: 'The Innovator',
+    description: 'Early adopters of cutting-edge healthcare solutions with a willingness to experiment to meet employee needs.',
     characteristics: [
-      'Focuses intensively on prevention and early intervention',
-      'Supports larger families with comprehensive benefits',
-      'High engagement in wellness programs'
+      'Early adoption of new programs',
+      'Willingness to experiment',
+      'Employee-centric focus',
+      'Continuous program refinement'
     ],
-    strategicPriorities: {
-      primaryFocus: 'Preventive care optimization',
-      secondaryPriorities: [
-        'Family-focused benefit design',
-        'Wellness program integration',
-        'Early intervention protocols'
-      ],
-      keyOpportunities: [
-        'Advanced wellness incentives',
-        'Family care coordination',
-        'Preventive screening optimization'
-      ]
-    },
-    riskScore: 5.8,
-    riskVariance: -5,
-    primaryRiskDriver: 'Family health management',
-    color: 'archetype-a3',
-    hexColor: getArchetypeColorHex('a3')
+    hexColor: '#A855F7'
   },
-  
-  // Family b: Pragmatists
   {
     id: 'b1',
-    name: 'Resourceful Adapters',
     familyId: 'b',
-    shortDescription: 'Organizations that prioritize healthcare cost management while maintaining effective health outcomes.',
-    longDescription: 'These organizations excel at balancing cost efficiency with appropriate healthcare access, implementing targeted interventions that deliver the highest value for their specific population needs.',
+    name: 'The Steward',
+    description: 'Responsible healthcare resource managers who effectively balance cost control with quality of care.',
     characteristics: [
-      'Strategic approach to cost management',
-      'Value-based benefit design',
-      'Efficient provider network utilization'
+      'Fiscal responsibility',
+      'Evidence-based investments',
+      'Deliberate program selection',
+      'Conservative change management'
     ],
-    strategicPriorities: {
-      primaryFocus: 'Cost-effectiveness optimization',
-      secondaryPriorities: [
-        'Network optimization',
-        'Value-based design',
-        'Utilization management'
-      ],
-      keyOpportunities: [
-        'Reference-based pricing',
-        'Targeted high-cost claim management',
-        'Preferred provider steerage'
-      ]
-    },
-    riskScore: 6.4,
-    riskVariance: -2,
-    primaryRiskDriver: 'Utilization variance',
-    color: 'archetype-b1',
-    hexColor: getArchetypeColorHex('b1')
+    hexColor: '#EC4899'
   },
   {
     id: 'b2',
-    name: 'Healthcare Pragmatists',
     familyId: 'b',
-    shortDescription: 'Organizations that maintain a methodical approach to healthcare benefits with balanced cost and access priorities.',
-    longDescription: 'These organizations achieve consistent health outcomes through well-structured benefit designs that balance access, quality, and cost considerations for their workforce demographics.',
+    name: 'The Practitioner',
+    description: 'Operational excellence experts who implement healthcare programs with precision and consistency.',
     characteristics: [
-      'Balanced approach to benefit design',
-      'Moderate risk profile',
-      'Consistent healthcare utilization patterns'
+      'Operational focus',
+      'Systematic implementation',
+      'Process optimization',
+      'Incremental improvement'
     ],
-    strategicPriorities: {
-      primaryFocus: 'Balanced benefits management',
-      secondaryPriorities: [
-        'Moderate plan design',
-        'Targeted clinical programs',
-        'Employee education'
-      ],
-      keyOpportunities: [
-        'Tiered network design',
-        'Condition-specific management programs',
-        'Consumer decision support tools'
-      ]
-    },
-    riskScore: 6.0,
-    riskVariance: 0,
-    primaryRiskDriver: 'Demographic distribution',
-    color: 'archetype-b2',
-    hexColor: getArchetypeColorHex('b2')
+    hexColor: '#D946EF'
   },
   {
     id: 'b3',
-    name: 'Care Channel Optimizers',
     familyId: 'b',
-    shortDescription: 'Organizations focused on maintaining workforce health through practical interventions and targeted health initiatives.',
-    longDescription: 'These organizations prioritize stability in healthcare outcomes and costs, implementing practical programs that address the specific health needs of their employee population.',
+    name: 'The Navigator',
+    description: 'Adaptable healthcare leaders who guide their organization through changing conditions with pragmatism.',
     characteristics: [
-      'Practical approach to workforce health',
-      'Targeted interventions for key health issues',
-      'Focus on workforce productivity'
+      'Flexibility in approach',
+      'Balanced risk assessment',
+      'Problem-solving orientation',
+      'Adaptive management style'
     ],
-    strategicPriorities: {
-      primaryFocus: 'Workforce health stability',
-      secondaryPriorities: [
-        'Absence management',
-        'Occupational health integration',
-        'Productivity enhancement'
-      ],
-      keyOpportunities: [
-        'Integrated disability management',
-        'Site-based health services',
-        'Population-specific health initiatives'
-      ]
-    },
-    riskScore: 5.9,
-    riskVariance: -3,
-    primaryRiskDriver: 'Occupational risk factors',
-    color: 'archetype-b3',
-    hexColor: getArchetypeColorHex('b3')
+    hexColor: '#F97316'
   },
-
-  // Family c: Logisticians
   {
     id: 'c1',
-    name: 'Scalable Access Architects',
     familyId: 'c',
-    shortDescription: 'Organizations that excel in systematic care coordination through established protocols and procedures.',
-    longDescription: 'These organizations leverage highly structured healthcare processes to ensure consistent care delivery, implementing standardized protocols that guide members through the healthcare system efficiently.',
+    name: 'The Administrator',
+    description: 'Structured healthcare management specialists who maintain consistent, compliant benefit programs.',
     characteristics: [
-      'Systematic approach to care coordination',
-      'Strong procedural healthcare protocols',
-      'Consistent healthcare delivery'
+      'Process adherence',
+      'Compliance-oriented',
+      'Standardized approaches',
+      'Risk-averse decision making'
     ],
-    strategicPriorities: {
-      primaryFocus: 'Systematic care coordination',
-      secondaryPriorities: [
-        'Process standardization',
-        'Care pathway development',
-        'Health navigation support'
-      ],
-      keyOpportunities: [
-        'Integrated care pathway systems',
-        'Standardized clinical protocols',
-        'Navigation support infrastructure'
-      ]
-    },
-    riskScore: 6.7,
-    riskVariance: 5,
-    primaryRiskDriver: 'Care coordination complexity',
-    color: 'archetype-c1',
-    hexColor: getArchetypeColorHex('c1')
+    hexColor: '#0EA5E9'
   },
   {
     id: 'c2',
-    name: 'Care Adherence Advocates',
     familyId: 'c',
-    shortDescription: 'Organizations that leverage comprehensive data analysis to guide healthcare strategy and interventions.',
-    longDescription: 'These organizations excel at using healthcare data to inform benefit design and clinical interventions, implementing targeted programs based on robust analytics and population insights.',
+    name: 'The Guardian',
+    description: 'Employee healthcare protectors who focus on safety, security, and accessibility of benefits.',
     characteristics: [
-      'Analytics-based healthcare approach',
-      'Evidence-driven program implementation',
-      'Continuous program refinement'
+      'Employee safety focus',
+      'Benefit accessibility',
+      'Coverage comprehensiveness',
+      'Protective measures emphasis'
     ],
-    strategicPriorities: {
-      primaryFocus: 'Analytics-driven decision making',
-      secondaryPriorities: [
-        'Predictive modeling',
-        'Outcomes measurement',
-        'Program optimization'
-      ],
-      keyOpportunities: [
-        'Advanced analytics integration',
-        'Predictive risk stratification',
-        'Real-time intervention triggers'
-      ]
-    },
-    riskScore: 7.1,
-    riskVariance: 8,
-    primaryRiskDriver: 'Population health complexities',
-    color: 'archetype-c2',
-    hexColor: getArchetypeColorHex('c2')
+    hexColor: '#06B6D4'
   },
   {
     id: 'c3',
-    name: 'Engaged Healthcare Consumers',
     familyId: 'c',
-    shortDescription: 'Organizations that prioritize healthcare regulatory compliance while maintaining effective benefit structures.',
-    longDescription: 'These organizations excel at maintaining compliance with healthcare regulations while implementing effective benefits programs, focusing on quality standards and documentation throughout the healthcare delivery system.',
+    name: 'The Coordinator',
+    description: 'Healthcare benefit orchestrators who ensure all programs work together cohesively for all stakeholders.',
     characteristics: [
-      'Strong compliance orientation',
-      'Standardized healthcare processes',
-      'Quality assurance focus'
+      'Multi-stakeholder alignment',
+      'Integrated program management',
+      'Comprehensive communication',
+      'System-wide coordination'
     ],
-    strategicPriorities: {
-      primaryFocus: 'Compliant program implementation',
-      secondaryPriorities: [
-        'Quality assurance',
-        'Documentation excellence',
-        'Regulatory navigation'
-      ],
-      keyOpportunities: [
-        'Integrated compliance management',
-        'Quality measurement systems',
-        'Regulatory update automation'
-      ]
-    },
-    riskScore: 6.3,
-    riskVariance: 2,
-    primaryRiskDriver: 'Regulatory complexity',
-    color: 'archetype-c3',
-    hexColor: getArchetypeColorHex('c3')
+    hexColor: '#14B8A6'
   }
 ];
