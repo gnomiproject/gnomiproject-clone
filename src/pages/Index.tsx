@@ -1,178 +1,226 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import Button from '@/components/shared/Button';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Section } from "@/components/shared/Section";
 import SectionTitle from '@/components/shared/SectionTitle';
-import { ArrowRight, Grid, List } from 'lucide-react';
-import { useArchetypeBasics } from '@/hooks/archetype/useArchetypeBasics';
-import ArchetypeCard from '@/components/home/ArchetypeCard';
+import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from '@/hooks/use-mobile';
 import InteractiveDNAExplorer from '@/components/home/InteractiveDNAExplorer';
-import { ArchetypeId } from '@/types/archetype';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
+import { ArrowDown } from 'lucide-react';
+
+interface FamilyData {
+  id: string;
+  name: string;
+  description: string;
+  common_traits: string[];
+}
 
 const Index = () => {
-  const [view, setView] = useState<'grid' | 'list'>('grid');
-  const { archetypes, isLoading } = useArchetypeBasics();
-  const dnaExplorerRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
+  const isMobile = useIsMobile();
+  const [families, setFamilies] = useState<FamilyData[]>([]);
 
-  const scrollToDNAExplorer = (e: React.MouseEvent) => {
+  // Fetch families from Supabase
+  const { isLoading: isLoadingFamilies } = useQuery({
+    queryKey: ['families'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('Core_Archetype_Families')
+        .select('*');
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to load archetype families",
+          variant: "destructive"
+        });
+        throw error;
+      }
+      return data;
+    },
+    onSuccess: (data) => {
+      setFamilies(data as FamilyData[]);
+    },
+    onError: (error) => {
+      console.error("Error fetching families:", error);
+    }
+  });
+
+  // Scroll to archetypes section
+  const scrollToArchetypes = (e: React.MouseEvent) => {
     e.preventDefault();
-    dnaExplorerRef.current?.scrollIntoView({ 
-      behavior: 'smooth',
-      block: 'start' 
-    });
+    const archetypeSection = document.getElementById('archetype-section');
+    archetypeSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   return (
-    <div className="min-h-screen">
-      {/* Hero Section with light blue background */}
-      <section className="py-8 bg-blue-50/50 relative overflow-hidden">
-        <div className="max-w-6xl mx-auto px-6 md:px-12">
-          <div className="flex flex-col items-start">
-            {/* Gnome character positioned to the left */}
-            <div className="mb-2 self-center md:self-start">
-              <img 
-                src="/lovable-uploads/3efcc8b7-0e2d-4a2b-bb23-fa686f18c691.png" 
-                alt="Gnome character" 
-                className="h-20 md:h-28"
-              />
-            </div>
-            
-            {/* Title - "What's Your Company's Healthcare" on the same line */}
-            <div className="mb-5 text-left w-full">
-              <h1 className="text-4xl md:text-5xl font-bold">
-                <span className="inline">What's Your Company's </span>
-                <span className="inline text-blue-500">Healthcare Personality?</span>
-              </h1>
-            </div>
-            
-            <div className="w-full text-left">
-              <p className="text-lg text-gray-700 mb-3">
-                Curious why your healthcare program differs from similar companies? Wonder which strategies would work best for your unique workforce?
-              </p>
-              
-              <p className="text-lg text-gray-700 mb-5">
-                In just 3 minutes, discover which of our nine healthcare archetypes matches your organization. Based on data from 400+ companies and 7+ million members, these archetypes reveal insights that typical industry benchmarks miss.
-              </p>
-              
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link to="/assessment">
-                  <Button size="lg">Find Your Archetype</Button>
-                </Link>
-                <Button 
-                  variant="secondary" 
-                  size="lg" 
-                  onClick={scrollToDNAExplorer}
-                >
-                  Explore All Archetypes
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Interactive DNA Explorer Section with ref */}
-      <div ref={dnaExplorerRef}>
-        <InteractiveDNAExplorer />
-      </div>
-
-      {/* DNA Section */}
-      <section className="py-16 px-6 md:px-12 bg-blue-50">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col items-start gap-8">
-            <div className="w-full text-left">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                Archetypes Unlock Your Healthcare Program's Hidden Potential
-              </h2>
-              <p className="text-lg text-gray-600 mb-6">
-                Understand what truly drives, limits, and distinguishes your healthcare program. Our archetypes reveal the underlying patterns that explain your unique outcomes, helping you build more effective strategies tailored to your organization's distinctive healthcare characteristics and behavioral tendencies.
-              </p>
-              <p className="text-lg text-gray-600">
-                After analyzing data from 400+ employers and over 7 million members, we've identified nine distinct healthcare archetypes organized into three families. Each archetype represents a unique pattern of healthcare costs, utilization behaviors, and outcomes that helps explain your program's performance and reveals targeted strategies that similar organizations have successfully implemented.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Archetypes Section */}
-      <section id="archetype-section" className="py-16 px-6 md:px-12">
-        <div className="max-w-6xl mx-auto">
-          <SectionTitle 
-            title="Meet the Employer Healthcare Archetypes" 
-            subtitle="Explore the nine archetype profiles we've identified, each with unique healthcare management patterns and opportunities." 
+    <>
+      {/* Hero Section */}
+      <Section className="bg-white py-24">
+        <div className="container mx-auto text-center">
+          <SectionTitle
+            title="Unlock the DNA of Your Organization's Healthcare Strategy"
+            subtitle="Discover how your approach to healthcare benefits compares to other employers and gain actionable insights to optimize your strategy."
             center
-            className="mb-12"
+          />
+          <Button size="lg" asChild>
+            <Link to="/assessment">Take the Free Assessment</Link>
+          </Button>
+        </div>
+      </Section>
+
+      {/* Interactive DNA Explorer Section */}
+      <InteractiveDNAExplorer />
+
+      {/* Families Section */}
+      <Section id="families-section" className="bg-gray-50 py-16">
+        <div className="container mx-auto">
+          <SectionTitle
+            title="Explore the Three Employer Healthcare Families"
+            subtitle="Understand the unique characteristics, strengths, and challenges of each family to better identify your organization's approach."
+            center
           />
 
-          <div className="flex justify-between items-center mb-8">
-            <h3 className="text-xl font-medium text-gray-700">
-              {isLoading ? "Loading..." : `${archetypes.length} Archetypes`}
-            </h3>
-            <div className="bg-white border rounded-lg flex overflow-hidden shadow-sm">
-              <button
-                className={`p-2.5 transition-colors ${view === 'grid' ? 'bg-blue-500 text-white' : 'bg-white text-gray-600 hover:bg-gray-100'}`}
-                onClick={() => setView('grid')}
-                aria-label="Grid view"
-              >
-                <Grid className="h-5 w-5" />
-              </button>
-              <button
-                className={`p-2.5 transition-colors ${view === 'list' ? 'bg-blue-500 text-white' : 'bg-white text-gray-600 hover:bg-gray-100'}`}
-                onClick={() => setView('list')}
-                aria-label="List view"
-              >
-                <List className="h-5 w-5" />
-              </button>
-            </div>
-          </div>
-
-          {isLoading ? (
-            <div className="flex justify-center py-12">
-              <div className="animate-pulse text-blue-500">Loading archetypes...</div>
+          {isLoadingFamilies ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[...Array(3)].map((_, i) => (
+                <Card key={i}>
+                  <CardHeader>
+                    <CardTitle><Skeleton className="h-5 w-3/4" /></CardTitle>
+                    <CardDescription><Skeleton className="h-4 w-1/2" /></CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Skeleton className="h-24" />
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           ) : (
-            <div className={`grid ${view === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'} gap-6`}>
-              {archetypes.map(archetype => (
-                <ArchetypeCard 
-                  key={archetype.id}
-                  id={archetype.id as ArchetypeId}
-                  title={archetype.name}
-                  category={`Family ${archetype.familyId.toUpperCase()}`}
-                  color={archetype.color}
-                  description={archetype.description}
-                  characteristics={archetype.keyCharacteristics}
-                />
-              ))}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {families.map((family) => {
+                // Convert commonTraits from JSON to string array
+                const commonTraits = Array.isArray(family.common_traits) 
+                  ? family.common_traits.map(trait => String(trait))
+                  : [];
+
+                return (
+                  <Card key={family.id}>
+                    <CardHeader>
+                      <CardTitle>{family.name}</CardTitle>
+                      <CardDescription>{family.id.toUpperCase()}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-gray-600 mb-4">{family.description}</p>
+                      <h4 className="font-semibold text-gray-700 mb-2">Common Traits:</h4>
+                      <ul className="list-disc list-inside text-gray-600">
+                        {commonTraits.map((trait, index) => (
+                          <li key={index}>{trait}</li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           )}
         </div>
-      </section>
+      </Section>
 
-      {/* CTA Section */}
-      <section className="py-16 px-6 md:px-12 bg-blue-50">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">
-            Ready to Discover Your Healthcare Archetype?
-          </h2>
-          <p className="text-lg text-gray-600 mb-6">
-            Take our 3-minute assessment and unlock insights tailored to your organization. 
-            Discover which healthcare archetype matches your company, how you compare to 
-            truly similar organizations, and what strategic opportunities have the highest 
-            chance of success.
-          </p>
-          <p className="text-lg text-gray-600 mb-10">
-            Give it a try! Companies that have found their healthcare archetype have discovered 
-            high-impact opportunities without months of analysis.
-          </p>
-          
-          <div className="flex justify-center">
-            <Link to="/assessment">
-              <Button className="text-lg px-8 py-4">Find Your Healthcare Archetype</Button>
-            </Link>
+      {/* Archetypes Section */}
+      <Section id="archetype-section" className="bg-white py-16">
+        <div className="container mx-auto">
+          <SectionTitle
+            title="Meet the Nine Employer Healthcare Archetypes"
+            subtitle="Dive deeper into each archetype to uncover specific strategies, strengths, and areas for improvement."
+            center
+          />
+
+          {/* Accordion for Mobile */}
+          {isMobile && (
+            <Accordion type="single" collapsible className="w-full">
+              {families.map((family) => {
+                // Convert commonTraits from JSON to string array
+                const commonTraits = Array.isArray(family.common_traits) 
+                  ? family.common_traits.map(trait => String(trait))
+                  : [];
+
+                return (
+                  <AccordionItem value={family.id} key={family.id}>
+                    <AccordionTrigger>
+                      {family.name}
+                      <ArrowDown className="h-4 w-4 shrink-0 ml-2" />
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>{family.name}</CardTitle>
+                          <CardDescription>{family.id.toUpperCase()}</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="text-gray-600 mb-4">{family.description}</p>
+                          <h4 className="font-semibold text-gray-700 mb-2">Common Traits:</h4>
+                          <ul className="list-disc list-inside text-gray-600">
+                            {commonTraits.map((trait, index) => (
+                              <li key={index}>{trait}</li>
+                            ))}
+                          </ul>
+                        </CardContent>
+                      </Card>
+                    </AccordionContent>
+                  </AccordionItem>
+                );
+              })}
+            </Accordion>
+          )}
+
+          {/* Grid for Desktop */}
+          {!isMobile && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {families.map((family) => {
+                // Convert commonTraits from JSON to string array
+                const commonTraits = Array.isArray(family.common_traits) 
+                  ? family.common_traits.map(trait => String(trait))
+                  : [];
+
+                return (
+                  <Card key={family.id}>
+                    <CardHeader>
+                      <CardTitle>{family.name}</CardTitle>
+                      <CardDescription>{family.id.toUpperCase()}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-gray-600 mb-4">{family.description}</p>
+                      <h4 className="font-semibold text-gray-700 mb-2">Common Traits:</h4>
+                      <ul className="list-disc list-inside text-gray-600">
+                        {commonTraits.map((trait, index) => (
+                          <li key={index}>{trait}</li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+
+          <div className="mt-8 text-center">
+            <Button size="lg" asChild>
+              <Link to="/assessment">Discover Your Archetype</Link>
+            </Button>
           </div>
         </div>
-      </section>
-    </div>
+      </Section>
+    </>
   );
 };
 

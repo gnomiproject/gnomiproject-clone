@@ -41,6 +41,7 @@ export const useGetArchetype = (archetypeId: ArchetypeId) => {
 
         if (data) {
           // Transform the database data to match our TypeScript type structure
+          // Ensuring all JSON arrays are properly converted to string arrays
           const transformedData: ArchetypeDetailedData = {
             id: data.id as ArchetypeId,
             familyId: data.family_id as 'a' | 'b' | 'c',
@@ -72,11 +73,27 @@ export const useGetArchetype = (archetypeId: ArchetypeId) => {
               },
               strategicPriorities: [],
               swot: {
-                // Convert JSON values to string arrays or provide empty arrays as fallbacks
-                strengths: swotData?.strengths ? Array.isArray(swotData.strengths) ? swotData.strengths : [] : [],
-                weaknesses: swotData?.weaknesses ? Array.isArray(swotData.weaknesses) ? swotData.weaknesses : [] : [],
-                opportunities: swotData?.opportunities ? Array.isArray(swotData.opportunities) ? swotData.opportunities : [] : [],
-                threats: swotData?.threats ? Array.isArray(swotData.threats) ? swotData.threats : [] : []
+                // Convert JSON values to string arrays with proper type checking
+                strengths: swotData?.strengths 
+                  ? Array.isArray(swotData.strengths) 
+                    ? swotData.strengths.map(item => String(item)) 
+                    : []
+                  : [],
+                weaknesses: swotData?.weaknesses 
+                  ? Array.isArray(swotData.weaknesses) 
+                    ? swotData.weaknesses.map(item => String(item)) 
+                    : []
+                  : [],
+                opportunities: swotData?.opportunities 
+                  ? Array.isArray(swotData.opportunities) 
+                    ? swotData.opportunities.map(item => String(item)) 
+                    : []
+                  : [],
+                threats: swotData?.threats 
+                  ? Array.isArray(swotData.threats) 
+                    ? swotData.threats.map(item => String(item)) 
+                    : []
+                  : []
               },
               costSavings: []
             }

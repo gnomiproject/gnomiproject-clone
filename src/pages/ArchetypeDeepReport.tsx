@@ -63,7 +63,7 @@ const ArchetypeDeepReport = () => {
       try {
         setLoadingReportData(true);
         
-        // Fetch deep dive report
+        // Fetch deep dive report - Use correct table name
         const { data: reportData, error: reportError } = await supabase
           .from('Analysis_Archetype_Deep_Dive_Reports')
           .select('*')
@@ -87,7 +87,7 @@ const ArchetypeDeepReport = () => {
           });
         }
         
-        // Fetch SWOT analysis
+        // Fetch SWOT analysis - Use correct table name
         const { data: swotData, error: swotError } = await supabase
           .from('Analysis_Archetype_SWOT')
           .select('*')
@@ -97,10 +97,18 @@ const ArchetypeDeepReport = () => {
         if (swotError) {
           console.error('Error fetching SWOT analysis:', swotError);
         } else if (swotData) {
-          setSwotAnalysis(swotData);
+          // Ensure arrays are properly converted from JSON
+          const processedSwot = {
+            ...swotData,
+            strengths: Array.isArray(swotData.strengths) ? swotData.strengths.map(String) : [],
+            weaknesses: Array.isArray(swotData.weaknesses) ? swotData.weaknesses.map(String) : [],
+            opportunities: Array.isArray(swotData.opportunities) ? swotData.opportunities.map(String) : [],
+            threats: Array.isArray(swotData.threats) ? swotData.threats.map(String) : []
+          };
+          setSwotAnalysis(processedSwot);
         }
         
-        // Fetch strategic recommendations
+        // Fetch strategic recommendations - Use correct table name
         const { data: recommendationsData, error: recommendationsError } = await supabase
           .from('Analysis_Archetype_Strategic_Recommendations')
           .select('*')
@@ -113,7 +121,7 @@ const ArchetypeDeepReport = () => {
           setStrategicRecommendations(recommendationsData);
         }
         
-        // Use the correct table name from the database schema
+        // Fetch distinctive metrics - Use correct table name
         const { data: metricsData, error: metricsError } = await supabase
           .from('Analysis_Archetype_Distinctive_Metrics')
           .select('*')

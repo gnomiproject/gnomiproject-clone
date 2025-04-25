@@ -217,10 +217,18 @@ const DeepReport = () => {
         const formattedSwot: SwotAnalysis = {
           id: swotData.id || uuidv4(),
           archetype_id: archetypeId,
-          strengths: Array.isArray(swotData.strengths) ? swotData.strengths : [],
-          weaknesses: Array.isArray(swotData.weaknesses) ? swotData.weaknesses : [],
-          opportunities: Array.isArray(swotData.opportunities) ? swotData.opportunities : [],
-          threats: Array.isArray(swotData.threats) ? swotData.threats : [],
+          strengths: Array.isArray(swotData.strengths)
+            ? swotData.strengths.map(item => String(item))
+            : [],
+          weaknesses: Array.isArray(swotData.weaknesses)
+            ? swotData.weaknesses.map(item => String(item))
+            : [],
+          opportunities: Array.isArray(swotData.opportunities)
+            ? swotData.opportunities.map(item => String(item))
+            : [],
+          threats: Array.isArray(swotData.threats)
+            ? swotData.threats.map(item => String(item))
+            : [],
           last_updated: swotData.last_updated || new Date().toISOString()
         };
         

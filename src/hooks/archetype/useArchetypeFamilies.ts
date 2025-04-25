@@ -18,13 +18,16 @@ export const useArchetypeFamilies = () => {
         
         if (error) throw error;
         
-        // Transform data to match our interface
+        // Transform data to match our interface and ensure proper type conversion
         const families = data.map(item => ({
           id: item.id as 'a' | 'b' | 'c',
           name: item.name || '',
           description: item.short_description || '',
-          commonTraits: Array.isArray(item.common_traits) ? item.common_traits : [],
-          hexColor: item.hex_color || getFamilyColorHex(item.id as 'a' | 'b' | 'c') // Use database value or fallback to our defined colors
+          // Ensure commonTraits is always a string array
+          commonTraits: Array.isArray(item.common_traits) 
+            ? item.common_traits.map(trait => String(trait)) 
+            : [],
+          hexColor: item.hex_color || getFamilyColorHex(item.id as 'a' | 'b' | 'c') // Use database value or fallback
         }));
         
         setAllFamilies(families);
