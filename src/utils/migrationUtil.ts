@@ -13,13 +13,14 @@ export const migrateDataToSupabase = async () => {
   try {
     console.log('Starting data migration to Supabase...');
     
-    // Step 1: Insert archetype families - use correct table name
+    // Step 1: Insert archetype families - use correct column names
     console.log('Migrating archetype families...');
     const formattedFamilies = archetypeFamilies.map(family => ({
       id: family.id,
       name: family.name,
-      description: family.description,
-      common_traits: family.commonTraits
+      short_description: family.description, // Changed from "description" to "short_description"
+      common_traits: family.commonTraits,
+      hex_color: family.hexColor // Added hex_color field
     }));
     
     const { error: familiesError } = await supabase
@@ -32,7 +33,7 @@ export const migrateDataToSupabase = async () => {
       throw new Error(`Error migrating families: ${familiesError.message}`);
     }
     
-    // Step 2: Insert archetypes - use correct table name
+    // Step 2: Insert archetypes - use correct table name and fields
     console.log('Migrating archetypes...');
     const formattedArchetypes = archetypes.map(archetype => ({
       id: archetype.id,
@@ -41,7 +42,7 @@ export const migrateDataToSupabase = async () => {
       short_description: archetype.shortDescription,
       long_description: archetype.longDescription,
       hex_color: archetype.hexColor,
-      industries: ''
+      industries: archetype.industries || '' // Ensure industries field is included
     }));
     
     const { error: archetypesError } = await supabase
@@ -81,12 +82,22 @@ export const migrateDataToSupabase = async () => {
     }
     
     // After migration, verify the data was inserted correctly
-    const { data: checkArchetypes, error: checkError } = await supabase
+    const { data: checkFamilies, error: checkFamiliesError } = await supabase
+      .from('Core_Archetype_Families')
+      .select('count');
+      
+    if (checkFamiliesError) {
+      console.error('Error verifying families migration:', checkFamiliesError);
+    } else {
+      console.log('Verification - Families in database:', checkFamilies);
+    }
+    
+    const { data: checkArchetypes, error: checkArchetypesError } = await supabase
       .from('Core_Archetype_Overview')
       .select('count');
       
-    if (checkError) {
-      console.error('Error verifying migration:', checkError);
+    if (checkArchetypesError) {
+      console.error('Error verifying archetypes migration:', checkArchetypesError);
     } else {
       console.log('Verification - Archetypes in database:', checkArchetypes);
     }
@@ -97,6 +108,7 @@ export const migrateDataToSupabase = async () => {
     
   } catch (error) {
     console.error('Migration failed:', error);
+    toast.error(`Migration failed: ${(error as Error).message}`);
     return false;
   }
 };

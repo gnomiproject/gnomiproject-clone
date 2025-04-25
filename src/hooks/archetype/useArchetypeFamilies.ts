@@ -13,16 +13,22 @@ export const useArchetypeFamilies = () => {
     const fetchFamilies = async () => {
       try {
         setLoading(true);
+        console.log("Fetching archetype families from Supabase...");
         
         const { data, error } = await supabase.from('Core_Archetype_Families').select('*');
         
-        if (error) throw error;
+        if (error) {
+          console.error('Error fetching family data:', error);
+          throw error;
+        }
+        
+        console.log("Retrieved families data:", data);
         
         // Transform data to match our interface and ensure proper type conversion
         const families = data.map(item => ({
           id: item.id as 'a' | 'b' | 'c',
           name: item.name || '',
-          description: item.short_description || '',
+          description: item.short_description || '', // Map from short_description to description
           // Ensure commonTraits is always a string array
           commonTraits: Array.isArray(item.common_traits) 
             ? item.common_traits.map(trait => String(trait)) 
