@@ -16,15 +16,19 @@ interface ArchetypeDetailDialogProps {
     familyId: 'a' | 'b' | 'c';
     name: string;
     familyName: string;
-    fullDescription: string;
-    keyCharacteristics: string[];
-    keyInsights: string[];
-    keyStatistics: {
-      [key: string]: {
-        value: string;
-        trend: 'up' | 'down' | 'neutral';
+    color?: string;
+    hexColor?: string;
+    standard: {
+      fullDescription: string;
+      keyCharacteristics: string[];
+      keyInsights: string[];
+      keyStatistics: {
+        [key: string]: {
+          value: string;
+          trend: 'up' | 'down' | 'neutral';
+        };
       };
-    };
+    }
   } | null;
 }
 
@@ -34,6 +38,9 @@ const ArchetypeDetailDialog: React.FC<ArchetypeDetailDialogProps> = ({
   archetypeDetail
 }) => {
   if (!archetypeDetail) return null;
+  
+  // Safely access keyStatistics with a default empty object to avoid Object.entries error
+  const keyStatistics = archetypeDetail.standard?.keyStatistics || {};
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -56,14 +63,14 @@ const ArchetypeDetailDialog: React.FC<ArchetypeDetailDialogProps> = ({
         <div className="mt-6 space-y-8">
           {/* Full Description */}
           <div>
-            <p className="text-gray-700 text-lg leading-relaxed">{archetypeDetail.fullDescription}</p>
+            <p className="text-gray-700 text-lg leading-relaxed">{archetypeDetail.standard?.fullDescription}</p>
           </div>
           
           {/* Key Statistics Section */}
           <div>
             <h3 className={`font-bold text-xl mb-5 text-archetype-${archetypeDetail.id}`}>Key Statistics</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-              {Object.entries(archetypeDetail.keyStatistics).map(([key, stat]) => (
+              {Object.entries(keyStatistics).map(([key, stat]) => (
                 <div key={key} className={`bg-archetype-${archetypeDetail.id}/5 rounded-lg p-5 border border-archetype-${archetypeDetail.id}/20`}>
                   <h4 className="font-medium text-gray-600 text-sm mb-1">
                     {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
@@ -93,7 +100,7 @@ const ArchetypeDetailDialog: React.FC<ArchetypeDetailDialogProps> = ({
           <div>
             <h3 className={`font-bold text-xl mb-5 text-archetype-${archetypeDetail.id}`}>Key Characteristics</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-              {archetypeDetail.keyCharacteristics.map((trait, index) => (
+              {archetypeDetail.standard?.keyCharacteristics?.map((trait, index) => (
                 <div 
                   key={index} 
                   className={`flex items-start gap-3 p-4 rounded-md bg-archetype-${archetypeDetail.id}/5 border-l-3 border-archetype-${archetypeDetail.id} text-left`}
@@ -109,7 +116,7 @@ const ArchetypeDetailDialog: React.FC<ArchetypeDetailDialogProps> = ({
           <div>
             <h3 className={`font-bold text-xl mb-5 text-archetype-${archetypeDetail.id}`}>Key Insights</h3>
             <ul className="space-y-3 mb-6 text-left">
-              {archetypeDetail.keyInsights.map((insight, index) => (
+              {archetypeDetail.standard?.keyInsights?.map((insight, index) => (
                 <li key={index} className="flex items-start gap-3">
                   <div className={`h-3 w-3 mt-1 rounded-full bg-archetype-${archetypeDetail.id} flex-shrink-0`}></div>
                   <span className="text-gray-700">{insight}</span>
