@@ -50,14 +50,17 @@ export const useGetArchetype = (archetypeId: ArchetypeId) => {
             // Map the color to a valid ArchetypeColor using the existing utility function
             color: getArchetypeColor(archetypeId) as ArchetypeColor,
             hexColor: data.hex_color || getArchetypeHexColor(archetypeId),
+            fullDescription: data.long_description || '',
+            keyFindings: [],
+            // Add the summary property for compatibility with the updated type
             summary: {
-              description: data.short_description,
+              description: data.short_description || '',
               keyCharacteristics: []
             },
             standard: {
-              fullDescription: data.long_description,
+              fullDescription: data.long_description || '',
               keyCharacteristics: [],
-              overview: '',
+              overview: data.short_description || '',
               keyStatistics: {
                 emergencyUtilization: { value: 'N/A', trend: 'neutral' },
                 specialistUtilization: { value: 'N/A', trend: 'neutral' },

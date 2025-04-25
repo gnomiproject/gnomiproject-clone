@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { ArchetypeDetailedData } from '@/types/archetype';
@@ -14,6 +15,11 @@ const AssessmentResultsHeader = ({
   // We keep the prop even though we don't use it, to avoid breaking the API
   onRetakeAssessment 
 }: AssessmentResultsHeaderProps) => {
+  // Use the description from standard or fall back to a default message
+  const description = archetypeData.summary?.description || 
+                      archetypeData.standard?.overview || 
+                      'No detailed description available for this archetype.';
+  
   return (
     <div className="p-8">
       <div className="text-center mb-8">
@@ -35,7 +41,7 @@ const AssessmentResultsHeader = ({
       </h2>
 
       <p className="text-gray-700 text-lg text-center max-w-3xl mx-auto">
-        {archetypeData.summary.description}
+        {description}
       </p>
     </div>
   );

@@ -9,6 +9,9 @@ interface KpiRiskTabProps {
 const KpiRiskTab = ({ archetypeData }: KpiRiskTabProps) => {
   const color = `archetype-${archetypeData.id}`;
 
+  // Safely access statistics with proper type checking
+  const keyStatistics = archetypeData.standard?.keyStatistics || {};
+
   return (
     <div className="py-6">
       <div className="space-y-6">
@@ -16,21 +19,25 @@ const KpiRiskTab = ({ archetypeData }: KpiRiskTabProps) => {
         <p className="mb-6 text-left">KPIs specific to {archetypeData.name} organizations:</p>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {Object.entries(archetypeData.standard.keyStatistics).map(([key, stat]) => (
-            <div key={key} className="bg-gray-50 rounded-lg p-4">
-              <h4 className="font-medium text-gray-600 mb-1 text-left">
-                {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
-              </h4>
-              <div className="flex items-center">
-                <span className={`text-2xl font-bold ${stat.trend === 'up' ? 'text-orange-600' : stat.trend === 'down' ? 'text-green-600' : 'text-gray-600'}`}>
-                  {stat.value}
-                </span>
-                <span className={`ml-2 ${stat.trend === 'up' ? 'text-orange-600' : stat.trend === 'down' ? 'text-green-600' : 'text-gray-600'}`}>
-                  {stat.trend === 'up' ? '↑' : stat.trend === 'down' ? '↓' : '–'}
-                </span>
+          {Object.entries(keyStatistics).map(([key, stat]) => {
+            if (!stat) return null; // Skip if stat doesn't exist
+            
+            return (
+              <div key={key} className="bg-gray-50 rounded-lg p-4">
+                <h4 className="font-medium text-gray-600 mb-1 text-left">
+                  {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                </h4>
+                <div className="flex items-center">
+                  <span className={`text-2xl font-bold ${stat.trend === 'up' ? 'text-orange-600' : stat.trend === 'down' ? 'text-green-600' : 'text-gray-600'}`}>
+                    {stat.value}
+                  </span>
+                  <span className={`ml-2 ${stat.trend === 'up' ? 'text-orange-600' : stat.trend === 'down' ? 'text-green-600' : 'text-gray-600'}`}>
+                    {stat.trend === 'up' ? '↑' : stat.trend === 'down' ? '↓' : '–'}
+                  </span>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
         
         <h4 className="text-2xl font-bold mb-4 mt-8 text-left">Risk Assessment</h4>
