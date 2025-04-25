@@ -960,6 +960,7 @@ export const archetypesDetailed: ArchetypeDetailedData[] = [
       'Smaller household sizes (-12.6%)'
     ],
     
+    // Ensure this section is properly closed and follows the ArchetypeDetailedData type
     summary: {
       description: 'Adaptable to varying schedules, these are organizations managing workforces with variable schedules and smaller household sizes.',
       keyCharacteristics: [
@@ -968,7 +969,6 @@ export const archetypesDetailed: ArchetypeDetailedData[] = [
       ]
     },
     
-    // Level 2: Standard for archetype detail pages
     standard: {
       fullDescription: 'Adaptable to varying schedules, these are organizations managing workforces with variable schedules and smaller household sizes. They create access frameworks that function effectively across diverse locations and shifts, accommodating fluctuating work patterns while maintaining care continuity.',
       keyCharacteristics: [
@@ -980,4 +980,3 @@ export const archetypesDetailed: ArchetypeDetailedData[] = [
         'Smaller household sizes'
       ],
       overview: 'Scalable Access Architects excel at creating healthcare frameworks that accommodate variable schedules and diverse locations. They achieve remarkable cost efficiency while maintaining necessary care quality, effectively addressing the unique challenges of workforces with fluctuating patterns and higher turnover dynamics.',
-      keyStatistics:
