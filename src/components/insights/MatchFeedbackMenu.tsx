@@ -26,14 +26,17 @@ const MatchFeedbackMenu = ({ archetypeId, onClose }: MatchFeedbackMenuProps) => 
     setIsSubmitting(true);
     
     try {
-      // Save feedback to Supabase
+      // Save feedback to Core_Archetype_Overview since we don't have a separate feedback table
       const { error } = await supabase
-        .from('archetype_feedback')
-        .insert({
-          archetype_id: archetypeId,
-          feedback: selectedFeedback,
-          user_comments: userComments.trim() !== '' ? userComments : null
-        });
+        .from('Core_Archetype_Overview')
+        .update({ 
+          feedback_data: {
+            feedback: selectedFeedback,
+            comments: userComments.trim() !== '' ? userComments : null,
+            timestamp: new Date().toISOString()
+          }
+        })
+        .eq('id', archetypeId);
       
       if (error) {
         console.error('Error submitting feedback:', error);

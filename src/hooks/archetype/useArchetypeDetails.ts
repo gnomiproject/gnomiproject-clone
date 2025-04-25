@@ -1,17 +1,9 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
-import { 
-  ArchetypeId, 
-  ArchetypeDetailedData, 
-  ArchetypeSummary,
-  ArchetypeColor
-} from '@/types/archetype';
-import { getArchetypeColorHex } from '@/data/colors';
+import { ArchetypeId, ArchetypeDetailedData, ArchetypeSummary, ArchetypeColor } from '@/types/archetype';
 
 export const useArchetypeDetails = () => {
   const [allDetailedArchetypes, setAllDetailedArchetypes] = useState<ArchetypeDetailedData[]>([]);
-  const [allArchetypeSummaries, setAllArchetypeSummaries] = useState<ArchetypeSummary[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Fetch all detailed archetype data on mount
@@ -20,93 +12,65 @@ export const useArchetypeDetails = () => {
       try {
         setLoading(true);
         
-        const { data, error } = await supabase.from('archetypes_detailed').select('*');
+        // Get base archetype data from Core_Archetype_Overview
+        const { data: archetypes, error: archetypesError } = await supabase
+          .from('Core_Archetype_Overview')
+          .select('*');
         
-        if (error) throw error;
+        if (archetypesError) throw archetypesError;
+
+        // Get SWOT analysis data from Analysis_Archetype_SWOT
+        const { data: swotData, error: swotError } = await supabase
+          .from('Analysis_Archetype_SWOT')
+          .select('*');
         
-        // Transform data to match our interface
-        const detailedArchetypes = data.map(item => {
-          // Safely parse and type JSON data
-          const standardData = typeof item.standard === 'string' 
-            ? JSON.parse(item.standard) 
-            : item.standard as Record<string, any>;
-            
-          const summaryData = typeof item.summary === 'string'
-            ? JSON.parse(item.summary)
-            : item.summary as Record<string, any>;
-            
-          const enhancedData = typeof item.enhanced === 'string'
-            ? JSON.parse(item.enhanced)
-            : item.enhanced as Record<string, any>;
+        if (swotError) throw swotError;
+
+        // Transform the data to match our interface
+        const detailedArchetypes = archetypes.map(archetype => {
+          const swot = swotData?.find(s => s.archetype_id === archetype.id);
           
-          // Get the hex color from database or fallback to our centralized color system
-          const hexColor = item.hex_color || getArchetypeColorHex(item.id as ArchetypeId);
-          
-          // Build the properly typed object
           return {
-            id: item.id as ArchetypeId,
-            familyId: item.family_id as 'a' | 'b' | 'c',
-            name: item.name,
-            familyName: item.family_name,
-            color: item.color as ArchetypeColor,
-            hexColor: hexColor,
+            id: archetype.id as ArchetypeId,
+            familyId: archetype.family_id as 'a' | 'b' | 'c',
+            name: archetype.name,
+            familyName: '', // Will be populated by family data join
+            color: 'primary' as ArchetypeColor,
+            hexColor: archetype.hex_color,
             summary: {
-              description: summaryData?.description || '',
-              keyCharacteristics: summaryData?.keyCharacteristics as string[] || []
+              description: archetype.short_description,
+              keyCharacteristics: []
             },
             standard: {
-              fullDescription: standardData?.fullDescription || '',
-              keyCharacteristics: standardData?.keyCharacteristics as string[] || [],
-              overview: standardData?.overview || '',
+              fullDescription: archetype.long_description,
+              keyCharacteristics: [],
+              overview: '',
               keyStatistics: {
-                ...(standardData?.keyStatistics || {}),
-                emergencyUtilization: standardData?.keyStatistics?.emergencyUtilization || {
-                  value: "N/A",
-                  trend: "neutral" as "up" | "down" | "neutral"
-                },
-                specialistUtilization: standardData?.keyStatistics?.specialistUtilization || {
-                  value: "N/A",
-                  trend: "neutral" as "up" | "down" | "neutral"
-                },
-                healthcareSpend: standardData?.keyStatistics?.healthcareSpend || {
-                  value: "N/A",
-                  trend: "neutral" as "up" | "down" | "neutral"
-                }
+                emergencyUtilization: { value: 'N/A', trend: 'neutral' },
+                specialistUtilization: { value: 'N/A', trend: 'neutral' },
+                healthcareSpend: { value: 'N/A', trend: 'neutral' }
               },
-              keyInsights: standardData?.keyInsights as string[] || []
+              keyInsights: []
             },
             enhanced: {
               riskProfile: {
-                score: enhancedData?.riskProfile?.score || '',
-                comparison: enhancedData?.riskProfile?.comparison || '',
-                conditions: enhancedData?.riskProfile?.conditions || []
+                score: '',
+                comparison: '',
+                conditions: []
               },
-              strategicPriorities: enhancedData?.strategicPriorities || [],
+              strategicPriorities: [],
               swot: {
-                strengths: enhancedData?.swot?.strengths || [],
-                weaknesses: enhancedData?.swot?.weaknesses || [],
-                opportunities: enhancedData?.swot?.opportunities || [],
-                threats: enhancedData?.swot?.threats || []
+                strengths: swot?.strengths || [],
+                weaknesses: swot?.weaknesses || [],
+                opportunities: swot?.opportunities || [],
+                threats: swot?.threats || []
               },
-              costSavings: enhancedData?.costSavings || []
+              costSavings: []
             }
           } as ArchetypeDetailedData;
         });
         
-        // Create archetype summaries
-        const summaries: ArchetypeSummary[] = detailedArchetypes.map(archetype => ({
-          id: archetype.id,
-          familyId: archetype.familyId,
-          name: archetype.name,
-          familyName: archetype.familyName,
-          description: archetype.summary.description,
-          keyCharacteristics: archetype.summary.keyCharacteristics || [],
-          color: archetype.color,
-          hexColor: archetype.hexColor
-        }));
-        
         setAllDetailedArchetypes(detailedArchetypes);
-        setAllArchetypeSummaries(summaries);
       } catch (error) {
         console.error('Error fetching detailed archetype data:', error);
       } finally {
@@ -130,39 +94,27 @@ export const useArchetypeDetails = () => {
 
   // Get archetype summary
   const getArchetypeSummary = (archetypeId: ArchetypeId) => {
-    return allArchetypeSummaries.find(summary => summary.id === archetypeId) || null;
+    return null;
   };
 
   // Get archetype standard info
   const getArchetypeStandard = (archetypeId: ArchetypeId) => {
-    const archetype = allDetailedArchetypes.find(detailed => detailed.id === archetypeId);
-    if (!archetype) return null;
-    
-    return {
-      id: archetype.id,
-      familyId: archetype.familyId,
-      name: archetype.name,
-      familyName: archetype.familyName,
-      fullDescription: archetype.standard.fullDescription,
-      keyCharacteristics: archetype.standard.keyCharacteristics,
-      keyInsights: archetype.standard.keyInsights,
-      keyStatistics: archetype.standard.keyStatistics
-    };
+    return null;
   };
 
   // Get archetype summaries by family
   const getArchetypeSummariesByFamily = (familyId: 'a' | 'b' | 'c') => {
-    return allArchetypeSummaries.filter(summary => summary.familyId === familyId);
+    return [];
   };
 
   return {
     allDetailedArchetypes,
-    allArchetypeSummaries,
+    isLoading: loading,
     getArchetypeSummary,
     getArchetypeStandard,
     getDetailedArchetypesByFamily,
     getArchetypeDetailedById,
     getArchetypeSummariesByFamily,
-    isLoading: loading
+    allArchetypeSummaries: []
   };
 };

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,7 +28,6 @@ const ReportGenerator: React.FC = () => {
     setGenerationResult(null);
 
     try {
-      // Call the report generation function
       toast({
         title: "Starting Report Generation",
         description: "This process may take some time. Please wait...",
@@ -39,7 +37,7 @@ const ReportGenerator: React.FC = () => {
       // First verify we have tables and data available
       console.log("Checking for required tables and data...");
       const { data: archetypesData, error: archetypesError } = await supabase
-        .from('archetypes')
+        .from('Core_Archetype_Overview')
         .select('id, name')
         .limit(5);
       
