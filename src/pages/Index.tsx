@@ -49,21 +49,27 @@ const Index = () => {
   return (
     <>
       {/* Hero Section */}
-      <Section className="bg-gradient-to-b from-blue-50 to-white min-h-[90vh] flex items-center">
-        <div className="container mx-auto max-w-5xl px-4">
-          <div className="text-center space-y-8">
-            <img 
-              src="/lovable-uploads/12da516f-6471-47a3-9861-9c4d50ab9415.png" 
-              alt="Healthcare Gnome" 
-              className="w-32 h-32 mx-auto md:mx-0 md:ml-[-100px] mb-2 object-contain self-start"
-            />
+      <section className="py-8 bg-gradient-to-b from-blue-50 to-white relative overflow-hidden">
+        <div className="max-w-6xl mx-auto px-6 md:px-12">
+          <div className="flex flex-col items-start">
+            {/* Gnome character positioned to the left */}
+            <div className="mb-2 self-center md:self-start">
+              <img 
+                src="/lovable-uploads/12da516f-6471-47a3-9861-9c4d50ab9415.png" 
+                alt="Healthcare Gnome" 
+                className="h-20 md:h-28"
+              />
+            </div>
             
-            <h1 className="text-5xl md:text-6xl font-bold tracking-tight">
-              What's Your Company's{' '}
-              <span className="text-blue-500">Healthcare Personality?</span>
-            </h1>
-            
-            <div className="max-w-3xl mx-auto space-y-6">
+            {/* Title */}
+            <div className="mb-5 text-left w-full">
+              <h1 className="text-4xl md:text-5xl font-bold">
+                <span className="inline">What's Your Company's </span>
+                <span className="inline text-blue-500">Healthcare Personality?</span>
+              </h1>
+            </div>
+
+            <div className="max-w-3xl space-y-6">
               <p className="text-xl text-gray-600">
                 Curious why your healthcare program differs from similar companies? Wonder which strategies would work best for your unique workforce?
               </p>
@@ -73,7 +79,7 @@ const Index = () => {
               </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
+            <div className="flex flex-col sm:flex-row gap-4 justify-start pt-4">
               <Button asChild size="lg" className="text-lg px-8">
                 <Link to="/assessment">Find Your Archetype</Link>
               </Button>
@@ -102,7 +108,7 @@ const Index = () => {
             )}
           </div>
         </div>
-      </Section>
+      </section>
 
       {/* Interactive DNA Explorer */}
       <InteractiveDNAExplorer />
