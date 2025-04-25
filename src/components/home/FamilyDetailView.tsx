@@ -45,7 +45,9 @@ const FamilyDetailView: React.FC<FamilyDetailViewProps> = ({
                 onClick={() => onSelectArchetype(archetype.id)}
               >
                 <h5 className={`font-semibold text-archetype-${archetype.id}`}>{archetype.name}</h5>
-                <p className="text-sm text-gray-600 mt-1">{archetype.description.substring(0, 75)}...</p>
+                <p className="text-sm text-gray-600 mt-1">
+                  {archetype.description ? `${archetype.description.substring(0, 75)}...` : 'No description available'}
+                </p>
               </div>
             ))
           }
