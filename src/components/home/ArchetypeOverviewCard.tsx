@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { ExternalLink } from 'lucide-react';
 
@@ -33,7 +32,12 @@ const ArchetypeOverviewCard = ({
       />
       
       <CardHeader>
-        <CardTitle>{name}</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle>{name}</CardTitle>
+          <span className="text-sm font-mono bg-gray-100 px-2 py-1 rounded">
+            {id.toLowerCase()}
+          </span>
+        </div>
         <CardDescription>
           family {familyId.toLowerCase()}{familyName ? `: ${familyName}` : ''}
         </CardDescription>
@@ -42,11 +46,8 @@ const ArchetypeOverviewCard = ({
       <CardContent className="space-y-4">
         <p className="text-gray-600">{shortDescription}</p>
         
-        <div className="flex justify-between items-center">
-          <Link to={`/archetype-report/${id}`} className="text-sm text-gray-500 hover:text-gray-700">
-            View Report
-          </Link>
-          {onShowDetailDialog && (
+        {onShowDetailDialog && (
+          <div className="flex justify-end">
             <Button 
               variant="outline" 
               size="sm" 
@@ -56,8 +57,8 @@ const ArchetypeOverviewCard = ({
               Learn More
               <ExternalLink className="h-4 w-4" />
             </Button>
-          )}
-        </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
