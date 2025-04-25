@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import InteractiveDNAExplorer from '@/components/home/InteractiveDNAExplorer';
 import ArchetypesGridSection from '@/components/home/ArchetypesGridSection';
-import { Section } from '@/components/shared/Section';
+import CallToActionSection from '@/components/home/CallToActionSection';
 import { migrateDataToSupabase, checkDataInSupabase } from '@/utils/migrationUtil';
 import { toast } from 'sonner';
 
@@ -115,6 +115,9 @@ const Index = () => {
 
       {/* Archetypes Grid */}
       <ArchetypesGridSection />
+
+      {/* Call to Action Section */}
+      <CallToActionSection />
     </>
   );
 };
