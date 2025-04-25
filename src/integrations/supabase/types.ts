@@ -9,509 +9,1195 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      archetype_data_041624bw: {
+      Analysis_Archetype_Deep_Dive_Reports: {
         Row: {
-          achetype_family: string | null
-          "Archetype Average": number | null
-          "Archetype Value": number | null
-          archetype_ID: string | null
-          archetype_name: string | null
-          Category: string | null
-          Difference: number | null
-          industries: string | null
-          key: number
-          Metric: string | null
-        }
-        Insert: {
-          achetype_family?: string | null
-          "Archetype Average"?: number | null
-          "Archetype Value"?: number | null
-          archetype_ID?: string | null
-          archetype_name?: string | null
-          Category?: string | null
-          Difference?: number | null
-          industries?: string | null
-          key: number
-          Metric?: string | null
-        }
-        Update: {
-          achetype_family?: string | null
-          "Archetype Average"?: number | null
-          "Archetype Value"?: number | null
-          archetype_ID?: string | null
-          archetype_name?: string | null
-          Category?: string | null
-          Difference?: number | null
-          industries?: string | null
-          key?: number
-          Metric?: string | null
-        }
-        Relationships: []
-      }
-      archetype_deep_dive_reports: {
-        Row: {
-          archetype_id: string
-          data_details: Json
-          distinctive_metrics_summary: string
+          archetype_id: string | null
+          benefits_structure: string | null
+          care_gaps: string | null
+          cost_analysis: string | null
+          demographic_insights: string | null
+          disease_prevalence: string | null
           id: string
-          introduction: string
           last_updated: string | null
-          summary_analysis: string
-          title: string
+          recommendations: string | null
+          utilization_patterns: string | null
         }
         Insert: {
-          archetype_id: string
-          data_details: Json
-          distinctive_metrics_summary: string
+          archetype_id?: string | null
+          benefits_structure?: string | null
+          care_gaps?: string | null
+          cost_analysis?: string | null
+          demographic_insights?: string | null
+          disease_prevalence?: string | null
           id?: string
-          introduction: string
           last_updated?: string | null
-          summary_analysis: string
-          title: string
+          recommendations?: string | null
+          utilization_patterns?: string | null
         }
         Update: {
-          archetype_id?: string
-          data_details?: Json
-          distinctive_metrics_summary?: string
+          archetype_id?: string | null
+          benefits_structure?: string | null
+          care_gaps?: string | null
+          cost_analysis?: string | null
+          demographic_insights?: string | null
+          disease_prevalence?: string | null
           id?: string
-          introduction?: string
           last_updated?: string | null
-          summary_analysis?: string
-          title?: string
+          recommendations?: string | null
+          utilization_patterns?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "archetype_deep_dive_reports_archetype_id_fkey"
+            foreignKeyName: "Analysis_Archetype_Deep_Dive_Reports_archetype_id_fkey"
             columns: ["archetype_id"]
             isOneToOne: false
-            referencedRelation: "archetypes"
+            referencedRelation: "Core_Archetype_Overview"
             referencedColumns: ["id"]
           },
         ]
       }
-      archetype_distinctive_metrics_table: {
+      Analysis_Archetype_Distinctive_Metrics: {
         Row: {
-          "Archetype Average": number | null
-          "Archetype Value": number | null
-          archetype_ID: string | null
-          Category: string | null
-          Difference: number | null
-          Metric: string | null
-        }
-        Insert: {
-          "Archetype Average"?: number | null
-          "Archetype Value"?: number | null
-          archetype_ID?: string | null
-          Category?: string | null
-          Difference?: number | null
-          Metric?: string | null
-        }
-        Update: {
-          "Archetype Average"?: number | null
-          "Archetype Value"?: number | null
-          archetype_ID?: string | null
-          Category?: string | null
-          Difference?: number | null
-          Metric?: string | null
-        }
-        Relationships: []
-      }
-      archetype_families: {
-        Row: {
-          common_traits: Json
-          description: string
-          hex_color: string | null
+          archetype_average: number | null
+          archetype_id: string | null
+          archetype_value: number | null
+          category: string | null
+          difference: number | null
           id: string
-          name: string
+          last_updated: string | null
+          metric: string | null
+          significance: string | null
         }
         Insert: {
-          common_traits: Json
-          description: string
-          hex_color?: string | null
-          id: string
-          name: string
+          archetype_average?: number | null
+          archetype_id?: string | null
+          archetype_value?: number | null
+          category?: string | null
+          difference?: number | null
+          id?: string
+          last_updated?: string | null
+          metric?: string | null
+          significance?: string | null
         }
         Update: {
-          common_traits?: Json
-          description?: string
-          hex_color?: string | null
+          archetype_average?: number | null
+          archetype_id?: string | null
+          archetype_value?: number | null
+          category?: string | null
+          difference?: number | null
           id?: string
-          name?: string
-        }
-        Relationships: []
-      }
-      archetype_feedback: {
-        Row: {
-          archetype_id: string
-          created_at: string
-          feedback: string
-          id: string
-          user_comments: string | null
-        }
-        Insert: {
-          archetype_id: string
-          created_at?: string
-          feedback: string
-          id?: string
-          user_comments?: string | null
-        }
-        Update: {
-          archetype_id?: string
-          created_at?: string
-          feedback?: string
-          id?: string
-          user_comments?: string | null
-        }
-        Relationships: []
-      }
-      archetype_metrics: {
-        Row: {
-          archetype_id: string
-          average_family_size: number
-          emergency_visits_per_1k: number
-          inpatient_admits_per_1k: number
-          paid_allowed_ratio: number
-          paid_pepy: number
-          paid_pepy_variance: number
-          paid_pmpy: number
-          paid_pmpy_variance: number
-          risk_cost_ratio: number
-          sdoh_score: number
-          specialist_visits_per_1k: number
-        }
-        Insert: {
-          archetype_id: string
-          average_family_size: number
-          emergency_visits_per_1k: number
-          inpatient_admits_per_1k: number
-          paid_allowed_ratio: number
-          paid_pepy: number
-          paid_pepy_variance: number
-          paid_pmpy: number
-          paid_pmpy_variance: number
-          risk_cost_ratio: number
-          sdoh_score: number
-          specialist_visits_per_1k: number
-        }
-        Update: {
-          archetype_id?: string
-          average_family_size?: number
-          emergency_visits_per_1k?: number
-          inpatient_admits_per_1k?: number
-          paid_allowed_ratio?: number
-          paid_pepy?: number
-          paid_pepy_variance?: number
-          paid_pmpy?: number
-          paid_pmpy_variance?: number
-          risk_cost_ratio?: number
-          sdoh_score?: number
-          specialist_visits_per_1k?: number
+          last_updated?: string | null
+          metric?: string | null
+          significance?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "archetype_metrics_archetype_id_fkey"
+            foreignKeyName: "Analysis_Archetype_Distinctive_Metrics_archetype_id_fkey"
             columns: ["archetype_id"]
-            isOneToOne: true
-            referencedRelation: "archetypes"
+            isOneToOne: false
+            referencedRelation: "Core_Archetype_Overview"
             referencedColumns: ["id"]
           },
         ]
       }
-      archetype_strategic_recommendations: {
+      Analysis_Archetype_Full_Reports: {
         Row: {
           archetype_id: string
-          description: string
+          archetype_overview: Json | null
+          detailed_metrics: Json | null
+          distinctive_metrics: Json | null
+          executive_summary: string | null
+          id: string
+          key_findings: Json | null
+          last_updated: string | null
+          strategic_recommendations: Json | null
+          swot_analysis: Json | null
+        }
+        Insert: {
+          archetype_id: string
+          archetype_overview?: Json | null
+          detailed_metrics?: Json | null
+          distinctive_metrics?: Json | null
+          executive_summary?: string | null
+          id?: string
+          key_findings?: Json | null
+          last_updated?: string | null
+          strategic_recommendations?: Json | null
+          swot_analysis?: Json | null
+        }
+        Update: {
+          archetype_id?: string
+          archetype_overview?: Json | null
+          detailed_metrics?: Json | null
+          distinctive_metrics?: Json | null
+          executive_summary?: string | null
+          id?: string
+          key_findings?: Json | null
+          last_updated?: string | null
+          strategic_recommendations?: Json | null
+          swot_analysis?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "Analysis_Archetype_Full_Reports_Archetype_id_fkey"
+            columns: ["archetype_id"]
+            isOneToOne: true
+            referencedRelation: "Core_Archetype_Overview"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      Analysis_Archetype_Strategic_Recommendations: {
+        Row: {
+          archetype_id: string | null
+          description: string | null
           id: string
           last_updated: string | null
           metrics_references: Json | null
-          recommendation_number: number
-          title: string
+          recommendation_number: number | null
+          title: string | null
         }
         Insert: {
-          archetype_id: string
-          description: string
+          archetype_id?: string | null
+          description?: string | null
           id?: string
           last_updated?: string | null
           metrics_references?: Json | null
-          recommendation_number: number
-          title: string
+          recommendation_number?: number | null
+          title?: string | null
         }
         Update: {
-          archetype_id?: string
-          description?: string
+          archetype_id?: string | null
+          description?: string | null
           id?: string
           last_updated?: string | null
           metrics_references?: Json | null
-          recommendation_number?: number
-          title?: string
+          recommendation_number?: number | null
+          title?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "archetype_strategic_recommendations_archetype_id_fkey"
+            foreignKeyName: "Analysis_Archetype_Strategic_Recommendations_archetype_id_fkey"
             columns: ["archetype_id"]
             isOneToOne: false
-            referencedRelation: "archetypes"
+            referencedRelation: "Core_Archetype_Overview"
             referencedColumns: ["id"]
           },
         ]
       }
-      archetype_swot_analyses: {
+      Analysis_Archetype_SWOT: {
         Row: {
           archetype_id: string
           id: string
           last_updated: string | null
-          opportunities: Json
-          strengths: Json
-          threats: Json
-          weaknesses: Json
+          opportunities: Json | null
+          strengths: Json | null
+          threats: Json | null
+          weaknesses: Json | null
         }
         Insert: {
           archetype_id: string
           id?: string
           last_updated?: string | null
-          opportunities: Json
-          strengths: Json
-          threats: Json
-          weaknesses: Json
+          opportunities?: Json | null
+          strengths?: Json | null
+          threats?: Json | null
+          weaknesses?: Json | null
         }
         Update: {
           archetype_id?: string
           id?: string
           last_updated?: string | null
-          opportunities?: Json
-          strengths?: Json
-          threats?: Json
-          weaknesses?: Json
+          opportunities?: Json | null
+          strengths?: Json | null
+          threats?: Json | null
+          weaknesses?: Json | null
         }
         Relationships: [
           {
-            foreignKeyName: "archetype_swot_analyses_archetype_id_fkey"
-            columns: ["archetype_id"]
-            isOneToOne: false
-            referencedRelation: "archetypes"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      archetypes: {
-        Row: {
-          characteristics: Json
-          color: string
-          family_id: string
-          hex_color: string | null
-          id: string
-          long_description: string
-          name: string
-          primary_risk_driver: string
-          risk_score: number
-          risk_variance: number
-          short_description: string
-          strategic_priorities: Json
-        }
-        Insert: {
-          characteristics: Json
-          color: string
-          family_id: string
-          hex_color?: string | null
-          id: string
-          long_description: string
-          name: string
-          primary_risk_driver: string
-          risk_score: number
-          risk_variance: number
-          short_description: string
-          strategic_priorities: Json
-        }
-        Update: {
-          characteristics?: Json
-          color?: string
-          family_id?: string
-          hex_color?: string | null
-          id?: string
-          long_description?: string
-          name?: string
-          primary_risk_driver?: string
-          risk_score?: number
-          risk_variance?: number
-          short_description?: string
-          strategic_priorities?: Json
-        }
-        Relationships: [
-          {
-            foreignKeyName: "archetypes_family_id_fkey"
-            columns: ["family_id"]
-            isOneToOne: false
-            referencedRelation: "archetype_families"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      archetypes_detailed: {
-        Row: {
-          color: string
-          enhanced: Json
-          family_id: string
-          family_name: string
-          hex_color: string | null
-          id: string
-          name: string
-          standard: Json
-          summary: Json
-        }
-        Insert: {
-          color: string
-          enhanced: Json
-          family_id: string
-          family_name: string
-          hex_color?: string | null
-          id: string
-          name: string
-          standard: Json
-          summary: Json
-        }
-        Update: {
-          color?: string
-          enhanced?: Json
-          family_id?: string
-          family_name?: string
-          hex_color?: string | null
-          id?: string
-          name?: string
-          standard?: Json
-          summary?: Json
-        }
-        Relationships: [
-          {
-            foreignKeyName: "archetypes_detailed_family_id_fkey"
-            columns: ["family_id"]
-            isOneToOne: false
-            referencedRelation: "archetype_families"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "archetypes_detailed_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "archetypes"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      distinctive_traits: {
-        Row: {
-          archetype_id: string
-          disease_patterns: Json
-          unique_insights: Json
-          utilization_patterns: Json
-        }
-        Insert: {
-          archetype_id: string
-          disease_patterns: Json
-          unique_insights: Json
-          utilization_patterns: Json
-        }
-        Update: {
-          archetype_id?: string
-          disease_patterns?: Json
-          unique_insights?: Json
-          utilization_patterns?: Json
-        }
-        Relationships: [
-          {
-            foreignKeyName: "distinctive_traits_archetype_id_fkey"
+            foreignKeyName: "Analysis_Archetype_SWOT_archetype_id_fkey"
             columns: ["archetype_id"]
             isOneToOne: true
-            referencedRelation: "archetypes"
+            referencedRelation: "Core_Archetype_Overview"
             referencedColumns: ["id"]
           },
         ]
       }
-      report_requests: {
+      Core_Archetype_Families: {
         Row: {
-          access_token: string
-          archetype_id: string
-          assessment_answers: Json | null
-          assessment_result: Json | null
-          comments: string | null
-          created_at: string
-          email: string
-          expires_at: string
+          common_traits: Json | null
+          hex_color: string | null
           id: string
-          name: string
-          organization: string
-          status: string
+          industries: string | null
+          long_description: string | null
+          name: string | null
+          short_description: string | null
         }
         Insert: {
-          access_token?: string
-          archetype_id: string
-          assessment_answers?: Json | null
-          assessment_result?: Json | null
-          comments?: string | null
-          created_at?: string
-          email: string
-          expires_at?: string
-          id?: string
-          name: string
-          organization: string
-          status?: string
+          common_traits?: Json | null
+          hex_color?: string | null
+          id: string
+          industries?: string | null
+          long_description?: string | null
+          name?: string | null
+          short_description?: string | null
         }
         Update: {
-          access_token?: string
-          archetype_id?: string
-          assessment_answers?: Json | null
-          assessment_result?: Json | null
-          comments?: string | null
-          created_at?: string
-          email?: string
-          expires_at?: string
+          common_traits?: Json | null
+          hex_color?: string | null
           id?: string
-          name?: string
-          organization?: string
-          status?: string
+          industries?: string | null
+          long_description?: string | null
+          name?: string | null
+          short_description?: string | null
+        }
+        Relationships: []
+      }
+      Core_Archetype_Overview: {
+        Row: {
+          family_id: string | null
+          hex_color: string | null
+          id: string
+          industries: string | null
+          long_description: string | null
+          name: string | null
+          short_description: string | null
+        }
+        Insert: {
+          family_id?: string | null
+          hex_color?: string | null
+          id: string
+          industries?: string | null
+          long_description?: string | null
+          name?: string | null
+          short_description?: string | null
+        }
+        Update: {
+          family_id?: string | null
+          hex_color?: string | null
+          id?: string
+          industries?: string | null
+          long_description?: string | null
+          name?: string | null
+          short_description?: string | null
+        }
+        Relationships: []
+      }
+      Core_Archetypes_Metrics: {
+        Row: {
+          Archetype: string | null
+          "Bene_Access to Benefits Composite": number | null
+          "Bene_Access to Disability Plans": number | null
+          "Bene_Access to Financial Planning": number | null
+          "Bene_Access to Flexible Workplace or Schedule": number | null
+          "Bene_Access to Health Insurance": number | null
+          "Bene_Access to Retirement": number | null
+          "Bene_Access to Wellness Programs": number | null
+          "Bene_Paid Personal Leave": number | null
+          "Cost_Avoidable ER Potential Savings PMPM": number | null
+          "Cost_Avoidable ER Potential Savings PMPY": number | null
+          "Cost_Medical & RX Allowed Amount PEPM": number | null
+          "Cost_Medical & RX Allowed Amount PEPY": number | null
+          "Cost_Medical & RX Allowed Amount PMPM": number | null
+          "Cost_Medical & RX Allowed Amount PMPY": number | null
+          "Cost_Medical & RX Paid Amount PEPM": number | null
+          "Cost_Medical & RX Paid Amount PEPY": number | null
+          "Cost_Medical & RX Paid Amount PMPM": number | null
+          "Cost_Medical & RX Paid Amount PMPY": number | null
+          "Cost_Medical Allowed Amount PEPM": number | null
+          "Cost_Medical Allowed Amount PEPY": number | null
+          "Cost_Medical Allowed Amount PMPM": number | null
+          "Cost_Medical Allowed Amount PMPY": number | null
+          "Cost_Medical Paid Amount PEPM": number | null
+          "Cost_Medical Paid Amount PEPY": number | null
+          "Cost_Medical Paid Amount PMPM": number | null
+          "Cost_Medical Paid Amount PMPY": number | null
+          "Cost_RX Allowed Amount PEPM": number | null
+          "Cost_RX Allowed Amount PEPY": number | null
+          "Cost_RX Allowed Amount PMPM": number | null
+          "Cost_RX Allowed Amount PMPY": number | null
+          "Cost_RX Paid Amount PEPM": number | null
+          "Cost_RX Paid Amount PEPY": number | null
+          "Cost_RX Paid Amount PMPM": number | null
+          "Cost_RX Paid Amount PMPY": number | null
+          "Cost_Specialty RX Allowed Amount PMPM": number | null
+          "Data Date": string | null
+          "Demo_Average Age": number | null
+          "Demo_Average Employees": number | null
+          "Demo_Average Family Size": number | null
+          "Demo_Average Members": number | null
+          "Demo_Average Percent Female": number | null
+          "Demo_Average Salary": number | null
+          "Demo_Average States": number | null
+          "Demo_Median Employees": number | null
+          "Demo_Median Members": number | null
+          "Dise_Allergies Prevalence": number | null
+          "Dise_Anxiety Prevalence": number | null
+          "Dise_Asthma Prevalence": number | null
+          "Dise_Autism Prevalence": number | null
+          "Dise_Back Pain Prevalence": number | null
+          "Dise_Cancer Prevalence": number | null
+          "Dise_Chemotherapy Prevalence": number | null
+          "Dise_Chronic Kidney Disease Prevalence": number | null
+          "Dise_COPD Prevalence": number | null
+          "Dise_Heart Disease Prevalence": number | null
+          "Dise_Hyperlipidemia Prevalence": number | null
+          "Dise_Hypertension Prevalence": number | null
+          "Dise_Infertility Prevalence": number | null
+          "Dise_Major Recurrent Depression Prevalence": number | null
+          "Dise_Mental Health Disorder Prevalence": number | null
+          "Dise_MSK Prevalence": number | null
+          "Dise_Multiple Sclerosis Prevalence": number | null
+          "Dise_Obesity Prevalence": number | null
+          "Dise_Osteoarthritis Prevalence": number | null
+          "Dise_PTSD Prevalence": number | null
+          "Dise_Sleep Apnea Prevalence": number | null
+          "Dise_Substance Use Disorder Prevalence": number | null
+          "Dise_Type 1 Diabetes Prevalence": number | null
+          "Dise_Type 2 Diabetes Prevalence": number | null
+          "Dise_Vitamin D Deficiency Prevalence": number | null
+          "Gaps_Behavioral Health FU Antidepressant Med Man": number | null
+          "Gaps_Behavioral Health FU Care Children ADHDMeds": number | null
+          "Gaps_Behavioral Health FU ED Visit Alcohol Other Drug Abuse":
+            | number
+            | null
+          "Gaps_Behavioral Health FU ED Visit Mental Illness": number | null
+          "Gaps_Behavioral Health FU High Intensity Care SUD": number | null
+          "Gaps_Behavioral Health FU Hospitalization Mental Illness":
+            | number
+            | null
+          "Gaps_Cancer Screening Breast": number | null
+          "Gaps_Cancer Screening Cervical": number | null
+          "Gaps_Cancer Screening Colon": number | null
+          "Gaps_Diabetes Annual Exam": number | null
+          "Gaps_Diabetes HbA1C Test": number | null
+          "Gaps_Diabetes Retinal Screening": number | null
+          "Gaps_Diabetes RX Adherence": number | null
+          "Gaps_Hyperlipidemia HDL Adherence": number | null
+          "Gaps_Hyperlipidemia LDL Adherence": number | null
+          "Gaps_Hyperlipidemia RX Adherence": number | null
+          "Gaps_Hyperlipidemia Triglyceride Adherence": number | null
+          "Gaps_Hypertension ACE Inhibitor RX Adherence": number | null
+          "Gaps_Hypertension Annual Exam": number | null
+          "Gaps_Hypertension ARB RX Adherence": number | null
+          "Gaps_Hypertension Beta Blocker RX Adherence": number | null
+          "Gaps_Hypertension Calcium Channel Blocker RX Adherence":
+            | number
+            | null
+          "Gaps_Hypertension Diuretic RX Adherence": number | null
+          "Gaps_Hypertension RX Adherence": number | null
+          "Gaps_Immunization HPV": number | null
+          "Gaps_Immunization Meningitis": number | null
+          "Gaps_Immunization TDAP": number | null
+          "Gaps_Wellness Visit Adults": number | null
+          "Gaps_Wellness Visit Ages 1-2": number | null
+          "Gaps_Wellness Visit Ages 1-20": number | null
+          "Gaps_Wellness Visit Ages 12-20": number | null
+          "Gaps_Wellness Visit Ages 2-7": number | null
+          "Gaps_Wellness Visit Ages 7-12": number | null
+          id: string
+          "Risk_Average Risk Score": number | null
+          "SDOH_Average Amenities Access": number | null
+          "SDOH_Average Childcare Access": number | null
+          "SDOH_Average Digital Access": number | null
+          "SDOH_Average Economic Insecurity": number | null
+          "SDOH_Average Food Access": number | null
+          "SDOH_Average Health Literacy": number | null
+          "SDOH_Average Healthcare Access": number | null
+          "SDOH_Average Neighborhood": number | null
+          "SDOH_Average SDOH": number | null
+          "SDOH_Average Transportation": number | null
+          "SDOH_Average Womens Health": number | null
+          "Util_Cesarean Sections": number | null
+          "Util_Dialysis Service per 1k Members": number | null
+          "Util_Emergency Visits per 1k Members": number | null
+          "Util_Inpatient Admits per 1k Members": number | null
+          "Util_Inpatient Days per 1k Members": number | null
+          "Util_Lab Services per 1k Members": number | null
+          "Util_Live Births": number | null
+          "Util_Observational Stays per 1k Members": number | null
+          "Util_Outpatient Surgeries per 1k Members": number | null
+          "Util_PCP Visits per 1k Members": number | null
+          "Util_Percent of Allowed Amount Spent on High Cost Claimants":
+            | number
+            | null
+          "Util_Percent of Members who are High Cost Claimants": number | null
+          "Util_Percent of Members who are Non-Utilizers": number | null
+          "Util_Preventative Visits per 1k Members": number | null
+          "Util_Radiology Services per 1k Members": number | null
+          "Util_Specialist Visits per 1k Members": number | null
+          "Util_Telehealth Adoption": number | null
+          "Util_Urgent Care Visits per 1k Members": number | null
+        }
+        Insert: {
+          Archetype?: string | null
+          "Bene_Access to Benefits Composite"?: number | null
+          "Bene_Access to Disability Plans"?: number | null
+          "Bene_Access to Financial Planning"?: number | null
+          "Bene_Access to Flexible Workplace or Schedule"?: number | null
+          "Bene_Access to Health Insurance"?: number | null
+          "Bene_Access to Retirement"?: number | null
+          "Bene_Access to Wellness Programs"?: number | null
+          "Bene_Paid Personal Leave"?: number | null
+          "Cost_Avoidable ER Potential Savings PMPM"?: number | null
+          "Cost_Avoidable ER Potential Savings PMPY"?: number | null
+          "Cost_Medical & RX Allowed Amount PEPM"?: number | null
+          "Cost_Medical & RX Allowed Amount PEPY"?: number | null
+          "Cost_Medical & RX Allowed Amount PMPM"?: number | null
+          "Cost_Medical & RX Allowed Amount PMPY"?: number | null
+          "Cost_Medical & RX Paid Amount PEPM"?: number | null
+          "Cost_Medical & RX Paid Amount PEPY"?: number | null
+          "Cost_Medical & RX Paid Amount PMPM"?: number | null
+          "Cost_Medical & RX Paid Amount PMPY"?: number | null
+          "Cost_Medical Allowed Amount PEPM"?: number | null
+          "Cost_Medical Allowed Amount PEPY"?: number | null
+          "Cost_Medical Allowed Amount PMPM"?: number | null
+          "Cost_Medical Allowed Amount PMPY"?: number | null
+          "Cost_Medical Paid Amount PEPM"?: number | null
+          "Cost_Medical Paid Amount PEPY"?: number | null
+          "Cost_Medical Paid Amount PMPM"?: number | null
+          "Cost_Medical Paid Amount PMPY"?: number | null
+          "Cost_RX Allowed Amount PEPM"?: number | null
+          "Cost_RX Allowed Amount PEPY"?: number | null
+          "Cost_RX Allowed Amount PMPM"?: number | null
+          "Cost_RX Allowed Amount PMPY"?: number | null
+          "Cost_RX Paid Amount PEPM"?: number | null
+          "Cost_RX Paid Amount PEPY"?: number | null
+          "Cost_RX Paid Amount PMPM"?: number | null
+          "Cost_RX Paid Amount PMPY"?: number | null
+          "Cost_Specialty RX Allowed Amount PMPM"?: number | null
+          "Data Date"?: string | null
+          "Demo_Average Age"?: number | null
+          "Demo_Average Employees"?: number | null
+          "Demo_Average Family Size"?: number | null
+          "Demo_Average Members"?: number | null
+          "Demo_Average Percent Female"?: number | null
+          "Demo_Average Salary"?: number | null
+          "Demo_Average States"?: number | null
+          "Demo_Median Employees"?: number | null
+          "Demo_Median Members"?: number | null
+          "Dise_Allergies Prevalence"?: number | null
+          "Dise_Anxiety Prevalence"?: number | null
+          "Dise_Asthma Prevalence"?: number | null
+          "Dise_Autism Prevalence"?: number | null
+          "Dise_Back Pain Prevalence"?: number | null
+          "Dise_Cancer Prevalence"?: number | null
+          "Dise_Chemotherapy Prevalence"?: number | null
+          "Dise_Chronic Kidney Disease Prevalence"?: number | null
+          "Dise_COPD Prevalence"?: number | null
+          "Dise_Heart Disease Prevalence"?: number | null
+          "Dise_Hyperlipidemia Prevalence"?: number | null
+          "Dise_Hypertension Prevalence"?: number | null
+          "Dise_Infertility Prevalence"?: number | null
+          "Dise_Major Recurrent Depression Prevalence"?: number | null
+          "Dise_Mental Health Disorder Prevalence"?: number | null
+          "Dise_MSK Prevalence"?: number | null
+          "Dise_Multiple Sclerosis Prevalence"?: number | null
+          "Dise_Obesity Prevalence"?: number | null
+          "Dise_Osteoarthritis Prevalence"?: number | null
+          "Dise_PTSD Prevalence"?: number | null
+          "Dise_Sleep Apnea Prevalence"?: number | null
+          "Dise_Substance Use Disorder Prevalence"?: number | null
+          "Dise_Type 1 Diabetes Prevalence"?: number | null
+          "Dise_Type 2 Diabetes Prevalence"?: number | null
+          "Dise_Vitamin D Deficiency Prevalence"?: number | null
+          "Gaps_Behavioral Health FU Antidepressant Med Man"?: number | null
+          "Gaps_Behavioral Health FU Care Children ADHDMeds"?: number | null
+          "Gaps_Behavioral Health FU ED Visit Alcohol Other Drug Abuse"?:
+            | number
+            | null
+          "Gaps_Behavioral Health FU ED Visit Mental Illness"?: number | null
+          "Gaps_Behavioral Health FU High Intensity Care SUD"?: number | null
+          "Gaps_Behavioral Health FU Hospitalization Mental Illness"?:
+            | number
+            | null
+          "Gaps_Cancer Screening Breast"?: number | null
+          "Gaps_Cancer Screening Cervical"?: number | null
+          "Gaps_Cancer Screening Colon"?: number | null
+          "Gaps_Diabetes Annual Exam"?: number | null
+          "Gaps_Diabetes HbA1C Test"?: number | null
+          "Gaps_Diabetes Retinal Screening"?: number | null
+          "Gaps_Diabetes RX Adherence"?: number | null
+          "Gaps_Hyperlipidemia HDL Adherence"?: number | null
+          "Gaps_Hyperlipidemia LDL Adherence"?: number | null
+          "Gaps_Hyperlipidemia RX Adherence"?: number | null
+          "Gaps_Hyperlipidemia Triglyceride Adherence"?: number | null
+          "Gaps_Hypertension ACE Inhibitor RX Adherence"?: number | null
+          "Gaps_Hypertension Annual Exam"?: number | null
+          "Gaps_Hypertension ARB RX Adherence"?: number | null
+          "Gaps_Hypertension Beta Blocker RX Adherence"?: number | null
+          "Gaps_Hypertension Calcium Channel Blocker RX Adherence"?:
+            | number
+            | null
+          "Gaps_Hypertension Diuretic RX Adherence"?: number | null
+          "Gaps_Hypertension RX Adherence"?: number | null
+          "Gaps_Immunization HPV"?: number | null
+          "Gaps_Immunization Meningitis"?: number | null
+          "Gaps_Immunization TDAP"?: number | null
+          "Gaps_Wellness Visit Adults"?: number | null
+          "Gaps_Wellness Visit Ages 1-2"?: number | null
+          "Gaps_Wellness Visit Ages 1-20"?: number | null
+          "Gaps_Wellness Visit Ages 12-20"?: number | null
+          "Gaps_Wellness Visit Ages 2-7"?: number | null
+          "Gaps_Wellness Visit Ages 7-12"?: number | null
+          id: string
+          "Risk_Average Risk Score"?: number | null
+          "SDOH_Average Amenities Access"?: number | null
+          "SDOH_Average Childcare Access"?: number | null
+          "SDOH_Average Digital Access"?: number | null
+          "SDOH_Average Economic Insecurity"?: number | null
+          "SDOH_Average Food Access"?: number | null
+          "SDOH_Average Health Literacy"?: number | null
+          "SDOH_Average Healthcare Access"?: number | null
+          "SDOH_Average Neighborhood"?: number | null
+          "SDOH_Average SDOH"?: number | null
+          "SDOH_Average Transportation"?: number | null
+          "SDOH_Average Womens Health"?: number | null
+          "Util_Cesarean Sections"?: number | null
+          "Util_Dialysis Service per 1k Members"?: number | null
+          "Util_Emergency Visits per 1k Members"?: number | null
+          "Util_Inpatient Admits per 1k Members"?: number | null
+          "Util_Inpatient Days per 1k Members"?: number | null
+          "Util_Lab Services per 1k Members"?: number | null
+          "Util_Live Births"?: number | null
+          "Util_Observational Stays per 1k Members"?: number | null
+          "Util_Outpatient Surgeries per 1k Members"?: number | null
+          "Util_PCP Visits per 1k Members"?: number | null
+          "Util_Percent of Allowed Amount Spent on High Cost Claimants"?:
+            | number
+            | null
+          "Util_Percent of Members who are High Cost Claimants"?: number | null
+          "Util_Percent of Members who are Non-Utilizers"?: number | null
+          "Util_Preventative Visits per 1k Members"?: number | null
+          "Util_Radiology Services per 1k Members"?: number | null
+          "Util_Specialist Visits per 1k Members"?: number | null
+          "Util_Telehealth Adoption"?: number | null
+          "Util_Urgent Care Visits per 1k Members"?: number | null
+        }
+        Update: {
+          Archetype?: string | null
+          "Bene_Access to Benefits Composite"?: number | null
+          "Bene_Access to Disability Plans"?: number | null
+          "Bene_Access to Financial Planning"?: number | null
+          "Bene_Access to Flexible Workplace or Schedule"?: number | null
+          "Bene_Access to Health Insurance"?: number | null
+          "Bene_Access to Retirement"?: number | null
+          "Bene_Access to Wellness Programs"?: number | null
+          "Bene_Paid Personal Leave"?: number | null
+          "Cost_Avoidable ER Potential Savings PMPM"?: number | null
+          "Cost_Avoidable ER Potential Savings PMPY"?: number | null
+          "Cost_Medical & RX Allowed Amount PEPM"?: number | null
+          "Cost_Medical & RX Allowed Amount PEPY"?: number | null
+          "Cost_Medical & RX Allowed Amount PMPM"?: number | null
+          "Cost_Medical & RX Allowed Amount PMPY"?: number | null
+          "Cost_Medical & RX Paid Amount PEPM"?: number | null
+          "Cost_Medical & RX Paid Amount PEPY"?: number | null
+          "Cost_Medical & RX Paid Amount PMPM"?: number | null
+          "Cost_Medical & RX Paid Amount PMPY"?: number | null
+          "Cost_Medical Allowed Amount PEPM"?: number | null
+          "Cost_Medical Allowed Amount PEPY"?: number | null
+          "Cost_Medical Allowed Amount PMPM"?: number | null
+          "Cost_Medical Allowed Amount PMPY"?: number | null
+          "Cost_Medical Paid Amount PEPM"?: number | null
+          "Cost_Medical Paid Amount PEPY"?: number | null
+          "Cost_Medical Paid Amount PMPM"?: number | null
+          "Cost_Medical Paid Amount PMPY"?: number | null
+          "Cost_RX Allowed Amount PEPM"?: number | null
+          "Cost_RX Allowed Amount PEPY"?: number | null
+          "Cost_RX Allowed Amount PMPM"?: number | null
+          "Cost_RX Allowed Amount PMPY"?: number | null
+          "Cost_RX Paid Amount PEPM"?: number | null
+          "Cost_RX Paid Amount PEPY"?: number | null
+          "Cost_RX Paid Amount PMPM"?: number | null
+          "Cost_RX Paid Amount PMPY"?: number | null
+          "Cost_Specialty RX Allowed Amount PMPM"?: number | null
+          "Data Date"?: string | null
+          "Demo_Average Age"?: number | null
+          "Demo_Average Employees"?: number | null
+          "Demo_Average Family Size"?: number | null
+          "Demo_Average Members"?: number | null
+          "Demo_Average Percent Female"?: number | null
+          "Demo_Average Salary"?: number | null
+          "Demo_Average States"?: number | null
+          "Demo_Median Employees"?: number | null
+          "Demo_Median Members"?: number | null
+          "Dise_Allergies Prevalence"?: number | null
+          "Dise_Anxiety Prevalence"?: number | null
+          "Dise_Asthma Prevalence"?: number | null
+          "Dise_Autism Prevalence"?: number | null
+          "Dise_Back Pain Prevalence"?: number | null
+          "Dise_Cancer Prevalence"?: number | null
+          "Dise_Chemotherapy Prevalence"?: number | null
+          "Dise_Chronic Kidney Disease Prevalence"?: number | null
+          "Dise_COPD Prevalence"?: number | null
+          "Dise_Heart Disease Prevalence"?: number | null
+          "Dise_Hyperlipidemia Prevalence"?: number | null
+          "Dise_Hypertension Prevalence"?: number | null
+          "Dise_Infertility Prevalence"?: number | null
+          "Dise_Major Recurrent Depression Prevalence"?: number | null
+          "Dise_Mental Health Disorder Prevalence"?: number | null
+          "Dise_MSK Prevalence"?: number | null
+          "Dise_Multiple Sclerosis Prevalence"?: number | null
+          "Dise_Obesity Prevalence"?: number | null
+          "Dise_Osteoarthritis Prevalence"?: number | null
+          "Dise_PTSD Prevalence"?: number | null
+          "Dise_Sleep Apnea Prevalence"?: number | null
+          "Dise_Substance Use Disorder Prevalence"?: number | null
+          "Dise_Type 1 Diabetes Prevalence"?: number | null
+          "Dise_Type 2 Diabetes Prevalence"?: number | null
+          "Dise_Vitamin D Deficiency Prevalence"?: number | null
+          "Gaps_Behavioral Health FU Antidepressant Med Man"?: number | null
+          "Gaps_Behavioral Health FU Care Children ADHDMeds"?: number | null
+          "Gaps_Behavioral Health FU ED Visit Alcohol Other Drug Abuse"?:
+            | number
+            | null
+          "Gaps_Behavioral Health FU ED Visit Mental Illness"?: number | null
+          "Gaps_Behavioral Health FU High Intensity Care SUD"?: number | null
+          "Gaps_Behavioral Health FU Hospitalization Mental Illness"?:
+            | number
+            | null
+          "Gaps_Cancer Screening Breast"?: number | null
+          "Gaps_Cancer Screening Cervical"?: number | null
+          "Gaps_Cancer Screening Colon"?: number | null
+          "Gaps_Diabetes Annual Exam"?: number | null
+          "Gaps_Diabetes HbA1C Test"?: number | null
+          "Gaps_Diabetes Retinal Screening"?: number | null
+          "Gaps_Diabetes RX Adherence"?: number | null
+          "Gaps_Hyperlipidemia HDL Adherence"?: number | null
+          "Gaps_Hyperlipidemia LDL Adherence"?: number | null
+          "Gaps_Hyperlipidemia RX Adherence"?: number | null
+          "Gaps_Hyperlipidemia Triglyceride Adherence"?: number | null
+          "Gaps_Hypertension ACE Inhibitor RX Adherence"?: number | null
+          "Gaps_Hypertension Annual Exam"?: number | null
+          "Gaps_Hypertension ARB RX Adherence"?: number | null
+          "Gaps_Hypertension Beta Blocker RX Adherence"?: number | null
+          "Gaps_Hypertension Calcium Channel Blocker RX Adherence"?:
+            | number
+            | null
+          "Gaps_Hypertension Diuretic RX Adherence"?: number | null
+          "Gaps_Hypertension RX Adherence"?: number | null
+          "Gaps_Immunization HPV"?: number | null
+          "Gaps_Immunization Meningitis"?: number | null
+          "Gaps_Immunization TDAP"?: number | null
+          "Gaps_Wellness Visit Adults"?: number | null
+          "Gaps_Wellness Visit Ages 1-2"?: number | null
+          "Gaps_Wellness Visit Ages 1-20"?: number | null
+          "Gaps_Wellness Visit Ages 12-20"?: number | null
+          "Gaps_Wellness Visit Ages 2-7"?: number | null
+          "Gaps_Wellness Visit Ages 7-12"?: number | null
+          id?: string
+          "Risk_Average Risk Score"?: number | null
+          "SDOH_Average Amenities Access"?: number | null
+          "SDOH_Average Childcare Access"?: number | null
+          "SDOH_Average Digital Access"?: number | null
+          "SDOH_Average Economic Insecurity"?: number | null
+          "SDOH_Average Food Access"?: number | null
+          "SDOH_Average Health Literacy"?: number | null
+          "SDOH_Average Healthcare Access"?: number | null
+          "SDOH_Average Neighborhood"?: number | null
+          "SDOH_Average SDOH"?: number | null
+          "SDOH_Average Transportation"?: number | null
+          "SDOH_Average Womens Health"?: number | null
+          "Util_Cesarean Sections"?: number | null
+          "Util_Dialysis Service per 1k Members"?: number | null
+          "Util_Emergency Visits per 1k Members"?: number | null
+          "Util_Inpatient Admits per 1k Members"?: number | null
+          "Util_Inpatient Days per 1k Members"?: number | null
+          "Util_Lab Services per 1k Members"?: number | null
+          "Util_Live Births"?: number | null
+          "Util_Observational Stays per 1k Members"?: number | null
+          "Util_Outpatient Surgeries per 1k Members"?: number | null
+          "Util_PCP Visits per 1k Members"?: number | null
+          "Util_Percent of Allowed Amount Spent on High Cost Claimants"?:
+            | number
+            | null
+          "Util_Percent of Members who are High Cost Claimants"?: number | null
+          "Util_Percent of Members who are Non-Utilizers"?: number | null
+          "Util_Preventative Visits per 1k Members"?: number | null
+          "Util_Radiology Services per 1k Members"?: number | null
+          "Util_Specialist Visits per 1k Members"?: number | null
+          "Util_Telehealth Adoption"?: number | null
+          "Util_Urgent Care Visits per 1k Members"?: number | null
+        }
+        Relationships: []
+      }
+      Core_Metric_Dictionary: {
+        Row: {
+          "Better Direction": string | null
+          "Column Name": string
+          "Importance Level": number | null
+          "Metric Category": string | null
+          "Metric Hover Desc": string | null
+          "Metric Name": string | null
+          "Metric Source": string | null
+        }
+        Insert: {
+          "Better Direction"?: string | null
+          "Column Name": string
+          "Importance Level"?: number | null
+          "Metric Category"?: string | null
+          "Metric Hover Desc"?: string | null
+          "Metric Name"?: string | null
+          "Metric Source"?: string | null
+        }
+        Update: {
+          "Better Direction"?: string | null
+          "Column Name"?: string
+          "Importance Level"?: number | null
+          "Metric Category"?: string | null
+          "Metric Hover Desc"?: string | null
+          "Metric Name"?: string | null
+          "Metric Source"?: string | null
+        }
+        Relationships: []
+      }
+      test_table: {
+        Row: {
+          created_at: string | null
+          id: string
+          key: string
+          value: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          key: string
+          value?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          key?: string
+          value?: string | null
         }
         Relationships: []
       }
     }
     Views: {
-      archetype_info: {
+      View_Cost_Metrics: {
         Row: {
-          achetype_family: string | null
-          archetype_name: string | null
-          industries: string | null
-          key: number | null
+          Archetype: string | null
+          "Cost_Avoidable ER Potential Savings PMPY": number | null
+          "Cost_Medical & RX Paid Amount PEPY": number | null
+          "Cost_Medical & RX Paid Amount PMPY": number | null
+          "Cost_Medical Paid Amount PEPY": number | null
+          "Cost_Medical Paid Amount PMPY": number | null
+          "Cost_RX Paid Amount PEPY": number | null
+          "Cost_RX Paid Amount PMPY": number | null
+          "Cost_Specialty RX Allowed Amount PMPM": number | null
+          id: string | null
+        }
+        Insert: {
+          Archetype?: string | null
+          "Cost_Avoidable ER Potential Savings PMPY"?: number | null
+          "Cost_Medical & RX Paid Amount PEPY"?: number | null
+          "Cost_Medical & RX Paid Amount PMPY"?: number | null
+          "Cost_Medical Paid Amount PEPY"?: number | null
+          "Cost_Medical Paid Amount PMPY"?: number | null
+          "Cost_RX Paid Amount PEPY"?: number | null
+          "Cost_RX Paid Amount PMPY"?: number | null
+          "Cost_Specialty RX Allowed Amount PMPM"?: number | null
+          id?: string | null
+        }
+        Update: {
+          Archetype?: string | null
+          "Cost_Avoidable ER Potential Savings PMPY"?: number | null
+          "Cost_Medical & RX Paid Amount PEPY"?: number | null
+          "Cost_Medical & RX Paid Amount PMPY"?: number | null
+          "Cost_Medical Paid Amount PEPY"?: number | null
+          "Cost_Medical Paid Amount PMPY"?: number | null
+          "Cost_RX Paid Amount PEPY"?: number | null
+          "Cost_RX Paid Amount PMPY"?: number | null
+          "Cost_Specialty RX Allowed Amount PMPM"?: number | null
+          id?: string | null
         }
         Relationships: []
       }
-      archetype_key_metrics: {
+      View_Demographics_Metrics: {
         Row: {
-          "Archetype Average": number | null
-          "Archetype Value": number | null
-          archetype_ID: string | null
-          Category: string | null
-          Difference: number | null
-          Metric: string | null
+          Archetype: string | null
+          "Demo_Average Age": number | null
+          "Demo_Average Employees": number | null
+          "Demo_Average Family Size": number | null
+          "Demo_Average Members": number | null
+          "Demo_Average Percent Female": number | null
+          "Demo_Average Salary": number | null
+          "Demo_Average States": number | null
+          "Demo_Median Employees": number | null
+          "Demo_Median Members": number | null
+          id: string | null
         }
         Insert: {
-          "Archetype Average"?: number | null
-          "Archetype Value"?: number | null
-          archetype_ID?: string | null
-          Category?: string | null
-          Difference?: number | null
-          Metric?: string | null
+          Archetype?: string | null
+          "Demo_Average Age"?: number | null
+          "Demo_Average Employees"?: number | null
+          "Demo_Average Family Size"?: number | null
+          "Demo_Average Members"?: number | null
+          "Demo_Average Percent Female"?: number | null
+          "Demo_Average Salary"?: number | null
+          "Demo_Average States"?: number | null
+          "Demo_Median Employees"?: number | null
+          "Demo_Median Members"?: number | null
+          id?: string | null
         }
         Update: {
-          "Archetype Average"?: number | null
-          "Archetype Value"?: number | null
-          archetype_ID?: string | null
-          Category?: string | null
-          Difference?: number | null
-          Metric?: string | null
+          Archetype?: string | null
+          "Demo_Average Age"?: number | null
+          "Demo_Average Employees"?: number | null
+          "Demo_Average Family Size"?: number | null
+          "Demo_Average Members"?: number | null
+          "Demo_Average Percent Female"?: number | null
+          "Demo_Average Salary"?: number | null
+          "Demo_Average States"?: number | null
+          "Demo_Median Employees"?: number | null
+          "Demo_Median Members"?: number | null
+          id?: string | null
+        }
+        Relationships: []
+      }
+      View_Disease_Prevalence: {
+        Row: {
+          Archetype: string | null
+          "Dise_Cancer Prevalence": number | null
+          "Dise_COPD Prevalence": number | null
+          "Dise_Heart Disease Prevalence": number | null
+          "Dise_Hypertension Prevalence": number | null
+          "Dise_Infertility Prevalence": number | null
+          "Dise_Mental Health Disorder Prevalence": number | null
+          "Dise_Multiple Sclerosis Prevalence": number | null
+          "Dise_Substance Use Disorder Prevalence": number | null
+          "Dise_Type 1 Diabetes Prevalence": number | null
+          "Dise_Type 2 Diabetes Prevalence": number | null
+          "Dise_Vitamin D Deficiency Prevalence": number | null
+          id: string | null
+        }
+        Insert: {
+          Archetype?: string | null
+          "Dise_Cancer Prevalence"?: number | null
+          "Dise_COPD Prevalence"?: number | null
+          "Dise_Heart Disease Prevalence"?: number | null
+          "Dise_Hypertension Prevalence"?: number | null
+          "Dise_Infertility Prevalence"?: number | null
+          "Dise_Mental Health Disorder Prevalence"?: number | null
+          "Dise_Multiple Sclerosis Prevalence"?: number | null
+          "Dise_Substance Use Disorder Prevalence"?: number | null
+          "Dise_Type 1 Diabetes Prevalence"?: number | null
+          "Dise_Type 2 Diabetes Prevalence"?: number | null
+          "Dise_Vitamin D Deficiency Prevalence"?: number | null
+          id?: string | null
+        }
+        Update: {
+          Archetype?: string | null
+          "Dise_Cancer Prevalence"?: number | null
+          "Dise_COPD Prevalence"?: number | null
+          "Dise_Heart Disease Prevalence"?: number | null
+          "Dise_Hypertension Prevalence"?: number | null
+          "Dise_Infertility Prevalence"?: number | null
+          "Dise_Mental Health Disorder Prevalence"?: number | null
+          "Dise_Multiple Sclerosis Prevalence"?: number | null
+          "Dise_Substance Use Disorder Prevalence"?: number | null
+          "Dise_Type 1 Diabetes Prevalence"?: number | null
+          "Dise_Type 2 Diabetes Prevalence"?: number | null
+          "Dise_Vitamin D Deficiency Prevalence"?: number | null
+          id?: string | null
+        }
+        Relationships: []
+      }
+      View_Gaps_In_Care: {
+        Row: {
+          Archetype: string | null
+          "Gaps_Behavioral Health FU Antidepressant Med Man": number | null
+          "Gaps_Behavioral Health FU Care Children ADHDMeds": number | null
+          "Gaps_Behavioral Health FU ED Visit Alcohol Other Drug Abuse":
+            | number
+            | null
+          "Gaps_Behavioral Health FU ED Visit Mental Illness": number | null
+          "Gaps_Behavioral Health FU High Intensity Care SUD": number | null
+          "Gaps_Behavioral Health FU Hospitalization Mental Illness":
+            | number
+            | null
+          "Gaps_Cancer Screening Breast": number | null
+          "Gaps_Cancer Screening Cervical": number | null
+          "Gaps_Cancer Screening Colon": number | null
+          "Gaps_Diabetes Annual Exam": number | null
+          "Gaps_Diabetes HbA1C Test": number | null
+          "Gaps_Diabetes Retinal Screening": number | null
+          "Gaps_Diabetes RX Adherence": number | null
+          "Gaps_Hyperlipidemia HDL Adherence": number | null
+          "Gaps_Hyperlipidemia LDL Adherence": number | null
+          "Gaps_Hyperlipidemia RX Adherence": number | null
+          "Gaps_Hyperlipidemia Triglyceride Adherence": number | null
+          "Gaps_Hypertension ACE Inhibitor RX Adherence": number | null
+          "Gaps_Hypertension Annual Exam": number | null
+          "Gaps_Hypertension ARB RX Adherence": number | null
+          "Gaps_Hypertension Beta Blocker RX Adherence": number | null
+          "Gaps_Hypertension Calcium Channel Blocker RX Adherence":
+            | number
+            | null
+          "Gaps_Hypertension Diuretic RX Adherence": number | null
+          "Gaps_Hypertension RX Adherence": number | null
+          "Gaps_Immunization HPV": number | null
+          "Gaps_Immunization Meningitis": number | null
+          "Gaps_Immunization TDAP": number | null
+          "Gaps_Wellness Visit Adults": number | null
+          "Gaps_Wellness Visit Ages 1-2": number | null
+          "Gaps_Wellness Visit Ages 1-20": number | null
+          "Gaps_Wellness Visit Ages 12-20": number | null
+          "Gaps_Wellness Visit Ages 2-7": number | null
+          "Gaps_Wellness Visit Ages 7-12": number | null
+          id: string | null
+        }
+        Insert: {
+          Archetype?: string | null
+          "Gaps_Behavioral Health FU Antidepressant Med Man"?: number | null
+          "Gaps_Behavioral Health FU Care Children ADHDMeds"?: number | null
+          "Gaps_Behavioral Health FU ED Visit Alcohol Other Drug Abuse"?:
+            | number
+            | null
+          "Gaps_Behavioral Health FU ED Visit Mental Illness"?: number | null
+          "Gaps_Behavioral Health FU High Intensity Care SUD"?: number | null
+          "Gaps_Behavioral Health FU Hospitalization Mental Illness"?:
+            | number
+            | null
+          "Gaps_Cancer Screening Breast"?: number | null
+          "Gaps_Cancer Screening Cervical"?: number | null
+          "Gaps_Cancer Screening Colon"?: number | null
+          "Gaps_Diabetes Annual Exam"?: number | null
+          "Gaps_Diabetes HbA1C Test"?: number | null
+          "Gaps_Diabetes Retinal Screening"?: number | null
+          "Gaps_Diabetes RX Adherence"?: number | null
+          "Gaps_Hyperlipidemia HDL Adherence"?: number | null
+          "Gaps_Hyperlipidemia LDL Adherence"?: number | null
+          "Gaps_Hyperlipidemia RX Adherence"?: number | null
+          "Gaps_Hyperlipidemia Triglyceride Adherence"?: number | null
+          "Gaps_Hypertension ACE Inhibitor RX Adherence"?: number | null
+          "Gaps_Hypertension Annual Exam"?: number | null
+          "Gaps_Hypertension ARB RX Adherence"?: number | null
+          "Gaps_Hypertension Beta Blocker RX Adherence"?: number | null
+          "Gaps_Hypertension Calcium Channel Blocker RX Adherence"?:
+            | number
+            | null
+          "Gaps_Hypertension Diuretic RX Adherence"?: number | null
+          "Gaps_Hypertension RX Adherence"?: number | null
+          "Gaps_Immunization HPV"?: number | null
+          "Gaps_Immunization Meningitis"?: number | null
+          "Gaps_Immunization TDAP"?: number | null
+          "Gaps_Wellness Visit Adults"?: number | null
+          "Gaps_Wellness Visit Ages 1-2"?: number | null
+          "Gaps_Wellness Visit Ages 1-20"?: number | null
+          "Gaps_Wellness Visit Ages 12-20"?: number | null
+          "Gaps_Wellness Visit Ages 2-7"?: number | null
+          "Gaps_Wellness Visit Ages 7-12"?: number | null
+          id?: string | null
+        }
+        Update: {
+          Archetype?: string | null
+          "Gaps_Behavioral Health FU Antidepressant Med Man"?: number | null
+          "Gaps_Behavioral Health FU Care Children ADHDMeds"?: number | null
+          "Gaps_Behavioral Health FU ED Visit Alcohol Other Drug Abuse"?:
+            | number
+            | null
+          "Gaps_Behavioral Health FU ED Visit Mental Illness"?: number | null
+          "Gaps_Behavioral Health FU High Intensity Care SUD"?: number | null
+          "Gaps_Behavioral Health FU Hospitalization Mental Illness"?:
+            | number
+            | null
+          "Gaps_Cancer Screening Breast"?: number | null
+          "Gaps_Cancer Screening Cervical"?: number | null
+          "Gaps_Cancer Screening Colon"?: number | null
+          "Gaps_Diabetes Annual Exam"?: number | null
+          "Gaps_Diabetes HbA1C Test"?: number | null
+          "Gaps_Diabetes Retinal Screening"?: number | null
+          "Gaps_Diabetes RX Adherence"?: number | null
+          "Gaps_Hyperlipidemia HDL Adherence"?: number | null
+          "Gaps_Hyperlipidemia LDL Adherence"?: number | null
+          "Gaps_Hyperlipidemia RX Adherence"?: number | null
+          "Gaps_Hyperlipidemia Triglyceride Adherence"?: number | null
+          "Gaps_Hypertension ACE Inhibitor RX Adherence"?: number | null
+          "Gaps_Hypertension Annual Exam"?: number | null
+          "Gaps_Hypertension ARB RX Adherence"?: number | null
+          "Gaps_Hypertension Beta Blocker RX Adherence"?: number | null
+          "Gaps_Hypertension Calcium Channel Blocker RX Adherence"?:
+            | number
+            | null
+          "Gaps_Hypertension Diuretic RX Adherence"?: number | null
+          "Gaps_Hypertension RX Adherence"?: number | null
+          "Gaps_Immunization HPV"?: number | null
+          "Gaps_Immunization Meningitis"?: number | null
+          "Gaps_Immunization TDAP"?: number | null
+          "Gaps_Wellness Visit Adults"?: number | null
+          "Gaps_Wellness Visit Ages 1-2"?: number | null
+          "Gaps_Wellness Visit Ages 1-20"?: number | null
+          "Gaps_Wellness Visit Ages 12-20"?: number | null
+          "Gaps_Wellness Visit Ages 2-7"?: number | null
+          "Gaps_Wellness Visit Ages 7-12"?: number | null
+          id?: string | null
+        }
+        Relationships: []
+      }
+      View_Risk_Factors: {
+        Row: {
+          Archetype: string | null
+          "Dise_COPD Prevalence": number | null
+          "Dise_Heart Disease Prevalence": number | null
+          "Dise_Hypertension Prevalence": number | null
+          "Dise_Mental Health Disorder Prevalence": number | null
+          "Dise_Substance Use Disorder Prevalence": number | null
+          "Dise_Type 2 Diabetes Prevalence": number | null
+          id: string | null
+          "Risk_Average Risk Score": number | null
+          "SDOH_Average Amenities Access": number | null
+          "SDOH_Average Childcare Access": number | null
+          "SDOH_Average Digital Access": number | null
+          "SDOH_Average Economic Insecurity": number | null
+          "SDOH_Average Food Access": number | null
+          "SDOH_Average Health Literacy": number | null
+          "SDOH_Average Healthcare Access": number | null
+          "SDOH_Average Neighborhood": number | null
+          "SDOH_Average SDOH": number | null
+          "SDOH_Average Transportation": number | null
+          "SDOH_Average Womens Health": number | null
+        }
+        Insert: {
+          Archetype?: string | null
+          "Dise_COPD Prevalence"?: number | null
+          "Dise_Heart Disease Prevalence"?: number | null
+          "Dise_Hypertension Prevalence"?: number | null
+          "Dise_Mental Health Disorder Prevalence"?: number | null
+          "Dise_Substance Use Disorder Prevalence"?: number | null
+          "Dise_Type 2 Diabetes Prevalence"?: number | null
+          id?: string | null
+          "Risk_Average Risk Score"?: number | null
+          "SDOH_Average Amenities Access"?: number | null
+          "SDOH_Average Childcare Access"?: number | null
+          "SDOH_Average Digital Access"?: number | null
+          "SDOH_Average Economic Insecurity"?: number | null
+          "SDOH_Average Food Access"?: number | null
+          "SDOH_Average Health Literacy"?: number | null
+          "SDOH_Average Healthcare Access"?: number | null
+          "SDOH_Average Neighborhood"?: number | null
+          "SDOH_Average SDOH"?: number | null
+          "SDOH_Average Transportation"?: number | null
+          "SDOH_Average Womens Health"?: number | null
+        }
+        Update: {
+          Archetype?: string | null
+          "Dise_COPD Prevalence"?: number | null
+          "Dise_Heart Disease Prevalence"?: number | null
+          "Dise_Hypertension Prevalence"?: number | null
+          "Dise_Mental Health Disorder Prevalence"?: number | null
+          "Dise_Substance Use Disorder Prevalence"?: number | null
+          "Dise_Type 2 Diabetes Prevalence"?: number | null
+          id?: string | null
+          "Risk_Average Risk Score"?: number | null
+          "SDOH_Average Amenities Access"?: number | null
+          "SDOH_Average Childcare Access"?: number | null
+          "SDOH_Average Digital Access"?: number | null
+          "SDOH_Average Economic Insecurity"?: number | null
+          "SDOH_Average Food Access"?: number | null
+          "SDOH_Average Health Literacy"?: number | null
+          "SDOH_Average Healthcare Access"?: number | null
+          "SDOH_Average Neighborhood"?: number | null
+          "SDOH_Average SDOH"?: number | null
+          "SDOH_Average Transportation"?: number | null
+          "SDOH_Average Womens Health"?: number | null
+        }
+        Relationships: []
+      }
+      View_Utilization_Metrics: {
+        Row: {
+          Archetype: string | null
+          id: string | null
+          "Util_Cesarean Sections": number | null
+          "Util_Dialysis Service per 1k Members": number | null
+          "Util_Emergency Visits per 1k Members": number | null
+          "Util_Inpatient Admits per 1k Members": number | null
+          "Util_Inpatient Days per 1k Members": number | null
+          "Util_Lab Services per 1k Members": number | null
+          "Util_Live Births": number | null
+          "Util_Observational Stays per 1k Members": number | null
+          "Util_Outpatient Surgeries per 1k Members": number | null
+          "Util_PCP Visits per 1k Members": number | null
+          "Util_Percent of Allowed Amount Spent on High Cost Claimants":
+            | number
+            | null
+          "Util_Percent of Members who are High Cost Claimants": number | null
+          "Util_Percent of Members who are Non-Utilizers": number | null
+          "Util_Preventative Visits per 1k Members": number | null
+          "Util_Radiology Services per 1k Members": number | null
+          "Util_Specialist Visits per 1k Members": number | null
+          "Util_Telehealth Adoption": number | null
+          "Util_Urgent Care Visits per 1k Members": number | null
+        }
+        Insert: {
+          Archetype?: string | null
+          id?: string | null
+          "Util_Cesarean Sections"?: number | null
+          "Util_Dialysis Service per 1k Members"?: number | null
+          "Util_Emergency Visits per 1k Members"?: number | null
+          "Util_Inpatient Admits per 1k Members"?: number | null
+          "Util_Inpatient Days per 1k Members"?: number | null
+          "Util_Lab Services per 1k Members"?: number | null
+          "Util_Live Births"?: number | null
+          "Util_Observational Stays per 1k Members"?: number | null
+          "Util_Outpatient Surgeries per 1k Members"?: number | null
+          "Util_PCP Visits per 1k Members"?: number | null
+          "Util_Percent of Allowed Amount Spent on High Cost Claimants"?:
+            | number
+            | null
+          "Util_Percent of Members who are High Cost Claimants"?: number | null
+          "Util_Percent of Members who are Non-Utilizers"?: number | null
+          "Util_Preventative Visits per 1k Members"?: number | null
+          "Util_Radiology Services per 1k Members"?: number | null
+          "Util_Specialist Visits per 1k Members"?: number | null
+          "Util_Telehealth Adoption"?: number | null
+          "Util_Urgent Care Visits per 1k Members"?: number | null
+        }
+        Update: {
+          Archetype?: string | null
+          id?: string | null
+          "Util_Cesarean Sections"?: number | null
+          "Util_Dialysis Service per 1k Members"?: number | null
+          "Util_Emergency Visits per 1k Members"?: number | null
+          "Util_Inpatient Admits per 1k Members"?: number | null
+          "Util_Inpatient Days per 1k Members"?: number | null
+          "Util_Lab Services per 1k Members"?: number | null
+          "Util_Live Births"?: number | null
+          "Util_Observational Stays per 1k Members"?: number | null
+          "Util_Outpatient Surgeries per 1k Members"?: number | null
+          "Util_PCP Visits per 1k Members"?: number | null
+          "Util_Percent of Allowed Amount Spent on High Cost Claimants"?:
+            | number
+            | null
+          "Util_Percent of Members who are High Cost Claimants"?: number | null
+          "Util_Percent of Members who are Non-Utilizers"?: number | null
+          "Util_Preventative Visits per 1k Members"?: number | null
+          "Util_Radiology Services per 1k Members"?: number | null
+          "Util_Specialist Visits per 1k Members"?: number | null
+          "Util_Telehealth Adoption"?: number | null
+          "Util_Urgent Care Visits per 1k Members"?: number | null
         }
         Relationships: []
       }
     }
     Functions: {
-      [_ in never]: never
+      create_test_table_if_not_exists: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      update_archetype_analysis: {
+        Args: {
+          p_archetype_id: string
+          p_executive_summary: string
+          p_archetype_overview: string
+          p_key_findings: Json
+          p_detailed_metrics: string
+          p_swot_analysis: Json
+          p_strategic_recommendations: Json
+          p_distinctive_metrics: Json
+        }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never
