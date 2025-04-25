@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,12 +11,14 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { v4 as uuidv4 } from 'uuid';
+import { ArchetypeDetailedData, ArchetypeId } from '@/types/archetype';
 
+// Fixed interface to include required archetypeId prop
 interface PremiumReportProps {
-  archetypeId: string;
+  archetypeId: ArchetypeId;
   assessmentResult?: any;
   assessmentAnswers?: any;
-  archetypeData?: any;  // Adding archetypeData prop to match usage in AssessmentResultsCard
+  archetypeData?: ArchetypeDetailedData;
 }
 
 const formSchema = z.object({

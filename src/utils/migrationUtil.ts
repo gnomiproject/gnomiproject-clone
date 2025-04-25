@@ -44,12 +44,8 @@ export const migrateDataToSupabase = async () => {
       family_id: archetype.familyId,
       short_description: archetype.shortDescription,
       long_description: archetype.longDescription,
-      characteristics: archetype.characteristics,
-      strategic_priorities: archetype.strategicPriorities,
-      risk_score: archetype.riskScore,
-      risk_variance: archetype.riskVariance,
-      primary_risk_driver: archetype.primaryRiskDriver,
-      color: archetype.color
+      hex_color: archetype.hexColor,
+      industries: ''
     }));
     
     const { error: archetypesError } = await supabase
@@ -66,26 +62,25 @@ export const migrateDataToSupabase = async () => {
       throw new Error(`Error migrating archetypes: ${archetypesError.message}`);
     }
     
-    // Step 3: Insert archetype metrics - use correct table name
+    // Step 3: Insert archetype metrics - use correct table name and format
     console.log('Migrating archetype metrics...');
+    // Fixed to match Supabase schema - each metric needs an 'id' field
     const formattedMetrics = archetypeMetrics.map(metric => ({
-      archetype_id: metric.archetypeId,
-      paid_pepy: metric.paidPEPY,
-      paid_pepy_variance: metric.paidPEPYVariance,
-      paid_pmpy: metric.paidPMPY,
-      paid_pmpy_variance: metric.paidPMPYVariance,
-      paid_allowed_ratio: metric.paidAllowedRatio,
-      average_family_size: metric.averageFamilySize,
-      specialist_visits_per_1k: metric.specialistVisitsPer1K,
-      inpatient_admits_per_1k: metric.inpatientAdmitsPer1K,
-      emergency_visits_per_1k: metric.emergencyVisitsPer1K,
-      sdoh_score: metric.sdohScore,
-      risk_cost_ratio: metric.riskCostRatio
+      id: metric.archetypeId,  // Use archetypeId as the id field
+      Archetype: metric.archetypeId,
+      "Cost_Medical Paid Amount PEPY": metric.paidPEPY,
+      "Cost_Medical Paid Amount PMPY": metric.paidPMPY,
+      // Add other fields as needed to match the schema
+      "Demo_Average Family Size": metric.averageFamilySize,
+      "Util_Specialist Visits per 1k Members": metric.specialistVisitsPer1K,
+      "Util_Inpatient Admits per 1k Members": metric.inpatientAdmitsPer1K,
+      "Util_Emergency Visits per 1k Members": metric.emergencyVisitsPer1K,
+      "Risk_Average Risk Score": metric.riskCostRatio
     }));
     
     const { error: metricsError } = await supabase
       .from('Core_Archetypes_Metrics')
-      .upsert(formattedMetrics, { onConflict: 'archetype_id' });
+      .upsert(formattedMetrics, { onConflict: 'id' });
       
     if (metricsError) {
       console.error('Error migrating metrics:', metricsError);

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -31,7 +30,7 @@ const Index = () => {
   const isMobile = useIsMobile();
   const [families, setFamilies] = useState<FamilyData[]>([]);
 
-  // Fetch families from Supabase
+  // Fetch families from Supabase - Fixed React Query hook usage
   const { isLoading: isLoadingFamilies } = useQuery({
     queryKey: ['families'],
     queryFn: async () => {
@@ -49,11 +48,15 @@ const Index = () => {
       }
       return data;
     },
-    onSuccess: (data) => {
-      setFamilies(data as FamilyData[]);
-    },
-    onError: (error) => {
-      console.error("Error fetching families:", error);
+    // Use onSettled instead of onSuccess and onError in newer versions of react-query
+    meta: {
+      onSettled: (data: any, error: any) => {
+        if (error) {
+          console.error("Error fetching families:", error);
+        } else if (data) {
+          setFamilies(data as FamilyData[]);
+        }
+      }
     }
   });
 

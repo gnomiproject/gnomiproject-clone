@@ -48,9 +48,9 @@ const DirectReport = () => {
       try {
         setLoadingReportData(true);
         
-        // Fetch deep dive report
+        // Fix table names to match Supabase schema
         const { data: reportData, error: reportError } = await supabase
-          .from('archetype_deep_dive_reports')
+          .from('Analysis_Archetype_Deep_Dive_Reports')
           .select('*')
           .eq('archetype_id', archetypeId)
           .maybeSingle();
@@ -61,9 +61,9 @@ const DirectReport = () => {
           setDeepDiveReport(reportData);
         }
         
-        // Fetch SWOT analysis
+        // Fix table names to match Supabase schema
         const { data: swotData, error: swotError } = await supabase
-          .from('archetype_swot_analyses')
+          .from('Analysis_Archetype_SWOT')
           .select('*')
           .eq('archetype_id', archetypeId)
           .maybeSingle();
@@ -74,9 +74,9 @@ const DirectReport = () => {
           setSwotAnalysis(swotData);
         }
         
-        // Fetch strategic recommendations
+        // Fix table names to match Supabase schema
         const { data: recommendationsData, error: recommendationsError } = await supabase
-          .from('archetype_strategic_recommendations')
+          .from('Analysis_Archetype_Strategic_Recommendations')
           .select('*')
           .eq('archetype_id', archetypeId)
           .order('recommendation_number', { ascending: true });

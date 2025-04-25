@@ -95,8 +95,11 @@ const Results = () => {
             />
           </div>
           
-          {/* Premium Report Component */}
-          <PremiumReport archetypeData={archetypeData} />
+          {/* Premium Report Component - Fixed missing archetypeId prop */}
+          <PremiumReport 
+            archetypeData={archetypeData} 
+            archetypeId={archetypeData.id} 
+          />
         </div>
       </div>
     </div>
