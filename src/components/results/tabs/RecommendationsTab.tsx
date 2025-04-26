@@ -59,7 +59,7 @@ const RecommendationsTab = ({ archetypeData }: RecommendationsTabProps) => {
                       </div>
                       <div>
                         <h3 className="font-semibold text-lg mb-1">{title}</h3>
-                        <p className="text-gray-600 text-sm">Full implementation strategy available in detailed report</p>
+                        <p className="text-gray-600 text-sm">Full implementation details in complete report</p>
                       </div>
                     </div>
                     <Lock className="text-gray-400 h-5 w-5" />
@@ -86,10 +86,10 @@ const RecommendationsTab = ({ archetypeData }: RecommendationsTabProps) => {
             </Badge>
           </div>
           <h3 className="text-lg font-semibold mb-2" style={{ color }}>
-            Access All Strategic Recommendations
+            Full Report Contains Complete Recommendations
           </h3>
           <p className="text-gray-600 mb-4">
-            The full report includes detailed implementation strategies and expected outcomes for each recommendation.
+            Access the full report for comprehensive implementation strategies and outcomes.
           </p>
         </div>
       )}
