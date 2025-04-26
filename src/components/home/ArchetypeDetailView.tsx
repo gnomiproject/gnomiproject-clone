@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { ArchetypeId } from '@/types/archetype';
-import { ExternalLink } from 'lucide-react';
 
 interface ArchetypeDetailViewProps {
   archetypeSummary: {
@@ -12,7 +11,7 @@ interface ArchetypeDetailViewProps {
     description: string;
     keyCharacteristics: string[];
   };
-  onShowDetailDialog: () => void;
+  onShowDetailDialog?: () => void; // Make this prop optional by adding ?
 }
 
 const ArchetypeDetailView: React.FC<ArchetypeDetailViewProps> = ({
@@ -54,16 +53,7 @@ const ArchetypeDetailView: React.FC<ArchetypeDetailViewProps> = ({
           ))}
         </div>
         
-        {/* Learn More button at the bottom */}
-        <div className="flex justify-end mt-6">
-          <button 
-            onClick={onShowDetailDialog}
-            className={`inline-flex items-center px-4 py-2 rounded text-white bg-archetype-${archetypeSummary.id} hover:opacity-90 transition-opacity`}
-          >
-            Learn More
-            <ExternalLink className="ml-2 h-4 w-4" />
-          </button>
-        </div>
+        {/* Removed the Learn More button as requested */}
       </div>
     </div>
   );
