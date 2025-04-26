@@ -7,13 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { DatabaseIcon, Copy, RefreshCw, Calendar, Trash2 } from "lucide-react";
+import { DatabaseIcon, Copy, RefreshCw, Calendar, Trash2, ExternalLink } from "lucide-react";
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 
 const DeepDiveReportsAccess = () => {
-  const [isGenerating, setIsGenerating] = useState(false);
+  const [isGenerating, setIsGenerating] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
+  const [lastGeneratedUrl, setLastGeneratedUrl] = useState<string | null>(null);
 
   const { data: reports, isLoading, error, refetch } = useQuery({
     queryKey: ['deep-dive-reports'],
@@ -23,46 +24,57 @@ const DeepDiveReportsAccess = () => {
         .select('*')
         .order('created_at', { ascending: false });
       
-      if (error) throw error;
-      return data;
+      if (error) {
+        console.error('Error fetching reports:', error);
+        throw error;
+      }
+      
+      return data || [];
     }
   });
 
   const generateReport = async (archetypeId: string) => {
     try {
-      setIsGenerating(true);
+      setIsGenerating(archetypeId);
       const expiryDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days from now
+      
+      // Generate a unique access token
+      const accessToken = crypto.randomUUID();
       
       // Insert into report_requests table
       const { data, error } = await supabase
         .from('report_requests')
         .insert({
           archetype_id: archetypeId,
-          access_token: crypto.randomUUID(),
+          access_token: accessToken,
           status: 'active',
           expires_at: expiryDate.toISOString(),
           name: 'Admin Generated',
           organization: 'Admin Access',
-          email: 'admin@example.com'
+          email: 'admin@example.com',
+          created_at: new Date().toISOString(),
+          id: crypto.randomUUID()
         })
-        .select()
-        .single();
+        .select();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error generating report:', error);
+        throw error;
+      }
 
-      toast.success('Report generated successfully');
-      refetch();
+      // Generate the report URL
+      const reportUrl = `${window.location.origin}/report/${archetypeId}/${accessToken}`;
+      setLastGeneratedUrl(reportUrl);
       
-      // Copy link to clipboard
-      const reportUrl = `${window.location.origin}/report/${archetypeId}/${data.access_token}`;
       await navigator.clipboard.writeText(reportUrl);
-      toast.success('Report link copied to clipboard');
+      toast.success('Report generated and link copied to clipboard');
       
+      refetch();
     } catch (error) {
       console.error('Error generating report:', error);
-      toast.error('Failed to generate report');
+      toast.error('Failed to generate report: ' + (error as Error).message);
     } finally {
-      setIsGenerating(false);
+      setIsGenerating(null);
     }
   };
 
@@ -80,7 +92,7 @@ const DeepDiveReportsAccess = () => {
       refetch();
     } catch (error) {
       console.error('Error deleting report:', error);
-      toast.error('Failed to delete report');
+      toast.error('Failed to delete report: ' + (error as Error).message);
     } finally {
       setIsDeleting(null);
     }
@@ -94,6 +106,11 @@ const DeepDiveReportsAccess = () => {
     } catch (error) {
       toast.error('Failed to copy link');
     }
+  };
+
+  const openReportInNewTab = (archetypeId: string, token: string) => {
+    const url = `${window.location.origin}/report/${archetypeId}/${token}`;
+    window.open(url, '_blank');
   };
 
   if (isLoading) {
@@ -111,6 +128,11 @@ const DeepDiveReportsAccess = () => {
         <AlertTitle>Error loading reports</AlertTitle>
         <AlertDescription>
           There was a problem loading the report data. Please try refreshing the page.
+          {error instanceof Error && (
+            <div className="mt-2 text-sm">
+              Error details: {error.message}
+            </div>
+          )}
         </AlertDescription>
       </Alert>
     );
@@ -124,6 +146,37 @@ const DeepDiveReportsAccess = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
+            {lastGeneratedUrl && (
+              <Alert className="mb-4 bg-green-50 border-green-200">
+                <AlertTitle className="flex items-center gap-2">
+                  <span>Report Generated Successfully</span>
+                </AlertTitle>
+                <AlertDescription className="mt-2">
+                  <div className="text-sm mb-2">Your report link:</div>
+                  <div className="bg-white p-2 rounded border flex justify-between items-center">
+                    <div className="text-sm truncate">{lastGeneratedUrl}</div>
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => navigator.clipboard.writeText(lastGeneratedUrl || '')}
+                      >
+                        <Copy className="h-4 w-4 mr-1" /> Copy
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => window.open(lastGeneratedUrl || '', '_blank')}
+                      >
+                        <ExternalLink className="h-4 w-4 mr-1" /> Open
+                      </Button>
+                    </div>
+                  </div>
+                </AlertDescription>
+              </Alert>
+            )}
+
+            <h3 className="text-lg font-medium">Generate new report</h3>
             <div className="flex flex-wrap gap-2">
               {['a1', 'a2', 'a3', 'b1', 'b2', 'b3', 'c1', 'c2', 'c3'].map((id) => (
                 <Button
@@ -131,13 +184,19 @@ const DeepDiveReportsAccess = () => {
                   variant="outline"
                   size="sm"
                   onClick={() => generateReport(id)}
-                  disabled={isGenerating}
+                  disabled={isGenerating !== null}
+                  className={isGenerating === id ? "animate-pulse" : ""}
                 >
-                  {isGenerating ? <RefreshCw className="h-4 w-4 animate-spin" /> : id.toUpperCase()}
+                  {isGenerating === id ? (
+                    <RefreshCw className="h-4 w-4 animate-spin mr-1" /> 
+                  ) : (
+                    id.toUpperCase()
+                  )}
                 </Button>
               ))}
             </div>
 
+            <h3 className="text-lg font-medium mt-6">Existing reports</h3>
             {reports && reports.length > 0 ? (
               <Table>
                 <TableHeader>
@@ -182,6 +241,14 @@ const DeepDiveReportsAccess = () => {
                             title="Copy link"
                           >
                             <Copy className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => openReportInNewTab(report.archetype_id, report.access_token)}
+                            title="Open report"
+                          >
+                            <ExternalLink className="h-4 w-4" />
                           </Button>
                           <Button
                             variant="ghost"
