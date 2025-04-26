@@ -1,8 +1,6 @@
-
 import React from 'react';
 import { ArchetypeDetailedData } from '@/types/archetype';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { TrendingUp, AlertTriangle, Lightbulb, Shield } from 'lucide-react';
 
 interface SwotTabProps {
@@ -31,13 +29,7 @@ const SwotTab = ({ archetypeData }: SwotTabProps) => {
     <div>
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
         <h2 className="text-xl font-bold">SWOT Analysis</h2>
-        <Button 
-          variant="outline" 
-          className="mt-4 md:mt-0"
-          style={{ color: color, borderColor: color }}
-        >
-          Get Strategic Implementation Plan
-        </Button>
+        {/* Removed "Get Strategic Implementation Plan" button */}
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
