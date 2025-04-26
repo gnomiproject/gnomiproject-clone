@@ -4,7 +4,7 @@ import { ArchetypeDetailedData } from '@/types/archetype';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ChevronRight, Lightbulb, Download } from 'lucide-react';
+import { Lock, Download, Lightbulb } from 'lucide-react';
 
 interface RecommendationsTabProps {
   archetypeData: ArchetypeDetailedData;
@@ -67,12 +67,10 @@ const RecommendationsTab = ({ archetypeData }: RecommendationsTabProps) => {
                       </div>
                       <div>
                         <h3 className="font-semibold text-lg mb-1">{title}</h3>
-                        <p className="text-gray-600 text-sm">Click for detailed implementation strategy</p>
+                        <p className="text-gray-600 text-sm">Full implementation strategy available in detailed report</p>
                       </div>
                     </div>
-                    <Button variant="ghost" size="icon" className="rounded-full">
-                      <ChevronRight size={20} />
-                    </Button>
+                    <Lock className="text-gray-400 h-5 w-5" />
                   </div>
                 </CardContent>
               </Card>
@@ -107,30 +105,6 @@ const RecommendationsTab = ({ archetypeData }: RecommendationsTabProps) => {
           </Button>
         </div>
       )}
-      
-      <Card>
-        <CardContent className="p-6">
-          <h3 className="text-lg font-semibold mb-3" style={{ color }}>Our Strategic Approach</h3>
-          <p className="text-gray-700">
-            Our strategic recommendations are developed based on extensive analysis of organizations similar to yours.
-            Each recommendation is tailored to address specific challenges and opportunities relevant to your archetype.
-          </p>
-          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h4 className="font-medium mb-1 text-sm">Data-Driven</h4>
-              <p className="text-xs text-gray-600">Recommendations based on analysis of real-world outcomes</p>
-            </div>
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h4 className="font-medium mb-1 text-sm">Archetype-Specific</h4>
-              <p className="text-xs text-gray-600">Customized to your organization's unique profile</p>
-            </div>
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h4 className="font-medium mb-1 text-sm">Actionable</h4>
-              <p className="text-xs text-gray-600">Practical strategies with clear implementation steps</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 };

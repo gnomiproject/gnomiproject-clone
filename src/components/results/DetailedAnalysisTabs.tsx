@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ArchetypeDetailedData } from '@/types/archetype';
@@ -70,9 +69,7 @@ const DetailedAnalysisTabs = ({ archetypeData, onRetakeAssessment }: DetailedAna
   };
   
   return (
-    <div className="bg-white px-4 md:px-8 py-6">
-      {getReportCTA('top')}
-      
+    <div className="bg-white px-4 md:px-8 py-6">      
       <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="w-full">
         {isMobile ? (
           <div className="mb-6">
@@ -142,8 +139,6 @@ const DetailedAnalysisTabs = ({ archetypeData, onRetakeAssessment }: DetailedAna
           <RecommendationsTab archetypeData={archetypeData} />
         </TabsContent>
       </Tabs>
-      
-      {getReportCTA('between')}
       
       {/* Full report request section */}
       <div className="mt-12 pt-8 border-t">
