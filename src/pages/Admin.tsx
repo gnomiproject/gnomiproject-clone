@@ -1,44 +1,47 @@
 
 import React from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import SectionTitle from '@/components/shared/SectionTitle';
-import DatabaseSync from '@/components/admin/DatabaseSync';
-import InsightsReportGenerator from '@/components/admin/InsightsReportGenerator';
-import DeepDiveReportsAccess from '@/components/admin/DeepDiveReportsAccess';
-import { Card } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
+import useReportGeneration from '@/hooks/useReportGeneration';
 
 const Admin = () => {
+  const { toast } = useToast();
+  const { generateAllReports, isGenerating } = useReportGeneration();
+
+  const handleGenerateReports = async () => {
+    try {
+      await generateAllReports();
+      toast({
+        title: "Reports Generated",
+        description: "All archetype reports have been generated successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to generate reports. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
-    <div className="container mx-auto py-8 px-4">
-      <SectionTitle 
-        title="Admin Dashboard" 
-        subtitle="Data management and report generation tools" 
-        center
-      />
+    <div className="container mx-auto py-8">
+      <h1 className="text-3xl font-bold mb-8">Admin Dashboard</h1>
       
-      <div className="max-w-5xl mx-auto mt-8">
-        <Tabs defaultValue="database" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="database">Database Sync</TabsTrigger>
-            <TabsTrigger value="insights">Insights Reports</TabsTrigger>
-            <TabsTrigger value="deepdive">Deep Dive Reports</TabsTrigger>
-          </TabsList>
-          
-          <Card className="mt-4 p-6 border rounded-md">
-            <TabsContent value="database" className="space-y-4">
-              <DatabaseSync />
-            </TabsContent>
-            
-            <TabsContent value="insights" className="space-y-4">
-              <InsightsReportGenerator />
-            </TabsContent>
-            
-            <TabsContent value="deepdive" className="space-y-4">
-              <DeepDiveReportsAccess />
-            </TabsContent>
-          </Card>
-        </Tabs>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Report Generation</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Button 
+            onClick={handleGenerateReports}
+            disabled={isGenerating}
+          >
+            {isGenerating ? "Generating Reports..." : "Generate All Reports"}
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   );
 };
