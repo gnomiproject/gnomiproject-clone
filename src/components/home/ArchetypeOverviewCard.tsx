@@ -3,7 +3,6 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArchetypeId } from '@/types/archetype';
 import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useArchetypeFamilies } from '@/hooks/archetype/useArchetypeFamilies';
 
@@ -27,65 +26,62 @@ const ArchetypeOverviewCard = ({
   const [isExpanded, setIsExpanded] = React.useState(false);
   const { getFamilyById } = useArchetypeFamilies();
   const familyInfo = getFamilyById(family_id as 'a' | 'b' | 'c');
-  const cardStyle = hex_color ? { borderTop: `3px solid ${hex_color}` } : {};
-  const bulletStyle = hex_color ? { backgroundColor: hex_color } : {};
   
   const handleToggleExpand = (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation(); // Prevent link navigation when clicking the button
     setIsExpanded(!isExpanded);
   };
-  
-  return (
-    <Link to={`/archetype/${id}`}>
-      <Card 
-        className={`h-full p-6 hover:shadow-lg transition-all duration-300 ${isExpanded ? 'scale-105' : ''}`} 
-        style={cardStyle}
-      >
-        <div className="flex justify-between items-start mb-2">
-          <h3 className="text-xl font-bold">{name}</h3>
-          <span className="text-sm text-gray-500">{id}</span>
-        </div>
-        <p className="text-sm text-gray-600 mb-4">
-          Family {family_id} - {familyInfo?.name || ''}
-        </p>
-        {short_description && (
-          <p className="text-gray-700 mb-4">{short_description}</p>
-        )}
-        
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="w-full mb-4"
-          onClick={handleToggleExpand}
-        >
-          {isExpanded ? (
-            <>
-              Show Less <ChevronUp className="ml-2 h-4 w-4" />
-            </>
-          ) : (
-            <>
-              Learn More <ChevronDown className="ml-2 h-4 w-4" />
-            </>
-          )}
-        </Button>
 
-        {isExpanded && key_characteristics && key_characteristics.length > 0 && (
-          <div className="mt-4 space-y-3 animate-in fade-in duration-200">
-            <h4 className="font-medium text-gray-700 mb-3">Key Characteristics:</h4>
-            {key_characteristics.map((characteristic, index) => (
-              <div 
-                key={index} 
-                className="flex items-start gap-3 p-3 bg-gray-50 rounded-md border border-gray-100"
-              >
-                <div 
-                  className="w-2 h-2 rounded-full mt-1.5 shrink-0" 
-                  style={bulletStyle}
-                />
-                <span>{characteristic}</span>
-              </div>
-            ))}
+  return (
+    <Link to={`/archetype/${id}`} onClick={(e) => {
+      if (isExpanded) {
+        e.preventDefault(); // Prevent navigation when expanded
+      }
+    }}>
+      <Card 
+        className={`h-full p-6 hover:shadow-md transition-all duration-300 relative overflow-hidden`}
+        style={{ borderTop: `3px solid ${hex_color}` }}
+      >
+        <div className="space-y-4">
+          <div className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-50 text-blue-500">
+            Family {family_id.toUpperCase()} - {familyInfo?.name || ''}
           </div>
-        )}
+          
+          <div>
+            <h3 className="text-2xl font-bold mb-2" style={{ color: hex_color }}>{name}</h3>
+            {short_description && (
+              <p className="text-gray-600 line-clamp-3">{short_description}</p>
+            )}
+          </div>
+
+          <button
+            onClick={handleToggleExpand}
+            className="inline-flex items-center text-gray-500 hover:text-gray-700"
+          >
+            {isExpanded ? (
+              <>Show Less <ChevronUp className="ml-1 h-4 w-4" /></>
+            ) : (
+              <>Show More <ChevronDown className="ml-1 h-4 w-4" /></>
+            )}
+          </button>
+
+          {isExpanded && key_characteristics && key_characteristics.length > 0 && (
+            <div className="animate-in fade-in duration-200 space-y-3">
+              <div className="pt-4 space-y-2">
+                {key_characteristics.map((characteristic, index) => (
+                  <div key={index} className="flex items-start gap-3">
+                    <div 
+                      className="w-2 h-2 rounded-full mt-2 shrink-0"
+                      style={{ backgroundColor: hex_color }}
+                    />
+                    <span className="text-gray-700">{characteristic}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </Card>
     </Link>
   );
