@@ -6,7 +6,8 @@ import useReportGeneration from '@/hooks/useReportGeneration';
 import ReportGenerator from '@/components/admin/ReportGenerator';
 import InsightsReportGenerator from '@/components/admin/InsightsReportGenerator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Database, BarChart } from 'lucide-react';
+import { Database, BarChart, FileSearch } from 'lucide-react';
+import DeepDiveReportsAccess from '@/components/admin/DeepDiveReportsAccess';
 
 const Admin = () => {
   const { toast } = useToast();
@@ -27,6 +28,10 @@ const Admin = () => {
             <BarChart className="w-4 h-4" />
             <span>Insights Reports</span>
           </TabsTrigger>
+          <TabsTrigger value="deepDive" className="flex items-center gap-2">
+            <FileSearch className="w-4 h-4" />
+            <span>Deep Dive Reports</span>
+          </TabsTrigger>
         </TabsList>
         
         <TabsContent value="database" className="space-y-6">
@@ -43,6 +48,13 @@ const Admin = () => {
           <Card className="p-6">
             <h2 className="text-2xl font-semibold mb-4">Insights Reports Management</h2>
             <InsightsReportGenerator />
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="deepDive" className="space-y-6">
+          <Card className="p-6">
+            <h2 className="text-2xl font-semibold mb-4">Deep Dive Reports Access</h2>
+            <DeepDiveReportsAccess />
           </Card>
         </TabsContent>
       </Tabs>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -25,6 +24,8 @@ import {
   TableRow 
 } from "@/components/ui/table";
 import ReportDetailView from './ReportDetailView';
+import { Link } from 'react-router-dom';
+import { ExternalLink } from 'lucide-react';
 
 interface ArchetypeSummary {
   id: string;
@@ -33,7 +34,7 @@ interface ArchetypeSummary {
   status: 'pending' | 'success' | 'error';
 }
 
-const InsightsReportGenerator: React.FC = () => {
+export function InsightsReportGenerator() {
   const [isLoading, setIsLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
   const [archetypes, setArchetypes] = useState<ArchetypeSummary[]>([]);
@@ -288,17 +289,32 @@ const InsightsReportGenerator: React.FC = () => {
                     {archetype.lastUpdated || 'Never'}
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleViewReport(archetype.id)}
-                      disabled={archetype.status !== 'success'}
-                      title={archetype.status !== 'success' ? 'No report available' : 'View report'}
-                      className="h-8 w-8 p-0"
-                    >
-                      <Eye className="h-4 w-4" />
-                      <span className="sr-only">View Report</span>
-                    </Button>
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleViewReport(archetype.id)}
+                        disabled={archetype.status !== 'success'}
+                        title={archetype.status !== 'success' ? 'No report available' : 'View JSON data'}
+                        className="h-8 w-8 p-0"
+                      >
+                        <Eye className="h-4 w-4" />
+                        <span className="sr-only">View Report Data</span>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        asChild
+                        disabled={archetype.status !== 'success'}
+                        title="View on insights page"
+                        className="h-8 w-8 p-0"
+                      >
+                        <Link to={`/insights?archetype=${archetype.id}`}>
+                          <ExternalLink className="h-4 w-4" />
+                          <span className="sr-only">View on Insights Page</span>
+                        </Link>
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))
@@ -315,6 +331,6 @@ const InsightsReportGenerator: React.FC = () => {
       />
     </div>
   );
-};
+}
 
 export default InsightsReportGenerator;
