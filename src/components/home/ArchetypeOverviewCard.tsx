@@ -29,16 +29,12 @@ const ArchetypeOverviewCard = ({
   
   const handleToggleExpand = (e: React.MouseEvent) => {
     e.preventDefault();
-    e.stopPropagation(); // Prevent link navigation when clicking the button
+    e.stopPropagation(); // Prevent navigation when clicking the button
     setIsExpanded(!isExpanded);
   };
 
   return (
-    <Link to={`/archetype/${id}`} onClick={(e) => {
-      if (isExpanded) {
-        e.preventDefault(); // Prevent navigation when expanded
-      }
-    }}>
+    <div className="h-full">
       <Card 
         className={`h-full p-6 hover:shadow-md transition-all duration-300 relative overflow-hidden`}
         style={{ borderTop: `3px solid ${hex_color}` }}
@@ -61,16 +57,26 @@ const ArchetypeOverviewCard = ({
             )}
           </div>
 
-          <button
-            onClick={handleToggleExpand}
-            className="inline-flex items-center text-gray-500 hover:text-gray-700"
-          >
-            {isExpanded ? (
-              <>Show Less <ChevronUp className="ml-1 h-4 w-4" /></>
-            ) : (
-              <>Show More <ChevronDown className="ml-1 h-4 w-4" /></>
-            )}
-          </button>
+          <div className="flex justify-between items-center">
+            <button
+              onClick={handleToggleExpand}
+              className="inline-flex items-center text-gray-500 hover:text-gray-700"
+            >
+              {isExpanded ? (
+                <>Show Less <ChevronUp className="ml-1 h-4 w-4" /></>
+              ) : (
+                <>Show More <ChevronDown className="ml-1 h-4 w-4" /></>
+              )}
+            </button>
+
+            <Link 
+              to={`/archetype/${id}`} 
+              className="text-sm text-blue-600 hover:underline"
+              onClick={(e) => e.stopPropagation()}
+            >
+              View Full Details
+            </Link>
+          </div>
 
           {isExpanded && key_characteristics && key_characteristics.length > 0 && (
             <div className="animate-in fade-in duration-200 space-y-3">
@@ -89,7 +95,7 @@ const ArchetypeOverviewCard = ({
           )}
         </div>
       </Card>
-    </Link>
+    </div>
   );
 };
 
