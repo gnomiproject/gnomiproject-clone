@@ -7,6 +7,7 @@ import { AssessmentResult } from '@/types/assessment';
 import MatchFeedbackMenu from '@/components/insights/MatchFeedbackMenu';
 import NoAssessmentResults from '@/components/insights/NoAssessmentResults';
 import AssessmentResultsCard from '@/components/insights/AssessmentResultsCard';
+import { toast } from 'sonner';
 
 // Storage keys
 const INSIGHTS_STORAGE_KEY = 'healthcareArchetypeInsights';
@@ -83,8 +84,13 @@ const Insights = () => {
 
   // Handle closing the feedback menu
   const handleCloseFeedback = () => {
-    setShowFeedback(false);
-    setHasFeedbackBeenClosed(true);
+    try {
+      setShowFeedback(false);
+      setHasFeedbackBeenClosed(true);
+    } catch (error) {
+      console.error('Error closing feedback menu:', error);
+      toast.error('There was an issue closing the feedback menu');
+    }
   };
 
   // Get the archetype data if one is selected - using consistent hook usage pattern

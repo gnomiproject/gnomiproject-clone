@@ -53,6 +53,16 @@ const MatchFeedbackMenu = ({ archetypeId, onClose }: MatchFeedbackMenuProps) => 
       setIsSubmitting(false);
     }
   };
+  
+  const handleClose = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      onClose();
+    } catch (error) {
+      console.error('Error in handleClose:', error);
+    }
+  };
 
   if (submitted) {
     return (
@@ -66,7 +76,7 @@ const MatchFeedbackMenu = ({ archetypeId, onClose }: MatchFeedbackMenuProps) => 
   return (
     <div className="p-4 bg-white shadow-lg border rounded-lg max-w-xs relative">
       <button 
-        onClick={onClose} 
+        onClick={handleClose} 
         className="absolute top-3 right-3 p-1 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
         aria-label="Close feedback menu"
       >
