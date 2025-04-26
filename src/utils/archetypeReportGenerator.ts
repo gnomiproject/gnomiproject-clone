@@ -32,15 +32,15 @@ function generateReportContent(archetype: any, organizedMetrics: any) {
   const summary_analysis = `The ${archetype.name} archetype exhibits distinct characteristics across several key performance indicators.`;
   const distinctive_metrics_summary = `Key metrics highlight the unique attributes of the ${archetype.name} archetype, providing a comprehensive overview of its strengths and weaknesses.`;
   
-  // Convert organized metrics to an actual JSON object rather than a string
-  const data_details = organizedMetrics;
+  // Convert organized metrics to a detailed_metrics field
+  const detailed_metrics = organizedMetrics;
 
   return {
     title,
     introduction,
     summary_analysis,
     distinctive_metrics_summary,
-    data_details
+    detailed_metrics
   };
 }
 
@@ -111,7 +111,7 @@ async function generateArchetypeReports(supabase: SupabaseClient) {
     // 1. Fetch all archetypes from the correct table name: Core_Archetype_Overview
     console.log('Fetching archetypes from database...');
     const { data: archetypes, error: archetypesError } = await supabase
-      .from('Core_Archetype_Overview')  // Changed from 'archetypes' to 'Core_Archetype_Overview'
+      .from('Core_Archetype_Overview')
       .select('*');
     
     if (archetypesError) {
@@ -142,9 +142,9 @@ async function generateArchetypeReports(supabase: SupabaseClient) {
         // 3. Fetch metrics data for this archetype - trying both tables
         console.log(`Fetching metrics for archetype ${archetype.id} from Core_Archetypes_Metrics...`);
         let { data: metrics, error: metricsError } = await supabase
-          .from('Core_Archetypes_Metrics')  // Changed from 'archetype_data_041624bw' to 'Core_Archetypes_Metrics'
+          .from('Core_Archetypes_Metrics')
           .select('*')
-          .eq('id', archetype.id);  // Changed from 'archetype_ID' to 'id'
+          .eq('id', archetype.id);
         
         if (metricsError) {
           console.error(`Error fetching metrics from Core_Archetypes_Metrics for ${archetype.id}:`, metricsError);
@@ -234,10 +234,10 @@ async function insertReportContent(
     console.log(`Inserting deep dive report for ${archetypeId}...`);
     console.log(`Report data structure:`, Object.keys(reportContent));
     
-    // Ensure data_details is properly formatted as a valid JSON object
-    const safeDataDetails = reportContent.data_details || {};
+    // Ensure detailed_metrics is properly formatted as a valid JSON object
+    const detailedMetrics = reportContent.detailed_metrics || {};
     
-    console.log(`Inserting report with data_details:`, typeof safeDataDetails);
+    console.log(`Inserting report with detailed_metrics:`, typeof detailedMetrics);
     
     // Check if report already exists
     const { data: existingReport } = await supabase
@@ -253,11 +253,12 @@ async function insertReportContent(
       const { error } = await supabase
         .from('Analysis_Archetype_Full_Reports')
         .update({
-          title: reportContent.title,
-          introduction: reportContent.introduction,
-          summary_analysis: reportContent.summary_analysis,
-          distinctive_metrics_summary: reportContent.distinctive_metrics_summary,
-          data_details: safeDataDetails,
+          executive_summary: reportContent.introduction,
+          archetype_overview: reportContent,
+          key_findings: [],
+          detailed_metrics: detailedMetrics,
+          swot_analysis: swotAnalysis,
+          strategic_recommendations: strategicRecommendations,
           last_updated: new Date().toISOString()
         })
         .eq('archetype_id', archetypeId);
@@ -268,11 +269,12 @@ async function insertReportContent(
         .from('Analysis_Archetype_Full_Reports')
         .insert({
           archetype_id: archetypeId,
-          title: reportContent.title,
-          introduction: reportContent.introduction,
-          summary_analysis: reportContent.summary_analysis,
-          distinctive_metrics_summary: reportContent.distinctive_metrics_summary,
-          data_details: safeDataDetails,
+          executive_summary: reportContent.introduction,
+          archetype_overview: reportContent,
+          key_findings: [],
+          detailed_metrics: detailedMetrics,
+          swot_analysis: swotAnalysis,
+          strategic_recommendations: strategicRecommendations,
           last_updated: new Date().toISOString()
         });
       reportError = error;
@@ -333,47 +335,29 @@ async function insertReportContent(
     
     console.log(`Successfully inserted SWOT analysis for ${archetypeId}`);
 
-    // Insert strategic recommendations - similar approach for each recommendation
+    // Clear and re-insert Strategic Recommendations
+    // Delete existing recommendations first
+    await supabase
+      .from('Analysis_Archetype_Strategic_Recommendations')
+      .delete()
+      .eq('archetype_id', archetypeId);
+    
     console.log(`Inserting ${strategicRecommendations.length} recommendations for ${archetypeId}...`);
     
     for (let i = 0; i < strategicRecommendations.length; i++) {
       const rec = strategicRecommendations[i];
       console.log(`Inserting recommendation ${i + 1}: ${rec.title}`);
       
-      // Check if recommendation exists
-      const { data: existingRec } = await supabase
+      const { error: recommendationError } = await supabase
         .from('Analysis_Archetype_Strategic_Recommendations')
-        .select('id')
-        .eq('archetype_id', archetypeId)
-        .eq('recommendation_number', i + 1)
-        .maybeSingle();
-      
-      let recommendationError;
-      if (existingRec?.id) {
-        const { error } = await supabase
-          .from('Analysis_Archetype_Strategic_Recommendations')
-          .update({
-            title: rec.title,
-            description: rec.description,
-            metrics_references: rec.metrics_references,
-            last_updated: new Date().toISOString()
-          })
-          .eq('archetype_id', archetypeId)
-          .eq('recommendation_number', i + 1);
-        recommendationError = error;
-      } else {
-        const { error } = await supabase
-          .from('Analysis_Archetype_Strategic_Recommendations')
-          .insert({
-            archetype_id: archetypeId,
-            recommendation_number: i + 1,
-            title: rec.title,
-            description: rec.description,
-            metrics_references: rec.metrics_references,
-            last_updated: new Date().toISOString()
-          });
-        recommendationError = error;
-      }
+        .insert({
+          archetype_id: archetypeId,
+          recommendation_number: i + 1,
+          title: rec.title,
+          description: rec.description,
+          metrics_references: rec.metrics_references,
+          last_updated: new Date().toISOString()
+        });
 
       if (recommendationError) {
         console.error(`Error inserting recommendation ${i+1} for ${archetypeId}:`, recommendationError);
