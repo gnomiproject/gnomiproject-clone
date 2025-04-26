@@ -21,8 +21,7 @@ const DatabaseSync: React.FC = () => {
     setSyncResult(null);
     
     try {
-      toast({
-        title: "Starting Database Synchronization",
+      toast("Starting Database Synchronization", {
         description: "This process may take some time. Please wait...",
       });
       
@@ -60,8 +59,7 @@ const DatabaseSync: React.FC = () => {
       
       localStorage.setItem('lastDatabaseSync', syncTime);
       
-      toast({
-        title: "Sync Completed Successfully",
+      toast("Sync Completed Successfully", {
         description: `Database synchronized at ${syncTime}`,
       });
     } catch (error) {
@@ -74,8 +72,7 @@ const DatabaseSync: React.FC = () => {
         details: errorMessage
       });
       
-      toast({
-        title: "Sync Failed",
+      toast("Sync Failed", {
         description: errorMessage,
         variant: "destructive",
       });
