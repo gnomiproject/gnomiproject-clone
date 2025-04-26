@@ -3,6 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArchetypeId } from '@/types/archetype';
 import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -29,9 +30,10 @@ const ArchetypeOverviewCard = ({
 }: ArchetypeOverviewCardProps) => {
   const [showDialog, setShowDialog] = React.useState(false);
   const cardStyle = hex_color ? { borderTop: `3px solid ${hex_color}` } : {};
+  const bulletStyle = hex_color ? { backgroundColor: hex_color } : {};
   
   const handleCardClick = (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent navigation when clicking the card
+    e.preventDefault();
     setShowDialog(true);
   };
   
@@ -45,13 +47,16 @@ const ArchetypeOverviewCard = ({
           </div>
           <p className="text-sm text-gray-600 mb-4">family {family_id}</p>
           {short_description && (
-            <p className="text-gray-700">{short_description}</p>
+            <p className="text-gray-700 mb-4">{short_description}</p>
           )}
+          <Button variant="outline" size="sm" className="w-full">
+            Learn More
+          </Button>
         </Card>
       </Link>
 
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent>
+        <DialogContent className="max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex justify-between items-center">
               <span>{name}</span>
@@ -60,13 +65,17 @@ const ArchetypeOverviewCard = ({
           </DialogHeader>
           <div className="mt-4">
             <h4 className="font-medium text-gray-700 mb-3">Key Characteristics:</h4>
-            <div className="space-y-2">
+            <div className="space-y-3">
               {Array.isArray(key_characteristics) && key_characteristics.map((characteristic, index) => (
                 <div 
                   key={index} 
-                  className="p-3 bg-gray-50 rounded-md border border-gray-100"
+                  className="flex items-start gap-3 p-3 bg-gray-50 rounded-md border border-gray-100"
                 >
-                  {characteristic}
+                  <div 
+                    className="w-2 h-2 rounded-full mt-1.5 shrink-0" 
+                    style={bulletStyle}
+                  />
+                  <span>{characteristic}</span>
                 </div>
               ))}
             </div>
