@@ -27,14 +27,15 @@ const DetailedArchetypeReport = ({ archetypeId, onRetakeAssessment }: DetailedAr
     
     // Add a slight delay to show loading state
     setTimeout(() => {
-      refetch().then(() => {
-        toast.success("Connection restored!");
-      }).catch((err) => {
-        toast.error("Connection failed. Using local data.");
-        console.error("Retry failed:", err);
-      }).finally(() => {
-        setIsRetrying(false);
-      });
+      refetch()
+        .catch((err) => {
+          toast.error("Connection failed. Using local data.");
+          console.error("Retry failed:", err);
+        })
+        .finally(() => {
+          toast.success("Connection restored!");
+          setIsRetrying(false);
+        });
     }, 500);
   };
   

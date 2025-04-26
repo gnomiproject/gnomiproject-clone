@@ -1,17 +1,16 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { ArchetypeDetailedData, ArchetypeId, FamilyId, Json } from '@/types/archetype';
 import { useArchetypes } from './useArchetypes';
 import { useQuery } from '@tanstack/react-query';
-import { queryClient } from '@/lib/queryClient';
 
 interface UseGetArchetype {
   archetypeData: ArchetypeDetailedData | null;
   familyData: any | null;
   isLoading: boolean;
   error: Error | null;
-  refetch: () => void;
+  refetch: () => Promise<any>;
 }
 
 // Helper function to safely convert JSONB arrays to string arrays
@@ -64,6 +63,23 @@ export const useGetArchetype = (archetypeId: ArchetypeId): UseGetArchetype => {
     enabled: !!archetypeId,
     refetchOnWindowFocus: false, // Prevent refetching when window regains focus
     refetchOnMount: false, // Prevent refetching on component mount if data exists
+    meta: {
+      onError: (err: Error) => {
+        console.error("Error fetching archetype data:", err);
+        
+        // Fallback to original archetype data structure on error
+        const fallbackArchetype = getArchetypeEnhanced(archetypeId);
+        if (fallbackArchetype) {
+          console.log("Using fallback data due to error");
+          setArchetypeData(fallbackArchetype);
+          
+          if (fallbackArchetype.familyId) {
+            const familyInfo = getFamilyById(fallbackArchetype.familyId);
+            setFamilyData(familyInfo);
+          }
+        }
+      }
+    },
     onSuccess: (data) => {
       if (data) {
         // Map data from level3_report_data to ArchetypeDetailedData structure
@@ -216,6 +232,6 @@ export const useGetArchetype = (archetypeId: ArchetypeId): UseGetArchetype => {
     familyData, 
     isLoading,
     error: error as Error | null,
-    refetch
+    refetch: refetch as () => Promise<any>
   };
 };
