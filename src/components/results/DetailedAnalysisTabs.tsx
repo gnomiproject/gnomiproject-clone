@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ArchetypeDetailedData } from '@/types/archetype';
@@ -19,8 +18,8 @@ interface DetailedAnalysisTabsProps {
 
 const DetailedAnalysisTabs = ({ archetypeData, onRetakeAssessment }: DetailedAnalysisTabsProps) => {
   const color = archetypeData.hexColor ? 
-    { borderColor: archetypeData.hexColor, color: archetypeData.hexColor } : 
-    { borderColor: `var(--color-archetype-${archetypeData.id})`, color: `var(--color-archetype-${archetypeData.id})` };
+    archetypeData.hexColor : 
+    `var(--color-archetype-${archetypeData.id})`;
   
   const [activeTab, setActiveTab] = useState("overview");
   const isMobile = useIsMobile();
@@ -44,7 +43,7 @@ const DetailedAnalysisTabs = ({ archetypeData, onRetakeAssessment }: DetailedAna
         {isMobile ? (
           <div className="mb-6">
             <Sheet>
-              <SheetTrigger className={`w-full flex items-center justify-between p-3 border rounded-md`} style={{ color: color.color, backgroundColor: `${color.color}10` }}>
+              <SheetTrigger className={`w-full flex items-center justify-between p-3 border rounded-md`} style={{ color: color, backgroundColor: `${color}10` }}>
                 <span className="font-medium">{getActiveTabLabel()}</span>
                 <ChevronDown size={18} />
               </SheetTrigger>
@@ -59,7 +58,7 @@ const DetailedAnalysisTabs = ({ archetypeData, onRetakeAssessment }: DetailedAna
                         document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
                       }}
                       className={`p-3 text-left flex items-center ${activeTab === tab.value ? 'font-bold' : 'text-gray-600'}`}
-                      style={activeTab === tab.value ? { color: color.color } : {}}
+                      style={activeTab === tab.value ? { color: color } : {}}
                     >
                       <tab.icon className="mr-2 h-5 w-5" />
                       {tab.label}
@@ -70,19 +69,19 @@ const DetailedAnalysisTabs = ({ archetypeData, onRetakeAssessment }: DetailedAna
             </Sheet>
           </div>
         ) : (
-          <TabsList className="mb-6 bg-gray-100 p-1 w-full overflow-x-auto flex">
+          <TabsList className="mb-6 bg-gray-100 p-1 w-full overflow-x-auto flex border-b">
             {tabItems.map((tab) => (
               <TabsTrigger 
                 key={tab.value}
                 value={tab.value} 
-                className="flex-1 data-[state=active]:border-b-2 hover:bg-gray-50"
+                className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium transition-colors
+                  ${activeTab === tab.value ? 'border-b-2 bg-white' : 'hover:bg-gray-50'}`}
                 style={{
-                  borderColor: activeTab === tab.value ? color.color : 'transparent',
-                  color: activeTab === tab.value ? color.color : undefined,
-                  backgroundColor: activeTab === tab.value ? `${color.color}10` : undefined
+                  borderColor: activeTab === tab.value ? color : 'transparent',
+                  color: activeTab === tab.value ? color : 'inherit',
                 }}
               >
-                <tab.icon className="mr-2 h-4 w-4" />
+                <tab.icon className="h-4 w-4" />
                 {tab.label}
               </TabsTrigger>
             ))}

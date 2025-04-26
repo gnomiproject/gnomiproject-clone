@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ArchetypeDetailedData } from '@/types/archetype';
 import { Badge } from '@/components/ui/badge';
@@ -36,11 +35,13 @@ const OverviewTab = ({ archetypeData }: OverviewTabProps) => {
     keyCharacteristics = archetypeData.summary.keyCharacteristics;
   }
   
-  // Safely extract industries with proper type checking
+  // Instead of formatting as array, just clean up the string
   let industries = '';
-  
   if (typeof archetypeData.industries === 'string') {
-    industries = archetypeData.industries;
+    industries = archetypeData.industries
+      .replace(/['"]/g, '')  // Remove quotes
+      .replace(/,\s*/g, ', ') // Clean up comma spacing
+      .trim();
   }
   
   // Get family name with proper fallback
@@ -87,18 +88,8 @@ const OverviewTab = ({ archetypeData }: OverviewTabProps) => {
               <Building className="mr-2 h-5 w-5 text-gray-500" />
               <h3 className="text-lg font-semibold">Common Industries</h3>
             </div>
-            {industryList.length > 0 ? (
-              <div className="flex flex-wrap gap-2">
-                {industryList.map((industry, index) => (
-                  <Badge 
-                    key={index} 
-                    variant="secondary"
-                    style={{ backgroundColor: `${color}15`, color: '#333' }}
-                  >
-                    {industry}
-                  </Badge>
-                ))}
-              </div>
+            {industries ? (
+              <p className="text-gray-700">{industries}</p>
             ) : (
               <p className="text-gray-500 italic">No industry data available</p>
             )}
