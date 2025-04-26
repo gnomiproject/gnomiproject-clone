@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -21,7 +20,7 @@ const DatabaseSync: React.FC = () => {
     setSyncResult(null);
     
     try {
-      toast("Starting Database Synchronization", {
+      toast.message("Starting Database Synchronization", {
         description: "This process may take some time. Please wait...",
       });
       
@@ -59,7 +58,7 @@ const DatabaseSync: React.FC = () => {
       
       localStorage.setItem('lastDatabaseSync', syncTime);
       
-      toast("Sync Completed Successfully", {
+      toast.success("Sync Completed Successfully", {
         description: `Database synchronized at ${syncTime}`,
       });
     } catch (error) {
@@ -72,9 +71,8 @@ const DatabaseSync: React.FC = () => {
         details: errorMessage
       });
       
-      toast("Sync Failed", {
+      toast.error("Sync Failed", {
         description: errorMessage,
-        variant: "destructive",
       });
     } finally {
       setIsSyncing(false);

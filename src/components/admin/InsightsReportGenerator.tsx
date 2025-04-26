@@ -92,9 +92,8 @@ const InsightsReportGenerator: React.FC = () => {
       console.error('Error loading archetypes:', err);
       setError(typeof err === 'string' ? err : (err as Error).message || 'Unknown error occurred');
       
-      toast("Error Loading Archetypes", {
+      toast.error("Error Loading Archetypes", {
         description: typeof err === 'string' ? err : (err as Error).message || 'Unknown error occurred',
-        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
@@ -107,7 +106,7 @@ const InsightsReportGenerator: React.FC = () => {
     setGenerationResult(null);
 
     try {
-      toast("Starting Report Generation", {
+      toast.message("Starting Report Generation", {
         description: "This process may take some time. Please wait...",
       });
       
@@ -136,18 +135,21 @@ const InsightsReportGenerator: React.FC = () => {
         ? `Processed ${results.succeeded} of ${results.total} archetypes successfully.`
         : 'No archetypes were processed successfully.';
       
-      toast(results.succeeded > 0 ? "Report Generation Complete" : "Report Generation Failed", {
-        description: successMessage,
-        variant: results.succeeded > 0 ? "default" : "destructive",
-      });
-      
+      if (results.succeeded > 0) {
+        toast.success("Report Generation Complete", {
+          description: successMessage,
+        });
+      } else {
+        toast.error("Report Generation Failed", {
+          description: successMessage,
+        });
+      }
     } catch (error) {
       console.error('Error generating reports:', error);
       setError(typeof error === 'string' ? error : (error as Error).message || 'Unknown error occurred');
       
-      toast("Error Generating Reports", {
+      toast.error("Error Generating Reports", {
         description: typeof error === 'string' ? error : (error as Error).message || 'Unknown error occurred',
-        variant: "destructive",
       });
     } finally {
       setIsGenerating(false);
