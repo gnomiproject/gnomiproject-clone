@@ -2,105 +2,49 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 
 // Helper function to organize metrics by category
-function organizeMetricsByCategory(metrics: any[]) {
-  console.log(`Organizing ${metrics.length} metrics by category`);
+function organizeMetricsByCategory(metrics: any) {
+  console.log(`Organizing metrics by category`);
   const organized: { [key: string]: any } = {};
-  metrics.forEach(metric => {
-    if (!metric.Category) {
-      console.log('Found metric without Category:', metric);
-      if (!organized['General']) {
-        organized['General'] = [];
-      }
-      organized['General'].push(metric);
-      return;
+  
+  // Go through all properties in the data object
+  Object.keys(metrics).forEach(key => {
+    // Skip non-metric properties or null values
+    if (!key.includes('_') || !metrics[key]) return;
+    
+    // Extract category from the metric name (e.g., "Cost_Medical Paid Amount PEPY" -> "Cost")
+    const category = key.split('_')[0];
+    
+    if (!organized[category]) {
+      organized[category] = [];
     }
-
-    if (!organized[metric.Category]) {
-      organized[metric.Category] = [];
-    }
-    organized[metric.Category].push(metric);
+    
+    organized[category].push({
+      metric: key.split('_')[1],
+      value: metrics[key],
+      category: category
+    });
   });
+  
   console.log(`Organized into ${Object.keys(organized).length} categories`);
   return organized;
 }
 
 // Helper function to generate report content
 function generateReportContent(archetype: any, organizedMetrics: any) {
-  console.log(`Generating report content for archetype ${archetype.id}: ${archetype.name}`);
-  const title = `Deep Dive Report: ${archetype.name}`;
-  const introduction = `This report provides an in-depth analysis of the ${archetype.name} archetype, focusing on key metrics and strategic insights.`;
-  const summary_analysis = `The ${archetype.name} archetype exhibits distinct characteristics across several key performance indicators.`;
-  const distinctive_metrics_summary = `Key metrics highlight the unique attributes of the ${archetype.name} archetype, providing a comprehensive overview of its strengths and weaknesses.`;
+  console.log(`Generating report content for archetype ${archetype.archetype_id}: ${archetype.archetype_name}`);
+  const title = `Deep Dive Report: ${archetype.archetype_name}`;
+  const introduction = archetype.executive_summary || 
+    `This report provides an in-depth analysis of the ${archetype.archetype_name} archetype, focusing on key metrics and strategic insights.`;
+  const summary_analysis = `The ${archetype.archetype_name} archetype exhibits distinct characteristics across several key performance indicators.`;
+  const distinctive_metrics_summary = `Key metrics highlight the unique attributes of the ${archetype.archetype_name} archetype, providing a comprehensive overview of its strengths and weaknesses.`;
   
-  // Convert organized metrics to a detailed_metrics field
-  const detailed_metrics = organizedMetrics;
-
   return {
     title,
     introduction,
     summary_analysis,
     distinctive_metrics_summary,
-    detailed_metrics
+    detailed_metrics: organizedMetrics
   };
-}
-
-// Helper function to generate SWOT analysis
-function generateSwotAnalysis(archetype: any, organizedMetrics: any) {
-  console.log(`Generating SWOT analysis for archetype ${archetype.id}`);
-  
-  // Get categories or use defaults if no metrics
-  const metricCategories = Object.keys(organizedMetrics).length > 0 
-    ? Object.keys(organizedMetrics) 
-    : ['Utilization', 'Cost', 'Quality', 'Access'];
-
-  const strengths = [
-    `Strong performance in ${archetype.name} core competencies`,
-    `Effective management of ${metricCategories[0] || 'primary metrics'}`
-  ];
-  const weaknesses = [
-    `Areas for improvement in ${metricCategories[1] || 'secondary metrics'}`,
-    `Challenges related to coordinating care effectively`
-  ];
-  const opportunities = [
-    `Leverage strengths in ${metricCategories[0] || 'key areas'} to expand market presence`,
-    `Implement strategies to address ${archetype.name}'s unique needs`
-  ];
-  const threats = [
-    `Competitive pressures in the ${archetype.name} archetype segment`,
-    `Rising costs in key service areas`
-  ];
-
-  return {
-    strengths,
-    weaknesses,
-    opportunities,
-    threats
-  };
-}
-
-// Helper function to generate strategic recommendations
-function generateStrategicRecommendations(archetype: any, organizedMetrics: any) {
-  console.log(`Generating recommendations for archetype ${archetype.id}`);
-  
-  // Get categories or use defaults if no metrics
-  const metricCategories = Object.keys(organizedMetrics).length > 0 
-    ? Object.keys(organizedMetrics) 
-    : ['Utilization', 'Cost', 'Quality', 'Access'];
-
-  const recommendations = [
-    {
-      title: `Optimize Performance in ${metricCategories[0] || 'Key Areas'}`,
-      description: `Focus on leveraging strengths in ${metricCategories[0] || 'primary metrics'} to achieve strategic goals.`,
-      metrics_references: metricCategories[0] || 'Key Metrics'
-    },
-    {
-      title: `Address ${archetype.name} Specific Needs`,
-      description: `Implement tailored strategies to support this archetype's unique healthcare requirements.`,
-      metrics_references: metricCategories[1] || 'Performance Metrics' 
-    }
-  ];
-
-  return recommendations;
 }
 
 // Full function to generate archetype reports
@@ -108,21 +52,21 @@ async function generateArchetypeReports(supabase: SupabaseClient) {
   console.log('Starting report generation process with detailed logging...');
   
   try {
-    // 1. Fetch all archetypes from the correct table name: Core_Archetype_Overview
-    console.log('Fetching archetypes from database...');
+    // Fetch all archetype data directly from level3_report_data
+    console.log('Fetching archetype data from level3_report_data table...');
     const { data: archetypes, error: archetypesError } = await supabase
-      .from('Core_Archetype_Overview')
+      .from('level3_report_data')
       .select('*');
     
     if (archetypesError) {
-      console.error('Error fetching archetypes:', archetypesError);
-      throw new Error(`Failed to fetch archetypes: ${archetypesError.message}`);
+      console.error('Error fetching data from level3_report_data:', archetypesError);
+      throw new Error(`Failed to fetch data: ${archetypesError.message}`);
     }
     
     console.log(`Found ${archetypes?.length || 0} archetypes to process`);
     
     if (!archetypes || archetypes.length === 0) {
-      throw new Error('No archetypes found in the database');
+      throw new Error('No archetype data found in level3_report_data table');
     }
     
     const results = {
@@ -134,79 +78,53 @@ async function generateArchetypeReports(supabase: SupabaseClient) {
       errors: [] as string[]
     };
     
-    // 2. Process each archetype
+    // Process each archetype data row
     for (const archetype of archetypes) {
       try {
-        console.log(`Processing archetype ${archetype.id}: ${archetype.name}`);
+        console.log(`Processing archetype ${archetype.archetype_id}: ${archetype.archetype_name}`);
         
-        // 3. Fetch metrics data for this archetype - trying both tables
-        console.log(`Fetching metrics for archetype ${archetype.id} from Core_Archetypes_Metrics...`);
-        let { data: metrics, error: metricsError } = await supabase
-          .from('Core_Archetypes_Metrics')
-          .select('*')
-          .eq('id', archetype.id);
+        // Organize metrics that are already in the row
+        console.log(`Organizing metrics for archetype ${archetype.archetype_id}...`);
+        const organizedMetrics = organizeMetricsByCategory(archetype);
         
-        if (metricsError) {
-          console.error(`Error fetching metrics from Core_Archetypes_Metrics for ${archetype.id}:`, metricsError);
-          console.log(`Will try alternative metrics source...`);
-        }
-        
-        // If no metrics found in first table, try another approach
-        if (!metrics || metrics.length === 0) {
-          console.log(`No metrics found in Core_Archetypes_Metrics for ${archetype.id}`);
-          
-          // Create minimal metrics data since no metrics were found
-          metrics = [
-            {
-              Category: 'Cost',
-              Metric: 'PEPY',
-              Archetype_Value: 0,
-              Archetype_Average: 0,
-              Difference: 0,
-              archetype_ID: archetype.id
-            },
-            {
-              Category: 'Utilization',
-              Metric: 'Office Visits',
-              Archetype_Value: 0,
-              Archetype_Average: 0,
-              Difference: 0,
-              archetype_ID: archetype.id
-            }
-          ];
-        }
-        
-        // 4. Organize metrics by category
-        console.log(`Organizing metrics for archetype ${archetype.id}...`);
-        const organizedMetrics = organizeMetricsByCategory(metrics);
-        
-        // 5. Generate report content based on metrics
-        console.log(`Generating report content for archetype ${archetype.id}...`);
+        // Generate report content based on metrics
+        console.log(`Generating report content for archetype ${archetype.archetype_id}...`);
         const reportContent = generateReportContent(archetype, organizedMetrics);
         
-        // 6. Generate SWOT analysis
-        console.log(`Generating SWOT analysis for archetype ${archetype.id}...`);
-        const swotAnalysis = generateSwotAnalysis(archetype, organizedMetrics);
+        // Get SWOT analysis directly from the data
+        console.log(`Getting SWOT analysis for archetype ${archetype.archetype_id}...`);
+        const swotAnalysis = {
+          strengths: archetype.strengths || [],
+          weaknesses: archetype.weaknesses || [],
+          opportunities: archetype.opportunities || [],
+          threats: archetype.threats || []
+        };
         
-        // 7. Generate strategic recommendations
-        console.log(`Generating strategic recommendations for archetype ${archetype.id}...`);
-        const strategicRecommendations = generateStrategicRecommendations(archetype, organizedMetrics);
+        // Get strategic recommendations directly from the data
+        console.log(`Getting strategic recommendations for archetype ${archetype.archetype_id}...`);
+        const strategicRecommendations = archetype.strategic_recommendations || [];
         
-        // 8. Insert report content
-        console.log(`Inserting data into Supabase for archetype ${archetype.id}...`);
-        await insertReportContent(supabase, archetype.id, reportContent, swotAnalysis, strategicRecommendations);
+        // Insert report content
+        console.log(`Inserting data into Supabase for archetype ${archetype.archetype_id}...`);
+        await insertReportContent(
+          supabase, 
+          archetype.archetype_id, 
+          reportContent, 
+          swotAnalysis, 
+          strategicRecommendations
+        );
         
-        console.log(`Completed processing for ${archetype.id}`);
+        console.log(`Completed processing for ${archetype.archetype_id}`);
         results.processed++;
         results.succeeded++;
-        results.archetypeIds.push(archetype.id);
+        results.archetypeIds.push(archetype.archetype_id);
         
       } catch (error) {
-        console.error(`Error processing archetype ${archetype.id}:`, error);
+        console.error(`Error processing archetype ${archetype.archetype_id}:`, error);
         const errorMessage = error instanceof Error ? error.message : String(error);
         results.processed++;
         results.failed++;
-        results.errors.push(`Error with ${archetype.id}: ${errorMessage}`);
+        results.errors.push(`Error with ${archetype.archetype_id}: ${errorMessage}`);
       }
     }
     
@@ -352,10 +270,10 @@ async function insertReportContent(
         .from('Analysis_Archetype_Strategic_Recommendations')
         .insert({
           archetype_id: archetypeId,
-          recommendation_number: i + 1,
+          recommendation_number: rec.recommendation_number || i + 1,
           title: rec.title,
           description: rec.description,
-          metrics_references: rec.metrics_references,
+          metrics_references: rec.metrics_references || '',
           last_updated: new Date().toISOString()
         });
 
