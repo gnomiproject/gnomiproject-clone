@@ -3,7 +3,7 @@ import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArchetypeId } from '@/types/archetype';
 import DetailedArchetypeReport from '@/components/insights/DetailedArchetypeReport';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft } from 'lucide-react';
 import { useGetArchetype } from '@/hooks/useGetArchetype';
@@ -46,16 +46,20 @@ const ArchetypePage = () => {
       <div className="min-h-screen bg-gray-50 py-12 px-6">
         <div className="max-w-5xl mx-auto">
           <Card className="p-8">
-            <CardContent className="flex flex-col items-center justify-center py-12">
+            <div className="flex flex-col items-center justify-center py-12">
               <h2 className="text-2xl font-bold mb-4">Archetype Not Found</h2>
               <p className="text-gray-600 mb-6">The archetype you're looking for doesn't exist or isn't available.</p>
               <Button onClick={() => navigate('/')}>Return to Home</Button>
-            </CardContent>
+            </div>
           </Card>
         </div>
       </div>
     );
   }
+  
+  const colorStyle = archetypeData.hexColor 
+    ? { color: archetypeData.hexColor, borderColor: archetypeData.hexColor } 
+    : { color: `var(--color-archetype-${archetypeData.id})`, borderColor: `var(--color-archetype-${archetypeData.id})` };
   
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-6">
@@ -71,7 +75,7 @@ const ArchetypePage = () => {
           </Button>
         </div>
         
-        <h1 className="text-3xl font-bold mb-8" style={{ color: archetypeData.hexColor }}>
+        <h1 className="text-3xl font-bold mb-8" style={{ color: colorStyle.color }}>
           {archetypeData.name}
         </h1>
         

@@ -1,326 +1,185 @@
 
 import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { ArchetypeDetailedData, ArchetypeId } from '@/types/archetype';
 import { useArchetypes } from './useArchetypes';
-import { ArchetypeId, ArchetypeDetailedData } from '@/types/archetype';
-import { supabase } from "@/integrations/supabase/client";
-import { getArchetypeColor, getArchetypeHexColor } from '@/components/home/utils/dna/colors';
 
-export const useGetArchetype = (archetypeId?: ArchetypeId) => {
-  const { getFamilyById, allDetailedArchetypes } = useArchetypes();
+interface UseGetArchetype {
+  archetypeData: ArchetypeDetailedData | null;
+  familyData: any | null;
+  isLoading: boolean;
+  error: Error | null;
+}
+
+export const useGetArchetype = (archetypeId: ArchetypeId): UseGetArchetype => {
   const [archetypeData, setArchetypeData] = useState<ArchetypeDetailedData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [familyData, setFamilyData] = useState<any | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
+  const { getArchetypeEnhanced, getFamilyById } = useArchetypes();
 
   useEffect(() => {
     const fetchArchetypeData = async () => {
-      setIsLoading(true);
-      setError(null);
-      
       if (!archetypeId) {
         setIsLoading(false);
-        setError(new Error('No archetype ID provided'));
         return;
       }
-      
+
       try {
-        // First, try to get data from allDetailedArchetypes (which might be preloaded)
-        const preloadedArchetype = allDetailedArchetypes.find(a => a.id === archetypeId);
-        
-        if (preloadedArchetype) {
-          setArchetypeData(preloadedArchetype);
-          setIsLoading(false);
-          return;
+        // Attempt to fetch data from level3_report_data first (newest structure)
+        const { data, error: fetchError } = await supabase
+          .from('level3_report_data')
+          .select('*')
+          .eq('archetype_id', archetypeId)
+          .maybeSingle();
+
+        if (fetchError) {
+          throw fetchError;
         }
-        
-        // If not available, try to fetch from Supabase
-        try {
-          const { data, error } = await supabase
-            .from('Core_Archetype_Overview')
-            .select('*')
-            .eq('id', archetypeId)
-            .maybeSingle();
 
-          if (error) {
-            throw new Error(`Error fetching archetype data: ${error.message}`);
-          }
+        if (data) {
+          // Map data from level3_report_data to ArchetypeDetailedData structure
+          const formattedData: ArchetypeDetailedData = {
+            id: data.archetype_id as ArchetypeId,
+            name: data.archetype_name || '',
+            familyId: data.family_id as any,
+            familyName: data.family_name,
+            hexColor: data.hex_color,
+            short_description: data.short_description,
+            long_description: data.long_description,
+            key_characteristics: Array.isArray(data.key_characteristics) 
+              ? data.key_characteristics 
+              : data.key_characteristics?.split('\n').filter(Boolean) || [],
+            industries: data.industries,
+            family_id: data.family_id,
 
-          if (data) {
-            // Process key_characteristics
-            let keyCharacteristics: string[] = [];
-            if (data.key_characteristics) {
-              if (Array.isArray(data.key_characteristics)) {
-                keyCharacteristics = data.key_characteristics.map(String);
-              } else if (typeof data.key_characteristics === 'string') {
-                // Split by newline if it's a string
-                keyCharacteristics = data.key_characteristics.split('\n').filter(item => item.trim() !== '');
-              }
-            }
+            // SWOT analysis
+            strengths: data.strengths || [],
+            weaknesses: data.weaknesses || [],
+            opportunities: data.opportunities || [],
+            threats: data.threats || [],
 
-            const transformedData: ArchetypeDetailedData = {
-              id: data.id as ArchetypeId,
-              familyId: data.family_id as any,
-              name: data.name,
-              familyName: '', // Will be populated using getFamilyById
-              color: getArchetypeColor(archetypeId),
-              hexColor: data.hex_color || getArchetypeHexColor(archetypeId),
-              short_description: data.short_description || '',
-              long_description: data.long_description || '',
-              key_characteristics: keyCharacteristics,
-              family_id: data.family_id as any,
-              
-              // Add compatibility with components using these properties
-              summary: {
-                description: data.short_description || '',
-                keyCharacteristics: keyCharacteristics
-              },
-              standard: {
-                fullDescription: data.long_description || '',
-                keyCharacteristics: keyCharacteristics,
-                overview: data.short_description || '',
-                keyStatistics: {},
-                keyInsights: []
-              },
-              enhanced: {
-                swot: {
-                  strengths: [],
-                  weaknesses: [],
-                  opportunities: [],
-                  threats: []
-                },
-                strategicPriorities: [],
-                costSavings: []
-              }
-            };
+            // Strategic recommendations
+            strategic_recommendations: data.strategic_recommendations || [],
+
+            // Metrics - using the new format but providing backwards compatibility
+            Demo_Average_Family_Size: data.Demo_Average_Family_Size,
+            Demo_Average_Age: data.Demo_Average_Age,
+            Demo_Average_Employees: data.Demo_Average_Employees,
+            Demo_Average_States: data.Demo_Average_States,
+            Demo_Average_Percent_Female: data.Demo_Average_Percent_Female,
             
-            // Add family name if available
-            const family = getFamilyById(data.family_id as any);
-            if (family) {
-              transformedData.familyName = family.name;
-            }
+            Util_Emergency_Visits_per_1k_Members: data.Util_Emergency_Visits_per_1k_Members,
+            Util_Specialist_Visits_per_1k_Members: data.Util_Specialist_Visits_per_1k_Members,
+            Util_Inpatient_Admits_per_1k_Members: data.Util_Inpatient_Admits_per_1k_Members,
+            Util_Percent_of_Members_who_are_Non_Utilizers: data.Util_Percent_of_Members_who_are_Non_Utilizers,
             
-            setArchetypeData(transformedData);
-          } else {
-            // If no data from Supabase, look for a hardcoded fallback
-            throw new Error(`Archetype ${archetypeId} not found in database`);
-          }
-        } catch (supabaseErr) {
-          console.error('Supabase fetch error:', supabaseErr);
+            Risk_Average_Risk_Score: data.Risk_Average_Risk_Score,
+            SDOH_Average_SDOH: data.SDOH_Average_SDOH,
+            
+            Cost_Medical_RX_Paid_Amount_PEPY: data.Cost_Medical_RX_Paid_Amount_PEPY,
+            Cost_Medical_RX_Paid_Amount_PMPY: data.Cost_Medical_RX_Paid_Amount_PMPY,
+            Cost_Avoidable_ER_Potential_Savings_PMPY: data.Cost_Avoidable_ER_Potential_Savings_PMPY,
+            
+            Dise_Heart_Disease_Prevalence: data.Dise_Heart_Disease_Prevalence,
+            Dise_Type_2_Diabetes_Prevalence: data.Dise_Type_2_Diabetes_Prevalence,
+            Dise_Mental_Health_Disorder_Prevalence: data.Dise_Mental_Health_Disorder_Prevalence,
+            Dise_Substance_Use_Disorder_Prevalence: data.Dise_Substance_Use_Disorder_Prevalence,
+            
+            Gaps_Diabetes_RX_Adherence: data.Gaps_Diabetes_RX_Adherence,
+            Gaps_Behavioral_Health_FU_ED_Visit_Mental_Illness: data.Gaps_Behavioral_Health_FU_ED_Visit_Mental_Illness,
+            Gaps_Cancer_Screening_Breast: data.Gaps_Cancer_Screening_Breast,
+            Gaps_Wellness_Visit_Adults: data.Gaps_Wellness_Visit_Adults,
+            
+            // For compatibility with legacy structures
+            standard: {
+              fullDescription: data.long_description || '',
+              keyCharacteristics: Array.isArray(data.key_characteristics) 
+                ? data.key_characteristics 
+                : data.key_characteristics?.split('\n').filter(Boolean) || [],
+              overview: data.short_description || '',
+              keyStatistics: {},
+              keyInsights: []
+            },
+            enhanced: {
+              swot: {
+                strengths: data.strengths || [],
+                weaknesses: data.weaknesses || [],
+                opportunities: data.opportunities || [],
+                threats: data.threats || [],
+              },
+              strategicPriorities: data.strategic_recommendations || [],
+              costSavings: [],
+              riskProfile: data.Risk_Average_Risk_Score ? {
+                score: data.Risk_Average_Risk_Score.toFixed(2),
+                comparison: 'Based on clinical and utilization patterns',
+                conditions: [
+                  { name: 'Risk Score', value: data.Risk_Average_Risk_Score.toFixed(2), barWidth: `${data.Risk_Average_Risk_Score * 50}%` }
+                ]
+              } : undefined
+            },
+            summary: {
+              description: data.short_description || '',
+              keyCharacteristics: Array.isArray(data.key_characteristics) 
+                ? data.key_characteristics 
+                : data.key_characteristics?.split('\n').filter(Boolean) || []
+            }
+          };
+
+          setArchetypeData(formattedData);
           
-          // Fallback to hardcoded archetype data
-          const fallbackArchetype = createFallbackArchetype(archetypeId);
+          // Set family data
+          if (data.family_id) {
+            const familyInfo = getFamilyById(data.family_id as any);
+            setFamilyData(familyInfo || {
+              id: data.family_id,
+              name: data.family_name || '',
+              description: data.family_short_description || '',
+              short_description: data.family_short_description || '',
+              long_description: data.family_long_description || '',
+              commonTraits: data.common_traits || [],
+              industries: data.family_industries || ''
+            });
+          }
+
+        } else {
+          // Fallback to original archetype data structure
+          const fallbackArchetype = getArchetypeEnhanced(archetypeId);
+          
           if (fallbackArchetype) {
-            console.log('Using fallback archetype data:', fallbackArchetype);
             setArchetypeData(fallbackArchetype);
+            
+            if (fallbackArchetype.familyId) {
+              const familyInfo = getFamilyById(fallbackArchetype.familyId);
+              setFamilyData(familyInfo);
+            }
           } else {
-            throw new Error(`Failed to load archetype ${archetypeId}`);
+            throw new Error("Archetype not found");
           }
         }
+
       } catch (err) {
-        setError(err instanceof Error ? err : new Error(String(err)));
-        console.error('Error in useGetArchetype:', err);
+        console.error("Error fetching archetype data:", err);
+        setError(err as Error);
+        
+        // Fallback to original archetype data structure
+        const fallbackArchetype = getArchetypeEnhanced(archetypeId);
+        
+        if (fallbackArchetype) {
+          setArchetypeData(fallbackArchetype);
+          
+          if (fallbackArchetype.familyId) {
+            const familyInfo = getFamilyById(fallbackArchetype.familyId);
+            setFamilyData(familyInfo);
+          }
+        }
       } finally {
         setIsLoading(false);
       }
     };
 
-    if (archetypeId) {
-      fetchArchetypeData();
-    } else {
-      setIsLoading(false);
-      setArchetypeData(null);
-      setError(new Error('No archetype ID provided'));
-    }
-  }, [archetypeId, getFamilyById, allDetailedArchetypes]);
+    fetchArchetypeData();
+  }, [archetypeId, getArchetypeEnhanced, getFamilyById]);
 
-  const familyData = archetypeData?.familyId ? getFamilyById(archetypeData.familyId) : undefined;
-
-  return {
-    archetypeData,
-    familyData,
-    isLoading,
-    error
-  };
-};
-
-// Fallback data in case the Supabase fetch fails
-const createFallbackArchetype = (archetypeId: ArchetypeId): ArchetypeDetailedData | null => {
-  const archetypeMap: Record<string, Partial<ArchetypeDetailedData>> = {
-    'a1': {
-      id: 'a1',
-      name: 'Balanced Cost Performer',
-      familyId: 'a',
-      familyName: 'Balanced Performers',
-      hexColor: '#3B82F6',
-      short_description: 'Organizations with moderate healthcare costs and generally balanced utilization patterns.',
-      key_characteristics: [
-        'Moderate overall healthcare spending',
-        'Balanced utilization across service categories',
-        'Moderate chronic condition prevalence',
-        'Average risk profile',
-        'Cost-effective care patterns'
-      ]
-    },
-    'a2': {
-      id: 'a2',
-      name: 'Young & Healthy Workforce',
-      familyId: 'a',
-      familyName: 'Balanced Performers',
-      hexColor: '#60A5FA',
-      short_description: 'Organizations with younger employees and low healthcare utilization.',
-      key_characteristics: [
-        'Lower than average healthcare costs',
-        'Lower utilization across most service categories',
-        'Lower chronic disease burden',
-        'Younger demographic profile',
-        'Higher focus on preventive care'
-      ]
-    },
-    'a3': {
-      id: 'a3',
-      name: 'Preventive Care Leaders',
-      familyId: 'a',
-      familyName: 'Balanced Performers',
-      hexColor: '#93C5FD',
-      short_description: 'Organizations with excellent preventive care utilization and care management.',
-      key_characteristics: [
-        'Strong preventive care utilization',
-        'Effective chronic condition management',
-        'Balanced healthcare spending',
-        'High engagement with wellness programs',
-        'Lower emergency and urgent care use'
-      ]
-    },
-    'b1': {
-      id: 'b1',
-      name: 'High-Cost, High-Complexity',
-      familyId: 'b',
-      familyName: 'High-Need Population',
-      hexColor: '#EF4444',
-      short_description: 'Organizations with high healthcare costs and complex medical needs.',
-      key_characteristics: [
-        'High overall healthcare spending',
-        'Higher utilization of specialty care',
-        'High prevalence of chronic conditions',
-        'Higher inpatient and emergency services',
-        'Substantial high-cost claimants'
-      ]
-    },
-    'b2': {
-      id: 'b2',
-      name: 'Chronic Condition Managers',
-      familyId: 'b',
-      familyName: 'High-Need Population',
-      hexColor: '#F87171',
-      short_description: 'Organizations managing a population with significant chronic disease burden.',
-      key_characteristics: [
-        'Above average chronic disease prevalence',
-        'Focused chronic condition management programs',
-        'Moderate to high pharmaceutical costs',
-        'Established care management protocols',
-        'Higher specialist utilization'
-      ]
-    },
-    'b3': {
-      id: 'b3',
-      name: 'Aging Workforce Navigators',
-      familyId: 'b',
-      familyName: 'High-Need Population',
-      hexColor: '#FCA5A5',
-      short_description: 'Organizations with an older workforce requiring specialized healthcare strategies.',
-      key_characteristics: [
-        'Higher average age demographic',
-        'Increasing healthcare utilization trends',
-        'Focus on age-appropriate preventive services',
-        'Higher prevalence of age-related conditions',
-        'Specialized retirement transition programs'
-      ]
-    },
-    'c1': {
-      id: 'c1',
-      name: 'High-Tech Adopters',
-      familyId: 'c',
-      familyName: 'Innovative Care Models',
-      hexColor: '#10B981',
-      short_description: 'Organizations embracing digital health solutions and innovative care delivery.',
-      key_characteristics: [
-        'High telehealth adoption rates',
-        'Digital health engagement strategies',
-        'Data-driven care management',
-        'Modern benefits design',
-        'Strong technology infrastructure'
-      ]
-    },
-    'c2': {
-      id: 'c2',
-      name: 'Value-Based Pioneers',
-      familyId: 'c',
-      familyName: 'Innovative Care Models',
-      hexColor: '#34D399',
-      short_description: 'Organizations implementing value-based care models with strong outcomes.',
-      key_characteristics: [
-        'Value-based care arrangements',
-        'Alternative payment models',
-        'Centers of excellence programs',
-        'Quality-focused provider networks',
-        'Integrated care coordination'
-      ]
-    },
-    'c3': {
-      id: 'c3',
-      name: 'Wellness Champions',
-      familyId: 'c',
-      familyName: 'Innovative Care Models',
-      hexColor: '#6EE7B7',
-      short_description: 'Organizations with comprehensive wellness programs and preventive health focus.',
-      key_characteristics: [
-        'Comprehensive wellness initiatives',
-        'Higher preventive care utilization',
-        'Mental health support programs',
-        'Lifestyle medicine approaches',
-        'Employee engagement in health programs'
-      ]
-    }
-  };
-
-  const archetypeData = archetypeMap[archetypeId];
-  
-  if (!archetypeData) {
-    return null;
-  }
-  
-  return {
-    id: archetypeData.id as ArchetypeId,
-    name: archetypeData.name || 'Unknown Archetype',
-    familyId: archetypeData.familyId as any,
-    familyName: archetypeData.familyName || '',
-    color: getArchetypeColor(archetypeId),
-    hexColor: archetypeData.hexColor || getArchetypeHexColor(archetypeId),
-    short_description: archetypeData.short_description || '',
-    long_description: archetypeData.short_description || '',
-    key_characteristics: archetypeData.key_characteristics || [],
-    family_id: archetypeData.familyId as any,
-    
-    // Add compatibility with components using these properties
-    summary: {
-      description: archetypeData.short_description || '',
-      keyCharacteristics: archetypeData.key_characteristics || []
-    },
-    standard: {
-      fullDescription: archetypeData.short_description || '',
-      keyCharacteristics: archetypeData.key_characteristics || [],
-      overview: archetypeData.short_description || '',
-      keyStatistics: {},
-      keyInsights: []
-    },
-    enhanced: {
-      swot: {
-        strengths: [],
-        weaknesses: [],
-        opportunities: [],
-        threats: []
-      },
-      strategicPriorities: [],
-      costSavings: []
-    }
-  } as ArchetypeDetailedData;
+  return { archetypeData, familyData, isLoading, error };
 };

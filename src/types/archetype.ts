@@ -114,9 +114,51 @@ export interface ArchetypeDetailedData {
     description: string;
     metrics_references?: any[];
   }>;
+  
+  // Add standalone properties for SWOT analysis 
+  strengths?: string[];
+  weaknesses?: string[];
+  opportunities?: string[];
+  threats?: string[];
+  
   // Add missing properties needed by components
   fullDescription?: string;
   keyFindings?: string[];
+  
+  // New properties from level3_report_data
+  // Demographics metrics
+  Demo_Average_Family_Size?: number;
+  Demo_Average_Age?: number;
+  Demo_Average_Employees?: number;
+  Demo_Average_States?: number;
+  Demo_Average_Percent_Female?: number;
+  
+  // Utilization metrics
+  Util_Emergency_Visits_per_1k_Members?: number;
+  Util_Specialist_Visits_per_1k_Members?: number;
+  Util_Inpatient_Admits_per_1k_Members?: number;
+  Util_Percent_of_Members_who_are_Non_Utilizers?: number;
+  
+  // Risk metrics
+  Risk_Average_Risk_Score?: number;
+  SDOH_Average_SDOH?: number;
+  
+  // Cost metrics
+  Cost_Medical_RX_Paid_Amount_PEPY?: number;
+  Cost_Medical_RX_Paid_Amount_PMPY?: number;
+  Cost_Avoidable_ER_Potential_Savings_PMPY?: number;
+  
+  // Disease metrics
+  Dise_Heart_Disease_Prevalence?: number;
+  Dise_Type_2_Diabetes_Prevalence?: number;
+  Dise_Mental_Health_Disorder_Prevalence?: number;
+  Dise_Substance_Use_Disorder_Prevalence?: number;
+  
+  // Care gap metrics
+  Gaps_Diabetes_RX_Adherence?: number;
+  Gaps_Behavioral_Health_FU_ED_Visit_Mental_Illness?: number;
+  Gaps_Cancer_Screening_Breast?: number;
+  Gaps_Wellness_Visit_Adults?: number;
 }
 
 export interface ArchetypeDeepDive {
