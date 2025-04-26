@@ -80,22 +80,9 @@ export const useGetArchetype = (archetypeId: ArchetypeId): UseGetArchetype => {
         }
       }
     },
-    onSettled: (data, error) => {
-      if (error) {
-        console.error("Error fetching archetype data:", error);
-        
-        // Fallback to original archetype data structure on error
-        const fallbackArchetype = getArchetypeEnhanced(archetypeId);
-        if (fallbackArchetype) {
-          console.log("Using fallback data due to error");
-          setArchetypeData(fallbackArchetype);
-          
-          if (fallbackArchetype.familyId) {
-            const familyInfo = getFamilyById(fallbackArchetype.familyId);
-            setFamilyData(familyInfo);
-          }
-        }
-      } else if (data) {
+    // Handle both success and error cases
+    onSuccess: (data) => {
+      if (data) {
         // Map data from level3_report_data to ArchetypeDetailedData structure
         const formattedData: ArchetypeDetailedData = {
           id: data.archetype_id as ArchetypeId,
@@ -221,6 +208,21 @@ export const useGetArchetype = (archetypeId: ArchetypeId): UseGetArchetype => {
             const familyInfo = getFamilyById(fallbackArchetype.familyId);
             setFamilyData(familyInfo);
           }
+        }
+      }
+    },
+    onError: (error: Error) => {
+      console.error("Error fetching archetype data:", error);
+      
+      // Fallback to original archetype data structure on error
+      const fallbackArchetype = getArchetypeEnhanced(archetypeId);
+      if (fallbackArchetype) {
+        console.log("Using fallback data due to error");
+        setArchetypeData(fallbackArchetype);
+        
+        if (fallbackArchetype.familyId) {
+          const familyInfo = getFamilyById(fallbackArchetype.familyId);
+          setFamilyData(familyInfo);
         }
       }
     }
