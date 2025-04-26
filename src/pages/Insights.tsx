@@ -19,10 +19,9 @@ const Insights = () => {
   const [hasFeedbackBeenClosed, setHasFeedbackBeenClosed] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { getAllArchetypeSummaries, getArchetypeEnhanced, getFamilyById } = useArchetypes();
   
-  // Fix: getAllArchetypeSummaries is returning an array, not a function
-  const archetypeSummaries = getAllArchetypeSummaries;
+  // Use consistent hook calls - important for React's hook rules
+  const { getArchetypeDetailedById, getFamilyById } = useArchetypes();
   
   useEffect(() => {
     // Check sources for archetype in this priority order:
@@ -88,8 +87,8 @@ const Insights = () => {
     setHasFeedbackBeenClosed(true);
   };
 
-  // Get the archetype data if one is selected
-  const archetypeData = selectedArchetype ? getArchetypeEnhanced(selectedArchetype) : null;
+  // Get the archetype data if one is selected - using consistent hook usage pattern
+  const archetypeData = selectedArchetype ? getArchetypeDetailedById(selectedArchetype) : null;
   const familyData = archetypeData?.familyId ? getFamilyById(archetypeData.familyId) : null;
 
   return (
