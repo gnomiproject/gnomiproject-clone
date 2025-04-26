@@ -1,19 +1,18 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Mail, Copy } from "lucide-react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { v4 as uuidv4 } from 'uuid';
 import { ArchetypeDetailedData, ArchetypeId } from '@/types/archetype';
 
-// Fixed interface to include required archetypeId prop
 interface PremiumReportProps {
   archetypeId: ArchetypeId;
   assessmentResult?: any;
@@ -21,6 +20,7 @@ interface PremiumReportProps {
   archetypeData?: ArchetypeDetailedData;
 }
 
+// Removed comments from the schema
 const formSchema = z.object({
   name: z.string().min(2, {
     message: "Name must be at least 2 characters.",
@@ -31,7 +31,6 @@ const formSchema = z.object({
   organization: z.string().min(2, {
     message: "Organization must be at least 2 characters.",
   }),
-  comments: z.string().optional(),
 });
 
 const PremiumReport = ({ archetypeId, assessmentResult, assessmentAnswers, archetypeData }: PremiumReportProps) => {
@@ -46,7 +45,7 @@ const PremiumReport = ({ archetypeId, assessmentResult, assessmentAnswers, arche
       name: "",
       email: "",
       organization: "",
-      comments: "",
+      // Removed comments default value
     },
   });
 
@@ -147,23 +146,6 @@ const PremiumReport = ({ archetypeId, assessmentResult, assessmentAnswers, arche
                   <FormLabel>Organization</FormLabel>
                   <FormControl>
                     <Input placeholder="Acme Corp" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="comments"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Comments</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Any specific requirements?"
-                      className="resize-none"
-                      {...field}
-                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
