@@ -18,7 +18,7 @@ const DeepDiveReportsAccess = () => {
     queryKey: ['deep-dive-reports'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('deep_dive_reports')
+        .from('report_requests')
         .select('*')
         .order('created_at', { ascending: false });
       
@@ -32,14 +32,17 @@ const DeepDiveReportsAccess = () => {
       setIsGenerating(true);
       const expiryDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days from now
       
-      // Insert as a single object, not an array
+      // Insert into report_requests table
       const { data, error } = await supabase
-        .from('deep_dive_reports')
+        .from('report_requests')
         .insert({
           archetype_id: archetypeId,
           access_token: crypto.randomUUID(),
           status: 'active',
-          expires_at: expiryDate.toISOString() // Convert Date to ISO string
+          expires_at: expiryDate.toISOString(), // Convert Date to ISO string
+          name: 'Admin Generated',
+          organization: 'Admin Access',
+          email: 'admin@example.com'
         })
         .select()
         .single();
