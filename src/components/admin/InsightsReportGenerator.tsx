@@ -33,6 +33,7 @@ interface ArchetypeSummary {
   name: string;
   lastUpdated: string | null;
   status: 'pending' | 'success' | 'error';
+  code?: string; // Added archetype code property
 }
 
 export function InsightsReportGenerator() {
@@ -58,7 +59,7 @@ export function InsightsReportGenerator() {
     setError(null);
     
     try {
-      // Fetch all archetypes
+      // Fetch all archetypes with their IDs (which include the code)
       const { data: archetypeData, error: archetypesError } = await supabase
         .from('Core_Archetype_Overview')
         .select('id, name');
@@ -69,6 +70,7 @@ export function InsightsReportGenerator() {
       const archetypeArray: ArchetypeSummary[] = archetypeData?.map(archetype => ({
         id: archetype.id,
         name: archetype.name || 'Unnamed Archetype',
+        code: archetype.id, // Storing the ID (which is the code like A1, B2, etc.)
         lastUpdated: null,
         status: 'pending'
       })) || [];
@@ -92,6 +94,14 @@ export function InsightsReportGenerator() {
           });
         }
       }
+      
+      // Sort archetypes by their code (A1, A2, B1, B2, etc.)
+      archetypeArray.sort((a, b) => {
+        if (a.code && b.code) {
+          return a.code.localeCompare(b.code);
+        }
+        return 0;
+      });
       
       setArchetypes(archetypeArray);
     } catch (err) {
@@ -161,7 +171,7 @@ export function InsightsReportGenerator() {
       setIsGenerating(false);
     }
   };
-
+  
   const handleViewReport = (archetypeId: string) => {
     setSelectedArchetype(archetypeId);
     setViewReportOpen(true);
@@ -249,6 +259,7 @@ export function InsightsReportGenerator() {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead>Code</TableHead>
               <TableHead>Archetype</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Last Updated</TableHead>
@@ -258,7 +269,7 @@ export function InsightsReportGenerator() {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={4} className="text-center py-4">
+                <TableCell colSpan={5} className="text-center py-4">
                   <div className="flex items-center justify-center gap-2">
                     <Loader2 className="h-4 w-4 animate-spin" />
                     Loading archetypes...
@@ -267,13 +278,16 @@ export function InsightsReportGenerator() {
               </TableRow>
             ) : archetypes.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={4} className="text-center py-4">
+                <TableCell colSpan={5} className="text-center py-4">
                   No archetypes found
                 </TableCell>
               </TableRow>
             ) : (
               archetypes.map(archetype => (
                 <TableRow key={archetype.id}>
+                  <TableCell>
+                    <span className="font-medium">{archetype.code}</span>
+                  </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <FileText size={16} />

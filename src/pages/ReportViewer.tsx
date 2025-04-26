@@ -40,7 +40,8 @@ const ReportViewer = () => {
   }, [archetypeId, token]);
 
   const handleBack = () => {
-    navigate('/admin');
+    // Navigate directly to admin without any state that could trigger unnecessary refreshes
+    navigate('/admin', { replace: true });
   };
   
   const handleRetakeAssessment = () => {
