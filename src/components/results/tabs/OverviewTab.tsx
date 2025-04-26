@@ -32,8 +32,9 @@ const OverviewTab = ({ archetypeData }: OverviewTabProps) => {
     // If it's already an array, use it directly
     keyCharacteristics = archetypeData.key_characteristics.map(item => String(item));
   } else if (typeof archetypeData.key_characteristics === 'string') {
-    // If it's a string, split it
-    keyCharacteristics = archetypeData.key_characteristics.split('\n').filter(Boolean);
+    // If it's a string, split it by newlines
+    const keyCharStr = archetypeData.key_characteristics as string;
+    keyCharacteristics = keyCharStr.split('\n').filter(Boolean);
   } else if (archetypeData.summary?.keyCharacteristics) {
     // Fallback to summary.keyCharacteristics if available
     keyCharacteristics = archetypeData.summary.keyCharacteristics;
