@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { calculateArchetypeMatch, getAssessmentQuestions } from '../utils/assessmentUtils';
@@ -133,8 +134,11 @@ export const useAssessment = () => {
         sessionStorage.setItem(SESSION_RESULTS_KEY, JSON.stringify(resultWithEmployeeCount));
       }
       
-      // Navigate to results page with the results
-      navigate('/results', { state: { result: assessmentResult, exactEmployeeCount } });
+      // Store the selected archetype in localStorage for persistence
+      localStorage.setItem(INSIGHTS_STORAGE_KEY, assessmentResult.primaryArchetype);
+      
+      // Navigate to insights page with the results
+      navigate('/insights', { state: { selectedArchetype: assessmentResult.primaryArchetype } });
       setIsCalculating(false);
     }, 7000);
   };
