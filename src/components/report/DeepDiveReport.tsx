@@ -60,6 +60,16 @@ const DeepDiveReport = ({ reportData, userData, averageData, loading }: DeepDive
 
   const toggleMenu = () => setMenuOpen(!menuOpen);
 
+  // Ensure userData has required fields (handle fallback data scenario)
+  if (!userData) {
+    userData = {
+      name: 'Demo User',
+      organization: 'Demo Organization',
+      created_at: new Date().toISOString(),
+      email: 'demo@example.com'
+    };
+  }
+
   if (loading) {
     return (
       <div className="animate-pulse space-y-4 p-8">
@@ -69,7 +79,7 @@ const DeepDiveReport = ({ reportData, userData, averageData, loading }: DeepDive
     );
   }
 
-  if (!reportData || !userData) {
+  if (!reportData) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-8">
         <div className="text-center">
@@ -79,6 +89,18 @@ const DeepDiveReport = ({ reportData, userData, averageData, loading }: DeepDive
         </div>
       </div>
     );
+  }
+
+  // Default average data if not provided
+  if (!averageData) {
+    averageData = {
+      archetype_id: 'All_Average',
+      archetype_name: 'Population Average',
+      "Demo_Average Age": 40,
+      "Demo_Average Family Size": 3.0,
+      "Risk_Average Risk Score": 1.0,
+      "Cost_Medical & RX Paid Amount PMPY": 5000
+    };
   }
 
   // Render the content based on active section
@@ -120,7 +142,7 @@ const DeepDiveReport = ({ reportData, userData, averageData, loading }: DeepDive
                 Deep Dive Healthcare Report
               </h1>
               <p className="text-sm text-gray-600">
-                {reportData.archetype_name} Archetype Analysis
+                {reportData.archetype_name || reportData.archetype_id?.toUpperCase()} Archetype Analysis
               </p>
             </div>
             <div className="text-right text-sm">

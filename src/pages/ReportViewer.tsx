@@ -8,6 +8,28 @@ import { AlertTriangle, Loader2 } from 'lucide-react';
 import { ArchetypeId } from '@/types/archetype';
 import { toast } from 'sonner';
 
+const defaultReportData = {
+  archetype_id: 'a1',
+  archetype_name: 'Sample Archetype',
+  short_description: 'This is a sample archetype with placeholder data.',
+  long_description: 'This is a detailed description of the archetype with all relevant information about its characteristics and behaviors.',
+  hex_color: '#4285F4',
+  key_characteristics: 'Key characteristic 1\nKey characteristic 2\nKey characteristic 3',
+  // Add default values for all the metrics
+  cost_analysis: 'This archetype exhibits average cost patterns with opportunities for optimization in specialty medication management.',
+  utilization_patterns: 'Members of this archetype typically utilize preventative services at higher rates than emergency services.',
+  demographic_insights: 'This archetype is characterized by a diverse age distribution with balanced gender representation.',
+  disease_prevalence: 'Common conditions include hypertension and type 2 diabetes at rates slightly above population averages.',
+  care_gaps: 'Opportunities for improvement in preventative screenings and medication adherence.',
+  recommendations: 'Focus on chronic condition management and preventative care initiatives.',
+  "Demo_Average Age": 42.5,
+  "Demo_Average Family Size": 3.2,
+  "Util_Emergency Visits per 1k Members": 150,
+  "Util_Specialist Visits per 1k Members": 1250,
+  "Risk_Average Risk Score": 1.2,
+  "Cost_Medical & RX Paid Amount PMPY": 5200
+};
+
 const ReportViewer = () => {
   const { archetypeId = '', token = '' } = useParams();
   const navigate = useNavigate();
@@ -16,6 +38,7 @@ const ReportViewer = () => {
   const [userData, setUserData] = useState<any>(null);
   const [averageData, setAverageData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [usingFallbackData, setUsingFallbackData] = useState(false);
 
   // Helper function to validate if a string is a valid ArchetypeId
   function isValidArchetypeId(id: string): boolean {
@@ -70,7 +93,19 @@ const ReportViewer = () => {
 
         if (archetypeError) {
           console.error('Error fetching archetype data:', archetypeError);
-          toast.error('Error loading report data. Please try again later.');
+          toast.warning('Using placeholder report data for demonstration purposes.');
+          // Use default data if real data is not available
+          setReportData({ ...defaultReportData, archetype_id: archetypeId });
+          setUsingFallbackData(true);
+          setIsLoading(false);
+          return;
+        }
+
+        if (!archetypeData) {
+          console.log('No archetype data found, using fallback data');
+          // Use default data if real data is not available
+          setReportData({ ...defaultReportData, archetype_id: archetypeId });
+          setUsingFallbackData(true);
           setIsLoading(false);
           return;
         }
@@ -84,11 +119,12 @@ const ReportViewer = () => {
 
         if (averageError) {
           console.error('Error fetching average data:', averageError);
-          toast.error('Error loading comparison data. Some charts may not display correctly.');
+          toast.warning('Some comparison data may not display correctly.');
         }
 
         setReportData(archetypeData);
-        setAverageData(averageData);
+        setAverageData(averageData || { archetype_id: 'All_Average' });
+        
       } catch (err) {
         console.error('Error fetching report:', err);
         setIsValidToken(false);
@@ -164,7 +200,25 @@ const ReportViewer = () => {
     );
   }
 
-  return <DeepDiveReport reportData={reportData} userData={userData} averageData={averageData} />;
+  // Show a banner if we're using fallback data
+  const FallbackBanner = () => {
+    if (usingFallbackData) {
+      return (
+        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6">
+          <p className="font-bold">Demo Mode</p>
+          <p>This report is using placeholder data for demonstration purposes.</p>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  return (
+    <>
+      {usingFallbackData && <FallbackBanner />}
+      <DeepDiveReport reportData={reportData} userData={userData} averageData={averageData} />
+    </>
+  );
 };
 
 export default ReportViewer;
