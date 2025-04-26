@@ -10,6 +10,7 @@ import Insights from '@/pages/Insights';
 import About from '@/pages/About';
 import NotFound from '@/pages/NotFound';
 import Admin from '@/pages/Admin';
+import ReportViewer from '@/pages/ReportViewer';
 
 const version = "0.0.1";
 
@@ -25,6 +26,7 @@ function App() {
             <Route path="/insights" element={<Insights />} />
             <Route path="/about" element={<About />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/report/:archetypeId/:token" element={<ReportViewer />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>

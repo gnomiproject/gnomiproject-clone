@@ -10,7 +10,8 @@ import {
   FileText, 
   Loader2, 
   RefreshCw,
-  Eye
+  Eye,
+  ExternalLink
 } from "lucide-react";
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -25,7 +26,7 @@ import {
 } from "@/components/ui/table";
 import ReportDetailView from './ReportDetailView';
 import { Link } from 'react-router-dom';
-import { ExternalLink } from 'lucide-react';
+import { getSecureReportUrl } from '@/utils/tokenGenerator';
 
 interface ArchetypeSummary {
   id: string;
@@ -164,6 +165,11 @@ export function InsightsReportGenerator() {
   const handleViewReport = (archetypeId: string) => {
     setSelectedArchetype(archetypeId);
     setViewReportOpen(true);
+  };
+
+  // Generate a secure report URL for a specific archetype
+  const getArchetypeReportUrl = (archetypeId: string): string => {
+    return getSecureReportUrl(archetypeId);
   };
 
   return (
@@ -306,12 +312,12 @@ export function InsightsReportGenerator() {
                         size="sm"
                         asChild
                         disabled={archetype.status !== 'success'}
-                        title="View on insights page"
+                        title="View secure report page"
                         className="h-8 w-8 p-0"
                       >
-                        <Link to={`/insights?archetype=${archetype.id}`}>
+                        <Link to={getArchetypeReportUrl(archetype.id)}>
                           <ExternalLink className="h-4 w-4" />
-                          <span className="sr-only">View on Insights Page</span>
+                          <span className="sr-only">View Report Page</span>
                         </Link>
                       </Button>
                     </div>
