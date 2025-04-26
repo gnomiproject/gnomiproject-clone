@@ -1,7 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useGetArchetype } from '@/hooks/useGetArchetype';
 import { supabase } from '@/integrations/supabase/client';
 import DeepDiveReport from '@/components/report/DeepDiveReport';
 import { Button } from '@/components/ui/button';
@@ -12,9 +11,8 @@ const ReportViewer = () => {
   const { archetypeId = '', token = '' } = useParams();
   const navigate = useNavigate();
   const [isValidToken, setIsValidToken] = useState<boolean | null>(null);
-  // Cast the archetypeId string to ArchetypeId type with validation
-  const validArchetypeId = isValidArchetypeId(archetypeId) ? archetypeId as ArchetypeId : undefined;
-  const { archetypeData, isLoading, error } = useGetArchetype(validArchetypeId);
+  const [reportData, setReportData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Helper function to validate if a string is a valid ArchetypeId
   function isValidArchetypeId(id: string): boolean {
@@ -23,35 +21,37 @@ const ReportViewer = () => {
   }
 
   useEffect(() => {
-    const validateToken = async () => {
+    const fetchReport = async () => {
       try {
+        // Fetch report data from our new view
         const { data, error } = await supabase
-          .from('report_requests')
-          .select('status, expires_at')
+          .from('view_deep_dive_reports')
+          .select('*')
           .eq('archetype_id', archetypeId)
           .eq('access_token', token)
-          .single();
+          .eq('status', 'active')
+          .maybeSingle();
 
         if (error) throw error;
 
-        const isValid = data && 
-          data.status === 'active' && 
-          (!data.expires_at || new Date(data.expires_at) > new Date());
-
+        const isValid = data && (!data.expires_at || new Date(data.expires_at) > new Date());
         setIsValidToken(isValid);
+        setReportData(data);
       } catch (err) {
-        console.error('Error validating token:', err);
+        console.error('Error fetching report:', err);
         setIsValidToken(false);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     if (token && archetypeId) {
-      validateToken();
+      fetchReport();
     }
   }, [token, archetypeId]);
 
   // Handle case where archetypeId is invalid
-  if (!validArchetypeId && archetypeId) {
+  if (!isValidArchetypeId(archetypeId)) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6 text-center">
@@ -89,7 +89,7 @@ const ReportViewer = () => {
     return <DeepDiveReport archetypeData={null} loading={true} />;
   }
 
-  if (error || !archetypeData) {
+  if (!reportData) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6 text-center">
@@ -106,7 +106,7 @@ const ReportViewer = () => {
     );
   }
 
-  return <DeepDiveReport archetypeData={archetypeData} />;
+  return <DeepDiveReport archetypeData={reportData} />;
 };
 
 export default ReportViewer;

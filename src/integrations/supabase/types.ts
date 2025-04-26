@@ -789,6 +789,45 @@ export type Database = {
         }
         Relationships: []
       }
+      deep_dive_reports: {
+        Row: {
+          access_token: string
+          archetype_id: string
+          comments: string | null
+          created_at: string | null
+          email: string | null
+          expires_at: string | null
+          id: string
+          name: string | null
+          organization: string | null
+          status: string
+        }
+        Insert: {
+          access_token: string
+          archetype_id: string
+          comments?: string | null
+          created_at?: string | null
+          email?: string | null
+          expires_at?: string | null
+          id?: string
+          name?: string | null
+          organization?: string | null
+          status?: string
+        }
+        Update: {
+          access_token?: string
+          archetype_id?: string
+          comments?: string | null
+          created_at?: string | null
+          email?: string | null
+          expires_at?: string | null
+          id?: string
+          name?: string | null
+          organization?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
       insights_feedback: {
         Row: {
           archetype_id: string | null
@@ -962,6 +1001,62 @@ export type Database = {
           "Cost_RX Paid Amount PMPY"?: number | null
           "Cost_Specialty RX Allowed Amount PMPM"?: number | null
           id?: string | null
+        }
+        Relationships: []
+      }
+      view_deep_dive_reports: {
+        Row: {
+          access_token: string | null
+          archetype_id: string | null
+          archetype_name: string | null
+          comments: string | null
+          "Cost_Avoidable ER Potential Savings PMPY": number | null
+          "Cost_Medical & RX Paid Amount PEPY": number | null
+          "Cost_Medical & RX Paid Amount PMPY": number | null
+          "Cost_Medical Paid Amount PEPY": number | null
+          "Cost_RX Paid Amount PEPY": number | null
+          created_at: string | null
+          "Demo_Average Age": number | null
+          "Demo_Average Employees": number | null
+          "Demo_Average Family Size": number | null
+          "Demo_Average Percent Female": number | null
+          "Demo_Average States": number | null
+          "Dise_Heart Disease Prevalence": number | null
+          "Dise_Mental Health Disorder Prevalence": number | null
+          "Dise_Substance Use Disorder Prevalence": number | null
+          "Dise_Type 2 Diabetes Prevalence": number | null
+          email: string | null
+          expires_at: string | null
+          family_id: string | null
+          family_industries: string | null
+          family_long_description: string | null
+          family_name: string | null
+          family_short_description: string | null
+          "Gaps_Behavioral Health FU ED Visit Mental Illness": number | null
+          "Gaps_Cancer Screening Breast": number | null
+          "Gaps_Diabetes RX Adherence": number | null
+          "Gaps_Wellness Visit Adults": number | null
+          hex_color: string | null
+          id: string | null
+          industries: string | null
+          key_characteristics: string | null
+          key_findings: Json | null
+          long_description: string | null
+          name: string | null
+          opportunities: Json | null
+          organization: string | null
+          "Risk_Average Risk Score": number | null
+          "SDOH_Average SDOH": number | null
+          short_description: string | null
+          status: string | null
+          strategic_recommendations: Json | null
+          strengths: Json | null
+          threats: Json | null
+          "Util_Emergency Visits per 1k Members": number | null
+          "Util_Inpatient Admits per 1k Members": number | null
+          "Util_Percent of Members who are Non-Utilizers": number | null
+          "Util_Specialist Visits per 1k Members": number | null
+          weaknesses: Json | null
         }
         Relationships: []
       }
