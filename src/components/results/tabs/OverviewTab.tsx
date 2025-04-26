@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ArchetypeDetailedData } from '@/types/archetype';
 import { Badge } from '@/components/ui/badge';
@@ -24,18 +25,26 @@ const OverviewTab = ({ archetypeData }: OverviewTabProps) => {
     long_description = archetypeData.long_description || archetypeData.standard?.fullDescription || '',
   } = archetypeData;
 
-  // Extract key characteristics with proper fallbacks and ensure it's an array
-  const keyCharacteristics = 
-    Array.isArray(archetypeData.key_characteristics) ? archetypeData.key_characteristics :
-    typeof archetypeData.key_characteristics === 'string' ? 
-      archetypeData.key_characteristics.split('\n').filter(Boolean) :
-    archetypeData.summary?.keyCharacteristics || [];
+  // Safely extract key characteristics with proper type checking
+  let keyCharacteristics: string[] = [];
   
-  // Get industries with proper fallback and ensure it's an array
-  const industries = 
-    typeof archetypeData.industries === 'string' 
-      ? archetypeData.industries 
-      : '';
+  if (Array.isArray(archetypeData.key_characteristics)) {
+    // If it's already an array, use it directly
+    keyCharacteristics = archetypeData.key_characteristics.map(item => String(item));
+  } else if (typeof archetypeData.key_characteristics === 'string') {
+    // If it's a string, split it
+    keyCharacteristics = archetypeData.key_characteristics.split('\n').filter(Boolean);
+  } else if (archetypeData.summary?.keyCharacteristics) {
+    // Fallback to summary.keyCharacteristics if available
+    keyCharacteristics = archetypeData.summary.keyCharacteristics;
+  }
+  
+  // Safely extract industries with proper type checking
+  let industries = '';
+  
+  if (typeof archetypeData.industries === 'string') {
+    industries = archetypeData.industries;
+  }
   
   // Get family name with proper fallback
   const familyName = archetypeData.family_name || archetypeData.familyName || '';
@@ -45,11 +54,6 @@ const OverviewTab = ({ archetypeData }: OverviewTabProps) => {
     industries.split(',').map(i => i.trim().replace(/^"?|"?$/g, '')) : 
     [];
   
-  // Format key characteristics as array safely
-  const characteristicsList = Array.isArray(keyCharacteristics) ? 
-    keyCharacteristics.map(item => String(item)) : 
-    [];
-
   return (
     <div>
       <div className="mb-8">
@@ -104,9 +108,9 @@ const OverviewTab = ({ archetypeData }: OverviewTabProps) => {
               <Users className="mr-2 h-5 w-5 text-gray-500" />
               <h3 className="text-lg font-semibold">Key Characteristics</h3>
             </div>
-            {characteristicsList.length > 0 ? (
+            {keyCharacteristics.length > 0 ? (
               <ul className="space-y-2">
-                {characteristicsList.map((item, index) => (
+                {keyCharacteristics.map((item, index) => (
                   <li key={index} className="flex items-start gap-2">
                     <div className="h-2 w-2 rounded-full mt-2 flex-shrink-0" style={{ backgroundColor: color.color }}></div>
                     <span>{item}</span>
