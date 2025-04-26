@@ -10,7 +10,8 @@ import {
   AlertTriangle, 
   FileText, 
   Loader2, 
-  RefreshCw
+  RefreshCw,
+  Eye
 } from "lucide-react";
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -23,6 +24,7 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
+import ReportDetailView from './ReportDetailView';
 
 interface ArchetypeSummary {
   id: string;
@@ -42,6 +44,8 @@ const InsightsReportGenerator: React.FC = () => {
     errors?: string[];
   }>(null);
   const [error, setError] = useState<string | null>(null);
+  const [selectedArchetype, setSelectedArchetype] = useState<string | null>(null);
+  const [viewReportOpen, setViewReportOpen] = useState(false);
 
   useEffect(() => {
     loadArchetypes();
@@ -156,6 +160,11 @@ const InsightsReportGenerator: React.FC = () => {
     }
   };
 
+  const handleViewReport = (archetypeId: string) => {
+    setSelectedArchetype(archetypeId);
+    setViewReportOpen(true);
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -236,12 +245,13 @@ const InsightsReportGenerator: React.FC = () => {
               <TableHead>Archetype</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Last Updated</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={3} className="text-center py-4">
+                <TableCell colSpan={4} className="text-center py-4">
                   <div className="flex items-center justify-center gap-2">
                     <Loader2 className="h-4 w-4 animate-spin" />
                     Loading archetypes...
@@ -250,7 +260,7 @@ const InsightsReportGenerator: React.FC = () => {
               </TableRow>
             ) : archetypes.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={3} className="text-center py-4">
+                <TableCell colSpan={4} className="text-center py-4">
                   No archetypes found
                 </TableCell>
               </TableRow>
@@ -277,12 +287,32 @@ const InsightsReportGenerator: React.FC = () => {
                   <TableCell>
                     {archetype.lastUpdated || 'Never'}
                   </TableCell>
+                  <TableCell className="text-right">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleViewReport(archetype.id)}
+                      disabled={archetype.status !== 'success'}
+                      title={archetype.status !== 'success' ? 'No report available' : 'View report'}
+                      className="h-8 w-8 p-0"
+                    >
+                      <Eye className="h-4 w-4" />
+                      <span className="sr-only">View Report</span>
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))
             )}
           </TableBody>
         </Table>
       </div>
+
+      {/* Report Detail Dialog */}
+      <ReportDetailView 
+        archetypeId={selectedArchetype} 
+        isOpen={viewReportOpen}
+        onClose={() => setViewReportOpen(false)}
+      />
     </div>
   );
 };
