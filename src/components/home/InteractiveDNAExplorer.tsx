@@ -1,11 +1,10 @@
-
 import React, { useState } from 'react';
-import { useArchetypes } from '@/hooks/useArchetypes';
 import DNAHelix from './DNAHelix';
 import SectionTitle from '@/components/shared/SectionTitle';
 import { ArchetypeId } from '@/types/archetype';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { ArrowDown } from 'lucide-react';
+import { useArchetypeBasics } from '@/hooks/archetype/useArchetypeBasics';
 
 // Import the component files
 import ArchetypeDetailView from './ArchetypeDetailView';
@@ -15,15 +14,13 @@ import EmptyExplorerState from './EmptyExplorerState';
 
 const InteractiveDNAExplorer = () => {
   const { 
-    allArchetypeSummaries, 
-    allFamilies, 
-    getArchetypeDetailedById 
-  } = useArchetypes();
+    archetypes, 
+    families, 
+    getFamilyById,
+    isLoading 
+  } = useArchetypeBasics();
   
-  const archetypeSummaries = allArchetypeSummaries || [];
-  const families = allFamilies || [];
   const isMobile = useIsMobile();
-
   const [selectedFamily, setSelectedFamily] = useState<string | null>(null);
   const [selectedArchetype, setSelectedArchetype] = useState<ArchetypeId | null>(null);
   const [showDetailDialog, setShowDetailDialog] = useState<boolean>(false);
@@ -50,35 +47,34 @@ const InteractiveDNAExplorer = () => {
 
   // Get the selected archetype's full data
   const selectedArchetypeDetail = selectedArchetype ? 
-    getArchetypeDetailedById(selectedArchetype) : 
+    archetypes?.find(a => a.id === selectedArchetype) : 
     null;
 
   // Get the selected family information
   const selectedFamilyInfo = selectedFamily ?
-    families.find(family => family.id === selectedFamily) :
+    getFamilyById(selectedFamily as any) :
     null;
     
   // Create a properly formatted archetype summary object that matches expected props
   const selectedArchetypeSummary = selectedArchetype && selectedArchetypeDetail ? {
     id: selectedArchetype,
     familyId: selectedArchetype.charAt(0) as 'a' | 'b' | 'c',
-    name: archetypeSummaries.find(a => a.id === selectedArchetype)?.name || 'Unknown Archetype',
+    name: selectedArchetypeDetail.name,
     familyName: selectedFamilyInfo?.name || 'Unknown Family',
-    description: selectedArchetypeDetail?.standard?.fullDescription || selectedArchetypeDetail?.long_description || '',
-    keyCharacteristics: selectedArchetypeDetail?.standard?.keyCharacteristics || selectedArchetypeDetail?.key_characteristics || []
+    description: selectedArchetypeDetail.short_description || '',
+    keyCharacteristics: selectedArchetypeDetail.key_characteristics || []
   } : null;
   
   // Convert archetype summaries to the expected format for FamilyDetailView
-  const formattedArchetypeSummaries = archetypeSummaries.map(summary => ({
-    id: summary.id,
-    familyId: summary.id.charAt(0) as 'a' | 'b' | 'c',
-    name: summary.name,
-    familyName: families.find(f => f.id === summary.id.charAt(0))?.name || '',
-    description: summary.description,
-    keyCharacteristics: Array.isArray(summary.keyCharacteristics) ? summary.keyCharacteristics : [],
-    color: summary.color,
-    hexColor: summary.hexColor
-  }));
+  const formattedArchetypeSummaries = archetypes?.map(archetype => ({
+    id: archetype.id,
+    familyId: archetype.family_id,
+    name: archetype.name,
+    familyName: getFamilyById(archetype.family_id)?.name || '',
+    description: archetype.short_description || '',
+    keyCharacteristics: archetype.key_characteristics || [],
+    color: archetype.hex_color,
+  })) || [];
 
   // Scroll to archetypes section
   const scrollToArchetypes = (e: React.MouseEvent) => {
@@ -123,8 +119,8 @@ const InteractiveDNAExplorer = () => {
     return {
       id: family.id,
       name: family.name,
-      description: family.description || family.short_description || family.long_description || '',
-      commonTraits: family.commonTraits || family.common_traits || []
+      description: family.short_description || '',
+      commonTraits: family.common_traits || []
     };
   };
 
@@ -133,15 +129,28 @@ const InteractiveDNAExplorer = () => {
     if (!archetype) return null;
     return {
       id: archetype.id,
-      familyId: archetype.familyId || (archetype.family_id as 'a' | 'b' | 'c'),
+      familyId: archetype.family_id,
       name: archetype.name,
       familyName: selectedFamilyInfo?.name || 'Unknown Family',
-      color: archetype.color,
-      hexColor: archetype.hexColor || archetype.hex_color,
-      keyFindings: archetype.standard?.keyCharacteristics || archetype.key_characteristics || [],
-      fullDescription: archetype.standard?.fullDescription || archetype.long_description || ''
+      hexColor: archetype.hex_color,
+      keyFindings: archetype.key_characteristics || [],
+      fullDescription: archetype.long_description || ''
     };
   };
+
+  if (isLoading) {
+    return (
+      <section className="py-16 px-6 md:px-12 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <SectionTitle 
+            title="Loading DNA Explorer..."
+            subtitle="Please wait while we load the data."
+            center
+          />
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-16 px-6 md:px-12 bg-white scroll-mt-16" id="dna-explorer">
@@ -190,13 +199,13 @@ const InteractiveDNAExplorer = () => {
       </div>
 
       {/* Level 2 Detail Dialog */}
-      {selectedArchetypeDetail && (
+      {/* {selectedArchetypeDetail && (
         <ArchetypeDetailDialog 
           open={showDetailDialog}
           onOpenChange={setShowDetailDialog}
           archetypeDetail={formatArchetypeDetail(selectedArchetypeDetail)}
         />
-      )}
+      )} */}
     </section>
   );
 };
