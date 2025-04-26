@@ -4,6 +4,7 @@ import { ArchetypeId } from '@/types/archetype';
 import { useArchetypes } from '@/hooks/useArchetypes';
 import DetailedAnalysisTabs from '@/components/results/DetailedAnalysisTabs';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useGetArchetype } from '@/hooks/useGetArchetype';
 
 interface DetailedArchetypeReportProps {
   archetypeId: ArchetypeId;
@@ -11,11 +12,13 @@ interface DetailedArchetypeReportProps {
 }
 
 const DetailedArchetypeReport = ({ archetypeId, onRetakeAssessment }: DetailedArchetypeReportProps) => {
-  // Get the archetype data from useArchetypes hook
-  const { allDetailedArchetypes, isLoading } = useArchetypes();
+  // Use the useGetArchetype hook to fetch data directly from Supabase
+  const { archetypeData, familyData, isLoading, error } = useGetArchetype(archetypeId);
   
-  // Find the archetype data for the provided ID
-  const archetypeData = allDetailedArchetypes.find(archetype => archetype.id === archetypeId);
+  console.log("DetailedArchetypeReport - archetypeData:", archetypeData);
+  console.log("DetailedArchetypeReport - familyData:", familyData);
+  console.log("DetailedArchetypeReport - isLoading:", isLoading);
+  console.log("DetailedArchetypeReport - error:", error);
   
   if (isLoading) {
     return (
@@ -26,8 +29,8 @@ const DetailedArchetypeReport = ({ archetypeId, onRetakeAssessment }: DetailedAr
     );
   }
   
-  if (!archetypeData) {
-    return <div>No detailed data available for this archetype.</div>;
+  if (error || !archetypeData) {
+    return <div>Error loading archetype data. Please try again later.</div>;
   }
   
   return (
