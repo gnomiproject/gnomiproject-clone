@@ -1,15 +1,14 @@
+
 import React, { useState } from 'react';
 import DNAHelix from './DNAHelix';
 import SectionTitle from '@/components/shared/SectionTitle';
 import { ArchetypeId } from '@/types/archetype';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { ArrowDown } from 'lucide-react';
 import { useArchetypeBasics } from '@/hooks/archetype/useArchetypeBasics';
 
 // Import the component files
 import ArchetypeDetailView from './ArchetypeDetailView';
 import FamilyDetailView from './FamilyDetailView';
-import ArchetypeDetailDialog from './ArchetypeDetailDialog';
 import EmptyExplorerState from './EmptyExplorerState';
 
 const InteractiveDNAExplorer = () => {
@@ -23,7 +22,11 @@ const InteractiveDNAExplorer = () => {
   const isMobile = useIsMobile();
   const [selectedFamily, setSelectedFamily] = useState<string | null>(null);
   const [selectedArchetype, setSelectedArchetype] = useState<ArchetypeId | null>(null);
-  const [showDetailDialog, setShowDetailDialog] = useState<boolean>(false);
+
+  // If on mobile, don't render anything
+  if (isMobile) {
+    return null;
+  }
 
   // Handle step click on the DNA helix
   const handleStepClick = (archetypeId: ArchetypeId) => {
@@ -36,10 +39,8 @@ const InteractiveDNAExplorer = () => {
 
   // Handle family button click
   const handleFamilyClick = (familyId: 'a' | 'b' | 'c') => {
-    // Toggle selection if clicking the same family again
     setSelectedFamily(familyId === selectedFamily ? null : familyId);
     
-    // Clear selected archetype if we're changing families
     if (selectedArchetype && selectedArchetype.charAt(0) !== familyId) {
       setSelectedArchetype(null);
     }
@@ -75,68 +76,6 @@ const InteractiveDNAExplorer = () => {
     keyCharacteristics: archetype.key_characteristics || [],
     color: archetype.hex_color,
   })) || [];
-
-  // Scroll to archetypes section
-  const scrollToArchetypes = (e: React.MouseEvent) => {
-    e.preventDefault();
-    const archetypeSection = document.getElementById('archetype-section');
-    archetypeSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
-
-  // Mobile alternative content
-  if (isMobile) {
-    return (
-      <section className="py-12 px-6 bg-white scroll-mt-16" id="dna-explorer">
-        <div className="max-w-6xl mx-auto">
-          <SectionTitle 
-            title="Explore the DNA of Employer Healthcare" 
-            subtitle="We've identified 9 distinct employer archetypes, grouped into 3 families based on how organizations manage healthcare."
-            center
-            className="mb-6"
-          />
-          
-          <div className="bg-blue-50/50 rounded-lg border border-blue-100 p-6 shadow-sm text-center">
-            <h3 className="text-xl font-bold text-blue-700 mb-3">For Best Experience</h3>
-            <p className="text-gray-600 mb-4">
-              Our interactive DNA explorer works best on desktop devices. 
-              Please scroll down to browse all archetypes in card format.
-            </p>
-            <button 
-              onClick={scrollToArchetypes}
-              className="inline-flex items-center text-blue-600 font-medium"
-            >
-              View All Archetypes <ArrowDown className="ml-1 h-4 w-4" />
-            </button>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  // Format family info to match expected props in FamilyDetailView
-  const formatFamilyInfo = (family) => {
-    if (!family) return null;
-    return {
-      id: family.id,
-      name: family.name,
-      description: family.short_description || '',
-      commonTraits: family.common_traits || []
-    };
-  };
-
-  // Format archetype detail to match expected props in ArchetypeDetailDialog
-  const formatArchetypeDetail = (archetype) => {
-    if (!archetype) return null;
-    return {
-      id: archetype.id,
-      familyId: archetype.family_id,
-      name: archetype.name,
-      familyName: selectedFamilyInfo?.name || 'Unknown Family',
-      hexColor: archetype.hex_color,
-      keyFindings: archetype.key_characteristics || [],
-      fullDescription: archetype.long_description || ''
-    };
-  };
 
   if (isLoading) {
     return (
@@ -184,8 +123,7 @@ const InteractiveDNAExplorer = () => {
               <EmptyExplorerState />
             ) : selectedArchetypeSummary ? (
               <ArchetypeDetailView 
-                archetypeSummary={selectedArchetypeSummary} 
-                onShowDetailDialog={() => setShowDetailDialog(true)} 
+                archetypeSummary={selectedArchetypeSummary}
               />
             ) : selectedFamilyInfo ? (
               <FamilyDetailView 
@@ -197,17 +135,20 @@ const InteractiveDNAExplorer = () => {
           </div>
         </div>
       </div>
-
-      {/* Level 2 Detail Dialog */}
-      {/* {selectedArchetypeDetail && (
-        <ArchetypeDetailDialog 
-          open={showDetailDialog}
-          onOpenChange={setShowDetailDialog}
-          archetypeDetail={formatArchetypeDetail(selectedArchetypeDetail)}
-        />
-      )} */}
     </section>
   );
 };
 
+// Helper function to format family info
+const formatFamilyInfo = (family: any) => {
+  if (!family) return null;
+  return {
+    id: family.id,
+    name: family.name,
+    description: family.short_description || '',
+    commonTraits: family.common_traits || []
+  };
+};
+
 export default InteractiveDNAExplorer;
+
