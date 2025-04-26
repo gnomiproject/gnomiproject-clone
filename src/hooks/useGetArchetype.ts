@@ -26,7 +26,9 @@ export const useGetArchetype = (archetypeId: ArchetypeId): UseGetArchetype => {
       }
 
       try {
-        // Attempt to fetch data from level3_report_data first (newest structure)
+        console.log("useGetArchetype - Fetching data for archetypeId:", archetypeId);
+        
+        // Attempt to fetch data from level3_report_data table
         const { data, error: fetchError } = await supabase
           .from('level3_report_data')
           .select('*')
@@ -36,6 +38,8 @@ export const useGetArchetype = (archetypeId: ArchetypeId): UseGetArchetype => {
         if (fetchError) {
           throw fetchError;
         }
+
+        console.log("useGetArchetype - Data fetched from level3_report_data:", data);
 
         if (data) {
           // Helper function to safely convert JSONB arrays to string arrays
@@ -151,6 +155,7 @@ export const useGetArchetype = (archetypeId: ArchetypeId): UseGetArchetype => {
             }
           };
 
+          console.log("useGetArchetype - Formatted data:", formattedData);
           setArchetypeData(formattedData);
           
           // Set family data
@@ -169,6 +174,7 @@ export const useGetArchetype = (archetypeId: ArchetypeId): UseGetArchetype => {
 
         } else {
           // Fallback to original archetype data structure
+          console.log("useGetArchetype - No data found in level3_report_data, falling back to local data");
           const fallbackArchetype = getArchetypeEnhanced(archetypeId);
           
           if (fallbackArchetype) {

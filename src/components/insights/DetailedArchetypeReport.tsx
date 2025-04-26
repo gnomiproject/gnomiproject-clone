@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { ArchetypeId } from '@/types/archetype';
-import { useArchetypes } from '@/hooks/useArchetypes';
 import DetailedAnalysisTabs from '@/components/results/DetailedAnalysisTabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useGetArchetype } from '@/hooks/useGetArchetype';
@@ -19,6 +18,7 @@ const DetailedArchetypeReport = ({ archetypeId, onRetakeAssessment }: DetailedAr
   console.log("DetailedArchetypeReport - familyData:", familyData);
   console.log("DetailedArchetypeReport - isLoading:", isLoading);
   console.log("DetailedArchetypeReport - error:", error);
+  console.log("DetailedArchetypeReport - archetypeId:", archetypeId);
   
   if (isLoading) {
     return (

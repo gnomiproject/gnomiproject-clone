@@ -58,27 +58,27 @@ const KeyMetricsTab = ({ archetypeData }: KeyMetricsTabProps) => {
     archetypeData.hexColor : 
     `var(--color-archetype-${archetypeData.id})`;
 
-  // Access metrics data with safe fallbacks and proper type handling
-  // Using optional chaining and nullish coalescing to avoid errors
-  
-  // Demographics metrics - use direct properties from archetypeData
-  const familySize = archetypeData["Demo_Average Family Size"] ?? 0;
-  const averageAge = archetypeData["Demo_Average Age"] ?? 0;
-  const averageStates = archetypeData["Demo_Average States"] ?? 0;
+  console.log("KeyMetricsTab - Archetype Data:", archetypeData);
 
-  // Utilization metrics - use direct properties from archetypeData
-  const erVisits = archetypeData["Util_Emergency Visits per 1k Members"] ?? 0;
-  const specialistVisits = archetypeData["Util_Specialist Visits per 1k Members"] ?? 0;
-  const inpatientAdmits = archetypeData["Util_Inpatient Admits per 1k Members"] ?? 0;
-  const nonUtilizers = archetypeData["Util_Percent of Members who are Non-Utilizers"] ?? 0;
+  // Access metrics data directly from archetypeData properties
+  // Demographics metrics
+  const familySize = archetypeData["Demo_Average Family Size"] || 0;
+  const averageAge = archetypeData["Demo_Average Age"] || 0;
+  const averageStates = archetypeData["Demo_Average States"] || 0;
 
-  // Risk metrics - use direct properties from archetypeData
-  const riskScore = archetypeData["Risk_Average Risk Score"] ?? 0;
-  const sdohScore = archetypeData["SDOH_Average SDOH"] ?? 0;
+  // Utilization metrics
+  const erVisits = archetypeData["Util_Emergency Visits per 1k Members"] || 0;
+  const specialistVisits = archetypeData["Util_Specialist Visits per 1k Members"] || 0;
+  const inpatientAdmits = archetypeData["Util_Inpatient Admits per 1k Members"] || 0;
+  const nonUtilizers = archetypeData["Util_Percent of Members who are Non-Utilizers"] || 0;
 
-  // Cost metrics - use direct properties from archetypeData
-  const totalCostPEPY = archetypeData["Cost_Medical & RX Paid Amount PEPY"] ?? 0;
-  const savingsPMPY = archetypeData["Cost_Avoidable ER Potential Savings PMPY"] ?? 0;
+  // Risk metrics
+  const riskScore = archetypeData["Risk_Average Risk Score"] || 0;
+  const sdohScore = archetypeData["SDOH_Average SDOH"] || 0;
+
+  // Cost metrics
+  const totalCostPEPY = archetypeData["Cost_Medical & RX Paid Amount PEPY"] || 0;
+  const savingsPMPY = archetypeData["Cost_Avoidable ER Potential Savings PMPY"] || 0;
 
   console.log("KeyMetricsTab - metrics being used:", {
     familySize,
@@ -93,8 +93,6 @@ const KeyMetricsTab = ({ archetypeData }: KeyMetricsTabProps) => {
     totalCostPEPY,
     savingsPMPY
   });
-
-  console.log("KeyMetricsTab - raw archetype data:", archetypeData);
 
   return (
     <div>
