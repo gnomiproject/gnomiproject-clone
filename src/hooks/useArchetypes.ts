@@ -12,6 +12,7 @@ import { useState, useEffect } from 'react';
  * This maintains the original API for backward compatibility
  */
 export const useArchetypes = () => {
+  // Always call hooks at the top level, in the same order every render
   const { 
     archetypes,
     allArchetypes,
@@ -27,15 +28,17 @@ export const useArchetypes = () => {
     isLoading: isLoadingFamilies 
   } = useArchetypeFamilies();
   
+  // State hooks always declared at the top
   const [allDetailedArchetypes, setAllDetailedArchetypes] = useState<ArchetypeDetailedData[]>([]);
   const [allArchetypeSummaries, setAllArchetypeSummaries] = useState<any[]>([]);
   
-  // We use the null archetypeId here but use the hook's getAllDetailedArchetypes function
+  // Always call this hook in the same order
   const {
     getAllDetailedArchetypes,
     isLoading: isLoadingDetails
   } = useArchetypeDetails();
   
+  // Always call this hook in the same order
   const {
     getMetricsForArchetype,
     getDistinctiveMetricsForArchetype,
@@ -70,7 +73,7 @@ export const useArchetypes = () => {
     if (!isLoadingBasics && !isLoadingFamilies) {
       loadDetailedArchetypes();
     }
-  }, [isLoadingBasics, isLoadingFamilies]);
+  }, [isLoadingBasics, isLoadingFamilies, getAllDetailedArchetypes, getFamilyById]);
   
   // Helper function to get archetype summary by ID
   const getArchetypeSummary = (id: ArchetypeId) => {
@@ -109,16 +112,16 @@ export const useArchetypes = () => {
     
     // From useArchetypeFamilies
     getAllFamilies: () => allFamilies,
-    allFamilies, // Expose directly for components to access
+    allFamilies,
     getFamilyById,
     
     // From processed detailed archetype data
     getAllDetailedArchetypes: () => allDetailedArchetypes,
-    allDetailedArchetypes, // Expose directly for components to access
+    allDetailedArchetypes,
     getDetailedArchetypesByFamily,
     getArchetypeSummary,
     getArchetypeStandard,
-    getArchetypeDetailedById, // Make sure this function is properly exposed
+    getArchetypeDetailedById,
     getArchetypeEnhanced: getArchetypeDetailedById, // Keep for backward compatibility
     getAllArchetypeSummaries: () => allArchetypeSummaries,
     allArchetypeSummaries,

@@ -4,7 +4,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Archetype, ArchetypeFamily, ArchetypeId, FamilyId } from '@/types/archetype';
 
 export const useArchetypeBasics = () => {
-  const { data: archetypeData, isLoading: isLoadingArchetypes, error: archetypeError } = useQuery({
+  // Always call the same hooks in the same order
+  const archetypesQuery = useQuery({
     queryKey: ['archetype-basics'],
     queryFn: async () => {
       const { data: archetypes, error } = await supabase
@@ -33,7 +34,7 @@ export const useArchetypeBasics = () => {
     }
   });
 
-  const { data: familyData, isLoading: isLoadingFamilies, error: familyError } = useQuery({
+  const familiesQuery = useQuery({
     queryKey: ['family-basics'],
     queryFn: async () => {
       const { data: families, error } = await supabase
@@ -61,33 +62,35 @@ export const useArchetypeBasics = () => {
     }
   });
 
+  const archetypeData = archetypesQuery.data || [];
+  const familyData = familiesQuery.data || [];
+  const error = archetypesQuery.error || familiesQuery.error;
+  const isLoading = archetypesQuery.isLoading || familiesQuery.isLoading;
+
   // Helper function to get archetype by ID
   const getArchetypeById = (id: ArchetypeId) => {
-    return archetypeData?.find(archetype => archetype.id === id) || null;
+    return archetypeData.find(archetype => archetype.id === id) || null;
   };
 
   // Helper function to get archetypes by family
   const getArchetypesByFamily = (familyId: string) => {
-    return archetypeData?.filter(archetype => archetype.family_id === familyId) || [];
+    return archetypeData.filter(archetype => archetype.family_id === familyId) || [];
   };
 
   // Helper function to get family by ID
   const getFamilyById = (id: FamilyId) => {
-    return familyData?.find(family => family.id === id) || null;
+    return familyData.find(family => family.id === id) || null;
   };
 
-  const error = archetypeError || familyError;
-  const isLoading = isLoadingArchetypes || isLoadingFamilies;
-
   return {
-    archetypes: archetypeData || [],
-    families: familyData || [],
+    archetypes: archetypeData,
+    families: familyData,
     getArchetypeById,
     getArchetypesByFamily,
     getFamilyById,
     isLoading,
     error,
     // Add for backward compatibility with useArchetypes hook
-    allArchetypes: archetypeData || []
+    allArchetypes: archetypeData
   };
 };
