@@ -83,6 +83,7 @@ const ArchetypesGridSection = () => {
                 family_id={archetype.family_id}
                 short_description={archetype.short_description}
                 hex_color={archetype.hex_color}
+                key_characteristics={archetype.key_characteristics}
               />
             ))
           ) : (
