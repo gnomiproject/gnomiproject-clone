@@ -6,6 +6,7 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Copy, ExternalLink } from "lucide-react";
+import { toast } from 'sonner';
 import ReportGenerationPanel from './ReportGenerationPanel';
 import ReportsTable from './ReportsTable';
 import EmptyReportsState from './EmptyReportsState';
