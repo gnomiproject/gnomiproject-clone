@@ -58,24 +58,24 @@ const KeyMetricsTab = ({ archetypeData }: KeyMetricsTabProps) => {
     archetypeData.hexColor : 
     `var(--color-archetype-${archetypeData.id})`;
 
-  // Demographics metrics
-  const familySize = archetypeData.Demo_Average_Family_Size ?? 0;
-  const averageAge = archetypeData.Demo_Average_Age ?? 0;
-  const averageStates = archetypeData.Demo_Average_States ?? 0;
+  // Demographics metrics - use the correct property names
+  const familySize = archetypeData["Demo_Average Family Size"] ?? 0;
+  const averageAge = archetypeData["Demo_Average Age"] ?? 0;
+  const averageStates = archetypeData["Demo_Average States"] ?? 0;
 
-  // Utilization metrics
-  const erVisits = archetypeData.Util_Emergency_Visits_per_1k_Members ?? 0;
-  const specialistVisits = archetypeData.Util_Specialist_Visits_per_1k_Members ?? 0;
-  const inpatientAdmits = archetypeData.Util_Inpatient_Admits_per_1k_Members ?? 0;
-  const nonUtilizers = archetypeData.Util_Percent_of_Members_who_are_Non_Utilizers ?? 0;
+  // Utilization metrics - use the correct property names
+  const erVisits = archetypeData["Util_Emergency Visits per 1k Members"] ?? 0;
+  const specialistVisits = archetypeData["Util_Specialist Visits per 1k Members"] ?? 0;
+  const inpatientAdmits = archetypeData["Util_Inpatient Admits per 1k Members"] ?? 0;
+  const nonUtilizers = archetypeData["Util_Percent of Members who are Non-Utilizers"] ?? 0;
 
-  // Risk metrics
-  const riskScore = archetypeData.Risk_Average_Risk_Score ?? 0;
-  const sdohScore = archetypeData.SDOH_Average_SDOH ?? 0;
+  // Risk metrics - use the correct property names
+  const riskScore = archetypeData["Risk_Average Risk Score"] ?? 0;
+  const sdohScore = archetypeData["SDOH_Average SDOH"] ?? 0;
 
-  // Cost metrics
-  const totalCostPEPY = archetypeData.Cost_Medical_RX_Paid_Amount_PEPY ?? 0;
-  const savingsPMPY = archetypeData.Cost_Avoidable_ER_Potential_Savings_PMPY ?? 0;
+  // Cost metrics - use the correct property names
+  const totalCostPEPY = archetypeData["Cost_Medical & RX Paid Amount PEPY"] ?? 0;
+  const savingsPMPY = archetypeData["Cost_Avoidable ER Potential Savings PMPY"] ?? 0;
 
   return (
     <div>
@@ -164,20 +164,18 @@ const KeyMetricsTab = ({ archetypeData }: KeyMetricsTabProps) => {
             description="Average clinical risk score (higher values indicate higher risk)" 
             color={color}
             icon={<AlertTriangle size={16} />}
-            isHighlighted={riskScore > 1.2}
           />
           <MetricCard 
-            title="SDOH Score" 
+            title="Social Determinants" 
             value={sdohScore.toFixed(2)} 
-            description="Social Determinants of Health score (higher values indicate more favorable social factors)" 
+            description="Social determinants of health score (higher values indicate better conditions)" 
             color={color}
-            icon={<AlertTriangle size={16} />}
-            isHighlighted={sdohScore < 70}
+            icon={<Users size={16} />}
           />
         </div>
       </div>
       
-      <div className="mb-4">
+      <div className="mb-8">
         <h3 className="text-lg font-semibold mb-4 flex items-center">
           <DollarSign className="mr-2 h-5 w-5 text-gray-500" /> 
           Cost Metrics
@@ -186,26 +184,18 @@ const KeyMetricsTab = ({ archetypeData }: KeyMetricsTabProps) => {
           <MetricCard 
             title="Total Healthcare Spend" 
             value={`$${totalCostPEPY.toLocaleString()}`} 
-            description="Medical and pharmacy cost per employee per year" 
+            description="Medical and pharmacy costs per employee per year" 
             color={color}
             icon={<DollarSign size={16} />}
-            isHighlighted={totalCostPEPY > 12000}
           />
           <MetricCard 
-            title="Potential Savings" 
+            title="Potential ER Savings" 
             value={`$${savingsPMPY.toLocaleString()}`} 
-            description="Potential savings from avoidable ER visits per member per year" 
+            description="Potential savings from avoidable emergency room visits per member per year" 
             color={color}
             icon={<DollarSign size={16} />}
-            isHighlighted={savingsPMPY > 100}
           />
         </div>
-      </div>
-      
-      <div className="mt-8 bg-gray-50 p-4 rounded-lg text-center">
-        <p className="text-gray-600 text-sm">
-          For detailed benchmarking and trend analysis, request the full archetype report
-        </p>
       </div>
     </div>
   );

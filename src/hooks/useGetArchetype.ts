@@ -42,8 +42,9 @@ export const useGetArchetype = (archetypeId: ArchetypeId): UseGetArchetype => {
           const formattedData: ArchetypeDetailedData = {
             id: data.archetype_id as ArchetypeId,
             name: data.archetype_name || '',
-            familyId: data.family_id as any,
+            familyId: data.family_id as FamilyId,
             familyName: data.family_name,
+            family_name: data.family_name, // Add for compatibility
             hexColor: data.hex_color,
             short_description: data.short_description,
             long_description: data.long_description,
@@ -54,42 +55,45 @@ export const useGetArchetype = (archetypeId: ArchetypeId): UseGetArchetype => {
             family_id: data.family_id,
 
             // SWOT analysis
-            strengths: data.strengths || [],
-            weaknesses: data.weaknesses || [],
-            opportunities: data.opportunities || [],
-            threats: data.threats || [],
+            strengths: data.strengths ? Array.isArray(data.strengths) ? data.strengths : [] : [],
+            weaknesses: data.weaknesses ? Array.isArray(data.weaknesses) ? data.weaknesses : [] : [],
+            opportunities: data.opportunities ? Array.isArray(data.opportunities) ? data.opportunities : [] : [],
+            threats: data.threats ? Array.isArray(data.threats) ? data.threats : [] : [],
 
             // Strategic recommendations
-            strategic_recommendations: data.strategic_recommendations || [],
+            strategic_recommendations: data.strategic_recommendations ? 
+              Array.isArray(data.strategic_recommendations) ? data.strategic_recommendations : [] : [],
 
-            // Metrics - using the new format but providing backwards compatibility
-            Demo_Average_Family_Size: data.Demo_Average_Family_Size,
-            Demo_Average_Age: data.Demo_Average_Age,
-            Demo_Average_Employees: data.Demo_Average_Employees,
-            Demo_Average_States: data.Demo_Average_States,
-            Demo_Average_Percent_Female: data.Demo_Average_Percent_Female,
+            // Use the correct property names from the database
+            "Demo_Average Family Size": data["Demo_Average Family Size"],
+            "Demo_Average Age": data["Demo_Average Age"],
+            "Demo_Average Employees": data["Demo_Average Employees"],
+            "Demo_Average States": data["Demo_Average States"],
+            "Demo_Average Percent Female": data["Demo_Average Percent Female"],
             
-            Util_Emergency_Visits_per_1k_Members: data.Util_Emergency_Visits_per_1k_Members,
-            Util_Specialist_Visits_per_1k_Members: data.Util_Specialist_Visits_per_1k_Members,
-            Util_Inpatient_Admits_per_1k_Members: data.Util_Inpatient_Admits_per_1k_Members,
-            Util_Percent_of_Members_who_are_Non_Utilizers: data.Util_Percent_of_Members_who_are_Non_Utilizers,
+            "Util_Emergency Visits per 1k Members": data["Util_Emergency Visits per 1k Members"],
+            "Util_Specialist Visits per 1k Members": data["Util_Specialist Visits per 1k Members"],
+            "Util_Inpatient Admits per 1k Members": data["Util_Inpatient Admits per 1k Members"],
+            "Util_Percent of Members who are Non-Utilizers": data["Util_Percent of Members who are Non-Utilizers"],
             
-            Risk_Average_Risk_Score: data.Risk_Average_Risk_Score,
-            SDOH_Average_SDOH: data.SDOH_Average_SDOH,
+            "Risk_Average Risk Score": data["Risk_Average Risk Score"],
+            "SDOH_Average SDOH": data["SDOH_Average SDOH"],
             
-            Cost_Medical_RX_Paid_Amount_PEPY: data.Cost_Medical_RX_Paid_Amount_PEPY,
-            Cost_Medical_RX_Paid_Amount_PMPY: data.Cost_Medical_RX_Paid_Amount_PMPY,
-            Cost_Avoidable_ER_Potential_Savings_PMPY: data.Cost_Avoidable_ER_Potential_Savings_PMPY,
+            "Cost_Medical & RX Paid Amount PEPY": data["Cost_Medical & RX Paid Amount PEPY"],
+            "Cost_Medical & RX Paid Amount PMPY": data["Cost_Medical & RX Paid Amount PMPY"],
+            "Cost_Avoidable ER Potential Savings PMPY": data["Cost_Avoidable ER Potential Savings PMPY"],
+            "Cost_Medical Paid Amount PEPY": data["Cost_Medical Paid Amount PEPY"],
+            "Cost_RX Paid Amount PEPY": data["Cost_RX Paid Amount PEPY"],
             
-            Dise_Heart_Disease_Prevalence: data.Dise_Heart_Disease_Prevalence,
-            Dise_Type_2_Diabetes_Prevalence: data.Dise_Type_2_Diabetes_Prevalence,
-            Dise_Mental_Health_Disorder_Prevalence: data.Dise_Mental_Health_Disorder_Prevalence,
-            Dise_Substance_Use_Disorder_Prevalence: data.Dise_Substance_Use_Disorder_Prevalence,
+            "Dise_Heart Disease Prevalence": data["Dise_Heart Disease Prevalence"],
+            "Dise_Type 2 Diabetes Prevalence": data["Dise_Type 2 Diabetes Prevalence"],
+            "Dise_Mental Health Disorder Prevalence": data["Dise_Mental Health Disorder Prevalence"],
+            "Dise_Substance Use Disorder Prevalence": data["Dise_Substance Use Disorder Prevalence"],
             
-            Gaps_Diabetes_RX_Adherence: data.Gaps_Diabetes_RX_Adherence,
-            Gaps_Behavioral_Health_FU_ED_Visit_Mental_Illness: data.Gaps_Behavioral_Health_FU_ED_Visit_Mental_Illness,
-            Gaps_Cancer_Screening_Breast: data.Gaps_Cancer_Screening_Breast,
-            Gaps_Wellness_Visit_Adults: data.Gaps_Wellness_Visit_Adults,
+            "Gaps_Diabetes RX Adherence": data["Gaps_Diabetes RX Adherence"],
+            "Gaps_Behavioral Health FU ED Visit Mental Illness": data["Gaps_Behavioral Health FU ED Visit Mental Illness"],
+            "Gaps_Cancer Screening Breast": data["Gaps_Cancer Screening Breast"],
+            "Gaps_Wellness Visit Adults": data["Gaps_Wellness Visit Adults"],
             
             // For compatibility with legacy structures
             standard: {
@@ -103,18 +107,18 @@ export const useGetArchetype = (archetypeId: ArchetypeId): UseGetArchetype => {
             },
             enhanced: {
               swot: {
-                strengths: data.strengths || [],
-                weaknesses: data.weaknesses || [],
-                opportunities: data.opportunities || [],
-                threats: data.threats || [],
+                strengths: Array.isArray(data.strengths) ? data.strengths : [],
+                weaknesses: Array.isArray(data.weaknesses) ? data.weaknesses : [],
+                opportunities: Array.isArray(data.opportunities) ? data.opportunities : [],
+                threats: Array.isArray(data.threats) ? data.threats : [],
               },
-              strategicPriorities: data.strategic_recommendations || [],
+              strategicPriorities: Array.isArray(data.strategic_recommendations) ? data.strategic_recommendations : [],
               costSavings: [],
-              riskProfile: data.Risk_Average_Risk_Score ? {
-                score: data.Risk_Average_Risk_Score.toFixed(2),
+              riskProfile: data["Risk_Average Risk Score"] ? {
+                score: data["Risk_Average Risk Score"].toFixed(2),
                 comparison: 'Based on clinical and utilization patterns',
                 conditions: [
-                  { name: 'Risk Score', value: data.Risk_Average_Risk_Score.toFixed(2), barWidth: `${data.Risk_Average_Risk_Score * 50}%` }
+                  { name: 'Risk Score', value: data["Risk_Average Risk Score"].toFixed(2), barWidth: `${data["Risk_Average Risk Score"] * 50}%` }
                 ]
               } : undefined
             },
@@ -130,14 +134,14 @@ export const useGetArchetype = (archetypeId: ArchetypeId): UseGetArchetype => {
           
           // Set family data
           if (data.family_id) {
-            const familyInfo = getFamilyById(data.family_id as any);
+            const familyInfo = getFamilyById(data.family_id as FamilyId);
             setFamilyData(familyInfo || {
               id: data.family_id,
               name: data.family_name || '',
               description: data.family_short_description || '',
               short_description: data.family_short_description || '',
               long_description: data.family_long_description || '',
-              commonTraits: data.common_traits || [],
+              commonTraits: Array.isArray(data.common_traits) ? data.common_traits : [],
               industries: data.family_industries || ''
             });
           }

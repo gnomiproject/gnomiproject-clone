@@ -23,10 +23,14 @@ const OverviewTab = ({ archetypeData }: OverviewTabProps) => {
   const {
     name: archetypeName = archetypeData.name,
     long_description = archetypeData.long_description || archetypeData.standard?.fullDescription || '',
-    industries = archetypeData.industries || '',
     key_characteristics = archetypeData.key_characteristics || archetypeData.summary?.keyCharacteristics || [],
-    family_name: familyName = archetypeData.familyName,
   } = archetypeData;
+
+  // Get industries with proper fallback
+  const industries = archetypeData.industries || '';
+  
+  // Get family name with proper fallback
+  const familyName = archetypeData.family_name || archetypeData.familyName || '';
 
   // Format industries as array
   const industryList = industries ? 

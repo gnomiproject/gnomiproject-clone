@@ -52,17 +52,17 @@ const DiseaseManagementTab = ({ archetypeData }: DiseaseManagementTabProps) => {
     archetypeData.hexColor : 
     `var(--color-archetype-${archetypeData.id})`;
 
-  // Disease prevalence metrics
-  const heartDiseasePrevalence = archetypeData.Dise_Heart_Disease_Prevalence ?? 0;
-  const diabetesPrevalence = archetypeData.Dise_Type_2_Diabetes_Prevalence ?? 0;
-  const mentalHealthPrevalence = archetypeData.Dise_Mental_Health_Disorder_Prevalence ?? 0;
-  const substanceUsePrevalence = archetypeData.Dise_Substance_Use_Disorder_Prevalence ?? 0;
+  // Disease prevalence metrics - using the correct property names
+  const heartDiseasePrevalence = archetypeData["Dise_Heart Disease Prevalence"] ?? 0;
+  const diabetesPrevalence = archetypeData["Dise_Type 2 Diabetes Prevalence"] ?? 0;
+  const mentalHealthPrevalence = archetypeData["Dise_Mental Health Disorder Prevalence"] ?? 0;
+  const substanceUsePrevalence = archetypeData["Dise_Substance Use Disorder Prevalence"] ?? 0;
 
-  // Care gaps metrics
-  const diabetesRxAdherence = archetypeData.Gaps_Diabetes_RX_Adherence ?? 0;
-  const behavioralHealthFollowup = archetypeData.Gaps_Behavioral_Health_FU_ED_Visit_Mental_Illness ?? 0;
-  const breastCancerScreening = archetypeData.Gaps_Cancer_Screening_Breast ?? 0;
-  const adultsWellnessVisit = archetypeData.Gaps_Wellness_Visit_Adults ?? 0;
+  // Care gaps metrics - using the correct property names
+  const diabetesRxAdherence = archetypeData["Gaps_Diabetes RX Adherence"] ?? 0;
+  const behavioralHealthFollowup = archetypeData["Gaps_Behavioral Health FU ED Visit Mental Illness"] ?? 0;
+  const breastCancerScreening = archetypeData["Gaps_Cancer Screening Breast"] ?? 0;
+  const adultsWellnessVisit = archetypeData["Gaps_Wellness Visit Adults"] ?? 0;
 
   return (
     <div>

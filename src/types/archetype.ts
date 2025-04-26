@@ -57,11 +57,13 @@ export interface ArchetypeDetailedData {
   name: string;
   familyId: FamilyId;
   familyName?: string;
+  family_name?: string; // Added for compatibility with level3_report_data
   color?: string;
   hexColor?: string;
   short_description?: string;
   long_description?: string;
   key_characteristics?: string[];
+  industries?: string; // Added for compatibility with level3_report_data
   summary?: {
     description: string;
     keyCharacteristics: string[];
@@ -125,40 +127,42 @@ export interface ArchetypeDetailedData {
   fullDescription?: string;
   keyFindings?: string[];
   
-  // New properties from level3_report_data
+  // New properties from level3_report_data with correct naming
   // Demographics metrics
-  Demo_Average_Family_Size?: number;
-  Demo_Average_Age?: number;
-  Demo_Average_Employees?: number;
-  Demo_Average_States?: number;
-  Demo_Average_Percent_Female?: number;
+  "Demo_Average Family Size"?: number;
+  "Demo_Average Age"?: number;
+  "Demo_Average Employees"?: number;
+  "Demo_Average States"?: number;
+  "Demo_Average Percent Female"?: number;
   
   // Utilization metrics
-  Util_Emergency_Visits_per_1k_Members?: number;
-  Util_Specialist_Visits_per_1k_Members?: number;
-  Util_Inpatient_Admits_per_1k_Members?: number;
-  Util_Percent_of_Members_who_are_Non_Utilizers?: number;
+  "Util_Emergency Visits per 1k Members"?: number;
+  "Util_Specialist Visits per 1k Members"?: number;
+  "Util_Inpatient Admits per 1k Members"?: number;
+  "Util_Percent of Members who are Non-Utilizers"?: number;
   
   // Risk metrics
-  Risk_Average_Risk_Score?: number;
-  SDOH_Average_SDOH?: number;
+  "Risk_Average Risk Score"?: number;
+  "SDOH_Average SDOH"?: number;
   
   // Cost metrics
-  Cost_Medical_RX_Paid_Amount_PEPY?: number;
-  Cost_Medical_RX_Paid_Amount_PMPY?: number;
-  Cost_Avoidable_ER_Potential_Savings_PMPY?: number;
+  "Cost_Medical & RX Paid Amount PEPY"?: number;
+  "Cost_Medical & RX Paid Amount PMPY"?: number;
+  "Cost_Avoidable ER Potential Savings PMPY"?: number;
+  "Cost_Medical Paid Amount PEPY"?: number;
+  "Cost_RX Paid Amount PEPY"?: number;
   
   // Disease metrics
-  Dise_Heart_Disease_Prevalence?: number;
-  Dise_Type_2_Diabetes_Prevalence?: number;
-  Dise_Mental_Health_Disorder_Prevalence?: number;
-  Dise_Substance_Use_Disorder_Prevalence?: number;
+  "Dise_Heart Disease Prevalence"?: number;
+  "Dise_Type 2 Diabetes Prevalence"?: number;
+  "Dise_Mental Health Disorder Prevalence"?: number;
+  "Dise_Substance Use Disorder Prevalence"?: number;
   
   // Care gap metrics
-  Gaps_Diabetes_RX_Adherence?: number;
-  Gaps_Behavioral_Health_FU_ED_Visit_Mental_Illness?: number;
-  Gaps_Cancer_Screening_Breast?: number;
-  Gaps_Wellness_Visit_Adults?: number;
+  "Gaps_Diabetes RX Adherence"?: number;
+  "Gaps_Behavioral Health FU ED Visit Mental Illness"?: number;
+  "Gaps_Cancer Screening Breast"?: number;
+  "Gaps_Wellness Visit Adults"?: number;
 }
 
 export interface ArchetypeDeepDive {
