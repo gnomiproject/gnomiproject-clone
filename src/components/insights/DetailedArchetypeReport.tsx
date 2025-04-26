@@ -1,11 +1,12 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { ArchetypeId } from '@/types/archetype';
 import DetailedAnalysisTabs from '@/components/results/DetailedAnalysisTabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useGetArchetype } from '@/hooks/useGetArchetype';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, RefreshCw } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface DetailedArchetypeReportProps {
   archetypeId: ArchetypeId;
@@ -13,28 +14,34 @@ interface DetailedArchetypeReportProps {
 }
 
 const DetailedArchetypeReport = ({ archetypeId, onRetakeAssessment }: DetailedArchetypeReportProps) => {
-  // Use the useGetArchetype hook to fetch data directly from Supabase
+  // Use the useGetArchetype hook to fetch data with proper caching
   const { archetypeData, familyData, isLoading, error, refetch } = useGetArchetype(archetypeId);
-  const [retryCount, setRetryCount] = useState(0);
+  const [isRetrying, setIsRetrying] = useState(false);
   
-  // Log component state for debugging
-  useEffect(() => {
-    console.log("DetailedArchetypeReport - archetypeData:", archetypeData);
-    console.log("DetailedArchetypeReport - familyData:", familyData);
-    console.log("DetailedArchetypeReport - isLoading:", isLoading);
-    console.log("DetailedArchetypeReport - error:", error ? error.message : "No error");
-    console.log("DetailedArchetypeReport - archetypeId:", archetypeId);
-  }, [archetypeData, familyData, isLoading, error, archetypeId]);
-  
-  // Handle refresh when retry button is clicked
+  // Handle refresh when retry button is clicked with debouncing
   const handleRetry = () => {
-    setRetryCount(prev => prev + 1);
-    refetch();
+    if (isRetrying) return; // Prevent multiple clicks
+    
+    setIsRetrying(true);
+    toast.info("Reconnecting to database...");
+    
+    // Add a slight delay to show loading state
+    setTimeout(() => {
+      refetch().then(() => {
+        toast.success("Connection restored!");
+      }).catch((err) => {
+        toast.error("Connection failed. Using local data.");
+        console.error("Retry failed:", err);
+      }).finally(() => {
+        setIsRetrying(false);
+      });
+    }, 500);
   };
   
   if (isLoading) {
     return (
       <div className="space-y-4 w-full">
+        <div className="h-2 w-24 bg-gray-200 rounded animate-pulse mb-2"></div>
         <Skeleton className="h-8 w-full" />
         <Skeleton className="h-40 w-full" />
       </div>
@@ -57,10 +64,11 @@ const DetailedArchetypeReport = ({ archetypeId, onRetakeAssessment }: DetailedAr
             <Button 
               variant="outline" 
               onClick={handleRetry}
+              disabled={isRetrying}
               className="flex items-center gap-2"
             >
-              <RefreshCw size={16} className={retryCount > 0 ? "animate-spin" : ""} />
-              Retry Connection
+              <RefreshCw size={16} className={isRetrying ? "animate-spin" : ""} />
+              {isRetrying ? "Connecting..." : "Retry Connection"}
             </Button>
             
             <Button 

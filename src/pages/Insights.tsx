@@ -8,6 +8,7 @@ import MatchFeedbackMenu from '@/components/insights/MatchFeedbackMenu';
 import NoAssessmentResults from '@/components/insights/NoAssessmentResults';
 import AssessmentResultsCard from '@/components/insights/AssessmentResultsCard';
 import { toast } from 'sonner';
+import { useQueryClient } from '@tanstack/react-query';
 
 // Storage keys
 const INSIGHTS_STORAGE_KEY = 'healthcareArchetypeInsights';
@@ -20,6 +21,7 @@ const Insights = () => {
   const [hasFeedbackBeenClosed, setHasFeedbackBeenClosed] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   
   // Use consistent hook calls - important for React's hook rules
   const { getArchetypeDetailedById, getFamilyById } = useArchetypes();
@@ -30,10 +32,11 @@ const Insights = () => {
     // 2. Session storage (user has taken assessment this session)
     // 3. Local storage (persisted preference)
     
+    let newArchetype: ArchetypeId | null = null;
+    
     if (location.state?.selectedArchetype) {
       // Source 1: Direct navigation from Results
-      const newArchetype = location.state.selectedArchetype;
-      setSelectedArchetype(newArchetype);
+      newArchetype = location.state.selectedArchetype;
       
       // Store in localStorage to persist across refreshes
       localStorage.setItem(INSIGHTS_STORAGE_KEY, newArchetype);
@@ -47,7 +50,7 @@ const Insights = () => {
         try {
           const parsedResults = JSON.parse(sessionResultsStr) as AssessmentResult;
           setSessionResults(parsedResults);
-          setSelectedArchetype(parsedResults.primaryArchetype);
+          newArchetype = parsedResults.primaryArchetype;
         } catch (error) {
           console.error('Error parsing session results:', error);
         }
@@ -55,23 +58,47 @@ const Insights = () => {
         // Source 3: Try to retrieve from localStorage if no state is present
         const storedArchetype = localStorage.getItem(INSIGHTS_STORAGE_KEY);
         if (storedArchetype) {
-          setSelectedArchetype(storedArchetype as ArchetypeId);
+          newArchetype = storedArchetype as ArchetypeId;
         }
       }
     }
-  }, [location.state]);
+    
+    // Only update selectedArchetype if it's different to avoid re-rendering
+    if (newArchetype && newArchetype !== selectedArchetype) {
+      setSelectedArchetype(newArchetype);
+      
+      // Pre-fetch the archetype data to fill the cache
+      queryClient.prefetchQuery({
+        queryKey: ['archetype', newArchetype],
+        staleTime: 5 * 60 * 1000 // 5 minutes
+      });
+    }
+  }, [location.state, queryClient, selectedArchetype]);
 
   // Add scroll event listener to show feedback menu when scrolling
+  // with throttling to avoid too many events
   useEffect(() => {
+    let scrollTimeout: number | null = null;
+    
     const handleScroll = () => {
-      if (!hasFeedbackBeenClosed && window.scrollY > 100) {
-        setShowFeedback(true);
+      if (scrollTimeout !== null) {
+        return;
       }
+      
+      scrollTimeout = window.setTimeout(() => {
+        if (!hasFeedbackBeenClosed && window.scrollY > 100) {
+          setShowFeedback(true);
+        }
+        scrollTimeout = null;
+      }, 100);
     };
 
     window.addEventListener('scroll', handleScroll);
     return () => {
       window.removeEventListener('scroll', handleScroll);
+      if (scrollTimeout !== null) {
+        window.clearTimeout(scrollTimeout);
+      }
     };
   }, [hasFeedbackBeenClosed]);
 
@@ -82,7 +109,7 @@ const Insights = () => {
     navigate('/assessment');
   };
 
-  // Handle closing the feedback menu
+  // Handle closing the feedback menu with error handling
   const handleCloseFeedback = () => {
     try {
       setShowFeedback(false);

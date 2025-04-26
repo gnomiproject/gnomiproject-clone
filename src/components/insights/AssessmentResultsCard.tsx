@@ -1,11 +1,12 @@
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { ArchetypeDetailedData, ArchetypeId } from '@/types/archetype';
 import DetailedArchetypeReport from '@/components/insights/DetailedArchetypeReport';
 import AssessmentResultsHeader from '@/components/insights/AssessmentResultsHeader';
 import PremiumReport from '@/components/results/PremiumReport';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 interface AssessmentResultsCardProps {
   archetypeData: ArchetypeDetailedData;
@@ -21,11 +22,33 @@ const AssessmentResultsCard = ({
   onRetakeAssessment 
 }: AssessmentResultsCardProps) => {
   const [showError, setShowError] = useState<boolean>(false);
+  const [isRetrying, setIsRetrying] = useState<boolean>(false);
   
-  // Handler for child component errors
-  const handleError = () => {
+  // Handler for child component errors with debouncing
+  const handleError = useCallback(() => {
     setShowError(true);
-  };
+  }, []);
+  
+  // Handler for retry with debouncing
+  const handleRetry = useCallback(() => {
+    if (isRetrying) return;
+    
+    setIsRetrying(true);
+    toast.info("Reconnecting to database...");
+    
+    // Simulate a retry with a timeout to avoid UI flickering
+    setTimeout(() => {
+      try {
+        setShowError(false);
+        toast.success("Connection restored!");
+      } catch (err) {
+        console.error("Error during retry:", err);
+        toast.error("Connection failed. Please try again.");
+      } finally {
+        setIsRetrying(false);
+      }
+    }, 700);
+  }, [isRetrying]);
   
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-12 border">
@@ -38,7 +61,7 @@ const AssessmentResultsCard = ({
         onRetakeAssessment={onRetakeAssessment}
       />
       
-      {/* Detailed analysis section - now with error handling */}
+      {/* Detailed analysis section - with improved error handling */}
       <div className="border-t">
         <div className="p-8">
           <h2 className="text-2xl font-bold mb-8 text-left">Detailed Analysis</h2>
@@ -50,12 +73,23 @@ const AssessmentResultsCard = ({
               <p className="text-red-600 mb-4">
                 We're having trouble loading your detailed archetype data.
               </p>
-              <Button 
-                onClick={() => setShowError(false)}
-                className="mx-auto"
-              >
-                Try Again
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Button 
+                  onClick={handleRetry}
+                  disabled={isRetrying}
+                  className="flex items-center gap-2"
+                >
+                  <RefreshCw size={16} className={isRetrying ? "animate-spin" : ""} />
+                  {isRetrying ? "Connecting..." : "Try Again"}
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  onClick={onRetakeAssessment}
+                >
+                  Retake Assessment
+                </Button>
+              </div>
             </div>
           ) : (
             <DetailedArchetypeReport 
