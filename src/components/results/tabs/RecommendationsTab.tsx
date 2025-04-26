@@ -3,8 +3,7 @@ import React from 'react';
 import { ArchetypeDetailedData } from '@/types/archetype';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Lock, Download, Lightbulb } from 'lucide-react';
+import { Lock, Lightbulb } from 'lucide-react';
 
 interface RecommendationsTabProps {
   archetypeData: ArchetypeDetailedData;
@@ -28,13 +27,6 @@ const RecommendationsTab = ({ archetypeData }: RecommendationsTabProps) => {
     <div>
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
         <h2 className="text-xl font-bold">Strategic Recommendations</h2>
-        <Button 
-          style={{ backgroundColor: color }}
-          className="mt-4 md:mt-0"
-        >
-          <Download className="mr-2 h-4 w-4" />
-          Get Full Implementation Plan
-        </Button>
       </div>
       
       <div className="mb-6">
@@ -99,10 +91,6 @@ const RecommendationsTab = ({ archetypeData }: RecommendationsTabProps) => {
           <p className="text-gray-600 mb-4">
             The full report includes detailed implementation strategies and expected outcomes for each recommendation.
           </p>
-          <Button style={{ backgroundColor: color }}>
-            <Download className="mr-2 h-4 w-4" />
-            Get Complete Recommendations
-          </Button>
         </div>
       )}
     </div>

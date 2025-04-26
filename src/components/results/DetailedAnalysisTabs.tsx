@@ -37,36 +37,6 @@ const DetailedAnalysisTabs = ({ archetypeData, onRetakeAssessment }: DetailedAna
   const getActiveTabLabel = () => {
     return tabItems.find(tab => tab.value === activeTab)?.label || "Overview";
   };
-
-  // Function to get persistent CTA element
-  const getReportCTA = (position: 'top' | 'between' | 'end') => {
-    return (
-      <div className={`w-full ${position === 'between' ? 'my-8 py-4 border-t border-b' : 'my-4'} 
-        ${position === 'end' ? 'mt-12 pt-8 border-t' : ''}`}>
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 px-4">
-          <div>
-            <h3 className="text-lg font-semibold" style={{ color: color.color }}>
-              {position === 'end' 
-                ? 'Ready for the complete analysis?' 
-                : 'Want more detailed insights?'}
-            </h3>
-            <p className="text-gray-600 text-sm">
-              {position === 'end' 
-                ? 'Our comprehensive reports provide actionable strategies specific to your organization.' 
-                : 'Get the full archetype report with detailed analytics and implementation strategies.'}
-            </p>
-          </div>
-          <Button 
-            className="whitespace-nowrap" 
-            style={{ backgroundColor: color.color }}
-          >
-            <Download className="mr-2 h-4 w-4" />
-            Request Full Report
-          </Button>
-        </div>
-      </div>
-    );
-  };
   
   return (
     <div className="bg-white px-4 md:px-8 py-6">      
@@ -140,7 +110,7 @@ const DetailedAnalysisTabs = ({ archetypeData, onRetakeAssessment }: DetailedAna
         </TabsContent>
       </Tabs>
       
-      {/* Full report request section */}
+      {/* Full report request section - KEEPING ONLY THIS ONE */}
       <div className="mt-12 pt-8 border-t">
         <div className="bg-gray-50 rounded-lg p-6">
           <h3 className="text-xl font-bold mb-2" style={{ color: color.color }}>
