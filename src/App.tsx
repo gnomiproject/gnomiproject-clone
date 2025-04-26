@@ -6,15 +6,10 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import Navbar from '@/components/layout/Navbar';
 import Index from '@/pages/Index';
 import Assessment from '@/pages/Assessment';
-import Results from '@/pages/Results';
-import DeepReport from '@/pages/DeepReport';
 import Insights from '@/pages/Insights';
 import About from '@/pages/About';
 import NotFound from '@/pages/NotFound';
 import Admin from '@/pages/Admin';
-import DirectReport from '@/pages/DirectReport';
-import ArchetypeDeepReport from '@/pages/ArchetypeDeepReport';
-import ArchetypePage from '@/pages/ArchetypePage';
 
 const version = "0.0.1";
 
@@ -27,11 +22,6 @@ function App() {
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/assessment" element={<Assessment />} />
-            <Route path="/results" element={<Results />} />
-            <Route path="/deep-report" element={<DeepReport />} />
-            <Route path="/direct-report/:archetypeId" element={<DirectReport />} />
-            <Route path="/archetype-report/:archetypeId" element={<ArchetypeDeepReport />} />
-            <Route path="/archetype/:archetypeId" element={<ArchetypePage />} />
             <Route path="/insights" element={<Insights />} />
             <Route path="/about" element={<About />} />
             <Route path="/admin" element={<Admin />} />
