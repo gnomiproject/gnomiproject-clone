@@ -108,10 +108,10 @@ async function generateArchetypeReports(supabase: SupabaseClient) {
   console.log('Starting report generation process with detailed logging...');
   
   try {
-    // 1. Fetch all archetypes
+    // 1. Fetch all archetypes from the correct table name: Core_Archetype_Overview
     console.log('Fetching archetypes from database...');
     const { data: archetypes, error: archetypesError } = await supabase
-      .from('archetypes')
+      .from('Core_Archetype_Overview')  // Changed from 'archetypes' to 'Core_Archetype_Overview'
       .select('*');
     
     if (archetypesError) {
@@ -140,68 +140,45 @@ async function generateArchetypeReports(supabase: SupabaseClient) {
         console.log(`Processing archetype ${archetype.id}: ${archetype.name}`);
         
         // 3. Fetch metrics data for this archetype - trying both tables
-        console.log(`Fetching metrics for archetype ${archetype.id} from archetype_data_041624bw...`);
+        console.log(`Fetching metrics for archetype ${archetype.id} from Core_Archetypes_Metrics...`);
         let { data: metrics, error: metricsError } = await supabase
-          .from('archetype_data_041624bw')
+          .from('Core_Archetypes_Metrics')  // Changed from 'archetype_data_041624bw' to 'Core_Archetypes_Metrics'
           .select('*')
-          .eq('archetype_ID', archetype.id);
+          .eq('id', archetype.id);  // Changed from 'archetype_ID' to 'id'
         
         if (metricsError) {
-          console.error(`Error fetching metrics from archetype_data_041624bw for ${archetype.id}:`, metricsError);
+          console.error(`Error fetching metrics from Core_Archetypes_Metrics for ${archetype.id}:`, metricsError);
           console.log(`Will try alternative metrics source...`);
         }
         
-        // If no metrics found in first table, try another table
+        // If no metrics found in first table, try another approach
         if (!metrics || metrics.length === 0) {
-          console.log(`No metrics found in archetype_data_041624bw for ${archetype.id}, trying archetype_metrics...`);
-          const { data: fallbackMetrics, error: fallbackError } = await supabase
-            .from('archetype_metrics')
-            .select('*')
-            .eq('archetype_id', archetype.id);
-            
-          if (fallbackError) {
-            console.error(`Error fetching metrics from archetype_metrics for ${archetype.id}:`, fallbackError);
-          } else if (fallbackMetrics && fallbackMetrics.length > 0) {
-            console.log(`Found ${fallbackMetrics.length} metrics in archetype_metrics for ${archetype.id}`);
-            // Transform metrics to match expected format
-            metrics = fallbackMetrics.map(m => ({
-              archetype_ID: m.archetype_id,
+          console.log(`No metrics found in Core_Archetypes_Metrics for ${archetype.id}`);
+          
+          // Create minimal metrics data since no metrics were found
+          metrics = [
+            {
               Category: 'Cost',
               Metric: 'PEPY',
-              Archetype_Value: m.paid_pepy,
+              Archetype_Value: 0,
               Archetype_Average: 0,
-              Difference: m.paid_pepy_variance
-            }));
-          }
+              Difference: 0,
+              archetype_ID: archetype.id
+            },
+            {
+              Category: 'Utilization',
+              Metric: 'Office Visits',
+              Archetype_Value: 0,
+              Archetype_Average: 0,
+              Difference: 0,
+              archetype_ID: archetype.id
+            }
+          ];
         }
-        
-        console.log(`Found ${metrics?.length || 0} metrics for archetype ${archetype.id}`);
-        
-        // Create minimal metrics data even if no metrics were found
-        const minimalMetrics = [
-          {
-            Category: 'Cost',
-            Metric: 'PEPY',
-            Archetype_Value: 0,
-            Archetype_Average: 0,
-            Difference: 0,
-            archetype_ID: archetype.id
-          },
-          {
-            Category: 'Utilization',
-            Metric: 'Office Visits',
-            Archetype_Value: 0,
-            Archetype_Average: 0,
-            Difference: 0,
-            archetype_ID: archetype.id
-          }
-        ];
-        
-        const metricsToUse = metrics && metrics.length > 0 ? metrics : minimalMetrics;
         
         // 4. Organize metrics by category
         console.log(`Organizing metrics for archetype ${archetype.id}...`);
-        const organizedMetrics = organizeMetricsByCategory(metricsToUse);
+        const organizedMetrics = organizeMetricsByCategory(metrics);
         
         // 5. Generate report content based on metrics
         console.log(`Generating report content for archetype ${archetype.id}...`);
@@ -264,7 +241,7 @@ async function insertReportContent(
     
     // Check if report already exists
     const { data: existingReport } = await supabase
-      .from('archetype_deep_dive_reports')
+      .from('Analysis_Archetype_Full_Reports')
       .select('id')
       .eq('archetype_id', archetypeId)
       .maybeSingle();
@@ -274,7 +251,7 @@ async function insertReportContent(
     if (existingReport?.id) {
       // Update existing report
       const { error } = await supabase
-        .from('archetype_deep_dive_reports')
+        .from('Analysis_Archetype_Full_Reports')
         .update({
           title: reportContent.title,
           introduction: reportContent.introduction,
@@ -288,7 +265,7 @@ async function insertReportContent(
     } else {
       // Insert new report
       const { error } = await supabase
-        .from('archetype_deep_dive_reports')
+        .from('Analysis_Archetype_Full_Reports')
         .insert({
           archetype_id: archetypeId,
           title: reportContent.title,
@@ -313,7 +290,7 @@ async function insertReportContent(
 
     // Insert or update SWOT analysis - same pattern as above
     const { data: existingSwot } = await supabase
-      .from('archetype_swot_analyses')
+      .from('Analysis_Archetype_SWOT')
       .select('id')
       .eq('archetype_id', archetypeId)
       .maybeSingle();
@@ -322,7 +299,7 @@ async function insertReportContent(
     let swotError;
     if (existingSwot?.id) {
       const { error } = await supabase
-        .from('archetype_swot_analyses')
+        .from('Analysis_Archetype_SWOT')
         .update({
           strengths: swotAnalysis.strengths,
           weaknesses: swotAnalysis.weaknesses,
@@ -334,7 +311,7 @@ async function insertReportContent(
       swotError = error;
     } else {
       const { error } = await supabase
-        .from('archetype_swot_analyses')
+        .from('Analysis_Archetype_SWOT')
         .insert({
           archetype_id: archetypeId,
           strengths: swotAnalysis.strengths,
@@ -365,7 +342,7 @@ async function insertReportContent(
       
       // Check if recommendation exists
       const { data: existingRec } = await supabase
-        .from('archetype_strategic_recommendations')
+        .from('Analysis_Archetype_Strategic_Recommendations')
         .select('id')
         .eq('archetype_id', archetypeId)
         .eq('recommendation_number', i + 1)
@@ -374,7 +351,7 @@ async function insertReportContent(
       let recommendationError;
       if (existingRec?.id) {
         const { error } = await supabase
-          .from('archetype_strategic_recommendations')
+          .from('Analysis_Archetype_Strategic_Recommendations')
           .update({
             title: rec.title,
             description: rec.description,
@@ -386,7 +363,7 @@ async function insertReportContent(
         recommendationError = error;
       } else {
         const { error } = await supabase
-          .from('archetype_strategic_recommendations')
+          .from('Analysis_Archetype_Strategic_Recommendations')
           .insert({
             archetype_id: archetypeId,
             recommendation_number: i + 1,
