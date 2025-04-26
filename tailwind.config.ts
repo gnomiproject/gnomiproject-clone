@@ -1,207 +1,198 @@
+import { Config } from 'tailwindcss';
+import { fontFamily } from 'tailwindcss/defaultTheme';
 
-import type { Config } from "tailwindcss";
-
-export default {
-	darkMode: ["class"],
-	content: [
-		"./pages/**/*.{ts,tsx}",
-		"./components/**/*.{ts,tsx}",
-		"./app/**/*.{ts,tsx}",
-		"./src/**/*.{ts,tsx}",
+const config = {
+  darkMode: ["class"],
+  content: [
+    './pages/**/*.{ts,tsx}',
+    './components/**/*.{ts,tsx}',
+    './app/**/*.{ts,tsx}',
+    './src/**/*.{ts,tsx}',
 	],
-	prefix: "",
-	theme: {
-		container: {
-			center: true,
-			padding: '2rem',
-			screens: {
-				'2xl': '1400px'
-			}
+  prefix: "",
+  theme: {
+    container: {
+      center: true,
+      padding: "2rem",
+      screens: {
+        "2xl": "1400px",
+      },
+    },
+    extend: {
+      colors: {
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
+		sidebar: {
+			DEFAULT: "hsl(var(--sidebar))",
+			foreground: "hsl(var(--sidebar-foreground))",
+			border: "hsl(var(--sidebar-border))",
+			accent: "hsl(var(--sidebar-accent))",
+			"accent-foreground": "hsl(var(--sidebar-accent-foreground))",
+			ring: "hsl(var(--sidebar-ring))",
 		},
-		extend: {
-			borderWidth: {
-				'3': '3px',
-			},
-			colors: {
-				border: 'hsl(var(--border))',
-				input: 'hsl(var(--input))',
-				ring: 'hsl(var(--ring))',
-				background: 'hsl(var(--background))',
-				foreground: 'hsl(var(--foreground))',
-				primary: {
-					DEFAULT: 'hsl(var(--primary))',
-					foreground: 'hsl(var(--primary-foreground))'
-				},
-				secondary: {
-					DEFAULT: 'hsl(var(--secondary))',
-					foreground: 'hsl(var(--secondary-foreground))'
-				},
-				destructive: {
-					DEFAULT: 'hsl(var(--destructive))',
-					foreground: 'hsl(var(--destructive-foreground))'
-				},
-				muted: {
-					DEFAULT: 'hsl(var(--muted))',
-					foreground: 'hsl(var(--muted-foreground))'
-				},
-				accent: {
-					DEFAULT: 'hsl(var(--accent))',
-					foreground: 'hsl(var(--accent-foreground))'
-				},
-				popover: {
-					DEFAULT: 'hsl(var(--popover))',
-					foreground: 'hsl(var(--popover-foreground))'
-				},
-				card: {
-					DEFAULT: 'hsl(var(--card))',
-					foreground: 'hsl(var(--card-foreground))'
-				},
-				sidebar: {
-					DEFAULT: 'hsl(var(--sidebar-background))',
-					foreground: 'hsl(var(--sidebar-foreground))',
-					primary: 'hsl(var(--sidebar-primary))',
-					'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
-					accent: 'hsl(var(--sidebar-accent))',
-					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
-					border: 'hsl(var(--sidebar-border))',
-					ring: 'hsl(var(--sidebar-ring))'
-				},
-				// Family colors
-				'family-a': '#00B0F0',  // Strategists
-				'family-b': '#00B2B1',  // Pragmatists
-				'family-c': '#FF8B91',  // Logisticians
-				
-				// Archetype specific colors
-				'archetype-a1': '#EC7500', // Savvy Healthcare Navigators
-				'archetype-a2': '#46E0D3', // Complex Condition Managers
-				'archetype-a3': '#FFC600', // Proactive Care Consumers
-				'archetype-b1': '#7030A0', // Resourceful Adapters
-				'archetype-b2': '#FF8C91', // Healthcare Pragmatists
-				'archetype-b3': '#0D41C0', // Care Channel Optimizers
-				'archetype-c1': '#E40032', // Scalable Access Architects
-				'archetype-c2': '#00B0F0', // Care Adherence Advocates
-				'archetype-c3': '#870C0C',  // Engaged Healthcare Consumers
-			},
-			borderRadius: {
-				lg: 'var(--radius)',
-				md: 'calc(var(--radius) - 2px)',
-				sm: 'calc(var(--radius) - 4px)'
-			},
-			keyframes: {
-				'accordion-down': {
-					from: {
-						height: '0'
-					},
-					to: {
-						height: 'var(--radix-accordion-content-height)'
-					}
-				},
-				'accordion-up': {
-					from: {
-						height: 'var(--radix-accordion-content-height)'
-					},
-					to: {
-						height: '0'
-					}
-				},
-				'fade-in': {
-					'0%': {
-						opacity: '0',
-						transform: 'translateY(10px)'
-					},
-					'100%': {
-						opacity: '1',
-						transform: 'translateY(0)'
-					}
-				},
-			},
-			animation: {
-				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out',
-				'fade-in': 'fade-in 0.5s ease-out'
-			},
-			safelist: [
-				// Make sure all our custom color classes are in the final CSS
-				'bg-family-a',
-				'bg-family-b',
-				'bg-family-c',
-				'text-family-a',
-				'text-family-b',
-				'text-family-c',
-				'bg-archetype-a1',
-				'bg-archetype-a2',
-				'bg-archetype-a3',
-				'bg-archetype-b1',
-				'bg-archetype-b2',
-				'bg-archetype-b3',
-				'bg-archetype-c1',
-				'bg-archetype-c2',
-				'bg-archetype-c3',
-				'text-archetype-a1',
-				'text-archetype-a2',
-				'text-archetype-a3',
-				'text-archetype-b1',
-				'text-archetype-b2',
-				'text-archetype-b3',
-				'text-archetype-c1',
-				'text-archetype-c2',
-				'text-archetype-c3',
-				'hover:bg-archetype-a1',
-				'hover:bg-archetype-a2',
-				'hover:bg-archetype-a3',
-				'hover:bg-archetype-b1',
-				'hover:bg-archetype-b2',
-				'hover:bg-archetype-b3',
-				'hover:bg-archetype-c1',
-				'hover:bg-archetype-c2',
-				'hover:bg-archetype-c3',
-				'hover:text-archetype-a1',
-				'hover:text-archetype-a2',
-				'hover:text-archetype-a3',
-				'hover:text-archetype-b1',
-				'hover:text-archetype-b2',
-				'hover:text-archetype-b3',
-				'hover:text-archetype-c1',
-				'hover:text-archetype-c2',
-				'hover:text-archetype-c3',
-				'bg-archetype-a1/10',
-				'bg-archetype-a2/10',
-				'bg-archetype-a3/10',
-				'bg-archetype-b1/10',
-				'bg-archetype-b2/10',
-				'bg-archetype-b3/10',
-				'bg-archetype-c1/10',
-				'bg-archetype-c2/10',
-				'bg-archetype-c3/10',
-				'bg-archetype-a1/20',
-				'bg-archetype-a2/20',
-				'bg-archetype-a3/20',
-				'bg-archetype-b1/20',
-				'bg-archetype-b2/20',
-				'bg-archetype-b3/20',
-				'bg-archetype-c1/20',
-				'bg-archetype-c2/20',
-				'bg-archetype-c3/20',
-				'border-archetype-a1',
-				'border-archetype-a2',
-				'border-archetype-a3',
-				'border-archetype-b1',
-				'border-archetype-b2',
-				'border-archetype-b3',
-				'border-archetype-c1',
-				'border-archetype-c2',
-				'border-archetype-c3',
-				'bg-family-a/10',
-				'bg-family-b/10',
-				'bg-family-c/10',
-				'bg-family-a/20',
-				'bg-family-b/20',
-				'bg-family-c/20',
-				'hover:bg-family-a/20',
-				'hover:bg-family-b/20',
-				'hover:bg-family-c/20',
-			],
-		}
-	},
-	plugins: [require("tailwindcss-animate")],
-} satisfies Config;
+        primary: {
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
+        },
+        secondary: {
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))",
+        },
+        destructive: {
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))",
+        },
+        muted: {
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
+        },
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
+        },
+        popover: {
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
+        },
+        card: {
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
+        },
+		'color-archetype-1': 'oklch(62.71 0.29 43.74)',
+		'color-archetype-2': 'oklch(67.87 0.28 138.13)',
+		'color-archetype-3': 'oklch(64.47 0.25 84.64)',
+		'color-archetype-4': 'oklch(63.87 0.24 318.48)',
+		'color-archetype-5': 'oklch(68.66 0.27 68.14)',
+		'color-archetype-6': 'oklch(64.97 0.24 39.14)',
+		'color-archetype-7': 'oklch(69.83 0.26 144.83)',
+		'color-archetype-8': 'oklch(65.9 0.23 87.94)',
+		'color-archetype-9': 'oklch(65.26 0.23 323.13)',
+		'color-archetype-10': 'oklch(70.88 0.25 71.41)',
+		'color-archetype-11': 'oklch(66.28 0.22 42.41)',
+		'color-archetype-12': 'oklch(71.91 0.24 148.18)',
+		'color-archetype-13': 'oklch(67.13 0.21 91.21)',
+		'color-archetype-14': 'oklch(66.55 0.22 327.78)',
+		'color-archetype-15': 'oklch(72.82 0.23 74.68)',
+		'color-archetype-16': 'oklch(67.5 0.21 45.68)',
+		'color-archetype-17': 'oklch(73.6 0.23 151.53)',
+		'color-archetype-18': 'oklch(67.97 0.2 94.48)',
+		'color-archetype-19': 'oklch(67.02 0.21 332.43)',
+		'color-archetype-20': 'oklch(74.35 0.22 77.95)',
+		'color-archetype-21': 'oklch(68.39 0.2 48.95)',
+		'color-archetype-22': 'oklch(75.03 0.22 154.88)',
+		'color-archetype-23': 'oklch(68.81 0.19 97.75)',
+		'color-archetype-24': 'oklch(67.48 0.2 337.08)',
+		'color-archetype-25': 'oklch(75.67 0.21 81.22)',
+		'color-archetype-26': 'oklch(68.78 0.19 52.22)',
+		'color-archetype-27': 'oklch(76.28 0.21 158.23)',
+		'color-archetype-28': 'oklch(69.2 0.19 101.02)',
+		'color-archetype-29': 'oklch(67.94 0.19 341.73)',
+		'color-archetype-30': 'oklch(76.85 0.2 84.49)',
+		'color-archetype-31': 'oklch(69.15 0.18 55.49)',
+		'color-archetype-32': 'oklch(77.4 0.2 161.58)',
+		'color-archetype-33': 'oklch(69.56 0.18 104.29)',
+		'color-archetype-34': 'oklch(68.39 0.19 346.38)',
+		'color-archetype-35': 'oklch(77.39 0.19 87.76)',
+		'color-archetype-36': 'oklch(69.51 0.18 58.76)',
+		'color-archetype-37': 'oklch(77.92 0.19 164.93)',
+		'color-archetype-38': 'oklch(69.93 0.17 107.56)',
+		'color-archetype-39': 'oklch(68.83 0.18 351.03)',
+		'color-archetype-40': 'oklch(77.89 0.19 91.03)',
+		'color-archetype-41': 'oklch(69.87 0.17 62.03)',
+		'color-archetype-42': 'oklch(78.42 0.18 168.28)',
+		'color-archetype-43': 'oklch(70.28 0.17 110.83)',
+		'color-archetype-44': 'oklch(69.24 0.17 355.68)',
+		'color-archetype-45': 'oklch(78.36 0.18 94.3)',
+		'color-archetype-46': 'oklch(70.22 0.16 65.3)',
+		'color-archetype-47': 'oklch(78.88 0.18 171.63)',
+		'color-archetype-48': 'oklch(70.61 0.16 114.1)',
+		'color-archetype-49': 'oklch(69.62 0.17 0.33)',
+		'color-archetype-50': 'oklch(78.81 0.17 97.57)',
+		'color-archetype-51': 'oklch(70.56 0.16 68.57)',
+		'color-archetype-52': 'oklch(79.3 0.17 174.98)',
+		'color-archetype-53': 'oklch(70.93 0.15 117.37)',
+		'color-archetype-54': 'oklch(69.99 0.16 4.98)',
+		'color-archetype-55': 'oklch(79.24 0.17 100.84)',
+		'color-archetype-56': 'oklch(70.89 0.15 71.84)',
+		'color-archetype-57': 'oklch(79.75 0.16 178.33)',
+		'color-archetype-58': 'oklch(71.28 0.15 120.64)',
+		'color-archetype-59': 'oklch(70.34 0.15 9.63)',
+		'color-archetype-60': 'oklch(79.68 0.16 104.11)',
+		'color-archetype-61': 'oklch(71.22 0.14 75.11)',
+		'color-archetype-62': 'oklch(80.17 0.16 181.68)',
+		'color-archetype-63': 'oklch(71.6 0.14 123.91)',
+		'color-archetype-64': 'oklch(70.69 0.15 14.28)',
+		'color-archetype-65': 'oklch(80.11 0.15 107.38)',
+		'color-archetype-66': 'oklch(71.54 0.14 78.38)',
+		'color-archetype-67': 'oklch(80.58 0.15 185.03)',
+		'color-archetype-68': 'oklch(71.93 0.13 127.18)',
+		'color-archetype-69': 'oklch(71.03 0.14 18.93)',
+		'color-archetype-70': 'oklch(80.52 0.15 110.65)',
+		'color-archetype-71': 'oklch(71.87 0.13 81.65)',
+		'color-archetype-72': 'oklch(80.97 0.14 188.38)',
+		'color-archetype-73': 'oklch(72.25 0.13 130.45)',
+		'color-archetype-74': 'oklch(71.37 0.13 23.58)',
+		'color-archetype-75': 'oklch(80.91 0.14 113.92)',
+		'color-archetype-76': 'oklch(72.2 0.13 84.92)',
+		'color-archetype-77': 'oklch(81.36 0.14 191.73)',
+		'color-archetype-78': 'oklch(72.58 0.12 133.72)',
+		'color-archetype-79': 'oklch(71.71 0.13 28.23)',
+		'color-archetype-80': 'oklch(81.3 0.13 117.19)',
+		'color-archetype-81': 'oklch(72.53 0.12 88.19)',
+		'color-archetype-82': 'oklch(81.74 0.13 195.08)',
+		'color-archetype-83': 'oklch(72.9 0.12 136.99)',
+		'color-archetype-84': 'oklch(72.04 0.12 32.88)',
+		'color-archetype-85': 'oklch(81.68 0.13 120.46)',
+		'color-archetype-86': 'oklch(72.85 0.11 91.46)',
+		'color-archetype-87': 'oklch(82.12 0.12 198.43)',
+		'color-archetype-88': 'oklch(73.22 0.11 140.26)',
+		'color-archetype-89': 'oklch(72.37 0.12 37.53)',
+		'color-archetype-90': 'oklch(82.06 0.12 123.73)',
+		'color-archetype-91': 'oklch(73.17 0.11 94.73)',
+		'color-archetype-92': 'oklch(82.49 0.12 201.78)',
+		'color-archetype-93': 'oklch(73.54 0.1 143.53)',
+		'color-archetype-94': 'oklch(72.7 0.11 42.18)',
+		'color-archetype-95': 'oklch(82.43 0.11 127)',
+		'color-archetype-96': 'oklch(73.5 0.1 98)',
+		'color-archetype-97': 'oklch(82.85 0.11 205.13)',
+		'color-archetype-98': 'oklch(73.86 0.1 146.8)',
+		'color-archetype-99': 'oklch(73.03 0.1 46.83)',
+		'color-archetype-100': 'oklch(82.79 0.11 130.27)',
+
+        // Make sure we have variants for badge colors
+        success: {
+          DEFAULT: "#10B981", // emerald-500
+          foreground: "#FFFFFF",
+        },
+      },
+      borderRadius: {
+        lg: "var(--radius)",
+        md: "calc(var(--radius) - 2px)",
+        sm: "calc(var(--radius) - 4px)",
+      },
+      fontFamily: {
+        sans: ["var(--font-sans)", ...fontFamily.sans],
+      },
+      keyframes: {
+        "accordion-down": {
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
+        },
+        "accordion-up": {
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
+        },
+      },
+      animation: {
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
+      },
+    },
+  },
+  plugins: [require("tailwindcss-animate")],
+} satisfies Config
+
+export default config
