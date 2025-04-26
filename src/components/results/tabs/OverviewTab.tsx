@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ArchetypeDetailedData } from '@/types/archetype';
 import { Badge } from '@/components/ui/badge';
@@ -34,8 +33,9 @@ const OverviewTab = ({ archetypeData }: OverviewTabProps) => {
   
   // Get industries with proper fallback and ensure it's an array
   const industries = 
-    typeof archetypeData.industries === 'string' ? archetypeData.industries :
-    '';
+    typeof archetypeData.industries === 'string' 
+      ? archetypeData.industries 
+      : '';
   
   // Get family name with proper fallback
   const familyName = archetypeData.family_name || archetypeData.familyName || '';
