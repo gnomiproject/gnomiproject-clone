@@ -6,13 +6,23 @@ import { Button } from "@/components/ui/button";
 import { Check, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
+import { supabase } from '@/integrations/supabase/client';
 
 interface MatchFeedbackMenuProps {
   archetypeId: string;
   onClose: () => void;
+  sessionId?: string;
+  assessmentResult?: any;
+  assessmentAnswers?: any;
 }
 
-const MatchFeedbackMenu = ({ archetypeId, onClose }: MatchFeedbackMenuProps) => {
+const MatchFeedbackMenu = ({ 
+  archetypeId, 
+  onClose, 
+  sessionId, 
+  assessmentResult, 
+  assessmentAnswers 
+}: MatchFeedbackMenuProps) => {
   const [selectedFeedback, setSelectedFeedback] = useState<string | null>(null);
   const [userComments, setUserComments] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -25,15 +35,19 @@ const MatchFeedbackMenu = ({ archetypeId, onClose }: MatchFeedbackMenuProps) => 
     setIsSubmitting(true);
     
     try {
-      // Instead of saving to database, just log the feedback since we don't have the appropriate table
-      console.log('Archetype Feedback:', {
-        archetypeId,
-        feedback: selectedFeedback,
-        comments: userComments.trim() !== '' ? userComments : null,
-        timestamp: new Date().toISOString()
-      });
+      const { error } = await supabase
+        .from('insights_feedback')
+        .insert({
+          archetype_id: archetypeId,
+          session_id: sessionId || null,
+          feedback: selectedFeedback,
+          user_comments: userComments.trim() || null,
+          assessment_result: assessmentResult || null,
+          assessment_answers: assessmentAnswers || null
+        });
+
+      if (error) throw error;
       
-      // Show success toast
       toast({
         title: "Feedback Received",
         description: "Thank you for helping us improve our archetype matching!",

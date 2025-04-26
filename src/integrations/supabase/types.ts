@@ -789,24 +789,87 @@ export type Database = {
         }
         Relationships: []
       }
-      test_table: {
+      insights_feedback: {
         Row: {
+          archetype_id: string | null
+          assessment_answers: Json | null
+          assessment_result: Json | null
           created_at: string | null
-          id: string
-          key: string
-          value: string | null
+          feedback: string | null
+          id: string | null
+          session_id: string | null
+          user_comments: string | null
         }
         Insert: {
+          archetype_id?: string | null
+          assessment_answers?: Json | null
+          assessment_result?: Json | null
           created_at?: string | null
-          id?: string
-          key: string
-          value?: string | null
+          feedback?: string | null
+          id?: string | null
+          session_id?: string | null
+          user_comments?: string | null
         }
         Update: {
+          archetype_id?: string | null
+          assessment_answers?: Json | null
+          assessment_result?: Json | null
           created_at?: string | null
-          id?: string
-          key?: string
-          value?: string | null
+          feedback?: string | null
+          id?: string | null
+          session_id?: string | null
+          user_comments?: string | null
+        }
+        Relationships: []
+      }
+      report_requests: {
+        Row: {
+          access_token: string | null
+          archetype_id: string | null
+          assessment_answers: Json | null
+          assessment_result: Json | null
+          comments: string | null
+          created_at: string | null
+          email: string | null
+          exact_employee_count: number | null
+          expires_at: string | null
+          id: string | null
+          name: string | null
+          organization: string | null
+          session_id: string | null
+          status: string | null
+        }
+        Insert: {
+          access_token?: string | null
+          archetype_id?: string | null
+          assessment_answers?: Json | null
+          assessment_result?: Json | null
+          comments?: string | null
+          created_at?: string | null
+          email?: string | null
+          exact_employee_count?: number | null
+          expires_at?: string | null
+          id?: string | null
+          name?: string | null
+          organization?: string | null
+          session_id?: string | null
+          status?: string | null
+        }
+        Update: {
+          access_token?: string | null
+          archetype_id?: string | null
+          assessment_answers?: Json | null
+          assessment_result?: Json | null
+          comments?: string | null
+          created_at?: string | null
+          email?: string | null
+          exact_employee_count?: number | null
+          expires_at?: string | null
+          id?: string | null
+          name?: string | null
+          organization?: string | null
+          session_id?: string | null
+          status?: string | null
         }
         Relationships: []
       }

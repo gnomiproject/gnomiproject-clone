@@ -1,15 +1,16 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { calculateArchetypeMatch, getAssessmentQuestions } from '../utils/assessmentUtils';
 import { AssessmentResult } from '../types/assessment';
 import { ArchetypeId } from '../types/archetype';
+import { v4 as uuidv4 } from 'uuid';
 
 // Storage keys for assessment data
 const INSIGHTS_STORAGE_KEY = 'healthcareArchetypeInsights';
 const SESSION_RESULTS_KEY = 'healthcareArchetypeSessionResults';
 const SESSION_ANSWERS_KEY = 'healthcareArchetypeAnswers';
 const SESSION_EXACT_EMPLOYEE_COUNT_KEY = 'healthcareArchetypeExactEmployeeCount';
+const SESSION_ID_KEY = 'healthcareArchetypeSessionId';
 
 /**
  * Hook to manage the assessment process
@@ -20,10 +21,21 @@ export const useAssessment = () => {
   const [result, setResult] = useState<AssessmentResult | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
   const [exactEmployeeCount, setExactEmployeeCount] = useState<number | null>(null);
+  const [sessionId, setSessionId] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const questions = getAssessmentQuestions();
   const totalQuestions = questions.length;
+
+  // Initialize or retrieve session ID
+  useEffect(() => {
+    let storedSessionId = sessionStorage.getItem(SESSION_ID_KEY);
+    if (!storedSessionId) {
+      storedSessionId = uuidv4();
+      sessionStorage.setItem(SESSION_ID_KEY, storedSessionId);
+    }
+    setSessionId(storedSessionId);
+  }, []);
 
   // Load answers and exact employee count from sessionStorage if available
   useEffect(() => {
@@ -31,7 +43,6 @@ export const useAssessment = () => {
     if (storedAnswers) {
       try {
         const parsedAnswers = JSON.parse(storedAnswers);
-        console.log('Loaded stored answers:', parsedAnswers);
         setAnswers(parsedAnswers);
       } catch (error) {
         console.error('Error parsing stored answers:', error);
@@ -121,24 +132,24 @@ export const useAssessment = () => {
       localStorage.removeItem(INSIGHTS_STORAGE_KEY);
       
       // Save results to sessionStorage to persist during the session
-      sessionStorage.setItem(SESSION_RESULTS_KEY, JSON.stringify(assessmentResult));
-      
-      // Save exact employee count with results
-      if (exactEmployeeCount !== null) {
-        const resultWithEmployeeCount = {
-          ...assessmentResult,
-          exactData: {
-            employeeCount: exactEmployeeCount
-          }
-        };
-        sessionStorage.setItem(SESSION_RESULTS_KEY, JSON.stringify(resultWithEmployeeCount));
-      }
+      const resultWithEmployeeCount = {
+        ...assessmentResult,
+        exactData: {
+          employeeCount: exactEmployeeCount
+        }
+      };
+      sessionStorage.setItem(SESSION_RESULTS_KEY, JSON.stringify(resultWithEmployeeCount));
       
       // Store the selected archetype in localStorage for persistence
       localStorage.setItem(INSIGHTS_STORAGE_KEY, assessmentResult.primaryArchetype);
       
-      // Navigate to insights page with the results
-      navigate('/insights', { state: { selectedArchetype: assessmentResult.primaryArchetype } });
+      // Navigate to insights page with the results and session ID
+      navigate('/insights', { 
+        state: { 
+          selectedArchetype: assessmentResult.primaryArchetype,
+          sessionId: sessionId
+        } 
+      });
       setIsCalculating(false);
     }, 7000);
   };
@@ -167,6 +178,7 @@ export const useAssessment = () => {
     result,
     isCalculating,
     exactEmployeeCount,
+    sessionId,
     setAnswer,
     setMultipleAnswers,
     setExactEmployeeCount: setEmployeeCount,
