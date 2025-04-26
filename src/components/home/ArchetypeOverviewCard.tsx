@@ -1,13 +1,11 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { ArchetypeId } from '@/types/archetype';
 import { Card } from '@/components/ui/card';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useArchetypeFamilies } from '@/hooks/archetype/useArchetypeFamilies';
 
 interface ArchetypeOverviewCardProps {
-  id: ArchetypeId;
+  id: string;
   name: string;
   family_id: string;
   short_description?: string;
@@ -16,7 +14,6 @@ interface ArchetypeOverviewCardProps {
 }
 
 const ArchetypeOverviewCard = ({
-  id,
   name,
   family_id,
   short_description,
@@ -29,7 +26,7 @@ const ArchetypeOverviewCard = ({
   
   const handleToggleExpand = (e: React.MouseEvent) => {
     e.preventDefault();
-    e.stopPropagation(); // Prevent navigation when clicking the button
+    e.stopPropagation();
     setIsExpanded(!isExpanded);
   };
 
@@ -43,7 +40,7 @@ const ArchetypeOverviewCard = ({
           <div 
             className="inline-flex items-center px-3 py-1 rounded-full text-sm"
             style={{ 
-              backgroundColor: `${familyInfo?.hex_color}15`, // Using 15 for 10% opacity
+              backgroundColor: `${familyInfo?.hex_color}15`, 
               color: familyInfo?.hex_color 
             }}
           >
@@ -57,39 +54,35 @@ const ArchetypeOverviewCard = ({
             )}
           </div>
 
-          <div className="flex justify-between items-center">
-            <button
-              onClick={handleToggleExpand}
-              className="inline-flex items-center text-gray-500 hover:text-gray-700"
-            >
-              {isExpanded ? (
-                <>Show Less <ChevronUp className="ml-1 h-4 w-4" /></>
-              ) : (
-                <>Show More <ChevronDown className="ml-1 h-4 w-4" /></>
-              )}
-            </button>
-
-            <Link 
-              to={`/archetype/${id}`} 
-              className="text-sm text-blue-600 hover:underline"
-              onClick={(e) => e.stopPropagation()}
-            >
-              View Full Details
-            </Link>
-          </div>
-
-          {isExpanded && key_characteristics && key_characteristics.length > 0 && (
-            <div className="animate-in fade-in duration-200 space-y-3">
-              <div className="pt-4 space-y-2">
-                {key_characteristics.map((characteristic, index) => (
-                  <div key={index} className="flex items-start gap-3">
-                    <div 
-                      className="w-2 h-2 rounded-full mt-2 shrink-0"
-                      style={{ backgroundColor: hex_color }}
-                    />
-                    <span className="text-gray-700">{characteristic}</span>
+          {key_characteristics && key_characteristics.length > 0 && (
+            <div className="mt-4">
+              {isExpanded && (
+                <div className="animate-in fade-in duration-200 space-y-3">
+                  <div className="pt-4 space-y-2">
+                    {key_characteristics.map((characteristic, index) => (
+                      <div key={index} className="flex items-start gap-3">
+                        <div 
+                          className="w-2 h-2 rounded-full mt-2 shrink-0"
+                          style={{ backgroundColor: hex_color }}
+                        />
+                        <span className="text-gray-700">{characteristic}</span>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                </div>
+              )}
+
+              <div className="flex justify-center mt-4">
+                <button
+                  onClick={handleToggleExpand}
+                  className="inline-flex items-center text-gray-500 hover:text-gray-700"
+                >
+                  {isExpanded ? (
+                    <>Show Less <ChevronUp className="ml-1 h-4 w-4" /></>
+                  ) : (
+                    <>Show More <ChevronDown className="ml-1 h-4 w-4" /></>
+                  )}
+                </button>
               </div>
             </div>
           )}
@@ -100,3 +93,4 @@ const ArchetypeOverviewCard = ({
 };
 
 export default ArchetypeOverviewCard;
+
