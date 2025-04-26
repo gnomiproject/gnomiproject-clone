@@ -28,7 +28,8 @@ const OverviewTab = ({ archetypeData }: OverviewTabProps) => {
   // Extract key characteristics with proper fallbacks and ensure it's an array
   const keyCharacteristics = 
     Array.isArray(archetypeData.key_characteristics) ? archetypeData.key_characteristics :
-    typeof archetypeData.key_characteristics === 'string' ? archetypeData.key_characteristics.split('\n').filter(Boolean) :
+    typeof archetypeData.key_characteristics === 'string' ? 
+      archetypeData.key_characteristics.split('\n').filter(Boolean) :
     archetypeData.summary?.keyCharacteristics || [];
   
   // Get industries with proper fallback and ensure it's an array
@@ -41,11 +42,10 @@ const OverviewTab = ({ archetypeData }: OverviewTabProps) => {
 
   // Format industries as array safely
   const industryList = industries ? 
-    typeof industries === 'string' ? industries.split(',').map(i => i.trim()) : 
-    [] : 
+    industries.split(',').map(i => i.trim().replace(/^"?|"?$/g, '')) : 
     [];
-
-  // Format key characteristics as array safely - already handled above, just use it directly
+  
+  // Format key characteristics as array safely
   const characteristicsList = Array.isArray(keyCharacteristics) ? 
     keyCharacteristics.map(item => String(item)) : 
     [];
