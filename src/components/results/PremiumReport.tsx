@@ -61,12 +61,20 @@ const PremiumReport = ({ archetypeId, assessmentResult, assessmentAnswers, arche
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>Request Full Report</CardTitle>
+        <CardTitle>Full Report - Free & Comprehensive</CardTitle>
         <CardDescription>
-          Provide your details to receive a comprehensive report.
+          Unlock Deep Insights at No Cost - Packed with Strategic Recommendations
         </CardDescription>
       </CardHeader>
       <CardContent>
+        <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4">
+          <p className="text-blue-800 font-semibold">
+            🔍 Full Report: Completely Free & Insight-Packed
+          </p>
+          <p className="text-blue-700 text-sm mt-2">
+            Gain actionable strategic insights tailored to your organization's unique profile
+          </p>
+        </div>
         <ReportRequestForm onSubmit={onSubmit} isSubmitting={isSubmitting} />
       </CardContent>
       {accessLink && (
@@ -75,7 +83,11 @@ const PremiumReport = ({ archetypeId, assessmentResult, assessmentAnswers, arche
           <ReportAccessLink accessLink={accessLink} />
         </>
       )}
-      <CardFooter />
+      <CardFooter>
+        <p className="text-xs text-gray-500 text-center w-full">
+          Your detailed, personalized report will be delivered directly to your email
+        </p>
+      </CardFooter>
     </Card>
   );
 };
