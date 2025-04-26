@@ -23,11 +23,18 @@ const OverviewTab = ({ archetypeData }: OverviewTabProps) => {
   const {
     name: archetypeName = archetypeData.name,
     long_description = archetypeData.long_description || archetypeData.standard?.fullDescription || '',
-    key_characteristics = archetypeData.key_characteristics || archetypeData.summary?.keyCharacteristics || [],
   } = archetypeData;
 
-  // Get industries with proper fallback
-  const industries = archetypeData.industries || '';
+  // Extract key characteristics with proper fallbacks and ensure it's an array
+  const keyCharacteristics = 
+    Array.isArray(archetypeData.key_characteristics) ? archetypeData.key_characteristics :
+    typeof archetypeData.key_characteristics === 'string' ? archetypeData.key_characteristics.split('\n').filter(Boolean) :
+    archetypeData.summary?.keyCharacteristics || [];
+  
+  // Get industries with proper fallback and ensure it's an array
+  const industries = 
+    typeof archetypeData.industries === 'string' ? archetypeData.industries :
+    '';
   
   // Get family name with proper fallback
   const familyName = archetypeData.family_name || archetypeData.familyName || '';
@@ -35,15 +42,13 @@ const OverviewTab = ({ archetypeData }: OverviewTabProps) => {
   // Format industries as array safely
   const industryList = industries ? 
     typeof industries === 'string' ? industries.split(',').map(i => i.trim()) : 
-    Array.isArray(industries) ? industries.map(i => String(i)) : [] : 
+    [] : 
     [];
 
-  // Format key characteristics as array safely
-  const characteristicsList = Array.isArray(key_characteristics) ? 
-    key_characteristics.map(item => String(item)) : 
-    typeof key_characteristics === 'string' ? 
-      key_characteristics.split('\n').filter(Boolean) : 
-      [];
+  // Format key characteristics as array safely - already handled above, just use it directly
+  const characteristicsList = Array.isArray(keyCharacteristics) ? 
+    keyCharacteristics.map(item => String(item)) : 
+    [];
 
   return (
     <div>
