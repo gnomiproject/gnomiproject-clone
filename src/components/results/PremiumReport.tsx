@@ -1,17 +1,12 @@
 
 import React, { useState } from 'react';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Mail, Copy } from "lucide-react";
-import { z } from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { v4 as uuidv4 } from 'uuid';
 import { ArchetypeDetailedData, ArchetypeId } from '@/types/archetype';
+import ReportRequestForm, { FormData } from './premium-report/ReportRequestForm';
+import ReportAccessLink from './premium-report/ReportAccessLink';
 
 interface PremiumReportProps {
   archetypeId: ArchetypeId;
@@ -20,40 +15,16 @@ interface PremiumReportProps {
   archetypeData?: ArchetypeDetailedData;
 }
 
-// Removed comments from the schema
-const formSchema = z.object({
-  name: z.string().min(2, {
-    message: "Name must be at least 2 characters.",
-  }),
-  email: z.string().email({
-    message: "Please enter a valid email address.",
-  }),
-  organization: z.string().min(2, {
-    message: "Organization must be at least 2 characters.",
-  }),
-});
-
 const PremiumReport = ({ archetypeId, assessmentResult, assessmentAnswers, archetypeData }: PremiumReportProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [accessLink, setAccessLink] = useState<string | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: "",
-      email: "",
-      organization: "",
-      // Removed comments default value
-    },
-  });
-
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const onSubmit = async (values: FormData) => {
     setIsSubmitting(true);
 
     try {
-      // Generate a unique access token
       const token = uuidv4();
       
       console.log('Requesting full report:', {
@@ -64,10 +35,6 @@ const PremiumReport = ({ archetypeId, assessmentResult, assessmentAnswers, arche
         accessToken: token,
       });
       
-      // In a real implementation, this would be inserted into the report_requests table
-      // But since we're working with existing tables, we'll just simulate it
-      
-      // Create an access link that would normally come from the database
       const baseUrl = window.location.origin;
       const reportLink = `${baseUrl}/archetype-report/${archetypeId}?token=${token}`;
       
@@ -91,16 +58,6 @@ const PremiumReport = ({ archetypeId, assessmentResult, assessmentAnswers, arche
     }
   };
 
-  const copyToClipboard = () => {
-    if (accessLink) {
-      navigator.clipboard.writeText(accessLink);
-      toast({
-        title: "Copied to clipboard",
-        description: "The access link has been copied to your clipboard.",
-      });
-    }
-  };
-
   return (
     <Card className="w-full">
       <CardHeader>
@@ -110,90 +67,15 @@ const PremiumReport = ({ archetypeId, assessmentResult, assessmentAnswers, arche
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="John Doe" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input placeholder="johndoe@example.com" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="organization"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Organization</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Acme Corp" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Submitting...
-                </>
-              ) : (
-                <>
-                  <Mail className="mr-2 h-4 w-4" />
-                  Request Report
-                </>
-              )}
-            </Button>
-          </form>
-        </Form>
+        <ReportRequestForm onSubmit={onSubmit} isSubmitting={isSubmitting} />
       </CardContent>
       {accessLink && (
         <>
           <Separator className="my-4" />
-          <CardContent>
-            <CardTitle>Access Your Report</CardTitle>
-            <CardDescription>
-              Use the link below to access your full report.
-            </CardDescription>
-            <div className="mt-4 flex items-center">
-              <Input
-                type="text"
-                value={accessLink}
-                readOnly
-                className="mr-2"
-              />
-              <Button variant="outline" size="sm" onClick={copyToClipboard}>
-                <Copy className="mr-2 h-4 w-4" />
-                Copy Link
-              </Button>
-            </div>
-            <p className="text-sm text-gray-500 mt-2">
-              Please save this link as it is unique to your request.
-            </p>
-          </CardContent>
+          <ReportAccessLink accessLink={accessLink} />
         </>
       )}
-      <CardFooter></CardFooter>
+      <CardFooter />
     </Card>
   );
 };
