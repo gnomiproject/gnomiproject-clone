@@ -30,16 +30,17 @@ const DeepDiveReportsAccess = () => {
   const generateReport = async (archetypeId: string) => {
     try {
       setIsGenerating(true);
+      const expiryDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days from now
+      
+      // Insert as a single object, not an array
       const { data, error } = await supabase
         .from('deep_dive_reports')
-        .insert([
-          { 
-            archetype_id: archetypeId,
-            access_token: crypto.randomUUID(),
-            status: 'active',
-            expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days from now
-          }
-        ])
+        .insert({
+          archetype_id: archetypeId,
+          access_token: crypto.randomUUID(),
+          status: 'active',
+          expires_at: expiryDate.toISOString() // Convert Date to ISO string
+        })
         .select()
         .single();
 
