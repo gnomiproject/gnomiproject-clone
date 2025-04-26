@@ -1,10 +1,10 @@
-
 import React from 'react';
 import { ArrowRight, Award, TrendingUp } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatPercent, formatNumber } from '@/utils/formatters';
+import { gnomeImages } from '@/utils/gnomeImages';
 
 interface ReportIntroductionProps {
   reportData: any;
@@ -12,6 +12,12 @@ interface ReportIntroductionProps {
 }
 
 const ReportIntroduction = ({ reportData, userData }: ReportIntroductionProps) => {
+  const formatArchetypeLabel = (id: string) => {
+    const formattedId = id.toLowerCase();
+    const familyId = formattedId[0];
+    return `${formattedId} ${reportData.archetype_name}`;
+  };
+
   // Extract secondary archetype from assessment results if available
   const assessmentResult = userData.assessment_result || {};
   const secondaryArchetype = assessmentResult.secondaryArchetype || 'A2';
@@ -28,7 +34,8 @@ const ReportIntroduction = ({ reportData, userData }: ReportIntroductionProps) =
             Personalized insights for {userData.name} at {userData.organization}
           </h2>
           <p className="text-lg mb-4">
-            Based on your assessment, your organization most closely matches the <span className="font-bold">{reportData.archetype_name}</span> healthcare archetype.
+            Based on your assessment, your organization most closely matches the{' '}
+            <span className="font-bold">{formatArchetypeLabel(reportData.archetype_id)}</span>.
           </p>
           <div className="mb-6">
             <div className="flex items-center gap-2 mb-2">
@@ -52,12 +59,9 @@ const ReportIntroduction = ({ reportData, userData }: ReportIntroductionProps) =
         </div>
         <div className="md:w-1/3 flex justify-center">
           <img
-            src={gnomeImage}
+            src={gnomeImages.welcome}
             alt="Welcome Gnome"
             className="max-h-64 object-contain"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = '/assets/gnomes/placeholder.svg';
-            }}
           />
         </div>
       </div>

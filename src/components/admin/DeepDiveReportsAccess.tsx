@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -138,6 +137,29 @@ const DeepDiveReportsAccess = () => {
     );
   }
 
+  const formatArchetypeLabel = (id: string) => {
+    // Convert to lowercase and ensure proper formatting
+    const formattedId = id.toLowerCase();
+    const familyId = formattedId[0]; // Extract family letter
+    const fullName = getArchetypeName(formattedId); // You'll need to implement this based on your data
+    return `${formattedId} ${fullName}`;
+  };
+
+  const getArchetypeName = (id: string) => {
+    const names: Record<string, string> = {
+      'a1': 'Proactive Planners',
+      'a2': 'Complex Condition Managers',
+      'a3': 'Wellness Champions',
+      'b1': 'Resourceful Adapters',
+      'b2': 'Cost-Conscious Caregivers',
+      'b3': 'Prevention Partners',
+      'c1': 'Traditional Consumers',
+      'c2': 'Reactive Responders',
+      'c3': 'Healthcare Avoiders'
+    };
+    return names[id.toLowerCase()] || 'Unknown Archetype';
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -190,7 +212,7 @@ const DeepDiveReportsAccess = () => {
                   {isGenerating === id ? (
                     <RefreshCw className="h-4 w-4 animate-spin mr-1" /> 
                   ) : (
-                    id.toUpperCase()
+                    formatArchetypeLabel(id)
                   )}
                 </Button>
               ))}
@@ -212,7 +234,7 @@ const DeepDiveReportsAccess = () => {
                   {reports.map((report) => (
                     <TableRow key={report.id}>
                       <TableCell className="font-medium">
-                        {report.archetype_id?.toUpperCase()}
+                        {formatArchetypeLabel(report.archetype_id)}
                       </TableCell>
                       <TableCell>
                         <Badge variant={report.status === 'active' ? 'default' : 'secondary'}>
