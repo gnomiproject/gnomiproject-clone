@@ -6,12 +6,21 @@ import { supabase } from '@/integrations/supabase/client';
 import DeepDiveReport from '@/components/report/DeepDiveReport';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle } from 'lucide-react';
+import { ArchetypeId } from '@/types/archetype';
 
 const ReportViewer = () => {
   const { archetypeId = '', token = '' } = useParams();
   const navigate = useNavigate();
   const [isValidToken, setIsValidToken] = useState<boolean | null>(null);
-  const { archetypeData, isLoading, error } = useGetArchetype(archetypeId);
+  // Cast the archetypeId string to ArchetypeId type with validation
+  const validArchetypeId = isValidArchetypeId(archetypeId) ? archetypeId as ArchetypeId : undefined;
+  const { archetypeData, isLoading, error } = useGetArchetype(validArchetypeId);
+
+  // Helper function to validate if a string is a valid ArchetypeId
+  function isValidArchetypeId(id: string): boolean {
+    const validIds: ArchetypeId[] = ['a1', 'a2', 'a3', 'b1', 'b2', 'b3', 'c1', 'c2', 'c3'];
+    return validIds.includes(id as ArchetypeId);
+  }
 
   useEffect(() => {
     const validateToken = async () => {
@@ -40,6 +49,24 @@ const ReportViewer = () => {
       validateToken();
     }
   }, [token, archetypeId]);
+
+  // Handle case where archetypeId is invalid
+  if (!validArchetypeId && archetypeId) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6 text-center">
+          <AlertTriangle className="mx-auto h-12 w-12 text-red-500 mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Invalid Archetype ID</h2>
+          <p className="text-gray-600 mb-6">
+            The requested archetype ID is not valid. Please check the URL or request a new report.
+          </p>
+          <Button onClick={() => navigate('/assessment')}>
+            Take Assessment
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   if (isValidToken === false) {
     return (
