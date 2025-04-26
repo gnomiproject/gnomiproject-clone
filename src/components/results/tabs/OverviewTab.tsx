@@ -32,15 +32,18 @@ const OverviewTab = ({ archetypeData }: OverviewTabProps) => {
   // Get family name with proper fallback
   const familyName = archetypeData.family_name || archetypeData.familyName || '';
 
-  // Format industries as array
+  // Format industries as array safely
   const industryList = industries ? 
     typeof industries === 'string' ? industries.split(',').map(i => i.trim()) : 
-    Array.isArray(industries) ? industries : [] : 
+    Array.isArray(industries) ? industries.map(i => String(i)) : [] : 
     [];
 
-  // Format key characteristics as array
-  const characteristicsList = Array.isArray(key_characteristics) ? key_characteristics : 
-    typeof key_characteristics === 'string' ? key_characteristics.split('\n').filter(Boolean) : [];
+  // Format key characteristics as array safely
+  const characteristicsList = Array.isArray(key_characteristics) ? 
+    key_characteristics.map(item => String(item)) : 
+    typeof key_characteristics === 'string' ? 
+      key_characteristics.split('\n').filter(Boolean) : 
+      [];
 
   return (
     <div>

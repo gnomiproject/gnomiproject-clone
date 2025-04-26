@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { ArchetypeDetailedData, ArchetypeId } from '@/types/archetype';
+import { ArchetypeDetailedData, ArchetypeId, FamilyId, Json } from '@/types/archetype';
 import { useArchetypes } from './useArchetypes';
 
 interface UseGetArchetype {
@@ -38,33 +38,54 @@ export const useGetArchetype = (archetypeId: ArchetypeId): UseGetArchetype => {
         }
 
         if (data) {
+          // Helper function to safely convert JSONB arrays to string arrays
+          const convertJsonToStringArray = (jsonArray: Json | null): string[] => {
+            if (!jsonArray) return [];
+            
+            if (Array.isArray(jsonArray)) {
+              return jsonArray.map(item => String(item));
+            }
+            
+            if (typeof jsonArray === 'string') {
+              return jsonArray.split('\n').filter(Boolean);
+            }
+            
+            return [];
+          };
+
           // Map data from level3_report_data to ArchetypeDetailedData structure
           const formattedData: ArchetypeDetailedData = {
             id: data.archetype_id as ArchetypeId,
             name: data.archetype_name || '',
-            familyId: data.family_id as FamilyId,
+            familyId: data.family_id as FamilyId || ('unknown' as FamilyId),
             familyName: data.family_name,
             family_name: data.family_name, // Add for compatibility
             hexColor: data.hex_color,
             short_description: data.short_description,
             long_description: data.long_description,
-            key_characteristics: Array.isArray(data.key_characteristics) 
-              ? data.key_characteristics 
-              : data.key_characteristics?.split('\n').filter(Boolean) || [],
+            key_characteristics: typeof data.key_characteristics === 'string'
+              ? data.key_characteristics.split('\n').filter(Boolean)
+              : [],
             industries: data.industries,
-            family_id: data.family_id,
+            family_id: data.family_id as FamilyId,
 
-            // SWOT analysis
-            strengths: data.strengths ? Array.isArray(data.strengths) ? data.strengths : [] : [],
-            weaknesses: data.weaknesses ? Array.isArray(data.weaknesses) ? data.weaknesses : [] : [],
-            opportunities: data.opportunities ? Array.isArray(data.opportunities) ? data.opportunities : [] : [],
-            threats: data.threats ? Array.isArray(data.threats) ? data.threats : [] : [],
+            // SWOT analysis - safely convert JSONB arrays to string arrays
+            strengths: convertJsonToStringArray(data.strengths),
+            weaknesses: convertJsonToStringArray(data.weaknesses),
+            opportunities: convertJsonToStringArray(data.opportunities),
+            threats: convertJsonToStringArray(data.threats),
 
-            // Strategic recommendations
-            strategic_recommendations: data.strategic_recommendations ? 
-              Array.isArray(data.strategic_recommendations) ? data.strategic_recommendations : [] : [],
+            // Strategic recommendations - handle complex structure conversion
+            strategic_recommendations: Array.isArray(data.strategic_recommendations) 
+              ? data.strategic_recommendations.map((rec: any) => ({
+                  recommendation_number: rec.recommendation_number || 0,
+                  title: rec.title || '',
+                  description: rec.description || '',
+                  metrics_references: rec.metrics_references || []
+                }))
+              : [],
 
-            // Use the correct property names from the database
+            // Use the correct property names from the database with proper type safety
             "Demo_Average Family Size": data["Demo_Average Family Size"],
             "Demo_Average Age": data["Demo_Average Age"],
             "Demo_Average Employees": data["Demo_Average Employees"],
@@ -98,19 +119,19 @@ export const useGetArchetype = (archetypeId: ArchetypeId): UseGetArchetype => {
             // For compatibility with legacy structures
             standard: {
               fullDescription: data.long_description || '',
-              keyCharacteristics: Array.isArray(data.key_characteristics) 
-                ? data.key_characteristics 
-                : data.key_characteristics?.split('\n').filter(Boolean) || [],
+              keyCharacteristics: typeof data.key_characteristics === 'string'
+                ? data.key_characteristics.split('\n').filter(Boolean)
+                : [],
               overview: data.short_description || '',
               keyStatistics: {},
               keyInsights: []
             },
             enhanced: {
               swot: {
-                strengths: Array.isArray(data.strengths) ? data.strengths : [],
-                weaknesses: Array.isArray(data.weaknesses) ? data.weaknesses : [],
-                opportunities: Array.isArray(data.opportunities) ? data.opportunities : [],
-                threats: Array.isArray(data.threats) ? data.threats : [],
+                strengths: convertJsonToStringArray(data.strengths),
+                weaknesses: convertJsonToStringArray(data.weaknesses),
+                opportunities: convertJsonToStringArray(data.opportunities),
+                threats: convertJsonToStringArray(data.threats),
               },
               strategicPriorities: Array.isArray(data.strategic_recommendations) ? data.strategic_recommendations : [],
               costSavings: [],
@@ -124,9 +145,9 @@ export const useGetArchetype = (archetypeId: ArchetypeId): UseGetArchetype => {
             },
             summary: {
               description: data.short_description || '',
-              keyCharacteristics: Array.isArray(data.key_characteristics) 
-                ? data.key_characteristics 
-                : data.key_characteristics?.split('\n').filter(Boolean) || []
+              keyCharacteristics: typeof data.key_characteristics === 'string'
+                ? data.key_characteristics.split('\n').filter(Boolean)
+                : []
             }
           };
 
@@ -141,7 +162,7 @@ export const useGetArchetype = (archetypeId: ArchetypeId): UseGetArchetype => {
               description: data.family_short_description || '',
               short_description: data.family_short_description || '',
               long_description: data.family_long_description || '',
-              commonTraits: Array.isArray(data.common_traits) ? data.common_traits : [],
+              commonTraits: Array.isArray(data.common_traits) ? data.common_traits.map(String) : [],
               industries: data.family_industries || ''
             });
           }

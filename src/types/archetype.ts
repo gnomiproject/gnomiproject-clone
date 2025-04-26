@@ -1,4 +1,3 @@
-
 export type ArchetypeId = 'a1' | 'a2' | 'a3' | 'b1' | 'b2' | 'b3' | 'c1' | 'c2' | 'c3';
 export type FamilyId = 'a' | 'b' | 'c';
 
@@ -51,7 +50,9 @@ export interface ArchetypeDetailed extends Archetype {
   }>;
 }
 
-// For backward compatibility with existing components
+// Add a JSON type definition that will help with Supabase's data
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
+
 export interface ArchetypeDetailedData {
   id: ArchetypeId;
   name: string;
