@@ -1,7 +1,7 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
+import InteractiveDNAExplorer from '@/components/home/InteractiveDNAExplorer';
 import ArchetypesGridSection from '@/components/home/ArchetypesGridSection';
 import CallToActionSection from '@/components/home/CallToActionSection';
 import { migrateDataToSupabase, checkDataInSupabase } from '@/utils/migrationUtil';
@@ -108,6 +108,9 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      {/* Interactive DNA Explorer */}
+      <InteractiveDNAExplorer />
 
       {/* Archetypes Grid */}
       <ArchetypesGridSection />

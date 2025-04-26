@@ -44,7 +44,13 @@ const ArchetypeOverviewCard = ({
         style={{ borderTop: `3px solid ${hex_color}` }}
       >
         <div className="space-y-4">
-          <div className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-50 text-blue-500">
+          <div 
+            className="inline-flex items-center px-3 py-1 rounded-full text-sm"
+            style={{ 
+              backgroundColor: `${familyInfo?.hex_color}15`, // Using 15 for 10% opacity
+              color: familyInfo?.hex_color 
+            }}
+          >
             Family {family_id.toUpperCase()} - {familyInfo?.name || ''}
           </div>
           
