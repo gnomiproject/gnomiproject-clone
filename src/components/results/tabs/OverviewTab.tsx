@@ -2,8 +2,7 @@
 import React from 'react';
 import { ArchetypeDetailedData } from '@/types/archetype';
 import { Badge } from '@/components/ui/badge';
-import { Info, ArrowRight, Building, Users } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Building, Users } from 'lucide-react';
 
 interface OverviewTabProps {
   archetypeData: ArchetypeDetailedData;
@@ -11,14 +10,14 @@ interface OverviewTabProps {
 
 const OverviewTab = ({ archetypeData }: OverviewTabProps) => {
   const color = archetypeData.hexColor ? 
-    { borderColor: archetypeData.hexColor, color: archetypeData.hexColor } : 
-    { borderColor: `var(--color-archetype-${archetypeData.id})`, color: `var(--color-archetype-${archetypeData.id})` };
+    archetypeData.hexColor : 
+    `var(--color-archetype-${archetypeData.id})`;
 
   // Get the family color - using archetype's family ID
   const familyColor = archetypeData.familyId ? 
-    { color: `var(--color-family-${archetypeData.familyId})` } : 
-    { color: '#888888' };
-
+    `var(--color-family-${archetypeData.familyId})` : 
+    '#888888';
+  
   // Extract fields from archetype data using the new structure
   const {
     name: archetypeName = archetypeData.name,
@@ -29,14 +28,11 @@ const OverviewTab = ({ archetypeData }: OverviewTabProps) => {
   let keyCharacteristics: string[] = [];
   
   if (Array.isArray(archetypeData.key_characteristics)) {
-    // If it's already an array, use it directly
     keyCharacteristics = archetypeData.key_characteristics.map(item => String(item));
   } else if (typeof archetypeData.key_characteristics === 'string') {
-    // If it's a string, split it by newlines
     const keyCharStr = archetypeData.key_characteristics as string;
     keyCharacteristics = keyCharStr.split('\n').filter(Boolean);
   } else if (archetypeData.summary?.keyCharacteristics) {
-    // Fallback to summary.keyCharacteristics if available
     keyCharacteristics = archetypeData.summary.keyCharacteristics;
   }
   
@@ -60,22 +56,22 @@ const OverviewTab = ({ archetypeData }: OverviewTabProps) => {
       <div className="mb-8">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-4">
           <div>
-            <Badge className="mb-2" style={{ color: familyColor.color, backgroundColor: `${familyColor.color}15` }}>
+            <Badge 
+              className="mb-2" 
+              style={{ 
+                backgroundColor: `${familyColor}15`,
+                color: '#333' // Dark text for better readability
+              }}
+            >
               Family: {familyName}
             </Badge>
-            <h2 className="text-2xl font-bold" style={{ color: color.color }}>
+            <h2 
+              className="text-2xl font-bold px-4 py-2 rounded-lg" 
+              style={{ backgroundColor: `${color}15` }}
+            >
               {archetypeName}
             </h2>
           </div>
-          <Button 
-            variant="outline" 
-            className="flex items-center gap-2 mt-4 md:mt-0"
-            style={{ color: color.color, borderColor: color.color }}
-          >
-            <Info size={16} />
-            View Archetype Details
-            <ArrowRight size={16} />
-          </Button>
         </div>
         
         <div className="bg-gray-50 p-6 rounded-lg mb-8">
@@ -94,7 +90,11 @@ const OverviewTab = ({ archetypeData }: OverviewTabProps) => {
             {industryList.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {industryList.map((industry, index) => (
-                  <Badge key={index} variant="secondary">
+                  <Badge 
+                    key={index} 
+                    variant="secondary"
+                    style={{ backgroundColor: `${color}15`, color: '#333' }}
+                  >
                     {industry}
                   </Badge>
                 ))}
@@ -113,8 +113,11 @@ const OverviewTab = ({ archetypeData }: OverviewTabProps) => {
               <ul className="space-y-2">
                 {keyCharacteristics.map((item, index) => (
                   <li key={index} className="flex items-start gap-2">
-                    <div className="h-2 w-2 rounded-full mt-2 flex-shrink-0" style={{ backgroundColor: color.color }}></div>
-                    <span>{item}</span>
+                    <div 
+                      className="h-2 w-2 rounded-full mt-2 flex-shrink-0" 
+                      style={{ backgroundColor: color }}
+                    />
+                    <span className="text-gray-700">{item}</span>
                   </li>
                 ))}
               </ul>
