@@ -1,9 +1,9 @@
+
 import React, { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ArchetypeDetailedData } from '@/types/archetype';
-import { Button } from "@/components/ui/button";
+import { ChevronDown, LineChart, PieChart, ListChecks, Activity, CircleDashed } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { ChevronDown, Download, LineChart, PieChart, ListChecks, Activity, CircleDashed } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import OverviewTab from './tabs/OverviewTab';
 import KeyMetricsTab from './tabs/KeyMetricsTab';
@@ -109,43 +109,6 @@ const DetailedAnalysisTabs = ({ archetypeData, onRetakeAssessment }: DetailedAna
           <RecommendationsTab archetypeData={archetypeData} />
         </TabsContent>
       </Tabs>
-      
-      {/* Full report request section - KEEPING ONLY THIS ONE */}
-      <div className="mt-12 pt-8 border-t">
-        <div className="bg-gray-50 rounded-lg p-6">
-          <h3 className="text-xl font-bold mb-2" style={{ color: color.color }}>
-            Request Your Complete Archetype Analysis
-          </h3>
-          <p className="text-gray-600 mb-6">
-            Our team will prepare a custom report with detailed analytics and actionable recommendations 
-            tailored specifically to your organization's needs.
-          </p>
-          
-          <form className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Your Name</label>
-                <input type="text" className="w-full p-2 border rounded" placeholder="Enter your name" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Organization</label>
-                <input type="text" className="w-full p-2 border rounded" placeholder="Enter organization name" />
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-              <input type="email" className="w-full p-2 border rounded" placeholder="Enter your email" />
-            </div>
-            <Button 
-              className="w-full md:w-auto" 
-              style={{ backgroundColor: color.color }}
-            >
-              <Download className="mr-2 h-4 w-4" />
-              Request Full Report
-            </Button>
-          </form>
-        </div>
-      </div>
       
       {/* Retake assessment button */}
       <div className="mt-12 text-center">

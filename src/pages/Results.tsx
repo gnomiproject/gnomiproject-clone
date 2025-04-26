@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import SectionTitle from '@/components/shared/SectionTitle';
@@ -87,7 +86,7 @@ const Results = () => {
             </div>
           </div>
 
-          {/* Detailed Analysis Tabs (always visible) */}
+          {/* Detailed Analysis Tabs */}
           <div className="border-t">
             <DetailedAnalysisTabs 
               archetypeData={archetypeData} 
@@ -95,11 +94,13 @@ const Results = () => {
             />
           </div>
           
-          {/* Premium Report Component - Fixed missing archetypeId prop */}
-          <PremiumReport 
-            archetypeData={archetypeData} 
-            archetypeId={archetypeData.id} 
-          />
+          {/* Premium Report Component - This is the only form we want to keep */}
+          <div className="border-t p-6 md:p-8 bg-gray-50">
+            <PremiumReport 
+              archetypeData={archetypeData} 
+              archetypeId={archetypeData.id}
+            />
+          </div>
         </div>
       </div>
     </div>
