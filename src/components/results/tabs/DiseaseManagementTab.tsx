@@ -9,24 +9,19 @@ interface DiseaseManagementTabProps {
   archetypeData: ArchetypeDetailedData;
 }
 
-// Helper component for rendering metric bars
 const MetricBar = ({ 
   label, 
   value, 
-  maxValue = 100,
   color = "#888888",
-  unit = "%",
   icon
 }: { 
   label: string; 
-  value: number; 
-  maxValue?: number;
+  value: number;
   color?: string;
-  unit?: string;
   icon?: React.ReactNode;
 }) => {
-  const percentage = Math.min(Math.max(0, (value / maxValue) * 100), 100);
-  const formattedValue = unit === "%" ? `${(value * 100).toFixed(1)}%` : `${value.toFixed(1)}${unit}`;
+  const percentage = value;
+  const formattedValue = `${(value).toFixed(1)}%`;
   
   return (
     <div className="mb-4">
@@ -40,7 +35,7 @@ const MetricBar = ({
         </span>
       </div>
       <Progress value={percentage} className="h-2" style={{ 
-        '--progress-background': `${color}30`,
+        '--progress-background': `${color}20`,
         '--progress-foreground': color
       } as React.CSSProperties} />
     </div>
@@ -52,13 +47,13 @@ const DiseaseManagementTab = ({ archetypeData }: DiseaseManagementTabProps) => {
     archetypeData.hexColor : 
     `var(--color-archetype-${archetypeData.id})`;
 
-  // Disease prevalence metrics - using the correct property names
+  // Disease prevalence metrics
   const heartDiseasePrevalence = archetypeData["Dise_Heart Disease Prevalence"] ?? 0;
   const diabetesPrevalence = archetypeData["Dise_Type 2 Diabetes Prevalence"] ?? 0;
   const mentalHealthPrevalence = archetypeData["Dise_Mental Health Disorder Prevalence"] ?? 0;
   const substanceUsePrevalence = archetypeData["Dise_Substance Use Disorder Prevalence"] ?? 0;
 
-  // Care gaps metrics - using the correct property names
+  // Care gaps metrics
   const diabetesRxAdherence = archetypeData["Gaps_Diabetes RX Adherence"] ?? 0;
   const behavioralHealthFollowup = archetypeData["Gaps_Behavioral Health FU ED Visit Mental Illness"] ?? 0;
   const breastCancerScreening = archetypeData["Gaps_Cancer Screening Breast"] ?? 0;
@@ -69,7 +64,6 @@ const DiseaseManagementTab = ({ archetypeData }: DiseaseManagementTabProps) => {
       <h2 className="text-xl font-bold mb-6">Disease & Care Management</h2>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Disease Prevalence Column */}
         <Card>
           <CardHeader className="pb-3" style={{ borderBottom: `1px solid ${color}30` }}>
             <CardTitle className="flex items-center">
@@ -81,32 +75,28 @@ const DiseaseManagementTab = ({ archetypeData }: DiseaseManagementTabProps) => {
             <div className="space-y-6">
               <MetricBar 
                 label="Heart Disease" 
-                value={heartDiseasePrevalence} 
-                maxValue={0.25}
+                value={heartDiseasePrevalence * 100}
                 color={color}
                 icon={<Heart size={16} color={color} />}
               />
               
               <MetricBar 
                 label="Type 2 Diabetes" 
-                value={diabetesPrevalence} 
-                maxValue={0.15}
+                value={diabetesPrevalence * 100}
                 color={color}
                 icon={<Activity size={16} color={color} />}
               />
               
               <MetricBar 
                 label="Mental Health Disorders" 
-                value={mentalHealthPrevalence} 
-                maxValue={0.25}
+                value={mentalHealthPrevalence * 100}
                 color={color}
                 icon={<Brain size={16} color={color} />}
               />
               
               <MetricBar 
                 label="Substance Use Disorder" 
-                value={substanceUsePrevalence} 
-                maxValue={0.1}
+                value={substanceUsePrevalence * 100}
                 color={color}
                 icon={<Pill size={16} color={color} />}
               />
@@ -118,7 +108,6 @@ const DiseaseManagementTab = ({ archetypeData }: DiseaseManagementTabProps) => {
           </CardContent>
         </Card>
 
-        {/* Care Gaps Column */}
         <Card>
           <CardHeader className="pb-3" style={{ borderBottom: `1px solid ${color}30` }}>
             <CardTitle className="flex items-center">
@@ -130,28 +119,28 @@ const DiseaseManagementTab = ({ archetypeData }: DiseaseManagementTabProps) => {
             <div className="space-y-6">
               <MetricBar 
                 label="Diabetes Medication Adherence" 
-                value={diabetesRxAdherence} 
+                value={diabetesRxAdherence}
                 color={color}
                 icon={<Pill size={16} color={color} />}
               />
               
               <MetricBar 
                 label="Mental Health Follow-Up" 
-                value={behavioralHealthFollowup} 
+                value={behavioralHealthFollowup}
                 color={color}
                 icon={<Brain size={16} color={color} />}
               />
               
               <MetricBar 
                 label="Breast Cancer Screening" 
-                value={breastCancerScreening} 
+                value={breastCancerScreening}
                 color={color}
                 icon={<Activity size={16} color={color} />}
               />
               
               <MetricBar 
                 label="Adult Wellness Visits" 
-                value={adultsWellnessVisit} 
+                value={adultsWellnessVisit}
                 color={color}
                 icon={<Heart size={16} color={color} />}
               />
