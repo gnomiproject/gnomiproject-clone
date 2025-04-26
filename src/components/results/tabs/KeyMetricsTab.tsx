@@ -58,24 +58,72 @@ const KeyMetricsTab = ({ archetypeData }: KeyMetricsTabProps) => {
     archetypeData.hexColor : 
     `var(--color-archetype-${archetypeData.id})`;
 
-  // Demographics metrics - use the correct property names
-  const familySize = archetypeData["Demo_Average Family Size"] ?? 0;
-  const averageAge = archetypeData["Demo_Average Age"] ?? 0;
-  const averageStates = archetypeData["Demo_Average States"] ?? 0;
+  // Access metrics data with safe fallbacks and proper type handling
+  // Using optional chaining and nullish coalescing to avoid errors
+  
+  // Demographics metrics
+  const familySize = archetypeData["Demo_Average Family Size"] != null ? 
+    archetypeData["Demo_Average Family Size"] : 
+    (archetypeData.enhanced?.demographics?.familySize || 0);
+    
+  const averageAge = archetypeData["Demo_Average Age"] != null ? 
+    archetypeData["Demo_Average Age"] : 
+    (archetypeData.enhanced?.demographics?.averageAge || 0);
+    
+  const averageStates = archetypeData["Demo_Average States"] != null ? 
+    archetypeData["Demo_Average States"] : 
+    (archetypeData.enhanced?.demographics?.states || 0);
 
-  // Utilization metrics - use the correct property names
-  const erVisits = archetypeData["Util_Emergency Visits per 1k Members"] ?? 0;
-  const specialistVisits = archetypeData["Util_Specialist Visits per 1k Members"] ?? 0;
-  const inpatientAdmits = archetypeData["Util_Inpatient Admits per 1k Members"] ?? 0;
-  const nonUtilizers = archetypeData["Util_Percent of Members who are Non-Utilizers"] ?? 0;
+  // Utilization metrics
+  const erVisits = archetypeData["Util_Emergency Visits per 1k Members"] != null ? 
+    archetypeData["Util_Emergency Visits per 1k Members"] : 
+    (archetypeData.enhanced?.utilization?.erVisits || 0);
+    
+  const specialistVisits = archetypeData["Util_Specialist Visits per 1k Members"] != null ? 
+    archetypeData["Util_Specialist Visits per 1k Members"] : 
+    (archetypeData.enhanced?.utilization?.specialistVisits || 0);
+    
+  const inpatientAdmits = archetypeData["Util_Inpatient Admits per 1k Members"] != null ? 
+    archetypeData["Util_Inpatient Admits per 1k Members"] : 
+    (archetypeData.enhanced?.utilization?.inpatientAdmits || 0);
+    
+  const nonUtilizers = archetypeData["Util_Percent of Members who are Non-Utilizers"] != null ? 
+    archetypeData["Util_Percent of Members who are Non-Utilizers"] : 
+    (archetypeData.enhanced?.utilization?.nonUtilizers || 0);
 
-  // Risk metrics - use the correct property names
-  const riskScore = archetypeData["Risk_Average Risk Score"] ?? 0;
-  const sdohScore = archetypeData["SDOH_Average SDOH"] ?? 0;
+  // Risk metrics
+  const riskScore = archetypeData["Risk_Average Risk Score"] != null ? 
+    archetypeData["Risk_Average Risk Score"] : 
+    (archetypeData.enhanced?.riskProfile?.score || 0);
+    
+  const sdohScore = archetypeData["SDOH_Average SDOH"] != null ? 
+    archetypeData["SDOH_Average SDOH"] : 
+    (archetypeData.enhanced?.sdoh?.average || 0);
 
-  // Cost metrics - use the correct property names
-  const totalCostPEPY = archetypeData["Cost_Medical & RX Paid Amount PEPY"] ?? 0;
-  const savingsPMPY = archetypeData["Cost_Avoidable ER Potential Savings PMPY"] ?? 0;
+  // Cost metrics
+  const totalCostPEPY = archetypeData["Cost_Medical & RX Paid Amount PEPY"] != null ? 
+    archetypeData["Cost_Medical & RX Paid Amount PEPY"] : 
+    (archetypeData.enhanced?.costs?.totalPEPY || 0);
+    
+  const savingsPMPY = archetypeData["Cost_Avoidable ER Potential Savings PMPY"] != null ? 
+    archetypeData["Cost_Avoidable ER Potential Savings PMPY"] : 
+    (archetypeData.enhanced?.costs?.potentialSavings || 0);
+
+  console.log("Metrics being used:", {
+    familySize,
+    averageAge,
+    averageStates,
+    erVisits,
+    specialistVisits,
+    inpatientAdmits,
+    nonUtilizers,
+    riskScore,
+    sdohScore,
+    totalCostPEPY,
+    savingsPMPY
+  });
+
+  console.log("Raw archetype data:", archetypeData);
 
   return (
     <div>
@@ -160,14 +208,14 @@ const KeyMetricsTab = ({ archetypeData }: KeyMetricsTabProps) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <MetricCard 
             title="Clinical Risk Score" 
-            value={riskScore.toFixed(2)} 
+            value={typeof riskScore === 'number' ? riskScore.toFixed(2) : riskScore} 
             description="Average clinical risk score (higher values indicate higher risk)" 
             color={color}
             icon={<AlertTriangle size={16} />}
           />
           <MetricCard 
             title="Social Determinants" 
-            value={sdohScore.toFixed(2)} 
+            value={typeof sdohScore === 'number' ? sdohScore.toFixed(2) : sdohScore} 
             description="Social determinants of health score (higher values indicate better conditions)" 
             color={color}
             icon={<Users size={16} />}
@@ -183,14 +231,14 @@ const KeyMetricsTab = ({ archetypeData }: KeyMetricsTabProps) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <MetricCard 
             title="Total Healthcare Spend" 
-            value={`$${totalCostPEPY.toLocaleString()}`} 
+            value={`$${typeof totalCostPEPY === 'number' ? totalCostPEPY.toLocaleString() : totalCostPEPY}`} 
             description="Medical and pharmacy costs per employee per year" 
             color={color}
             icon={<DollarSign size={16} />}
           />
           <MetricCard 
             title="Potential ER Savings" 
-            value={`$${savingsPMPY.toLocaleString()}`} 
+            value={`$${typeof savingsPMPY === 'number' ? savingsPMPY.toLocaleString() : savingsPMPY}`} 
             description="Potential savings from avoidable emergency room visits per member per year" 
             color={color}
             icon={<DollarSign size={16} />}
