@@ -1,113 +1,85 @@
 
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useGetArchetype } from '@/hooks/useGetArchetype';
-import { ArchetypeId } from '@/types/archetype';
-import { Loader2, ArrowLeft, ShieldAlert } from 'lucide-react';
-import DetailedArchetypeReport from '@/components/insights/DetailedArchetypeReport';
+import { supabase } from '@/integrations/supabase/client';
+import DeepDiveReport from '@/components/report/DeepDiveReport';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { toast } from 'sonner';
-import AssessmentResultsHeader from '@/components/insights/AssessmentResultsHeader';
+import { AlertTriangle } from 'lucide-react';
 
 const ReportViewer = () => {
-  const { archetypeId, token } = useParams<{ archetypeId: ArchetypeId, token: string }>();
-  const [isValidToken, setIsValidToken] = useState<boolean>(false);
-  const [isChecking, setIsChecking] = useState<boolean>(true);
+  const { archetypeId = '', token = '' } = useParams();
   const navigate = useNavigate();
-  
-  const { archetypeData, familyData, isLoading } = useGetArchetype(archetypeId as ArchetypeId);
-  
-  // Validate the access token
+  const [isValidToken, setIsValidToken] = useState<boolean | null>(null);
+  const { archetypeData, isLoading, error } = useGetArchetype(archetypeId);
+
   useEffect(() => {
-    if (!archetypeId || !token) {
-      setIsChecking(false);
-      setIsValidToken(false);
-      return;
-    }
-    
-    // Check if the token is valid
-    const storedTokens = JSON.parse(localStorage.getItem('admin_report_tokens') || '{}');
-    const validToken = storedTokens[archetypeId] === token;
-    
-    // Token is valid if it exists and hasn't expired
-    setIsValidToken(validToken);
-    setIsChecking(false);
-    
-    if (!validToken) {
-      toast.error("Invalid or expired access token");
-    }
-  }, [archetypeId, token]);
+    const validateToken = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('report_requests')
+          .select('status, expires_at')
+          .eq('archetype_id', archetypeId)
+          .eq('access_token', token)
+          .single();
 
-  const handleBack = () => {
-    // Navigate directly to admin without any state that could trigger unnecessary refreshes
-    navigate('/admin', { replace: true });
-  };
-  
-  const handleRetakeAssessment = () => {
-    navigate('/assessment');
-  };
+        if (error) throw error;
 
-  if (isChecking) {
+        const isValid = data && 
+          data.status === 'active' && 
+          (!data.expires_at || new Date(data.expires_at) > new Date());
+
+        setIsValidToken(isValid);
+      } catch (err) {
+        console.error('Error validating token:', err);
+        setIsValidToken(false);
+      }
+    };
+
+    if (token && archetypeId) {
+      validateToken();
+    }
+  }, [token, archetypeId]);
+
+  if (isValidToken === false) {
     return (
-      <div className="container mx-auto py-16 flex flex-col items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-        <p className="text-lg text-muted-foreground">Verifying access...</p>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6 text-center">
+          <AlertTriangle className="mx-auto h-12 w-12 text-amber-500 mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Invalid Access</h2>
+          <p className="text-gray-600 mb-6">
+            This report link is either invalid or has expired. Please request a new report.
+          </p>
+          <Button onClick={() => navigate('/assessment')}>
+            Take Assessment
+          </Button>
+        </div>
       </div>
     );
   }
-  
-  if (!isValidToken || !archetypeId) {
+
+  if (isLoading) {
+    return <DeepDiveReport archetypeData={null} loading={true} />;
+  }
+
+  if (error || !archetypeData) {
     return (
-      <div className="container mx-auto py-16">
-        <Card className="max-w-lg mx-auto p-6 text-center">
-          <div className="flex flex-col items-center gap-4 py-6">
-            <ShieldAlert className="h-16 w-16 text-destructive" />
-            <h1 className="text-2xl font-bold">Access Denied</h1>
-            <p className="text-muted-foreground mb-4">
-              You don't have permission to access this report. Please return to the admin panel and generate a valid access link.
-            </p>
-            <Button onClick={handleBack}>Return to Admin Panel</Button>
-          </div>
-        </Card>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6 text-center">
+          <AlertTriangle className="mx-auto h-12 w-12 text-red-500 mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Error Loading Report</h2>
+          <p className="text-gray-600 mb-6">
+            There was an error loading the report data. Please try again later.
+          </p>
+          <Button onClick={() => window.location.reload()}>
+            Retry
+          </Button>
+        </div>
       </div>
     );
   }
-  
-  return (
-    <div className="container mx-auto py-8">
-      <div className="mb-6">
-        <Button variant="ghost" onClick={handleBack} className="flex items-center gap-2">
-          <ArrowLeft className="h-4 w-4" />
-          Back to Admin
-        </Button>
-      </div>
-      
-      <Card>
-        {isLoading ? (
-          <div className="flex justify-center items-center min-h-[300px]">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
-        ) : archetypeData && familyData ? (
-          <div>
-            <AssessmentResultsHeader 
-              archetypeData={archetypeData}
-              familyData={familyData}
-              onRetakeAssessment={handleRetakeAssessment}
-            />
-            <DetailedArchetypeReport 
-              archetypeId={archetypeId as ArchetypeId}
-              onRetakeAssessment={handleRetakeAssessment} 
-            />
-          </div>
-        ) : (
-          <div className="p-6 text-center">
-            <p className="text-lg">Report data not found</p>
-          </div>
-        )}
-      </Card>
-    </div>
-  );
+
+  return <DeepDiveReport archetypeData={archetypeData} />;
 };
 
 export default ReportViewer;
