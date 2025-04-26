@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { ArchetypeDetailedData, ArchetypeId, FamilyId, Json } from '@/types/archetype';
 import { useArchetypes } from './useArchetypes';
@@ -50,8 +50,10 @@ export const useGetArchetype = (archetypeId: ArchetypeId): UseGetArchetype => {
   const [familyData, setFamilyData] = useState<any | null>(null);
   const { getArchetypeEnhanced, getFamilyById } = useArchetypes();
   
-  // Process data on success
-  const handleSuccess = (data: any) => {
+  // Process data on success - defined as a callback to avoid recreating on each render
+  const processData = useCallback((data: any) => {
+    console.log("Processing data:", data);
+    
     if (data) {
       // Map data from level3_report_data to ArchetypeDetailedData structure
       const formattedData: ArchetypeDetailedData = {
@@ -152,6 +154,7 @@ export const useGetArchetype = (archetypeId: ArchetypeId): UseGetArchetype => {
       };
 
       setArchetypeData(formattedData);
+      console.log("Formatted archetype data:", formattedData);
       
       // Set family data
       if (data.family_id) {
@@ -172,6 +175,7 @@ export const useGetArchetype = (archetypeId: ArchetypeId): UseGetArchetype => {
       const fallbackArchetype = getArchetypeEnhanced(archetypeId);
       
       if (fallbackArchetype) {
+        console.log("Using fallback archetype data:", fallbackArchetype);
         setArchetypeData(fallbackArchetype);
         
         if (fallbackArchetype.familyId) {
@@ -180,10 +184,10 @@ export const useGetArchetype = (archetypeId: ArchetypeId): UseGetArchetype => {
         }
       }
     }
-  };
+  }, [getFamilyById, getArchetypeEnhanced, archetypeId]);
 
-  // Handle errors
-  const handleError = (error: Error) => {
+  // Handle errors - defined as a callback to avoid recreating on each render
+  const handleError = useCallback((error: Error) => {
     console.error("Error fetching archetype data:", error);
     
     // Fallback to original archetype data structure on error
@@ -197,13 +201,14 @@ export const useGetArchetype = (archetypeId: ArchetypeId): UseGetArchetype => {
         setFamilyData(familyInfo);
       }
     }
-  };
+  }, [getFamilyById, getArchetypeEnhanced, archetypeId]);
   
   // Use React Query for data fetching with proper caching
   const { 
     isLoading, 
     error, 
-    refetch 
+    refetch,
+    data 
   } = useQuery({
     queryKey: ['archetype', archetypeId],
     queryFn: () => fetchArchetypeData(archetypeId),
@@ -211,12 +216,17 @@ export const useGetArchetype = (archetypeId: ArchetypeId): UseGetArchetype => {
     retry: 1, // Only retry once
     enabled: !!archetypeId,
     refetchOnWindowFocus: false, // Prevent refetching when window regains focus
-    refetchOnMount: false, // Prevent refetching on component mount if data exists
-    meta: {
-      onSuccess: handleSuccess,
-      onError: handleError
-    }
+    refetchOnMount: false // Prevent refetching on component mount if data exists
   });
+
+  // Process data when it changes
+  useEffect(() => {
+    if (data) {
+      processData(data);
+    } else if (error) {
+      handleError(error as Error);
+    }
+  }, [data, error, processData, handleError]);
 
   return { 
     archetypeData, 
