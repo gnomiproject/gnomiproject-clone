@@ -90,35 +90,35 @@ export const useGetArchetype = (archetypeId: ArchetypeId): UseGetArchetype => {
               : [],
 
             // Use the correct property names from the database with proper type safety
-            "Demo_Average Family Size": data["Demo_Average Family Size"],
-            "Demo_Average Age": data["Demo_Average Age"],
-            "Demo_Average Employees": data["Demo_Average Employees"],
-            "Demo_Average States": data["Demo_Average States"],
-            "Demo_Average Percent Female": data["Demo_Average Percent Female"],
+            "Demo_Average Family Size": data["Demo_Average Family Size"] || 0,
+            "Demo_Average Age": data["Demo_Average Age"] || 0,
+            "Demo_Average Employees": data["Demo_Average Employees"] || 0,
+            "Demo_Average States": data["Demo_Average States"] || 0,
+            "Demo_Average Percent Female": data["Demo_Average Percent Female"] || 0,
             
-            "Util_Emergency Visits per 1k Members": data["Util_Emergency Visits per 1k Members"],
-            "Util_Specialist Visits per 1k Members": data["Util_Specialist Visits per 1k Members"],
-            "Util_Inpatient Admits per 1k Members": data["Util_Inpatient Admits per 1k Members"],
-            "Util_Percent of Members who are Non-Utilizers": data["Util_Percent of Members who are Non-Utilizers"],
+            "Util_Emergency Visits per 1k Members": data["Util_Emergency Visits per 1k Members"] || 0,
+            "Util_Specialist Visits per 1k Members": data["Util_Specialist Visits per 1k Members"] || 0,
+            "Util_Inpatient Admits per 1k Members": data["Util_Inpatient Admits per 1k Members"] || 0,
+            "Util_Percent of Members who are Non-Utilizers": data["Util_Percent of Members who are Non-Utilizers"] || 0,
             
-            "Risk_Average Risk Score": data["Risk_Average Risk Score"],
-            "SDOH_Average SDOH": data["SDOH_Average SDOH"],
+            "Risk_Average Risk Score": data["Risk_Average Risk Score"] || 0,
+            "SDOH_Average SDOH": data["SDOH_Average SDOH"] || 0,
             
-            "Cost_Medical & RX Paid Amount PEPY": data["Cost_Medical & RX Paid Amount PEPY"],
-            "Cost_Medical & RX Paid Amount PMPY": data["Cost_Medical & RX Paid Amount PMPY"],
-            "Cost_Avoidable ER Potential Savings PMPY": data["Cost_Avoidable ER Potential Savings PMPY"],
-            "Cost_Medical Paid Amount PEPY": data["Cost_Medical Paid Amount PEPY"],
-            "Cost_RX Paid Amount PEPY": data["Cost_RX Paid Amount PEPY"],
+            "Cost_Medical & RX Paid Amount PEPY": data["Cost_Medical & RX Paid Amount PEPY"] || 0,
+            "Cost_Medical & RX Paid Amount PMPY": data["Cost_Medical & RX Paid Amount PMPY"] || 0,
+            "Cost_Avoidable ER Potential Savings PMPY": data["Cost_Avoidable ER Potential Savings PMPY"] || 0,
+            "Cost_Medical Paid Amount PEPY": data["Cost_Medical Paid Amount PEPY"] || 0,
+            "Cost_RX Paid Amount PEPY": data["Cost_RX Paid Amount PEPY"] || 0,
             
-            "Dise_Heart Disease Prevalence": data["Dise_Heart Disease Prevalence"],
-            "Dise_Type 2 Diabetes Prevalence": data["Dise_Type 2 Diabetes Prevalence"],
-            "Dise_Mental Health Disorder Prevalence": data["Dise_Mental Health Disorder Prevalence"],
-            "Dise_Substance Use Disorder Prevalence": data["Dise_Substance Use Disorder Prevalence"],
+            "Dise_Heart Disease Prevalence": data["Dise_Heart Disease Prevalence"] || 0,
+            "Dise_Type 2 Diabetes Prevalence": data["Dise_Type 2 Diabetes Prevalence"] || 0,
+            "Dise_Mental Health Disorder Prevalence": data["Dise_Mental Health Disorder Prevalence"] || 0,
+            "Dise_Substance Use Disorder Prevalence": data["Dise_Substance Use Disorder Prevalence"] || 0,
             
-            "Gaps_Diabetes RX Adherence": data["Gaps_Diabetes RX Adherence"],
-            "Gaps_Behavioral Health FU ED Visit Mental Illness": data["Gaps_Behavioral Health FU ED Visit Mental Illness"],
-            "Gaps_Cancer Screening Breast": data["Gaps_Cancer Screening Breast"],
-            "Gaps_Wellness Visit Adults": data["Gaps_Wellness Visit Adults"],
+            "Gaps_Diabetes RX Adherence": data["Gaps_Diabetes RX Adherence"] || 0,
+            "Gaps_Behavioral Health FU ED Visit Mental Illness": data["Gaps_Behavioral Health FU ED Visit Mental Illness"] || 0,
+            "Gaps_Cancer Screening Breast": data["Gaps_Cancer Screening Breast"] || 0,
+            "Gaps_Wellness Visit Adults": data["Gaps_Wellness Visit Adults"] || 0,
             
             // For compatibility with legacy structures
             standard: {
@@ -143,7 +143,7 @@ export const useGetArchetype = (archetypeId: ArchetypeId): UseGetArchetype => {
                 score: data["Risk_Average Risk Score"].toFixed(2),
                 comparison: 'Based on clinical and utilization patterns',
                 conditions: [
-                  { name: 'Risk Score', value: data["Risk_Average Risk Score"].toFixed(2), barWidth: `${data["Risk_Average Risk Score"] * 50}%` }
+                  { name: 'Risk Score', value: data["Risk_Average Risk Score"].toFixed(2), barWidth: `${data["Risk_Average Risk Score"] * 10}%` }
                 ]
               } : undefined
             },

@@ -143,7 +143,7 @@ const Results = () => {
             />
           </div>
           
-          {/* Premium Report Component - This is the only form we want to keep */}
+          {/* Premium Report Component */}
           <div className="border-t p-6 md:p-8 bg-gray-50">
             <PremiumReport 
               archetypeData={archetypeData} 
