@@ -212,8 +212,10 @@ export const useGetArchetype = (archetypeId: ArchetypeId): UseGetArchetype => {
     enabled: !!archetypeId,
     refetchOnWindowFocus: false, // Prevent refetching when window regains focus
     refetchOnMount: false, // Prevent refetching on component mount if data exists
-    onSuccess: handleSuccess,
-    onError: handleError
+    meta: {
+      onSuccess: handleSuccess,
+      onError: handleError
+    }
   });
 
   return { 
