@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft } from 'lucide-react';
 import { useGetArchetype } from '@/hooks/useGetArchetype';
+import { toast } from 'sonner';
 
 const ArchetypePage = () => {
   const { archetypeId } = useParams<{ archetypeId: string }>();
@@ -16,6 +17,14 @@ const ArchetypePage = () => {
   const handleRetakeAssessment = () => {
     navigate('/assessment');
   };
+  
+  React.useEffect(() => {
+    if (error) {
+      toast.error("Failed to load archetype data", {
+        description: "We couldn't connect to the database. Using fallback data."
+      });
+    }
+  }, [error]);
   
   if (isLoading) {
     return (
@@ -32,7 +41,7 @@ const ArchetypePage = () => {
     );
   }
   
-  if (error || !archetypeData) {
+  if (!archetypeData) {
     return (
       <div className="min-h-screen bg-gray-50 py-12 px-6">
         <div className="max-w-5xl mx-auto">
