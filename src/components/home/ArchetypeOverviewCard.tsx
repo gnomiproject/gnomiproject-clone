@@ -4,12 +4,8 @@ import { Link } from 'react-router-dom';
 import { ArchetypeId } from '@/types/archetype';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { ChevronDown, ChevronUp } from 'lucide-react';
+import { useArchetypeFamilies } from '@/hooks/archetype/useArchetypeFamilies';
 
 interface ArchetypeOverviewCardProps {
   id: ArchetypeId;
@@ -28,61 +24,70 @@ const ArchetypeOverviewCard = ({
   hex_color,
   key_characteristics = []
 }: ArchetypeOverviewCardProps) => {
-  const [showDialog, setShowDialog] = React.useState(false);
+  const [isExpanded, setIsExpanded] = React.useState(false);
+  const { getFamilyById } = useArchetypeFamilies();
+  const familyInfo = getFamilyById(family_id as 'a' | 'b' | 'c');
   const cardStyle = hex_color ? { borderTop: `3px solid ${hex_color}` } : {};
   const bulletStyle = hex_color ? { backgroundColor: hex_color } : {};
   
-  const handleCardClick = (e: React.MouseEvent) => {
+  const handleToggleExpand = (e: React.MouseEvent) => {
     e.preventDefault();
-    setShowDialog(true);
+    setIsExpanded(!isExpanded);
   };
   
   return (
-    <>
-      <Link to={`/archetype/${id}`} onClick={handleCardClick}>
-        <Card className="h-full p-6 hover:shadow-lg transition-shadow" style={cardStyle}>
-          <div className="flex justify-between items-start mb-2">
-            <h3 className="text-xl font-bold">{name}</h3>
-            <span className="text-sm text-gray-500">{id}</span>
-          </div>
-          <p className="text-sm text-gray-600 mb-4">family {family_id}</p>
-          {short_description && (
-            <p className="text-gray-700 mb-4">{short_description}</p>
+    <Link to={`/archetype/${id}`}>
+      <Card 
+        className={`h-full p-6 hover:shadow-lg transition-all duration-300 ${isExpanded ? 'scale-105' : ''}`} 
+        style={cardStyle}
+      >
+        <div className="flex justify-between items-start mb-2">
+          <h3 className="text-xl font-bold">{name}</h3>
+          <span className="text-sm text-gray-500">{id}</span>
+        </div>
+        <p className="text-sm text-gray-600 mb-4">
+          Family {family_id} - {familyInfo?.name || ''}
+        </p>
+        {short_description && (
+          <p className="text-gray-700 mb-4">{short_description}</p>
+        )}
+        
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="w-full mb-4"
+          onClick={handleToggleExpand}
+        >
+          {isExpanded ? (
+            <>
+              Show Less <ChevronUp className="ml-2 h-4 w-4" />
+            </>
+          ) : (
+            <>
+              Learn More <ChevronDown className="ml-2 h-4 w-4" />
+            </>
           )}
-          <Button variant="outline" size="sm" className="w-full">
-            Learn More
-          </Button>
-        </Card>
-      </Link>
+        </Button>
 
-      <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex justify-between items-center">
-              <span>{name}</span>
-              <span className="text-sm text-gray-500">{id}</span>
-            </DialogTitle>
-          </DialogHeader>
-          <div className="mt-4">
+        {isExpanded && key_characteristics && key_characteristics.length > 0 && (
+          <div className="mt-4 space-y-3 animate-in fade-in duration-200">
             <h4 className="font-medium text-gray-700 mb-3">Key Characteristics:</h4>
-            <div className="space-y-3">
-              {Array.isArray(key_characteristics) && key_characteristics.map((characteristic, index) => (
+            {key_characteristics.map((characteristic, index) => (
+              <div 
+                key={index} 
+                className="flex items-start gap-3 p-3 bg-gray-50 rounded-md border border-gray-100"
+              >
                 <div 
-                  key={index} 
-                  className="flex items-start gap-3 p-3 bg-gray-50 rounded-md border border-gray-100"
-                >
-                  <div 
-                    className="w-2 h-2 rounded-full mt-1.5 shrink-0" 
-                    style={bulletStyle}
-                  />
-                  <span>{characteristic}</span>
-                </div>
-              ))}
-            </div>
+                  className="w-2 h-2 rounded-full mt-1.5 shrink-0" 
+                  style={bulletStyle}
+                />
+                <span>{characteristic}</span>
+              </div>
+            ))}
           </div>
-        </DialogContent>
-      </Dialog>
-    </>
+        )}
+      </Card>
+    </Link>
   );
 };
 
