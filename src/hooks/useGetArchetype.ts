@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { ArchetypeDetailedData, ArchetypeId, FamilyId, Json } from '@/types/archetype';
 import { useArchetypes } from './useArchetypes';
@@ -9,6 +9,7 @@ interface UseGetArchetype {
   familyData: any | null;
   isLoading: boolean;
   error: Error | null;
+  refetch: () => void;
 }
 
 export const useGetArchetype = (archetypeId: ArchetypeId): UseGetArchetype => {
@@ -16,7 +17,15 @@ export const useGetArchetype = (archetypeId: ArchetypeId): UseGetArchetype => {
   const [familyData, setFamilyData] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
+  const [refreshKey, setRefreshKey] = useState<number>(0);
   const { getArchetypeEnhanced, getFamilyById } = useArchetypes();
+
+  // Function to trigger data refetch
+  const refetch = useCallback(() => {
+    setError(null);
+    setIsLoading(true);
+    setRefreshKey(prev => prev + 1);
+  }, []);
 
   useEffect(() => {
     const fetchArchetypeData = async () => {
@@ -188,6 +197,9 @@ export const useGetArchetype = (archetypeId: ArchetypeId): UseGetArchetype => {
             throw new Error("Archetype not found");
           }
         }
+        
+        // Clear any previous errors
+        setError(null);
 
       } catch (err) {
         console.error("Error fetching archetype data:", err);
@@ -197,6 +209,7 @@ export const useGetArchetype = (archetypeId: ArchetypeId): UseGetArchetype => {
         const fallbackArchetype = getArchetypeEnhanced(archetypeId);
         
         if (fallbackArchetype) {
+          console.log("useGetArchetype - Using fallback data due to error:", fallbackArchetype);
           setArchetypeData(fallbackArchetype);
           
           if (fallbackArchetype.familyId) {
@@ -210,7 +223,7 @@ export const useGetArchetype = (archetypeId: ArchetypeId): UseGetArchetype => {
     };
 
     fetchArchetypeData();
-  }, [archetypeId, getArchetypeEnhanced, getFamilyById]);
+  }, [archetypeId, getArchetypeEnhanced, getFamilyById, refreshKey]);
 
-  return { archetypeData, familyData, isLoading, error };
+  return { archetypeData, familyData, isLoading, error, refetch };
 };
