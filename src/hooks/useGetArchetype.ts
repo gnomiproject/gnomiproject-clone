@@ -212,14 +212,8 @@ export const useGetArchetype = (archetypeId: ArchetypeId): UseGetArchetype => {
     enabled: !!archetypeId,
     refetchOnWindowFocus: false, // Prevent refetching when window regains focus
     refetchOnMount: false, // Prevent refetching on component mount if data exists
-    // For React Query v5, use callbacks with onSettled
-    onSettled: (data, error) => {
-      if (error) {
-        handleError(error as Error);
-      } else if (data) {
-        handleSuccess(data);
-      }
-    }
+    onSuccess: handleSuccess,
+    onError: handleError
   });
 
   return { 
