@@ -4,14 +4,17 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import DeepDiveReport from '@/components/report/DeepDiveReport';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Loader2 } from 'lucide-react';
 import { ArchetypeId } from '@/types/archetype';
+import { toast } from 'sonner';
 
 const ReportViewer = () => {
   const { archetypeId = '', token = '' } = useParams();
   const navigate = useNavigate();
   const [isValidToken, setIsValidToken] = useState<boolean | null>(null);
   const [reportData, setReportData] = useState<any>(null);
+  const [userData, setUserData] = useState<any>(null);
+  const [averageData, setAverageData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   // Helper function to validate if a string is a valid ArchetypeId
@@ -21,22 +24,71 @@ const ReportViewer = () => {
   }
 
   useEffect(() => {
-    const fetchReport = async () => {
+    const fetchReportData = async () => {
       try {
-        // Fetch report data from our new view
-        const { data, error } = await supabase
-          .from('view_deep_dive_reports')
+        setIsLoading(true);
+        
+        // Step 1: Check if the token is valid and get user data
+        const { data: userData, error: userError } = await supabase
+          .from('report_requests')
           .select('*')
-          .eq('archetype_id', archetypeId)
           .eq('access_token', token)
-          .eq('status', 'active')
+          .eq('archetype_id', archetypeId)
           .maybeSingle();
 
-        if (error) throw error;
+        if (userError) {
+          console.error('Error fetching user data:', userError);
+          setIsValidToken(false);
+          setIsLoading(false);
+          return;
+        }
 
-        const isValid = data && (!data.expires_at || new Date(data.expires_at) > new Date());
-        setIsValidToken(isValid);
-        setReportData(data);
+        if (!userData) {
+          setIsValidToken(false);
+          setIsLoading(false);
+          return;
+        }
+
+        // Check if the report has expired
+        const isExpired = userData.expires_at && new Date(userData.expires_at) < new Date();
+        if (isExpired) {
+          setIsValidToken(false);
+          setIsLoading(false);
+          toast.error('This report link has expired.');
+          return;
+        }
+
+        setUserData(userData);
+        setIsValidToken(true);
+
+        // Step 2: Fetch the archetype-specific report data
+        const { data: archetypeData, error: archetypeError } = await supabase
+          .from('level4_deepdive_report_data')
+          .select('*')
+          .eq('archetype_id', archetypeId)
+          .maybeSingle();
+
+        if (archetypeError) {
+          console.error('Error fetching archetype data:', archetypeError);
+          toast.error('Error loading report data. Please try again later.');
+          setIsLoading(false);
+          return;
+        }
+
+        // Step 3: Fetch the average data for comparisons
+        const { data: averageData, error: averageError } = await supabase
+          .from('level4_deepdive_report_data')
+          .select('*')
+          .eq('archetype_id', 'All_Average')
+          .maybeSingle();
+
+        if (averageError) {
+          console.error('Error fetching average data:', averageError);
+          toast.error('Error loading comparison data. Some charts may not display correctly.');
+        }
+
+        setReportData(archetypeData);
+        setAverageData(averageData);
       } catch (err) {
         console.error('Error fetching report:', err);
         setIsValidToken(false);
@@ -46,7 +98,7 @@ const ReportViewer = () => {
     };
 
     if (token && archetypeId) {
-      fetchReport();
+      fetchReportData();
     }
   }, [token, archetypeId]);
 
@@ -68,6 +120,16 @@ const ReportViewer = () => {
     );
   }
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
+        <Loader2 className="h-12 w-12 text-blue-500 animate-spin mb-4" />
+        <h2 className="text-xl font-semibold mb-2">Loading Your Report</h2>
+        <p className="text-gray-600">Please wait while we prepare your deep dive analysis...</p>
+      </div>
+    );
+  }
+
   if (isValidToken === false) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -83,10 +145,6 @@ const ReportViewer = () => {
         </div>
       </div>
     );
-  }
-
-  if (isLoading) {
-    return <DeepDiveReport archetypeData={null} loading={true} />;
   }
 
   if (!reportData) {
@@ -106,7 +164,7 @@ const ReportViewer = () => {
     );
   }
 
-  return <DeepDiveReport archetypeData={reportData} />;
+  return <DeepDiveReport reportData={reportData} userData={userData} averageData={averageData} />;
 };
 
 export default ReportViewer;
