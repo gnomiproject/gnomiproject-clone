@@ -1,29 +1,18 @@
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useArchetypes } from '@/hooks/useArchetypes';
 import { ArchetypeId } from '@/types/archetype';
 import DetailedArchetypeReport from '@/components/insights/DetailedArchetypeReport';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft } from 'lucide-react';
+import { useGetArchetype } from '@/hooks/useGetArchetype';
 
 const ArchetypePage = () => {
   const { archetypeId } = useParams<{ archetypeId: string }>();
   const navigate = useNavigate();
-  const { getArchetypeDetailedById, isLoading } = useArchetypes();
-  const [notFound, setNotFound] = useState(false);
+  const { archetypeData, isLoading, error } = useGetArchetype(archetypeId as ArchetypeId);
   
-  useEffect(() => {
-    // Check if archetype exists
-    if (!isLoading && archetypeId) {
-      const archetype = getArchetypeDetailedById(archetypeId as ArchetypeId);
-      if (!archetype) {
-        setNotFound(true);
-      }
-    }
-  }, [archetypeId, getArchetypeDetailedById, isLoading]);
-
   const handleRetakeAssessment = () => {
     navigate('/assessment');
   };
@@ -43,7 +32,7 @@ const ArchetypePage = () => {
     );
   }
   
-  if (notFound) {
+  if (error || !archetypeData) {
     return (
       <div className="min-h-screen bg-gray-50 py-12 px-6">
         <div className="max-w-5xl mx-auto">
@@ -73,8 +62,8 @@ const ArchetypePage = () => {
           </Button>
         </div>
         
-        <h1 className="text-3xl font-bold mb-8">
-          {archetypeId?.toUpperCase()} Archetype Details
+        <h1 className="text-3xl font-bold mb-8" style={{ color: archetypeData.hexColor }}>
+          {archetypeData.name}
         </h1>
         
         <DetailedArchetypeReport 

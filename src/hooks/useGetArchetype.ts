@@ -5,7 +5,7 @@ import { ArchetypeId, ArchetypeDetailedData } from '@/types/archetype';
 import { supabase } from "@/integrations/supabase/client";
 import { getArchetypeColor, getArchetypeHexColor } from '@/components/home/utils/dna/colors';
 
-export const useGetArchetype = (archetypeId: ArchetypeId) => {
+export const useGetArchetype = (archetypeId?: ArchetypeId) => {
   const { getFamilyById } = useArchetypes();
   const [archetypeData, setArchetypeData] = useState<ArchetypeDetailedData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -15,6 +15,12 @@ export const useGetArchetype = (archetypeId: ArchetypeId) => {
     const fetchArchetypeData = async () => {
       setIsLoading(true);
       setError(null);
+      
+      if (!archetypeId) {
+        setIsLoading(false);
+        setError(new Error('No archetype ID provided'));
+        return;
+      }
       
       try {
         const { data, error } = await supabase
@@ -75,6 +81,12 @@ export const useGetArchetype = (archetypeId: ArchetypeId) => {
             }
           };
           
+          // Add family name if available
+          const family = getFamilyById(data.family_id as any);
+          if (family) {
+            transformedData.familyName = family.name;
+          }
+          
           setArchetypeData(transformedData);
         } else {
           setArchetypeData(null);
@@ -93,8 +105,9 @@ export const useGetArchetype = (archetypeId: ArchetypeId) => {
     } else {
       setIsLoading(false);
       setArchetypeData(null);
+      setError(new Error('No archetype ID provided'));
     }
-  }, [archetypeId]);
+  }, [archetypeId, getFamilyById]);
 
   const familyData = archetypeData?.familyId ? getFamilyById(archetypeData.familyId) : undefined;
 
