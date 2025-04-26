@@ -20,8 +20,9 @@ const MetricBar = ({
   color?: string;
   icon?: React.ReactNode;
 }) => {
-  const percentage = value;
-  const formattedValue = `${(value).toFixed(1)}%`;
+  // Convert decimal to percentage if needed
+  const displayValue = value > 1 ? value : value * 100;
+  const formattedValue = `${displayValue.toFixed(1)}%`;
   
   return (
     <div className="mb-4">
@@ -34,7 +35,7 @@ const MetricBar = ({
           {formattedValue}
         </span>
       </div>
-      <Progress value={percentage} className="h-2" style={{ 
+      <Progress value={displayValue} className="h-2" style={{ 
         '--progress-background': `${color}20`,
         '--progress-foreground': color
       } as React.CSSProperties} />
@@ -47,13 +48,21 @@ const DiseaseManagementTab = ({ archetypeData }: DiseaseManagementTabProps) => {
     archetypeData.hexColor : 
     `var(--color-archetype-${archetypeData.id})`;
 
-  // Disease prevalence metrics
+  // Disease prevalence metrics - already stored as decimals (0-1)
   const heartDiseasePrevalence = archetypeData["Dise_Heart Disease Prevalence"] ?? 0;
   const diabetesPrevalence = archetypeData["Dise_Type 2 Diabetes Prevalence"] ?? 0;
   const mentalHealthPrevalence = archetypeData["Dise_Mental Health Disorder Prevalence"] ?? 0;
   const substanceUsePrevalence = archetypeData["Dise_Substance Use Disorder Prevalence"] ?? 0;
 
-  // Care gaps metrics
+  // Care gaps metrics - may be stored as percentages (0-100) already
+  // Console log to check the actual values
+  console.log('Care Gaps Data:', {
+    diabetesRxAdherence: archetypeData["Gaps_Diabetes RX Adherence"],
+    behavioralHealthFollowup: archetypeData["Gaps_Behavioral Health FU ED Visit Mental Illness"],
+    breastCancerScreening: archetypeData["Gaps_Cancer Screening Breast"],
+    adultsWellnessVisit: archetypeData["Gaps_Wellness Visit Adults"],
+  });
+  
   const diabetesRxAdherence = archetypeData["Gaps_Diabetes RX Adherence"] ?? 0;
   const behavioralHealthFollowup = archetypeData["Gaps_Behavioral Health FU ED Visit Mental Illness"] ?? 0;
   const breastCancerScreening = archetypeData["Gaps_Cancer Screening Breast"] ?? 0;
