@@ -104,7 +104,38 @@ const InsightsReportGenerator: React.FC = () => {
     }
   };
 
-  return { checkDatabaseConnection };
+  // Return JSX here
+  return (
+    <div className="space-y-6">
+      <div>
+        {/* Render connection status, archetypes, etc. */}
+        <button 
+          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" 
+          onClick={checkDatabaseConnection}
+        >
+          Check Database Connection
+        </button>
+        
+        {connectionStatus === 'checking' && (
+          <p className="mt-2 text-gray-600">Checking connection...</p>
+        )}
+        
+        {connectionStatus === 'connected' && (
+          <p className="mt-2 text-green-600">Connected to database successfully!</p>
+        )}
+        
+        {connectionStatus === 'error' && (
+          <p className="mt-2 text-red-600">{error || "Error connecting to database"}</p>
+        )}
+        
+        {archetypes.length > 0 && (
+          <div className="mt-4">
+            <h3 className="text-lg font-medium">Found {archetypes.length} archetypes</h3>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 };
 
 export default InsightsReportGenerator;
