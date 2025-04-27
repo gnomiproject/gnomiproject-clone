@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -35,22 +34,10 @@ const AdminReportViewer = () => {
       setError(null);
       
       try {
-        // Try to get basic data with minimal fields
         const primaryTable = isInsightsReport ? 'level3_report_data' : 'level4_deepdive_report_data';
         const fallbackTable = isInsightsReport ? 'level4_deepdive_report_data' : 'level3_report_data';
         
         console.log(`AdminReportViewer: Fetching ${reportType} data for ${archetypeId} from ${primaryTable}`);
-        
-        // Get basic information about the archetype
-        const { data: archetypeData, error: archetypeError } = await supabase
-          .from('Core_Archetype_Overview')
-          .select('name, id')
-          .eq('id', archetypeId)
-          .single();
-          
-        if (archetypeError) {
-          console.warn('Error fetching archetype data:', archetypeError);
-        }
         
         const { data, error } = await supabase
           .from(primaryTable)
@@ -61,7 +48,7 @@ const AdminReportViewer = () => {
         if (error) throw error;
         
         if (data) {
-          // Use uppercase archetype ID as a fallback if we don't have a specific code
+          // Use uppercase archetype ID as the code
           const archetypeCode = archetypeId.toUpperCase();
           
           setRawData({
@@ -85,7 +72,7 @@ const AdminReportViewer = () => {
         if (fallbackError) throw fallbackError;
         
         if (fallbackData) {
-          // Use uppercase archetype ID as a fallback if we don't have a specific code
+          // Use uppercase archetype ID as the code
           const archetypeCode = archetypeId.toUpperCase();
           
           setRawData({
