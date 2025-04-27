@@ -13,6 +13,12 @@ import { Loader2, Download, FileText, Copy, Check } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { calculatePercentageDifference } from '@/utils/reports/metricUtils';
+import { OverviewTab } from './report-sections/OverviewTab';
+import { MetricsTab } from './report-sections/MetricsTab';
+import { SwotTab } from './report-sections/SwotTab';
+import { DemographicsTab } from './report-sections/DemographicsTab';
+import { UtilizationTab } from './report-sections/UtilizationTab';
+import { RecommendationsTab } from './report-sections/RecommendationsTab';
 
 interface ReportDetailViewProps {
   archetypeId: string | null;
@@ -316,108 +322,27 @@ const ReportDetailView = ({ archetypeId, isOpen, onClose }: ReportDetailViewProp
               </TabsList>
               
               <TabsContent value="overview" className="p-4 border rounded-md mt-2">
-                {renderOverviewSection()}
+                <OverviewTab report={report} />
               </TabsContent>
               
               <TabsContent value="metrics" className="p-4 border rounded-md mt-2">
-                <h3 className="text-lg font-medium mb-2">Detailed Metrics</h3>
-                {renderDetailedMetrics()}
+                <MetricsTab report={report} />
               </TabsContent>
               
               <TabsContent value="swot" className="p-4 border rounded-md mt-2">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h4 className="font-medium mb-2">Strengths</h4>
-                    <ul className="list-disc list-inside">
-                      {report.swot_analysis?.strengths?.map((strength: string, idx: number) => (
-                        <li key={idx}>{strength}</li>
-                      )) || <li>No strengths available</li>}
-                    </ul>
-                  </div>
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h4 className="font-medium mb-2">Weaknesses</h4>
-                    <ul className="list-disc list-inside">
-                      {report.swot_analysis?.weaknesses?.map((weakness: string, idx: number) => (
-                        <li key={idx}>{weakness}</li>
-                      )) || <li>No weaknesses available</li>}
-                    </ul>
-                  </div>
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h4 className="font-medium mb-2">Opportunities</h4>
-                    <ul className="list-disc list-inside">
-                      {report.swot_analysis?.opportunities?.map((opportunity: string, idx: number) => (
-                        <li key={idx}>{opportunity}</li>
-                      )) || <li>No opportunities available</li>}
-                    </ul>
-                  </div>
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h4 className="font-medium mb-2">Threats</h4>
-                    <ul className="list-disc list-inside">
-                      {report.swot_analysis?.threats?.map((threat: string, idx: number) => (
-                        <li key={idx}>{threat}</li>
-                      )) || <li>No threats available</li>}
-                    </ul>
-                  </div>
-                </div>
+                <SwotTab report={report} />
               </TabsContent>
               
               <TabsContent value="demographics" className="p-4 border rounded-md mt-2">
-                <h3 className="text-lg font-medium mb-2">Demographics</h3>
-                <div className="grid gap-4">
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h4 className="font-medium mb-2">General Demographics</h4>
-                    <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <dt className="text-sm text-gray-600">Average Age</dt>
-                        <dd>{report.Demo_Average_Age || "N/A"}</dd>
-                      </div>
-                      <div>
-                        <dt className="text-sm text-gray-600">Average Family Size</dt>
-                        <dd>{report.Demo_Average_Family_Size || "N/A"}</dd>
-                      </div>
-                      <div>
-                        <dt className="text-sm text-gray-600">Average States</dt>
-                        <dd>{report.Demo_Average_States || "N/A"}</dd>
-                      </div>
-                      <div>
-                        <dt className="text-sm text-gray-600">Average Employees</dt>
-                        <dd>{report.Demo_Average_Employees || "N/A"}</dd>
-                      </div>
-                    </dl>
-                  </div>
-                </div>
+                <DemographicsTab report={report} />
               </TabsContent>
               
               <TabsContent value="utilization" className="p-4 border rounded-md mt-2">
-                <h3 className="text-lg font-medium mb-2">Utilization Patterns</h3>
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <p className="whitespace-pre-line">{report.utilization_patterns || "No utilization data available"}</p>
-                </div>
+                <UtilizationTab report={report} />
               </TabsContent>
               
               <TabsContent value="recommendations" className="p-4 border rounded-md mt-2">
-                <h3 className="text-lg font-medium mb-2">Strategic Recommendations</h3>
-                <div className="space-y-4">
-                  {report.strategic_recommendations ? (
-                    Array.isArray(report.strategic_recommendations) ? (
-                      report.strategic_recommendations.map((rec: any, index: number) => (
-                        <div key={index} className="bg-gray-50 p-4 rounded-lg">
-                          <h4 className="font-medium mb-2">
-                            Recommendation {rec.recommendation_number || index + 1}
-                          </h4>
-                          <p className="font-medium text-gray-800">{rec.title}</p>
-                          <p className="mt-2 text-gray-600">{rec.description}</p>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="bg-gray-50 p-4 rounded-lg">
-                        <p>{JSON.stringify(report.strategic_recommendations, null, 2)}</p>
-                      </div>
-                    )
-                  ) : (
-                    <p>No recommendations available</p>
-                  )}
-                </div>
+                <RecommendationsTab report={report} />
               </TabsContent>
             </Tabs>
           </div>
