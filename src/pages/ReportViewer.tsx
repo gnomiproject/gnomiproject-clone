@@ -30,6 +30,16 @@ const defaultReportData = {
   "Cost_Medical & RX Paid Amount PMPY": 5200
 };
 
+// Default average values for metrics when API data is not available
+const defaultAverageData = {
+  "Risk_Average Risk Score": 1.0,
+  "SDOH_Average SDOH": 0.5,
+  "Util_Emergency Visits per 1k Members": 150,
+  "Util_Specialist Visits per 1k Members": 1326.63,
+  "Cost_Medical & RX Paid Amount PEPY": 10000,
+  "Cost_Medical & RX Paid Amount PMPY": 8500
+};
+
 const ReportViewer = () => {
   const { archetypeId = '', token = '' } = useParams();
   const navigate = useNavigate();
@@ -84,7 +94,26 @@ const ReportViewer = () => {
         setUserData(userData);
         setIsValidToken(true);
 
-        // Step 2: Fetch the archetype-specific report data
+        // Step 2: Always fetch the average data first for proper comparisons
+        const { data: avgData, error: avgError } = await supabase
+          .from('level4_deepdive_report_data')
+          .select('*')
+          .eq('archetype_id', 'All_Average')
+          .maybeSingle();
+
+        if (avgError) {
+          console.error('Error fetching average data:', avgError);
+          toast.warning('Unable to load comparison data, using defaults.');
+          setAverageData(defaultAverageData);
+        } else if (avgData) {
+          console.log('Average data loaded:', avgData);
+          setAverageData(avgData);
+        } else {
+          console.log('No average data found, using defaults');
+          setAverageData(defaultAverageData);
+        }
+
+        // Step 3: Fetch the archetype-specific report data
         const { data: archetypeData, error: archetypeError } = await supabase
           .from('level4_deepdive_report_data')
           .select('*')
@@ -110,20 +139,7 @@ const ReportViewer = () => {
           return;
         }
 
-        // Step 3: Fetch the average data for comparisons
-        const { data: averageData, error: averageError } = await supabase
-          .from('level4_deepdive_report_data')
-          .select('*')
-          .eq('archetype_id', 'All_Average')
-          .maybeSingle();
-
-        if (averageError) {
-          console.error('Error fetching average data:', averageError);
-          toast.warning('Some comparison data may not display correctly.');
-        }
-
         setReportData(archetypeData);
-        setAverageData(averageData || { archetype_id: 'All_Average' });
         
       } catch (err) {
         console.error('Error fetching report:', err);

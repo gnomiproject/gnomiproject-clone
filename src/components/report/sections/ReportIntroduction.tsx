@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ArrowRight, Award, TrendingUp } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
@@ -5,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatPercent, formatNumber } from '@/utils/formatters';
 import { gnomeImages } from '@/utils/gnomeImages';
+import { calculatePercentageDifference } from '@/utils/reports/metricUtils';
 
 interface ReportIntroductionProps {
   reportData: any;
@@ -24,6 +26,15 @@ const ReportIntroduction = ({ reportData, userData }: ReportIntroductionProps) =
   
   // Gnome image
   const gnomeImage = '/assets/gnomes/gnome_lefthand.png';
+
+  // Define averages for key metrics
+  // These should ideally be fetched from the averageData
+  const averages = {
+    "Cost_Medical & RX Paid Amount PEPY": 10000,
+    "Risk_Average Risk Score": 1.0,
+    "Util_Emergency Visits per 1k Members": 150,
+    "Util_Specialist Visits per 1k Members": 1326.63
+  };
 
   return (
     <div className="space-y-8">
@@ -72,35 +83,51 @@ const ReportIntroduction = ({ reportData, userData }: ReportIntroductionProps) =
         <MetricCard 
           title="Annual Cost PEPY"
           value={formatNumber(reportData["Cost_Medical & RX Paid Amount PEPY"] || 0, 'currency')}
-          comparison={getComparisonText(reportData["Cost_Medical & RX Paid Amount PEPY"], 10000)}
+          comparison={calculateComparisonText(
+            reportData["Cost_Medical & RX Paid Amount PEPY"], 
+            averages["Cost_Medical & RX Paid Amount PEPY"],
+            "Cost"
+          )}
           icon={<TrendingUp className="h-5 w-5" />}
-          positive={reportData["Cost_Medical & RX Paid Amount PEPY"] < 10000}
+          positive={reportData["Cost_Medical & RX Paid Amount PEPY"] < averages["Cost_Medical & RX Paid Amount PEPY"]}
         />
         
         <MetricCard 
           title="Risk Score"
           value={formatNumber(reportData["Risk_Average Risk Score"] || 0, 'number', 2)}
-          comparison={getComparisonText(reportData["Risk_Average Risk Score"], 1.0)}
+          comparison={calculateComparisonText(
+            reportData["Risk_Average Risk Score"], 
+            averages["Risk_Average Risk Score"],
+            "Risk"
+          )}
           icon={<Award className="h-5 w-5" />}
-          positive={reportData["Risk_Average Risk Score"] < 1.0}
+          positive={reportData["Risk_Average Risk Score"] < averages["Risk_Average Risk Score"]}
         />
         
         <MetricCard 
           title="ER Visits"
           value={formatNumber(reportData["Util_Emergency Visits per 1k Members"] || 0, 'number', 0)}
           suffix="per 1,000"
-          comparison={getComparisonText(reportData["Util_Emergency Visits per 1k Members"], 150)}
+          comparison={calculateComparisonText(
+            reportData["Util_Emergency Visits per 1k Members"], 
+            averages["Util_Emergency Visits per 1k Members"],
+            "Emergency"
+          )}
           icon={<Award className="h-5 w-5" />}
-          positive={reportData["Util_Emergency Visits per 1k Members"] < 150}
+          positive={reportData["Util_Emergency Visits per 1k Members"] < averages["Util_Emergency Visits per 1k Members"]}
         />
         
         <MetricCard 
           title="Specialist Visits"
           value={formatNumber(reportData["Util_Specialist Visits per 1k Members"] || 0, 'number', 0)}
           suffix="per 1,000"
-          comparison={getComparisonText(reportData["Util_Specialist Visits per 1k Members"], 3000)}
+          comparison={calculateComparisonText(
+            reportData["Util_Specialist Visits per 1k Members"], 
+            averages["Util_Specialist Visits per 1k Members"],
+            "Specialist"
+          )}
           icon={<Award className="h-5 w-5" />}
-          positive={reportData["Util_Specialist Visits per 1k Members"] < 3000}
+          positive={reportData["Util_Specialist Visits per 1k Members"] < averages["Util_Specialist Visits per 1k Members"]}
         />
       </div>
 
@@ -163,15 +190,14 @@ const ReportIntroduction = ({ reportData, userData }: ReportIntroductionProps) =
   );
 };
 
-// Helper function to create comparison text
-const getComparisonText = (value: number, benchmark: number): string => {
-  if (!value) return 'No data available';
+// Helper function to calculate comparison text using the utility function
+const calculateComparisonText = (value: number, average: number, metricType: string): string => {
+  if (!value || !average) return 'No data available';
   
-  const diff = value - benchmark;
-  const percentDiff = (diff / benchmark) * 100;
+  const diff = calculatePercentageDifference(value, average);
   const direction = diff > 0 ? 'higher' : 'lower';
   
-  return `${Math.abs(percentDiff).toFixed(1)}% ${direction} than average`;
+  return `${Math.abs(diff).toFixed(1)}% ${direction} than average`;
 };
 
 // Reusable metric card component
