@@ -1,9 +1,9 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { ArchetypeDetailedData, ArchetypeId, FamilyId, Json } from '@/types/archetype';
 import { useArchetypes } from './useArchetypes';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { toast } from "@/hooks/use-toast"; // Add this import
 
 interface UseGetArchetype {
   archetypeData: ArchetypeDetailedData | null;
