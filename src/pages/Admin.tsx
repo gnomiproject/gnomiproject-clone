@@ -7,7 +7,7 @@ import ReportGenerator from '@/components/admin/ReportGenerator';
 import InsightsReportGenerator from '@/components/admin/InsightsReportGenerator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Database, BarChart, FileSearch } from 'lucide-react';
-import DeepDiveReportsAccess from '@/components/admin/DeepDiveReportsAccess';
+import DeepDiveReportsAccess from '@/components/admin/reports/DeepDiveReportsAccess';
 
 const Admin = () => {
   const { toast } = useToast();

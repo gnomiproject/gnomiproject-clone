@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Copy, ExternalLink } from "lucide-react";
+import { Copy, ExternalLink, Info } from "lucide-react";
 import { toast } from 'sonner';
 import ReportGenerationPanel from './ReportGenerationPanel';
 import ReportsTable from './ReportsTable';
@@ -109,6 +109,16 @@ const DeepDiveReportsAccess = () => {
           <CardTitle>Deep Dive Reports Management</CardTitle>
         </CardHeader>
         <CardContent>
+          <Alert className="mb-6">
+            <Info className="h-4 w-4" />
+            <AlertTitle>About Deep Dive Reports</AlertTitle>
+            <AlertDescription>
+              <p>Unlike Insights Reports which are publicly accessible, Deep Dive Reports require secure access tokens.</p>
+              <p className="mt-2">These tokens provide controlled access to detailed reports for specific users or clients.</p>
+              <p className="mt-2"><strong>Note:</strong> For public insights reports without tokens, use the Insights Reports tab.</p>
+            </AlertDescription>
+          </Alert>
+          
           <div className="space-y-4">
             {lastGeneratedUrl && (
               <Alert className="mb-4 bg-green-50 border-green-200">
