@@ -9,7 +9,7 @@ import ReportDetailView from './ReportDetailView';
 import DatabaseConnectionStatus from './insights/DatabaseConnectionStatus';
 import GenerationResults from './insights/GenerationResults';
 import ArchetypeList from './insights/ArchetypeList';
-import { useArchetypeLoader } from '@/hooks/useArchetypeLoader';
+import { useArchetypeLoader, ArchetypeListItem } from '@/hooks/useArchetypeLoader';
 import { ReportActions } from './reports/ReportActions';
 import { GenerationResult } from '@/types/reports';
 
