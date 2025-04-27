@@ -15,7 +15,7 @@ import ReportViewer from '@/pages/ReportViewer';
 import AdminReportViewer from '@/pages/AdminReportViewer';
 import AdminReportDebug from '@/pages/AdminReportDebug';
 
-const version = "0.0.1";
+const version = "0.0.2"; // Updated version number
 
 function App() {
   return (

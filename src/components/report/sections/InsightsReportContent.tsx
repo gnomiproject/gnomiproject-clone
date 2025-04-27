@@ -1,9 +1,11 @@
 
 import React from 'react';
 import { Card } from '@/components/ui/card';
+import { Section } from '@/components/shared/Section';
+import SectionTitle from '@/components/shared/SectionTitle';
 
 interface InsightsReportContentProps {
-  archetype: any; // Temporarily using any while we build out the basic version
+  archetype: any; // We'll use any for now until we define a more specific type
 }
 
 const InsightsReportContent: React.FC<InsightsReportContentProps> = ({ archetype }) => {
@@ -12,10 +14,9 @@ const InsightsReportContent: React.FC<InsightsReportContentProps> = ({ archetype
 
   // Safely extract name from either format (admin or regular)
   const name = archetype?.name || archetype?.archetype_name || 'Untitled Archetype';
-  const description = archetype?.short_description || archetype?.description || 'No description available';
   
   return (
-    <div className="max-w-7xl mx-auto py-8 space-y-8">
+    <div className="max-w-7xl mx-auto py-8 space-y-12">
       <div className="flex justify-between items-start mb-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">
@@ -27,100 +28,159 @@ const InsightsReportContent: React.FC<InsightsReportContentProps> = ({ archetype
         </div>
       </div>
 
-      <div className="grid gap-8">
+      {/* 1. Overview Section */}
+      <Section id="overview">
+        <SectionTitle 
+          title="Overview" 
+          subtitle="General information about this archetype population"
+        />
         <Card className="p-6">
-          <h2 className="text-2xl font-bold mb-4">Overview</h2>
-          <p className="text-gray-700">{description}</p>
+          <p className="text-gray-700">{archetype?.short_description || 'No description available'}</p>
+          {archetype?.executive_summary && (
+            <div className="mt-4">
+              <h3 className="text-lg font-semibold mb-2">Executive Summary</h3>
+              <p className="text-gray-700">{archetype.executive_summary}</p>
+            </div>
+          )}
         </Card>
-        
-        {archetype?.executive_summary && (
-          <Card className="p-6">
-            <h2 className="text-2xl font-bold mb-4">Executive Summary</h2>
-            <p className="text-gray-700">{archetype.executive_summary}</p>
-          </Card>
-        )}
-        
-        {archetype?.key_findings && (
-          <Card className="p-6">
-            <h2 className="text-2xl font-bold mb-4">Key Findings</h2>
-            <div className="space-y-4">
-              {Array.isArray(archetype.key_findings) ? (
-                archetype.key_findings.map((finding: string, index: number) => (
-                  <p key={index} className="text-gray-700">{finding}</p>
-                ))
-              ) : (
-                <p className="text-gray-700">Key findings data not available</p>
-              )}
-            </div>
-          </Card>
-        )}
-        
-        {/* Add SWOT Analysis section */}
-        {(archetype?.strengths || archetype?.weaknesses || archetype?.opportunities || archetype?.threats) && (
-          <Card className="p-6">
-            <h2 className="text-2xl font-bold mb-4">SWOT Analysis</h2>
-            
-            {archetype?.strengths && archetype.strengths.length > 0 && (
-              <div className="mb-4">
-                <h3 className="text-lg font-semibold text-green-700">Strengths</h3>
-                <ul className="list-disc pl-5 mt-2 space-y-1">
-                  {archetype.strengths.map((item: string, index: number) => (
-                    <li key={`strength-${index}`} className="text-gray-700">{item}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            
-            {archetype?.weaknesses && archetype.weaknesses.length > 0 && (
-              <div className="mb-4">
-                <h3 className="text-lg font-semibold text-red-700">Weaknesses</h3>
-                <ul className="list-disc pl-5 mt-2 space-y-1">
-                  {archetype.weaknesses.map((item: string, index: number) => (
-                    <li key={`weakness-${index}`} className="text-gray-700">{item}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            
-            {archetype?.opportunities && archetype.opportunities.length > 0 && (
-              <div className="mb-4">
-                <h3 className="text-lg font-semibold text-blue-700">Opportunities</h3>
-                <ul className="list-disc pl-5 mt-2 space-y-1">
-                  {archetype.opportunities.map((item: string, index: number) => (
-                    <li key={`opportunity-${index}`} className="text-gray-700">{item}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            
-            {archetype?.threats && archetype.threats.length > 0 && (
-              <div className="mb-4">
-                <h3 className="text-lg font-semibold text-orange-700">Threats</h3>
-                <ul className="list-disc pl-5 mt-2 space-y-1">
-                  {archetype.threats.map((item: string, index: number) => (
-                    <li key={`threat-${index}`} className="text-gray-700">{item}</li>
-                  ))}
-                </ul>
-              </div>
+      </Section>
+      
+      {/* 2. Key Metrics Section */}
+      <Section id="key-metrics">
+        <SectionTitle 
+          title="Key Metrics" 
+          subtitle="Important performance indicators for this population"
+        />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* We'll render metric cards dynamically based on available data */}
+          {Object.entries(archetype || {})
+            .filter(([key]) => key.includes('_') && typeof archetype[key] === 'number')
+            .slice(0, 6) // Limit to 6 key metrics
+            .map(([key, value]: [string, any]) => (
+              <Card key={key} className="p-4">
+                <p className="text-sm text-gray-500">{key.replace(/_/g, ' ')}</p>
+                <p className="text-2xl font-bold">{typeof value === 'number' ? value.toLocaleString() : value}</p>
+              </Card>
+            ))}
+        </div>
+      </Section>
+      
+      {/* 3. SWOT Analysis Section */}
+      <Section id="swot-analysis">
+        <SectionTitle 
+          title="SWOT Analysis" 
+          subtitle="Strengths, Weaknesses, Opportunities, and Threats"
+        />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Strengths */}
+          <Card className="p-6 border-l-4 border-green-500">
+            <h3 className="text-lg font-semibold text-green-700 mb-4">Strengths</h3>
+            {Array.isArray(archetype?.strengths) && archetype.strengths.length > 0 ? (
+              <ul className="list-disc pl-5 space-y-1">
+                {archetype.strengths.map((item: string, index: number) => (
+                  <li key={`strength-${index}`} className="text-gray-700">{item}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-gray-500 italic">No strengths data available</p>
             )}
           </Card>
-        )}
-        
-        {/* Add Strategic Recommendations section */}
-        {archetype?.strategic_recommendations && archetype.strategic_recommendations.length > 0 && (
-          <Card className="p-6">
-            <h2 className="text-2xl font-bold mb-4">Strategic Recommendations</h2>
-            <div className="space-y-4">
-              {archetype.strategic_recommendations.map((rec: any, index: number) => (
-                <div key={`rec-${index}`} className="p-4 border-l-4 border-blue-500 bg-blue-50 rounded">
-                  <h3 className="font-bold text-lg">{rec.title || `Recommendation ${rec.recommendation_number || (index + 1)}`}</h3>
-                  <p className="mt-2 text-gray-700">{rec.description}</p>
+          
+          {/* Weaknesses */}
+          <Card className="p-6 border-l-4 border-red-500">
+            <h3 className="text-lg font-semibold text-red-700 mb-4">Weaknesses</h3>
+            {Array.isArray(archetype?.weaknesses) && archetype.weaknesses.length > 0 ? (
+              <ul className="list-disc pl-5 space-y-1">
+                {archetype.weaknesses.map((item: string, index: number) => (
+                  <li key={`weakness-${index}`} className="text-gray-700">{item}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-gray-500 italic">No weaknesses data available</p>
+            )}
+          </Card>
+          
+          {/* Opportunities */}
+          <Card className="p-6 border-l-4 border-blue-500">
+            <h3 className="text-lg font-semibold text-blue-700 mb-4">Opportunities</h3>
+            {Array.isArray(archetype?.opportunities) && archetype.opportunities.length > 0 ? (
+              <ul className="list-disc pl-5 space-y-1">
+                {archetype.opportunities.map((item: string, index: number) => (
+                  <li key={`opportunity-${index}`} className="text-gray-700">{item}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-gray-500 italic">No opportunities data available</p>
+            )}
+          </Card>
+          
+          {/* Threats */}
+          <Card className="p-6 border-l-4 border-orange-500">
+            <h3 className="text-lg font-semibold text-orange-700 mb-4">Threats</h3>
+            {Array.isArray(archetype?.threats) && archetype.threats.length > 0 ? (
+              <ul className="list-disc pl-5 space-y-1">
+                {archetype.threats.map((item: string, index: number) => (
+                  <li key={`threat-${index}`} className="text-gray-700">{item}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-gray-500 italic">No threats data available</p>
+            )}
+          </Card>
+        </div>
+      </Section>
+      
+      {/* 4. Disease & Care Management Section */}
+      <Section id="disease-care">
+        <SectionTitle 
+          title="Disease & Care Management" 
+          subtitle="Health conditions and care management insights"
+        />
+        <Card className="p-6">
+          {/* We would populate this with actual disease/care data */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Prevalent Conditions</h3>
+            <p className="text-gray-700">
+              {archetype?.disease_prevalence || "No disease prevalence data available"}
+            </p>
+            
+            <h3 className="text-lg font-semibold mt-6">Care Management Opportunities</h3>
+            <p className="text-gray-700">
+              {archetype?.care_management || "No care management data available"}
+            </p>
+          </div>
+        </Card>
+      </Section>
+      
+      {/* 5. Strategic Recommendations Section */}
+      <Section id="recommendations">
+        <SectionTitle 
+          title="Strategic Recommendations" 
+          subtitle="Actionable insights for population health management"
+        />
+        <div className="space-y-4">
+          {archetype?.strategic_recommendations && Array.isArray(archetype.strategic_recommendations) && 
+           archetype.strategic_recommendations.length > 0 ? (
+            archetype.strategic_recommendations.map((rec: any, index: number) => (
+              <Card key={`rec-${index}`} className="p-6">
+                <div className="flex items-start gap-4">
+                  <div className="rounded-full bg-blue-100 text-blue-800 font-bold h-8 w-8 flex items-center justify-center flex-shrink-0">
+                    {rec.recommendation_number || index + 1}
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">{rec.title || `Recommendation ${index + 1}`}</h3>
+                    <p className="text-gray-700">{rec.description || "No description available"}</p>
+                  </div>
                 </div>
-              ))}
-            </div>
-          </Card>
-        )}
-      </div>
+              </Card>
+            ))
+          ) : (
+            <Card className="p-6 text-center">
+              <p className="text-gray-500 italic">No strategic recommendations available</p>
+            </Card>
+          )}
+        </div>
+      </Section>
     </div>
   );
 };

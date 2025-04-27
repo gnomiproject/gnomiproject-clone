@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import ArchetypeReport from '@/components/insights/ArchetypeReport';
@@ -14,9 +13,9 @@ import { toast } from 'sonner';
 import ArchetypeError from '@/components/insights/ArchetypeError';
 import { Button } from '@/components/ui/button';
 import { RefreshCw } from 'lucide-react';
+import InsightsReportContent from '@/components/report/sections/InsightsReportContent';
 
 const ReportViewer = () => {
-  // Always declare all params and state variables first
   const { archetypeId = '', token } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
@@ -203,11 +202,9 @@ const ReportViewer = () => {
             Refresh Data
           </Button>
         </div>
-        <ArchetypeReport 
-          archetypeId={archetypeId as ArchetypeId} 
-          reportData={finalReportData} 
-          dataSource={dataSource} 
-        />
+        <div className="container mx-auto">
+          <InsightsReportContent archetype={finalReportData} />
+        </div>
       </div>
     );
   } else {
