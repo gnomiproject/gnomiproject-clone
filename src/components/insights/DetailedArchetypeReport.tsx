@@ -11,11 +11,8 @@ interface DetailedArchetypeReportProps {
 
 const DetailedArchetypeReport = ({ archetypeId, onRetakeAssessment }: DetailedArchetypeReportProps) => {
   const { getArchetypeDetailedById } = useArchetypes();
-  
-  // Get archetype data directly from local storage
   const archetypeData = getArchetypeDetailedById(archetypeId);
   
-  // Simply render the content with the local data
   return (
     <ArchetypeContent 
       archetypeData={archetypeData}

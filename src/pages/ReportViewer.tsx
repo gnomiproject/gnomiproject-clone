@@ -75,7 +75,7 @@ const ReportViewer = () => {
     "Cost_Medical & RX Paid Amount PMPY": 5000
   };
 
-  // Render the appropriate report type based on the route
+  // Directly render the appropriate report type based on the route
   return isInsightsReport ? (
     <ArchetypeReport archetypeId={archetypeId as ArchetypeId} reportData={reportData} />
   ) : (
