@@ -24,14 +24,21 @@ const ArchetypeReport = ({ archetypeId, reportData, dataSource }: ArchetypeRepor
   const { getArchetypeEnhanced, getFamilyById } = useArchetypes();
   const [activeTab, setActiveTab] = useState('overview');
   const renderCountRef = useRef(0);
-  const processingRef = useRef(false);
+  const processedRef = useRef(false);
+  const mountedRef = useRef(true);
   
   // Log component lifecycle for debugging
   useEffect(() => {
     renderCountRef.current += 1;
     console.log(`ArchetypeReport: Mount/Render #${renderCountRef.current} for ${archetypeId}`);
     
+    // Reset flags when archetypeId changes
+    if (archetypeId) {
+      processedRef.current = false;
+    }
+    
     return () => {
+      mountedRef.current = false;
       console.log(`ArchetypeReport: Unmounting for ${archetypeId}`);
     };
   }, [archetypeId]);

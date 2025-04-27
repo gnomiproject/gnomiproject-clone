@@ -13,7 +13,8 @@ interface DetailedArchetypeReportProps {
 const DetailedArchetypeReport = ({ archetypeId, onRetakeAssessment }: DetailedArchetypeReportProps) => {
   const { getArchetypeDetailedById } = useArchetypes();
   const renderCountRef = useRef(0);
-  const processingRef = useRef(false);
+  const processedRef = useRef(false);
+  const mountedRef = useRef(true);
   const { archetypeData: dbArchetypeData, isLoading } = useGetArchetype(archetypeId);
   
   // Log component lifecycle for debugging
@@ -21,27 +22,30 @@ const DetailedArchetypeReport = ({ archetypeId, onRetakeAssessment }: DetailedAr
     renderCountRef.current += 1;
     console.log(`DetailedArchetypeReport: Mount/Render #${renderCountRef.current} for ${archetypeId}`);
     
+    // Reset flags when archetypeId changes
+    if (archetypeId) {
+      processedRef.current = false;
+    }
+    
     return () => {
+      mountedRef.current = false;
       console.log(`DetailedArchetypeReport: Unmounting for ${archetypeId}`);
     };
   }, [archetypeId]);
   
   // Use memoization with strict dependency tracking to prevent redundant calculations
   const archetypeData = useMemo(() => {
-    // Skip processing if already in progress
-    if (processingRef.current) {
-      console.log(`DetailedArchetypeReport: Skipping redundant processing for ${archetypeId} (already in progress)`);
+    // Skip processing if already done or component unmounted
+    if (processedRef.current || !mountedRef.current) {
+      console.log(`DetailedArchetypeReport: Skipping redundant processing for ${archetypeId}`);
       return dbArchetypeData || getArchetypeDetailedById(archetypeId);
     }
     
-    try {
-      processingRef.current = true;
-      console.log(`DetailedArchetypeReport: Processing data for ${archetypeId} (sequence #${renderCountRef.current})`);
-      return dbArchetypeData || getArchetypeDetailedById(archetypeId);
-    } finally {
-      // Reset processing flag when done
-      processingRef.current = false;
-    }
+    // Set processing flag immediately before any operations
+    processedRef.current = true;
+    console.log(`DetailedArchetypeReport: Processing data for ${archetypeId} (sequence #${renderCountRef.current})`);
+    
+    return dbArchetypeData || getArchetypeDetailedById(archetypeId);
   }, [dbArchetypeData, getArchetypeDetailedById, archetypeId]);
   
   // Skip rendering if loading to prevent flicker
