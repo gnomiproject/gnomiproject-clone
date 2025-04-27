@@ -1,3 +1,4 @@
+
 export type ArchetypeId = 'a1' | 'a2' | 'a3' | 'b1' | 'b2' | 'b3' | 'c1' | 'c2' | 'c3';
 export type FamilyId = 'a' | 'b' | 'c';
 
@@ -127,6 +128,11 @@ export interface ArchetypeDetailedData {
   // Add missing properties needed by components
   fullDescription?: string;
   keyFindings?: string[];
+  
+  // Add properties for compatibility with level4_deepdive_report_data
+  // These are the fields we need from the database tables
+  archetype_id?: string;  // Add this property to fix the type error
+  archetype_name?: string; // Add this property to fix the type error
   
   // New properties from level3_report_data with correct naming
   // Demographics metrics
