@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -55,7 +54,7 @@ const PremiumReport = ({ archetypeId, assessmentResult, assessmentAnswers, arche
       });
       
       const baseUrl = window.location.origin;
-      // Make sure to use the correct route format that matches our App.tsx routes
+      // Make sure to use the correct route format for deep dive reports that includes token
       const reportLink = `${baseUrl}/report/${archetypeId}/${token}`;
       
       setAccessToken(token);

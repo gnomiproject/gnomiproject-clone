@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -106,15 +105,10 @@ const ReportViewer = () => {
           setUserData(userData);
           setIsValidToken(true);
         } else {
-          // If no token in URL, check if it's an admin user or provide a demo view
-          console.log('No token provided, using demo mode');
-          setUserData({
-            name: 'Demo User',
-            organization: 'Demo Organization',
-            created_at: new Date().toISOString(),
-            email: 'demo@example.com'
-          });
-          setIsValidToken(true);
+          // IMPORTANT CHANGE: If accessing without a token, redirect to insights
+          // This page is only for deep dive reports that require tokens
+          navigate('/insights');
+          return;
         }
 
         // Step 2: Always fetch the average data first for proper comparisons
@@ -175,7 +169,7 @@ const ReportViewer = () => {
     if (archetypeId) {
       fetchReportData();
     }
-  }, [token, archetypeId]);
+  }, [token, archetypeId, navigate]);
 
   // Handle case where archetypeId is invalid
   if (!isValidArchetypeId(archetypeId)) {

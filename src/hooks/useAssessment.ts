@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { calculateArchetypeMatch, getAssessmentQuestions } from '../utils/assessmentUtils';
@@ -123,7 +124,7 @@ export const useAssessment = () => {
   const calculateResults = () => {
     setIsCalculating(true);
     
-    // Simulate calculation time - 7 seconds
+    // Simulate calculation time
     setTimeout(() => {
       const assessmentResult = calculateArchetypeMatch(answers);
       setResult(assessmentResult);
@@ -143,13 +144,15 @@ export const useAssessment = () => {
       // Store the selected archetype in localStorage for persistence
       localStorage.setItem(INSIGHTS_STORAGE_KEY, assessmentResult.primaryArchetype);
       
-      // Navigate to insights page with the results and session ID
+      // IMPORTANT: Navigate to insights page with the results and session ID
+      // This is crucial for showing the insights report
       navigate('/insights', { 
         state: { 
           selectedArchetype: assessmentResult.primaryArchetype,
           sessionId: sessionId
         } 
       });
+      
       setIsCalculating(false);
     }, 7000);
   };

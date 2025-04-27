@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useArchetypes } from '@/hooks/useArchetypes';
@@ -26,6 +25,7 @@ const Insights = () => {
   // Use consistent hook calls - important for React's hook rules
   const { getArchetypeDetailedById, getFamilyById } = useArchetypes();
   
+  // This useEffect is crucial for handling the assessment result
   useEffect(() => {
     // Check sources for archetype in this priority order:
     // 1. Location state (direct navigation from Results)
@@ -35,6 +35,7 @@ const Insights = () => {
     let newArchetype: ArchetypeId | null = null;
     
     if (location.state?.selectedArchetype) {
+      console.log("Setting archetype from location state:", location.state.selectedArchetype);
       // Source 1: Direct navigation from Results
       newArchetype = location.state.selectedArchetype;
       
@@ -47,24 +48,30 @@ const Insights = () => {
       // Source 2: Check sessionStorage for results from current session
       const sessionResultsStr = sessionStorage.getItem(SESSION_RESULTS_KEY);
       if (sessionResultsStr) {
+        console.log("Found session results in storage");
         try {
           const parsedResults = JSON.parse(sessionResultsStr) as AssessmentResult;
           setSessionResults(parsedResults);
           newArchetype = parsedResults.primaryArchetype;
+          console.log("Using archetype from session storage:", newArchetype);
         } catch (error) {
           console.error('Error parsing session results:', error);
+          toast.error("Couldn't load your assessment results. Please try again.");
         }
       } else {
         // Source 3: Try to retrieve from localStorage if no state is present
         const storedArchetype = localStorage.getItem(INSIGHTS_STORAGE_KEY);
         if (storedArchetype) {
+          console.log("Using archetype from local storage:", storedArchetype);
           newArchetype = storedArchetype as ArchetypeId;
+        } else {
+          console.log("No archetype found in any storage");
         }
       }
     }
     
-    // Only update selectedArchetype if it's different to avoid re-rendering
-    if (newArchetype && newArchetype !== selectedArchetype) {
+    // Only update selectedArchetype if we found one
+    if (newArchetype) {
       setSelectedArchetype(newArchetype);
       
       // Pre-fetch the archetype data to fill the cache
@@ -73,7 +80,7 @@ const Insights = () => {
         staleTime: 5 * 60 * 1000 // 5 minutes
       });
     }
-  }, [location.state, queryClient, selectedArchetype]);
+  }, [location, queryClient]); // Removed selectedArchetype from deps to prevent loops
 
   // Add scroll event listener to show feedback menu when scrolling
   // with throttling to avoid too many events
@@ -120,7 +127,7 @@ const Insights = () => {
     }
   };
 
-  // Get the archetype data if one is selected - using consistent hook usage pattern
+  // Get the archetype data if one is selected
   const archetypeData = selectedArchetype ? getArchetypeDetailedById(selectedArchetype) : null;
   const familyData = archetypeData?.familyId ? getFamilyById(archetypeData.familyId) : null;
 
