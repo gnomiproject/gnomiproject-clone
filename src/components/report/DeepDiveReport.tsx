@@ -54,7 +54,14 @@ const DeepDiveReport = ({
       reportDataExists: !!reportData,
       reportDataKeys: reportData ? Object.keys(reportData) : [],
       name: reportData?.name || reportData?.archetype_name,
-      id: reportData?.id || reportData?.archetype_id
+      id: reportData?.id || reportData?.archetype_id,
+      swot: {
+        strengths: reportData?.strengths?.length || 0,
+        weaknesses: reportData?.weaknesses?.length || 0,
+        opportunities: reportData?.opportunities?.length || 0,
+        threats: reportData?.threats?.length || 0
+      },
+      recommendations: reportData?.strategic_recommendations?.length || 0
     });
     
     return () => {
@@ -71,6 +78,33 @@ const DeepDiveReport = ({
           <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-red-800">
             <h2 className="text-lg font-semibold mb-2">Error Loading Report</h2>
             <p>Unable to load report data. Please try refreshing the page.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
+  // Safety checks to ensure data is usable before attempting to render
+  const ensureDataSafety = () => {
+    // Create defaults for critical fields if they're missing
+    if (!reportData.strengths) reportData.strengths = [];
+    if (!reportData.weaknesses) reportData.weaknesses = [];
+    if (!reportData.opportunities) reportData.opportunities = [];
+    if (!reportData.threats) reportData.threats = [];
+    if (!reportData.strategic_recommendations) reportData.strategic_recommendations = [];
+    
+    return true;
+  };
+  
+  // Skip rendering if data doesn't pass safety checks
+  if (!ensureDataSafety()) {
+    console.error('DeepDiveReport: Data safety check failed');
+    return (
+      <div className="bg-white min-h-screen p-8">
+        <div className="container mx-auto">
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-yellow-800">
+            <h2 className="text-lg font-semibold mb-2">Data Validation Error</h2>
+            <p>The report data structure is incomplete or invalid. Please contact support.</p>
           </div>
         </div>
       </div>
@@ -137,41 +171,51 @@ const DeepDiveReport = ({
           averageData={averageData}
         />
         
-        {/* Lazy-loaded sections */}
-        <Suspense fallback={<SectionLoadingFallback />}>
-          <CostAnalysis
-            reportData={reportData}
-            averageData={averageData}
-          />
-        </Suspense>
+        {/* Lazy-loaded sections wrapped in error boundaries */}
+        <ErrorBoundary fallback={<SectionErrorFallback title="Cost Analysis" />}>
+          <Suspense fallback={<SectionLoadingFallback />}>
+            <CostAnalysis
+              reportData={reportData}
+              averageData={averageData}
+            />
+          </Suspense>
+        </ErrorBoundary>
         
-        <Suspense fallback={<SectionLoadingFallback />}>
-          <UtilizationPatterns
-            reportData={reportData}
-            averageData={averageData}
-          />
-        </Suspense>
+        <ErrorBoundary fallback={<SectionErrorFallback title="Utilization Patterns" />}>
+          <Suspense fallback={<SectionLoadingFallback />}>
+            <UtilizationPatterns
+              reportData={reportData}
+              averageData={averageData}
+            />
+          </Suspense>
+        </ErrorBoundary>
         
-        <Suspense fallback={<SectionLoadingFallback />}>
-          <DiseaseManagement
-            reportData={reportData}
-            averageData={averageData}
-          />
-        </Suspense>
+        <ErrorBoundary fallback={<SectionErrorFallback title="Disease Management" />}>
+          <Suspense fallback={<SectionLoadingFallback />}>
+            <DiseaseManagement
+              reportData={reportData}
+              averageData={averageData}
+            />
+          </Suspense>
+        </ErrorBoundary>
         
-        <Suspense fallback={<SectionLoadingFallback />}>
-          <CareGaps
-            reportData={reportData}
-            averageData={averageData}
-          />
-        </Suspense>
+        <ErrorBoundary fallback={<SectionErrorFallback title="Care Gaps" />}>
+          <Suspense fallback={<SectionLoadingFallback />}>
+            <CareGaps
+              reportData={reportData}
+              averageData={averageData}
+            />
+          </Suspense>
+        </ErrorBoundary>
         
-        <Suspense fallback={<SectionLoadingFallback />}>
-          <StrategicRecommendations
-            reportData={reportData}
-            averageData={averageData}
-          />
-        </Suspense>
+        <ErrorBoundary fallback={<SectionErrorFallback title="Strategic Recommendations" />}>
+          <Suspense fallback={<SectionLoadingFallback />}>
+            <StrategicRecommendations
+              reportData={reportData}
+              averageData={averageData}
+            />
+          </Suspense>
+        </ErrorBoundary>
         
         <ContactSection
           userData={userData}
@@ -181,5 +225,42 @@ const DeepDiveReport = ({
     </div>
   );
 };
+
+// Simple error boundary component
+class ErrorBoundary extends React.Component<
+  { children: React.ReactNode, fallback: React.ReactNode },
+  { hasError: boolean }
+> {
+  constructor(props: { children: React.ReactNode, fallback: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error, info: React.ErrorInfo) {
+    console.error('DeepDiveReport section error:', error, info);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback;
+    }
+
+    return this.props.children;
+  }
+}
+
+// Fallback component for section errors
+const SectionErrorFallback = ({ title }: { title: string }) => (
+  <div className="my-8 p-6 bg-gray-50 border border-gray-200 rounded-lg">
+    <h3 className="text-lg font-medium text-gray-900 mb-2">{title}</h3>
+    <p className="text-gray-500">
+      This section couldn't be loaded due to a data or rendering issue.
+    </p>
+  </div>
+);
 
 export default DeepDiveReport;

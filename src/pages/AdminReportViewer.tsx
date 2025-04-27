@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -46,6 +47,16 @@ const AdminReportViewer = () => {
       rawDataKeys: rawData ? Object.keys(rawData) : [],
       error: error?.message || 'none'
     });
+
+    if (rawData) {
+      console.log('AdminReportViewer: SWOT data check:', {
+        strengths: rawData.strengths?.length || 0,
+        weaknesses: rawData.weaknesses?.length || 0,
+        opportunities: rawData.opportunities?.length || 0,
+        threats: rawData.threats?.length || 0,
+        strategic_recommendations: rawData.strategic_recommendations?.length || 0
+      });
+    }
     
     return () => {
       console.log('AdminReportViewer: Unmounting component');

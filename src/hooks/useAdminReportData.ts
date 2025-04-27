@@ -25,7 +25,7 @@ export function useAdminReportData({ archetypeId, reportType, skipCache = false 
         return;
       }
 
-      console.log('useAdminReportData: Starting data fetch for', archetypeId);
+      console.log('useAdminReportData: Starting data fetch for', archetypeId, 'report type:', reportType);
       setLoading(true);
       setError(null);
       
@@ -48,17 +48,8 @@ export function useAdminReportData({ archetypeId, reportType, skipCache = false 
         
         if (data) {
           console.log('useAdminReportData: Data found in primary table:', Object.keys(data));
-          // Use uppercase archetype ID as the code
-          const archetypeCode = archetypeId.toUpperCase();
-          
-          // Process the data before setting it
-          const processedData = {
-            ...data,
-            code: archetypeCode,
-            id: data.archetype_id || archetypeId,
-            name: data.archetype_name || archetypeId,
-            reportType: reportType === 'insights' ? 'Insights' : 'Deep Dive'
-          };
+          // Create a consistent data structure regardless of source
+          const processedData = standardizeArchetypeData(data, archetypeId, reportType);
           
           console.log('useAdminReportData: Processed data keys:', Object.keys(processedData));
           setData(processedData);
@@ -84,17 +75,9 @@ export function useAdminReportData({ archetypeId, reportType, skipCache = false 
         
         if (fallbackData) {
           console.log('useAdminReportData: Data found in fallback table:', Object.keys(fallbackData));
-          // Use uppercase archetype ID as the code
-          const archetypeCode = archetypeId.toUpperCase();
           
-          // Process the data before setting it
-          const processedFallbackData = {
-            ...fallbackData,
-            code: archetypeCode,
-            id: fallbackData.archetype_id || archetypeId,
-            name: fallbackData.archetype_name || archetypeId,
-            reportType: reportType === 'insights' ? 'Insights' : 'Deep Dive'
-          };
+          // Create a consistent data structure regardless of source
+          const processedFallbackData = standardizeArchetypeData(fallbackData, archetypeId, reportType);
           
           console.log('useAdminReportData: Processed fallback data keys:', Object.keys(processedFallbackData));
           setData(processedFallbackData);
@@ -104,23 +87,7 @@ export function useAdminReportData({ archetypeId, reportType, skipCache = false 
           console.log('useAdminReportData: No data found in either table');
           
           // Last resort: Create minimal synthetic data for testing
-          const syntheticData = {
-            archetype_id: archetypeId,
-            archetype_name: `Archetype ${archetypeId.toUpperCase()}`,
-            short_description: "This is fallback data since no actual data was found in the database.",
-            code: archetypeId.toUpperCase(),
-            id: archetypeId,
-            name: `Archetype ${archetypeId.toUpperCase()} (Synthetic)`,
-            reportType: reportType === 'insights' ? 'Insights' : 'Deep Dive',
-            // Add minimal required properties for report rendering
-            strengths: ["Fallback strength 1", "Fallback strength 2"],
-            weaknesses: ["Fallback weakness 1", "Fallback weakness 2"],
-            opportunities: ["Fallback opportunity 1", "Fallback opportunity 2"],
-            threats: ["Fallback threat 1", "Fallback threat 2"],
-            strategic_recommendations: [
-              { recommendation_number: 1, title: "Fallback recommendation", description: "This is a fallback recommendation" }
-            ]
-          };
+          const syntheticData = createSyntheticData(archetypeId, reportType);
           
           console.log('useAdminReportData: Using synthetic data:', Object.keys(syntheticData));
           setData(syntheticData);
@@ -132,23 +99,7 @@ export function useAdminReportData({ archetypeId, reportType, skipCache = false 
         setError(err instanceof Error ? err : new Error(err.message || 'Failed to load report data'));
         
         // Create fallback minimal data even on error
-        const errorFallbackData = {
-          archetype_id: archetypeId,
-          archetype_name: `Archetype ${archetypeId.toUpperCase()} (Error Fallback)`,
-          short_description: `Error loading data: ${err.message || 'Unknown error'}`,
-          code: archetypeId.toUpperCase(), // Fixed: Using archetypeId directly instead of undefined archetypeCode
-          id: archetypeId,
-          name: `Archetype ${archetypeId.toUpperCase()} (Error Fallback)`,
-          reportType: reportType === 'insights' ? 'Insights' : 'Deep Dive',
-          // Add minimal required properties for report rendering
-          strengths: ["Error fallback strength"],
-          weaknesses: ["Error fallback weakness"],
-          opportunities: ["Error fallback opportunity"],
-          threats: ["Error fallback threat"],
-          strategic_recommendations: [
-            { recommendation_number: 1, title: "Error fallback recommendation", description: "This is an error fallback recommendation" }
-          ]
-        };
+        const errorFallbackData = createErrorFallbackData(archetypeId, reportType, err);
         
         console.log('useAdminReportData: Using error fallback data');
         setData(errorFallbackData);
@@ -160,6 +111,77 @@ export function useAdminReportData({ archetypeId, reportType, skipCache = false 
     fetchData();
   }, [archetypeId, reportType, skipCache]);
   
+  // Helper function to standardize data structure regardless of source
+  const standardizeArchetypeData = (sourceData: any, id: string, type: 'insights' | 'deepdive') => {
+    // Create a standard data structure that works for both report types
+    const archetypeCode = id.toUpperCase();
+    
+    return {
+      ...sourceData,
+      // Ensure these key fields exist for both report types
+      code: archetypeCode,
+      id: sourceData.archetype_id || id,
+      name: sourceData.archetype_name || `Archetype ${archetypeCode}`,
+      reportType: type === 'insights' ? 'Insights' : 'Deep Dive',
+      // Ensure SWOT data is consistently structured
+      strengths: sourceData.strengths || (sourceData.swot_analysis ? JSON.parse(sourceData.swot_analysis).strengths : []),
+      weaknesses: sourceData.weaknesses || (sourceData.swot_analysis ? JSON.parse(sourceData.swot_analysis).weaknesses : []),
+      opportunities: sourceData.opportunities || (sourceData.swot_analysis ? JSON.parse(sourceData.swot_analysis).opportunities : []),
+      threats: sourceData.threats || (sourceData.swot_analysis ? JSON.parse(sourceData.swot_analysis).threats : []),
+      // Ensure strategic recommendations exist
+      strategic_recommendations: sourceData.strategic_recommendations || []
+    };
+  };
+  
+  // Helper function to create synthetic data
+  const createSyntheticData = (id: string, type: 'insights' | 'deepdive') => {
+    const archetypeCode = id.toUpperCase();
+    return {
+      archetype_id: id,
+      archetype_name: `Archetype ${archetypeCode}`,
+      short_description: "This is fallback data since no actual data was found in the database.",
+      code: archetypeCode,
+      id: id,
+      name: `Archetype ${archetypeCode} (Synthetic)`,
+      reportType: type === 'insights' ? 'Insights' : 'Deep Dive',
+      // Add minimal required properties for report rendering
+      strengths: ["Fallback strength 1", "Fallback strength 2"],
+      weaknesses: ["Fallback weakness 1", "Fallback weakness 2"],
+      opportunities: ["Fallback opportunity 1", "Fallback opportunity 2"],
+      threats: ["Fallback threat 1", "Fallback threat 2"],
+      strategic_recommendations: [
+        { recommendation_number: 1, title: "Fallback recommendation", description: "This is a fallback recommendation" }
+      ],
+      // Add other required fields that might be needed by both report types
+      Demo_Average_Age: 40,
+      Demo_Average_Family_Size: 3.0,
+      Risk_Average_Risk_Score: 1.0,
+      Cost_Medical_RX_Paid_Amount_PMPY: 5000
+    };
+  };
+  
+  // Helper function to create error fallback data
+  const createErrorFallbackData = (id: string, type: 'insights' | 'deepdive', err: any) => {
+    const archetypeCode = id.toUpperCase();
+    return {
+      archetype_id: id,
+      archetype_name: `Archetype ${archetypeCode} (Error Fallback)`,
+      short_description: `Error loading data: ${err.message || 'Unknown error'}`,
+      code: archetypeCode,
+      id: id,
+      name: `Archetype ${archetypeCode} (Error Fallback)`,
+      reportType: type === 'insights' ? 'Insights' : 'Deep Dive',
+      // Add minimal required properties for report rendering
+      strengths: ["Error fallback strength"],
+      weaknesses: ["Error fallback weakness"],
+      opportunities: ["Error fallback opportunity"],
+      threats: ["Error fallback threat"],
+      strategic_recommendations: [
+        { recommendation_number: 1, title: "Error fallback recommendation", description: "This is an error fallback recommendation" }
+      ]
+    };
+  };
+
   const refreshData = () => {
     console.log('useAdminReportData: Refreshing data');
     setLoading(true);
