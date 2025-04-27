@@ -62,6 +62,21 @@ const DeepDiveReport = ({
     };
   }, [reportData]);
   
+  // Check if report data is valid to prevent rendering errors
+  if (!reportData) {
+    console.error('DeepDiveReport: No report data provided');
+    return (
+      <div className="bg-white min-h-screen p-8">
+        <div className="container mx-auto">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-red-800">
+            <h2 className="text-lg font-semibold mb-2">Error Loading Report</h2>
+            <p>Unable to load report data. Please try refreshing the page.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
   // Check if we're using fallback data
   const usingFallbackData = !reportData.strategic_recommendations || reportData.strategic_recommendations.length === 0;
 

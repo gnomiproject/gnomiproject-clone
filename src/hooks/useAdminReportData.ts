@@ -51,13 +51,17 @@ export function useAdminReportData({ archetypeId, reportType, skipCache = false 
           // Use uppercase archetype ID as the code
           const archetypeCode = archetypeId.toUpperCase();
           
-          setData({
+          // Process the data before setting it
+          const processedData = {
             ...data,
             code: archetypeCode,
             id: data.archetype_id || archetypeId,
             name: data.archetype_name || archetypeId,
             reportType: reportType === 'insights' ? 'Insights' : 'Deep Dive'
-          });
+          };
+          
+          console.log('useAdminReportData: Processed data keys:', Object.keys(processedData));
+          setData(processedData);
           setDataSource(primaryTable);
           setLoading(false);
           return;
@@ -83,13 +87,17 @@ export function useAdminReportData({ archetypeId, reportType, skipCache = false 
           // Use uppercase archetype ID as the code
           const archetypeCode = archetypeId.toUpperCase();
           
-          setData({
+          // Process the data before setting it
+          const processedFallbackData = {
             ...fallbackData,
             code: archetypeCode,
             id: fallbackData.archetype_id || archetypeId,
             name: fallbackData.archetype_name || archetypeId,
             reportType: reportType === 'insights' ? 'Insights' : 'Deep Dive'
-          });
+          };
+          
+          console.log('useAdminReportData: Processed fallback data keys:', Object.keys(processedFallbackData));
+          setData(processedFallbackData);
           setDataSource(`${fallbackTable} (fallback)`);
           setLoading(false);
         } else {
@@ -128,7 +136,7 @@ export function useAdminReportData({ archetypeId, reportType, skipCache = false 
           archetype_id: archetypeId,
           archetype_name: `Archetype ${archetypeId.toUpperCase()} (Error Fallback)`,
           short_description: `Error loading data: ${err.message || 'Unknown error'}`,
-          code: archetypeId.toUpperCase(),
+          code: archetypeCode || archetypeId.toUpperCase(),
           id: archetypeId,
           name: `Archetype ${archetypeId.toUpperCase()} (Error Fallback)`,
           reportType: reportType === 'insights' ? 'Insights' : 'Deep Dive',
