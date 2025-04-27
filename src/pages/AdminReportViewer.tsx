@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -7,7 +8,8 @@ import { RefreshCw } from 'lucide-react';
 import { useAdminReportData } from '@/hooks/useAdminReportData';
 import InsightsReportContent from '@/components/report/sections/InsightsReportContent';
 import DeepDiveReportContent from '@/components/report/sections/DeepDiveReportContent';
-import { getReportSchema, ReportType } from '@/utils/reports/schemaUtils';
+import { getReportSchema } from '@/utils/reports/schemaUtils';
+import { ReportType } from '@/types/reports';
 import { OverviewTab } from '@/components/admin/report-sections/OverviewTab';
 import { SwotTab } from '@/components/admin/report-sections/SwotTab';
 import { MetricsTab } from '@/components/admin/report-sections/MetricsTab';

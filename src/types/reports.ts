@@ -1,3 +1,4 @@
+
 export type ReportType = "insight" | "deepDive";
 
 export type ReportField = string;
