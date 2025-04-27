@@ -12,12 +12,14 @@ export const useReportGeneration = () => {
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const [lastGeneratedUrl, setLastGeneratedUrl] = useState('');
+  const [generationInProgress, setGenerationInProgress] = useState<string[]>([]);
 
   /**
    * Generate a report for a specific archetype
    */
   const generateReport = async (archetypeId: string) => {
     setIsGenerating(true);
+    setGenerationInProgress(prev => [...prev, archetypeId]);
     
     try {
       // Fetch the archetype data from the level4_deepdive_report_data table
@@ -89,6 +91,7 @@ export const useReportGeneration = () => {
       throw error;
     } finally {
       setIsGenerating(false);
+      setGenerationInProgress(prev => prev.filter(id => id !== archetypeId));
     }
   };
 
@@ -130,6 +133,9 @@ export const useReportGeneration = () => {
     isGenerating,
     isDeleting,
     lastGeneratedUrl,
-    setLastGeneratedUrl
+    setLastGeneratedUrl,
+    generationInProgress
   };
 };
+
+export default useReportGeneration;

@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 import { calculatePercentageDifference } from '@/utils/reports/metricUtils';
+import generateArchetypeReports from '@/utils/archetypeReportGenerator';
 
 /**
  * Hook to handle report generation and management for both insights and deep dive reports

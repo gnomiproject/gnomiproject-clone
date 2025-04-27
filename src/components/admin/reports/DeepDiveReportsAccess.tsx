@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 import ReportGenerationPanel from './ReportGenerationPanel';
 import ReportsTable from './ReportsTable';
 import EmptyReportsState from './EmptyReportsState';
-import { useReportGeneration } from './useReportGeneration';
+import useReportGeneration from '@/hooks/useReportGeneration';
 
 const DeepDiveReportsAccess = () => {
   const { 
@@ -20,7 +20,7 @@ const DeepDiveReportsAccess = () => {
     isDeleting, 
     lastGeneratedUrl, 
     setLastGeneratedUrl,
-    generationInProgress
+    generationInProgress 
   } = useReportGeneration();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -188,7 +188,7 @@ const DeepDiveReportsAccess = () => {
               isGenerating={isGenerating}
               onGenerateReport={handleGenerateReport}
               formatArchetypeLabel={formatArchetypeLabel}
-              generationInProgress={generationInProgress || []}
+              generationInProgress={generationInProgress}
             />
 
             <div className="flex justify-between items-center mt-6 mb-4">
