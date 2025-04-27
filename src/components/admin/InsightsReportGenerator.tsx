@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
@@ -59,31 +60,33 @@ export function InsightsReportGenerator({ initialConnectionStatus }: InsightsRep
     enabled: connectionStatus === 'connected',
     staleTime: 1000 * 60 * 15, // 15 minutes
     gcTime: 1000 * 60 * 30, // 30 minutes - fixed from cacheTime
-    retry: 1,
-    onSuccess: (data) => {
-      // Update our local archetypes state with the fetched data
-      const formattedArchetypes = data.map(item => ({
-        id: item.archetype_id,
-        name: item.archetype_name || '',
-        familyId: item.family_id || '',
-        description: item.short_description || '',
-        status: 'idle' as const,
-        lastUpdated: null
-      }));
-      setArchetypes(formattedArchetypes);
-    },
-    onError: (error) => {
-      console.error("Error fetching archetypes:", error);
-      toast.error("Error loading archetypes", {
-        description: (error as Error).message,
-      });
-    }
+    retry: 1
   });
 
   // If we have initialConnectionStatus, make sure we load archetypes when component mounts
   useEffect(() => {
     if (connectionStatus === 'connected' && !archetypes.length) {
-      refetchArchetypes();
+      refetchArchetypes()
+        .then(result => {
+          // After fetching, process the data
+          if (result.data) {
+            const formattedArchetypes = result.data.map(item => ({
+              id: item.archetype_id,
+              name: item.archetype_name || '',
+              familyId: item.family_id || '',
+              description: item.short_description || '',
+              status: 'idle' as const,
+              lastUpdated: null
+            }));
+            setArchetypes(formattedArchetypes);
+          }
+        })
+        .catch(error => {
+          console.error("Error fetching archetypes:", error);
+          toast.error("Error loading archetypes", {
+            description: error.message,
+          });
+        });
     }
   }, [connectionStatus]);
 
@@ -142,7 +145,21 @@ export function InsightsReportGenerator({ initialConnectionStatus }: InsightsRep
       toast.success("Database Connection Successful");
       
       // Load archetypes if we're connected
-      await refetchArchetypes();
+      await refetchArchetypes()
+        .then(result => {
+          // After fetching, process the data
+          if (result.data) {
+            const formattedArchetypes = result.data.map(item => ({
+              id: item.archetype_id,
+              name: item.archetype_name || '',
+              familyId: item.family_id || '',
+              description: item.short_description || '',
+              status: 'idle' as const,
+              lastUpdated: null
+            }));
+            setArchetypes(formattedArchetypes);
+          }
+        });
       return true;
     } catch (err) {
       console.error("Error testing database:", err);

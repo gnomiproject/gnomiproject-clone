@@ -6,7 +6,7 @@ import DeepDiveReport from '@/components/report/DeepDiveReport';
 import ReportError from '@/components/report/ReportError';
 import ReportLoadingState from '@/components/report/ReportLoadingState';
 import { isValidArchetypeId } from '@/utils/archetypeValidation';
-import { ArchetypeId } from '@/types/archetype';
+import { ArchetypeId, ArchetypeDetailedData } from '@/types/archetype';
 import { useArchetypes } from '@/hooks/useArchetypes';
 import { useGetArchetype } from '@/hooks/useGetArchetype';
 import { useReportData } from '@/hooks/useReportData';
@@ -109,9 +109,11 @@ const ReportViewer = () => {
       );
     }
 
+    const typedReportData = reportData as unknown as ArchetypeDetailedData;
+    
     return (
       <DeepDiveReport 
-        reportData={reportData} 
+        reportData={typedReportData} 
         userData={userData} 
         averageData={averageData}
         loading={isLoading}
@@ -190,6 +192,8 @@ const ReportViewer = () => {
     );
   } else {
     // For deep dive report (regular or admin view)
+    const typedReportData = reportData as unknown as ArchetypeDetailedData;
+    
     return (
       <>
         {isAdminView && (
@@ -198,7 +202,7 @@ const ReportViewer = () => {
           </div>
         )}
         <DeepDiveReport 
-          reportData={reportData} 
+          reportData={typedReportData} 
           userData={adminUserData} 
           averageData={averageData}
           isAdminView={isAdminView}

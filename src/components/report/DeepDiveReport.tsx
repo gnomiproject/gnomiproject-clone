@@ -15,7 +15,7 @@ import ReportIntroduction from './sections/ReportIntroduction';
 import ContactSection from './sections/ContactSection';
 import { ArchetypeDetailedData } from '@/types/archetype';
 import FallbackBanner from './FallbackBanner';
-import { useMediaQuery } from '@/hooks/use-mobile';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface DeepDiveReportProps {
   reportData: ArchetypeDetailedData;
@@ -32,7 +32,7 @@ const DeepDiveReport = ({
   loading = false,
   isAdminView = false
 }: DeepDiveReportProps) => {
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isMobile = useIsMobile();
   const usingFallbackData = !reportData.strategic_recommendations || reportData.strategic_recommendations.length === 0;
   
   return (
@@ -54,9 +54,7 @@ const DeepDiveReport = ({
       
       {/* If using fallback data, show a banner */}
       {usingFallbackData && !loading && (
-        <FallbackBanner 
-          message="This report is using fallback data because the complete data isn't available from the database." 
-        />
+        <FallbackBanner show={true} />
       )}
       
       <div className="container mx-auto px-4 md:px-8 py-8 max-w-[1200px]">
@@ -68,55 +66,51 @@ const DeepDiveReport = ({
         />
         
         <ExecutiveSummary 
-          archetype={reportData}
-          isMobile={isMobile}
+          archetypeData={reportData}
         />
         
         <ArchetypeProfile
-          archetype={reportData}
+          reportData={reportData}
+          averageData={averageData}
         />
         
         <SwotAnalysis 
-          strengths={reportData.strengths || reportData?.enhanced?.swot?.strengths || []}
-          weaknesses={reportData.weaknesses || reportData?.enhanced?.swot?.weaknesses || []}
-          opportunities={reportData.opportunities || reportData?.enhanced?.swot?.opportunities || []}
-          threats={reportData.threats || reportData?.enhanced?.swot?.threats || []}
-          familyId={reportData.familyId || reportData.family_id}
+          archetypeData={reportData}
         />
         
         <DemographicsSection
-          archetype={reportData}
+          reportData={reportData}
           averageData={averageData}
         />
         
         <RiskFactors
-          archetype={reportData}
+          reportData={reportData}
           averageData={averageData}
         />
         
         <CostAnalysis
-          archetype={reportData}
+          reportData={reportData}
           averageData={averageData}
         />
         
         <UtilizationPatterns
-          archetype={reportData}
+          reportData={reportData}
           averageData={averageData}
         />
         
         <DiseaseManagement
-          archetype={reportData}
+          reportData={reportData}
           averageData={averageData}
         />
         
         <CareGaps
-          archetype={reportData}
+          reportData={reportData}
           averageData={averageData}
         />
         
         <StrategicRecommendations
-          recommendations={reportData.strategic_recommendations || []}
-          archetypeId={reportData.id}
+          reportData={reportData}
+          averageData={averageData}
         />
         
         <ContactSection

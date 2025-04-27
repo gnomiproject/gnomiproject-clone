@@ -8,7 +8,22 @@ interface SwotAnalysisProps {
 }
 
 const SwotAnalysis = ({ archetypeData }: SwotAnalysisProps) => {
-  const { enhanced } = archetypeData;
+  // Get SWOT data from the archetype data
+  const strengths = archetypeData.enhanced?.swot?.strengths || 
+                   archetypeData.strengths || 
+                   [];
+                   
+  const weaknesses = archetypeData.enhanced?.swot?.weaknesses || 
+                    archetypeData.weaknesses || 
+                    [];
+                    
+  const opportunities = archetypeData.enhanced?.swot?.opportunities || 
+                       archetypeData.opportunities || 
+                       [];
+                       
+  const threats = archetypeData.enhanced?.swot?.threats || 
+                 archetypeData.threats || 
+                 [];
 
   return (
     <Card>
@@ -20,7 +35,7 @@ const SwotAnalysis = ({ archetypeData }: SwotAnalysisProps) => {
           <div className="p-4 bg-green-50 rounded-lg">
             <h3 className="font-semibold text-green-700 mb-2">Strengths</h3>
             <ul className="list-disc list-inside space-y-2">
-              {enhanced?.swot.strengths.map((strength, index) => (
+              {strengths.map((strength, index) => (
                 <li key={index} className="text-green-600">{strength}</li>
               ))}
             </ul>
@@ -29,7 +44,7 @@ const SwotAnalysis = ({ archetypeData }: SwotAnalysisProps) => {
           <div className="p-4 bg-amber-50 rounded-lg">
             <h3 className="font-semibold text-amber-700 mb-2">Weaknesses</h3>
             <ul className="list-disc list-inside space-y-2">
-              {enhanced?.swot.weaknesses.map((weakness, index) => (
+              {weaknesses.map((weakness, index) => (
                 <li key={index} className="text-amber-600">{weakness}</li>
               ))}
             </ul>
@@ -38,7 +53,7 @@ const SwotAnalysis = ({ archetypeData }: SwotAnalysisProps) => {
           <div className="p-4 bg-blue-50 rounded-lg">
             <h3 className="font-semibold text-blue-700 mb-2">Opportunities</h3>
             <ul className="list-disc list-inside space-y-2">
-              {enhanced?.swot.opportunities.map((opportunity, index) => (
+              {opportunities.map((opportunity, index) => (
                 <li key={index} className="text-blue-600">{opportunity}</li>
               ))}
             </ul>
@@ -47,7 +62,7 @@ const SwotAnalysis = ({ archetypeData }: SwotAnalysisProps) => {
           <div className="p-4 bg-red-50 rounded-lg">
             <h3 className="font-semibold text-red-700 mb-2">Threats</h3>
             <ul className="list-disc list-inside space-y-2">
-              {enhanced?.swot.threats.map((threat, index) => (
+              {threats.map((threat, index) => (
                 <li key={index} className="text-red-600">{threat}</li>
               ))}
             </ul>
