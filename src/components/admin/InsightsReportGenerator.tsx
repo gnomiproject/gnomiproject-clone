@@ -6,8 +6,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import useReportGeneration from '@/hooks/useReportGeneration';
 import ReportDetailView from './ReportDetailView';
-import DatabaseConnectionStatus from './DatabaseConnectionStatus';
-import GenerationResults from './GenerationResults';
+import DatabaseConnectionStatus from './insights/DatabaseConnectionStatus';
+import GenerationResults from './insights/GenerationResults';
 import ArchetypeList from './insights/ArchetypeList';
 import { useArchetypeLoader } from '@/hooks/useArchetypeLoader';
 import { ReportActions } from './reports/ReportActions';
@@ -78,7 +78,10 @@ export function InsightsReportGenerator() {
         description: "This process may take some time. Please wait...",
       });
       
-      setArchetypes(prev => prev.map(a => ({ ...a, status: 'pending' })));
+      setArchetypes(prev => prev.map(a => ({ 
+        ...a, 
+        status: 'pending' as const 
+      })));
       
       const results = await generateAllReports();
       console.log("Report generation completed with results:", results);

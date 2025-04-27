@@ -67,4 +67,3 @@ const DatabaseConnectionStatus = ({
 };
 
 export default DatabaseConnectionStatus;
-

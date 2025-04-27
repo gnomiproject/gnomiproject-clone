@@ -2,13 +2,7 @@
 import React from 'react';
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { CheckCircle, XCircle } from "lucide-react";
-
-interface GenerationResult {
-  total: number;
-  succeeded: number;
-  failed: number;
-  errors?: string[];
-}
+import { GenerationResult } from '@/types/reports';
 
 interface GenerationResultsProps {
   result: GenerationResult | null;
@@ -47,4 +41,3 @@ const GenerationResults = ({ result }: GenerationResultsProps) => {
 };
 
 export default GenerationResults;
-
