@@ -1,3 +1,4 @@
+
 // Common types for report schemas
 export type ReportField = string;
 
