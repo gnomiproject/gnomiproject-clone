@@ -45,7 +45,15 @@ const DetailedArchetypeReport = ({ archetypeId, onRetakeAssessment }: DetailedAr
     processedRef.current = true;
     console.log(`DetailedArchetypeReport: Processing data for ${archetypeId} (sequence #${renderCountRef.current})`);
     
-    return dbArchetypeData || getArchetypeDetailedById(archetypeId);
+    // Get data from API or fallback to local data
+    const data = dbArchetypeData || getArchetypeDetailedById(archetypeId);
+    
+    // Log warning if no data is found
+    if (!data) {
+      console.warn(`DetailedArchetypeReport: No data found for archetype ${archetypeId}`);
+    }
+    
+    return data;
   }, [dbArchetypeData, getArchetypeDetailedById, archetypeId]);
   
   // Skip rendering if loading to prevent flicker
@@ -61,6 +69,22 @@ const DetailedArchetypeReport = ({ archetypeId, onRetakeAssessment }: DetailedAr
             <div className="h-4 bg-gray-200 rounded"></div>
           </div>
         </div>
+      </div>
+    );
+  }
+  
+  // Show error state if no data is available
+  if (!archetypeData) {
+    return (
+      <div className="w-full p-6 rounded-lg bg-white shadow border border-red-200">
+        <h3 className="text-lg font-semibold text-red-600">No Data Available</h3>
+        <p className="mt-2 text-gray-700">Unable to load archetype data for ID: {archetypeId}</p>
+        <button 
+          className="mt-4 px-4 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200"
+          onClick={onRetakeAssessment}
+        >
+          Retake Assessment
+        </button>
       </div>
     );
   }

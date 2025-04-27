@@ -25,39 +25,42 @@ interface ArchetypeContentProps {
 const ArchetypeContent = ({ archetypeData, archetypeId, onRetakeAssessment }: ArchetypeContentProps) => {
   const { getTraitsForArchetype } = useArchetypeMetrics();
   const traits = getTraitsForArchetype(archetypeId);
-  const familyColor = archetypeData.hexColor || '#6E59A5';
+  
+  // Add better defensive coding for color handling - use the archetype ID to get a fallback color
+  const fallbackColor = getArchetypeColorHex(archetypeId) || '#6E59A5';
+  const familyColor = archetypeData?.hexColor || archetypeData?.color || fallbackColor;
   
   // Use different sources for key characteristics with proper type handling
   const keyCharacteristics = 
-    archetypeData.key_characteristics || 
-    archetypeData.standard?.keyCharacteristics ||
-    archetypeData.summary?.keyCharacteristics ||
+    (archetypeData?.key_characteristics) || 
+    (archetypeData?.standard?.keyCharacteristics) ||
+    (archetypeData?.summary?.keyCharacteristics) ||
     (traits?.uniqueInsights || []) ||
     [];
   
   // Use different sources for industries
-  const industries = archetypeData.industries || 
+  const industries = archetypeData?.industries || 
     "Various industries including healthcare, finance, and technology";
     
   // Use different description sources with fallbacks
   const longDescription = 
-    archetypeData.long_description || 
-    archetypeData.short_description || 
-    (archetypeData.summary?.description) || 
+    archetypeData?.long_description || 
+    archetypeData?.short_description || 
+    (archetypeData?.summary?.description) || 
     "This archetype represents organizations with specific healthcare management approaches and characteristics.";
 
   // Get family name with fallback
-  const familyName = archetypeData.familyName || archetypeData.family_name || "Healthcare Archetype Family";
+  const familyName = archetypeData?.familyName || archetypeData?.family_name || "Healthcare Archetype Family";
     
   // Get strengths, weaknesses, opportunities, threats with fallbacks
-  const strengths = archetypeData.strengths || archetypeData.enhanced?.swot?.strengths || [];
-  const weaknesses = archetypeData.weaknesses || archetypeData.enhanced?.swot?.weaknesses || [];
-  const opportunities = archetypeData.opportunities || archetypeData.enhanced?.swot?.opportunities || [];
-  const threats = archetypeData.threats || archetypeData.enhanced?.swot?.threats || [];
+  const strengths = archetypeData?.strengths || (archetypeData?.enhanced?.swot?.strengths) || [];
+  const weaknesses = archetypeData?.weaknesses || (archetypeData?.enhanced?.swot?.weaknesses) || [];
+  const opportunities = archetypeData?.opportunities || (archetypeData?.enhanced?.swot?.opportunities) || [];
+  const threats = archetypeData?.threats || (archetypeData?.enhanced?.swot?.threats) || [];
   
   // Get strategic recommendations with fallback
-  const strategicRecommendations = archetypeData.strategic_recommendations || 
-    archetypeData.enhanced?.strategicPriorities || [];
+  const strategicRecommendations = archetypeData?.strategic_recommendations || 
+    (archetypeData?.enhanced?.strategicPriorities) || [];
   
   return (
     <div className="text-left space-y-6">
@@ -92,10 +95,10 @@ const ArchetypeContent = ({ archetypeData, archetypeId, onRetakeAssessment }: Ar
               <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-2">
                 <div>
                   <CardTitle className="text-2xl font-bold">
-                    {archetypeData.name || archetypeData.id?.toUpperCase()}
+                    {archetypeData?.name || archetypeId?.toUpperCase() || 'Unknown Archetype'}
                   </CardTitle>
                   <p className="text-gray-600 mt-1">
-                    {familyName} Family
+                    {familyName}
                   </p>
                 </div>
                 <div className="inline-flex items-center px-3 py-1 rounded-full text-sm" 
@@ -109,7 +112,7 @@ const ArchetypeContent = ({ archetypeData, archetypeId, onRetakeAssessment }: Ar
                 {longDescription}
               </p>
               
-              {keyCharacteristics.length > 0 && (
+              {keyCharacteristics && keyCharacteristics.length > 0 && (
                 <div className="mt-6">
                   <h3 className="text-lg font-semibold mb-2">Key Characteristics</h3>
                   <ul className="list-disc list-inside space-y-2">
