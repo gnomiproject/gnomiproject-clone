@@ -1,8 +1,10 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { getReportSchema, getDataSource } from '@/utils/reports/schemaUtils';
 import type { ReportType } from '@/utils/reports/schemaUtils';
 import { ArchetypeId } from '@/types/archetype';
+import { ValidDataSource } from '@/utils/reports/dataSourceUtils';
 
 interface UseReportDataOptions {
   archetypeId?: string;
@@ -78,9 +80,10 @@ export const useReportData = ({
 
         // Get schema and data source based on report type
         const reportType: ReportType = isInsightsReport ? 'insight' : 'deepDive';
-        const schema = getReportSchema(reportType);
         const mainSection = isInsightsReport ? 'overview' : 'archetypeProfile';
-        const dataSourceTable = getDataSource(reportType, mainSection);
+        
+        // Get type-safe data source
+        const dataSourceTable: ValidDataSource = getDataSource(reportType, mainSection);
 
         if (!dataSourceTable) {
           throw new Error(`No data source found for report type: ${reportType}`);
@@ -132,9 +135,10 @@ export const useReportData = ({
         if (!fetchedReportData) {
           // Try alternate data source as fallback
           const fallbackType: ReportType = isInsightsReport ? 'deepDive' : 'insight';
-          const fallbackSchema = getReportSchema(fallbackType);
           const fallbackSection = isInsightsReport ? 'archetypeProfile' : 'overview';
-          const fallbackDataSource = getDataSource(fallbackType, fallbackSection);
+          
+          // Get type-safe fallback data source
+          const fallbackDataSource: ValidDataSource = getDataSource(fallbackType, fallbackSection);
           
           if (!fallbackDataSource) {
             throw new Error('No fallback data source available');

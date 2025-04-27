@@ -2,6 +2,7 @@
 import { ReportSchema, ReportField, ReportSection } from "@/types/reports";
 import { insightReportSchema } from "@/schemas/insightReportSchema";
 import { deepDiveReportSchema } from "@/schemas/deepDiveReportSchema";
+import { ValidDataSource, getTypeValidDataSource } from "./dataSourceUtils";
 
 export type ReportType = "insight" | "deepDive";
 
@@ -19,7 +20,6 @@ export const getReportFields = (type: ReportType, sectionKey: string): ReportFie
   return section?.fields || [];
 };
 
-export const getDataSource = (type: ReportType, sectionKey: string): string | undefined => {
-  const section = getReportSection(type, sectionKey);
-  return section?.dataSource;
+export const getDataSource = (type: ReportType, sectionKey: string): ValidDataSource => {
+  return getTypeValidDataSource(type, sectionKey);
 };
