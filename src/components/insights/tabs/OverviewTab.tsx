@@ -1,9 +1,9 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArchetypeDetailedData } from '@/types/archetype';
 import { insightReportSchema } from '@/schemas/insightReportSchema';
+import { formatFieldValue } from '@/utils/reports/fieldFormatters';
 
 interface OverviewTabProps {
   archetypeData: ArchetypeDetailedData;
@@ -25,17 +25,18 @@ const OverviewTab = ({ archetypeData, familyColor }: OverviewTabProps) => {
   }
 
   // Extract fields based on schema with type safety
-  const archetypeName = archetypeData[overviewFields.find(f => f === 'archetype_name') as keyof ArchetypeDetailedData] || 
+  const archetypeName = (archetypeData[overviewFields.find(f => f === 'archetype_name') as keyof ArchetypeDetailedData] as string) || 
                        archetypeData.name || 
-                       archetypeData.id?.toUpperCase();
+                       archetypeData.id?.toUpperCase() || 
+                       'Unknown Archetype';
 
-  const familyName = archetypeData[overviewFields.find(f => f === 'family_name') as keyof ArchetypeDetailedData] || 
+  const familyName = (archetypeData[overviewFields.find(f => f === 'family_name') as keyof ArchetypeDetailedData] as string) || 
                     archetypeData.familyName || 
                     "Healthcare Archetype Family";
 
-  const description = archetypeData[overviewFields.find(f => f === 'long_description') as keyof ArchetypeDetailedData] || 
+  const description = (archetypeData[overviewFields.find(f => f === 'long_description') as keyof ArchetypeDetailedData] as string) || 
                      archetypeData.short_description || 
-                     archetypeData.summary?.description || 
+                     (archetypeData.summary?.description as string) || 
                      "This archetype represents organizations with specific healthcare management approaches and characteristics.";
   
   // Handle key characteristics with proper type checking
@@ -53,7 +54,7 @@ const OverviewTab = ({ archetypeData, familyColor }: OverviewTabProps) => {
     keyCharacteristics = archetypeData.summary.keyCharacteristics;
   }
   
-  const industries = archetypeData[overviewFields.find(f => f === 'industries') as keyof ArchetypeDetailedData] || 
+  const industries = (archetypeData[overviewFields.find(f => f === 'industries') as keyof ArchetypeDetailedData] as string) || 
                     archetypeData.industries || 
                     "Various industries including healthcare, finance, and technology";
   
