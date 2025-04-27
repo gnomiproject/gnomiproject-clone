@@ -46,22 +46,33 @@ const DeepDiveReport = ({
   const isMobile = useIsMobile();
   
   // Add debug logging to see the data structure
-  console.log('DeepDiveReport: Data received:', reportData);
+  console.log('DeepDiveReport: Data received:', {
+    hasData: !!reportData,
+    dataType: typeof reportData,
+    dataKeys: reportData ? Object.keys(reportData) : [],
+    name: reportData?.name || reportData?.archetype_name,
+    id: reportData?.id || reportData?.archetype_id
+  });
 
   // Debug log to see what's happening during render
   useEffect(() => {
     console.log('DeepDiveReport: Component mounted with data', {
       reportDataExists: !!reportData,
       reportDataKeys: reportData ? Object.keys(reportData) : [],
+      reportDataType: reportData ? typeof reportData : 'undefined',
       name: reportData?.name || reportData?.archetype_name,
       id: reportData?.id || reportData?.archetype_id,
-      swot: {
-        strengths: reportData?.strengths?.length || 0,
-        weaknesses: reportData?.weaknesses?.length || 0,
-        opportunities: reportData?.opportunities?.length || 0,
-        threats: reportData?.threats?.length || 0
-      },
-      recommendations: reportData?.strategic_recommendations?.length || 0
+      swot: reportData ? {
+        strengths: Array.isArray(reportData.strengths) ? reportData.strengths.length : typeof reportData.strengths,
+        weaknesses: Array.isArray(reportData.weaknesses) ? reportData.weaknesses.length : typeof reportData.weaknesses,
+        opportunities: Array.isArray(reportData.opportunities) ? reportData.opportunities.length : typeof reportData.opportunities,
+        threats: Array.isArray(reportData.threats) ? reportData.threats.length : typeof reportData.threats
+      } : 'none',
+      recommendations: reportData?.strategic_recommendations 
+        ? (Array.isArray(reportData.strategic_recommendations) 
+          ? reportData.strategic_recommendations.length 
+          : typeof reportData.strategic_recommendations)
+        : 'none'
     });
     
     return () => {
@@ -87,29 +98,29 @@ const DeepDiveReport = ({
   // Safety checks to ensure data is usable before attempting to render
   const ensureDataSafety = () => {
     // Create defaults for critical fields if they're missing
-    if (!reportData.strengths) reportData.strengths = [];
-    if (!reportData.weaknesses) reportData.weaknesses = [];
-    if (!reportData.opportunities) reportData.opportunities = [];
-    if (!reportData.threats) reportData.threats = [];
-    if (!reportData.strategic_recommendations) reportData.strategic_recommendations = [];
+    if (!Array.isArray(reportData.strengths)) reportData.strengths = [];
+    if (!Array.isArray(reportData.weaknesses)) reportData.weaknesses = [];
+    if (!Array.isArray(reportData.opportunities)) reportData.opportunities = [];
+    if (!Array.isArray(reportData.threats)) reportData.threats = [];
+    if (!Array.isArray(reportData.strategic_recommendations)) reportData.strategic_recommendations = [];
+    
+    // Log any problematic fields we had to fix
+    const problematicFields = [];
+    if (!Array.isArray(reportData.strengths)) problematicFields.push('strengths');
+    if (!Array.isArray(reportData.weaknesses)) problematicFields.push('weaknesses');
+    if (!Array.isArray(reportData.opportunities)) problematicFields.push('opportunities');
+    if (!Array.isArray(reportData.threats)) problematicFields.push('threats');
+    if (!Array.isArray(reportData.strategic_recommendations)) problematicFields.push('strategic_recommendations');
+    
+    if (problematicFields.length > 0) {
+      console.warn('DeepDiveReport: Fixed problematic fields:', problematicFields);
+    }
     
     return true;
   };
   
-  // Skip rendering if data doesn't pass safety checks
-  if (!ensureDataSafety()) {
-    console.error('DeepDiveReport: Data safety check failed');
-    return (
-      <div className="bg-white min-h-screen p-8">
-        <div className="container mx-auto">
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-yellow-800">
-            <h2 className="text-lg font-semibold mb-2">Data Validation Error</h2>
-            <p>The report data structure is incomplete or invalid. Please contact support.</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // Apply safety checks
+  ensureDataSafety();
   
   // Check if we're using fallback data
   const usingFallbackData = !reportData.strategic_recommendations || reportData.strategic_recommendations.length === 0;

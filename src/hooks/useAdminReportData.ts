@@ -48,7 +48,8 @@ export function useAdminReportData({ archetypeId, reportType, skipCache = false 
         
         if (data) {
           console.log('useAdminReportData: Data found in primary table:', Object.keys(data));
-          // Create a consistent data structure regardless of source
+          
+          // Ensure JSON fields are properly parsed
           const processedData = standardizeArchetypeData(data, archetypeId, reportType);
           
           console.log('useAdminReportData: Processed data keys:', Object.keys(processedData));
@@ -113,6 +114,53 @@ export function useAdminReportData({ archetypeId, reportType, skipCache = false 
   
   // Helper function to standardize data structure regardless of source
   const standardizeArchetypeData = (sourceData: any, id: string, type: 'insights' | 'deepdive') => {
+    // Check for JSON fields that need parsing and handle them safely
+    const safeParseJSON = (value: any) => {
+      if (!value) return null;
+      
+      // If it's already an object, don't try to parse it again
+      if (typeof value === 'object' && value !== null) {
+        return value;
+      }
+      
+      // Try to parse string JSON
+      if (typeof value === 'string') {
+        try {
+          return JSON.parse(value);
+        } catch (e) {
+          console.warn('useAdminReportData: Failed to parse JSON string:', value);
+          return value; // Return original value if parsing fails
+        }
+      }
+      
+      return value;
+    };
+    
+    // Handle SWOT data which might be stored differently in different tables
+    const parsedSwotAnalysis = sourceData.swot_analysis ? safeParseJSON(sourceData.swot_analysis) : null;
+    
+    // Extract SWOT data from either direct fields or nested swot_analysis
+    const strengths = sourceData.strengths ? 
+      safeParseJSON(sourceData.strengths) : 
+      (parsedSwotAnalysis?.strengths || []);
+      
+    const weaknesses = sourceData.weaknesses ? 
+      safeParseJSON(sourceData.weaknesses) : 
+      (parsedSwotAnalysis?.weaknesses || []);
+      
+    const opportunities = sourceData.opportunities ? 
+      safeParseJSON(sourceData.opportunities) : 
+      (parsedSwotAnalysis?.opportunities || []);
+      
+    const threats = sourceData.threats ? 
+      safeParseJSON(sourceData.threats) : 
+      (parsedSwotAnalysis?.threats || []);
+    
+    // Parse strategic recommendations if it exists and is a string
+    const strategicRecommendations = sourceData.strategic_recommendations ? 
+      safeParseJSON(sourceData.strategic_recommendations) : 
+      [];
+    
     // Create a standard data structure that works for both report types
     const archetypeCode = id.toUpperCase();
     
@@ -123,13 +171,13 @@ export function useAdminReportData({ archetypeId, reportType, skipCache = false 
       id: sourceData.archetype_id || id,
       name: sourceData.archetype_name || `Archetype ${archetypeCode}`,
       reportType: type === 'insights' ? 'Insights' : 'Deep Dive',
-      // Ensure SWOT data is consistently structured
-      strengths: sourceData.strengths || (sourceData.swot_analysis ? JSON.parse(sourceData.swot_analysis).strengths : []),
-      weaknesses: sourceData.weaknesses || (sourceData.swot_analysis ? JSON.parse(sourceData.swot_analysis).weaknesses : []),
-      opportunities: sourceData.opportunities || (sourceData.swot_analysis ? JSON.parse(sourceData.swot_analysis).opportunities : []),
-      threats: sourceData.threats || (sourceData.swot_analysis ? JSON.parse(sourceData.swot_analysis).threats : []),
-      // Ensure strategic recommendations exist
-      strategic_recommendations: sourceData.strategic_recommendations || []
+      // Ensure SWOT data is consistently structured as arrays
+      strengths: Array.isArray(strengths) ? strengths : [],
+      weaknesses: Array.isArray(weaknesses) ? weaknesses : [],
+      opportunities: Array.isArray(opportunities) ? opportunities : [],
+      threats: Array.isArray(threats) ? threats : [],
+      // Ensure strategic recommendations exist as an array
+      strategic_recommendations: Array.isArray(strategicRecommendations) ? strategicRecommendations : []
     };
   };
   

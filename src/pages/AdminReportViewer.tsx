@@ -98,7 +98,12 @@ const AdminReportViewer = () => {
     });
   };
 
-  console.log('AdminReportViewer: Rendering with state:', { loading, error: error?.message, hasData: !!rawData });
+  console.log('AdminReportViewer: Rendering with state:', { 
+    loading, 
+    error: error?.message, 
+    hasData: !!rawData,
+    rawDataType: rawData ? typeof rawData : 'undefined'
+  });
 
   // Return the component content based on various conditions
   return (
@@ -138,12 +143,28 @@ const AdminReportViewer = () => {
               <div>{String(!!error)}</div>
               <div><strong>Has Data:</strong></div>
               <div>{String(!!rawData)}</div>
+              <div><strong>Raw Data Type:</strong></div>
+              <div>{rawData ? typeof rawData : 'undefined'}</div>
               <div><strong>Raw Data Keys:</strong></div>
               <div>{rawData ? Object.keys(rawData).join(', ') : 'No data'}</div>
             </div>
             {error && (
               <div className="mt-4 p-2 bg-red-100 text-red-800 rounded">
                 <strong>Error:</strong> {error.message}
+              </div>
+            )}
+            {rawData && (
+              <div className="mt-4">
+                <details>
+                  <summary className="cursor-pointer font-medium">SWOT Data Details</summary>
+                  <div className="mt-2 p-2 bg-white rounded text-xs">
+                    <div><strong>Strengths:</strong> {Array.isArray(rawData.strengths) ? `Array[${rawData.strengths.length}]` : typeof rawData.strengths}</div>
+                    <div><strong>Weaknesses:</strong> {Array.isArray(rawData.weaknesses) ? `Array[${rawData.weaknesses.length}]` : typeof rawData.weaknesses}</div>
+                    <div><strong>Opportunities:</strong> {Array.isArray(rawData.opportunities) ? `Array[${rawData.opportunities.length}]` : typeof rawData.opportunities}</div>
+                    <div><strong>Threats:</strong> {Array.isArray(rawData.threats) ? `Array[${rawData.threats.length}]` : typeof rawData.threats}</div>
+                    <div><strong>Strategic Recommendations:</strong> {Array.isArray(rawData.strategic_recommendations) ? `Array[${rawData.strategic_recommendations.length}]` : typeof rawData.strategic_recommendations}</div>
+                  </div>
+                </details>
               </div>
             )}
           </CardContent>
