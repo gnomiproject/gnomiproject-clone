@@ -18,17 +18,25 @@ const DetailedArchetypeReport = ({ archetypeId, onRetakeAssessment }: DetailedAr
   const [isRetrying, setIsRetrying] = useState(false);
   const { getArchetypeDetailedById } = useArchetypes();
   
-  // Fallback to local data if API request fails
+  // Always fetch local data as a guaranteed fallback
   const localArchetypeData = getArchetypeDetailedById(archetypeId);
   
   // Use local data if remote data is not available
   const displayData = archetypeData || localArchetypeData;
   
   useEffect(() => {
+    // Log what we're using to help with debugging
     if (!archetypeData && localArchetypeData) {
       console.log("Using local archetype data as fallback");
     }
-  }, [archetypeData, localArchetypeData]);
+    
+    // If we have data from either source, make sure we show it
+    if (displayData) {
+      console.log("Display data is available:", displayData.id);
+    } else {
+      console.error("No display data available for:", archetypeId);
+    }
+  }, [archetypeData, localArchetypeData, displayData, archetypeId]);
   
   const handleRetry = () => {
     if (isRetrying) return;
@@ -36,23 +44,26 @@ const DetailedArchetypeReport = ({ archetypeId, onRetakeAssessment }: DetailedAr
     setIsRetrying(true);
     toast.info("Reconnecting to database...");
     
-    setTimeout(() => {
-      refetch()
-        .catch((err) => {
-          toast.error("Connection failed. Using local data.");
-          console.error("Retry failed:", err);
-        })
-        .finally(() => {
-          toast.success("Connection restored!");
-          setIsRetrying(false);
-        });
-    }, 500);
+    refetch()
+      .then(() => {
+        toast.success("Connection restored!");
+      })
+      .catch((err) => {
+        console.error("Retry failed:", err);
+        toast.error("Connection failed. Using local data.");
+      })
+      .finally(() => {
+        setIsRetrying(false);
+      });
   };
   
-  if (isLoading) {
+  // Show loading skeleton during initial load
+  if (isLoading && !displayData) {
     return <ArchetypeLoadingSkeleton />;
   }
   
+  // If we have an error BUT we have local data, skip the error display
+  // and just show the local data instead
   if (error && !displayData) {
     return (
       <ArchetypeError 
@@ -63,6 +74,7 @@ const DetailedArchetypeReport = ({ archetypeId, onRetakeAssessment }: DetailedAr
     );
   }
   
+  // If we still don't have any data after trying all sources, show a helpful error
   if (!displayData) {
     return (
       <div className="p-6 border rounded-md bg-red-50 text-center">
@@ -80,6 +92,7 @@ const DetailedArchetypeReport = ({ archetypeId, onRetakeAssessment }: DetailedAr
     );
   }
   
+  // If we get here, we have data to display (either from API or local)
   return (
     <ArchetypeContent 
       archetypeData={displayData}

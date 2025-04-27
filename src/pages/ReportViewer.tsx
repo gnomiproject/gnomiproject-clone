@@ -114,11 +114,11 @@ const ReportViewer = () => {
   }
 
   // Handle data loading errors
-  if (error) {
+  if (error && !reportData) {
     return (
       <ReportError 
         title="Error Loading Report"
-        message={`There was a problem loading the report: ${error.message || 'Unknown error'}. We're using local data if available.`}
+        message={`There was a problem loading the report. We're using local data if available.`}
         actionLabel="Try Again"
         onAction={handleRetry}
       />

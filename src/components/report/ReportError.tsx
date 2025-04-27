@@ -8,25 +8,49 @@ interface ReportErrorProps {
   message: string;
   actionLabel: string;
   onAction: () => void;
+  secondaryAction?: () => void;
+  secondaryActionLabel?: string;
 }
 
-const ReportError = ({ title, message, actionLabel, onAction }: ReportErrorProps) => {
+const ReportError = ({ 
+  title, 
+  message, 
+  actionLabel, 
+  onAction, 
+  secondaryAction, 
+  secondaryActionLabel 
+}: ReportErrorProps) => {
   return (
     <div className="min-h-[70vh] bg-gray-50 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
         <AlertTriangle className="mx-auto h-12 w-12 text-red-500 mb-6" />
         <h2 className="text-2xl font-bold text-gray-900 mb-3">{title}</h2>
         <p className="text-gray-600 mb-8">{message}</p>
-        <Button 
-          onClick={onAction} 
-          className="px-6 py-3 flex items-center gap-2 mx-auto"
-          size="lg"
-        >
-          {actionLabel.toLowerCase().includes('try') && (
-            <RefreshCw className="h-4 w-4" />
+        
+        <div className="space-y-3">
+          <Button 
+            onClick={onAction} 
+            className="px-6 py-3 flex items-center gap-2 mx-auto"
+            size="lg"
+          >
+            {actionLabel.toLowerCase().includes('try') && (
+              <RefreshCw className="h-4 w-4 animate-spin" />
+            )}
+            {actionLabel}
+          </Button>
+          
+          {secondaryAction && secondaryActionLabel && (
+            <div>
+              <Button
+                variant="link"
+                onClick={secondaryAction}
+                className="mt-2"
+              >
+                {secondaryActionLabel}
+              </Button>
+            </div>
           )}
-          {actionLabel}
-        </Button>
+        </div>
       </div>
     </div>
   );
