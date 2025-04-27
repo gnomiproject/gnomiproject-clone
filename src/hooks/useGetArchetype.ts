@@ -252,7 +252,11 @@ export const useGetArchetype = (archetypeId: ArchetypeId, skipCache: boolean = f
 
   // Force refresh data
   const refreshData = async () => {
-    toast.loading("Refreshing archetype data...");
+    // Use standard toast method with title and description
+    toast({
+      title: "Refreshing Archetype Data",
+      description: "Fetching the latest information..."
+    });
     
     // Clear cache for this archetype
     const cacheKey = `archetype-${archetypeId}`;
@@ -265,9 +269,16 @@ export const useGetArchetype = (archetypeId: ArchetypeId, skipCache: boolean = f
     
     try {
       await refetch();
-      toast.success("Archetype data refreshed!");
+      toast({
+        title: "Refresh Successful",
+        description: "Archetype data has been updated."
+      });
     } catch (e) {
-      toast.error("Failed to refresh data. Please try again.");
+      toast({
+        title: "Refresh Failed",
+        description: "Unable to update archetype data. Please try again.",
+        variant: "destructive" // Use destructive variant for error toasts
+      });
     }
   };
 
