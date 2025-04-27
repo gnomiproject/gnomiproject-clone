@@ -33,6 +33,37 @@ export const getSecureReportUrl = (archetypeId: string): string => {
 };
 
 /**
+ * Validate an access token for a report
+ * @param archetypeId The ID of the archetype
+ * @param token The token to validate
+ * @returns Boolean indicating if the token is valid
+ */
+export const validateReportToken = (archetypeId: string, token: string): boolean => {
+  try {
+    const storedTokens = JSON.parse(localStorage.getItem('admin_report_tokens') || '{}');
+    return storedTokens[archetypeId] === token;
+  } catch (error) {
+    console.error('Error validating token:', error);
+    return false;
+  }
+};
+
+/**
+ * Get the token for a specific archetype report
+ * @param archetypeId The ID of the archetype
+ * @returns The token if it exists, or null
+ */
+export const getReportToken = (archetypeId: string): string | null => {
+  try {
+    const storedTokens = JSON.parse(localStorage.getItem('admin_report_tokens') || '{}');
+    return storedTokens[archetypeId] || null;
+  } catch (error) {
+    console.error('Error getting token:', error);
+    return null;
+  }
+};
+
+/**
  * Clear all stored tokens
  */
 export const clearAllReportTokens = (): void => {
