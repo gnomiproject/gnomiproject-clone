@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { DollarSign, TrendingDown, AlertTriangle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -49,67 +50,49 @@ const CostAnalysis = ({ reportData, averageData }: CostAnalysisProps) => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <CostCard 
           title="Total Cost PEPY"
-          value={formatNumber(reportData["Cost_Medical & RX Paid Amount PEPY"] || 0, 'currency')}
-          comparison={formatComparison(
-            reportData["Cost_Medical & RX Paid Amount PEPY"],
-            averageData["Cost_Medical & RX Paid Amount PEPY"],
-            'lower'
-          )}
+          value={reportData["Cost_Medical & RX Paid Amount PEPY"] || 0}
+          average={averageData["Cost_Medical & RX Paid Amount PEPY"] || 0}
+          betterDirection="lower"
           icon={<DollarSign className="h-5 w-5" />}
         />
         
         <CostCard 
           title="Medical Cost PEPY"
-          value={formatNumber(reportData["Cost_Medical Paid Amount PEPY"] || 0, 'currency')}
-          comparison={formatComparison(
-            reportData["Cost_Medical Paid Amount PEPY"],
-            averageData["Cost_Medical Paid Amount PEPY"],
-            'lower'
-          )}
+          value={reportData["Cost_Medical Paid Amount PEPY"] || 0}
+          average={averageData["Cost_Medical Paid Amount PEPY"] || 0}
+          betterDirection="lower"
           icon={<DollarSign className="h-5 w-5" />}
         />
         
         <CostCard 
           title="Rx Cost PEPY"
-          value={formatNumber(reportData["Cost_RX Paid Amount PEPY"] || 0, 'currency')}
-          comparison={formatComparison(
-            reportData["Cost_RX Paid Amount PEPY"],
-            averageData["Cost_RX Paid Amount PEPY"],
-            'lower'
-          )}
+          value={reportData["Cost_RX Paid Amount PEPY"] || 0}
+          average={averageData["Cost_RX Paid Amount PEPY"] || 0}
+          betterDirection="lower"
           icon={<DollarSign className="h-5 w-5" />}
         />
         
         <CostCard 
           title="Total Cost PMPY"
-          value={formatNumber(reportData["Cost_Medical & RX Paid Amount PMPY"] || 0, 'currency')}
-          comparison={formatComparison(
-            reportData["Cost_Medical & RX Paid Amount PMPY"],
-            averageData["Cost_Medical & RX Paid Amount PMPY"],
-            'lower'
-          )}
+          value={reportData["Cost_Medical & RX Paid Amount PMPY"] || 0}
+          average={averageData["Cost_Medical & RX Paid Amount PMPY"] || 0}
+          betterDirection="lower"
           icon={<DollarSign className="h-5 w-5" />}
         />
         
         <CostCard 
           title="Medical Cost PMPY"
-          value={formatNumber(reportData["Cost_Medical Paid Amount PMPY"] || 0, 'currency')}
-          comparison={formatComparison(
-            reportData["Cost_Medical Paid Amount PMPY"],
-            averageData["Cost_Medical Paid Amount PMPY"],
-            'lower'
-          )}
+          value={reportData["Cost_Medical Paid Amount PMPY"] || 0}
+          average={averageData["Cost_Medical Paid Amount PMPY"] || 0}
+          betterDirection="lower"
           icon={<DollarSign className="h-5 w-5" />}
         />
         
         <CostCard 
           title="Rx Cost PMPY"
-          value={formatNumber(reportData["Cost_RX Paid Amount PMPY"] || 0, 'currency')}
-          comparison={formatComparison(
-            reportData["Cost_RX Paid Amount PMPY"],
-            averageData["Cost_RX Paid Amount PMPY"],
-            'lower'
-          )}
+          value={reportData["Cost_RX Paid Amount PMPY"] || 0}
+          average={averageData["Cost_RX Paid Amount PMPY"] || 0}
+          betterDirection="lower"
           icon={<DollarSign className="h-5 w-5" />}
         />
       </div>
@@ -138,6 +121,11 @@ const CostAnalysis = ({ reportData, averageData }: CostAnalysisProps) => {
                   by directing members to more appropriate care settings such as primary care, 
                   urgent care, or telehealth.
                 </p>
+                {averageData["Cost_Avoidable ER Potential Savings PMPY"] && (
+                  <p className="mt-2 text-orange-700">
+                    Archetype average: {formatNumber(averageData["Cost_Avoidable ER Potential Savings PMPY"], 'currency')} per member per year
+                  </p>
+                )}
               </div>
             </div>
             <div className="md:w-2/3">
@@ -223,24 +211,29 @@ const CostAnalysis = ({ reportData, averageData }: CostAnalysisProps) => {
   );
 };
 
-// Reusable cost card component
+// Reusable cost card component with improved display of average values
 const CostCard = ({ 
   title, 
   value, 
-  comparison, 
-  icon 
+  average, 
+  icon,
+  betterDirection = 'higher'
 }: { 
   title: string; 
-  value: string; 
-  comparison: { text: string; type: 'positive' | 'negative' | 'neutral' }; 
+  value: number; 
+  average: number; 
   icon: React.ReactNode;
+  betterDirection?: 'higher' | 'lower';
 }) => {
+  const formattedValue = formatNumber(value, 'currency', 0);
+  const { text, type } = formatComparison(value, average, betterDirection);
+  
   return (
     <div className="bg-white rounded-lg border p-4">
       <div className="flex items-center mb-2">
         <div className={`p-2 rounded-lg mr-3 ${
-          comparison.type === 'positive' ? 'bg-green-100' : 
-          comparison.type === 'negative' ? 'bg-red-100' : 'bg-gray-100'
+          type === 'positive' ? 'bg-green-100' : 
+          type === 'negative' ? 'bg-red-100' : 'bg-gray-100'
         }`}>
           {icon}
         </div>
@@ -248,13 +241,13 @@ const CostCard = ({
       </div>
       <div className="mt-2">
         <div className="text-2xl font-bold">
-          {value}
+          {formattedValue}
         </div>
         <p className={`text-sm mt-1 ${
-          comparison.type === 'positive' ? 'text-green-600' : 
-          comparison.type === 'negative' ? 'text-red-600' : 'text-gray-600'
+          type === 'positive' ? 'text-green-600' : 
+          type === 'negative' ? 'text-red-600' : 'text-gray-600'
         }`}>
-          {comparison.text}
+          {text}
         </p>
       </div>
     </div>
@@ -277,9 +270,7 @@ const formatComparison = (value: number, benchmark: number, betterDirection: 'hi
   const direction = diff > 0 ? 'higher' : 'lower';
   
   // Format the benchmark/average value
-  const formattedAverage = betterDirection === 'lower' ? 
-    `$${benchmark.toLocaleString()}` : 
-    benchmark.toLocaleString();
+  const formattedAverage = `$${benchmark.toLocaleString()}`;
     
   const text = `${Math.abs(percentDiff).toFixed(1)}% ${direction} than average (${formattedAverage})`;
   

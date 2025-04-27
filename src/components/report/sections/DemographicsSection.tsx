@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Users, Building, Map, User, Calendar, CreditCard } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -51,21 +52,21 @@ const DemographicsSection = ({ reportData, averageData }: DemographicsSectionPro
         <DemographicCard 
           title="Employees"
           value={formatNumber(reportData["Demo_Average Employees"] || 0, 'number', 0)}
-          comparison={formatComparison(reportData["Demo_Average Employees"], averageData["Demo_Average Employees"])}
+          averageValue={averageData["Demo_Average Employees"]}
           icon={<Users className="h-5 w-5" />}
         />
         
         <DemographicCard 
           title="Members"
           value={formatNumber(reportData["Demo_Average Members"] || 0, 'number', 0)}
-          comparison={formatComparison(reportData["Demo_Average Members"], averageData["Demo_Average Members"])}
+          averageValue={averageData["Demo_Average Members"]}
           icon={<User className="h-5 w-5" />}
         />
         
         <DemographicCard 
           title="Average Family Size"
           value={formatNumber(reportData["Demo_Average Family Size"] || 0, 'number', 1)}
-          comparison={formatComparison(reportData["Demo_Average Family Size"], averageData["Demo_Average Family Size"])}
+          averageValue={averageData["Demo_Average Family Size"]}
           icon={<Users className="h-5 w-5" />}
         />
         
@@ -73,21 +74,23 @@ const DemographicsSection = ({ reportData, averageData }: DemographicsSectionPro
           title="Average Age"
           value={formatNumber(reportData["Demo_Average Age"] || 0, 'number', 1)}
           suffix="years"
-          comparison={formatComparison(reportData["Demo_Average Age"], averageData["Demo_Average Age"])}
+          averageValue={averageData["Demo_Average Age"]}
           icon={<Calendar className="h-5 w-5" />}
         />
         
         <DemographicCard 
           title="Female Population"
           value={formatNumber(reportData["Demo_Average Percent Female"] || 0, 'percent')}
-          comparison={formatComparison(reportData["Demo_Average Percent Female"], averageData["Demo_Average Percent Female"])}
+          averageValue={averageData["Demo_Average Percent Female"]}
+          isPercent={true}
           icon={<User className="h-5 w-5" />}
         />
         
         <DemographicCard 
           title="Average Salary"
           value={formatNumber(reportData["Demo_Average Salary"] || 0, 'currency', 0)}
-          comparison={formatComparison(reportData["Demo_Average Salary"], averageData["Demo_Average Salary"])}
+          averageValue={averageData["Demo_Average Salary"]}
+          isCurrency={true}
           icon={<CreditCard className="h-5 w-5" />}
         />
       </div>
@@ -175,16 +178,28 @@ const DemographicsSection = ({ reportData, averageData }: DemographicsSectionPro
 const DemographicCard = ({ 
   title, 
   value, 
-  suffix = '', 
-  comparison, 
-  icon 
+  suffix = '',
+  averageValue,
+  icon,
+  isPercent = false,
+  isCurrency = false
 }: { 
   title: string; 
   value: string; 
   suffix?: string; 
-  comparison: string; 
-  icon: React.ReactNode 
+  averageValue: number;
+  icon: React.ReactNode;
+  isPercent?: boolean;
+  isCurrency?: boolean;
 }) => {
+  // Calculate comparison text
+  const comparisonText = formatComparison(
+    parseFloat(value.replace(/[^0-9.-]+/g, "")), 
+    averageValue, 
+    isPercent,
+    isCurrency
+  );
+
   return (
     <div className="bg-white rounded-lg border p-4">
       <div className="flex items-center mb-2">
@@ -197,23 +212,35 @@ const DemographicCard = ({
         <div className="text-2xl font-bold">
           {value} {suffix && <span className="text-sm font-normal">{suffix}</span>}
         </div>
-        <p className="text-sm text-gray-600 mt-1">{comparison}</p>
+        <p className="text-sm text-gray-600 mt-1">{comparisonText}</p>
       </div>
     </div>
   );
 };
 
-// Format comparison text
-const formatComparison = (value: number, benchmark: number): string => {
-  if (!value || !benchmark) return 'No comparison data';
+// Format comparison text with proper handling of average values
+const formatComparison = (
+  value: number, 
+  average: number, 
+  isPercent: boolean = false,
+  isCurrency: boolean = false
+): string => {
+  if (!value || !average) return 'No comparison data';
   
-  const diff = value - benchmark;
-  const percentDiff = (diff / benchmark) * 100;
+  const diff = value - average;
+  const percentDiff = (diff / average) * 100;
   
   if (Math.abs(percentDiff) < 1) return 'On par with archetype average';
   
-  // Format the benchmark/average value
-  const formattedAverage = benchmark.toLocaleString();
+  // Format the average value appropriately
+  let formattedAverage;
+  if (isCurrency) {
+    formattedAverage = `$${average.toLocaleString()}`;
+  } else if (isPercent) {
+    formattedAverage = `${(average * 100).toFixed(1)}%`;
+  } else {
+    formattedAverage = average.toLocaleString();
+  }
   
   return `${percentDiff > 0 ? '+' : ''}${percentDiff.toFixed(1)}% vs. archetype average (${formattedAverage})`;
 };

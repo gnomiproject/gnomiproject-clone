@@ -61,7 +61,7 @@ const MetricCard = ({
             maximumFractionDigits: 2
           }) : value}
         </div>
-        {comparison && averageValue && (
+        {comparison && averageValue !== undefined && (
           <p className="mt-2 text-sm text-gray-600">
             {comparison} ({typeof averageValue === 'number' ? averageValue.toLocaleString() : averageValue})
           </p>
@@ -115,6 +115,19 @@ const KeyMetricsTab = ({ archetypeData }: KeyMetricsTabProps) => {
   const totalCostPEPY = archetypeData["Cost_Medical & RX Paid Amount PEPY"] || 8500;
   const savingsPMPY = archetypeData["Cost_Avoidable ER Potential Savings PMPY"] || 450;
 
+  // Average values (population averages)
+  const avgFamilySize = 2.5;
+  const avgAge = 40;
+  const avgStates = 2;
+  const avgERVisits = 150;
+  const avgSpecialistVisits = 2200;
+  const avgInpatientAdmits = 65;
+  const avgNonUtilizers = 0.20;
+  const avgRiskScore = 1.0;
+  const avgSDOHScore = 3.0;
+  const avgTotalCost = 7800;
+  const avgSavings = 380;
+
   console.log("KeyMetricsTab - metrics being used:", {
     familySize,
     averageAge,
@@ -145,6 +158,8 @@ const KeyMetricsTab = ({ archetypeData }: KeyMetricsTabProps) => {
             description="Average family size for members in this archetype" 
             color={color}
             icon={<Users size={16} />}
+            comparison={`${((familySize - avgFamilySize) / avgFamilySize * 100).toFixed(1)}% vs. average`}
+            averageValue={avgFamilySize}
           />
           <MetricCard 
             title="Average Age" 
@@ -152,6 +167,8 @@ const KeyMetricsTab = ({ archetypeData }: KeyMetricsTabProps) => {
             description="Average age of members in this archetype" 
             color={color}
             icon={<Users size={16} />}
+            comparison={`${((averageAge - avgAge) / avgAge * 100).toFixed(1)}% vs. average`}
+            averageValue={avgAge}
           />
           <MetricCard 
             title="Geographic Spread" 
@@ -159,6 +176,8 @@ const KeyMetricsTab = ({ archetypeData }: KeyMetricsTabProps) => {
             description="Average number of states where members are located" 
             color={color}
             icon={<Users size={16} />}
+            comparison={`${((averageStates - avgStates) / avgStates * 100).toFixed(1)}% vs. average`}
+            averageValue={avgStates}
           />
         </div>
       </div>
@@ -176,6 +195,8 @@ const KeyMetricsTab = ({ archetypeData }: KeyMetricsTabProps) => {
             color={color}
             icon={<Activity size={16} />}
             isHighlighted={erVisits > 200}
+            comparison={`${((erVisits - avgERVisits) / avgERVisits * 100).toFixed(1)}% vs. average`}
+            averageValue={`${avgERVisits} per 1k`}
           />
           <MetricCard 
             title="Specialist Visits" 
@@ -184,6 +205,8 @@ const KeyMetricsTab = ({ archetypeData }: KeyMetricsTabProps) => {
             color={color}
             icon={<Activity size={16} />}
             isHighlighted={specialistVisits > 3000}
+            comparison={`${((specialistVisits - avgSpecialistVisits) / avgSpecialistVisits * 100).toFixed(1)}% vs. average`}
+            averageValue={`${avgSpecialistVisits} per 1k`}
           />
           <MetricCard 
             title="Hospital Admits" 
@@ -192,6 +215,8 @@ const KeyMetricsTab = ({ archetypeData }: KeyMetricsTabProps) => {
             color={color}
             icon={<Activity size={16} />}
             isHighlighted={inpatientAdmits > 100}
+            comparison={`${((inpatientAdmits - avgInpatientAdmits) / avgInpatientAdmits * 100).toFixed(1)}% vs. average`}
+            averageValue={`${avgInpatientAdmits} per 1k`}
           />
           <MetricCard 
             title="Non-Utilizers" 
@@ -200,6 +225,8 @@ const KeyMetricsTab = ({ archetypeData }: KeyMetricsTabProps) => {
             color={color}
             icon={<Activity size={16} />}
             isHighlighted={nonUtilizers > 0.3}
+            comparison={`${((nonUtilizers - avgNonUtilizers) / avgNonUtilizers * 100).toFixed(1)}% vs. average`}
+            averageValue={`${(avgNonUtilizers * 100).toFixed(1)}%`}
           />
         </div>
       </div>
@@ -216,6 +243,8 @@ const KeyMetricsTab = ({ archetypeData }: KeyMetricsTabProps) => {
             description="Average clinical risk score (higher values indicate higher risk)" 
             color={color}
             icon={<AlertTriangle size={16} />}
+            comparison={`${((riskScore - avgRiskScore) / avgRiskScore * 100).toFixed(1)}% vs. average`}
+            averageValue={avgRiskScore.toFixed(2)}
           />
           <MetricCard 
             title="Social Determinants" 
@@ -223,6 +252,8 @@ const KeyMetricsTab = ({ archetypeData }: KeyMetricsTabProps) => {
             description="Social determinants of health score (higher values indicate better conditions)" 
             color={color}
             icon={<Users size={16} />}
+            comparison={`${((sdohScore - avgSDOHScore) / avgSDOHScore * 100).toFixed(1)}% vs. average`}
+            averageValue={avgSDOHScore.toFixed(2)}
           />
         </div>
       </div>
@@ -239,6 +270,8 @@ const KeyMetricsTab = ({ archetypeData }: KeyMetricsTabProps) => {
             description="Medical and pharmacy costs per employee per year" 
             color={color}
             icon={<DollarSign size={16} />}
+            comparison={`${((totalCostPEPY - avgTotalCost) / avgTotalCost * 100).toFixed(1)}% vs. average`}
+            averageValue={`$${avgTotalCost.toLocaleString()}`}
           />
           <MetricCard 
             title="Potential ER Savings" 
@@ -246,6 +279,8 @@ const KeyMetricsTab = ({ archetypeData }: KeyMetricsTabProps) => {
             description="Potential savings from avoidable emergency room visits per member per year" 
             color={color}
             icon={<DollarSign size={16} />}
+            comparison={`${((savingsPMPY - avgSavings) / avgSavings * 100).toFixed(1)}% vs. average`}
+            averageValue={`$${avgSavings.toLocaleString()}`}
           />
         </div>
       </div>
