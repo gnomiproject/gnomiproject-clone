@@ -6,6 +6,7 @@ import { useGetArchetype } from '@/hooks/useGetArchetype';
 import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { isValidArchetypeId } from '@/utils/archetypeValidation';
+import { ArchetypeId } from '@/types/archetype';
 
 const ReportView = () => {
   const { archetypeId } = useParams();
@@ -20,7 +21,8 @@ const ReportView = () => {
     );
   }
 
-  const { archetypeData, isLoading, error } = useGetArchetype(archetypeId);
+  // Type assertion to narrow the type to ArchetypeId
+  const { archetypeData, isLoading, error } = useGetArchetype(archetypeId as ArchetypeId);
 
   if (error) {
     toast.error("Failed to load archetype data");
