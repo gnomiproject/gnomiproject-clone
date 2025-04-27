@@ -37,7 +37,7 @@ const InsightsReportContent: React.FC<InsightsReportContentProps> = ({ archetype
       <InsightCareSection archetype={archetype} />
       
       <Section id="recommendations">
-        <RecommendationsSection recommendations={archetype?.strategic_recommendations} />
+        <RecommendationsSection reportData={archetype} averageData={{}} />
       </Section>
     </div>
   );
