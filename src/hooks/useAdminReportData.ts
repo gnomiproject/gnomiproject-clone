@@ -136,7 +136,7 @@ export function useAdminReportData({ archetypeId, reportType, skipCache = false 
           archetype_id: archetypeId,
           archetype_name: `Archetype ${archetypeId.toUpperCase()} (Error Fallback)`,
           short_description: `Error loading data: ${err.message || 'Unknown error'}`,
-          code: archetypeCode || archetypeId.toUpperCase(),
+          code: archetypeId.toUpperCase(), // Fixed: Using archetypeId directly instead of undefined archetypeCode
           id: archetypeId,
           name: `Archetype ${archetypeId.toUpperCase()} (Error Fallback)`,
           reportType: reportType === 'insights' ? 'Insights' : 'Deep Dive',
