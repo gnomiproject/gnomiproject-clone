@@ -1,4 +1,3 @@
-
 // Common types for report schemas
 export type ReportField = string;
 
@@ -13,6 +12,20 @@ export interface ReportSection {
 export type ReportSchema = {
   [sectionKey: string]: ReportSection;
 };
+
+// Report types
+export type ReportType = "insight" | "deepDive";
+
+export interface SectionMapping {
+  insight: string;
+  deepDive: string[];
+}
+
+// Report mapping types
+export interface ReportMapping {
+  sections: Record<string, string[]>;
+  sharedFields: string[];
+}
 
 // Report generation result types
 export interface GenerationResult {
@@ -31,4 +44,3 @@ export interface ReportGenerationResults {
   archetypeIds: string[];
   errors: string[];
 }
-
