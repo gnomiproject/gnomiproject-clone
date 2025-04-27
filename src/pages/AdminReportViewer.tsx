@@ -211,7 +211,7 @@ const AdminReportViewer = () => {
               {isInsightsReport ? (
                 <div className="space-y-6">
                   <div className="bg-white rounded-lg shadow overflow-hidden mb-12">
-                    {console.log('AdminReportViewer: About to render InsightsReportContent with:', rawData)}
+                    {/* Fixed the issue on this line - no more void return */}
                     <InsightsReportContent archetype={rawData} />
                   </div>
                 </div>
