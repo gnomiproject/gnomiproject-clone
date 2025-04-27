@@ -12,6 +12,8 @@ import { useGetArchetype } from '@/hooks/useGetArchetype';
 import { useReportData } from '@/hooks/useReportData';
 import { toast } from 'sonner';
 import ArchetypeError from '@/components/insights/ArchetypeError';
+import { Button } from '@/components/ui/button';
+import { RefreshCw } from 'lucide-react';
 
 const ReportViewer = () => {
   const { archetypeId = '', token } = useParams();
@@ -22,6 +24,7 @@ const ReportViewer = () => {
   const [isInsightsReport, setIsInsightsReport] = useState(false);
   const [isAdminView, setIsAdminView] = useState(false);
   const [isRetrying, setIsRetrying] = useState(false);
+  const [skipCache, setSkipCache] = useState(false);
   
   // Determine if we're viewing an insights report based on the route
   useEffect(() => {
@@ -46,8 +49,9 @@ const ReportViewer = () => {
     isLoading: archetypeLoading, 
     error: archetypeError, 
     dataSource,
-    refetch: refetchArchetype
-  } = useGetArchetype(archetypeId as ArchetypeId);
+    refetch: refetchArchetype,
+    refreshData: refreshArchetypeData
+  } = useGetArchetype(archetypeId as ArchetypeId, skipCache);
   
   // Function to handle retry when there's a connection error
   const handleRetry = async () => {
@@ -59,6 +63,18 @@ const ReportViewer = () => {
       toast.error("Connection failed. Please try again.");
     } finally {
       setIsRetrying(false);
+    }
+  };
+
+  // Function to refresh data
+  const handleRefreshData = async () => {
+    setSkipCache(true);
+    try {
+      await refreshArchetypeData();
+      setSkipCache(false);
+    } catch (err) {
+      toast.error("Failed to refresh data");
+      setSkipCache(false);
     }
   };
   
@@ -85,12 +101,26 @@ const ReportViewer = () => {
       isValidAccess, 
       error, 
       dataSource: reportDataSource,
-      retry: retryReportData
+      retry: retryReportData,
+      refreshData: refreshReportData
     } = useReportData({ 
       archetypeId, 
       token, 
-      isInsightsReport: false 
+      isInsightsReport: false,
+      skipCache 
     });
+
+    // Function to refresh data
+    const handleRefreshReportData = async () => {
+      setSkipCache(true);
+      try {
+        await refreshReportData();
+        setSkipCache(false);
+      } catch (err) {
+        toast.error("Failed to refresh data");
+        setSkipCache(false);
+      }
+    };
 
     if (isLoading || initialLoading) {
       return <ReportLoadingState />;
@@ -112,12 +142,27 @@ const ReportViewer = () => {
     const typedReportData = reportData as unknown as ArchetypeDetailedData;
     
     return (
-      <DeepDiveReport 
-        reportData={typedReportData} 
-        userData={userData} 
-        averageData={averageData}
-        loading={isLoading}
-      />
+      <div className="relative">
+        {!isAdminView && (
+          <div className="fixed right-6 top-24 z-50">
+            <Button 
+              variant="outline"
+              size="sm"
+              onClick={handleRefreshReportData}
+              className="bg-white shadow-md hover:bg-gray-100"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh Data
+            </Button>
+          </div>
+        )}
+        <DeepDiveReport 
+          reportData={typedReportData} 
+          userData={userData} 
+          averageData={averageData}
+          loading={isLoading}
+        />
+      </div>
     );
   }
 
@@ -184,23 +229,51 @@ const ReportViewer = () => {
   // Render the appropriate report type based on the route
   if (isInsightsReport) {
     return (
-      <ArchetypeReport 
-        archetypeId={archetypeId as ArchetypeId} 
-        reportData={reportData} 
-        dataSource={dataSource} 
-      />
+      <div className="relative">
+        <div className="fixed right-6 top-24 z-50">
+          <Button 
+            variant="outline"
+            size="sm"
+            onClick={handleRefreshData}
+            className="bg-white shadow-md hover:bg-gray-100"
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh Data
+          </Button>
+        </div>
+        <ArchetypeReport 
+          archetypeId={archetypeId as ArchetypeId} 
+          reportData={reportData} 
+          dataSource={dataSource} 
+        />
+      </div>
     );
   } else {
     // For deep dive report (regular or admin view)
     const typedReportData = reportData as unknown as ArchetypeDetailedData;
     
     return (
-      <DeepDiveReport 
-        reportData={typedReportData} 
-        userData={adminUserData} 
-        averageData={averageData}
-        isAdminView={isAdminView}
-      />
+      <div className="relative">
+        {isAdminView && (
+          <div className="fixed right-6 top-24 z-50">
+            <Button 
+              variant="outline"
+              size="sm"
+              onClick={handleRefreshData}
+              className="bg-white shadow-md hover:bg-gray-100"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh Data
+            </Button>
+          </div>
+        )}
+        <DeepDiveReport 
+          reportData={typedReportData} 
+          userData={adminUserData} 
+          averageData={averageData}
+          isAdminView={isAdminView}
+        />
+      </div>
     );
   }
 };

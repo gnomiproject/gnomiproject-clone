@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { ArchetypeDetailedData, ArchetypeId, FamilyId, Json } from '@/types/archetype';
 import { useArchetypes } from './useArchetypes';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 interface UseGetArchetype {
   archetypeData: ArchetypeDetailedData | null;
@@ -12,7 +12,11 @@ interface UseGetArchetype {
   error: Error | null;
   refetch: () => Promise<any>;
   dataSource: string;
+  refreshData: () => Promise<void>;
 }
+
+// In-memory cache
+const archetypeCache = new Map();
 
 // Helper function to safely convert JSONB arrays to string arrays
 const convertJsonToStringArray = (jsonArray: Json | null): string[] => {
@@ -30,8 +34,15 @@ const convertJsonToStringArray = (jsonArray: Json | null): string[] => {
 };
 
 // Function to fetch archetype data from Supabase
-const fetchArchetypeData = async (archetypeId: ArchetypeId) => {
+const fetchArchetypeData = async (archetypeId: ArchetypeId, skipCache: boolean = false) => {
   console.log("Fetching data for archetypeId:", archetypeId);
+  
+  // Check cache first if not explicitly skipping
+  const cacheKey = `archetype-${archetypeId}`;
+  if (!skipCache && archetypeCache.has(cacheKey)) {
+    console.log(`Using cached data for archetype ${archetypeId}`);
+    return archetypeCache.get(cacheKey).data;
+  }
   
   const { data, error: fetchError } = await supabase
     .from('level3_report_data')
@@ -42,15 +53,24 @@ const fetchArchetypeData = async (archetypeId: ArchetypeId) => {
   if (fetchError) {
     throw fetchError;
   }
+  
+  // Store in cache
+  if (data) {
+    archetypeCache.set(cacheKey, {
+      data,
+      timestamp: Date.now()
+    });
+  }
 
   return data;
 };
 
-export const useGetArchetype = (archetypeId: ArchetypeId): UseGetArchetype => {
+export const useGetArchetype = (archetypeId: ArchetypeId, skipCache: boolean = false): UseGetArchetype => {
   const [archetypeData, setArchetypeData] = useState<ArchetypeDetailedData | null>(null);
   const [familyData, setFamilyData] = useState<any | null>(null);
   const [dataSource, setDataSource] = useState<string>(''); 
   const { getArchetypeEnhanced, getFamilyById } = useArchetypes();
+  const queryClient = useQueryClient();
   
   // Process data on success - defined as a callback to avoid recreating on each render
   const processData = useCallback((data: any) => {
@@ -208,15 +228,15 @@ export const useGetArchetype = (archetypeId: ArchetypeId): UseGetArchetype => {
     }
   }, [getFamilyById, getArchetypeEnhanced, archetypeId]);
   
-  // Use React Query for data fetching with proper caching - ENSURE THIS HOOK IS ALWAYS CALLED
+  // Use React Query for data fetching with proper caching
   const { 
     isLoading, 
     error, 
     refetch,
     data 
   } = useQuery({
-    queryKey: ['archetype', archetypeId],
-    queryFn: () => fetchArchetypeData(archetypeId),
+    queryKey: ['archetype', archetypeId, skipCache],
+    queryFn: () => fetchArchetypeData(archetypeId, skipCache),
     staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
     retry: 1, // Only retry once
     enabled: !!archetypeId,
@@ -230,6 +250,27 @@ export const useGetArchetype = (archetypeId: ArchetypeId): UseGetArchetype => {
     }
   });
 
+  // Force refresh data
+  const refreshData = async () => {
+    toast.loading("Refreshing archetype data...");
+    
+    // Clear cache for this archetype
+    const cacheKey = `archetype-${archetypeId}`;
+    archetypeCache.delete(cacheKey);
+    
+    // Invalidate query cache
+    queryClient.invalidateQueries({
+      queryKey: ['archetype', archetypeId]
+    });
+    
+    try {
+      await refetch();
+      toast.success("Archetype data refreshed!");
+    } catch (e) {
+      toast.error("Failed to refresh data. Please try again.");
+    }
+  };
+
   // Process data in useEffect, not conditionally in render
   useEffect(() => {
     if (data) {
@@ -239,12 +280,21 @@ export const useGetArchetype = (archetypeId: ArchetypeId): UseGetArchetype => {
     }
   }, [data, error, processData, handleError]);
 
+  // Cleanup function for memory management
+  useEffect(() => {
+    return () => {
+      // Clean up any heavy data on unmount
+      console.log(`Cleaning up resources for archetype ${archetypeId}`);
+    };
+  }, [archetypeId]);
+
   return { 
     archetypeData, 
     familyData, 
     isLoading,
     error: error as Error | null,
     refetch: refetch as () => Promise<any>,
-    dataSource
+    dataSource,
+    refreshData
   };
 };

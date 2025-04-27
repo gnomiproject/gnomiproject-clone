@@ -1,21 +1,32 @@
 
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import ExecutiveSummary from './sections/ExecutiveSummary';
 import SwotAnalysis from './sections/SwotAnalysis';
 import ArchetypeProfile from './sections/ArchetypeProfile';
 import DemographicsSection from './sections/DemographicsSection';
 import MetricsAnalysis from './sections/MetricsAnalysis';
 import RiskFactors from './sections/RiskFactors';
-import UtilizationPatterns from './sections/UtilizationPatterns';
-import CostAnalysis from './sections/CostAnalysis';
-import DiseaseManagement from './sections/DiseaseManagement';
-import CareGaps from './sections/CareGaps';
-import StrategicRecommendations from './sections/StrategicRecommendations';
 import ReportIntroduction from './sections/ReportIntroduction';
 import ContactSection from './sections/ContactSection';
 import { ArchetypeDetailedData } from '@/types/archetype';
 import FallbackBanner from './FallbackBanner';
 import { useIsMobile } from '@/hooks/use-mobile';
+
+// Lazy-load non-critical sections
+const UtilizationPatterns = lazy(() => import('./sections/UtilizationPatterns'));
+const CostAnalysis = lazy(() => import('./sections/CostAnalysis'));
+const DiseaseManagement = lazy(() => import('./sections/DiseaseManagement'));
+const CareGaps = lazy(() => import('./sections/CareGaps'));
+const StrategicRecommendations = lazy(() => import('./sections/StrategicRecommendations'));
+
+// Loading fallback for lazy components
+const SectionLoadingFallback = () => (
+  <div className="py-8 px-4 border border-gray-200 rounded-lg animate-pulse bg-gray-50">
+    <div className="h-6 bg-gray-200 rounded w-1/3 mb-4"></div>
+    <div className="h-32 bg-gray-200 rounded mb-4"></div>
+    <div className="h-20 bg-gray-200 rounded"></div>
+  </div>
+);
 
 interface DeepDiveReportProps {
   reportData: ArchetypeDetailedData;
@@ -88,30 +99,41 @@ const DeepDiveReport = ({
           averageData={averageData}
         />
         
-        <CostAnalysis
-          reportData={reportData}
-          averageData={averageData}
-        />
+        {/* Lazy-loaded sections */}
+        <Suspense fallback={<SectionLoadingFallback />}>
+          <CostAnalysis
+            reportData={reportData}
+            averageData={averageData}
+          />
+        </Suspense>
         
-        <UtilizationPatterns
-          reportData={reportData}
-          averageData={averageData}
-        />
+        <Suspense fallback={<SectionLoadingFallback />}>
+          <UtilizationPatterns
+            reportData={reportData}
+            averageData={averageData}
+          />
+        </Suspense>
         
-        <DiseaseManagement
-          reportData={reportData}
-          averageData={averageData}
-        />
+        <Suspense fallback={<SectionLoadingFallback />}>
+          <DiseaseManagement
+            reportData={reportData}
+            averageData={averageData}
+          />
+        </Suspense>
         
-        <CareGaps
-          reportData={reportData}
-          averageData={averageData}
-        />
+        <Suspense fallback={<SectionLoadingFallback />}>
+          <CareGaps
+            reportData={reportData}
+            averageData={averageData}
+          />
+        </Suspense>
         
-        <StrategicRecommendations
-          reportData={reportData}
-          averageData={averageData}
-        />
+        <Suspense fallback={<SectionLoadingFallback />}>
+          <StrategicRecommendations
+            reportData={reportData}
+            averageData={averageData}
+          />
+        </Suspense>
         
         <ContactSection
           userData={userData}

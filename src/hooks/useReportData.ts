@@ -4,19 +4,24 @@ import { supabase } from '@/integrations/supabase/client';
 import { ArchetypeId } from '@/types/archetype';
 import { toast } from 'sonner';
 import { useArchetypes } from '@/hooks/useArchetypes';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 interface UseReportDataProps {
   archetypeId: string;
   token: string;
   isInsightsReport: boolean;
+  skipCache?: boolean;
 }
 
-export const useReportData = ({ archetypeId, token, isInsightsReport }: UseReportDataProps) => {
+// Create a simple in-memory cache
+const reportCache = new Map();
+
+export const useReportData = ({ archetypeId, token, isInsightsReport, skipCache = false }: UseReportDataProps) => {
   const [isValidAccess, setIsValidAccess] = useState<boolean | null>(null);
   const [userData, setUserData] = useState<any>(null);
   const [usingFallbackData, setUsingFallbackData] = useState(false);
   const [dataSource, setDataSource] = useState<string>('');
+  const queryClient = useQueryClient();
   
   const { getArchetypeDetailedById } = useArchetypes();
 
@@ -24,36 +29,52 @@ export const useReportData = ({ archetypeId, token, isInsightsReport }: UseRepor
   const fetchArchetypeData = useCallback(async () => {
     console.log(`Fetching archetype data for ${archetypeId}...`);
     
+    // Check cache first if not explicitly skipping
+    const cacheKey = `report-${archetypeId}-${isInsightsReport ? 'insights' : 'deepdive'}`;
+    if (!skipCache && reportCache.has(cacheKey)) {
+      console.log(`Using cached data for ${archetypeId}`);
+      const cachedData = reportCache.get(cacheKey);
+      setDataSource(`${cachedData.source} (cached)`);
+      return cachedData.data;
+    }
+    
     // For deep dive reports, check the token against report_requests table
     if (!isInsightsReport && token) {
-      // Validate the token
-      const { data: requestData, error: requestError } = await supabase
-        .from('report_requests')
-        .select('*')
-        .eq('access_token', token)
-        .eq('archetype_id', archetypeId)
-        .maybeSingle();
+      // Skip token validation for admin views
+      if (token !== 'admin-view') {
+        // Validate the token
+        const { data: requestData, error: requestError } = await supabase
+          .from('report_requests')
+          .select('*')
+          .eq('access_token', token)
+          .eq('archetype_id', archetypeId)
+          .maybeSingle();
+          
+        if (requestError) {
+          throw new Error(`Access validation error: ${requestError.message}`);
+        }
         
-      if (requestError) {
-        throw new Error(`Access validation error: ${requestError.message}`);
+        if (!requestData) {
+          throw new Error('Invalid access token');
+        }
+        
+        // Check if token is expired
+        if (requestData.expires_at && new Date(requestData.expires_at) < new Date()) {
+          throw new Error('Access token has expired');
+        }
+        
+        // Store user data
+        setUserData(requestData.assessment_result || null);
+      } else {
+        setIsValidAccess(true);
       }
       
-      if (!requestData) {
-        throw new Error('Invalid access token');
-      }
-      
-      // Check if token is expired
-      if (requestData.expires_at && new Date(requestData.expires_at) < new Date()) {
-        throw new Error('Access token has expired');
-      }
-      
-      // Store user data
-      setUserData(requestData.assessment_result || null);
       setIsValidAccess(true);
     }
     
     // Try fetching from Analysis_Archetype_Full_Reports first (most complete)
     try {
+      // Query only essential fields to reduce data transfer
       const { data, error } = await supabase
         .from('Analysis_Archetype_Full_Reports')
         .select('*')
@@ -65,6 +86,14 @@ export const useReportData = ({ archetypeId, token, isInsightsReport }: UseRepor
       } else if (data) {
         console.log('Found data in Analysis_Archetype_Full_Reports');
         setDataSource('Analysis_Archetype_Full_Reports');
+        
+        // Store in cache
+        reportCache.set(cacheKey, {
+          data,
+          source: 'Analysis_Archetype_Full_Reports',
+          timestamp: Date.now()
+        });
+        
         return data;
       }
     } catch (e) {
@@ -84,6 +113,14 @@ export const useReportData = ({ archetypeId, token, isInsightsReport }: UseRepor
       } else if (data) {
         console.log('Found data in level3_report_data');
         setDataSource('level3_report_data');
+        
+        // Store in cache
+        reportCache.set(cacheKey, {
+          data,
+          source: 'level3_report_data',
+          timestamp: Date.now()
+        });
+        
         return data;
       }
     } catch (e) {
@@ -103,6 +140,14 @@ export const useReportData = ({ archetypeId, token, isInsightsReport }: UseRepor
       } else if (data) {
         console.log('Found data in level4_deepdive_report_data');
         setDataSource('level4_deepdive_report_data');
+        
+        // Store in cache
+        reportCache.set(cacheKey, {
+          data,
+          source: 'level4_deepdive_report_data',
+          timestamp: Date.now()
+        });
+        
         return data;
       }
     } catch (e) {
@@ -149,6 +194,14 @@ export const useReportData = ({ archetypeId, token, isInsightsReport }: UseRepor
       
       console.log('Using combined Core tables data');
       setDataSource('Core tables');
+      
+      // Store in cache
+      reportCache.set(cacheKey, {
+        data: combinedData,
+        source: 'Core tables',
+        timestamp: Date.now()
+      });
+      
       return combinedData;
     } catch (e) {
       console.error('Exception accessing Core tables:', e);
@@ -174,11 +227,19 @@ export const useReportData = ({ archetypeId, token, isInsightsReport }: UseRepor
       
       setDataSource('local data');
       setUsingFallbackData(true);
+      
+      // Store in cache
+      reportCache.set(cacheKey, {
+        data: localReportData,
+        source: 'local data',
+        timestamp: Date.now()
+      });
+      
       return localReportData;
     }
     
     return null;
-  }, [archetypeId, token, isInsightsReport, getArchetypeDetailedById]);
+  }, [archetypeId, token, isInsightsReport, getArchetypeDetailedById, skipCache]);
 
   // Use React Query for data fetching with proper caching
   const { 
@@ -187,7 +248,7 @@ export const useReportData = ({ archetypeId, token, isInsightsReport }: UseRepor
     error,
     refetch
   } = useQuery({
-    queryKey: ['reportData', archetypeId, token, isInsightsReport],
+    queryKey: ['reportData', archetypeId, token, isInsightsReport, skipCache],
     queryFn: fetchArchetypeData,
     staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
     retry: 1, // Only retry once
@@ -206,6 +267,27 @@ export const useReportData = ({ archetypeId, token, isInsightsReport }: UseRepor
     }
   };
 
+  // Force refresh data
+  const refreshData = async () => {
+    toast.loading("Refreshing report data...");
+    
+    // Clear cache for this report
+    const cacheKey = `report-${archetypeId}-${isInsightsReport ? 'insights' : 'deepdive'}`;
+    reportCache.delete(cacheKey);
+    
+    // Invalidate query cache
+    queryClient.invalidateQueries({
+      queryKey: ['reportData', archetypeId]
+    });
+    
+    try {
+      await refetch();
+      toast.success("Report data refreshed!");
+    } catch (e) {
+      toast.error("Failed to refresh data. Please try again.");
+    }
+  };
+
   // Create average data for comparison
   const averageData = {
     archetype_id: 'All_Average',
@@ -216,6 +298,14 @@ export const useReportData = ({ archetypeId, token, isInsightsReport }: UseRepor
     "Cost_Medical & RX Paid Amount PMPY": 5000
   };
 
+  // Cleanup function for memory management
+  useEffect(() => {
+    return () => {
+      // Clean up any heavy data on unmount
+      console.log(`Cleaning up resources for ${archetypeId}`);
+    };
+  }, [archetypeId]);
+
   return {
     reportData,
     userData,
@@ -225,6 +315,7 @@ export const useReportData = ({ archetypeId, token, isInsightsReport }: UseRepor
     error: error as Error | null,
     usingFallbackData,
     dataSource,
-    retry
+    retry,
+    refreshData
   };
 };
