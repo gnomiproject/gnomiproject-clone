@@ -60,9 +60,13 @@ const ArchetypeContent = ({ archetypeData, archetypeId, onRetakeAssessment }: Ar
             <div className="mt-6">
               <h3 className="text-lg font-semibold mb-2">Key Characteristics</h3>
               <ul className="list-disc list-inside space-y-2">
-                {keyCharacteristics.map((char, index) => (
+                {keyCharacteristics.map((char: any, index: number) => (
                   <li key={index} className="text-gray-700">
-                    {typeof char === 'string' ? char : char.name || JSON.stringify(char)}
+                    {typeof char === 'string' 
+                      ? char 
+                      : typeof char === 'object' && char !== null && 'name' in char
+                        ? char.name 
+                        : JSON.stringify(char)}
                   </li>
                 ))}
               </ul>
