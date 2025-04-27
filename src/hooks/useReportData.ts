@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { ArchetypeId } from '@/types/archetype';
 import { toast } from 'sonner';
@@ -32,8 +32,9 @@ export const useReportData = ({ archetypeId, token, isInsightsReport }: UseRepor
         
         // Different approach based on whether it's an insights report or a deep dive report
         if (isInsightsReport) {
-          // For insights reports, first try to fetch from Supabase
+          // For insights reports, try fetching data with multiple fallback strategies
           try {
+            console.log('Attempting to fetch from Analysis_Archetype_Full_Reports...');
             const { data, error } = await supabase
               .from('Analysis_Archetype_Full_Reports')
               .select('*')
@@ -46,14 +47,16 @@ export const useReportData = ({ archetypeId, token, isInsightsReport }: UseRepor
             }
             
             if (data) {
-              console.log('Found report data in Analysis_Archetype_Full_Reports');
+              console.log('Found report data in Analysis_Archetype_Full_Reports:', data.archetype_id);
               setReportData(data);
               setIsValidAccess(true);
               return;
+            } else {
+              console.log('No data found in Analysis_Archetype_Full_Reports');
             }
             
             // If no data in primary table, try level3_report_data
-            console.log('No insights report found, falling back to level3_report_data');
+            console.log('Falling back to level3_report_data...');
             const { data: fallbackData, error: fallbackError } = await supabase
               .from('level3_report_data')
               .select('*')
@@ -66,15 +69,37 @@ export const useReportData = ({ archetypeId, token, isInsightsReport }: UseRepor
             }
             
             if (fallbackData) {
-              console.log('Found fallback data in level3_report_data');
+              console.log('Found fallback data in level3_report_data:', fallbackData.archetype_id);
               setUsingFallbackData(true);
               setReportData(fallbackData);
               setIsValidAccess(true);
               return;
+            } else {
+              console.log('No data found in level3_report_data');
             }
             
-            // If still no data, use in-memory data
-            throw new Error('No database report data found');
+            // Try deepdive table as another fallback
+            console.log('Trying level4_deepdive_report_data as additional fallback...');
+            const { data: deepdiveData, error: deepdiveError } = await supabase
+              .from('level4_deepdive_report_data')
+              .select('*')
+              .eq('archetype_id', archetypeId)
+              .maybeSingle();
+              
+            if (deepdiveError) {
+              console.error('Error fetching deepdive data:', deepdiveError);
+            } else if (deepdiveData) {
+              console.log('Found data in level4_deepdive_report_data:', deepdiveData.archetype_id);
+              setUsingFallbackData(true);
+              setReportData(deepdiveData);
+              setIsValidAccess(true);
+              return;
+            } else {
+              console.log('No data found in level4_deepdive_report_data');
+            }
+            
+            // If all database attempts fail, use in-memory data
+            throw new Error('No database report data found, trying local data');
           }
           catch (dbError) {
             console.warn(`Database fetch failed: ${dbError}`);
@@ -84,18 +109,22 @@ export const useReportData = ({ archetypeId, token, isInsightsReport }: UseRepor
             const localArchetypeData = getArchetypeDetailedById(archetypeId as ArchetypeId);
             
             if (localArchetypeData) {
+              console.log('Found local archetype data:', localArchetypeData.id);
+              
               // Convert to expected report format
               const localReportData = {
                 archetype_id: localArchetypeData.id,
                 archetype_name: localArchetypeData.name,
-                short_description: localArchetypeData.short_description,
-                long_description: localArchetypeData.long_description,
-                key_characteristics: localArchetypeData.key_characteristics,
+                short_description: localArchetypeData.short_description || '',
+                long_description: localArchetypeData.long_description || '',
+                key_characteristics: localArchetypeData.key_characteristics || [],
                 strengths: localArchetypeData.enhanced?.swot?.strengths || [],
                 weaknesses: localArchetypeData.enhanced?.swot?.weaknesses || [],
                 opportunities: localArchetypeData.enhanced?.swot?.opportunities || [],
                 threats: localArchetypeData.enhanced?.swot?.threats || [],
-                strategic_recommendations: localArchetypeData.enhanced?.strategicPriorities || []
+                strategic_recommendations: localArchetypeData.enhanced?.strategicPriorities || [],
+                family_id: localArchetypeData.familyId,
+                family_name: localArchetypeData.familyName
               };
               
               setUsingFallbackData(true);
@@ -103,6 +132,7 @@ export const useReportData = ({ archetypeId, token, isInsightsReport }: UseRepor
               setIsValidAccess(true);
             } else {
               // No data found at all
+              console.error('No local data found for archetype:', archetypeId);
               setError(new Error('No report data found for this archetype'));
               setIsValidAccess(false);
             }
@@ -146,6 +176,10 @@ export const useReportData = ({ archetypeId, token, isInsightsReport }: UseRepor
             
             // Fetch the deep dive report data with proper error handling
             try {
+              // Try multiple tables with fallbacks
+              console.log('Trying to fetch deep dive report...');
+              
+              // First try full reports
               const { data: reportData, error: reportError } = await supabase
                 .from('Analysis_Archetype_Full_Reports')
                 .select('*')
@@ -159,6 +193,7 @@ export const useReportData = ({ archetypeId, token, isInsightsReport }: UseRepor
               
               // If report found, use it
               if (reportData) {
+                console.log('Found data in Analysis_Archetype_Full_Reports');
                 setReportData(reportData);
                 setUserData(requestData.assessment_result || null);
                 setAverageData(null); // Could fetch average data in future if needed
@@ -180,35 +215,59 @@ export const useReportData = ({ archetypeId, token, isInsightsReport }: UseRepor
               }
               
               if (fallbackData) {
+                console.log('Found data in level4_deepdive_report_data');
                 setUsingFallbackData(true);
                 setReportData(fallbackData);
                 setUserData(requestData.assessment_result || null);
                 setIsValidAccess(true);
-              } else {
-                // Try in-memory data as last resort
-                const localArchetypeData = getArchetypeDetailedById(archetypeId as ArchetypeId);
+                return;
+              }
+              
+              // Try level3 data as another fallback
+              console.log('Trying level3_report_data as additional fallback...');
+              const { data: level3Data, error: level3Error } = await supabase
+                .from('level3_report_data')
+                .select('*')
+                .eq('archetype_id', archetypeId)
+                .maybeSingle();
                 
-                if (localArchetypeData) {
-                  const localReportData = {
-                    archetype_id: localArchetypeData.id,
-                    archetype_name: localArchetypeData.name,
-                    short_description: localArchetypeData.short_description,
-                    long_description: localArchetypeData.long_description,
-                    key_characteristics: localArchetypeData.key_characteristics,
-                    strengths: localArchetypeData.enhanced?.swot?.strengths || [],
-                    weaknesses: localArchetypeData.enhanced?.swot?.weaknesses || [],
-                    opportunities: localArchetypeData.enhanced?.swot?.opportunities || [],
-                    threats: localArchetypeData.enhanced?.swot?.threats || []
-                  };
-                  
-                  setUsingFallbackData(true);
-                  setReportData(localReportData);
-                  setUserData(requestData.assessment_result || null);
-                  setIsValidAccess(true);
-                } else {
-                  setError(new Error('No report data found for this archetype'));
-                  setIsValidAccess(false);
-                }
+              if (level3Error) {
+                console.error('Error fetching level3 data:', level3Error);
+              } else if (level3Data) {
+                console.log('Found data in level3_report_data');
+                setUsingFallbackData(true);
+                setReportData(level3Data);
+                setUserData(requestData.assessment_result || null);
+                setIsValidAccess(true);
+                return;
+              }
+                
+              // Try in-memory data as last resort
+              const localArchetypeData = getArchetypeDetailedById(archetypeId as ArchetypeId);
+              
+              if (localArchetypeData) {
+                console.log('Using local archetype data as last resort');
+                const localReportData = {
+                  archetype_id: localArchetypeData.id,
+                  archetype_name: localArchetypeData.name,
+                  short_description: localArchetypeData.short_description || '',
+                  long_description: localArchetypeData.long_description || '',
+                  key_characteristics: localArchetypeData.key_characteristics || [],
+                  strengths: localArchetypeData.enhanced?.swot?.strengths || [],
+                  weaknesses: localArchetypeData.enhanced?.swot?.weaknesses || [],
+                  opportunities: localArchetypeData.enhanced?.swot?.opportunities || [],
+                  threats: localArchetypeData.enhanced?.swot?.threats || [],
+                  family_id: localArchetypeData.familyId
+                };
+                
+                setUsingFallbackData(true);
+                setReportData(localReportData);
+                setUserData(requestData.assessment_result || null);
+                setIsValidAccess(true);
+              } else {
+                console.error('No local data found for archetype:', archetypeId);
+                setError(new Error('No report data found for this archetype'));
+                setIsValidAccess(false);
               }
             } catch (reportFetchError) {
               console.error('Error in report data fetching:', reportFetchError);
@@ -224,7 +283,24 @@ export const useReportData = ({ archetypeId, token, isInsightsReport }: UseRepor
       } catch (error) {
         console.error('Error in useReportData:', error);
         setError(error as Error);
-        setIsValidAccess(false);
+        
+        // Last resort - try to use local data even if there was an error
+        const localArchetypeData = getArchetypeDetailedById(archetypeId as ArchetypeId);
+        if (localArchetypeData) {
+          console.log('Using local data after error as emergency fallback');
+          const emergencyData = {
+            archetype_id: localArchetypeData.id,
+            archetype_name: localArchetypeData.name,
+            short_description: localArchetypeData.short_description,
+            long_description: localArchetypeData.long_description,
+            key_characteristics: localArchetypeData.key_characteristics || [],
+          };
+          setReportData(emergencyData);
+          setUsingFallbackData(true);
+          setIsValidAccess(true);
+        } else {
+          setIsValidAccess(false);
+        }
       } finally {
         setIsLoading(false);
       }
