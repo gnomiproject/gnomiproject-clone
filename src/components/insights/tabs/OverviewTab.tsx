@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArchetypeDetailedData } from '@/types/archetype';
 import { insightReportSchema } from '@/schemas/insightReportSchema';
-import { formatFieldValue } from '@/utils/reports/fieldFormatters';
+import { useReportValidation } from '@/hooks/reports/useReportValidation';
+import { toast } from 'sonner';
 
 interface OverviewTabProps {
   archetypeData: ArchetypeDetailedData;
@@ -12,8 +13,22 @@ interface OverviewTabProps {
 }
 
 const OverviewTab = ({ archetypeData, familyColor }: OverviewTabProps) => {
-  // Get schema fields for overview section
   const overviewFields = insightReportSchema.overview.fields;
+  
+  const {
+    isValid,
+    validationMessages,
+    getSafeValue
+  } = useReportValidation(archetypeData, overviewFields);
+
+  // Show validation warnings if any
+  React.useEffect(() => {
+    if (!isValid && validationMessages.length > 0) {
+      toast.warning('Some data may be missing or invalid', {
+        description: validationMessages.join(', ')
+      });
+    }
+  }, [isValid, validationMessages]);
 
   if (!archetypeData) {
     return (
@@ -25,50 +40,20 @@ const OverviewTab = ({ archetypeData, familyColor }: OverviewTabProps) => {
     );
   }
 
-  // Extract fields based on schema with type safety
-  const archetypeName = (archetypeData[overviewFields.find(f => f === 'archetype_name') as keyof ArchetypeDetailedData] as string) || 
-                       archetypeData.name || 
-                       archetypeData.id?.toUpperCase() || 
-                       'Unknown Archetype';
-
-  const familyName = (archetypeData[overviewFields.find(f => f === 'family_name') as keyof ArchetypeDetailedData] as string) || 
-                    archetypeData.familyName || 
-                    "Healthcare Archetype Family";
-
-  const description = (archetypeData[overviewFields.find(f => f === 'long_description') as keyof ArchetypeDetailedData] as string) || 
-                     archetypeData.short_description || 
-                     (archetypeData.summary?.description as string) || 
-                     "This archetype represents organizations with specific healthcare management approaches and characteristics.";
-  
-  // Handle key characteristics with proper type checking
-  let keyCharacteristics: string[] = [];
-  const keyCharField = overviewFields.find(f => f === 'key_characteristics');
-  
-  if (keyCharField && keyCharField in archetypeData) {
-    const rawCharacteristics = archetypeData[keyCharField as keyof ArchetypeDetailedData];
-    if (Array.isArray(rawCharacteristics)) {
-      keyCharacteristics = rawCharacteristics.map(String);
-    } else if (typeof rawCharacteristics === 'string') {
-      keyCharacteristics = rawCharacteristics.split('\n').filter(Boolean);
-    }
-  } else if (archetypeData.summary?.keyCharacteristics) {
-    keyCharacteristics = archetypeData.summary.keyCharacteristics;
-  }
-  
-  const industries = (archetypeData[overviewFields.find(f => f === 'industries') as keyof ArchetypeDetailedData] as string) || 
-                    archetypeData.industries || 
-                    "Various industries including healthcare, finance, and technology";
-  
-  const safeColor = familyColor || '#6E59A5';
+  // Get validated values
+  const archetypeName = getSafeValue('archetype_name');
+  const familyName = getSafeValue('family_name');
+  const description = getSafeValue('long_description');
+  const industries = getSafeValue('industries');
+  const keyCharacteristics = getSafeValue('key_characteristics');
+  const safeColor = familyColor || getSafeValue('hex_color');
 
   return (
     <Card>
       <CardHeader style={{ borderBottom: `4px solid ${safeColor}` }}>
         <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-2">
           <div>
-            <CardTitle className="text-2xl font-bold">
-              {archetypeName}
-            </CardTitle>
+            <CardTitle className="text-2xl font-bold">{archetypeName}</CardTitle>
             <p className="text-gray-600 mt-1">{familyName}</p>
           </div>
           <div className="inline-flex items-center px-3 py-1 rounded-full text-sm" 
@@ -80,16 +65,15 @@ const OverviewTab = ({ archetypeData, familyColor }: OverviewTabProps) => {
       <CardContent className="space-y-6 pt-6">
         <p className="text-lg text-gray-700">{description}</p>
         
-        {keyCharacteristics.length > 0 && (
+        {Array.isArray(keyCharacteristics) && keyCharacteristics.length > 0 && (
           <div className="mt-6">
             <h3 className="text-lg font-semibold mb-2">Key Characteristics</h3>
             <ul className="list-disc list-inside space-y-2">
               {keyCharacteristics.map((char, index) => (
                 <li key={index} className="text-gray-700">
                   {typeof char === 'string' ? char : 
-                   (typeof char === 'object' && char !== null && 'name' in char) ? 
-                     (char as { name: string }).name : 
-                     JSON.stringify(char)}
+                   (typeof char === 'object' && char !== null) ? 
+                     JSON.stringify(char) : char}
                 </li>
               ))}
             </ul>
