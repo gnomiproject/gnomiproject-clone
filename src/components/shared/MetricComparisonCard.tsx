@@ -27,7 +27,13 @@ const MetricComparisonCard = ({
   
   // Determine display text
   const comparisonWord = difference > 0 ? "higher than" : "lower than";
-  const comparisonText = `${Math.abs(difference).toFixed(1)}% ${comparisonWord} average`;
+  
+  // Format the average value
+  const formattedAverage = title.toLowerCase().includes('cost') ? 
+    `$${average.toLocaleString()}` : 
+    average.toLocaleString();
+  
+  const comparisonText = `${Math.abs(difference).toFixed(1)}% ${comparisonWord} average (${formattedAverage})`;
   
   // Determine color for the comparison text
   const textColor = isBetter ? "text-green-600" : "text-amber-600";
