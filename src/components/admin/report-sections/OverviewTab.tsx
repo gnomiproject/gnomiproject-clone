@@ -10,6 +10,9 @@ interface OverviewTabProps {
 export const OverviewTab = ({ report }: OverviewTabProps) => {
   if (!report) return <p>No overview data available</p>;
 
+  // Get schema fields for the overview section
+  const overviewFields = insightReportSchema.overview.fields;
+
   return (
     <div className="space-y-6">
       {/* Archetype Name and Family */}
