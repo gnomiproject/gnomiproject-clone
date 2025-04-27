@@ -13,7 +13,20 @@ const OverviewTab = ({ archetypeData, familyColor }: OverviewTabProps) => {
   const familyName = archetypeData.familyName || archetypeData.family_name || "Healthcare Archetype Family";
   const longDescription = archetypeData.long_description || archetypeData.short_description || 
     (archetypeData.summary?.description) || "This archetype represents organizations with specific healthcare management approaches and characteristics.";
-  const keyCharacteristics = archetypeData.key_characteristics || [];
+  
+  // Ensure keyCharacteristics is always an array
+  let keyCharacteristics: any[] = [];
+  
+  if (archetypeData.key_characteristics) {
+    if (Array.isArray(archetypeData.key_characteristics)) {
+      keyCharacteristics = archetypeData.key_characteristics;
+    } else if (typeof archetypeData.key_characteristics === 'string') {
+      keyCharacteristics = archetypeData.key_characteristics.split('\n').filter(Boolean);
+    }
+  } else if (archetypeData.summary?.keyCharacteristics && Array.isArray(archetypeData.summary.keyCharacteristics)) {
+    keyCharacteristics = archetypeData.summary.keyCharacteristics;
+  }
+  
   const industries = archetypeData.industries || "Various industries including healthcare, finance, and technology";
 
   return (
@@ -40,7 +53,9 @@ const OverviewTab = ({ archetypeData, familyColor }: OverviewTabProps) => {
             <h3 className="text-lg font-semibold mb-2">Key Characteristics</h3>
             <ul className="list-disc list-inside space-y-2">
               {keyCharacteristics.map((char, index) => (
-                <li key={index} className="text-gray-700">{char}</li>
+                <li key={index} className="text-gray-700">{typeof char === 'string' ? char : 
+                  (typeof char === 'object' && char !== null && 'name' in char) ? char.name : 
+                  JSON.stringify(char)}</li>
               ))}
             </ul>
           </div>
