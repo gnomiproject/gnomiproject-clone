@@ -1,104 +1,122 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
-export interface Archetype {
+export type ArchetypeStatus = 'idle' | 'pending' | 'success' | 'error';
+
+export interface ArchetypeListItem {
   id: string;
-  code: string;
   name: string;
-  status: 'pending' | 'success' | 'error';
+  status: ArchetypeStatus;
   lastUpdated: string | null;
+  hasReport: boolean;
 }
 
-export const useArchetypeLoader = () => {
-  const [archetypes, setArchetypes] = useState<Archetype[]>([]);
+export interface UseArchetypeLoaderResult {
+  archetypes: ArchetypeListItem[];
+  setArchetypes: React.Dispatch<React.SetStateAction<ArchetypeListItem[]>>;
+  isLoading: boolean;
+  isRefreshing: boolean;
+  error: string | null;
+  loadArchetypes: () => Promise<void>;
+}
+
+export function useArchetypeLoader(): UseArchetypeLoaderResult {
+  const [archetypes, setArchetypes] = useState<ArchetypeListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
-  const loadArchetypes = async () => {
+
+  const loadArchetypes = useCallback(async () => {
+    const isFirstLoad = isLoading;
+    if (!isFirstLoad) {
+      setIsRefreshing(true);
+    }
+    
+    setError(null);
+    
     try {
-      setIsLoading(true);
-      setError(null);
+      console.log('Loading archetypes from database...');
+      // First check if the Analysis_Archetype_Full_Reports table exists and if archetypes have reports
+      let reportData: Record<string, boolean> = {};
       
-      // Try first to get data from Analysis_Archetype_Full_Reports
-      console.log('Fetching archetypes from Analysis_Archetype_Full_Reports...');
-      const { data: reportData, error: reportError } = await supabase
-        .from('Analysis_Archetype_Full_Reports')
-        .select('archetype_id, last_updated');
-      
-      if (reportError) {
-        console.warn('Error fetching from Analysis_Archetype_Full_Reports:', reportError);
+      try {
+        const { data: reportsList, error: reportsError } = await supabase
+          .from('Analysis_Archetype_Full_Reports')
+          .select('archetype_id');
+          
+        if (!reportsError && reportsList) {
+          reportsList.forEach(report => {
+            reportData[report.archetype_id] = true;
+          });
+        }
+      } catch (error) {
+        console.warn('Error checking reports table:', error);
+        // Continue even if this fails, we'll just assume no reports exist
       }
       
-      // Get core archetypes data
-      console.log('Fetching archetypes from Core_Archetype_Overview...');
-      const { data, error: archError } = await supabase
+      // Now get the list of archetypes from Core_Archetype_Overview
+      const { data: archetypesData, error: archetypesError } = await supabase
         .from('Core_Archetype_Overview')
-        .select('id, name, family_id');
+        .select('*');
         
-      if (archError) {
-        throw new Error(`Failed to load archetypes: ${archError.message}`);
+      if (archetypesError) {
+        throw new Error(`Failed to load archetypes: ${archetypesError.message}`);
       }
       
-      if (!data || data.length === 0) {
-        setError('No archetypes found in the database');
+      if (!archetypesData || archetypesData.length === 0) {
         setArchetypes([]);
+        setError('No archetypes found in the database');
+        if (!isFirstLoad) {
+          toast.warning('No archetypes found');
+        }
         return;
       }
       
-      // Map core data and report status
-      const mappedData = data.map(arch => {
-        const reportEntry = reportData?.find(r => r.archetype_id === arch.id);
-        const code = arch.id.toUpperCase(); // Could be overridden if there's a custom code field
-        
-        return {
-          id: arch.id,
-          code: code,
-          name: arch.name,
-          status: reportEntry ? 'success' : 'pending',
-          lastUpdated: reportEntry?.last_updated 
-            ? new Date(reportEntry.last_updated).toLocaleString() 
-            : null
-        } as Archetype;
-      });
+      console.log(`Loaded ${archetypesData.length} archetypes`);
       
-      setArchetypes(mappedData);
-      console.log(`Loaded ${mappedData.length} archetypes`);
+      const formattedArchetypes: ArchetypeListItem[] = archetypesData.map(archetype => ({
+        id: archetype.id,
+        name: archetype.name || archetype.id,
+        status: 'idle' as ArchetypeStatus,
+        lastUpdated: null,
+        hasReport: !!reportData[archetype.id]
+      }));
       
-    } catch (err) {
-      console.error('Error in loadArchetypes:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error loading archetypes';
+      setArchetypes(formattedArchetypes);
+      
+      if (!isFirstLoad) {
+        toast.success(`Loaded ${archetypesData.length} archetypes`);
+      }
+    } catch (error) {
+      console.error('Error in loadArchetypes:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load archetypes';
       setError(errorMessage);
       
-      toast.error('Failed to load archetypes', {
-        description: errorMessage
-      });
+      if (!isFirstLoad) {
+        toast.error('Error Loading Archetypes', {
+          description: errorMessage,
+        });
+      }
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
     }
-  };
-  
-  const refreshArchetypes = () => {
-    setIsRefreshing(true);
-    loadArchetypes();
-  };
-  
-  // Initial load
+  }, [isLoading]);
+
   useEffect(() => {
-    // Don't auto-load archetypes on mount - this will be triggered 
-    // after successful DB connection check
+    // We don't automatically load when component mounts
+    // because we want to check the database connection first
+    // This will be called from the parent component after connection success
   }, []);
-  
+
   return {
     archetypes,
     setArchetypes,
     isLoading,
     isRefreshing,
     error,
-    loadArchetypes,
-    refreshArchetypes
+    loadArchetypes
   };
-};
+}

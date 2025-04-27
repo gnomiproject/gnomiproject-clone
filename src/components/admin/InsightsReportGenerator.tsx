@@ -17,7 +17,7 @@ export function InsightsReportGenerator() {
   const [generationResult, setGenerationResult] = useState<GenerationResult | null>(null);
   const [selectedArchetype, setSelectedArchetype] = useState<string | null>(null);
   const [viewReportOpen, setViewReportOpen] = useState(false);
-  const [connectionStatus, setConnectionStatus] = useState<'checking' | 'connected' | 'error' | null>(null);
+  const [connectionStatus, setConnectionStatus] = useState<'unchecked' | 'checking' | 'connected' | 'error'>('unchecked');
   const [error, setError] = useState<string | null>(null);
   const [timeoutWarning, setTimeoutWarning] = useState(false);
   
@@ -42,7 +42,7 @@ export function InsightsReportGenerator() {
     if (connectionStatus === 'checking') {
       timeoutId = setTimeout(() => {
         setTimeoutWarning(true);
-      }, 5000);
+      }, 5000); // 5 seconds
     } else {
       setTimeoutWarning(false);
     }
@@ -59,10 +59,21 @@ export function InsightsReportGenerator() {
       setError(null);
       console.log("Testing database connection to Supabase...");
       
-      // First try a simple query to check connection
-      const { data, error: connError } = await supabase
+      // Set a timeout to prevent hanging connections
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Connection timed out after 15 seconds')), 15000);
+      });
+      
+      // Try a simple query with a fast timeout
+      const queryPromise = supabase
         .from('Core_Archetype_Overview')
         .select('count(*)', { count: 'exact', head: true });
+      
+      // Race the query against the timeout
+      const { data, error: connError } = await Promise.race([
+        queryPromise,
+        timeoutPromise.then(() => { throw new Error('Connection timed out'); })
+      ]) as any;
       
       if (connError) {
         console.error("Database connection error:", connError);
@@ -78,7 +89,7 @@ export function InsightsReportGenerator() {
       setConnectionStatus('connected');
       toast.success("Database Connection Successful");
       
-      // Once connected, load archetypes data
+      // Only load archetypes once connected
       await loadArchetypes();
       return true;
     } catch (err) {
@@ -164,7 +175,7 @@ export function InsightsReportGenerator() {
       
       <DatabaseConnectionStatus 
         status={connectionStatus}
-        error={error}
+        error={error || undefined}
         onRetry={checkDatabaseConnection}
         timeoutWarning={timeoutWarning}
       />
@@ -185,7 +196,7 @@ export function InsightsReportGenerator() {
         isGenerating={isGenerating}
         isLoading={isLoading}
         isRefreshing={isRefreshing}
-        connectionStatus={connectionStatus}
+        connectionStatus={connectionStatus === 'connected' ? 'connected' : connectionStatus === 'checking' ? 'checking' : connectionStatus === 'error' ? 'error' : null}
       />
 
       <div className="rounded-md border">

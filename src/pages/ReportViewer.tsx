@@ -1,20 +1,32 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import ArchetypeReport from '@/components/insights/ArchetypeReport';
 import DeepDiveReport from '@/components/report/DeepDiveReport';
 import ReportError from '@/components/report/ReportError';
+import ReportLoadingState from '@/components/report/ReportLoadingState';
 import { isValidArchetypeId } from '@/utils/archetypeValidation';
 import { ArchetypeId } from '@/types/archetype';
 import { useArchetypes } from '@/hooks/useArchetypes';
 import { useGetArchetype } from '@/hooks/useGetArchetype';
 import { useReportData } from '@/hooks/useReportData';
+import { toast } from 'sonner';
 
 const ReportViewer = () => {
   const { archetypeId = '', token } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const { getArchetypeDetailedById } = useArchetypes();
+  const [initialLoading, setInitialLoading] = useState(true);
+  
+  // After a brief initial loading state for better UX
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setInitialLoading(false);
+    }, 600);
+    
+    return () => clearTimeout(timer);
+  }, []);
   
   // Check if we're accessing via insights route
   const isInsightsReport = location.pathname.startsWith('/insights/report');
@@ -47,9 +59,8 @@ const ReportViewer = () => {
       isInsightsReport: false 
     });
 
-    if (isLoading) {
-      // Show loading state
-      return <div className="flex justify-center items-center min-h-screen">Loading report data...</div>;
+    if (isLoading || initialLoading) {
+      return <ReportLoadingState />;
     }
 
     if (!isValidAccess || error) {
@@ -73,10 +84,29 @@ const ReportViewer = () => {
     );
   }
 
+  // For insights reports or when no token is provided
+  if (initialLoading) {
+    return <ReportLoadingState />;
+  }
+
   // Get the archetype data with full database data for non-token cases
   const { archetypeData, isLoading, error, dataSource } = useGetArchetype(archetypeId as ArchetypeId);
   
-  // Fallback to local data if there's an error or while loading
+  // If loading, show loading state
+  if (isLoading) {
+    return <ReportLoadingState />;
+  }
+
+  // If there's an error, check if we can use local data
+  if (error) {
+    console.error('Error loading archetype data:', error);
+    toast.error(`Error loading data: ${error.message}`, { 
+      id: 'archetype-load-error',
+      duration: 5000
+    });
+  }
+  
+  // Fallback to local data if there's an error or no data
   const localArchetypeData = getArchetypeDetailedById(archetypeId as ArchetypeId);
   
   // If no data available even in local data, show a helpful error
