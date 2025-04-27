@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -92,42 +91,40 @@ const DeepDiveReport = ({ reportData, userData, averageData, loading }: DeepDive
   }
 
   // Default average data if not provided
-  if (!averageData) {
-    averageData = {
-      archetype_id: 'All_Average',
-      archetype_name: 'Population Average',
-      "Demo_Average Age": 40,
-      "Demo_Average Family Size": 3.0,
-      "Risk_Average Risk Score": 1.0,
-      "Cost_Medical & RX Paid Amount PMPY": 5000
-    };
-  }
+  const safeAverageData = averageData || {
+    archetype_id: 'All_Average',
+    archetype_name: 'Population Average',
+    "Demo_Average Age": 40,
+    "Demo_Average Family Size": 3.0,
+    "Risk_Average Risk Score": 1.0,
+    "Cost_Medical & RX Paid Amount PMPY": 5000
+  };
 
   // Render the content based on active section
   const renderContent = () => {
     switch (activeSection) {
       case 'introduction':
-        return <ReportIntroduction reportData={reportData} userData={userData} />;
+        return <ReportIntroduction reportData={reportData} userData={userData} averageData={safeAverageData} />;
       case 'profile':
-        return <ArchetypeProfile reportData={reportData} averageData={averageData} />;
+        return <ArchetypeProfile reportData={reportData} averageData={safeAverageData} />;
       case 'demographics':
-        return <DemographicsSection reportData={reportData} averageData={averageData} />;
+        return <DemographicsSection reportData={reportData} averageData={safeAverageData} />;
       case 'cost':
-        return <CostAnalysis reportData={reportData} averageData={averageData} />;
+        return <CostAnalysis reportData={reportData} averageData={safeAverageData} />;
       case 'utilization':
-        return <UtilizationPatterns reportData={reportData} averageData={averageData} />;
+        return <UtilizationPatterns reportData={reportData} averageData={safeAverageData} />;
       case 'disease':
-        return <DiseaseManagement reportData={reportData} averageData={averageData} />;
+        return <DiseaseManagement reportData={reportData} averageData={safeAverageData} />;
       case 'care-gaps':
-        return <CareGaps reportData={reportData} averageData={averageData} />;
+        return <CareGaps reportData={reportData} averageData={safeAverageData} />;
       case 'risk':
-        return <RiskFactors reportData={reportData} averageData={averageData} />;
+        return <RiskFactors reportData={reportData} averageData={safeAverageData} />;
       case 'recommendations':
-        return <StrategicRecommendations reportData={reportData} averageData={averageData} />;
+        return <StrategicRecommendations reportData={reportData} averageData={safeAverageData} />;
       case 'contact':
         return <ContactSection userData={userData} />;
       default:
-        return <ReportIntroduction reportData={reportData} userData={userData} />;
+        return <ReportIntroduction reportData={reportData} userData={userData} averageData={safeAverageData} />;
     }
   };
 

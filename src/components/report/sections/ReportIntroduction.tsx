@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ArrowRight, Award, TrendingUp } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
@@ -50,11 +51,7 @@ const MetricCard = ({
   );
 };
 
-const ReportIntroduction = ({ reportData, userData, averageData }: { 
-  reportData: any; 
-  userData: any;
-  averageData: any;
-}) => {
+const ReportIntroduction = ({ reportData, userData, averageData }: ReportIntroductionProps) => {
   const formatArchetypeLabel = (id: string) => {
     const formattedId = id.toLowerCase();
     const familyId = formattedId[0];
