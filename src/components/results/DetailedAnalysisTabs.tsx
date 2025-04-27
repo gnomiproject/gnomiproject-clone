@@ -1,15 +1,12 @@
+
 import React, { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ArchetypeDetailedData } from '@/types/archetype';
 import { ChevronDown, LineChart, PieChart, ListChecks, Activity, CircleDashed } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useIsMobile } from '@/hooks/use-mobile';
-import OverviewTab from './tabs/OverviewTab';
-import KeyMetricsTab from './tabs/KeyMetricsTab';
-import SwotTab from './tabs/SwotTab';
-import DiseaseManagementTab from './tabs/DiseaseManagementTab';
-import RecommendationsTab from './tabs/RecommendationsTab';
 import RetakeButton from './RetakeButton';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface DetailedAnalysisTabsProps {
   archetypeData: ArchetypeDetailedData;
@@ -36,6 +33,18 @@ const DetailedAnalysisTabs = ({ archetypeData, onRetakeAssessment }: DetailedAna
   const getActiveTabLabel = () => {
     return tabItems.find(tab => tab.value === activeTab)?.label || "Overview";
   };
+
+  // Temporary placeholder component for tabs
+  const PlaceholderTabContent = ({ title }: { title: string }) => (
+    <Card>
+      <CardContent className="p-6">
+        <div className="text-center py-8">
+          <h3 className="text-lg font-medium mb-2">{title} Content</h3>
+          <p className="text-gray-500">This tab content is currently being updated.</p>
+        </div>
+      </CardContent>
+    </Card>
+  );
   
   return (
     <div className="bg-white px-4 md:px-8 py-6">      
@@ -89,23 +98,23 @@ const DetailedAnalysisTabs = ({ archetypeData, onRetakeAssessment }: DetailedAna
         )}
 
         <TabsContent value="overview">
-          <OverviewTab archetypeData={archetypeData} />
+          <PlaceholderTabContent title="Overview" />
         </TabsContent>
         
         <TabsContent value="metrics">
-          <KeyMetricsTab archetypeData={archetypeData} />
+          <PlaceholderTabContent title="Key Metrics" />
         </TabsContent>
         
         <TabsContent value="swot">
-          <SwotTab archetypeData={archetypeData} />
+          <PlaceholderTabContent title="SWOT Analysis" />
         </TabsContent>
         
         <TabsContent value="disease">
-          <DiseaseManagementTab archetypeData={archetypeData} />
+          <PlaceholderTabContent title="Disease Management" />
         </TabsContent>
         
         <TabsContent value="recommendations">
-          <RecommendationsTab archetypeData={archetypeData} />
+          <PlaceholderTabContent title="Recommendations" />
         </TabsContent>
       </Tabs>
       
