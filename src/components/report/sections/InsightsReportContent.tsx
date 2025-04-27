@@ -54,6 +54,72 @@ const InsightsReportContent: React.FC<InsightsReportContentProps> = ({ archetype
             </div>
           </Card>
         )}
+        
+        {/* Add SWOT Analysis section */}
+        {(archetype?.strengths || archetype?.weaknesses || archetype?.opportunities || archetype?.threats) && (
+          <Card className="p-6">
+            <h2 className="text-2xl font-bold mb-4">SWOT Analysis</h2>
+            
+            {archetype?.strengths && archetype.strengths.length > 0 && (
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold text-green-700">Strengths</h3>
+                <ul className="list-disc pl-5 mt-2 space-y-1">
+                  {archetype.strengths.map((item: string, index: number) => (
+                    <li key={`strength-${index}`} className="text-gray-700">{item}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            
+            {archetype?.weaknesses && archetype.weaknesses.length > 0 && (
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold text-red-700">Weaknesses</h3>
+                <ul className="list-disc pl-5 mt-2 space-y-1">
+                  {archetype.weaknesses.map((item: string, index: number) => (
+                    <li key={`weakness-${index}`} className="text-gray-700">{item}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            
+            {archetype?.opportunities && archetype.opportunities.length > 0 && (
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold text-blue-700">Opportunities</h3>
+                <ul className="list-disc pl-5 mt-2 space-y-1">
+                  {archetype.opportunities.map((item: string, index: number) => (
+                    <li key={`opportunity-${index}`} className="text-gray-700">{item}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            
+            {archetype?.threats && archetype.threats.length > 0 && (
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold text-orange-700">Threats</h3>
+                <ul className="list-disc pl-5 mt-2 space-y-1">
+                  {archetype.threats.map((item: string, index: number) => (
+                    <li key={`threat-${index}`} className="text-gray-700">{item}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </Card>
+        )}
+        
+        {/* Add Strategic Recommendations section */}
+        {archetype?.strategic_recommendations && archetype.strategic_recommendations.length > 0 && (
+          <Card className="p-6">
+            <h2 className="text-2xl font-bold mb-4">Strategic Recommendations</h2>
+            <div className="space-y-4">
+              {archetype.strategic_recommendations.map((rec: any, index: number) => (
+                <div key={`rec-${index}`} className="p-4 border-l-4 border-blue-500 bg-blue-50 rounded">
+                  <h3 className="font-bold text-lg">{rec.title || `Recommendation ${rec.recommendation_number || (index + 1)}`}</h3>
+                  <p className="mt-2 text-gray-700">{rec.description}</p>
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
       </div>
     </div>
   );
