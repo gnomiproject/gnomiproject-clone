@@ -44,6 +44,11 @@ const DeepDiveReport = ({
   isAdminView = false
 }: DeepDiveReportProps) => {
   const isMobile = useIsMobile();
+  
+  // Add debug logging to see the data structure
+  console.log('DeepDiveReport: Data received:', reportData);
+  
+  // Check if we're using fallback data
   const usingFallbackData = !reportData.strategic_recommendations || reportData.strategic_recommendations.length === 0;
   
   return (
@@ -70,8 +75,8 @@ const DeepDiveReport = ({
       
       <div className="container mx-auto px-4 md:px-8 py-8 max-w-[1200px]">
         <ReportIntroduction
-          archetypeName={reportData.name}
-          archetypeId={reportData.id}
+          archetypeName={reportData.name || reportData.archetype_name || 'Unknown Archetype'}
+          archetypeId={reportData.id || reportData.archetype_id || 'unknown'}
           userData={userData}
           isAdminView={isAdminView}
         />
