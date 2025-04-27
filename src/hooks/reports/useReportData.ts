@@ -3,9 +3,10 @@ import { useState, useEffect, useCallback } from 'react';
 import { getDataSource } from '@/utils/reports/schemaUtils';
 import type { ReportType } from '@/utils/reports/schemaUtils';
 import { getFromCache, setInCache, clearFromCache } from '@/utils/reports/reportCache';
-import { processReportData } from '@/utils/reports/reportDataTransforms';
+import { processReportData, AverageData } from '@/utils/reports/reportDataTransforms';
 import { fetchReportData, fetchTokenAccess } from './useFetchReportData';
 import { toast } from "@/hooks/use-toast";
+import { ArchetypeDetailedData } from '@/types/archetype';
 
 interface UseReportDataOptions {
   archetypeId?: string;
@@ -15,9 +16,9 @@ interface UseReportDataOptions {
 }
 
 interface UseReportDataResult {
-  reportData: any;
+  reportData: ArchetypeDetailedData | null;
   userData: any;
-  averageData: any;
+  averageData: AverageData;
   isLoading: boolean;
   isValidAccess: boolean;
   error: Error | null;
@@ -32,9 +33,9 @@ export const useReportData = ({
   isInsightsReport, 
   skipCache = false 
 }: UseReportDataOptions): UseReportDataResult => {
-  const [reportData, setReportData] = useState<any>(null);
+  const [reportData, setReportData] = useState<ArchetypeDetailedData | null>(null);
   const [userData, setUserData] = useState<any>(null);
-  const [averageData, setAverageData] = useState<any>(null);
+  const [averageData, setAverageData] = useState<AverageData>(processReportData(null).averageData);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isValidAccess, setIsValidAccess] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
@@ -167,4 +168,3 @@ export const useReportData = ({
     refreshData
   };
 };
-
