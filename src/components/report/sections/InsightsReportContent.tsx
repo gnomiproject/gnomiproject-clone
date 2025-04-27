@@ -15,15 +15,18 @@ const InsightsReportContent: React.FC<InsightsReportContentProps> = ({ archetype
   console.log('InsightsReportContent: Rendering with archetype data:', {
     hasData: !!archetype,
     keys: archetype ? Object.keys(archetype) : [],
-    name: archetype?.name || archetype?.archetype_name || 'No name'
+    name: archetype?.name || 'No name'
   });
+
+  // Safely access the name property
+  const archetypeName = archetype?.name || '';
 
   return (
     <div className="max-w-7xl mx-auto py-8 space-y-8">
       <div className="flex justify-between items-start mb-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">
-            {archetype.name || archetype.archetype_name} Insights Report
+            {archetypeName} Insights Report
           </h1>
           <p className="text-gray-500 mt-2">
             Comprehensive analysis and strategic recommendations
