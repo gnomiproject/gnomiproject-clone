@@ -5,11 +5,12 @@ import { ArchetypeId } from '@/types/archetype';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
-import { ChartBar, FileText, StarHalf, Award, Building2, Rocket, Heart } from 'lucide-react';
+import { ChartBar, FileText, StarHalf, Award, Building2, Rocket, Heart, AlertCircle } from 'lucide-react';
 import { gnomeImages } from '@/utils/gnomeImages';
 import { getArchetypeColorHex } from '@/data/colors';
 import Button from '@/components/shared/Button';
 import { cn } from '@/lib/utils';
+import ReportError from '@/components/report/ReportError';
 
 interface ArchetypeReportProps {
   archetypeId: ArchetypeId;
@@ -23,7 +24,17 @@ const ArchetypeReport = ({ archetypeId, reportData }: ArchetypeReportProps) => {
   const family = archetype ? getFamilyById(archetype.familyId) : undefined;
   const traits = getTraitsForArchetype(archetypeId);
   
-  if (!archetype) return <div className="text-left">Archetype not found</div>;
+  // If no archetype data is found, show a user-friendly error with retry option
+  if (!archetype) {
+    return (
+      <ReportError 
+        title="Archetype Not Found"
+        message={`We couldn't find data for archetype "${archetypeId}". This might be due to a temporary data loading issue.`}
+        actionLabel="Retry Loading Data"
+        onAction={() => window.location.reload()}
+      />
+    );
+  }
 
   // Using proper archetype-specific color classes
   const archetypeColor = `archetype-${archetype.id}`;
