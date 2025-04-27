@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { calculateArchetypeMatch, getAssessmentQuestions } from '../utils/assessmentUtils';
@@ -144,10 +145,10 @@ export const useAssessment = () => {
         sessionStorage.setItem(SESSION_RESULTS_KEY, JSON.stringify(resultWithEmployeeCount));
         
         console.log("Assessment completed. Results:", assessmentResult);
-        console.log("Navigating to insights with sessionId:", sessionId);
+        console.log("Navigating directly to report with sessionId:", sessionId);
         
-        // Navigate to insights page with the results and session ID
-        navigate('/insights', { 
+        // Navigate directly to the report page with the results and session ID
+        navigate(`/insights/report/${assessmentResult.primaryArchetype}`, { 
           state: { 
             selectedArchetype: assessmentResult.primaryArchetype,
             sessionId: sessionId
