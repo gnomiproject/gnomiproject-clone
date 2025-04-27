@@ -7,6 +7,7 @@ import { RefreshCw } from 'lucide-react';
 import { useAdminReportData } from '@/hooks/useAdminReportData';
 import InsightsReportContent from '@/components/report/sections/InsightsReportContent';
 import DeepDiveReportContent from '@/components/report/sections/DeepDiveReportContent';
+import { getReportSchema, ReportType } from '@/utils/reports/schemaUtils';
 
 const AdminReportViewer = () => {
   const { archetypeId = '' } = useParams();
@@ -17,6 +18,10 @@ const AdminReportViewer = () => {
     return path.includes('insights-report') ? 'insights' : 'deepdive';
   });
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // Get the schema for the current report type
+  const schemaType: ReportType = reportType === 'insights' ? 'insight' : 'deepDive';
+  const reportSchema = getReportSchema(schemaType);
 
   // Get report data from the admin hook
   const {

@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { insightReportSchema } from '@/schemas/insightReportSchema';
 
 interface OverviewTabProps {
   report: any;
@@ -8,9 +9,12 @@ interface OverviewTabProps {
 export const OverviewTab = ({ report }: OverviewTabProps) => {
   if (!report) return <p>No overview data available</p>;
 
+  // Get the fields from our schema
+  const overviewFields = insightReportSchema.overview.fields;
+
   return (
     <div className="space-y-6">
-      {/* Archetype Name */}
+      {/* Archetype Name and Family */}
       <div className="border-b pb-4">
         <h1 className="text-2xl font-bold text-gray-900">
           {report.archetype_name || 'Unnamed Archetype'}

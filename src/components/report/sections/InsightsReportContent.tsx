@@ -3,6 +3,7 @@ import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Section } from '@/components/shared/Section';
 import SectionTitle from '@/components/shared/SectionTitle';
+import { insightReportSchema } from '@/schemas/insightReportSchema';
 
 interface InsightsReportContentProps {
   archetype: any; // We'll use any for now until we define a more specific type
@@ -31,7 +32,7 @@ const InsightsReportContent: React.FC<InsightsReportContentProps> = ({ archetype
       {/* 1. Overview Section */}
       <Section id="overview">
         <SectionTitle 
-          title="Overview" 
+          title={insightReportSchema.overview.title}
           subtitle="General information about this archetype population"
         />
         <Card className="p-6">
@@ -48,20 +49,23 @@ const InsightsReportContent: React.FC<InsightsReportContentProps> = ({ archetype
       {/* 2. Key Metrics Section */}
       <Section id="key-metrics">
         <SectionTitle 
-          title="Key Metrics" 
+          title={insightReportSchema.metrics.title}
           subtitle="Important performance indicators for this population"
         />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* We'll render metric cards dynamically based on available data */}
-          {Object.entries(archetype || {})
-            .filter(([key]) => key.includes('_') && typeof archetype[key] === 'number')
-            .slice(0, 6) // Limit to 6 key metrics
-            .map(([key, value]: [string, any]) => (
-              <Card key={key} className="p-4">
-                <p className="text-sm text-gray-500">{key.replace(/_/g, ' ')}</p>
-                <p className="text-2xl font-bold">{typeof value === 'number' ? value.toLocaleString() : value}</p>
-              </Card>
-            ))}
+          {/* We'll render metric cards dynamically based on schema definition */}
+          {insightReportSchema.metrics.fields.map((fieldKey) => {
+            const value = archetype[fieldKey];
+            if (value !== undefined) {
+              return (
+                <Card key={fieldKey} className="p-4">
+                  <p className="text-sm text-gray-500">{fieldKey.replace(/_/g, ' ')}</p>
+                  <p className="text-2xl font-bold">{typeof value === 'number' ? value.toLocaleString() : value}</p>
+                </Card>
+              );
+            }
+            return null;
+          })}
         </div>
       </Section>
       
