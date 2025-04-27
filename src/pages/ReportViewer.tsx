@@ -34,6 +34,10 @@ const ReportViewer = () => {
     return () => clearTimeout(timer);
   }, []);
   
+  // Always call the hook regardless of the path
+  // This ensures consistent hook order on every render
+  const { archetypeData: archetypeApiData, isLoading: archetypeLoading, error: archetypeError, dataSource } = useGetArchetype(archetypeId as ArchetypeId);
+  
   // Validate archetype ID early
   if (!isValidArchetypeId(archetypeId)) {
     return (
@@ -55,7 +59,7 @@ const ReportViewer = () => {
       isLoading, 
       isValidAccess, 
       error, 
-      dataSource 
+      dataSource: reportDataSource 
     } = useReportData({ 
       archetypeId, 
       token, 
@@ -88,23 +92,14 @@ const ReportViewer = () => {
   }
 
   // For insights reports or when no token is provided
-  if (initialLoading) {
-    return <ReportLoadingState />;
-  }
-
-  // Get the archetype data with full database data for non-token cases
-  // Fix: Ensure this hook is always called to prevent "rendered more hooks than previous render" error
-  const { archetypeData, isLoading, error, dataSource } = useGetArchetype(archetypeId as ArchetypeId);
-  
-  // If loading, show loading state
-  if (isLoading) {
+  if (initialLoading || archetypeLoading) {
     return <ReportLoadingState />;
   }
 
   // If there's an error, check if we can use local data
-  if (error) {
-    console.error('Error loading archetype data:', error);
-    toast.error(`Error loading data: ${error.message}`, { 
+  if (archetypeError) {
+    console.error('Error loading archetype data:', archetypeError);
+    toast.error(`Error loading data: ${archetypeError.message}`, { 
       id: 'archetype-load-error',
       duration: 5000
     });
@@ -114,7 +109,7 @@ const ReportViewer = () => {
   const localArchetypeData = getArchetypeDetailedById(archetypeId as ArchetypeId);
   
   // If no data available even in local data, show a helpful error
-  if (!localArchetypeData && !archetypeData) {
+  if (!localArchetypeData && !archetypeApiData) {
     return (
       <ReportError 
         title="Report Not Available"
@@ -126,7 +121,7 @@ const ReportViewer = () => {
   }
 
   // Report data will use real database data or fallback to local data
-  const reportData = archetypeData || localArchetypeData;
+  const reportData = archetypeApiData || localArchetypeData;
   
   // Dummy data for other report properties that might be needed for DeepDiveReport
   const userData = {
