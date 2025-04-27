@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import SimpleReportLinks from '@/components/admin/reports/SimpleReportLinks';
 
@@ -17,20 +16,17 @@ const Admin = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="insights" className="w-full">
-            <TabsList className="mb-4">
-              <TabsTrigger value="insights">Insights Reports</TabsTrigger>
-              <TabsTrigger value="deepdive">Deep Dive Reports</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="insights">
+          <div className="space-y-8">
+            <div>
+              <h2 className="text-xl font-semibold mb-4">Insights Reports</h2>
               <SimpleReportLinks reportType="insights" />
-            </TabsContent>
+            </div>
             
-            <TabsContent value="deepdive">
+            <div>
+              <h2 className="text-xl font-semibold mb-4">Deep Dive Reports</h2>
               <SimpleReportLinks reportType="deepdive" />
-            </TabsContent>
-          </Tabs>
+            </div>
+          </div>
         </CardContent>
       </Card>
       
