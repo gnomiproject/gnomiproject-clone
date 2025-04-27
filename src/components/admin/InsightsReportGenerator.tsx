@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -27,7 +28,6 @@ import {
 } from "@/components/ui/table";
 import ReportDetailView from './ReportDetailView';
 import { Link } from 'react-router-dom';
-import { getSecureReportUrl } from '@/utils/tokenGenerator';
 
 interface ArchetypeSummary {
   id: string;
@@ -178,14 +178,14 @@ export function InsightsReportGenerator() {
     setViewReportOpen(true);
   };
 
-  // Generate a secure report URL for a specific archetype
-  const getArchetypeReportUrl = (archetypeId: string): string => {
-    return getSecureReportUrl(archetypeId);
+  // Get direct URL for insights report (no token needed)
+  const getInsightsReportUrl = (archetypeId: string): string => {
+    return `/insights/report/${archetypeId}`;
   };
   
   // Copy report URL to clipboard
   const copyReportUrl = (archetypeId: string) => {
-    const url = window.location.origin + getSecureReportUrl(archetypeId);
+    const url = window.location.origin + getInsightsReportUrl(archetypeId);
     navigator.clipboard.writeText(url).then(() => {
       toast.success("Report URL copied to clipboard");
     }).catch(err => {
@@ -338,10 +338,10 @@ export function InsightsReportGenerator() {
                         size="sm"
                         asChild
                         disabled={archetype.status !== 'success'}
-                        title="View secure report page"
+                        title="View insights report page"
                         className="h-8 w-8 p-0"
                       >
-                        <Link to={getSecureReportUrl(archetype.id)} target="_blank">
+                        <Link to={getInsightsReportUrl(archetype.id)} target="_blank">
                           <ExternalLink className="h-4 w-4" />
                           <span className="sr-only">View Report Page</span>
                         </Link>

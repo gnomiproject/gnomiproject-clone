@@ -1,5 +1,6 @@
+
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import DeepDiveReport from '@/components/report/DeepDiveReport';
 import { Button } from '@/components/ui/button';
@@ -41,12 +42,16 @@ const defaultAverageData = {
 const ReportViewer = () => {
   const { archetypeId = '', token = '' } = useParams();
   const navigate = useNavigate();
-  const [isValidToken, setIsValidToken] = useState<boolean | null>(null);
+  const location = useLocation();
+  const [isValidAccess, setIsValidAccess] = useState<boolean | null>(null);
   const [reportData, setReportData] = useState<any>(null);
   const [userData, setUserData] = useState<any>(null);
   const [averageData, setAverageData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [usingFallbackData, setUsingFallbackData] = useState(false);
+  
+  // Check if we're accessing via insights route (no token needed)
+  const isInsightsReport = location.pathname.startsWith('/insights/report');
 
   function isValidArchetypeId(id: string): boolean {
     const validIds: ArchetypeId[] = ['a1', 'a2', 'a3', 'b1', 'b2', 'b3', 'c1', 'c2', 'c3'];
@@ -57,10 +62,16 @@ const ReportViewer = () => {
     const fetchReportData = async () => {
       try {
         setIsLoading(true);
-        console.log('Starting report data fetch for:', archetypeId, 'with token:', token);
+        console.log('Starting report data fetch for:', archetypeId, 'access path:', location.pathname);
         
-        if (!token) {
-          console.log('No token provided - checking if accessing from admin panel');
+        // For insights reports, we don't need token validation
+        if (isInsightsReport) {
+          console.log('Insights report access - no token required');
+          setIsValidAccess(true);
+        }
+        // For admin panel access with no token provided
+        else if (!token && location.pathname.startsWith('/report/')) {
+          console.log('Admin access route - checking admin validation');
           const isAdmin = validateReportToken(archetypeId, token);
           if (!isAdmin) {
             console.log('Not an admin access, redirecting to insights');
@@ -68,9 +79,11 @@ const ReportViewer = () => {
             return;
           }
           console.log('Admin access validated');
-          setIsValidToken(true);
-        } else {
-          console.log('Checking token validity:', { archetypeId, token });
+          setIsValidAccess(true);
+        } 
+        // For deep dive reports with token
+        else if (token) {
+          console.log('Checking token validity for deep dive report:', { archetypeId, token });
           
           const { data: userData, error: userError } = await supabase
             .from('report_requests')
@@ -83,14 +96,14 @@ const ReportViewer = () => {
 
           if (userError) {
             console.error('Error fetching user data:', userError);
-            setIsValidToken(false);
+            setIsValidAccess(false);
             setIsLoading(false);
             return;
           }
 
           if (!userData) {
             console.error('No user data found for token:', token);
-            setIsValidToken(false);
+            setIsValidAccess(false);
             setIsLoading(false);
             return;
           }
@@ -98,16 +111,17 @@ const ReportViewer = () => {
           const isExpired = userData.expires_at && new Date(userData.expires_at) < new Date();
           if (isExpired) {
             console.error('Report link expired');
-            setIsValidToken(false);
+            setIsValidAccess(false);
             setIsLoading(false);
             toast.error('This report link has expired.');
             return;
           }
 
           setUserData(userData);
-          setIsValidToken(true);
+          setIsValidAccess(true);
         }
 
+        // Fetch average data for comparisons regardless of access path
         const { data: avgData, error: avgError } = await supabase
           .from('level4_deepdive_report_data')
           .select('*')
@@ -126,6 +140,7 @@ const ReportViewer = () => {
           setAverageData(defaultAverageData);
         }
 
+        // Fetch the archetype-specific report data
         const { data: archetypeData, error: archetypeError } = await supabase
           .from('level4_deepdive_report_data')
           .select('*')
@@ -153,7 +168,7 @@ const ReportViewer = () => {
         
       } catch (err) {
         console.error('Error fetching report:', err);
-        setIsValidToken(false);
+        setIsValidAccess(false);
       } finally {
         setIsLoading(false);
       }
@@ -162,7 +177,7 @@ const ReportViewer = () => {
     if (archetypeId) {
       fetchReportData();
     }
-  }, [token, archetypeId, navigate]);
+  }, [token, archetypeId, navigate, location.pathname, isInsightsReport]);
 
   if (!isValidArchetypeId(archetypeId)) {
     return (
@@ -191,7 +206,7 @@ const ReportViewer = () => {
     );
   }
 
-  if (isValidToken === false) {
+  if (isValidAccess === false) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6 text-center">
