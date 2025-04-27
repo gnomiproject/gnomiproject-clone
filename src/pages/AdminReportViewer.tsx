@@ -1,9 +1,9 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, Home } from 'lucide-react';
+import { RefreshCw, Home, Bug } from 'lucide-react';
 import InsightsReportContent from '@/components/report/sections/InsightsReportContent';
 import ContactSection from '@/components/report/sections/ContactSection';
 import DeepDiveReport from '@/components/report/DeepDiveReport';
@@ -15,6 +15,7 @@ const AdminReportViewer = () => {
   const { archetypeId = '' } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const [debugMode, setDebugMode] = useState(false);
   
   // Determine report type based on URL and parameters
   const searchParams = new URLSearchParams(location.search);
@@ -22,11 +23,27 @@ const AdminReportViewer = () => {
   const isInsightsReport = location.pathname.includes('insights-report') || queryReportType === 'insights';
   const reportType = isInsightsReport ? 'insights' : 'deepdive';
   
-  // Use the custom hook for data fetching
+  // Use the custom hook for data fetching with explicit parameters
   const { data: rawData, loading, error, dataSource, refreshData } = useAdminReportData({
     archetypeId,
-    reportType
+    reportType,
+    skipCache: false
   });
+
+  useEffect(() => {
+    // Log debugging information when component mounts or parameters change
+    console.log('AdminReportViewer: Mounted/Updated with params:', {
+      archetypeId,
+      reportType,
+      isInsightsReport,
+      hasData: !!rawData,
+      dataSource
+    });
+    
+    return () => {
+      console.log('AdminReportViewer: Unmounting component');
+    };
+  }, [archetypeId, reportType, rawData, dataSource]);
 
   // Mock user data for admin view
   const mockUserData = {
@@ -54,8 +71,63 @@ const AdminReportViewer = () => {
     });
   };
 
+  const toggleDebugMode = () => {
+    setDebugMode(!debugMode);
+    toast({
+      title: debugMode ? "Debug mode disabled" : "Debug mode enabled",
+      description: debugMode ? "Hiding detailed debug information" : "Showing detailed debug information",
+    });
+  };
+
   return (
     <div className="container mx-auto py-8 px-4">
+      {/* Debug toggle button (visible only in development) */}
+      {import.meta.env.DEV && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={toggleDebugMode}
+          className="absolute top-4 right-4 flex items-center gap-2"
+        >
+          <Bug className="h-4 w-4" />
+          {debugMode ? "Hide Debug Info" : "Show Debug Info"}
+        </Button>
+      )}
+      
+      {/* Debug information panel */}
+      {debugMode && (
+        <Card className="mb-6 border-amber-300 bg-amber-50">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-amber-800">Debug Information</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              <div><strong>Archetype ID:</strong></div>
+              <div>{archetypeId || 'Not set'}</div>
+              <div><strong>Report Type:</strong></div>
+              <div>{reportType} (isInsightsReport: {String(isInsightsReport)})</div>
+              <div><strong>URL Path:</strong></div>
+              <div>{location.pathname}</div>
+              <div><strong>Query String:</strong></div>
+              <div>{location.search}</div>
+              <div><strong>Data Source:</strong></div>
+              <div>{dataSource || 'None'}</div>
+              <div><strong>Loading:</strong></div>
+              <div>{String(loading)}</div>
+              <div><strong>Has Error:</strong></div>
+              <div>{String(!!error)}</div>
+              <div><strong>Has Data:</strong></div>
+              <div>{String(!!rawData)}</div>
+            </div>
+            {error && (
+              <div className="mt-4 p-2 bg-red-100 text-red-800 rounded">
+                <strong>Error:</strong> {error.message}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       {loading ? (
         <Card>
           <CardContent className="pt-6">
@@ -92,16 +164,16 @@ const AdminReportViewer = () => {
                   <CardTitle>
                     <div className="flex items-center gap-2">
                       <span className="px-2 py-1 bg-gray-200 rounded text-sm">
-                        {rawData.code}
+                        {rawData.code || rawData.archetype_id?.toUpperCase()}
                       </span>
-                      {rawData.name}
+                      {rawData.name || rawData.archetype_name}
                     </div>
                   </CardTitle>
                   <p className="text-sm text-gray-500">
-                    {rawData.reportType} Report View
+                    {rawData.reportType || (isInsightsReport ? 'Insights' : 'Deep Dive')} Report View
                   </p>
                   <div className="text-xs text-gray-400 mt-1">
-                    Data source: {dataSource}
+                    Data source: {dataSource || 'Unknown'}
                   </div>
                 </div>
                 <Button 
@@ -150,7 +222,7 @@ const AdminReportViewer = () => {
               <Card>
                 <CardHeader>
                   <CardTitle>Raw Data Explorer</CardTitle>
-                  <p className="text-xs text-gray-500">Source: {dataSource}</p>
+                  <p className="text-xs text-gray-500">Source: {dataSource || 'Unknown'}</p>
                 </CardHeader>
                 <CardContent>
                   <div className="bg-gray-100 rounded p-4 overflow-auto max-h-[800px]">
