@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -86,8 +87,9 @@ const OverviewTab = ({ archetypeData, familyColor }: OverviewTabProps) => {
               {keyCharacteristics.map((char, index) => (
                 <li key={index} className="text-gray-700">
                   {typeof char === 'string' ? char : 
-                   (typeof char === 'object' && char !== null && 'name' in char) ? char.name : 
-                   JSON.stringify(char)}
+                   (typeof char === 'object' && char !== null && 'name' in char) ? 
+                     (char as { name: string }).name : 
+                     JSON.stringify(char)}
                 </li>
               ))}
             </ul>
