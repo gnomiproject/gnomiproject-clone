@@ -1,19 +1,15 @@
 
-// Add or update these types in the existing file
+// Common types for report schemas
+export type ReportField = string;
 
-export interface GenerationResult {
-  total: number;
-  succeeded: number;
-  failed: number;
-  archetypeIds: string[];
-  errors?: string[];
+export type ReportDataSource = "level3_report_data" | "level4_deepdive_report_data";
+
+export interface ReportSection {
+  title: string;
+  fields: ReportField[];
+  dataSource: ReportDataSource;
 }
 
-export interface ReportGenerationResults {
-  total: number;
-  processed: number;
-  succeeded: number;
-  failed: number;
-  archetypeIds: string[];
-  errors: string[];
-}
+export type ReportSchema = {
+  [sectionKey: string]: ReportSection;
+};
