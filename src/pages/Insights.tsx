@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useArchetypes } from '@/hooks/useArchetypes';
@@ -12,10 +13,12 @@ import { useQueryClient } from '@tanstack/react-query';
 // Storage keys
 const INSIGHTS_STORAGE_KEY = 'healthcareArchetypeInsights';
 const SESSION_RESULTS_KEY = 'healthcareArchetypeSessionResults';
+const SESSION_ID_KEY = 'healthcareArchetypeSessionId';
 
 const Insights = () => {
   const [selectedArchetype, setSelectedArchetype] = useState<ArchetypeId | null>(null);
   const [sessionResults, setSessionResults] = useState<AssessmentResult | null>(null);
+  const [sessionId, setSessionId] = useState<string | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const [hasFeedbackBeenClosed, setHasFeedbackBeenClosed] = useState(false);
   const location = useLocation();
@@ -25,14 +28,25 @@ const Insights = () => {
   // Use consistent hook calls - important for React's hook rules
   const { getArchetypeDetailedById, getFamilyById } = useArchetypes();
   
+  // Load session ID
+  useEffect(() => {
+    const storedSessionId = sessionStorage.getItem(SESSION_ID_KEY);
+    if (storedSessionId) {
+      setSessionId(storedSessionId);
+    }
+  }, []);
+  
   // This useEffect is crucial for handling the assessment result
   useEffect(() => {
+    console.log("Insights page: Checking for archetype data sources");
+    
     // Check sources for archetype in this priority order:
     // 1. Location state (direct navigation from Results)
     // 2. Session storage (user has taken assessment this session)
     // 3. Local storage (persisted preference)
     
     let newArchetype: ArchetypeId | null = null;
+    let assessmentResults = null;
     
     if (location.state?.selectedArchetype) {
       console.log("Setting archetype from location state:", location.state.selectedArchetype);
@@ -42,6 +56,12 @@ const Insights = () => {
       // Store in localStorage to persist across refreshes
       localStorage.setItem(INSIGHTS_STORAGE_KEY, newArchetype);
       
+      // Set session ID if available in location state
+      if (location.state.sessionId) {
+        sessionStorage.setItem(SESSION_ID_KEY, location.state.sessionId);
+        setSessionId(location.state.sessionId);
+      }
+      
       // Clear the location state to avoid persisting the selection on refresh
       window.history.replaceState({}, document.title);
     } else {
@@ -50,9 +70,9 @@ const Insights = () => {
       if (sessionResultsStr) {
         console.log("Found session results in storage");
         try {
-          const parsedResults = JSON.parse(sessionResultsStr) as AssessmentResult;
-          setSessionResults(parsedResults);
-          newArchetype = parsedResults.primaryArchetype;
+          assessmentResults = JSON.parse(sessionResultsStr);
+          setSessionResults(assessmentResults);
+          newArchetype = assessmentResults.primaryArchetype;
           console.log("Using archetype from session storage:", newArchetype);
         } catch (error) {
           console.error('Error parsing session results:', error);
@@ -153,6 +173,8 @@ const Insights = () => {
           <MatchFeedbackMenu 
             archetypeId={selectedArchetype} 
             onClose={handleCloseFeedback}
+            sessionId={sessionId}
+            assessmentResult={sessionResults}
           />
         </div>
       )}

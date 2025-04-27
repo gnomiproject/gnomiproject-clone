@@ -2,6 +2,9 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArchetypeDetailedData, ArchetypeId } from '@/types/archetype';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { useArchetypeMetrics } from '@/hooks/archetype/useArchetypeMetrics';
 
 interface ArchetypeContentProps {
   archetypeData: ArchetypeDetailedData;
@@ -10,25 +13,85 @@ interface ArchetypeContentProps {
 }
 
 const ArchetypeContent = ({ archetypeData, archetypeId, onRetakeAssessment }: ArchetypeContentProps) => {
+  const { getTraitsForArchetype } = useArchetypeMetrics();
+  const traits = getTraitsForArchetype(archetypeId);
+  
+  // Use different sources for key characteristics
+  const keyCharacteristics = 
+    archetypeData.key_characteristics || 
+    (archetypeData.traits?.map(trait => trait.name)) || 
+    (traits?.map(trait => trait.name)) ||
+    [];
+  
+  // Use different sources for industries
+  const industries = archetypeData.industries || 
+    archetypeData.common_industries || 
+    "Various industries including healthcare, finance, and technology";
+    
+  // Use different description sources with fallbacks
+  const longDescription = 
+    archetypeData.long_description || 
+    archetypeData.short_description || 
+    (archetypeData.summary?.description) || 
+    "This archetype represents organizations with specific healthcare management approaches and characteristics.";
+    
   return (
-    <div className="text-left">
-      <div 
-        className="border-t-4"
-        style={{ borderColor: archetypeData.hexColor || `var(--color-archetype-${archetypeId})` }} 
-      >
-        <div className="bg-white p-6">
-          <h2 className="text-2xl font-bold mb-4">{archetypeData.name}</h2>
-          <p className="text-gray-600 mb-6">{archetypeData.short_description}</p>
-          <div className="mt-8 text-center">
-            <Button 
-              onClick={onRetakeAssessment}
-              variant="outline"
-              className="text-sm"
-            >
-              Want to try again? Retake the assessment
-            </Button>
+    <div className="text-left space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Executive Summary</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-lg text-gray-700">
+            {longDescription}
+          </p>
+          
+          {keyCharacteristics.length > 0 && (
+            <div className="mt-6">
+              <h3 className="text-lg font-semibold mb-2">Key Characteristics</h3>
+              <ul className="list-disc list-inside space-y-2">
+                {keyCharacteristics.map((char, index) => (
+                  <li key={index} className="text-gray-700">{typeof char === 'string' ? char : char.name || JSON.stringify(char)}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <div className="mt-6">
+            <h3 className="text-lg font-semibold mb-2">Common Industries</h3>
+            <p className="text-gray-700">{industries}</p>
           </div>
-        </div>
+        </CardContent>
+      </Card>
+      
+      <Separator />
+      
+      <Card>
+        <CardHeader>
+          <CardTitle>Strategic Focus Areas</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-gray-700 mb-4">
+            {archetypeData.strategy_focus || "Organizations with this archetype typically focus on optimizing healthcare delivery through strategic initiatives."}
+          </p>
+          
+          {archetypeData.challenges && (
+            <div className="mt-4">
+              <h3 className="text-lg font-semibold mb-2">Common Challenges</h3>
+              <p className="text-gray-700">{archetypeData.challenges}</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+      
+      <div className="mt-8 text-center">
+        <Button 
+          onClick={onRetakeAssessment}
+          variant="outline"
+          className="text-sm"
+        >
+          Want to try again? Retake the assessment
+        </Button>
       </div>
     </div>
   );
