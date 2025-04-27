@@ -36,7 +36,7 @@ const PremiumReport = ({ archetypeId, assessmentResult, assessmentAnswers, arche
       });
       
       const baseUrl = window.location.origin;
-      const reportLink = `${baseUrl}/archetype-report/${archetypeId}?token=${token}`;
+      const reportLink = `${baseUrl}/report/${archetypeId}?token=${token}`;
       
       setAccessToken(token);
       setAccessLink(reportLink);
