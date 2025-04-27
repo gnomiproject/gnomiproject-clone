@@ -3,6 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArchetypeDetailedData } from '@/types/archetype';
+import { insightReportSchema } from '@/schemas/insightReportSchema';
 
 interface OverviewTabProps {
   archetypeData: ArchetypeDetailedData;
@@ -10,6 +11,9 @@ interface OverviewTabProps {
 }
 
 const OverviewTab = ({ archetypeData, familyColor }: OverviewTabProps) => {
+  // Get schema fields for overview section
+  const overviewFields = insightReportSchema.overview.fields;
+
   if (!archetypeData) {
     return (
       <Card>
@@ -20,26 +24,28 @@ const OverviewTab = ({ archetypeData, familyColor }: OverviewTabProps) => {
     );
   }
 
-  // Use fallbacks for all required fields
-  const familyName = archetypeData.familyName || archetypeData.family_name || "Healthcare Archetype Family";
-  const longDescription = archetypeData.long_description || archetypeData.short_description || 
-    (archetypeData.summary?.description) || "This archetype represents organizations with specific healthcare management approaches and characteristics.";
+  // Extract fields based on schema
+  const archetypeName = archetypeData[overviewFields.find(f => f === 'archetype_name') || 'name'] || archetypeData.id?.toUpperCase();
+  const familyName = archetypeData[overviewFields.find(f => f === 'family_name') || 'familyName'] || "Healthcare Archetype Family";
+  const description = archetypeData[overviewFields.find(f => f === 'long_description') || 'long_description'] || 
+                     archetypeData.short_description || 
+                     archetypeData.summary?.description || 
+                     "This archetype represents organizations with specific healthcare management approaches and characteristics.";
   
-  // Ensure keyCharacteristics is always an array
-  let keyCharacteristics: any[] = [];
+  // Handle key characteristics with schema awareness
+  let keyCharacteristics: string[] = [];
+  const keyCharField = overviewFields.find(f => f === 'key_characteristics');
   
-  if (archetypeData.key_characteristics) {
-    if (Array.isArray(archetypeData.key_characteristics)) {
-      keyCharacteristics = archetypeData.key_characteristics;
-    } else if (typeof archetypeData.key_characteristics === 'string') {
-      // Using type assertion to handle the TypeScript error
-      keyCharacteristics = (archetypeData.key_characteristics as string).split('\n').filter(Boolean);
-    }
-  } else if (archetypeData.summary?.keyCharacteristics && Array.isArray(archetypeData.summary.keyCharacteristics)) {
-    keyCharacteristics = archetypeData.summary.keyCharacteristics;
+  if (keyCharField && archetypeData[keyCharField]) {
+    const rawCharacteristics = archetypeData[keyCharField];
+    keyCharacteristics = Array.isArray(rawCharacteristics) ? rawCharacteristics :
+      typeof rawCharacteristics === 'string' ? rawCharacteristics.split('\n').filter(Boolean) :
+      archetypeData.summary?.keyCharacteristics || [];
   }
   
-  const industries = archetypeData.industries || "Various industries including healthcare, finance, and technology";
+  const industries = archetypeData[overviewFields.find(f => f === 'industries') || 'industries'] || 
+    "Various industries including healthcare, finance, and technology";
+  
   const safeColor = familyColor || '#6E59A5';
 
   return (
@@ -48,7 +54,7 @@ const OverviewTab = ({ archetypeData, familyColor }: OverviewTabProps) => {
         <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-2">
           <div>
             <CardTitle className="text-2xl font-bold">
-              {archetypeData.name || archetypeData.id?.toUpperCase()}
+              {archetypeName}
             </CardTitle>
             <p className="text-gray-600 mt-1">{familyName}</p>
           </div>
@@ -59,16 +65,18 @@ const OverviewTab = ({ archetypeData, familyColor }: OverviewTabProps) => {
         </div>
       </CardHeader>
       <CardContent className="space-y-6 pt-6">
-        <p className="text-lg text-gray-700">{longDescription}</p>
+        <p className="text-lg text-gray-700">{description}</p>
         
         {keyCharacteristics.length > 0 && (
           <div className="mt-6">
             <h3 className="text-lg font-semibold mb-2">Key Characteristics</h3>
             <ul className="list-disc list-inside space-y-2">
               {keyCharacteristics.map((char, index) => (
-                <li key={index} className="text-gray-700">{typeof char === 'string' ? char : 
-                  (typeof char === 'object' && char !== null && 'name' in char) ? char.name : 
-                  JSON.stringify(char)}</li>
+                <li key={index} className="text-gray-700">
+                  {typeof char === 'string' ? char : 
+                   (typeof char === 'object' && char !== null && 'name' in char) ? char.name : 
+                   JSON.stringify(char)}
+                </li>
               ))}
             </ul>
           </div>
