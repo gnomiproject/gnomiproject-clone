@@ -35,22 +35,22 @@ export function useAdminReportData({ archetypeId, reportType, skipCache = false 
         
         console.log(`useAdminReportData: Fetching ${reportType} data for ${archetypeId} from ${primaryTable}`);
         
-        const { data, error } = await supabase
+        const { data: fetchedData, error: fetchError } = await supabase
           .from(primaryTable)
           .select('*')
           .eq('archetype_id', archetypeId)
           .maybeSingle();
 
-        if (error) {
-          console.error('useAdminReportData: Error from primary table:', error);
-          throw error;
+        if (fetchError) {
+          console.error('useAdminReportData: Error from primary table:', fetchError);
+          throw fetchError;
         }
         
-        if (data) {
-          console.log('useAdminReportData: Data found in primary table:', Object.keys(data));
+        if (fetchedData) {
+          console.log('useAdminReportData: Data found in primary table:', Object.keys(fetchedData));
           
           // Ensure JSON fields are properly parsed
-          const processedData = standardizeArchetypeData(data, archetypeId, reportType);
+          const processedData = standardizeArchetypeData(fetchedData, archetypeId, reportType);
           
           console.log('useAdminReportData: Processed data keys:', Object.keys(processedData));
           setData(processedData);
@@ -162,14 +162,14 @@ export function useAdminReportData({ archetypeId, reportType, skipCache = false 
       [];
     
     // Create a standard data structure that works for both report types
-    const archetypeCode = id.toUpperCase();
+    const archetypeId = id.toUpperCase();
     
     return {
       ...sourceData,
       // Ensure these key fields exist for both report types
-      code: archetypeCode,
+      code: archetypeId,
       id: sourceData.archetype_id || id,
-      name: sourceData.archetype_name || `Archetype ${archetypeCode}`,
+      name: sourceData.archetype_name || `Archetype ${archetypeId}`,
       reportType: type === 'insights' ? 'Insights' : 'Deep Dive',
       // Ensure SWOT data is consistently structured as arrays
       strengths: Array.isArray(strengths) ? strengths : [],
@@ -183,14 +183,14 @@ export function useAdminReportData({ archetypeId, reportType, skipCache = false 
   
   // Helper function to create synthetic data
   const createSyntheticData = (id: string, type: 'insights' | 'deepdive') => {
-    const archetypeCode = id.toUpperCase();
+    const archetypeId = id.toUpperCase();
     return {
       archetype_id: id,
-      archetype_name: `Archetype ${archetypeCode}`,
+      archetype_name: `Archetype ${archetypeId}`,
       short_description: "This is fallback data since no actual data was found in the database.",
-      code: archetypeCode,
+      code: archetypeId,
       id: id,
-      name: `Archetype ${archetypeCode} (Synthetic)`,
+      name: `Archetype ${archetypeId} (Synthetic)`,
       reportType: type === 'insights' ? 'Insights' : 'Deep Dive',
       // Add minimal required properties for report rendering
       strengths: ["Fallback strength 1", "Fallback strength 2"],
@@ -210,14 +210,14 @@ export function useAdminReportData({ archetypeId, reportType, skipCache = false 
   
   // Helper function to create error fallback data
   const createErrorFallbackData = (id: string, type: 'insights' | 'deepdive', err: any) => {
-    const archetypeCode = id.toUpperCase();
+    const archetypeId = id.toUpperCase();
     return {
       archetype_id: id,
-      archetype_name: `Archetype ${archetypeCode} (Error Fallback)`,
+      archetype_name: `Archetype ${archetypeId} (Error Fallback)`,
       short_description: `Error loading data: ${err.message || 'Unknown error'}`,
-      code: archetypeCode,
+      code: archetypeId,
       id: id,
-      name: `Archetype ${archetypeCode} (Error Fallback)`,
+      name: `Archetype ${archetypeId} (Error Fallback)`,
       reportType: type === 'insights' ? 'Insights' : 'Deep Dive',
       // Add minimal required properties for report rendering
       strengths: ["Error fallback strength"],

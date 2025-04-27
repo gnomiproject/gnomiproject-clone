@@ -36,6 +36,7 @@ const AdminReportViewer = () => {
     skipCache: false
   });
 
+  // Extra validation for deep dive reports
   useEffect(() => {
     // Log debugging information when component mounts or parameters change
     console.log('AdminReportViewer: Effect triggered:', {
@@ -50,11 +51,13 @@ const AdminReportViewer = () => {
 
     if (rawData) {
       console.log('AdminReportViewer: SWOT data check:', {
-        strengths: rawData.strengths?.length || 0,
-        weaknesses: rawData.weaknesses?.length || 0,
-        opportunities: rawData.opportunities?.length || 0,
-        threats: rawData.threats?.length || 0,
-        strategic_recommendations: rawData.strategic_recommendations?.length || 0
+        strengths: Array.isArray(rawData.strengths) ? rawData.strengths.length : typeof rawData.strengths,
+        weaknesses: Array.isArray(rawData.weaknesses) ? rawData.weaknesses.length : typeof rawData.weaknesses,
+        opportunities: Array.isArray(rawData.opportunities) ? rawData.opportunities.length : typeof rawData.opportunities,
+        threats: Array.isArray(rawData.threats) ? rawData.threats.length : typeof rawData.threats,
+        strategic_recommendations: Array.isArray(rawData.strategic_recommendations) ? 
+          rawData.strategic_recommendations.length : 
+          typeof rawData.strategic_recommendations
       });
     }
     
@@ -102,8 +105,43 @@ const AdminReportViewer = () => {
     loading, 
     error: error?.message, 
     hasData: !!rawData,
-    rawDataType: rawData ? typeof rawData : 'undefined'
+    rawDataType: rawData ? typeof rawData : 'undefined',
+    reportType,
+    isInsightsReport
   });
+
+  // Prepare safe data for deep dive report
+  const prepareDeepDiveData = (data: any): ArchetypeDetailedData => {
+    if (!data) {
+      // Return minimal fallback data if no data is available
+      return {
+        id: archetypeId as any,
+        name: `Archetype ${archetypeId.toUpperCase()} (Fallback)`,
+        familyId: 'a' as any,
+        strengths: [],
+        weaknesses: [],
+        opportunities: [],
+        threats: [],
+        strategic_recommendations: []
+      } as ArchetypeDetailedData;
+    }
+    
+    // Ensure all required fields exist
+    const safeData = {
+      ...data,
+      id: data.id || data.archetype_id || archetypeId,
+      name: data.name || data.archetype_name || `Archetype ${archetypeId.toUpperCase()}`,
+      familyId: data.family_id || 'a',
+      strengths: Array.isArray(data.strengths) ? data.strengths : [],
+      weaknesses: Array.isArray(data.weaknesses) ? data.weaknesses : [],
+      opportunities: Array.isArray(data.opportunities) ? data.opportunities : [],
+      threats: Array.isArray(data.threats) ? data.threats : [],
+      strategic_recommendations: Array.isArray(data.strategic_recommendations) ? 
+        data.strategic_recommendations : []
+    };
+    
+    return safeData as ArchetypeDetailedData;
+  };
 
   // Return the component content based on various conditions
   return (
@@ -248,7 +286,7 @@ const AdminReportViewer = () => {
                 </div>
               ) : (
                 <DeepDiveReport 
-                  reportData={rawData as unknown as ArchetypeDetailedData} 
+                  reportData={prepareDeepDiveData(rawData)} 
                   userData={mockUserData}
                   averageData={defaultAverageData}
                   isAdminView={true}

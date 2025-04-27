@@ -51,7 +51,9 @@ const DeepDiveReport = ({
     dataType: typeof reportData,
     dataKeys: reportData ? Object.keys(reportData) : [],
     name: reportData?.name || reportData?.archetype_name,
-    id: reportData?.id || reportData?.archetype_id
+    id: reportData?.id || reportData?.archetype_id,
+    isNull: reportData === null,
+    isUndefined: reportData === undefined
   });
 
   // Debug log to see what's happening during render
@@ -80,7 +82,7 @@ const DeepDiveReport = ({
     };
   }, [reportData]);
   
-  // Check if report data is valid to prevent rendering errors
+  // Apply safety checks before rendering anything
   if (!reportData) {
     console.error('DeepDiveReport: No report data provided');
     return (
@@ -95,14 +97,17 @@ const DeepDiveReport = ({
     );
   }
   
+  // Create a safe copy of the data to work with
+  const safeReportData = {...reportData};
+  
   // Safety checks to ensure data is usable before attempting to render
   const ensureDataSafety = () => {
     // Create defaults for critical fields if they're missing
-    if (!Array.isArray(reportData.strengths)) reportData.strengths = [];
-    if (!Array.isArray(reportData.weaknesses)) reportData.weaknesses = [];
-    if (!Array.isArray(reportData.opportunities)) reportData.opportunities = [];
-    if (!Array.isArray(reportData.threats)) reportData.threats = [];
-    if (!Array.isArray(reportData.strategic_recommendations)) reportData.strategic_recommendations = [];
+    if (!Array.isArray(safeReportData.strengths)) safeReportData.strengths = [];
+    if (!Array.isArray(safeReportData.weaknesses)) safeReportData.weaknesses = [];
+    if (!Array.isArray(safeReportData.opportunities)) safeReportData.opportunities = [];
+    if (!Array.isArray(safeReportData.threats)) safeReportData.threats = [];
+    if (!Array.isArray(safeReportData.strategic_recommendations)) safeReportData.strategic_recommendations = [];
     
     // Log any problematic fields we had to fix
     const problematicFields = [];
@@ -123,11 +128,11 @@ const DeepDiveReport = ({
   ensureDataSafety();
   
   // Check if we're using fallback data
-  const usingFallbackData = !reportData.strategic_recommendations || reportData.strategic_recommendations.length === 0;
+  const usingFallbackData = !safeReportData.strategic_recommendations || safeReportData.strategic_recommendations.length === 0;
 
   // Get name and id safely from either format
-  const archetypeName = reportData?.name || reportData?.archetype_name || 'Unknown Archetype';
-  const archetypeId = reportData?.id || reportData?.archetype_id || 'unknown';
+  const archetypeName = safeReportData?.name || safeReportData?.archetype_name || 'Unknown Archetype';
+  const archetypeId = safeReportData?.id || safeReportData?.archetype_id || 'unknown';
   
   return (
     <div className="bg-white min-h-screen">
@@ -160,25 +165,25 @@ const DeepDiveReport = ({
         />
         
         <ExecutiveSummary 
-          archetypeData={reportData}
+          archetypeData={safeReportData}
         />
         
         <ArchetypeProfile
-          reportData={reportData}
+          reportData={safeReportData}
           averageData={averageData}
         />
         
         <SwotAnalysis 
-          archetypeData={reportData}
+          archetypeData={safeReportData}
         />
         
         <DemographicsSection
-          reportData={reportData}
+          reportData={safeReportData}
           averageData={averageData}
         />
         
         <RiskFactors
-          reportData={reportData}
+          reportData={safeReportData}
           averageData={averageData}
         />
         
@@ -186,7 +191,7 @@ const DeepDiveReport = ({
         <ErrorBoundary fallback={<SectionErrorFallback title="Cost Analysis" />}>
           <Suspense fallback={<SectionLoadingFallback />}>
             <CostAnalysis
-              reportData={reportData}
+              reportData={safeReportData}
               averageData={averageData}
             />
           </Suspense>
@@ -195,7 +200,7 @@ const DeepDiveReport = ({
         <ErrorBoundary fallback={<SectionErrorFallback title="Utilization Patterns" />}>
           <Suspense fallback={<SectionLoadingFallback />}>
             <UtilizationPatterns
-              reportData={reportData}
+              reportData={safeReportData}
               averageData={averageData}
             />
           </Suspense>
@@ -204,7 +209,7 @@ const DeepDiveReport = ({
         <ErrorBoundary fallback={<SectionErrorFallback title="Disease Management" />}>
           <Suspense fallback={<SectionLoadingFallback />}>
             <DiseaseManagement
-              reportData={reportData}
+              reportData={safeReportData}
               averageData={averageData}
             />
           </Suspense>
@@ -213,7 +218,7 @@ const DeepDiveReport = ({
         <ErrorBoundary fallback={<SectionErrorFallback title="Care Gaps" />}>
           <Suspense fallback={<SectionLoadingFallback />}>
             <CareGaps
-              reportData={reportData}
+              reportData={safeReportData}
               averageData={averageData}
             />
           </Suspense>
@@ -222,7 +227,7 @@ const DeepDiveReport = ({
         <ErrorBoundary fallback={<SectionErrorFallback title="Strategic Recommendations" />}>
           <Suspense fallback={<SectionLoadingFallback />}>
             <StrategicRecommendations
-              reportData={reportData}
+              reportData={safeReportData}
               averageData={averageData}
             />
           </Suspense>
