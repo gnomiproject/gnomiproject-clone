@@ -25,7 +25,7 @@ function App() {
             <Route path="/" element={<Index />} />
             <Route path="/assessment" element={<Assessment />} />
             <Route path="/insights" element={<Insights />} />
-            <Route path="/insights/report/:archetypeId" element={<ReportView />} />
+            <Route path="/insights/report/:archetypeId" element={<ReportViewer />} />
             <Route path="/about" element={<About />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/report/:archetypeId" element={<ReportViewer />} />

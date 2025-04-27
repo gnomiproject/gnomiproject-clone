@@ -29,7 +29,7 @@ const ContactSection = ({ userData, isAdminView = false }: ContactSectionProps) 
           <div>
             <h3 className="text-lg font-semibold mb-2">Report Details</h3>
             <p className="text-gray-600 mb-1">Report Generated: {formattedDate}</p>
-            <p className="text-gray-600 mb-1">Report ID: {(Math.random().toString(36).substring(2, 10)).toUpperCase()}</p>
+            <p className="text-gray-600 mb-1">Report ID: {isAdminView ? "ADMIN-VIEW-ONLY" : (Math.random().toString(36).substring(2, 10)).toUpperCase()}</p>
             <p className="text-gray-600">Valid Until: {format(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), 'MMM d, yyyy')}</p>
           </div>
           
