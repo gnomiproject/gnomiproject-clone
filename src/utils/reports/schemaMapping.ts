@@ -1,5 +1,5 @@
 
-import { ReportSchema, ReportType, ReportSection } from "@/types/reports";
+import { ReportSchema, ReportType } from "@/types/reports";
 import { insightReportSchema } from "@/schemas/insightReportSchema";
 import { deepDiveReportSchema } from "@/schemas/deepDiveReportSchema";
 
@@ -8,6 +8,7 @@ export const sectionMappings = {
   overview: ['archetypeProfile'],
   metrics: ['demographics', 'costAnalysis', 'utilizationPatterns'],
   swot: ['swotAnalysis'],
+  diseaseAndCare: ['diseaseManagement', 'careGaps'],
   recommendations: ['strategicRecommendations']
 } as const;
 

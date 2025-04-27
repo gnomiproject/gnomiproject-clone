@@ -1,47 +1,16 @@
 
-// Common types for report schemas
-export type ReportField = string;
+// If this file doesn't exist yet, we'll create it
 
-export type ReportDataSource = "level3_report_data" | "level4_deepdive_report_data";
+export type ReportType = "insight" | "deepDive";
+
+export type ReportField = string;
 
 export interface ReportSection {
   title: string;
   fields: ReportField[];
-  dataSource: ReportDataSource;
+  dataSource: string;
 }
 
-export type ReportSchema = {
+export interface ReportSchema {
   [sectionKey: string]: ReportSection;
-};
-
-// Report types
-export type ReportType = "insight" | "deepDive";
-
-export interface SectionMapping {
-  insight: string;
-  deepDive: string[];
-}
-
-// Report mapping types
-export interface ReportMapping {
-  sections: Record<string, string[]>;
-  sharedFields: string[];
-}
-
-// Report generation result types
-export interface GenerationResult {
-  total: number;
-  succeeded: number;
-  failed: number;
-  archetypeIds: string[];
-  errors?: string[];
-}
-
-export interface ReportGenerationResults {
-  total: number;
-  processed: number;
-  succeeded: number;
-  failed: number;
-  archetypeIds: string[];
-  errors: string[];
 }

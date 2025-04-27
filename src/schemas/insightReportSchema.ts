@@ -2,6 +2,7 @@
 import { ReportSchema } from "@/types/reports";
 
 export const insightReportSchema: ReportSchema = {
+  // Overview section
   overview: {
     title: "Archetype Overview",
     fields: [
@@ -16,6 +17,7 @@ export const insightReportSchema: ReportSchema = {
     dataSource: "level3_report_data"
   },
   
+  // Key Metrics section
   metrics: {
     title: "Key Metrics",
     fields: [
@@ -30,6 +32,43 @@ export const insightReportSchema: ReportSchema = {
       "SDOH_Average SDOH",
       "Cost_Medical & RX Paid Amount PEPY",
       "Cost_Avoidable ER Potential Savings PMPY"
+    ],
+    dataSource: "level3_report_data"
+  },
+  
+  // SWOT Analysis section
+  swot: {
+    title: "SWOT Analysis",
+    fields: [
+      "strengths",
+      "weaknesses",
+      "opportunities",
+      "threats"
+    ],
+    dataSource: "level3_report_data"
+  },
+  
+  // Disease & Care Management section
+  diseaseAndCare: {
+    title: "Disease & Care Management",
+    fields: [
+      "Dise_Heart Disease Prevalence",
+      "Dise_Type 2 Diabetes Prevalence",
+      "Dise_Mental Health Disorder Prevalence",
+      "Dise_Substance Use Disorder Prevalence",
+      "Gaps_Diabetes RX Adherence",
+      "Gaps_Behavioral Health FU ED Visit Mental Illness",
+      "Gaps_Cancer Screening Breast",
+      "Gaps_Wellness Visit Adults"
+    ],
+    dataSource: "level3_report_data"
+  },
+  
+  // Strategic Recommendations section
+  recommendations: {
+    title: "Strategic Recommendations",
+    fields: [
+      "strategic_recommendations"
     ],
     dataSource: "level3_report_data"
   }

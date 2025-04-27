@@ -72,7 +72,7 @@ const InsightsReportContent: React.FC<InsightsReportContentProps> = ({ archetype
       {/* 3. SWOT Analysis Section */}
       <Section id="swot-analysis">
         <SectionTitle 
-          title="SWOT Analysis" 
+          title={insightReportSchema.swot.title}
           subtitle="Strengths, Weaknesses, Opportunities, and Threats"
         />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -137,21 +137,48 @@ const InsightsReportContent: React.FC<InsightsReportContentProps> = ({ archetype
       {/* 4. Disease & Care Management Section */}
       <Section id="disease-care">
         <SectionTitle 
-          title="Disease & Care Management" 
+          title={insightReportSchema.diseaseAndCare.title} 
           subtitle="Health conditions and care management insights"
         />
         <Card className="p-6">
-          {/* We would populate this with actual disease/care data */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Prevalent Conditions</h3>
-            <p className="text-gray-700">
-              {archetype?.disease_prevalence || "No disease prevalence data available"}
-            </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Disease Prevalence</h3>
+              <div className="space-y-3">
+                {['Dise_Heart Disease Prevalence', 'Dise_Type 2 Diabetes Prevalence', 
+                  'Dise_Mental Health Disorder Prevalence', 'Dise_Substance Use Disorder Prevalence'].map((metric) => {
+                  const value = archetype[metric];
+                  if (value !== undefined) {
+                    return (
+                      <div key={metric} className="flex justify-between items-center">
+                        <span className="text-gray-700">{metric.replace('Dise_', '').replace('_', ' ')}</span>
+                        <span className="font-medium">{(value * 100).toFixed(1)}%</span>
+                      </div>
+                    );
+                  }
+                  return null;
+                })}
+              </div>
+            </div>
             
-            <h3 className="text-lg font-semibold mt-6">Care Management Opportunities</h3>
-            <p className="text-gray-700">
-              {archetype?.care_management || "No care management data available"}
-            </p>
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Care Gaps</h3>
+              <div className="space-y-3">
+                {['Gaps_Diabetes RX Adherence', 'Gaps_Behavioral Health FU ED Visit Mental Illness',
+                  'Gaps_Cancer Screening Breast', 'Gaps_Wellness Visit Adults'].map((metric) => {
+                  const value = archetype[metric];
+                  if (value !== undefined) {
+                    return (
+                      <div key={metric} className="flex justify-between items-center">
+                        <span className="text-gray-700">{metric.replace('Gaps_', '')}</span>
+                        <span className="font-medium">{(value * 100).toFixed(1)}%</span>
+                      </div>
+                    );
+                  }
+                  return null;
+                })}
+              </div>
+            </div>
           </div>
         </Card>
       </Section>
@@ -159,7 +186,7 @@ const InsightsReportContent: React.FC<InsightsReportContentProps> = ({ archetype
       {/* 5. Strategic Recommendations Section */}
       <Section id="recommendations">
         <SectionTitle 
-          title="Strategic Recommendations" 
+          title={insightReportSchema.recommendations.title} 
           subtitle="Actionable insights for population health management"
         />
         <div className="space-y-4">
