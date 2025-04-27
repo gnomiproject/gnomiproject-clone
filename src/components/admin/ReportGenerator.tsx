@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -133,9 +134,11 @@ const ReportGenerator: React.FC = () => {
     }
   };
 
+  // Update this function to open exactly the same report viewer that users see post-assessment
   const handleViewReport = (archetypeId: string) => {
     if (isValidArchetypeId(archetypeId)) {
-      window.open(`/insights/report/${archetypeId}`, '_blank');
+      // Open in the same window or tab to see the exact same report view
+      window.location.href = `/insights/report/${archetypeId}`;
     } else {
       toast.error("Invalid Archetype ID", {
         description: `Cannot view report for invalid archetype: ${archetypeId}`,
