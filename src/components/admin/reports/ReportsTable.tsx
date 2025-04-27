@@ -24,7 +24,7 @@ interface Report {
 
 interface ReportsTableProps {
   reports: Report[];
-  isDeleting: string | null;
+  isDeleting: boolean;
   formatArchetypeLabel: (id: string) => string;
   onCopyLink: (archetypeId: string, token: string) => void;
   onOpenReport: (archetypeId: string, token: string) => void;
@@ -96,11 +96,11 @@ const ReportsTable = ({
                   variant="ghost"
                   size="sm"
                   onClick={() => onDeleteReport(report.id)}
-                  disabled={isDeleting === report.id}
+                  disabled={isDeleting}
                   className="text-red-500 hover:text-red-700"
                   title="Delete report"
                 >
-                  {isDeleting === report.id ? (
+                  {isDeleting ? (
                     <RefreshCw className="h-4 w-4 animate-spin" />
                   ) : (
                     <Trash2 className="h-4 w-4" />

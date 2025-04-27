@@ -9,8 +9,8 @@ import { calculatePercentageDifference } from '@/utils/reports/metricUtils';
  * Hook to handle report generation and management
  */
 export const useReportGeneration = () => {
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [isGenerating, setIsGenerating] = useState<boolean>(false);
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const [lastGeneratedUrl, setLastGeneratedUrl] = useState('');
 
   /**
@@ -25,7 +25,7 @@ export const useReportGeneration = () => {
         .from('level4_deepdive_report_data')
         .select('*')
         .eq('archetype_id', archetypeId)
-        .single();
+        .maybeSingle();
       
       if (archetypeError) {
         throw new Error(`Error fetching archetype data: ${archetypeError.message}`);
@@ -36,7 +36,7 @@ export const useReportGeneration = () => {
         .from('level4_deepdive_report_data')
         .select('*')
         .eq('archetype_id', 'All_Average')
-        .single();
+        .maybeSingle();
         
       if (averageError) {
         console.warn(`Warning: Could not fetch average data: ${averageError.message}`);
@@ -77,7 +77,7 @@ export const useReportGeneration = () => {
       setLastGeneratedUrl(reportUrl);
       
       toast.success("Report Generated", {
-        description: `Successfully generated report for ${archetypeId.toLowerCase()} ${archetypeData.archetype_name || ''}`,
+        description: `Successfully generated report for ${archetypeId.toLowerCase()} ${archetypeData?.archetype_name || ''}`,
       });
       
       return reportUrl;

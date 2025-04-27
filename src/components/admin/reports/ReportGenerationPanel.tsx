@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
 
 interface ReportGenerationPanelProps {
-  isGenerating: string | null;
+  isGenerating: boolean;
   onGenerateReport: (archetypeId: string) => void;
   formatArchetypeLabel: (id: string) => string;
 }
@@ -26,10 +26,10 @@ const ReportGenerationPanel = ({
             variant="outline"
             size="sm"
             onClick={() => onGenerateReport(id)}
-            disabled={isGenerating !== null}
-            className={isGenerating === id ? "animate-pulse" : ""}
+            disabled={isGenerating}
+            className={isGenerating ? "animate-pulse" : ""}
           >
-            {isGenerating === id ? (
+            {isGenerating ? (
               <RefreshCw className="h-4 w-4 animate-spin mr-1" />
             ) : (
               formatArchetypeLabel(id)
