@@ -12,7 +12,8 @@ interface ButtonProps {
   className?: string;
   type?: 'button' | 'submit' | 'reset';
   size?: ButtonSize;
-  disabled?: boolean; // Added disabled property
+  disabled?: boolean;
+  style?: React.CSSProperties; // Added style property
 }
 
 const Button = ({ 
@@ -22,7 +23,8 @@ const Button = ({
   className,
   type = 'button',
   size = 'default',
-  disabled = false // Default value for disabled
+  disabled = false,
+  style // Add style to the destructuring
 }: ButtonProps) => {
   const baseStyles = "px-6 py-3 rounded-full font-medium text-center transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2";
   
@@ -43,6 +45,7 @@ const Button = ({
       type={type}
       onClick={onClick}
       disabled={disabled}
+      style={style} // Apply the style prop
       className={cn(
         baseStyles, 
         variantStyles[variant], 
