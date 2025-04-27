@@ -1,78 +1,90 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { ArchetypeDetailedData } from '@/types/archetype';
+import { getArchetypeColorHex } from '@/data/colors';
 
 interface SwotTabProps {
   archetypeData: ArchetypeDetailedData;
-  familyColor: string;
+  swotData: {
+    strengths: string[];
+    weaknesses: string[];
+    opportunities: string[];
+    threats: string[];
+  };
 }
 
-const SwotTab = ({ archetypeData, familyColor }: SwotTabProps) => {
-  const strengths = archetypeData.strengths || archetypeData.enhanced?.swot?.strengths || [];
-  const weaknesses = archetypeData.weaknesses || archetypeData.enhanced?.swot?.weaknesses || [];
-  const opportunities = archetypeData.opportunities || archetypeData.enhanced?.swot?.opportunities || [];
-  const threats = archetypeData.threats || archetypeData.enhanced?.swot?.threats || [];
-
+const SwotTab = ({ archetypeData, swotData }: SwotTabProps) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>SWOT Analysis</CardTitle>
+        <CardTitle className="text-2xl">SWOT Analysis for {archetypeData.name}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Strengths */}
-          <div className="border rounded-lg p-4" style={{ borderColor: `${familyColor}40` }}>
-            <h3 className="text-lg font-semibold mb-3 text-green-700">Strengths</h3>
-            <ul className="list-disc list-inside space-y-2">
-              {strengths.slice(0, 5).map((item, index) => (
-                <li key={`strength-${index}`} className="text-gray-700">{item}</li>
+          <div className="bg-green-50 border border-green-200 rounded-lg p-6">
+            <h4 className="text-lg font-bold text-green-700 mb-4">Strengths</h4>
+            <ul className="space-y-2">
+              {(swotData.strengths || []).map((strength: string, index: number) => (
+                <li key={index} className="flex items-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-green-500"></div>
+                  <span>{strength}</span>
+                </li>
               ))}
-              {strengths.length === 0 && <li className="text-gray-500">No specific strengths identified</li>}
+              
+              {(!swotData.strengths || swotData.strengths.length === 0) && (
+                <li className="text-gray-500 italic">No strengths data available</li>
+              )}
             </ul>
           </div>
           
-          {/* Weaknesses */}
-          <div className="border rounded-lg p-4" style={{ borderColor: `${familyColor}40` }}>
-            <h3 className="text-lg font-semibold mb-3 text-red-700">Weaknesses</h3>
-            <ul className="list-disc list-inside space-y-2">
-              {weaknesses.slice(0, 5).map((item, index) => (
-                <li key={`weakness-${index}`} className="text-gray-700">{item}</li>
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+            <h4 className="text-lg font-bold text-red-700 mb-4">Weaknesses</h4>
+            <ul className="space-y-2">
+              {(swotData.weaknesses || []).map((weakness: string, index: number) => (
+                <li key={index} className="flex items-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-red-500"></div>
+                  <span>{weakness}</span>
+                </li>
               ))}
-              {weaknesses.length === 0 && <li className="text-gray-500">No specific weaknesses identified</li>}
+              
+              {(!swotData.weaknesses || swotData.weaknesses.length === 0) && (
+                <li className="text-gray-500 italic">No weaknesses data available</li>
+              )}
             </ul>
           </div>
           
-          {/* Opportunities */}
-          <div className="border rounded-lg p-4" style={{ borderColor: `${familyColor}40` }}>
-            <h3 className="text-lg font-semibold mb-3 text-blue-700">Opportunities</h3>
-            <ul className="list-disc list-inside space-y-2">
-              {opportunities.slice(0, 5).map((item, index) => (
-                <li key={`opportunity-${index}`} className="text-gray-700">{item}</li>
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+            <h4 className="text-lg font-bold text-blue-700 mb-4">Opportunities</h4>
+            <ul className="space-y-2">
+              {(swotData.opportunities || []).map((opportunity: string, index: number) => (
+                <li key={index} className="flex items-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-blue-500"></div>
+                  <span>{opportunity}</span>
+                </li>
               ))}
-              {opportunities.length === 0 && <li className="text-gray-500">No specific opportunities identified</li>}
+              
+              {(!swotData.opportunities || swotData.opportunities.length === 0) && (
+                <li className="text-gray-500 italic">No opportunities data available</li>
+              )}
             </ul>
           </div>
           
-          {/* Threats */}
-          <div className="border rounded-lg p-4" style={{ borderColor: `${familyColor}40` }}>
-            <h3 className="text-lg font-semibold mb-3 text-orange-700">Threats</h3>
-            <ul className="list-disc list-inside space-y-2">
-              {threats.slice(0, 5).map((item, index) => (
-                <li key={`threat-${index}`} className="text-gray-700">{item}</li>
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-6">
+            <h4 className="text-lg font-bold text-amber-700 mb-4">Threats</h4>
+            <ul className="space-y-2">
+              {(swotData.threats || []).map((threat: string, index: number) => (
+                <li key={index} className="flex items-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-amber-500"></div>
+                  <span>{threat}</span>
+                </li>
               ))}
-              {threats.length === 0 && <li className="text-gray-500">No specific threats identified</li>}
+              
+              {(!swotData.threats || swotData.threats.length === 0) && (
+                <li className="text-gray-500 italic">No threats data available</li>
+              )}
             </ul>
           </div>
-        </div>
-        
-        <div className="mt-6 p-4 bg-yellow-50 border border-yellow-100 rounded-lg">
-          <h3 className="font-semibold text-yellow-800">Want to explore strategic implications in detail?</h3>
-          <p className="text-yellow-700">Get the full report with detailed analysis and actionable insights.</p>
-          <Button className="mt-2 bg-yellow-700 hover:bg-yellow-800" size="sm">
-            Request Full Report
-          </Button>
         </div>
       </CardContent>
     </Card>

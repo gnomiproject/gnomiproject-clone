@@ -7,6 +7,7 @@ import ReportError from '@/components/report/ReportError';
 import { isValidArchetypeId } from '@/utils/archetypeValidation';
 import { ArchetypeId } from '@/types/archetype';
 import { useArchetypes } from '@/hooks/useArchetypes';
+import { useGetArchetype } from '@/hooks/useGetArchetype';
 
 const ReportViewer = () => {
   const { archetypeId = '' } = useParams();
@@ -29,11 +30,14 @@ const ReportViewer = () => {
     );
   }
 
-  // Get the archetype data directly from our local data
-  const archetypeData = getArchetypeDetailedById(archetypeId as ArchetypeId);
+  // Get the archetype data with full database data
+  const { archetypeData, isLoading, error } = useGetArchetype(archetypeId as ArchetypeId);
   
-  // If no data available, show a helpful error
-  if (!archetypeData) {
+  // Fallback to local data if there's an error or while loading
+  const localArchetypeData = getArchetypeDetailedById(archetypeId as ArchetypeId);
+  
+  // If no data available even in local data, show a helpful error
+  if (!localArchetypeData) {
     return (
       <ReportError 
         title="Report Not Available"
@@ -44,21 +48,10 @@ const ReportViewer = () => {
     );
   }
 
-  // Format report data from local archetype data
-  const reportData = {
-    archetype_id: archetypeData.id,
-    archetype_name: archetypeData.name,
-    short_description: archetypeData.short_description || '',
-    long_description: archetypeData.long_description || '',
-    key_characteristics: archetypeData.key_characteristics || [],
-    strengths: archetypeData.enhanced?.swot?.strengths || [],
-    weaknesses: archetypeData.enhanced?.swot?.weaknesses || [],
-    opportunities: archetypeData.enhanced?.swot?.opportunities || [],
-    threats: archetypeData.enhanced?.swot?.threats || [],
-    strategic_recommendations: archetypeData.enhanced?.strategicPriorities || []
-  };
+  // Report data will use real database data or fallback to local data
+  const reportData = archetypeData || localArchetypeData;
   
-  // Dummy data for other report properties that might be needed
+  // Dummy data for other report properties that might be needed for DeepDiveReport
   const userData = {
     name: 'Demo User',
     organization: 'Demo Organization',
