@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { AlertTriangle, Loader2 } from 'lucide-react';
 import { ArchetypeId } from '@/types/archetype';
 import { toast } from 'sonner';
+import { validateReportToken } from '@/utils/tokenGenerator';
 
 const defaultReportData = {
   archetype_id: 'a1',
@@ -14,7 +15,6 @@ const defaultReportData = {
   long_description: 'This is a detailed description of the archetype with all relevant information about its characteristics and behaviors.',
   hex_color: '#4285F4',
   key_characteristics: 'Key characteristic 1\nKey characteristic 2\nKey characteristic 3',
-  // Add default values for all the metrics
   cost_analysis: 'This archetype exhibits average cost patterns with opportunities for optimization in specialty medication management.',
   utilization_patterns: 'Members of this archetype typically utilize preventative services at higher rates than emergency services.',
   demographic_insights: 'This archetype is characterized by a diverse age distribution with balanced gender representation.',
@@ -29,7 +29,6 @@ const defaultReportData = {
   "Cost_Medical & RX Paid Amount PMPY": 5200
 };
 
-// Default average values for metrics when API data is not available
 const defaultAverageData = {
   "Risk_Average Risk Score": 1.0,
   "SDOH_Average SDOH": 0.5,
@@ -40,7 +39,6 @@ const defaultAverageData = {
 };
 
 const ReportViewer = () => {
-  // Modified to handle both URL patterns - with or without token in the URL
   const { archetypeId = '', token = '' } = useParams();
   const navigate = useNavigate();
   const [isValidToken, setIsValidToken] = useState<boolean | null>(null);
@@ -50,7 +48,6 @@ const ReportViewer = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [usingFallbackData, setUsingFallbackData] = useState(false);
 
-  // Helper function to validate if a string is a valid ArchetypeId
   function isValidArchetypeId(id: string): boolean {
     const validIds: ArchetypeId[] = ['a1', 'a2', 'a3', 'b1', 'b2', 'b3', 'c1', 'c2', 'c3'];
     return validIds.includes(id as ArchetypeId);
@@ -60,12 +57,19 @@ const ReportViewer = () => {
     const fetchReportData = async () => {
       try {
         setIsLoading(true);
+        console.log('Starting report data fetch for:', archetypeId, 'with token:', token);
         
-        // For token-based access check
-        let userDataResult = null;
-        
-        if (token) {
-          // Step 1: Check if the token is valid and get user data
+        if (!token) {
+          console.log('No token provided - checking if accessing from admin panel');
+          const isAdmin = validateReportToken(archetypeId, token);
+          if (!isAdmin) {
+            console.log('Not an admin access, redirecting to insights');
+            navigate('/insights');
+            return;
+          }
+          console.log('Admin access validated');
+          setIsValidToken(true);
+        } else {
           console.log('Checking token validity:', { archetypeId, token });
           
           const { data: userData, error: userError } = await supabase
@@ -91,7 +95,6 @@ const ReportViewer = () => {
             return;
           }
 
-          // Check if the report has expired
           const isExpired = userData.expires_at && new Date(userData.expires_at) < new Date();
           if (isExpired) {
             console.error('Report link expired');
@@ -101,17 +104,10 @@ const ReportViewer = () => {
             return;
           }
 
-          userDataResult = userData;
           setUserData(userData);
           setIsValidToken(true);
-        } else {
-          // IMPORTANT CHANGE: If accessing without a token, redirect to insights
-          // This page is only for deep dive reports that require tokens
-          navigate('/insights');
-          return;
         }
 
-        // Step 2: Always fetch the average data first for proper comparisons
         const { data: avgData, error: avgError } = await supabase
           .from('level4_deepdive_report_data')
           .select('*')
@@ -130,7 +126,6 @@ const ReportViewer = () => {
           setAverageData(defaultAverageData);
         }
 
-        // Step 3: Fetch the archetype-specific report data
         const { data: archetypeData, error: archetypeError } = await supabase
           .from('level4_deepdive_report_data')
           .select('*')
@@ -140,7 +135,6 @@ const ReportViewer = () => {
         if (archetypeError) {
           console.error('Error fetching archetype data:', archetypeError);
           toast.warning('Using placeholder report data for demonstration purposes.');
-          // Use default data if real data is not available
           setReportData({ ...defaultReportData, archetype_id: archetypeId });
           setUsingFallbackData(true);
           setIsLoading(false);
@@ -149,7 +143,6 @@ const ReportViewer = () => {
 
         if (!archetypeData) {
           console.log('No archetype data found, using fallback data');
-          // Use default data if real data is not available
           setReportData({ ...defaultReportData, archetype_id: archetypeId });
           setUsingFallbackData(true);
           setIsLoading(false);
@@ -171,7 +164,6 @@ const ReportViewer = () => {
     }
   }, [token, archetypeId, navigate]);
 
-  // Handle case where archetypeId is invalid
   if (!isValidArchetypeId(archetypeId)) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -233,7 +225,6 @@ const ReportViewer = () => {
     );
   }
 
-  // Show a banner if we're using fallback data
   const FallbackBanner = () => {
     if (usingFallbackData) {
       return (

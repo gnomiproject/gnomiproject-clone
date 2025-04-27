@@ -11,7 +11,8 @@ import {
   Loader2, 
   RefreshCw,
   Eye,
-  ExternalLink
+  ExternalLink,
+  Copy
 } from "lucide-react";
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -181,6 +182,17 @@ export function InsightsReportGenerator() {
   const getArchetypeReportUrl = (archetypeId: string): string => {
     return getSecureReportUrl(archetypeId);
   };
+  
+  // Copy report URL to clipboard
+  const copyReportUrl = (archetypeId: string) => {
+    const url = window.location.origin + getSecureReportUrl(archetypeId);
+    navigator.clipboard.writeText(url).then(() => {
+      toast.success("Report URL copied to clipboard");
+    }).catch(err => {
+      console.error('Failed to copy URL:', err);
+      toast.error("Failed to copy URL");
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -329,10 +341,21 @@ export function InsightsReportGenerator() {
                         title="View secure report page"
                         className="h-8 w-8 p-0"
                       >
-                        <Link to={getArchetypeReportUrl(archetype.id)}>
+                        <Link to={getSecureReportUrl(archetype.id)} target="_blank">
                           <ExternalLink className="h-4 w-4" />
                           <span className="sr-only">View Report Page</span>
                         </Link>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => copyReportUrl(archetype.id)}
+                        disabled={archetype.status !== 'success'}
+                        title="Copy report URL to clipboard"
+                        className="h-8 w-8 p-0"
+                      >
+                        <Copy className="h-4 w-4" />
+                        <span className="sr-only">Copy Report URL</span>
                       </Button>
                     </div>
                   </TableCell>
