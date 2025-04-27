@@ -31,13 +31,13 @@ const ReportViewer = () => {
   }
 
   // Get the archetype data with full database data
-  const { archetypeData, isLoading, error } = useGetArchetype(archetypeId as ArchetypeId);
+  const { archetypeData, isLoading, error, dataSource } = useGetArchetype(archetypeId as ArchetypeId);
   
   // Fallback to local data if there's an error or while loading
   const localArchetypeData = getArchetypeDetailedById(archetypeId as ArchetypeId);
   
   // If no data available even in local data, show a helpful error
-  if (!localArchetypeData) {
+  if (!localArchetypeData && !archetypeData) {
     return (
       <ReportError 
         title="Report Not Available"
@@ -70,9 +70,17 @@ const ReportViewer = () => {
 
   // Directly render the appropriate report type based on the route
   return isInsightsReport ? (
-    <ArchetypeReport archetypeId={archetypeId as ArchetypeId} reportData={reportData} />
+    <ArchetypeReport 
+      archetypeId={archetypeId as ArchetypeId} 
+      reportData={reportData} 
+      dataSource={dataSource} 
+    />
   ) : (
-    <DeepDiveReport reportData={reportData} userData={userData} averageData={averageData} />
+    <DeepDiveReport 
+      reportData={reportData} 
+      userData={userData} 
+      averageData={averageData}
+    />
   );
 };
 

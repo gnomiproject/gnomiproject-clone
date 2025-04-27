@@ -1,31 +1,35 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useArchetypes } from '@/hooks/useArchetypes';
 import { ArchetypeId } from '@/types/archetype';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
-import { ChartBar, FileText, StarHalf, Award, Building2, Rocket, Heart, AlertCircle } from 'lucide-react';
+import { ChartBar, FileText, StarHalf, Award, Building2, Rocket, Heart, AlertCircle, Info } from 'lucide-react';
 import { gnomeImages } from '@/utils/gnomeImages';
 import { getArchetypeColorHex } from '@/data/colors';
-import Button from '@/components/shared/Button';
 import { cn } from '@/lib/utils';
 import ReportError from '@/components/report/ReportError';
 import MetricsTab from './tabs/MetricsTab';
 import OverviewTab from './tabs/OverviewTab';
 import SwotTab from './tabs/SwotTab';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface ArchetypeReportProps {
   archetypeId: ArchetypeId;
   reportData: any;
+  dataSource?: string;
 }
 
-const ArchetypeReport = ({ archetypeId, reportData }: ArchetypeReportProps) => {
+const ArchetypeReport = ({ archetypeId, reportData, dataSource }: ArchetypeReportProps) => {
   const { getArchetypeEnhanced, getFamilyById } = useArchetypes();
   const [activeTab, setActiveTab] = useState('overview');
   
-  const archetype = reportData || getArchetypeEnhanced(archetypeId);
-  const family = archetype ? getFamilyById(archetype.familyId) : undefined;
+  // If no data was provided, fallback to local data
+  const localArchetype = getArchetypeEnhanced(archetypeId);
+  const archetype = reportData || localArchetype;
+  const family = archetype ? getFamilyById(archetype.familyId || archetype.family_id) : undefined;
   
   // If no archetype data is found, show a user-friendly error with retry option
   if (!archetype) {
@@ -40,8 +44,8 @@ const ArchetypeReport = ({ archetypeId, reportData }: ArchetypeReportProps) => {
   }
 
   // Get family color to use consistently throughout the report
-  const familyHexColor = getArchetypeColorHex(archetype.familyId);
-  const archetypeHexColor = archetype.hexColor || getArchetypeColorHex(archetype.id);
+  const familyHexColor = getArchetypeColorHex(archetype.familyId || archetype.family_id);
+  const archetypeHexColor = archetype.hexColor || archetype.hex_color || getArchetypeColorHex(archetype.id);
   
   // Choose a gnome image based on archetype
   const gnomeImage = archetypeId.startsWith('a') 
@@ -49,6 +53,24 @@ const ArchetypeReport = ({ archetypeId, reportData }: ArchetypeReportProps) => {
     : archetypeId.startsWith('b') 
       ? gnomeImages.clipboard 
       : gnomeImages.magnifying;
+  
+  // Make sure we have a consistent data structure regardless of source
+  const normalizeArchetypeData = () => {
+    return {
+      id: archetype.id || archetype.archetype_id,
+      name: archetype.name || archetype.archetype_name,
+      shortDescription: archetype.short_description || '',
+      longDescription: archetype.long_description || '',
+      familyId: archetype.familyId || archetype.family_id,
+      familyName: archetype.familyName || archetype.family_name,
+      keyCharacteristics: Array.isArray(archetype.key_characteristics) 
+        ? archetype.key_characteristics 
+        : archetype.key_characteristics?.split(',').map((s: string) => s.trim()) || [],
+      industries: archetype.industries || ''
+    };
+  };
+  
+  const normalizedData = normalizeArchetypeData();
   
   // Ensure we have SWOT data with fallback
   const swotData = {
@@ -68,6 +90,15 @@ const ArchetypeReport = ({ archetypeId, reportData }: ArchetypeReportProps) => {
       <div className="h-2" style={{ backgroundColor: archetypeHexColor }}></div>
       
       <div className="p-6 md:p-8">
+        {dataSource && (
+          <Alert variant="outline" className="mb-4">
+            <Info className="h-4 w-4" />
+            <AlertDescription className="text-xs text-muted-foreground">
+              Data source: {dataSource}
+            </AlertDescription>
+          </Alert>
+        )}
+        
         <div className="flex flex-col md:flex-row gap-8 mb-10 items-center">
           <div className="md:flex-grow space-y-4">
             <div className="flex items-center gap-2 mb-3">
@@ -75,15 +106,15 @@ const ArchetypeReport = ({ archetypeId, reportData }: ArchetypeReportProps) => {
                 backgroundColor: `${familyHexColor}20`, 
                 color: familyHexColor 
               }}>
-                {`Family ${archetype.familyId?.toUpperCase() || archetype.family_id?.toUpperCase()}`}
+                {`Family ${normalizedData.familyId?.toUpperCase() || 'Unknown'}`}
               </Badge>
-              <Badge variant="outline">{archetype.id.toUpperCase()}</Badge>
+              <Badge variant="outline">{normalizedData.id.toUpperCase()}</Badge>
             </div>
             
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900">{archetype.name}</h1>
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900">{normalizedData.name}</h1>
             
             <p className="text-xl text-gray-700 leading-relaxed">
-              {archetype.short_description || ''}
+              {normalizedData.shortDescription}
             </p>
           </div>
           
@@ -91,7 +122,7 @@ const ArchetypeReport = ({ archetypeId, reportData }: ArchetypeReportProps) => {
           <div className="flex-shrink-0 hidden md:block">
             <img 
               src={gnomeImage}
-              alt={`${archetype.name} Guide`}
+              alt={`${normalizedData.name} Guide`}
               className="h-48 object-contain"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
@@ -132,7 +163,7 @@ const ArchetypeReport = ({ archetypeId, reportData }: ArchetypeReportProps) => {
           
           {/* Strategic Priorities Tab */}
           <TabsContent value="priorities" className="mt-6">
-            <h3 className="text-2xl font-bold mb-6">Strategic Priorities for {archetype.name}</h3>
+            <h3 className="text-2xl font-bold mb-6">Strategic Priorities for {normalizedData.name}</h3>
             <div className="space-y-6">
               {(strategicPriorities).map((priority: any, index: number) => (
                 <Card key={index} className="bg-white border rounded-lg p-6 shadow-sm overflow-hidden">
@@ -175,7 +206,7 @@ const ArchetypeReport = ({ archetypeId, reportData }: ArchetypeReportProps) => {
                 <h3 className="text-2xl font-bold mb-6">Common Industries</h3>
                 <Card className="bg-white border rounded-lg p-6">
                   <p className="text-gray-700 whitespace-pre-line">
-                    {archetype.industries || 'No industry data available'}
+                    {normalizedData.industries || 'No industry data available'}
                   </p>
                 </Card>
               </div>

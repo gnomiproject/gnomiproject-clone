@@ -27,38 +27,76 @@ async function generateArchetypeReports(supabase: SupabaseClient): Promise<Repor
       throw new Error(`Database connection error: ${connectionError.message}`);
     }
     
-    // Fetch all archetype data directly from level3_report_data
-    console.log('Fetching archetype data from level3_report_data table...');
-    const { data: archetypes, error: archetypesError } = await supabase
-      .from('level3_report_data')
-      .select('*');
+    // Tracking which data source we're using
+    let dataSource = '';
+    let archetypes = null;
     
-    if (archetypesError) {
-      console.error('Error fetching data from level3_report_data:', archetypesError);
-      throw new Error(`Failed to fetch data from level3_report_data: ${archetypesError.message}`);
+    // Try fetching data from all possible tables in order of preference
+    // First try level3_report_data (most detailed source)
+    try {
+      console.log('Attempting to fetch data from level3_report_data...');
+      const { data: level3Data, error: level3Error } = await supabase
+        .from('level3_report_data')
+        .select('*');
+      
+      if (level3Error) {
+        console.error('Error fetching from level3_report_data:', level3Error);
+      } else if (level3Data && level3Data.length > 0) {
+        console.log(`Found ${level3Data.length} archetypes in level3_report_data`);
+        archetypes = level3Data;
+        dataSource = 'level3_report_data';
+      } else {
+        console.log('No data found in level3_report_data');
+      }
+    } catch (e) {
+      console.error('Exception when accessing level3_report_data:', e);
     }
     
-    console.log(`Found ${archetypes?.length || 0} archetypes to process from level3_report_data`);
+    // If level3 failed, try Core_Archetype_Overview + Core_Archetypes_Metrics
+    if (!archetypes) {
+      try {
+        console.log('Falling back to Core tables...');
+        const { data: overviewData, error: overviewError } = await supabase
+          .from('Core_Archetype_Overview')
+          .select('*');
+          
+        if (overviewError) {
+          console.error('Error fetching from Core_Archetype_Overview:', overviewError);
+          throw new Error(`Failed to fetch archetype overviews: ${overviewError.message}`);
+        }
+        
+        if (!overviewData || overviewData.length === 0) {
+          throw new Error('No archetype data found in Core_Archetype_Overview');
+        }
+        
+        console.log(`Found ${overviewData.length} archetypes in Core_Archetype_Overview`);
+        
+        // Get metrics data for these archetypes
+        const { data: metricsData, error: metricsError } = await supabase
+          .from('Core_Archetypes_Metrics')
+          .select('*');
+          
+        if (metricsError) {
+          console.error('Error fetching from Core_Archetypes_Metrics:', metricsError);
+        }
+        
+        // Combine overview and metrics data
+        archetypes = overviewData.map(overview => {
+          const metrics = metricsData?.find(m => m.id === overview.id) || {};
+          return { ...overview, ...metrics };
+        });
+        
+        dataSource = 'Core tables';
+      } catch (e) {
+        console.error('Exception when accessing Core tables:', e);
+        throw new Error(`Failed to fetch data from any source: ${e instanceof Error ? e.message : String(e)}`);
+      }
+    }
+    
+    console.log(`Using data source: ${dataSource} with ${archetypes?.length || 0} archetypes`);
     
     if (!archetypes || archetypes.length === 0) {
-      // Try fetching from Core_Archetype_Overview and Core_Archetypes_Metrics as fallback
-      console.log('No data found in level3_report_data, trying to fetch from Core tables as fallback...');
-      
-      const { data: overviewData, error: overviewError } = await supabase
-        .from('Core_Archetype_Overview')
-        .select('*');
-        
-      if (overviewError) {
-        console.error('Error fetching data from Core_Archetype_Overview:', overviewError);
-        throw new Error('No archetype data found in any table');
-      }
-      
-      if (!overviewData || overviewData.length === 0) {
-        throw new Error('No archetype data found in any table');
-      }
-      
-      console.log(`Found ${overviewData.length} archetypes in Core_Archetype_Overview`);
-      throw new Error('Level3 report data is missing. Please ensure level3_report_data table is populated with data.');
+      throw new Error('No archetype data found in any table');
     }
     
     const results: ReportGenerationResults = {
@@ -70,26 +108,28 @@ async function generateArchetypeReports(supabase: SupabaseClient): Promise<Repor
       errors: []
     };
     
-    // Process each archetype data row
+    // Process each archetype but only for standard archetype IDs
     for (const archetype of archetypes) {
       try {
-        if (!ARCHETYPE_IDS.includes(archetype.archetype_id as ArchetypeId)) {
-          console.log(`Skipping archetype ${archetype.archetype_id} - not in standard set`);
+        const archetypeId = archetype.archetype_id || archetype.id;
+        
+        if (!ARCHETYPE_IDS.includes(archetypeId as ArchetypeId)) {
+          console.log(`Skipping archetype ${archetypeId} - not in standard set`);
           continue;
         }
         
-        console.log(`Processing archetype ${archetype.archetype_id}: ${archetype.archetype_name}`);
+        console.log(`Processing archetype ${archetypeId}: ${archetype.archetype_name || archetype.name}`);
         
         // Organize metrics that are already in the row
-        console.log(`Organizing metrics for archetype ${archetype.archetype_id}...`);
+        console.log(`Organizing metrics for archetype ${archetypeId}...`);
         const organizedMetrics = organizeMetricsByCategory(archetype);
         
         // Generate report content based on metrics
-        console.log(`Generating report content for archetype ${archetype.archetype_id}...`);
+        console.log(`Generating report content for archetype ${archetypeId}...`);
         const reportContent = generateReportContent(archetype, organizedMetrics);
         
-        // Get SWOT analysis directly from the data
-        console.log(`Getting SWOT analysis for archetype ${archetype.archetype_id}...`);
+        // Get SWOT analysis from the data with fallbacks
+        console.log(`Getting SWOT analysis for archetype ${archetypeId}...`);
         const swotAnalysis = {
           strengths: archetype.strengths || [],
           weaknesses: archetype.weaknesses || [],
@@ -97,31 +137,31 @@ async function generateArchetypeReports(supabase: SupabaseClient): Promise<Repor
           threats: archetype.threats || []
         };
         
-        // Get strategic recommendations directly from the data
-        console.log(`Getting strategic recommendations for archetype ${archetype.archetype_id}...`);
+        // Get strategic recommendations with fallbacks
+        console.log(`Getting strategic recommendations for archetype ${archetypeId}...`);
         const strategicRecommendations = archetype.strategic_recommendations || [];
         
         // Insert report content
-        console.log(`Inserting data into Supabase for archetype ${archetype.archetype_id}...`);
+        console.log(`Inserting data into Supabase for archetype ${archetypeId}...`);
         await insertReportContent(
           supabase, 
-          archetype.archetype_id, 
+          archetypeId, 
           reportContent, 
           swotAnalysis, 
           strategicRecommendations
         );
         
-        console.log(`Completed processing for ${archetype.archetype_id}`);
+        console.log(`Completed processing for ${archetypeId}`);
         results.processed++;
         results.succeeded++;
-        results.archetypeIds.push(archetype.archetype_id);
+        results.archetypeIds.push(archetypeId);
         
       } catch (error) {
-        console.error(`Error processing archetype ${archetype.archetype_id}:`, error);
+        console.error(`Error processing archetype ${archetype.archetype_id || archetype.id}:`, error);
         const errorMessage = error instanceof Error ? error.message : String(error);
         results.processed++;
         results.failed++;
-        results.errors.push(`Error with ${archetype.archetype_id}: ${errorMessage}`);
+        results.errors.push(`Error with ${archetype.archetype_id || archetype.id}: ${errorMessage}`);
       }
     }
     
