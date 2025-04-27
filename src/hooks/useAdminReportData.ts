@@ -130,7 +130,15 @@ export function useAdminReportData({ archetypeId, reportType, skipCache = false 
           code: archetypeId.toUpperCase(),
           id: archetypeId,
           name: `Archetype ${archetypeId.toUpperCase()} (Error Fallback)`,
-          reportType: reportType === 'insights' ? 'Insights' : 'Deep Dive'
+          reportType: reportType === 'insights' ? 'Insights' : 'Deep Dive',
+          // Add minimal required properties for report rendering
+          strengths: ["Error fallback strength"],
+          weaknesses: ["Error fallback weakness"],
+          opportunities: ["Error fallback opportunity"],
+          threats: ["Error fallback threat"],
+          strategic_recommendations: [
+            { recommendation_number: 1, title: "Error fallback recommendation", description: "This is an error fallback recommendation" }
+          ]
         };
         
         console.log('useAdminReportData: Using error fallback data');

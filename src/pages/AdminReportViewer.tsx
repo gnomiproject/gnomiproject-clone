@@ -89,6 +89,7 @@ const AdminReportViewer = () => {
 
   console.log('AdminReportViewer: Rendering with state:', { loading, error: error?.message, hasData: !!rawData });
 
+  // Return the component content based on various conditions
   return (
     <div className="container mx-auto py-8 px-4">
       {/* Debug toggle button (visible in all environments temporarily) */}
@@ -102,7 +103,7 @@ const AdminReportViewer = () => {
         {debugMode ? "Hide Debug Info" : "Show Debug Info"}
       </Button>
       
-      {/* Debug information panel (always visible for now) */}
+      {/* Debug information panel (when debug mode is enabled) */}
       {debugMode && (
         <Card className="mb-6 border-amber-300 bg-amber-50">
           <CardHeader className="pb-2">
