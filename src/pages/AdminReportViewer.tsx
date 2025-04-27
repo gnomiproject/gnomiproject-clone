@@ -8,6 +8,7 @@ import { RefreshCw, Home } from 'lucide-react';
 import InsightsReportContent from '@/components/report/sections/InsightsReportContent';
 import ContactSection from '@/components/report/sections/ContactSection';
 import ReportIntroduction from '@/components/report/sections/ReportIntroduction';
+import DeepDiveReport from '@/components/report/DeepDiveReport';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const AdminReportViewer = () => {
@@ -28,7 +29,7 @@ const AdminReportViewer = () => {
 
   // Fetch minimal data on mount
   useEffect(() => {
-    const fetchMinimalData = async () => {
+    const fetchArchetypeData = async () => {
       if (!archetypeId) {
         setError('No archetype ID provided');
         setLoading(false);
@@ -46,7 +47,7 @@ const AdminReportViewer = () => {
         
         const { data, error } = await supabase
           .from(primaryTable)
-          .select('archetype_id, archetype_name, short_description, long_description, family_id')
+          .select('*')
           .eq('archetype_id', archetypeId)
           .maybeSingle();
 
@@ -59,6 +60,8 @@ const AdminReportViewer = () => {
           setRawData({
             ...data,
             code: archetypeCode,
+            id: data.archetype_id,
+            name: data.archetype_name,
             reportType: isInsightsReport ? 'Insights' : 'Deep Dive'
           });
           setDataSource(primaryTable);
@@ -70,7 +73,7 @@ const AdminReportViewer = () => {
         console.log(`AdminReportViewer: No data found in ${primaryTable}, trying ${fallbackTable}`);
         const { data: fallbackData, error: fallbackError } = await supabase
           .from(fallbackTable)
-          .select('archetype_id, archetype_name, short_description, long_description, family_id')
+          .select('*')
           .eq('archetype_id', archetypeId)
           .maybeSingle();
           
@@ -83,6 +86,8 @@ const AdminReportViewer = () => {
           setRawData({
             ...fallbackData,
             code: archetypeCode,
+            id: fallbackData.archetype_id,
+            name: fallbackData.archetype_name,
             reportType: isInsightsReport ? 'Insights' : 'Deep Dive'
           });
           setDataSource(`${fallbackTable} (fallback)`);
@@ -97,8 +102,26 @@ const AdminReportViewer = () => {
       }
     };
     
-    fetchMinimalData();
+    fetchArchetypeData();
   }, [archetypeId, isInsightsReport, reportType]);
+
+  // Mock user data for admin view
+  const mockUserData = {
+    name: "Admin View",
+    organization: "Sample Organization",
+    email: "admin@example.com",
+    created_at: new Date().toISOString()
+  };
+
+  // Default average data for comparisons
+  const defaultAverageData = {
+    archetype_id: 'All_Average',
+    archetype_name: 'Population Average',
+    "Demo_Average Age": 40,
+    "Demo_Average Family Size": 3.0,
+    "Risk_Average Risk Score": 1.0,
+    "Cost_Medical & RX Paid Amount PMPY": 5000
+  };
 
   return (
     <div className="container mx-auto py-8 px-4">
@@ -140,7 +163,7 @@ const AdminReportViewer = () => {
                       <span className="px-2 py-1 bg-gray-200 rounded text-sm">
                         {rawData.code}
                       </span>
-                      {rawData.archetype_name}
+                      {rawData.name}
                     </div>
                   </CardTitle>
                   <p className="text-sm text-gray-500">
@@ -171,21 +194,25 @@ const AdminReportViewer = () => {
             </TabsList>
             
             <TabsContent value="formatted" className="space-y-6">
-              <ReportIntroduction 
-                archetypeName={rawData.archetype_name}
-                archetypeId={rawData.code}
-                userData={null}
-                isAdminView={true}
+              {isInsightsReport ? (
+                <div className="space-y-6">
+                  <div className="bg-white rounded-lg shadow overflow-hidden mb-12">
+                    <InsightsReportContent archetype={rawData} />
+                  </div>
+                </div>
+              ) : (
+                <DeepDiveReport 
+                  reportData={rawData} 
+                  userData={mockUserData}
+                  averageData={defaultAverageData}
+                  isAdminView={true}
+                />
+              )}
+              
+              <ContactSection 
+                isAdminView={true} 
+                userData={mockUserData} 
               />
-              
-              <InsightsReportContent archetype={rawData} />
-              
-              <ContactSection isAdminView={true} userData={{
-                name: "Admin View",
-                organization: "System Access",
-                email: "admin@example.com",
-                created_at: new Date().toISOString()
-              }} />
             </TabsContent>
             
             <TabsContent value="raw">
