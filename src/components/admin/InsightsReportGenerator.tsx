@@ -12,12 +12,25 @@ import ArchetypeList from './insights/ArchetypeList';
 import { useArchetypeLoader, ArchetypeListItem } from '@/hooks/useArchetypeLoader';
 import { ReportActions } from './reports/ReportActions';
 import { GenerationResult } from '@/types/reports';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
-export function InsightsReportGenerator() {
+interface InsightsReportGeneratorProps {
+  initialConnectionStatus?: boolean;
+}
+
+export function InsightsReportGenerator({ initialConnectionStatus }: InsightsReportGeneratorProps) {
   const [generationResult, setGenerationResult] = useState<GenerationResult | null>(null);
   const [selectedArchetype, setSelectedArchetype] = useState<string | null>(null);
   const [viewReportOpen, setViewReportOpen] = useState(false);
-  const [connectionStatus, setConnectionStatus] = useState<'unchecked' | 'checking' | 'connected' | 'error'>('unchecked');
+  const queryClient = useQueryClient();
+  
+  // Use the connection status from the parent with a fallback to "unchecked"
+  const [connectionStatus, setConnectionStatus] = useState<'unchecked' | 'checking' | 'connected' | 'error'>(
+    initialConnectionStatus === true ? 'connected' : 
+    initialConnectionStatus === false ? 'error' : 
+    'unchecked'
+  );
+  
   const [error, setError] = useState<string | null>(null);
   const [timeoutWarning, setTimeoutWarning] = useState(false);
   
@@ -25,15 +38,55 @@ export function InsightsReportGenerator() {
   const { 
     archetypes, 
     setArchetypes,
-    isLoading, 
+    isLoading: archetypesLoading, 
     isRefreshing,
     error: archetypesError,
     loadArchetypes 
   } = useArchetypeLoader();
+  
+  // Use React Query to fetch archetypes list only when the component needs it
+  const { data: archetypesData, refetch: refetchArchetypes } = useQuery({
+    queryKey: ['archetypes-list'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('level3_report_data')
+        .select('archetype_id, archetype_name, family_id, short_description')
+        .order('archetype_id', { ascending: true });
+      
+      if (error) throw error;
+      return data || [];
+    },
+    // Only run if we have a valid connection
+    enabled: connectionStatus === 'connected',
+    staleTime: 1000 * 60 * 15, // 15 minutes
+    cacheTime: 1000 * 60 * 30, // 30 minutes
+    retry: 1,
+    onSuccess: (data) => {
+      // Update our local archetypes state with the fetched data
+      const formattedArchetypes = data.map(item => ({
+        id: item.archetype_id,
+        name: item.archetype_name || '',
+        familyId: item.family_id || '',
+        description: item.short_description || '',
+        status: 'idle' as const,
+        lastUpdated: null
+      }));
+      setArchetypes(formattedArchetypes);
+    },
+    onError: (error) => {
+      console.error("Error fetching archetypes:", error);
+      toast.error("Error loading archetypes", {
+        description: (error as Error).message,
+      });
+    }
+  });
 
+  // If we have initialConnectionStatus, make sure we load archetypes when component mounts
   useEffect(() => {
-    checkDatabaseConnection();
-  }, []);
+    if (connectionStatus === 'connected' && !archetypes.length) {
+      refetchArchetypes();
+    }
+  }, [connectionStatus]);
 
   // Add timeout warning after 5 seconds if still checking
   useEffect(() => {
@@ -89,8 +142,8 @@ export function InsightsReportGenerator() {
       setConnectionStatus('connected');
       toast.success("Database Connection Successful");
       
-      // Only load archetypes once connected
-      await loadArchetypes();
+      // Load archetypes if we're connected
+      await refetchArchetypes();
       return true;
     } catch (err) {
       console.error("Error testing database:", err);
@@ -192,9 +245,9 @@ export function InsightsReportGenerator() {
       
       <ReportActions 
         onGenerateReports={handleGenerateReports}
-        onRefresh={loadArchetypes}
+        onRefresh={() => refetchArchetypes()}
         isGenerating={isGenerating}
-        isLoading={isLoading}
+        isLoading={archetypesLoading}
         isRefreshing={isRefreshing}
         connectionStatus={connectionStatus === 'connected' ? 'connected' : connectionStatus === 'checking' ? 'checking' : connectionStatus === 'error' ? 'error' : null}
       />
@@ -202,7 +255,7 @@ export function InsightsReportGenerator() {
       <div className="rounded-md border">
         <ArchetypeList
           archetypes={archetypes}
-          isLoading={isLoading}
+          isLoading={archetypesLoading}
           error={archetypesError}
           onViewReport={handleViewReport}
           onCopyReportUrl={copyReportUrl}

@@ -19,21 +19,33 @@ export const supabase = createClient<Database>(
     },
     global: {
       fetch: (...args) => {
-        // Add timeout of 30 seconds
+        // Add reasonable timeout of 15 seconds (was 30s before)
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 30000);
+        const timeoutId = setTimeout(() => controller.abort(), 15000);
         
         // @ts-ignore
-        return fetch(...args, { signal: controller.signal })
-          .then(response => {
-            clearTimeout(timeoutId);
-            return response;
-          })
-          .catch(error => {
-            clearTimeout(timeoutId);
-            throw error;
-          });
+        return fetch(...args, { 
+          signal: controller.signal,
+          // Add cache policy to help with redundant requests
+          cache: 'default'
+        })
+        .then(response => {
+          clearTimeout(timeoutId);
+          return response;
+        })
+        .catch(error => {
+          clearTimeout(timeoutId);
+          throw error;
+        });
       }
+    },
+    db: {
+      // Add schema to all queries
+      schema: 'public'
+    },
+    // Enhance realtime subscription settings
+    realtime: {
+      timeout: 10000
     }
   }
 );

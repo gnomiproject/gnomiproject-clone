@@ -11,8 +11,13 @@ import ReportGenerationPanel from './ReportGenerationPanel';
 import ReportsTable from './ReportsTable';
 import EmptyReportsState from './EmptyReportsState';
 import useReportGeneration from '@/hooks/useReportGeneration';
+import DatabaseConnectionStatus from '../insights/DatabaseConnectionStatus';
 
-const DeepDiveReportsAccess = () => {
+interface DeepDiveReportsAccessProps {
+  initialConnectionStatus?: boolean;
+}
+
+const DeepDiveReportsAccess = ({ initialConnectionStatus }: DeepDiveReportsAccessProps) => {
   const { 
     generateReport, 
     deleteReport, 
@@ -23,8 +28,18 @@ const DeepDiveReportsAccess = () => {
     generationInProgress 
   } = useReportGeneration();
   const [isRefreshing, setIsRefreshing] = useState(false);
+  
+  // Use the connection status from the parent with a fallback to "unchecked"
+  const [connectionStatus, setConnectionStatus] = useState<'unchecked' | 'checking' | 'connected' | 'error'>(
+    initialConnectionStatus === true ? 'connected' : 
+    initialConnectionStatus === false ? 'error' : 
+    'unchecked'
+  );
+  const [error, setError] = useState<string | null>(null);
+  const [timeoutWarning, setTimeoutWarning] = useState(false);
 
-  const { data: reports, isLoading, error, refetch } = useQuery({
+  // Use React Query to fetch reports list efficiently
+  const { data: reports, isLoading, error: fetchError, refetch } = useQuery({
     queryKey: ['deep-dive-reports'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -35,9 +50,80 @@ const DeepDiveReportsAccess = () => {
       if (error) throw error;
       return data || [];
     },
-    staleTime: Infinity, // Data will remain fresh until manually invalidated
-    refetchOnWindowFocus: false // Prevent automatic refetch on window focus
+    // Only run if we have a valid connection
+    enabled: connectionStatus === 'connected',
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    refetchOnWindowFocus: false, // Prevent automatic refetch on window focus
   });
+
+  // If there's an error from the query, display it
+  useEffect(() => {
+    if (fetchError) {
+      setError((fetchError as Error).message);
+    }
+  }, [fetchError]);
+
+  // Check connection if needed
+  const checkDatabaseConnection = async () => {
+    try {
+      setConnectionStatus('checking');
+      setTimeoutWarning(false);
+      setError(null);
+      
+      const { data, error: connError } = await supabase
+        .from('report_requests')
+        .select('count(*)', { count: 'exact', head: true });
+      
+      if (connError) {
+        console.error("Database connection error:", connError);
+        setConnectionStatus('error');
+        setError(`Database connection error: ${connError.message}`);
+        toast.error("Database Connection Failed", {
+          description: connError.message,
+        });
+        return false;
+      }
+      
+      setConnectionStatus('connected');
+      toast.success("Database Connection Successful");
+      // Fetch reports list now
+      await refetch();
+      return true;
+    } catch (err) {
+      console.error("Error testing database:", err);
+      setConnectionStatus('error');
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      setError(`Connection error: ${errorMessage}`);
+      toast.error("Connection Error", {
+        description: errorMessage,
+      });
+      return false;
+    }
+  };
+
+  // If we have initialConnectionStatus, fetch reports when component mounts
+  useEffect(() => {
+    if (connectionStatus === 'connected') {
+      refetch();
+    }
+  }, [connectionStatus]);
+
+  // Add timeout warning after 5 seconds if still checking
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    
+    if (connectionStatus === 'checking') {
+      timeoutId = setTimeout(() => {
+        setTimeoutWarning(true);
+      }, 5000); // 5 seconds
+    } else {
+      setTimeoutWarning(false);
+    }
+    
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [connectionStatus]);
 
   const refreshReportsList = async () => {
     setIsRefreshing(true);
@@ -111,7 +197,8 @@ const DeepDiveReportsAccess = () => {
     window.open(url, '_blank');
   };
 
-  if (isLoading) {
+  // Loading state only if we're explicitly checking connection
+  if (connectionStatus === 'checking') {
     return (
       <div className="space-y-4 animate-pulse">
         <div className="h-8 bg-gray-200 rounded w-1/3"></div>
@@ -120,24 +207,17 @@ const DeepDiveReportsAccess = () => {
     );
   }
 
-  if (error) {
-    return (
-      <Alert variant="destructive">
-        <AlertTitle>Error loading reports</AlertTitle>
-        <AlertDescription>
-          There was a problem loading the report data. Please try refreshing the page.
-          {error instanceof Error && (
-            <div className="mt-2 text-sm">
-              Error details: {error.message}
-            </div>
-          )}
-        </AlertDescription>
-      </Alert>
-    );
-  }
-
   return (
     <div className="space-y-6">
+      {connectionStatus !== 'connected' && (
+        <DatabaseConnectionStatus 
+          status={connectionStatus}
+          error={error || undefined}
+          onRetry={checkDatabaseConnection}
+          timeoutWarning={timeoutWarning}
+        />
+      )}
+
       <Card>
         <CardHeader>
           <CardTitle>Deep Dive Reports Management</CardTitle>
@@ -184,37 +264,41 @@ const DeepDiveReportsAccess = () => {
               </Alert>
             )}
 
-            <ReportGenerationPanel
-              isGenerating={isGenerating}
-              onGenerateReport={handleGenerateReport}
-              formatArchetypeLabel={formatArchetypeLabel}
-              generationInProgress={generationInProgress}
-            />
+            {connectionStatus === 'connected' && (
+              <>
+                <ReportGenerationPanel
+                  isGenerating={isGenerating}
+                  onGenerateReport={handleGenerateReport}
+                  formatArchetypeLabel={formatArchetypeLabel}
+                  generationInProgress={generationInProgress}
+                />
 
-            <div className="flex justify-between items-center mt-6 mb-4">
-              <h3 className="text-lg font-medium">Existing reports</h3>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={refreshReportsList} 
-                disabled={isRefreshing}
-              >
-                <RefreshCw className={`h-4 w-4 mr-1 ${isRefreshing ? 'animate-spin' : ''}`} />
-                Refresh List
-              </Button>
-            </div>
-            
-            {reports && reports.length > 0 ? (
-              <ReportsTable
-                reports={reports}
-                isDeleting={isDeleting}
-                formatArchetypeLabel={formatArchetypeLabel}
-                onCopyLink={copyReportLink}
-                onOpenReport={openReportInNewTab}
-                onDeleteReport={handleDeleteReport}
-              />
-            ) : (
-              <EmptyReportsState />
+                <div className="flex justify-between items-center mt-6 mb-4">
+                  <h3 className="text-lg font-medium">Existing reports</h3>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={refreshReportsList} 
+                    disabled={isRefreshing}
+                  >
+                    <RefreshCw className={`h-4 w-4 mr-1 ${isRefreshing ? 'animate-spin' : ''}`} />
+                    Refresh List
+                  </Button>
+                </div>
+                
+                {reports && reports.length > 0 ? (
+                  <ReportsTable
+                    reports={reports}
+                    isDeleting={isDeleting}
+                    formatArchetypeLabel={formatArchetypeLabel}
+                    onCopyLink={copyReportLink}
+                    onOpenReport={openReportInNewTab}
+                    onDeleteReport={handleDeleteReport}
+                  />
+                ) : (
+                  <EmptyReportsState />
+                )}
+              </>
             )}
           </div>
         </CardContent>

@@ -10,8 +10,13 @@ import { isValidArchetypeId } from '@/utils/archetypeValidation';
 import DatabaseConnectionStatus from './status/DatabaseConnectionStatus';
 import GenerationError from './status/GenerationError';
 import GenerationResults from './reports/GenerationResults';
+import { useQuery } from '@tanstack/react-query';
 
-const ReportGenerator = () => {
+interface ReportGeneratorProps {
+  initialConnectionStatus?: boolean;
+}
+
+const ReportGenerator = ({ initialConnectionStatus }: ReportGeneratorProps) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationResult, setGenerationResult] = useState<null | {
     total: number;
@@ -22,14 +27,40 @@ const ReportGenerator = () => {
     errors?: string[];
   }>(null);
   const [error, setError] = useState<string | null>(null);
-  const [databaseStatus, setDatabaseStatus] = useState<'unchecked' | 'checking' | 'connected' | 'error'>('unchecked');
   const [showTimeoutWarning, setShowTimeoutWarning] = useState(false);
   const connectionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Use the connection status from the parent with a fallback to "unchecked"
+  const [databaseStatus, setDatabaseStatus] = useState<'unchecked' | 'checking' | 'connected' | 'error'>(
+    initialConnectionStatus === true ? 'connected' : 
+    initialConnectionStatus === false ? 'error' : 
+    'unchecked'
+  );
+
+  // Use React Query to fetch database metadata only when needed
+  const { data: dbMetadata, refetch: refreshDbMetadata, isLoading: isCheckingTables } = useQuery({
+    queryKey: ['database-tables-check'],
+    queryFn: async () => {
+      // Check for all required tables in a single query
+      const tablesData = await Promise.all([
+        supabase.from('level3_report_data').select('count(*)', { count: 'exact', head: true }),
+        supabase.from('Analysis_Archetype_Full_Reports').select('count(*)', { count: 'exact', head: true }),
+      ]);
+      
+      return {
+        level3Count: tablesData[0].count || 0,
+        reportsCount: tablesData[1].count || 0,
+        hasErrors: tablesData.some(result => result.error != null),
+        errors: tablesData.map(result => result.error).filter(Boolean),
+      };
+    },
+    // Only run this query when explicitly needed, not on component mount
+    enabled: false,
+    staleTime: 1000 * 60 * 10, // 10 minutes
+    retry: 0,
+  });
+
   useEffect(() => {
-    // Check database connection when component mounts
-    handleTestDatabaseConnection();
-    
     // Clean up timeout on unmount
     return () => {
       if (connectionTimeoutRef.current) {
@@ -48,22 +79,6 @@ const ReportGenerator = () => {
         description: "Generating reports for all archetypes. Please wait...",
         duration: 5000,
       });
-      
-      // First verify we have tables and data available
-      console.log("Checking for required tables and data...");
-      const { data: archetypesData, error: archetypesError } = await supabase
-        .from('Core_Archetype_Overview')
-        .select('id, name')
-        .limit(5);
-      
-      if (archetypesError) {
-        console.error("Error checking archetypes table:", archetypesError);
-        toast.error("Error Checking Database", {
-          description: "Could not verify database structure. Check console for details.",
-          duration: 5000,
-        });
-        throw new Error(`Database check failed: ${archetypesError.message}`);
-      }
       
       // Generate the reports in batch
       console.log("Starting archetype report generation in batch...");
@@ -131,6 +146,12 @@ const ReportGenerator = () => {
         .select('id')
         .limit(1);
       
+      // Clear the timeout since we got a response
+      if (connectionTimeoutRef.current) {
+        clearTimeout(connectionTimeoutRef.current);
+        connectionTimeoutRef.current = null;
+      }
+      
       if (connectionError) {
         console.error("Basic database connection error:", connectionError);
         setDatabaseStatus('error');
@@ -142,45 +163,15 @@ const ReportGenerator = () => {
         return;
       }
       
-      // Now check for data count using a safer method
-      console.log("Checking for data in Core_Archetype_Overview...");
-      const { data, error } = await supabase
-        .from('Core_Archetype_Overview')
-        .select('*', { count: 'exact', head: true });
-        
-      // Clear the timeout since we got a response
-      if (connectionTimeoutRef.current) {
-        clearTimeout(connectionTimeoutRef.current);
-        connectionTimeoutRef.current = null;
-      }
-      
-      if (error) {
-        console.error("Error checking data count:", error);
-        setDatabaseStatus('error');
-        setError(error.message);
-        toast.error("Database Connection Error", {
-          description: error.message,
-          duration: 5000,
-        });
-        return;
-      }
-      
-      // Check if we have any data using a safer method
-      const { count: countResult } = await supabase
-        .from('Core_Archetype_Overview')
-        .select('*', { count: 'exact' });
-        
-      const dataCount = typeof countResult === 'number' ? countResult : 0;
-      
-      console.log("Database connection successful. Data count:", dataCount);
       setDatabaseStatus('connected');
+      // Now fetch metadata about the tables
+      await refreshDbMetadata();
+      
       toast.success("Database Connection Successful", {
-        description: `Connected successfully. Found ${dataCount} archetypes.`,
+        description: "Connected successfully to Supabase.",
         duration: 5000,
       });
 
-      // Check additional required tables
-      checkRequiredTables();
     } catch (error) {
       // Clear the timeout if there was an error
       if (connectionTimeoutRef.current) {
@@ -194,57 +185,6 @@ const ReportGenerator = () => {
       
       toast.error("Connection Test Error", {
         description: typeof error === 'string' ? error : (error as Error).message || 'Unknown error testing connection',
-        duration: 5000,
-      });
-    }
-  };
-
-  const checkRequiredTables = async () => {
-    try {
-      // Check level3_report_data table using a safer approach
-      console.log("Checking level3_report_data table...");
-      const { data: level3Data, error: level3Error } = await supabase
-        .from('level3_report_data')
-        .select('archetype_id');
-        
-      if (level3Error) {
-        console.warn("Warning: level3_report_data access error:", level3Error.message);
-        toast.warning("Table Access Issue", {
-          description: `Cannot access level3_report_data table: ${level3Error.message}`,
-          duration: 7000,
-        });
-      } else {
-        const level3Count = level3Data?.length || 0;
-        console.log(`Found ${level3Count} rows in level3_report_data`);
-        
-        if (level3Count === 0) {
-          toast.warning("Missing Report Data", {
-            description: "level3_report_data table exists but contains no data. Reports generation may fail.",
-            duration: 7000,
-          });
-        }
-      }
-
-      // Check Analysis_Archetype_Full_Reports table using a safer approach
-      console.log("Checking Analysis_Archetype_Full_Reports table...");
-      const { data: reportsData, error: reportsError } = await supabase
-        .from('Analysis_Archetype_Full_Reports')
-        .select('archetype_id');
-        
-      if (reportsError) {
-        console.warn("Warning: Analysis_Archetype_Full_Reports access error:", reportsError.message);
-        toast.warning("Table Access Issue", {
-          description: `Cannot access Analysis_Archetype_Full_Reports table: ${reportsError.message}`,
-          duration: 7000,
-        });
-      } else {
-        const reportsCount = reportsData?.length || 0;
-        console.log(`Found ${reportsCount} rows in Analysis_Archetype_Full_Reports`);
-      }
-    } catch (error) {
-      console.error("Error checking required tables:", error);
-      toast.error("Table Check Error", {
-        description: typeof error === 'string' ? error : (error as Error).message || 'Unknown error checking tables',
         duration: 5000,
       });
     }
@@ -284,6 +224,22 @@ const ReportGenerator = () => {
             results={generationResult}
             onViewReport={handleViewReport}
           />
+        )}
+
+        {dbMetadata && databaseStatus === 'connected' && (
+          <div className="mt-4 p-4 bg-gray-50 rounded-md">
+            <h3 className="font-medium text-sm text-gray-700 mb-2">Database Information</h3>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <p className="text-gray-600">Level 3 Report Data:</p>
+                <p className="font-medium">{dbMetadata.level3Count} records</p>
+              </div>
+              <div>
+                <p className="text-gray-600">Full Reports:</p>
+                <p className="font-medium">{dbMetadata.reportsCount} records</p>
+              </div>
+            </div>
+          </div>
         )}
       </CardContent>
       

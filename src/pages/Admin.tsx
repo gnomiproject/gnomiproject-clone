@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { toast } from 'sonner';
@@ -9,10 +8,60 @@ import InsightsReportGenerator from '@/components/admin/InsightsReportGenerator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Database, BarChart, FileSearch } from 'lucide-react';
 import DeepDiveReportsAccess from '@/components/admin/reports/DeepDiveReportsAccess';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 const Admin = () => {
-  const { generateAllReports, isGenerating } = useReportGeneration();
   const [activeTab, setActiveTab] = useState("database");
+  
+  // Use React Query to check database connection only once when component mounts
+  // This prevents multiple repeated connection checks across child components
+  const { data: dbConnectionStatus } = useQuery({
+    queryKey: ['database-connection-status'],
+    queryFn: async () => {
+      try {
+        const { data, error } = await supabase
+          .from('Core_Archetype_Overview')
+          .select('count(*)', { count: 'exact', head: true });
+          
+        if (error) throw error;
+        return { connected: true, count: data };
+      } catch (error) {
+        console.error("Database connection check failed:", error);
+        return { connected: false, error };
+      }
+    },
+    // Keep this data fresh for a long time to avoid repeated checks
+    staleTime: 1000 * 60 * 30, // 30 minutes
+    retry: 1,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  });
+
+  // When tab changes, prefetch data for that tab to improve perceived performance
+  useEffect(() => {
+    // Only attempt prefetching if we have a valid connection
+    if (dbConnectionStatus?.connected && activeTab) {
+      let prefetchKey;
+      
+      switch(activeTab) {
+        case "insights":
+          prefetchKey = ['archetypes-list'];
+          break;
+        case "deepDive":
+          prefetchKey = ['deep-dive-reports'];
+          break;
+        default:
+          // No prefetch needed for database tab
+          return;
+      }
+      
+      // If we have a key to prefetch, do it
+      if (prefetchKey) {
+        queryClient.prefetchQuery({ queryKey: prefetchKey });
+      }
+    }
+  }, [activeTab, dbConnectionStatus]);
 
   return (
     <div className="container mx-auto py-8">
@@ -34,13 +83,14 @@ const Admin = () => {
           </TabsTrigger>
         </TabsList>
         
+        {/* Pass down the connection status so child components don't need to check again */}
         <TabsContent value="database" className="space-y-6">
           <Card className="p-6">
             <h2 className="text-2xl font-semibold mb-4">Database Management Tools</h2>
             <p className="text-gray-600 mb-6">
               Use these tools to refresh database content, check connections, and manage data.
             </p>
-            <ReportGenerator />
+            <ReportGenerator initialConnectionStatus={dbConnectionStatus?.connected} />
           </Card>
         </TabsContent>
         
@@ -50,7 +100,7 @@ const Admin = () => {
             <p className="text-gray-600 mb-6">
               These reports are publicly accessible without tokens at /insights/report/[archetypeId]
             </p>
-            <InsightsReportGenerator />
+            <InsightsReportGenerator initialConnectionStatus={dbConnectionStatus?.connected} />
           </Card>
         </TabsContent>
 
@@ -60,7 +110,7 @@ const Admin = () => {
             <p className="text-gray-600 mb-6">
               These reports require secure access tokens and are shared via /report/[archetypeId]/[token]
             </p>
-            <DeepDiveReportsAccess />
+            <DeepDiveReportsAccess initialConnectionStatus={dbConnectionStatus?.connected} />
           </Card>
         </TabsContent>
       </Tabs>
