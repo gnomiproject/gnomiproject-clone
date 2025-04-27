@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useArchetypes } from '@/hooks/useArchetypes';
 import { ArchetypeId } from '@/types/archetype';
@@ -91,7 +90,7 @@ const ArchetypeReport = ({ archetypeId, reportData, dataSource }: ArchetypeRepor
       
       <div className="p-6 md:p-8">
         {dataSource && (
-          <Alert variant="outline" className="mb-4">
+          <Alert className="mb-4">
             <Info className="h-4 w-4" />
             <AlertDescription className="text-xs text-muted-foreground">
               Data source: {dataSource}

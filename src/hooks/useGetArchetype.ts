@@ -11,6 +11,7 @@ interface UseGetArchetype {
   isLoading: boolean;
   error: Error | null;
   refetch: () => Promise<any>;
+  dataSource: string; // Added dataSource property
 }
 
 // Helper function to safely convert JSONB arrays to string arrays
@@ -48,6 +49,7 @@ const fetchArchetypeData = async (archetypeId: ArchetypeId) => {
 export const useGetArchetype = (archetypeId: ArchetypeId): UseGetArchetype => {
   const [archetypeData, setArchetypeData] = useState<ArchetypeDetailedData | null>(null);
   const [familyData, setFamilyData] = useState<any | null>(null);
+  const [dataSource, setDataSource] = useState<string>(''); // Added dataSource state
   const { getArchetypeEnhanced, getFamilyById } = useArchetypes();
   
   // Process data on success - defined as a callback to avoid recreating on each render
@@ -154,6 +156,7 @@ export const useGetArchetype = (archetypeId: ArchetypeId): UseGetArchetype => {
       };
 
       setArchetypeData(formattedData);
+      setDataSource('level3_report_data'); // Set data source
       console.log("Formatted archetype data:", formattedData);
       
       // Set family data
@@ -177,6 +180,7 @@ export const useGetArchetype = (archetypeId: ArchetypeId): UseGetArchetype => {
       if (fallbackArchetype) {
         console.log("Using fallback archetype data:", fallbackArchetype);
         setArchetypeData(fallbackArchetype);
+        setDataSource('local data'); // Set data source for fallback
         
         if (fallbackArchetype.familyId) {
           const familyInfo = getFamilyById(fallbackArchetype.familyId);
@@ -195,6 +199,7 @@ export const useGetArchetype = (archetypeId: ArchetypeId): UseGetArchetype => {
     if (fallbackArchetype) {
       console.log("Using fallback data due to error");
       setArchetypeData(fallbackArchetype);
+      setDataSource('local data (fallback after error)'); // Set data source for error fallback
       
       if (fallbackArchetype.familyId) {
         const familyInfo = getFamilyById(fallbackArchetype.familyId);
@@ -233,6 +238,7 @@ export const useGetArchetype = (archetypeId: ArchetypeId): UseGetArchetype => {
     familyData, 
     isLoading,
     error: error as Error | null,
-    refetch: refetch as () => Promise<any>
+    refetch: refetch as () => Promise<any>,
+    dataSource // Return the data source
   };
 };
