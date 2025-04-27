@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArchetypeDetailedData, ArchetypeId } from '@/types/archetype';
@@ -73,7 +72,7 @@ const ArchetypeContent = ({ archetypeData, archetypeId, onRetakeAssessment }: Ar
             <span>Key Metrics</span>
           </TabsTrigger>
           <TabsTrigger value="swot" className="flex items-center gap-2">
-            <ClipboardDocumentCheckIcon size={16} />
+            <ClipboardCheckIcon size={16} />
             <span>SWOT Analysis</span>
           </TabsTrigger>
           <TabsTrigger value="disease" className="flex items-center gap-2">
@@ -81,7 +80,7 @@ const ArchetypeContent = ({ archetypeData, archetypeId, onRetakeAssessment }: Ar
             <span>Disease & Care</span>
           </TabsTrigger>
           <TabsTrigger value="recommendations" className="flex items-center gap-2">
-            <LightBulbIcon size={16} />
+            <LightbulbIcon size={16} />
             <span>Recommendations</span>
           </TabsTrigger>
         </TabsList>
