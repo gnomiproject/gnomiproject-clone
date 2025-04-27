@@ -221,6 +221,59 @@ const ReportDetailView = ({ archetypeId, isOpen, onClose }: ReportDetailViewProp
     );
   };
 
+  const renderOverviewSection = () => {
+    if (!report) return <p>No overview data available</p>;
+
+    return (
+      <div className="space-y-6">
+        {/* Archetype Name */}
+        <div className="border-b pb-4">
+          <h1 className="text-2xl font-bold text-gray-900">
+            {report.archetype_name || 'Unnamed Archetype'}
+          </h1>
+          <p className="text-lg text-gray-600 mt-1">
+            Family: {report.family_name || 'Unknown Family'}
+          </p>
+        </div>
+
+        {/* Long Description */}
+        <div className="bg-gray-50 p-4 rounded-lg">
+          <h3 className="font-medium mb-2">Detailed Description</h3>
+          <p className="text-gray-700 whitespace-pre-line">
+            {report.long_description || 'No detailed description available'}
+          </p>
+        </div>
+
+        {/* Industries */}
+        <div className="bg-gray-50 p-4 rounded-lg">
+          <h3 className="font-medium mb-2">Common Industries</h3>
+          <p className="text-gray-700">
+            {report.industries || 'No industry information available'}
+          </p>
+        </div>
+
+        {/* Key Characteristics */}
+        <div className="bg-gray-50 p-4 rounded-lg">
+          <h3 className="font-medium mb-2">Key Characteristics</h3>
+          {report.key_characteristics ? (
+            <ul className="list-disc list-inside space-y-1 text-gray-700">
+              {(typeof report.key_characteristics === 'string' 
+                ? report.key_characteristics.split('\n')
+                : Array.isArray(report.key_characteristics)
+                ? report.key_characteristics
+                : []
+              ).map((char, index) => (
+                <li key={index}>{char}</li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-gray-500 italic">No key characteristics available</p>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-auto">
@@ -263,51 +316,7 @@ const ReportDetailView = ({ archetypeId, isOpen, onClose }: ReportDetailViewProp
               </TabsList>
               
               <TabsContent value="overview" className="p-4 border rounded-md mt-2">
-                <div className="space-y-6">
-                  <section>
-                    <h3 className="text-lg font-medium mb-2">Basic Information</h3>
-                    <div className="grid gap-4">
-                      <div className="bg-gray-50 p-4 rounded-lg">
-                        <h4 className="font-medium mb-2">Archetype Name</h4>
-                        <p>{report.archetype_name || report.name || "Not available"}</p>
-                      </div>
-                      <div className="bg-gray-50 p-4 rounded-lg">
-                        <h4 className="font-medium mb-2">Family</h4>
-                        <p>{report.family_name || "Not available"}</p>
-                      </div>
-                      <div className="bg-gray-50 p-4 rounded-lg">
-                        <h4 className="font-medium mb-2">Description</h4>
-                        <p className="whitespace-pre-line">{report.long_description || report.short_description || "Not available"}</p>
-                      </div>
-                      <div className="bg-gray-50 p-4 rounded-lg">
-                        <h4 className="font-medium mb-2">Industries</h4>
-                        <p>{report.industries || "Not available"}</p>
-                      </div>
-                      <div className="bg-gray-50 p-4 rounded-lg">
-                        <h4 className="font-medium mb-2">Key Characteristics</h4>
-                        {report.key_characteristics ? (
-                          <ul className="list-disc list-inside">
-                            {Array.isArray(report.key_characteristics) 
-                              ? report.key_characteristics.map((char: string, idx: number) => (
-                                  <li key={idx}>{char}</li>
-                                ))
-                              : <li>{report.key_characteristics}</li>
-                            }
-                          </ul>
-                        ) : (
-                          <p>Not available</p>
-                        )}
-                      </div>
-                    </div>
-                  </section>
-                  
-                  <section>
-                    <h3 className="text-lg font-medium mb-2">Executive Summary</h3>
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                      <p className="whitespace-pre-line">{report.executive_summary || "No summary available"}</p>
-                    </div>
-                  </section>
-                </div>
+                {renderOverviewSection()}
               </TabsContent>
               
               <TabsContent value="metrics" className="p-4 border rounded-md mt-2">
