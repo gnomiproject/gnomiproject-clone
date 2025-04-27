@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from '@/components/ui/sonner';
@@ -29,6 +28,7 @@ function App() {
             <Route path="/admin" element={<Admin />} />
             <Route path="/report/:archetypeId" element={<ReportViewer />} />
             <Route path="/report/:archetypeId/:token" element={<ReportViewer />} />
+            <Route path="/report/:archetypeId/admin-view" element={<ReportViewer />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
