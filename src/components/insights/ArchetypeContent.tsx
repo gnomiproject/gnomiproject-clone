@@ -16,12 +16,12 @@ const ArchetypeContent = ({ archetypeData, archetypeId, onRetakeAssessment }: Ar
   const { getTraitsForArchetype } = useArchetypeMetrics();
   const traits = getTraitsForArchetype(archetypeId);
   
-  // Use different sources for key characteristics
+  // Use different sources for key characteristics with proper type handling
   const keyCharacteristics = 
     archetypeData.key_characteristics || 
     archetypeData.standard?.keyCharacteristics ||
     archetypeData.summary?.keyCharacteristics ||
-    traits?.map(trait => trait.name) ||
+    (traits?.uniqueInsights || []) ||
     [];
   
   // Use different sources for industries
@@ -44,7 +44,7 @@ const ArchetypeContent = ({ archetypeData, archetypeId, onRetakeAssessment }: Ar
   const challenges = 
     archetypeData.enhanced?.swot?.weaknesses?.join(". ") || 
     "Common challenges include managing costs while maintaining quality of care.";
-    
+  
   return (
     <div className="text-left space-y-6">
       <Card>
