@@ -1,210 +1,128 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { 
-  ChevronRight, 
-  Home, 
-  Users, 
-  Activity, 
-  PieChart, 
-  Heart, 
-  AlertCircle, 
-  Shield, 
-  Lightbulb,
-  Mail,
-  ChevronLeft
-} from 'lucide-react';
-import { format } from 'date-fns';
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
-import { cn } from '@/lib/utils';
 
-// Report section components
-import ReportIntroduction from './sections/ReportIntroduction';
+import React from 'react';
+import ExecutiveSummary from './sections/ExecutiveSummary';
+import SwotAnalysis from './sections/SwotAnalysis';
 import ArchetypeProfile from './sections/ArchetypeProfile';
 import DemographicsSection from './sections/DemographicsSection';
-import CostAnalysis from './sections/CostAnalysis';
+import MetricsAnalysis from './sections/MetricsAnalysis';
+import RiskFactors from './sections/RiskFactors';
 import UtilizationPatterns from './sections/UtilizationPatterns';
+import CostAnalysis from './sections/CostAnalysis';
 import DiseaseManagement from './sections/DiseaseManagement';
 import CareGaps from './sections/CareGaps';
-import RiskFactors from './sections/RiskFactors';
 import StrategicRecommendations from './sections/StrategicRecommendations';
+import ReportIntroduction from './sections/ReportIntroduction';
 import ContactSection from './sections/ContactSection';
+import { ArchetypeDetailedData } from '@/types/archetype';
+import FallbackBanner from './FallbackBanner';
+import { useMediaQuery } from '@/hooks/use-mobile';
 
 interface DeepDiveReportProps {
-  reportData: any;
-  userData: any;
-  averageData?: any;
+  reportData: ArchetypeDetailedData;
+  userData?: any;
+  averageData: any;
   loading?: boolean;
+  isAdminView?: boolean;
 }
 
-// Navigation sections configuration
-const navigationSections = [
-  { id: 'introduction', name: 'Home & Introduction', icon: Home },
-  { id: 'profile', name: 'Archetype Profile', icon: PieChart },
-  { id: 'demographics', name: 'Demographics', icon: Users },
-  { id: 'cost', name: 'Cost Analysis', icon: Activity },
-  { id: 'utilization', name: 'Utilization Patterns', icon: Activity },
-  { id: 'disease', name: 'Disease Prevalence', icon: Heart },
-  { id: 'care-gaps', name: 'Care Gaps', icon: AlertCircle },
-  { id: 'risk', name: 'Risk & SDOH Factors', icon: Shield },
-  { id: 'recommendations', name: 'Strategic Recommendations', icon: Lightbulb },
-  { id: 'contact', name: 'Contact Us', icon: Mail },
-];
-
-const DeepDiveReport = ({ reportData, userData, averageData, loading }: DeepDiveReportProps) => {
-  const navigate = useNavigate();
-  const [activeSection, setActiveSection] = useState('introduction');
-  const [menuOpen, setMenuOpen] = useState(true);
-
-  const toggleMenu = () => setMenuOpen(!menuOpen);
-
-  // Ensure userData has required fields (handle fallback data scenario)
-  if (!userData) {
-    userData = {
-      name: 'Demo User',
-      organization: 'Demo Organization',
-      created_at: new Date().toISOString(),
-      email: 'demo@example.com'
-    };
-  }
-
-  if (loading) {
-    return (
-      <div className="animate-pulse space-y-4 p-8">
-        <div className="h-12 bg-gray-200 rounded w-1/2"></div>
-        <div className="h-64 bg-gray-200 rounded"></div>
-      </div>
-    );
-  }
-
-  if (!reportData) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen p-8">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Report Data Not Available</h1>
-          <p className="mb-6">The requested report could not be found or has expired.</p>
-          <Button onClick={() => navigate('/')}>Back to Home</Button>
-        </div>
-      </div>
-    );
-  }
-
-  // Default average data if not provided
-  const safeAverageData = averageData || {
-    archetype_id: 'All_Average',
-    archetype_name: 'Population Average',
-    "Demo_Average Age": 40,
-    "Demo_Average Family Size": 3.0,
-    "Risk_Average Risk Score": 1.0,
-    "Cost_Medical & RX Paid Amount PMPY": 5000
-  };
-
-  // Render the content based on active section
-  const renderContent = () => {
-    switch (activeSection) {
-      case 'introduction':
-        return <ReportIntroduction reportData={reportData} userData={userData} averageData={safeAverageData} />;
-      case 'profile':
-        return <ArchetypeProfile reportData={reportData} averageData={safeAverageData} />;
-      case 'demographics':
-        return <DemographicsSection reportData={reportData} averageData={safeAverageData} />;
-      case 'cost':
-        return <CostAnalysis reportData={reportData} averageData={safeAverageData} />;
-      case 'utilization':
-        return <UtilizationPatterns reportData={reportData} averageData={safeAverageData} />;
-      case 'disease':
-        return <DiseaseManagement reportData={reportData} averageData={safeAverageData} />;
-      case 'care-gaps':
-        return <CareGaps reportData={reportData} averageData={safeAverageData} />;
-      case 'risk':
-        return <RiskFactors reportData={reportData} averageData={safeAverageData} />;
-      case 'recommendations':
-        return <StrategicRecommendations reportData={reportData} averageData={safeAverageData} />;
-      case 'contact':
-        return <ContactSection userData={userData} />;
-      default:
-        return <ReportIntroduction reportData={reportData} userData={userData} averageData={safeAverageData} />;
-    }
-  };
-
+const DeepDiveReport = ({ 
+  reportData, 
+  userData, 
+  averageData, 
+  loading = false,
+  isAdminView = false
+}: DeepDiveReportProps) => {
+  const isMobile = useMediaQuery("(max-width: 768px)");
+  const usingFallbackData = !reportData.strategic_recommendations || reportData.strategic_recommendations.length === 0;
+  
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Report Header */}
-      <header className="bg-white border-b p-4 print:hidden">
-        <div className="container mx-auto">
-          <div className="flex flex-wrap justify-between items-center gap-4">
-            <div>
-              <h1 className="text-xl font-bold text-blue-800">
-                Deep Dive Healthcare Report
-              </h1>
-              <p className="text-sm text-gray-600">
-                {reportData.archetype_name || reportData.archetype_id?.toUpperCase()} Archetype Analysis
-              </p>
-            </div>
-            <div className="text-right text-sm">
-              <p><span className="font-medium">For:</span> {userData.name}</p>
-              <p><span className="font-medium">Organization:</span> {userData.organization}</p>
-              <p><span className="font-medium">Generated:</span> {format(new Date(userData.created_at), 'MMM d, yyyy')}</p>
-            </div>
-          </div>
+    <div className="bg-white min-h-screen">
+      {/* Admin View Banner */}
+      {isAdminView && (
+        <div className="bg-yellow-50 border-yellow-200 border-b p-4 text-yellow-800 text-sm sticky top-0 z-50 flex justify-between items-center">
+          <span>
+            <strong>Admin View</strong> - Viewing with placeholder user data. User-specific metrics may not be accurate.
+          </span>
+          <button 
+            className="text-yellow-700 hover:text-yellow-900 font-medium text-xs bg-yellow-100 hover:bg-yellow-200 px-3 py-1 rounded"
+            onClick={() => window.print()}
+          >
+            Print Report
+          </button>
         </div>
-      </header>
-
-      {/* Main Content with Sidebar */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar Navigation - Collapsible on mobile */}
-        <div className={cn(
-          "bg-white border-r transition-all duration-300 print:hidden",
-          menuOpen ? "w-64" : "w-0 md:w-16"
-        )}>
-          <div className="flex justify-end p-2">
-            <Button variant="ghost" size="sm" onClick={toggleMenu} className="md:hidden">
-              {menuOpen ? <ChevronLeft size={18} /> : <ChevronRight size={18} />}
-            </Button>
-          </div>
-          <nav className="p-2 overflow-y-auto h-full">
-            {navigationSections.map((section) => (
-              <Button
-                key={section.id}
-                variant="ghost"
-                className={cn(
-                  "w-full justify-start text-left mb-1 overflow-hidden whitespace-nowrap",
-                  activeSection === section.id ? "bg-blue-50 text-blue-700" : "text-gray-700",
-                  section.id === 'contact' ? "mt-6" : "",
-                  !menuOpen ? "px-3" : "px-4"
-                )}
-                onClick={() => setActiveSection(section.id)}
-              >
-                <section.icon className={cn("h-5 w-5 mr-2", !menuOpen && "mr-0")} />
-                {menuOpen && <span>{section.name}</span>}
-              </Button>
-            ))}
-          </nav>
-        </div>
-
-        {/* Main Content Area */}
-        <div className="flex-1 overflow-y-auto p-6 md:p-8 print:p-0">
-          <div className="container mx-auto">
-            {/* Mobile menu toggle */}
-            <div className="md:hidden mb-4">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={toggleMenu}
-                className="flex items-center gap-2"
-              >
-                {menuOpen ? <ChevronLeft size={18} /> : <ChevronRight size={18} />}
-                {!menuOpen && "Menu"}
-              </Button>
-            </div>
-            
-            {/* Content */}
-            <div>
-              {renderContent()}
-            </div>
-          </div>
-        </div>
+      )}
+      
+      {/* If using fallback data, show a banner */}
+      {usingFallbackData && !loading && (
+        <FallbackBanner 
+          message="This report is using fallback data because the complete data isn't available from the database." 
+        />
+      )}
+      
+      <div className="container mx-auto px-4 md:px-8 py-8 max-w-[1200px]">
+        <ReportIntroduction
+          archetypeName={reportData.name}
+          archetypeId={reportData.id}
+          userData={userData}
+          isAdminView={isAdminView}
+        />
+        
+        <ExecutiveSummary 
+          archetype={reportData}
+          isMobile={isMobile}
+        />
+        
+        <ArchetypeProfile
+          archetype={reportData}
+        />
+        
+        <SwotAnalysis 
+          strengths={reportData.strengths || reportData?.enhanced?.swot?.strengths || []}
+          weaknesses={reportData.weaknesses || reportData?.enhanced?.swot?.weaknesses || []}
+          opportunities={reportData.opportunities || reportData?.enhanced?.swot?.opportunities || []}
+          threats={reportData.threats || reportData?.enhanced?.swot?.threats || []}
+          familyId={reportData.familyId || reportData.family_id}
+        />
+        
+        <DemographicsSection
+          archetype={reportData}
+          averageData={averageData}
+        />
+        
+        <RiskFactors
+          archetype={reportData}
+          averageData={averageData}
+        />
+        
+        <CostAnalysis
+          archetype={reportData}
+          averageData={averageData}
+        />
+        
+        <UtilizationPatterns
+          archetype={reportData}
+          averageData={averageData}
+        />
+        
+        <DiseaseManagement
+          archetype={reportData}
+          averageData={averageData}
+        />
+        
+        <CareGaps
+          archetype={reportData}
+          averageData={averageData}
+        />
+        
+        <StrategicRecommendations
+          recommendations={reportData.strategic_recommendations || []}
+          archetypeId={reportData.id}
+        />
+        
+        <ContactSection
+          userData={userData}
+          isAdminView={isAdminView}
+        />
       </div>
     </div>
   );

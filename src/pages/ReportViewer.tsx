@@ -20,12 +20,15 @@ const ReportViewer = () => {
   const { getArchetypeDetailedById } = useArchetypes();
   const [initialLoading, setInitialLoading] = useState(true);
   const [isInsightsReport, setIsInsightsReport] = useState(false);
+  const [isAdminView, setIsAdminView] = useState(false);
   const [isRetrying, setIsRetrying] = useState(false);
   
   // Determine if we're viewing an insights report based on the route
   useEffect(() => {
     setIsInsightsReport(location.pathname.startsWith('/insights/report'));
-  }, [location.pathname]);
+    // Check if this is an admin view (for Deep Dive reports without tokens)
+    setIsAdminView(token === 'admin-view');
+  }, [location.pathname, token]);
   
   // After a brief initial loading state for better UX
   useEffect(() => {
@@ -73,7 +76,7 @@ const ReportViewer = () => {
   }
 
   // For deep dive reports with tokens, use the useReportData hook
-  if (!isInsightsReport && token) {
+  if (!isInsightsReport && token && !isAdminView) {
     const { 
       reportData, 
       userData, 
@@ -116,7 +119,7 @@ const ReportViewer = () => {
     );
   }
 
-  // For insights reports or when no token is provided
+  // For admin-view deep dive reports or insights reports
   if (initialLoading || archetypeLoading) {
     return <ReportLoadingState />;
   }
@@ -159,12 +162,12 @@ const ReportViewer = () => {
   // Report data will use real database data or fallback to local data
   const reportData = archetypeApiData || localArchetypeData;
   
-  // Dummy data for other report properties that might be needed for DeepDiveReport
-  const userData = {
-    name: 'Demo User',
-    organization: 'Demo Organization',
+  // Setup admin view mock data for DeepDiveReport
+  const adminUserData = {
+    name: 'Admin Viewer',
+    organization: 'Admin Organization',
     created_at: new Date().toISOString(),
-    email: 'demo@example.com'
+    email: 'admin@example.com'
   };
   
   const averageData = {
@@ -177,19 +180,32 @@ const ReportViewer = () => {
   };
 
   // Render the appropriate report type based on the route
-  return isInsightsReport ? (
-    <ArchetypeReport 
-      archetypeId={archetypeId as ArchetypeId} 
-      reportData={reportData} 
-      dataSource={dataSource} 
-    />
-  ) : (
-    <DeepDiveReport 
-      reportData={reportData} 
-      userData={userData} 
-      averageData={averageData}
-    />
-  );
+  if (isInsightsReport) {
+    return (
+      <ArchetypeReport 
+        archetypeId={archetypeId as ArchetypeId} 
+        reportData={reportData} 
+        dataSource={dataSource} 
+      />
+    );
+  } else {
+    // For deep dive report (regular or admin view)
+    return (
+      <>
+        {isAdminView && (
+          <div className="bg-yellow-50 border-yellow-200 border p-4 text-yellow-800 text-center">
+            <strong>Admin View</strong> - Viewing with placeholder user data. Not a real user session.
+          </div>
+        )}
+        <DeepDiveReport 
+          reportData={reportData} 
+          userData={adminUserData} 
+          averageData={averageData}
+          isAdminView={isAdminView}
+        />
+      </>
+    );
+  }
 };
 
 export default ReportViewer;

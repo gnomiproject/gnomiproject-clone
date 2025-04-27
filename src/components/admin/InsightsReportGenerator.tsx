@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
@@ -59,7 +58,7 @@ export function InsightsReportGenerator({ initialConnectionStatus }: InsightsRep
     // Only run if we have a valid connection
     enabled: connectionStatus === 'connected',
     staleTime: 1000 * 60 * 15, // 15 minutes
-    cacheTime: 1000 * 60 * 30, // 30 minutes
+    gcTime: 1000 * 60 * 30, // 30 minutes - fixed from cacheTime
     retry: 1,
     onSuccess: (data) => {
       // Update our local archetypes state with the fetched data
