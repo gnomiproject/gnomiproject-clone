@@ -26,11 +26,11 @@ const Admin = () => {
           </TabsTrigger>
           <TabsTrigger value="insights" className="flex items-center gap-2">
             <BarChart className="w-4 h-4" />
-            <span>Insights Reports</span>
+            <span>Public Insights Reports</span>
           </TabsTrigger>
           <TabsTrigger value="deepDive" className="flex items-center gap-2">
             <FileSearch className="w-4 h-4" />
-            <span>Deep Dive Reports</span>
+            <span>Private Deep Dive Reports</span>
           </TabsTrigger>
         </TabsList>
         
@@ -46,14 +46,20 @@ const Admin = () => {
         
         <TabsContent value="insights" className="space-y-6">
           <Card className="p-6">
-            <h2 className="text-2xl font-semibold mb-4">Insights Reports Management</h2>
+            <h2 className="text-2xl font-semibold mb-4">Public Insights Reports Management</h2>
+            <p className="text-gray-600 mb-6">
+              These reports are publicly accessible without tokens at /insights/report/[archetypeId]
+            </p>
             <InsightsReportGenerator />
           </Card>
         </TabsContent>
 
         <TabsContent value="deepDive" className="space-y-6">
           <Card className="p-6">
-            <h2 className="text-2xl font-semibold mb-4">Deep Dive Reports Access</h2>
+            <h2 className="text-2xl font-semibold mb-4">Private Deep Dive Reports</h2>
+            <p className="text-gray-600 mb-6">
+              These reports require secure access tokens and are shared via /report/[archetypeId]/[token]
+            </p>
             <DeepDiveReportsAccess />
           </Card>
         </TabsContent>

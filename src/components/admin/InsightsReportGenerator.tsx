@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -177,16 +178,16 @@ export function InsightsReportGenerator() {
     setViewReportOpen(true);
   };
 
-  // Get direct URL for insights report (no token needed)
+  // Get direct URL for insights report - fixed to use /insights/report path
   const getInsightsReportUrl = (archetypeId: string): string => {
     return `/insights/report/${archetypeId}`;
   };
   
-  // Copy report URL to clipboard
+  // Copy report URL to clipboard with the correct URL
   const copyReportUrl = (archetypeId: string) => {
     const url = window.location.origin + getInsightsReportUrl(archetypeId);
     navigator.clipboard.writeText(url).then(() => {
-      toast.success("Report URL copied to clipboard");
+      toast.success("Insights report URL copied to clipboard");
     }).catch(err => {
       console.error('Failed to copy URL:', err);
       toast.error("Failed to copy URL");
@@ -342,7 +343,7 @@ export function InsightsReportGenerator() {
                       >
                         <Link to={getInsightsReportUrl(archetype.id)} target="_blank">
                           <ExternalLink className="h-4 w-4" />
-                          <span className="sr-only">View Report Page</span>
+                          <span className="sr-only">View Insights Report</span>
                         </Link>
                       </Button>
                       <Button
@@ -350,7 +351,7 @@ export function InsightsReportGenerator() {
                         size="sm"
                         onClick={() => copyReportUrl(archetype.id)}
                         disabled={archetype.status !== 'success'}
-                        title="Copy report URL to clipboard"
+                        title="Copy insights report URL to clipboard"
                         className="h-8 w-8 p-0"
                       >
                         <Copy className="h-4 w-4" />

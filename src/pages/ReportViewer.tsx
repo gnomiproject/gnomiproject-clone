@@ -1,12 +1,13 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import DeepDiveReport from '@/components/report/DeepDiveReport';
+import ArchetypeReport from '@/components/insights/ArchetypeReport'; // Import for insights reports
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, Loader2 } from 'lucide-react';
 import { ArchetypeId } from '@/types/archetype';
 import { toast } from 'sonner';
-import { validateReportToken } from '@/utils/tokenGenerator';
 
 const defaultReportData = {
   archetype_id: 'a1',
@@ -107,35 +108,53 @@ const ReportViewer = () => {
           setIsValidAccess(true);
         }
 
-        // Fetch average data for comparisons regardless of access path
-        const { data: avgData, error: avgError } = await supabase
-          .from('level4_deepdive_report_data')
-          .select('*')
-          .eq('archetype_id', 'All_Average')
-          .maybeSingle();
+        // Fetch report data based on report type (insights vs deep dive)
+        if (isInsightsReport) {
+          // Fetch insights report data
+          const { data: insightsData, error: insightsError } = await supabase
+            .from('Analysis_Archetype_Full_Reports')
+            .select('*')
+            .eq('archetype_id', archetypeId)
+            .maybeSingle();
 
-        if (avgError) {
-          console.warn('Error fetching average data, using defaults');
-          setAverageData(defaultAverageData);
-        } else if (avgData) {
-          setAverageData(avgData);
+          if (insightsError || !insightsData) {
+            console.warn('Using placeholder insights report data');
+            setReportData({ archetype_id: archetypeId });
+            setUsingFallbackData(true);
+          } else {
+            setReportData(insightsData);
+          }
         } else {
-          setAverageData(defaultAverageData);
-        }
+          // Fetch average data for deep dive reports
+          const { data: avgData, error: avgError } = await supabase
+            .from('level4_deepdive_report_data')
+            .select('*')
+            .eq('archetype_id', 'All_Average')
+            .maybeSingle();
 
-        // Fetch the archetype-specific report data
-        const { data: archetypeData, error: archetypeError } = await supabase
-          .from('level4_deepdive_report_data')
-          .select('*')
-          .eq('archetype_id', archetypeId)
-          .maybeSingle();
+          if (avgError) {
+            console.warn('Error fetching average data, using defaults');
+            setAverageData(defaultAverageData);
+          } else if (avgData) {
+            setAverageData(avgData);
+          } else {
+            setAverageData(defaultAverageData);
+          }
 
-        if (archetypeError || !archetypeData) {
-          console.warn('Using placeholder report data for demo');
-          setReportData({ ...defaultReportData, archetype_id: archetypeId });
-          setUsingFallbackData(true);
-        } else {
-          setReportData(archetypeData);
+          // Fetch the archetype-specific deep dive report data
+          const { data: archetypeData, error: archetypeError } = await supabase
+            .from('level4_deepdive_report_data')
+            .select('*')
+            .eq('archetype_id', archetypeId)
+            .maybeSingle();
+
+          if (archetypeError || !archetypeData) {
+            console.warn('Using placeholder report data for demo');
+            setReportData({ ...defaultReportData, archetype_id: archetypeId });
+            setUsingFallbackData(true);
+          } else {
+            setReportData(archetypeData);
+          }
         }
         
       } catch (err) {
@@ -173,7 +192,7 @@ const ReportViewer = () => {
       <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
         <Loader2 className="h-12 w-12 text-blue-500 animate-spin mb-4" />
         <h2 className="text-xl font-semibold mb-2">Loading Your Report</h2>
-        <p className="text-gray-600">Please wait while we prepare your deep dive analysis...</p>
+        <p className="text-gray-600">Please wait while we prepare your report...</p>
       </div>
     );
   }
@@ -224,10 +243,15 @@ const ReportViewer = () => {
     return null;
   };
 
+  // Render the appropriate report type based on the route
   return (
     <>
       {usingFallbackData && <FallbackBanner />}
-      <DeepDiveReport reportData={reportData} userData={userData} averageData={averageData} />
+      {isInsightsReport ? (
+        <ArchetypeReport archetypeId={archetypeId as ArchetypeId} reportData={reportData} />
+      ) : (
+        <DeepDiveReport reportData={reportData} userData={userData} averageData={averageData} />
+      )}
     </>
   );
 };
