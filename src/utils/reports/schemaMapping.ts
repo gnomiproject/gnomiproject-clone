@@ -2,6 +2,7 @@
 import { ReportSchema, ReportType } from "@/types/reports";
 import { insightReportSchema } from "@/schemas/insightReportSchema";
 import { deepDiveReportSchema } from "@/schemas/deepDiveReportSchema";
+import { ReportDataSource } from "./dataSourceUtils";
 
 // Define mapping between insight and deep dive sections
 export const sectionMappings = {
@@ -63,6 +64,6 @@ export const getFieldsForReport = (reportType: ReportType, sectionKey: string): 
 };
 
 // Get the appropriate data source based on report type
-export const getDataSource = (reportType: ReportType): string => {
+export const getDataSource = (reportType: ReportType): ReportDataSource => {
   return reportType === 'insight' ? 'level3_report_data' : 'level4_deepdive_report_data';
 };

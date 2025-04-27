@@ -4,8 +4,6 @@ import { insightReportSchema } from "@/schemas/insightReportSchema";
 import { deepDiveReportSchema } from "@/schemas/deepDiveReportSchema";
 import { ReportDataSource, getTypeValidDataSource } from "./dataSourceUtils";
 
-export type ReportType = "insight" | "deepDive";
-
 export const getReportSchema = (type: ReportType): ReportSchema => {
   return type === "insight" ? insightReportSchema : deepDiveReportSchema;
 };
@@ -21,5 +19,5 @@ export const getReportFields = (type: ReportType, sectionKey: string): ReportFie
 };
 
 export const getDataSource = (type: ReportType, sectionKey: string): ReportDataSource => {
-  return getTypeValidDataSource(type, sectionKey);
+  return getTypeValidDataSource(type);
 };

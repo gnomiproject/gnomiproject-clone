@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from 'react';
 import { getDataSource } from '@/utils/reports/schemaMapping';
 import { supabase } from '@/integrations/supabase/client';
@@ -71,9 +72,7 @@ export const useReportData = ({
 
       // Determine report type and data source
       const reportType: ReportType = isInsightsReport ? 'insight' : 'deepDive';
-      const mainSection = isInsightsReport ? 'overview' : 'archetypeProfile';
-      const dataSourceTable = getDataSource(reportType, mainSection);
-
+      
       // Validate token access if provided
       if (token) {
         const { data: accessData, error: accessError } = await fetchTokenAccess(archetypeId, token);
@@ -96,13 +95,13 @@ export const useReportData = ({
       }
 
       // Fetch report data
-      const fetchedData = await fetchReportData(archetypeId, reportType, dataSourceTable);
+      const fetchedData = await fetchReportData(archetypeId, reportType);
       
       if (fetchedData) {
         const processedData = processReportData(fetchedData);
         setReportData(processedData.reportData);
         setAverageData(processedData.averageData);
-        setDataSource(dataSourceTable);
+        setDataSource(getDataSource(reportType));
 
         // Cache successful results
         setInCache(cacheKey, {
