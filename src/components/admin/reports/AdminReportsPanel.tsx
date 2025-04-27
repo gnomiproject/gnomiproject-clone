@@ -1,8 +1,7 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { ArchetypeInsightsList } from './ArchetypeInsightsList';
 import { ArchetypeDeepDiveList } from './ArchetypeDeepDiveList';
-import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BarChart, FileSearch } from 'lucide-react';
