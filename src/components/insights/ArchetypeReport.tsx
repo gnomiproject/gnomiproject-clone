@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useArchetypes } from '@/hooks/useArchetypes';
 import { ArchetypeId } from '@/types/archetype';
@@ -10,6 +9,7 @@ import Button from '@/components/shared/Button';
 
 interface ArchetypeReportProps {
   archetypeId: ArchetypeId;
+  reportData?: any; // Added reportData prop as optional
 }
 
 // Define types for the statistics to fix the TypeScript errors
@@ -31,7 +31,7 @@ const defaultRiskProfile = {
   ]
 };
 
-const ArchetypeReport = ({ archetypeId }: ArchetypeReportProps) => {
+const ArchetypeReport = ({ archetypeId, reportData }: ArchetypeReportProps) => {
   const { getArchetypeEnhanced, getFamilyById, getTraitsForArchetype, getMetricsForArchetype } = useArchetypes();
   
   const archetype = getArchetypeEnhanced(archetypeId);
