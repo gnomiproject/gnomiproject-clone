@@ -195,19 +195,12 @@ const ReportViewer = () => {
     const typedReportData = reportData as unknown as ArchetypeDetailedData;
     
     return (
-      <>
-        {isAdminView && (
-          <div className="bg-yellow-50 border-yellow-200 border p-4 text-yellow-800 text-center">
-            <strong>Admin View</strong> - Viewing with placeholder user data. Not a real user session.
-          </div>
-        )}
-        <DeepDiveReport 
-          reportData={typedReportData} 
-          userData={adminUserData} 
-          averageData={averageData}
-          isAdminView={isAdminView}
-        />
-      </>
+      <DeepDiveReport 
+        reportData={typedReportData} 
+        userData={adminUserData} 
+        averageData={averageData}
+        isAdminView={isAdminView}
+      />
     );
   }
 };
