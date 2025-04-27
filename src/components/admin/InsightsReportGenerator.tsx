@@ -4,6 +4,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
 import { ArchetypeId } from '@/types/archetype';
+import useReportGeneration from '@/hooks/useReportGeneration';
+import DatabaseConnectionStatus from './insights/DatabaseConnectionStatus';
 
 // Define ArchetypeListItem type
 interface ArchetypeListItem {
@@ -21,6 +23,7 @@ const InsightsReportGenerator: React.FC = () => {
   const [timeoutWarning, setTimeoutWarning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [archetypes, setArchetypes] = useState<ArchetypeListItem[]>([]);
+  const { generateAllReports, isGenerating } = useReportGeneration();
 
   const checkDatabaseConnection = async () => {
     try {
@@ -104,36 +107,55 @@ const InsightsReportGenerator: React.FC = () => {
     }
   };
 
+  const handleGenerateAllReports = async () => {
+    try {
+      if (connectionStatus !== 'connected') {
+        const connected = await checkDatabaseConnection();
+        if (!connected) {
+          toast.error("Please establish database connection first");
+          return;
+        }
+      }
+      
+      const results = await generateAllReports();
+      toast.success("Reports generation completed", {
+        description: `Generated ${results.succeeded} reports successfully.`
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      toast.error("Error generating reports", {
+        description: errorMessage,
+      });
+    }
+  };
+
   // Return JSX here
   return (
     <div className="space-y-6">
-      <div>
-        {/* Render connection status, archetypes, etc. */}
-        <button 
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" 
-          onClick={checkDatabaseConnection}
-        >
-          Check Database Connection
-        </button>
-        
-        {connectionStatus === 'checking' && (
-          <p className="mt-2 text-gray-600">Checking connection...</p>
-        )}
-        
-        {connectionStatus === 'connected' && (
-          <p className="mt-2 text-green-600">Connected to database successfully!</p>
-        )}
-        
-        {connectionStatus === 'error' && (
-          <p className="mt-2 text-red-600">{error || "Error connecting to database"}</p>
-        )}
-        
-        {archetypes.length > 0 && (
-          <div className="mt-4">
-            <h3 className="text-lg font-medium">Found {archetypes.length} archetypes</h3>
-          </div>
-        )}
-      </div>
+      <DatabaseConnectionStatus 
+        status={connectionStatus}
+        error={error || undefined}
+        onRetry={checkDatabaseConnection}
+        timeoutWarning={timeoutWarning}
+      />
+      
+      {connectionStatus === 'connected' && (
+        <div className="space-y-4">
+          <button 
+            className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
+            onClick={handleGenerateAllReports}
+            disabled={isGenerating}
+          >
+            {isGenerating ? "Generating Reports..." : "Generate All Reports"}
+          </button>
+          
+          {archetypes.length > 0 && (
+            <div className="mt-4">
+              <h3 className="text-lg font-medium">Found {archetypes.length} archetypes</h3>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

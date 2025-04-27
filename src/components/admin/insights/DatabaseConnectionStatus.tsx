@@ -84,7 +84,23 @@ const DatabaseConnectionStatus = ({
     );
   }
 
-  return null;
+  return (
+    <Alert className="mb-4 bg-blue-50 border-blue-200">
+      <AlertTitle>Database Connection</AlertTitle>
+      <AlertDescription className="flex justify-between items-center">
+        <span>Check database connection status before generating reports.</span>
+        {onRetry && (
+          <Button 
+            onClick={onRetry} 
+            variant="outline" 
+            size="sm"
+          >
+            Check Connection
+          </Button>
+        )}
+      </AlertDescription>
+    </Alert>
+  );
 };
 
 export default DatabaseConnectionStatus;
