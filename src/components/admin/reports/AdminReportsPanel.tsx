@@ -4,7 +4,7 @@ import { ArchetypeInsightsList } from './ArchetypeInsightsList';
 import { ArchetypeDeepDiveList } from './ArchetypeDeepDiveList';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BarChart, FileSearch } from 'lucide-react';
+import { Activity, FileSearch } from 'lucide-react';
 
 const AdminReportsPanel = () => {
   return (
@@ -12,7 +12,7 @@ const AdminReportsPanel = () => {
       <Tabs defaultValue="insights" className="w-full">
         <TabsList className="mb-6">
           <TabsTrigger value="insights" className="flex items-center gap-2">
-            <BarChart className="w-4 h-4" />
+            <Activity className="w-4 h-4" />
             <span>Insights Reports</span>
           </TabsTrigger>
           <TabsTrigger value="deepdive" className="flex items-center gap-2">
