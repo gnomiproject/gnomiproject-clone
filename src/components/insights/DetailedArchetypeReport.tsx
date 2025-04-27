@@ -1,7 +1,5 @@
-
 import React, { useState } from 'react';
 import { ArchetypeId } from '@/types/archetype';
-import DetailedAnalysisTabs from '@/components/results/DetailedAnalysisTabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useGetArchetype } from '@/hooks/useGetArchetype';
 import { Button } from '@/components/ui/button';
@@ -90,10 +88,19 @@ const DetailedArchetypeReport = ({ archetypeId, onRetakeAssessment }: DetailedAr
         className="border-t-4"
         style={{ borderColor: archetypeData.hexColor || `var(--color-archetype-${archetypeId})` }} 
       >
-        <DetailedAnalysisTabs 
-          archetypeData={archetypeData} 
-          onRetakeAssessment={onRetakeAssessment}
-        />
+        <div className="bg-white p-6">
+          <h2 className="text-2xl font-bold mb-4">{archetypeData.name}</h2>
+          <p className="text-gray-600 mb-6">{archetypeData.short_description}</p>
+          <div className="mt-8 text-center">
+            <Button 
+              onClick={onRetakeAssessment}
+              variant="outline"
+              className="text-sm"
+            >
+              Want to try again? Retake the assessment
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   );
