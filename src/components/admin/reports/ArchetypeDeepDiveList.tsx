@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, Loader2 } from 'lucide-react';
 
 interface Archetype {
   id: string;
@@ -14,7 +14,7 @@ interface Archetype {
 
 export const ArchetypeDeepDiveList = () => {
   const [archetypes, setArchetypes] = useState<Archetype[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   
   useEffect(() => {
     const fetchArchetypes = async () => {
@@ -44,6 +44,7 @@ export const ArchetypeDeepDiveList = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center py-8">
+        <Loader2 className="w-8 h-8 animate-spin text-primary mr-2" />
         <p className="text-muted-foreground">Loading archetypes...</p>
       </div>
     );
@@ -51,19 +52,26 @@ export const ArchetypeDeepDiveList = () => {
   
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {archetypes.map(archetype => (
-        <Card key={archetype.id} className="p-4">
-          <h3 className="font-medium mb-2">{archetype.name}</h3>
-          <Button 
-            onClick={() => openDeepDiveReport(archetype.id)}
-            variant="outline"
-            className="w-full gap-2"
-          >
-            <ExternalLink className="w-4 h-4" />
-            View Report
-          </Button>
-        </Card>
-      ))}
+      {archetypes.length === 0 ? (
+        <div className="col-span-3 text-center py-8">
+          <p className="text-muted-foreground">No archetypes found. Please check your database connection.</p>
+        </div>
+      ) : (
+        archetypes.map(archetype => (
+          <Card key={archetype.id} className="p-4 hover:shadow-md transition-shadow">
+            <h3 className="font-medium mb-2">{archetype.name}</h3>
+            <p className="text-sm text-gray-500 mb-3">ID: {archetype.id}</p>
+            <Button 
+              onClick={() => openDeepDiveReport(archetype.id)}
+              variant="outline"
+              className="w-full gap-2"
+            >
+              <ExternalLink className="w-4 h-4" />
+              View Report
+            </Button>
+          </Card>
+        ))
+      )}
     </div>
   );
 };

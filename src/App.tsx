@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from '@/components/ui/sonner';
@@ -9,6 +10,7 @@ import Insights from '@/pages/Insights';
 import About from '@/pages/About';
 import NotFound from '@/pages/NotFound';
 import Admin from '@/pages/Admin';
+import ReportView from '@/pages/ReportView';
 import ReportViewer from '@/pages/ReportViewer';
 
 const version = "0.0.1";
@@ -23,7 +25,7 @@ function App() {
             <Route path="/" element={<Index />} />
             <Route path="/assessment" element={<Assessment />} />
             <Route path="/insights" element={<Insights />} />
-            <Route path="/insights/report/:archetypeId" element={<ReportViewer />} />
+            <Route path="/insights/report/:archetypeId" element={<ReportView />} />
             <Route path="/about" element={<About />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/report/:archetypeId" element={<ReportViewer />} />
