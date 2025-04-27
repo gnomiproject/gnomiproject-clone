@@ -1,9 +1,14 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Home } from 'lucide-react';
+import InsightsReportContent from '@/components/report/sections/InsightsReportContent';
+import ContactSection from '@/components/report/sections/ContactSection';
+import ReportIntroduction from '@/components/report/sections/ReportIntroduction';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const AdminReportViewer = () => {
   const { archetypeId = '' } = useParams();
@@ -124,73 +129,91 @@ const AdminReportViewer = () => {
           </CardContent>
         </Card>
       ) : (
-        <Card className="mb-6">
-          <CardHeader className="pb-2">
-            <div className="flex justify-between items-center">
-              <div className="space-y-1">
-                <CardTitle>
-                  <div className="flex items-center gap-2">
-                    <span className="px-2 py-1 bg-gray-200 rounded text-sm">
-                      {rawData.code}
-                    </span>
-                    {rawData.archetype_name || `Archetype ${archetypeId}`}
-                  </div>
-                </CardTitle>
-                <p className="text-sm text-gray-500">
-                  {rawData.reportType} Report View
-                </p>
+        <div className="space-y-6">
+          {/* Header Section */}
+          <Card className="mb-6">
+            <CardHeader className="pb-2">
+              <div className="flex justify-between items-center">
+                <div className="space-y-1">
+                  <CardTitle>
+                    <div className="flex items-center gap-2">
+                      <span className="px-2 py-1 bg-gray-200 rounded text-sm">
+                        {rawData.code}
+                      </span>
+                      {rawData.archetype_name}
+                    </div>
+                  </CardTitle>
+                  <p className="text-sm text-gray-500">
+                    {rawData.reportType} Report View
+                  </p>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => window.location.reload()}
+                  className="flex items-center gap-2"
+                >
+                  <RefreshCw className="h-3 w-3" />
+                  Refresh
+                </Button>
               </div>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => window.location.reload()}
-                className="flex items-center gap-2"
-              >
-                <RefreshCw className="h-3 w-3" />
-                Refresh
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="mb-4 text-sm text-gray-500">
-              <strong>Source:</strong> {dataSource} | <strong>Admin View Mode:</strong> {isInsightsReport ? 'Insights Report' : 'Deep Dive Report'}
-            </div>
+            </CardHeader>
+          </Card>
+
+          {/* Report Content */}
+          <Tabs defaultValue="formatted" className="w-full">
+            <TabsList>
+              <TabsTrigger value="formatted">Formatted Report</TabsTrigger>
+              <TabsTrigger value="raw">Raw Data</TabsTrigger>
+            </TabsList>
             
-            {/* Basic Archetype Information */}
-            <div className="mb-6">
-              <h2 className="text-lg font-semibold mb-2">Description</h2>
-              <p className="mb-4">{rawData.short_description || 'No description available'}</p>
+            <TabsContent value="formatted" className="space-y-6">
+              <ReportIntroduction 
+                archetypeName={rawData.archetype_name}
+                archetypeId={rawData.code}
+                userData={null}
+                isAdminView={true}
+              />
               
-              {rawData.long_description && (
-                <>
-                  <h3 className="text-md font-medium mb-1">Full Description</h3>
-                  <p className="text-sm">{rawData.long_description}</p>
-                </>
-              )}
-            </div>
+              <InsightsReportContent archetype={rawData} />
+              
+              <ContactSection isAdminView={true} userData={{
+                name: "Admin View",
+                organization: "System Access",
+                email: "admin@example.com",
+                created_at: new Date().toISOString()
+              }} />
+            </TabsContent>
             
-            {/* Raw Data Explorer */}
-            <div>
-              <h2 className="text-lg font-semibold mb-2">Raw Data Explorer</h2>
-              <p className="text-xs text-gray-500 mb-2">For debugging only. This represents the raw data from the database.</p>
-              <div className="bg-gray-100 rounded p-4 overflow-auto max-h-96">
-                <pre className="text-xs">{JSON.stringify(rawData, null, 2)}</pre>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            <TabsContent value="raw">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Raw Data Explorer</CardTitle>
+                  <p className="text-xs text-gray-500">Source: {dataSource}</p>
+                </CardHeader>
+                <CardContent>
+                  <div className="bg-gray-100 rounded p-4 overflow-auto max-h-[800px]">
+                    <pre className="text-xs whitespace-pre-wrap">
+                      {JSON.stringify(rawData, null, 2)}
+                    </pre>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+          
+          <div className="flex justify-between mt-8">
+            <Button 
+              variant="outline" 
+              onClick={() => navigate('/admin')}
+              className="flex items-center gap-2"
+            >
+              <Home className="h-4 w-4" />
+              Back to Admin Dashboard
+            </Button>
+          </div>
+        </div>
       )}
-      
-      <div className="flex justify-between">
-        <Button 
-          variant="outline" 
-          onClick={() => navigate('/admin')}
-          className="flex items-center gap-2"
-        >
-          <Home className="h-4 w-4" />
-          Back to Admin Dashboard
-        </Button>
-      </div>
     </div>
   );
 };
