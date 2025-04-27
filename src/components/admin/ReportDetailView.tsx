@@ -31,7 +31,7 @@ interface ReportData {
 const ReportDetailView = ({ archetypeId, isOpen, onClose }: ReportDetailViewProps) => {
   const [loading, setLoading] = useState(true);
   const [archetypeName, setArchetypeName] = useState('');
-  const [report, setReport] = useState<ReportData | null>(null);
+  const [report, setReport] = useState<any>(null);
   const [copied, setCopied] = useState(false);
   const [averageData, setAverageData] = useState<any>(null);
   const { toast } = useToast();
@@ -252,25 +252,62 @@ const ReportDetailView = ({ archetypeId, isOpen, onClose }: ReportDetailViewProp
               </Button>
             </div>
             
-            <Tabs defaultValue="summary" className="w-full">
-              <TabsList className="grid grid-cols-5">
-                <TabsTrigger value="summary">Summary</TabsTrigger>
+            <Tabs defaultValue="overview" className="w-full">
+              <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 gap-1">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
                 <TabsTrigger value="metrics">Metrics</TabsTrigger>
                 <TabsTrigger value="swot">SWOT</TabsTrigger>
+                <TabsTrigger value="demographics">Demographics</TabsTrigger>
+                <TabsTrigger value="utilization">Utilization</TabsTrigger>
                 <TabsTrigger value="recommendations">Recommendations</TabsTrigger>
               </TabsList>
               
-              <TabsContent value="summary" className="p-4 border rounded-md mt-2">
-                <h3 className="text-lg font-medium mb-2">Executive Summary</h3>
-                <p className="whitespace-pre-line">{report.executive_summary || "No summary available"}</p>
-              </TabsContent>
-              
               <TabsContent value="overview" className="p-4 border rounded-md mt-2">
-                <h3 className="text-lg font-medium mb-2">Archetype Overview</h3>
-                <pre className="bg-gray-100 p-4 rounded-md text-sm overflow-auto max-h-96">
-                  {formatJson(report.archetype_overview)}
-                </pre>
+                <div className="space-y-6">
+                  <section>
+                    <h3 className="text-lg font-medium mb-2">Basic Information</h3>
+                    <div className="grid gap-4">
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <h4 className="font-medium mb-2">Archetype Name</h4>
+                        <p>{report.archetype_name || report.name || "Not available"}</p>
+                      </div>
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <h4 className="font-medium mb-2">Family</h4>
+                        <p>{report.family_name || "Not available"}</p>
+                      </div>
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <h4 className="font-medium mb-2">Description</h4>
+                        <p className="whitespace-pre-line">{report.long_description || report.short_description || "Not available"}</p>
+                      </div>
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <h4 className="font-medium mb-2">Industries</h4>
+                        <p>{report.industries || "Not available"}</p>
+                      </div>
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <h4 className="font-medium mb-2">Key Characteristics</h4>
+                        {report.key_characteristics ? (
+                          <ul className="list-disc list-inside">
+                            {Array.isArray(report.key_characteristics) 
+                              ? report.key_characteristics.map((char: string, idx: number) => (
+                                  <li key={idx}>{char}</li>
+                                ))
+                              : <li>{report.key_characteristics}</li>
+                            }
+                          </ul>
+                        ) : (
+                          <p>Not available</p>
+                        )}
+                      </div>
+                    </div>
+                  </section>
+                  
+                  <section>
+                    <h3 className="text-lg font-medium mb-2">Executive Summary</h3>
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <p className="whitespace-pre-line">{report.executive_summary || "No summary available"}</p>
+                    </div>
+                  </section>
+                </div>
               </TabsContent>
               
               <TabsContent value="metrics" className="p-4 border rounded-md mt-2">
@@ -279,17 +316,99 @@ const ReportDetailView = ({ archetypeId, isOpen, onClose }: ReportDetailViewProp
               </TabsContent>
               
               <TabsContent value="swot" className="p-4 border rounded-md mt-2">
-                <h3 className="text-lg font-medium mb-2">SWOT Analysis</h3>
-                <pre className="bg-gray-100 p-4 rounded-md text-sm overflow-auto max-h-96">
-                  {formatJson(report.swot_analysis)}
-                </pre>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-medium mb-2">Strengths</h4>
+                    <ul className="list-disc list-inside">
+                      {report.swot_analysis?.strengths?.map((strength: string, idx: number) => (
+                        <li key={idx}>{strength}</li>
+                      )) || <li>No strengths available</li>}
+                    </ul>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-medium mb-2">Weaknesses</h4>
+                    <ul className="list-disc list-inside">
+                      {report.swot_analysis?.weaknesses?.map((weakness: string, idx: number) => (
+                        <li key={idx}>{weakness}</li>
+                      )) || <li>No weaknesses available</li>}
+                    </ul>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-medium mb-2">Opportunities</h4>
+                    <ul className="list-disc list-inside">
+                      {report.swot_analysis?.opportunities?.map((opportunity: string, idx: number) => (
+                        <li key={idx}>{opportunity}</li>
+                      )) || <li>No opportunities available</li>}
+                    </ul>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-medium mb-2">Threats</h4>
+                    <ul className="list-disc list-inside">
+                      {report.swot_analysis?.threats?.map((threat: string, idx: number) => (
+                        <li key={idx}>{threat}</li>
+                      )) || <li>No threats available</li>}
+                    </ul>
+                  </div>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="demographics" className="p-4 border rounded-md mt-2">
+                <h3 className="text-lg font-medium mb-2">Demographics</h3>
+                <div className="grid gap-4">
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-medium mb-2">General Demographics</h4>
+                    <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <dt className="text-sm text-gray-600">Average Age</dt>
+                        <dd>{report.Demo_Average_Age || "N/A"}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-sm text-gray-600">Average Family Size</dt>
+                        <dd>{report.Demo_Average_Family_Size || "N/A"}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-sm text-gray-600">Average States</dt>
+                        <dd>{report.Demo_Average_States || "N/A"}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-sm text-gray-600">Average Employees</dt>
+                        <dd>{report.Demo_Average_Employees || "N/A"}</dd>
+                      </div>
+                    </dl>
+                  </div>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="utilization" className="p-4 border rounded-md mt-2">
+                <h3 className="text-lg font-medium mb-2">Utilization Patterns</h3>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <p className="whitespace-pre-line">{report.utilization_patterns || "No utilization data available"}</p>
+                </div>
               </TabsContent>
               
               <TabsContent value="recommendations" className="p-4 border rounded-md mt-2">
                 <h3 className="text-lg font-medium mb-2">Strategic Recommendations</h3>
-                <pre className="bg-gray-100 p-4 rounded-md text-sm overflow-auto max-h-96">
-                  {formatJson(report.strategic_recommendations)}
-                </pre>
+                <div className="space-y-4">
+                  {report.strategic_recommendations ? (
+                    Array.isArray(report.strategic_recommendations) ? (
+                      report.strategic_recommendations.map((rec: any, index: number) => (
+                        <div key={index} className="bg-gray-50 p-4 rounded-lg">
+                          <h4 className="font-medium mb-2">
+                            Recommendation {rec.recommendation_number || index + 1}
+                          </h4>
+                          <p className="font-medium text-gray-800">{rec.title}</p>
+                          <p className="mt-2 text-gray-600">{rec.description}</p>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <p>{JSON.stringify(report.strategic_recommendations, null, 2)}</p>
+                      </div>
+                    )
+                  ) : (
+                    <p>No recommendations available</p>
+                  )}
+                </div>
               </TabsContent>
             </Tabs>
           </div>
