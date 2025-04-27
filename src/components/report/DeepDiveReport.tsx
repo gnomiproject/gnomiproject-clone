@@ -1,5 +1,5 @@
 
-import React, { lazy, Suspense } from 'react';
+import React, { lazy, Suspense, useEffect } from 'react';
 import ExecutiveSummary from './sections/ExecutiveSummary';
 import SwotAnalysis from './sections/SwotAnalysis';
 import ArchetypeProfile from './sections/ArchetypeProfile';
@@ -47,9 +47,27 @@ const DeepDiveReport = ({
   
   // Add debug logging to see the data structure
   console.log('DeepDiveReport: Data received:', reportData);
+
+  // Debug log to see what's happening during render
+  useEffect(() => {
+    console.log('DeepDiveReport: Component mounted with data', {
+      reportDataExists: !!reportData,
+      reportDataKeys: reportData ? Object.keys(reportData) : [],
+      name: reportData?.name || reportData?.archetype_name,
+      id: reportData?.id || reportData?.archetype_id
+    });
+    
+    return () => {
+      console.log('DeepDiveReport: Component unmounting');
+    };
+  }, [reportData]);
   
   // Check if we're using fallback data
   const usingFallbackData = !reportData.strategic_recommendations || reportData.strategic_recommendations.length === 0;
+
+  // Get name and id safely from either format
+  const archetypeName = reportData?.name || reportData?.archetype_name || 'Unknown Archetype';
+  const archetypeId = reportData?.id || reportData?.archetype_id || 'unknown';
   
   return (
     <div className="bg-white min-h-screen">
@@ -75,8 +93,8 @@ const DeepDiveReport = ({
       
       <div className="container mx-auto px-4 md:px-8 py-8 max-w-[1200px]">
         <ReportIntroduction
-          archetypeName={reportData.name || reportData.archetype_name || 'Unknown Archetype'}
-          archetypeId={reportData.id || reportData.archetype_id || 'unknown'}
+          archetypeName={archetypeName}
+          archetypeId={archetypeId}
           userData={userData}
           isAdminView={isAdminView}
         />

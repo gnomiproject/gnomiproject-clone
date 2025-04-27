@@ -30,9 +30,8 @@ export function useAdminReportData({ archetypeId, reportType, skipCache = false 
       setError(null);
       
       try {
-        // Determine primary and fallback tables based on report type
+        // Determine primary table based on report type
         const primaryTable = reportType === 'insights' ? 'level3_report_data' : 'level4_deepdive_report_data';
-        const fallbackTable = reportType === 'insights' ? 'level4_deepdive_report_data' : 'level3_report_data';
         
         console.log(`useAdminReportData: Fetching ${reportType} data for ${archetypeId} from ${primaryTable}`);
         
@@ -64,8 +63,10 @@ export function useAdminReportData({ archetypeId, reportType, skipCache = false 
           return;
         }
         
-        // If no data found in primary table, try fallback
+        // If no data found in primary table, try fallback (other table)
+        const fallbackTable = reportType === 'insights' ? 'level4_deepdive_report_data' : 'level3_report_data';
         console.log(`useAdminReportData: No data found in ${primaryTable}, trying ${fallbackTable}`);
+        
         const { data: fallbackData, error: fallbackError } = await supabase
           .from(fallbackTable)
           .select('*')

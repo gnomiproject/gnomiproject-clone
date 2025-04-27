@@ -10,6 +10,7 @@ import DeepDiveReport from '@/components/report/DeepDiveReport';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAdminReportData } from '@/hooks/useAdminReportData';
 import { toast } from '@/components/ui/use-toast';
+import { ArchetypeDetailedData } from '@/types/archetype';
 
 const AdminReportViewer = () => {
   const { archetypeId = '' } = useParams();
@@ -216,7 +217,7 @@ const AdminReportViewer = () => {
                 </div>
               ) : (
                 <DeepDiveReport 
-                  reportData={rawData} 
+                  reportData={rawData as unknown as ArchetypeDetailedData} 
                   userData={mockUserData}
                   averageData={defaultAverageData}
                   isAdminView={true}
