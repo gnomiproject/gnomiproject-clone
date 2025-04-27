@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import ArchetypeReport from '@/components/insights/ArchetypeReport';
 import DeepDiveReport from '@/components/report/DeepDiveReport';
@@ -78,8 +78,8 @@ const ReportViewer = () => {
     }
   };
   
-  // Validate archetype ID early - this doesn't use hooks so it's safe 
-  // to place here conditionally
+  // FIXED: Move this validation outside of the conditional rendering
+  // so it doesn't break the hooks order
   if (!isValidArchetypeId(archetypeId)) {
     return (
       <ReportError 
@@ -91,83 +91,89 @@ const ReportViewer = () => {
     );
   }
 
+  // Define all hooks and variables needed for both paths
+  const [reportData, setReportData] = useState<any>(null);
+  const [userData, setUserData] = useState<any>(null);
+  const [averageData, setAverageData] = useState<any>(null);
+  const [isValidAccess, setIsValidAccess] = useState(true);
+  const [loadingReport, setLoadingReport] = useState(false);
+  const [reportError, setReportError] = useState<Error | null>(null);
+  
   // For deep dive reports with tokens, use the useReportData hook
-  if (!isInsightsReport && token && !isAdminView) {
-    const { 
-      reportData, 
-      userData, 
-      averageData, 
-      isLoading, 
-      isValidAccess, 
-      error, 
-      dataSource: reportDataSource,
-      retry: retryReportData,
-      refreshData: refreshReportData
-    } = useReportData({ 
-      archetypeId, 
-      token, 
-      isInsightsReport: false,
-      skipCache 
-    });
-
-    // Function to refresh data
-    const handleRefreshReportData = async () => {
-      setSkipCache(true);
-      try {
-        await refreshReportData();
-        setSkipCache(false);
-      } catch (err) {
-        toast.error("Failed to refresh data");
-        setSkipCache(false);
+  useEffect(() => {
+    let isMounted = true;
+    
+    const loadReportData = async () => {
+      if (!isInsightsReport && token && !isAdminView) {
+        setLoadingReport(true);
+        try {
+          // Use the hook in a non-conditional way
+          const { reportData: hookReportData, userData: hookUserData, 
+                  averageData: hookAverageData, isValidAccess: hookIsValidAccess, 
+                  error: hookError } = useReportData({ 
+            archetypeId, 
+            token, 
+            isInsightsReport: false,
+            skipCache 
+          });
+          
+          // Only update state if component is still mounted
+          if (isMounted) {
+            setReportData(hookReportData);
+            setUserData(hookUserData);
+            setAverageData(hookAverageData);
+            setIsValidAccess(hookIsValidAccess);
+            setReportError(hookError);
+          }
+        } catch (error) {
+          if (isMounted) {
+            console.error("Error in report data loading:", error);
+            setReportError(error as Error);
+          }
+        } finally {
+          if (isMounted) {
+            setLoadingReport(false);
+          }
+        }
       }
     };
-
-    if (isLoading || initialLoading) {
-      return <ReportLoadingState />;
-    }
-
-    if (!isValidAccess || error) {
-      return (
-        <ReportError 
-          title="Access Denied"
-          message={`Unable to access this report: ${error?.message || 'Invalid or expired token'}`}
-          actionLabel="Retry Connection"
-          onAction={retryReportData}
-          secondaryAction={() => navigate('/')}
-          secondaryActionLabel="Back to Home"
-        />
-      );
-    }
-
-    const typedReportData = reportData as unknown as ArchetypeDetailedData;
     
-    return (
-      <div className="relative">
-        {!isAdminView && (
-          <div className="fixed right-6 top-24 z-50">
-            <Button 
-              variant="outline"
-              size="sm"
-              onClick={handleRefreshReportData}
-              className="bg-white shadow-md hover:bg-gray-100"
-            >
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Refresh Data
-            </Button>
-          </div>
-        )}
-        <DeepDiveReport 
-          reportData={typedReportData} 
-          userData={userData} 
-          averageData={averageData}
-          loading={isLoading}
-        />
-      </div>
-    );
-  }
+    loadReportData();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [archetypeId, token, isInsightsReport, isAdminView, skipCache]);
+  
+  // Function to refresh report data
+  const handleRefreshReportData = async () => {
+    setSkipCache(true);
+    setLoadingReport(true);
+    setTimeout(() => {
+      setSkipCache(false);
+      setLoadingReport(false);
+      window.location.reload();
+    }, 100);
+  };
 
-  // For admin-view deep dive reports or insights reports
-  if (initialLoading || archetypeLoading) {
+  // Setup admin view mock data for DeepDiveReport
+  const adminUserData = {
+    name: 'Admin Viewer',
+    organization: 'Admin Organization',
+    created_at: new Date().toISOString(),
+    email: 'admin@example.com'
+  };
+  
+  const defaultAverageData = {
+    archetype_id: 'All_Average',
+    archetype_name: 'Population Average',
+    "Demo_Average Age": 40,
+    "Demo_Average Family Size": 3.0,
+    "Risk_Average Risk Score": 1.0,
+    "Cost_Medical & RX Paid Amount PMPY": 5000
+  };
+
+  if (initialLoading || archetypeLoading || loadingReport) {
     return <ReportLoadingState />;
   }
 
@@ -191,11 +197,25 @@ const ReportViewer = () => {
     });
   }
   
+  // Special handling for report token access errors
+  if (!isInsightsReport && token && !isAdminView) {
+    if (!isValidAccess || reportError) {
+      return (
+        <ReportError 
+          title="Access Denied"
+          message={`Unable to access this report: ${reportError?.message || 'Invalid or expired token'}`}
+          actionLabel="Back to Home"
+          onAction={() => navigate('/')}
+        />
+      );
+    }
+  }
+  
   // Fallback to local data if there's an error or no data
   const localArchetypeData = getArchetypeDetailedById(archetypeId as ArchetypeId);
   
   // If no data available even in local data, show a helpful error
-  if (!localArchetypeData && !archetypeApiData) {
+  if (!localArchetypeData && !archetypeApiData && !reportData) {
     return (
       <ReportError 
         title="Report Not Available"
@@ -207,25 +227,10 @@ const ReportViewer = () => {
   }
 
   // Report data will use real database data or fallback to local data
-  const reportData = archetypeApiData || localArchetypeData;
+  const finalReportData = reportData || archetypeApiData || localArchetypeData;
+  const finalUserData = userData || adminUserData;
+  const finalAverageData = averageData || defaultAverageData;
   
-  // Setup admin view mock data for DeepDiveReport
-  const adminUserData = {
-    name: 'Admin Viewer',
-    organization: 'Admin Organization',
-    created_at: new Date().toISOString(),
-    email: 'admin@example.com'
-  };
-  
-  const averageData = {
-    archetype_id: 'All_Average',
-    archetype_name: 'Population Average',
-    "Demo_Average Age": 40,
-    "Demo_Average Family Size": 3.0,
-    "Risk_Average Risk Score": 1.0,
-    "Cost_Medical & RX Paid Amount PMPY": 5000
-  };
-
   // Render the appropriate report type based on the route
   if (isInsightsReport) {
     return (
@@ -243,34 +248,32 @@ const ReportViewer = () => {
         </div>
         <ArchetypeReport 
           archetypeId={archetypeId as ArchetypeId} 
-          reportData={reportData} 
+          reportData={finalReportData} 
           dataSource={dataSource} 
         />
       </div>
     );
   } else {
     // For deep dive report (regular or admin view)
-    const typedReportData = reportData as unknown as ArchetypeDetailedData;
+    const typedReportData = finalReportData as unknown as ArchetypeDetailedData;
     
     return (
       <div className="relative">
-        {isAdminView && (
-          <div className="fixed right-6 top-24 z-50">
-            <Button 
-              variant="outline"
-              size="sm"
-              onClick={handleRefreshData}
-              className="bg-white shadow-md hover:bg-gray-100"
-            >
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Refresh Data
-            </Button>
-          </div>
-        )}
+        <div className="fixed right-6 top-24 z-50">
+          <Button 
+            variant="outline"
+            size="sm"
+            onClick={isAdminView ? handleRefreshData : handleRefreshReportData}
+            className="bg-white shadow-md hover:bg-gray-100"
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh Data
+          </Button>
+        </div>
         <DeepDiveReport 
           reportData={typedReportData} 
-          userData={adminUserData} 
-          averageData={averageData}
+          userData={finalUserData} 
+          averageData={finalAverageData}
           isAdminView={isAdminView}
         />
       </div>

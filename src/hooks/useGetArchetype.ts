@@ -77,6 +77,23 @@ export const useGetArchetype = (archetypeId: ArchetypeId, skipCache: boolean = f
   const processingRef = useRef(false);
   const processedDataRef = useRef<string | null>(null);
   
+  // Use React Query for data fetching with proper caching
+  const { 
+    isLoading, 
+    error, 
+    refetch,
+    data 
+  } = useQuery({
+    queryKey: ['archetype', archetypeId, skipCache],
+    queryFn: () => fetchArchetypeData(archetypeId, skipCache),
+    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
+    gcTime: 10 * 60 * 1000, // Keep unused data for 10 minutes
+    retry: 1, // Only retry once
+    enabled: Boolean(archetypeId),
+    refetchOnWindowFocus: false, // Prevent refetching when window regains focus
+    refetchOnMount: false, // Prevent refetching on component mount if data exists
+  });
+  
   // Process data on success - defined as a callback to avoid recreating on each render
   const processData = useCallback((data: any) => {
     // Guard against redundant processing
@@ -253,28 +270,6 @@ export const useGetArchetype = (archetypeId: ArchetypeId, skipCache: boolean = f
       }
     }
   }, [getFamilyById, getArchetypeEnhanced, archetypeId]);
-  
-  // Use React Query for data fetching with proper caching
-  const { 
-    isLoading, 
-    error, 
-    refetch,
-    data 
-  } = useQuery({
-    queryKey: ['archetype', archetypeId, skipCache],
-    queryFn: () => fetchArchetypeData(archetypeId, skipCache),
-    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
-    retry: 1, // Only retry once
-    enabled: !!archetypeId,
-    refetchOnWindowFocus: false, // Prevent refetching when window regains focus
-    refetchOnMount: false, // Prevent refetching on component mount if data exists
-    // Fix: Remove conditional state updates inside the query callbacks
-    meta: {
-      onError: (err: Error) => {
-        console.log("Query error caught in meta handler");
-      }
-    }
-  });
 
   // Force refresh data
   const refreshData = async () => {

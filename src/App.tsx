@@ -29,11 +29,11 @@ function App() {
             <Route path="/insights/report/:archetypeId" element={<ReportViewer />} />
             <Route path="/about" element={<About />} />
             <Route path="/admin" element={<Admin />} />
+            {/* Standard report routes */}
             <Route path="/report/:archetypeId" element={<ReportViewer />} />
             <Route path="/report/:archetypeId/:token" element={<ReportViewer />} />
-            <Route path="/report/:archetypeId/admin-view" element={<ReportViewer />} />
             
-            {/* New dedicated admin routes with minimal processing */}
+            {/* Admin-specific routes that use the lightweight AdminReportViewer */}
             <Route path="/admin/insights-report/:archetypeId" element={<AdminReportViewer />} />
             <Route path="/admin/report/:archetypeId" element={<AdminReportViewer />} />
             

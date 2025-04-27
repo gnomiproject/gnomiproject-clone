@@ -1,352 +1,190 @@
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { ArchetypeId } from '@/types/archetype';
-import { toast } from 'sonner';
-import { useArchetypes } from '@/hooks/useArchetypes';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
 
-interface UseReportDataProps {
-  archetypeId: string;
-  token: string;
+interface UseReportDataOptions {
+  archetypeId?: string;
+  token?: string;
   isInsightsReport: boolean;
   skipCache?: boolean;
 }
 
-// Create a simple in-memory cache
+interface UseReportDataResult {
+  reportData: any;
+  userData: any;
+  averageData: any;
+  isLoading: boolean;
+  isValidAccess: boolean;
+  error: Error | null;
+  dataSource: string;
+  retry: () => void;
+  refreshData: () => Promise<void>;
+}
+
+// Simple in-memory cache
 const reportCache = new Map();
 
-export const useReportData = ({ archetypeId, token, isInsightsReport, skipCache = false }: UseReportDataProps) => {
-  const [isValidAccess, setIsValidAccess] = useState<boolean | null>(null);
+export const useReportData = ({ 
+  archetypeId = '', 
+  token = '', 
+  isInsightsReport, 
+  skipCache = false 
+}: UseReportDataOptions): UseReportDataResult => {
+  const [reportData, setReportData] = useState<any>(null);
   const [userData, setUserData] = useState<any>(null);
-  const [usingFallbackData, setUsingFallbackData] = useState(false);
+  const [averageData, setAverageData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isValidAccess, setIsValidAccess] = useState<boolean>(false);
+  const [error, setError] = useState<Error | null>(null);
   const [dataSource, setDataSource] = useState<string>('');
-  const queryClient = useQueryClient();
-  
-  const { getArchetypeDetailedById } = useArchetypes();
 
-  // Add processing guard to prevent redundant processing
-  const processingRef = useRef(false);
-  const processedDataRef = useRef<string | null>(null);
-
-  // This function consolidates our data fetching strategy
-  const fetchArchetypeData = useCallback(async () => {
-    console.log(`Fetching archetype data for ${archetypeId}...`);
-    
-    // Check cache first if not explicitly skipping
-    const cacheKey = `report-${archetypeId}-${isInsightsReport ? 'insights' : 'deepdive'}`;
-    if (!skipCache && reportCache.has(cacheKey)) {
-      console.log(`Using cached data for ${archetypeId}`);
-      const cachedData = reportCache.get(cacheKey);
-      setDataSource(`${cachedData.source} (cached)`);
-      return cachedData.data;
-    }
-    
-    // For deep dive reports, check the token against report_requests table
-    if (!isInsightsReport && token) {
-      // Skip token validation for admin views
-      if (token !== 'admin-view') {
-        // Validate the token
-        const { data: requestData, error: requestError } = await supabase
-          .from('report_requests')
-          .select('*')
-          .eq('access_token', token)
-          .eq('archetype_id', archetypeId)
-          .maybeSingle();
-          
-        if (requestError) {
-          throw new Error(`Access validation error: ${requestError.message}`);
-        }
-        
-        if (!requestData) {
-          throw new Error('Invalid access token');
-        }
-        
-        // Check if token is expired
-        if (requestData.expires_at && new Date(requestData.expires_at) < new Date()) {
-          throw new Error('Access token has expired');
-        }
-        
-        // Store user data
-        setUserData(requestData.assessment_result || null);
-      } else {
-        setIsValidAccess(true);
-      }
-      
-      setIsValidAccess(true);
-    }
-    
-    // Try fetching from Analysis_Archetype_Full_Reports first (most complete)
-    try {
-      // Query only essential fields to reduce data transfer
-      const { data, error } = await supabase
-        .from('Analysis_Archetype_Full_Reports')
-        .select('*')
-        .eq('archetype_id', archetypeId)
-        .maybeSingle();
-      
-      if (error) {
-        console.error('Error fetching from Analysis_Archetype_Full_Reports:', error);
-      } else if (data) {
-        console.log('Found data in Analysis_Archetype_Full_Reports');
-        setDataSource('Analysis_Archetype_Full_Reports');
-        
-        // Store in cache
-        reportCache.set(cacheKey, {
-          data,
-          source: 'Analysis_Archetype_Full_Reports',
-          timestamp: Date.now()
-        });
-        
-        return data;
-      }
-    } catch (e) {
-      console.error('Exception accessing Analysis_Archetype_Full_Reports:', e);
-    }
-    
-    // Try level3_report_data next
-    try {
-      const { data, error } = await supabase
-        .from('level3_report_data')
-        .select('*')
-        .eq('archetype_id', archetypeId)
-        .maybeSingle();
-        
-      if (error) {
-        console.error('Error fetching from level3_report_data:', error);
-      } else if (data) {
-        console.log('Found data in level3_report_data');
-        setDataSource('level3_report_data');
-        
-        // Store in cache
-        reportCache.set(cacheKey, {
-          data,
-          source: 'level3_report_data',
-          timestamp: Date.now()
-        });
-        
-        return data;
-      }
-    } catch (e) {
-      console.error('Exception accessing level3_report_data:', e);
-    }
-    
-    // Try level4_deepdive_report_data as another option
-    try {
-      const { data, error } = await supabase
-        .from('level4_deepdive_report_data')
-        .select('*')
-        .eq('archetype_id', archetypeId)
-        .maybeSingle();
-        
-      if (error) {
-        console.error('Error fetching from level4_deepdive_report_data:', error);
-      } else if (data) {
-        console.log('Found data in level4_deepdive_report_data');
-        setDataSource('level4_deepdive_report_data');
-        
-        // Store in cache
-        reportCache.set(cacheKey, {
-          data,
-          source: 'level4_deepdive_report_data',
-          timestamp: Date.now()
-        });
-        
-        return data;
-      }
-    } catch (e) {
-      console.error('Exception accessing level4_deepdive_report_data:', e);
-    }
-    
-    // As last resort, try Core tables
-    try {
-      // Get basic archetype info
-      const { data: overviewData, error: overviewError } = await supabase
-        .from('Core_Archetype_Overview')
-        .select('*')
-        .eq('id', archetypeId)
-        .maybeSingle();
-        
-      if (overviewError) {
-        console.error('Error fetching from Core_Archetype_Overview:', overviewError);
-        return null;
-      }
-      
-      if (!overviewData) {
-        console.log('No data found in Core_Archetype_Overview');
-        return null;
-      }
-      
-      // Get metrics data
-      const { data: metricsData, error: metricsError } = await supabase
-        .from('Core_Archetypes_Metrics')
-        .select('*')
-        .eq('id', archetypeId)
-        .maybeSingle();
-        
-      if (metricsError) {
-        console.error('Error fetching from Core_Archetypes_Metrics:', metricsError);
-      }
-      
-      // Combine data
-      const combinedData = { 
-        ...overviewData, 
-        ...(metricsData || {}),
-        archetype_id: overviewData.id,
-        archetype_name: overviewData.name
-      };
-      
-      console.log('Using combined Core tables data');
-      setDataSource('Core tables');
-      
-      // Store in cache
-      reportCache.set(cacheKey, {
-        data: combinedData,
-        source: 'Core tables',
-        timestamp: Date.now()
-      });
-      
-      return combinedData;
-    } catch (e) {
-      console.error('Exception accessing Core tables:', e);
-    }
-    
-    // Last resort - try local data
-    const localArchetypeData = getArchetypeDetailedById(archetypeId as ArchetypeId);
-    
-    if (localArchetypeData) {
-      console.log('Using local data for report');
-      const localReportData = {
-        archetype_id: localArchetypeData.id,
-        archetype_name: localArchetypeData.name,
-        short_description: localArchetypeData.short_description || '',
-        long_description: localArchetypeData.long_description || '',
-        key_characteristics: localArchetypeData.key_characteristics || [],
-        strengths: localArchetypeData.enhanced?.swot?.strengths || [],
-        weaknesses: localArchetypeData.enhanced?.swot?.weaknesses || [],
-        opportunities: localArchetypeData.enhanced?.swot?.opportunities || [],
-        threats: localArchetypeData.enhanced?.swot?.threats || [],
-        family_id: localArchetypeData.familyId
-      };
-      
-      setDataSource('local data');
-      setUsingFallbackData(true);
-      
-      // Store in cache
-      reportCache.set(cacheKey, {
-        data: localReportData,
-        source: 'local data',
-        timestamp: Date.now()
-      });
-      
-      return localReportData;
-    }
-    
-    return null;
-  }, [archetypeId, token, isInsightsReport, getArchetypeDetailedById, skipCache]);
-
-  // Use React Query for data fetching with proper caching
-  const { 
-    data: reportData, 
-    isLoading, 
-    error,
-    refetch
-  } = useQuery({
-    queryKey: ['reportData', archetypeId, token, isInsightsReport, skipCache],
-    queryFn: fetchArchetypeData,
-    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
-    retry: 1, // Only retry once
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-  });
-
-  // Handle retry functionality
-  const retry = async () => {
-    toast.loading("Retrying connection...");
-    // Reset processed data flag
-    processedDataRef.current = null;
-    
-    try {
-      await refetch();
-      toast.success("Connection successful!");
-    } catch (e) {
-      toast.error("Connection failed. Please try again.");
-    }
-  };
-
-  // Force refresh data
-  const refreshData = async () => {
-    toast.loading("Refreshing report data...");
-    
-    // Reset processed data flag
-    processedDataRef.current = null;
-    
-    // Clear cache for this report
-    const cacheKey = `report-${archetypeId}-${isInsightsReport ? 'insights' : 'deepdive'}`;
-    reportCache.delete(cacheKey);
-    
-    // Invalidate query cache
-    queryClient.invalidateQueries({
-      queryKey: ['reportData', archetypeId]
-    });
-    
-    try {
-      await refetch();
-      toast.success("Report data refreshed!");
-    } catch (e) {
-      toast.error("Failed to refresh data. Please try again.");
-    }
-  };
-
-  // Create average data for comparison
-  const averageData = {
-    archetype_id: 'All_Average',
-    archetype_name: 'Population Average',
-    "Demo_Average Age": 40,
-    "Demo_Average Family Size": 3.0,
-    "Risk_Average Risk Score": 1.0,
-    "Cost_Medical & RX Paid Amount PMPY": 5000
-  };
-
-  // Track processed data to prevent redundant processing
+  // Load report data on mount
   useEffect(() => {
     let isMounted = true;
-    
-    if (reportData && isMounted) {
-      // Check for redundant processing
-      const dataHash = JSON.stringify(reportData?.archetype_id);
-      
-      if (processedDataRef.current === dataHash) {
-        console.log(`Skipping redundant processing for report ${archetypeId}`);
-        return;
+    const loadReportData = async () => {
+      // Always reset states at the start of data loading
+      if (isMounted) {
+        setIsLoading(true);
+        setError(null);
       }
-      
-      console.log(`Processing report data for ${archetypeId} (hash: ${dataHash})`);
-      processedDataRef.current = dataHash;
-    }
+
+      try {
+        const cacheKey = `report-${archetypeId}-${token}`;
+        
+        // Check cache first if not skipping
+        if (!skipCache && reportCache.has(cacheKey)) {
+          const cachedData = reportCache.get(cacheKey);
+          if (isMounted) {
+            setReportData(cachedData.reportData);
+            setUserData(cachedData.userData);
+            setAverageData(cachedData.averageData);
+            setIsValidAccess(true);
+            setDataSource('cache');
+            setIsLoading(false);
+          }
+          return;
+        }
+        
+        // Validate token and fetch report data
+        const { data: accessData, error: accessError } = await supabase
+          .from('report_requests')
+          .select('id, archetype_id, name, organization, email, created_at')
+          .eq('archetype_id', archetypeId)
+          .eq('access_token', token)
+          .gt('expires_at', new Date().toISOString())
+          .maybeSingle();
+        
+        if (accessError) throw accessError;
+        
+        if (!accessData) {
+          if (isMounted) {
+            setIsValidAccess(false);
+            setError(new Error('Invalid or expired access token'));
+            setIsLoading(false);
+          }
+          return;
+        }
+        
+        // If token is valid, fetch the report data
+        const reportTable = isInsightsReport ? 'level3_report_data' : 'level4_deepdive_report_data';
+        const { data: fetchedReportData, error: reportError } = await supabase
+          .from(reportTable)
+          .select('*')
+          .eq('archetype_id', archetypeId)
+          .maybeSingle();
+        
+        if (reportError) throw reportError;
+        
+        if (!fetchedReportData) {
+          throw new Error(`No report data found for archetype ${archetypeId}`);
+        }
+        
+        // Create average data
+        const defaultAverageData = {
+          archetype_id: 'All_Average',
+          archetype_name: 'Population Average',
+          "Demo_Average Age": 40,
+          "Demo_Average Family Size": 3.0,
+          "Risk_Average Risk Score": 1.0,
+          "Cost_Medical & RX Paid Amount PMPY": 5000
+        };
+        
+        // Cache the result
+        reportCache.set(cacheKey, {
+          reportData: fetchedReportData,
+          userData: accessData,
+          averageData: defaultAverageData
+        });
+        
+        if (isMounted) {
+          setReportData(fetchedReportData);
+          setUserData(accessData);
+          setAverageData(defaultAverageData);
+          setIsValidAccess(true);
+          setDataSource(reportTable);
+          setError(null);
+        }
+      } catch (err) {
+        console.error('Error loading report data:', err);
+        if (isMounted) {
+          setError(err instanceof Error ? err : new Error('Unknown error loading report'));
+          setIsValidAccess(false);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+    
+    loadReportData();
     
     return () => {
       isMounted = false;
     };
-  }, [reportData, archetypeId]);
-
-  // Cleanup function for memory management
-  useEffect(() => {
-    return () => {
-      // Clean up any heavy data on unmount
-      console.log(`Cleaning up resources for ${archetypeId}`);
-      processedDataRef.current = null;
-    };
-  }, [archetypeId]);
-
+  }, [archetypeId, token, isInsightsReport, skipCache]);
+  
+  // Function to retry loading data
+  const retry = () => {
+    setIsLoading(true);
+    setError(null);
+    
+    // Force a reload by changing the timestamp
+    const timestamp = Date.now();
+    const cacheKey = `report-${archetypeId}-${token}`;
+    reportCache.delete(cacheKey);
+    
+    // The effect will run again due to the skipCache dependency
+    setTimeout(() => {
+      window.location.reload();
+    }, 100);
+  };
+  
+  // Function to refresh data and skip cache
+  const refreshData = async () => {
+    setIsLoading(true);
+    setError(null);
+    
+    // Clear cache for this report
+    const cacheKey = `report-${archetypeId}-${token}`;
+    reportCache.delete(cacheKey);
+    
+    // Force reload the page
+    setTimeout(() => {
+      window.location.reload();
+    }, 100);
+    
+    return Promise.resolve();
+  };
+  
   return {
     reportData,
     userData,
     averageData,
     isLoading,
     isValidAccess,
-    error: error as Error | null,
-    usingFallbackData,
+    error,
     dataSource,
     retry,
     refreshData
