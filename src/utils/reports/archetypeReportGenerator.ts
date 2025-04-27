@@ -3,13 +3,16 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { organizeMetricsByCategory } from './metricUtils';
 import { generateReportContent } from './contentGenerator';
 import { insertReportContent } from './databaseUtils';
-import { ReportGenerationResults, SwotAnalysis, StrategicRecommendation } from './types';
+import { ArchetypeId } from '@/types/archetype';
+import { ReportGenerationResults } from './types';
+
+const ARCHETYPE_IDS: ArchetypeId[] = ['a1', 'a2', 'a3', 'b1', 'b2', 'b3', 'c1', 'c2', 'c3'];
 
 /**
- * Main function to generate archetype reports
+ * Main function to generate all archetype reports in batch
  */
 async function generateArchetypeReports(supabase: SupabaseClient): Promise<ReportGenerationResults> {
-  console.log('Starting report generation process with detailed logging...');
+  console.log('Starting batch report generation for all archetypes...');
   
   try {
     // Fetch all archetype data directly from level3_report_data
@@ -30,7 +33,7 @@ async function generateArchetypeReports(supabase: SupabaseClient): Promise<Repor
     }
     
     const results: ReportGenerationResults = {
-      total: archetypes.length,
+      total: ARCHETYPE_IDS.length,
       processed: 0,
       succeeded: 0,
       failed: 0,
@@ -41,6 +44,11 @@ async function generateArchetypeReports(supabase: SupabaseClient): Promise<Repor
     // Process each archetype data row
     for (const archetype of archetypes) {
       try {
+        if (!ARCHETYPE_IDS.includes(archetype.archetype_id as ArchetypeId)) {
+          console.log(`Skipping archetype ${archetype.archetype_id} - not in standard set`);
+          continue;
+        }
+        
         console.log(`Processing archetype ${archetype.archetype_id}: ${archetype.archetype_name}`);
         
         // Organize metrics that are already in the row
@@ -53,7 +61,7 @@ async function generateArchetypeReports(supabase: SupabaseClient): Promise<Repor
         
         // Get SWOT analysis directly from the data
         console.log(`Getting SWOT analysis for archetype ${archetype.archetype_id}...`);
-        const swotAnalysis: SwotAnalysis = {
+        const swotAnalysis = {
           strengths: archetype.strengths || [],
           weaknesses: archetype.weaknesses || [],
           opportunities: archetype.opportunities || [],
@@ -62,7 +70,7 @@ async function generateArchetypeReports(supabase: SupabaseClient): Promise<Repor
         
         // Get strategic recommendations directly from the data
         console.log(`Getting strategic recommendations for archetype ${archetype.archetype_id}...`);
-        const strategicRecommendations: StrategicRecommendation[] = archetype.strategic_recommendations || [];
+        const strategicRecommendations = archetype.strategic_recommendations || [];
         
         // Insert report content
         console.log(`Inserting data into Supabase for archetype ${archetype.archetype_id}...`);

@@ -11,11 +11,11 @@ import { isValidArchetypeId } from '@/utils/archetypeValidation';
 import { ArchetypeId } from '@/types/archetype';
 
 const ReportViewer = () => {
-  const { archetypeId = '', token = '' } = useParams();
+  const { archetypeId = '' } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Check if we're accessing via insights route (no token needed)
+  // Check if we're accessing via insights route
   const isInsightsReport = location.pathname.startsWith('/insights/report');
 
   if (!isValidArchetypeId(archetypeId)) {
@@ -38,7 +38,7 @@ const ReportViewer = () => {
     usingFallbackData
   } = useReportData({
     archetypeId,
-    token,
+    token: '',
     isInsightsReport
   });
 

@@ -1,12 +1,15 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, CheckCircle, XCircle, AlertTriangle, RefreshCw, Database } from "lucide-react";
+import { Loader2, CheckCircle, XCircle, AlertTriangle, RefreshCw, Database, ExternalLink } from "lucide-react";
 import { supabase } from '@/integrations/supabase/client';
 import generateArchetypeReports from '@/utils/archetypeReportGenerator';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
+import { isValidArchetypeId } from '@/utils/archetypeValidation';
+import { ArchetypeId } from '@/types/archetype';
 
 const ReportGenerator: React.FC = () => {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -20,7 +23,6 @@ const ReportGenerator: React.FC = () => {
   }>(null);
   const [error, setError] = useState<string | null>(null);
   const [databaseStatus, setDatabaseStatus] = useState<'unchecked' | 'checking' | 'connected' | 'error'>('unchecked');
-  const { toast } = useToast();
 
   const handleGenerateReports = async () => {
     setIsGenerating(true);
@@ -29,8 +31,8 @@ const ReportGenerator: React.FC = () => {
 
     try {
       toast({
-        title: "Starting Report Generation",
-        description: "This process may take some time. Please wait...",
+        title: "Starting Batch Report Generation",
+        description: "Generating reports for all archetypes. Please wait...",
         duration: 5000,
       });
       
@@ -62,16 +64,16 @@ const ReportGenerator: React.FC = () => {
         }
       }
       
-      // Generate the actual reports
-      console.log("Starting archetype report generation...");
+      // Generate the reports in batch
+      console.log("Starting archetype report generation in batch...");
       const results = await generateArchetypeReports(supabase);
-      console.log("Report generation completed with results:", results);
+      console.log("Batch report generation completed with results:", results);
       
       setGenerationResult(results);
       
       const successMessage = results.succeeded > 0 
-        ? `Processed ${results.succeeded} of ${results.total} archetypes successfully.`
-        : 'No archetypes were processed successfully.';
+        ? `Generated ${results.succeeded} of ${results.total} archetype reports successfully.`
+        : 'No archetype reports were generated successfully.';
       
       toast({
         title: results.succeeded > 0 ? "Report Generation Complete" : "Report Generation Failed",
@@ -141,12 +143,24 @@ const ReportGenerator: React.FC = () => {
     }
   };
 
+  const handleViewReport = (archetypeId: string) => {
+    if (isValidArchetypeId(archetypeId)) {
+      window.open(`/insights/report/${archetypeId}`, '_blank');
+    } else {
+      toast({
+        title: "Invalid Archetype ID",
+        description: `Cannot view report for invalid archetype: ${archetypeId}`,
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <Card className="w-full mb-6">
       <CardHeader>
         <CardTitle>Archetype Report Generator</CardTitle>
         <CardDescription>
-          Generate detailed reports for all archetypes based on their metrics data
+          Generate detailed reports for all archetypes (a1-c3) in batch
         </CardDescription>
       </CardHeader>
       
@@ -192,7 +206,20 @@ const ReportGenerator: React.FC = () => {
                 <CheckCircle className="h-4 w-4" />
                 <AlertTitle>Success</AlertTitle>
                 <AlertDescription>
-                  Generated reports for archetypes: {generationResult.archetypeIds.join(', ')}
+                  <div className="mb-2">Generated reports for archetypes:</div>
+                  <div className="flex flex-wrap gap-2">
+                    {generationResult.archetypeIds.map((id) => (
+                      <Badge 
+                        key={id} 
+                        variant="outline" 
+                        className="cursor-pointer hover:bg-gray-100 flex items-center gap-1"
+                        onClick={() => handleViewReport(id)}
+                      >
+                        {id.toUpperCase()}
+                        <ExternalLink className="h-3 w-3 ml-1" />
+                      </Badge>
+                    ))}
+                  </div>
                 </AlertDescription>
               </Alert>
             )}
@@ -245,7 +272,7 @@ const ReportGenerator: React.FC = () => {
           ) : (
             <>
               <RefreshCw className="mr-2 h-4 w-4" />
-              Generate Reports
+              Generate All Reports
             </>
           )}
         </Button>
