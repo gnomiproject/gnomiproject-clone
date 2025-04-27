@@ -1,11 +1,11 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Copy, ExternalLink, Info } from "lucide-react";
+import { Copy, ExternalLink, Info, RefreshCw } from "lucide-react";
 import { toast } from 'sonner';
 import ReportGenerationPanel from './ReportGenerationPanel';
 import ReportsTable from './ReportsTable';
@@ -19,8 +19,10 @@ const DeepDiveReportsAccess = () => {
     isGenerating, 
     isDeleting, 
     lastGeneratedUrl, 
-    setLastGeneratedUrl 
+    setLastGeneratedUrl,
+    generationInProgress
   } = useReportGeneration();
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const { data: reports, isLoading, error, refetch } = useQuery({
     queryKey: ['deep-dive-reports'],
@@ -32,8 +34,23 @@ const DeepDiveReportsAccess = () => {
       
       if (error) throw error;
       return data || [];
-    }
+    },
+    staleTime: Infinity, // Data will remain fresh until manually invalidated
+    refetchOnWindowFocus: false // Prevent automatic refetch on window focus
   });
+
+  const refreshReportsList = async () => {
+    setIsRefreshing(true);
+    try {
+      await refetch();
+      toast.success("Reports list refreshed");
+    } catch (error) {
+      toast.error("Failed to refresh reports list");
+      console.error("Error refreshing reports:", error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   const formatArchetypeLabel = (id: string) => {
     const formattedId = id.toLowerCase();
@@ -60,7 +77,7 @@ const DeepDiveReportsAccess = () => {
     try {
       const reportUrl = await generateReport(archetypeId);
       console.log("Generated report with URL:", reportUrl);
-      refetch();
+      await refreshReportsList();
     } catch (error) {
       console.error("Error generating report:", error);
       toast.error("Failed to generate report");
@@ -71,7 +88,7 @@ const DeepDiveReportsAccess = () => {
     try {
       await deleteReport(reportId);
       toast.success("Report deleted successfully");
-      refetch();
+      await refreshReportsList();
     } catch (error) {
       console.error("Error deleting report:", error);
       toast.error("Failed to delete report");
@@ -171,9 +188,22 @@ const DeepDiveReportsAccess = () => {
               isGenerating={isGenerating}
               onGenerateReport={handleGenerateReport}
               formatArchetypeLabel={formatArchetypeLabel}
+              generationInProgress={generationInProgress || []}
             />
 
-            <h3 className="text-lg font-medium mt-6">Existing reports</h3>
+            <div className="flex justify-between items-center mt-6 mb-4">
+              <h3 className="text-lg font-medium">Existing reports</h3>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={refreshReportsList} 
+                disabled={isRefreshing}
+              >
+                <RefreshCw className={`h-4 w-4 mr-1 ${isRefreshing ? 'animate-spin' : ''}`} />
+                Refresh List
+              </Button>
+            </div>
+            
             {reports && reports.length > 0 ? (
               <ReportsTable
                 reports={reports}

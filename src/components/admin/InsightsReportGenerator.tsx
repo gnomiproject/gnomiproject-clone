@@ -14,7 +14,8 @@ import {
   Eye,
   ExternalLink,
   Copy,
-  Database
+  Database,
+  CalendarIcon
 } from "lucide-react";
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -29,6 +30,7 @@ import {
 } from "@/components/ui/table";
 import ReportDetailView from './ReportDetailView';
 import { Link } from 'react-router-dom';
+import { format } from 'date-fns';
 
 interface ArchetypeSummary {
   id: string;
@@ -41,6 +43,7 @@ interface ArchetypeSummary {
 export function InsightsReportGenerator() {
   const [isLoading, setIsLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false); // New state for refresh operation
   const [archetypes, setArchetypes] = useState<ArchetypeSummary[]>([]);
   const [generationResult, setGenerationResult] = useState<null | {
     total: number;
@@ -96,6 +99,7 @@ export function InsightsReportGenerator() {
   const loadArchetypes = async () => {
     setIsLoading(true);
     setError(null);
+    setIsRefreshing(true); // Indicate refresh operation in progress
     
     try {
       console.log("Fetching archetypes from Core_Archetype_Overview...");
@@ -117,6 +121,7 @@ export function InsightsReportGenerator() {
         setError("No archetypes found in the database");
         setArchetypes([]);
         setIsLoading(false);
+        setIsRefreshing(false);
         return;
       }
       
@@ -124,7 +129,7 @@ export function InsightsReportGenerator() {
       const archetypeArray: ArchetypeSummary[] = archetypeData.map(archetype => ({
         id: archetype.id,
         name: archetype.name || 'Unnamed Archetype',
-        code: archetype.id, // Storing the ID (which is the code like A1, B2, etc.)
+        code: archetype.id.toUpperCase(), // Storing the ID (which is the code like A1, B2, etc.)
         lastUpdated: null,
         status: 'pending'
       }));
@@ -149,7 +154,7 @@ export function InsightsReportGenerator() {
           archetypeArray.forEach(archetype => {
             const report = reportData.find(r => r.archetype_id === archetype.id);
             if (report) {
-              archetype.lastUpdated = new Date(report.last_updated).toLocaleString();
+              archetype.lastUpdated = report.last_updated ? new Date(report.last_updated).toLocaleString() : null;
               archetype.status = 'success';
             }
           });
@@ -190,6 +195,9 @@ export function InsightsReportGenerator() {
       });
       
       setArchetypes(archetypeArray);
+      toast.success("Archetype status refreshed", {
+        description: `Found ${archetypeArray.length} archetypes`
+      });
     } catch (err) {
       console.error('Error loading archetypes:', err);
       setError(typeof err === 'string' ? err : (err as Error).message || 'Unknown error occurred');
@@ -199,6 +207,7 @@ export function InsightsReportGenerator() {
       });
     } finally {
       setIsLoading(false);
+      setIsRefreshing(false);
     }
   };
 
@@ -393,10 +402,10 @@ export function InsightsReportGenerator() {
         <Button 
           variant="outline" 
           onClick={loadArchetypes}
-          disabled={isLoading || isGenerating || connectionStatus === 'error' || !connectionStatus}
+          disabled={isLoading || isGenerating || connectionStatus === 'error' || !connectionStatus || isRefreshing}
         >
-          <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-          Refresh Status
+          <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+          {isRefreshing ? "Refreshing..." : "Refresh Status"}
         </Button>
       </div>
 
@@ -453,7 +462,12 @@ export function InsightsReportGenerator() {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    {archetype.lastUpdated || 'Never'}
+                    {archetype.lastUpdated ? (
+                      <div className="flex items-center gap-1">
+                        <CalendarIcon className="h-3 w-3 text-gray-400" />
+                        <span>{archetype.lastUpdated}</span>
+                      </div>
+                    ) : 'Never'}
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">

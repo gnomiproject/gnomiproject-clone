@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import useReportGeneration from '@/hooks/useReportGeneration';
 import ReportGenerator from '@/components/admin/ReportGenerator';
 import InsightsReportGenerator from '@/components/admin/InsightsReportGenerator';
@@ -10,7 +11,6 @@ import { Database, BarChart, FileSearch } from 'lucide-react';
 import DeepDiveReportsAccess from '@/components/admin/reports/DeepDiveReportsAccess';
 
 const Admin = () => {
-  const { toast } = useToast();
   const { generateAllReports, isGenerating } = useReportGeneration();
   const [activeTab, setActiveTab] = useState("database");
 
