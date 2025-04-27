@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import ArchetypeReport from '@/components/insights/ArchetypeReport';
 import DeepDiveReport from '@/components/report/DeepDiveReport';
@@ -11,6 +11,7 @@ import { useArchetypes } from '@/hooks/useArchetypes';
 import { useGetArchetype } from '@/hooks/useGetArchetype';
 import { useReportData } from '@/hooks/useReportData';
 import { toast } from 'sonner';
+import ArchetypeError from '@/components/insights/ArchetypeError';
 
 const ReportViewer = () => {
   const { archetypeId = '', token } = useParams();
@@ -19,6 +20,7 @@ const ReportViewer = () => {
   const { getArchetypeDetailedById } = useArchetypes();
   const [initialLoading, setInitialLoading] = useState(true);
   const [isInsightsReport, setIsInsightsReport] = useState(false);
+  const [isRetrying, setIsRetrying] = useState(false);
   
   // Determine if we're viewing an insights report based on the route
   useEffect(() => {
@@ -36,9 +38,29 @@ const ReportViewer = () => {
   
   // Always call the hook regardless of the path
   // This ensures consistent hook order on every render
-  const { archetypeData: archetypeApiData, isLoading: archetypeLoading, error: archetypeError, dataSource } = useGetArchetype(archetypeId as ArchetypeId);
+  const { 
+    archetypeData: archetypeApiData, 
+    isLoading: archetypeLoading, 
+    error: archetypeError, 
+    dataSource,
+    refetch: refetchArchetype
+  } = useGetArchetype(archetypeId as ArchetypeId);
   
-  // Validate archetype ID early
+  // Function to handle retry when there's a connection error
+  const handleRetry = async () => {
+    setIsRetrying(true);
+    try {
+      await refetchArchetype();
+      toast.success("Reconnected successfully");
+    } catch (err) {
+      toast.error("Connection failed. Please try again.");
+    } finally {
+      setIsRetrying(false);
+    }
+  };
+  
+  // Validate archetype ID early - this doesn't use hooks so it's safe 
+  // to place here conditionally
   if (!isValidArchetypeId(archetypeId)) {
     return (
       <ReportError 
@@ -59,7 +81,8 @@ const ReportViewer = () => {
       isLoading, 
       isValidAccess, 
       error, 
-      dataSource: reportDataSource 
+      dataSource: reportDataSource,
+      retry: retryReportData
     } = useReportData({ 
       archetypeId, 
       token, 
@@ -75,8 +98,10 @@ const ReportViewer = () => {
         <ReportError 
           title="Access Denied"
           message={`Unable to access this report: ${error?.message || 'Invalid or expired token'}`}
-          actionLabel="Back to Home"
-          onAction={() => navigate('/')}
+          actionLabel="Retry Connection"
+          onAction={retryReportData}
+          secondaryAction={() => navigate('/')}
+          secondaryActionLabel="Back to Home"
         />
       );
     }
@@ -96,7 +121,18 @@ const ReportViewer = () => {
     return <ReportLoadingState />;
   }
 
-  // If there's an error, check if we can use local data
+  // If there's a connection error, show a specific error component with retry option
+  if (archetypeError && archetypeError.message?.includes('timeout')) {
+    return (
+      <ArchetypeError 
+        onRetry={handleRetry}
+        onRetakeAssessment={() => navigate('/assessment')}
+        isRetrying={isRetrying}
+      />
+    );
+  }
+  
+  // If there's any other error, check if we can use local data
   if (archetypeError) {
     console.error('Error loading archetype data:', archetypeError);
     toast.error(`Error loading data: ${archetypeError.message}`, { 

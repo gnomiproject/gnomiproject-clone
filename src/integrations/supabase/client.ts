@@ -9,4 +9,31 @@ const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+export const supabase = createClient<Database>(
+  SUPABASE_URL, 
+  SUPABASE_PUBLISHABLE_KEY,
+  {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+    },
+    global: {
+      fetch: (...args) => {
+        // Add timeout of 30 seconds
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000);
+        
+        // @ts-ignore
+        return fetch(...args, { signal: controller.signal })
+          .then(response => {
+            clearTimeout(timeoutId);
+            return response;
+          })
+          .catch(error => {
+            clearTimeout(timeoutId);
+            throw error;
+          });
+      }
+    }
+  }
+);

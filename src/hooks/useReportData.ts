@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { ArchetypeId } from '@/types/archetype';
 import { toast } from 'sonner';
 import { useArchetypes } from '@/hooks/useArchetypes';
+import { useQuery } from '@tanstack/react-query';
 
 interface UseReportDataProps {
   archetypeId: string;
@@ -12,20 +13,44 @@ interface UseReportDataProps {
 }
 
 export const useReportData = ({ archetypeId, token, isInsightsReport }: UseReportDataProps) => {
-  const [isLoading, setIsLoading] = useState(true);
   const [isValidAccess, setIsValidAccess] = useState<boolean | null>(null);
-  const [reportData, setReportData] = useState<any>(null);
   const [userData, setUserData] = useState<any>(null);
-  const [averageData, setAverageData] = useState<any>(null);
   const [usingFallbackData, setUsingFallbackData] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
   const [dataSource, setDataSource] = useState<string>('');
   
   const { getArchetypeDetailedById } = useArchetypes();
 
   // This function consolidates our data fetching strategy
-  const fetchArchetypeData = async (archetypeId: string) => {
+  const fetchArchetypeData = useCallback(async () => {
     console.log(`Fetching archetype data for ${archetypeId}...`);
+    
+    // For deep dive reports, check the token against report_requests table
+    if (!isInsightsReport && token) {
+      // Validate the token
+      const { data: requestData, error: requestError } = await supabase
+        .from('report_requests')
+        .select('*')
+        .eq('access_token', token)
+        .eq('archetype_id', archetypeId)
+        .maybeSingle();
+        
+      if (requestError) {
+        throw new Error(`Access validation error: ${requestError.message}`);
+      }
+      
+      if (!requestData) {
+        throw new Error('Invalid access token');
+      }
+      
+      // Check if token is expired
+      if (requestData.expires_at && new Date(requestData.expires_at) < new Date()) {
+        throw new Error('Access token has expired');
+      }
+      
+      // Store user data
+      setUserData(requestData.assessment_result || null);
+      setIsValidAccess(true);
+    }
     
     // Try fetching from Analysis_Archetype_Full_Reports first (most complete)
     try {
@@ -40,7 +65,7 @@ export const useReportData = ({ archetypeId, token, isInsightsReport }: UseRepor
       } else if (data) {
         console.log('Found data in Analysis_Archetype_Full_Reports');
         setDataSource('Analysis_Archetype_Full_Reports');
-        return { data, source: 'Analysis_Archetype_Full_Reports' };
+        return data;
       }
     } catch (e) {
       console.error('Exception accessing Analysis_Archetype_Full_Reports:', e);
@@ -59,7 +84,7 @@ export const useReportData = ({ archetypeId, token, isInsightsReport }: UseRepor
       } else if (data) {
         console.log('Found data in level3_report_data');
         setDataSource('level3_report_data');
-        return { data, source: 'level3_report_data' };
+        return data;
       }
     } catch (e) {
       console.error('Exception accessing level3_report_data:', e);
@@ -78,7 +103,7 @@ export const useReportData = ({ archetypeId, token, isInsightsReport }: UseRepor
       } else if (data) {
         console.log('Found data in level4_deepdive_report_data');
         setDataSource('level4_deepdive_report_data');
-        return { data, source: 'level4_deepdive_report_data' };
+        return data;
       }
     } catch (e) {
       console.error('Exception accessing level4_deepdive_report_data:', e);
@@ -124,187 +149,82 @@ export const useReportData = ({ archetypeId, token, isInsightsReport }: UseRepor
       
       console.log('Using combined Core tables data');
       setDataSource('Core tables');
-      return { data: combinedData, source: 'Core tables' };
+      return combinedData;
     } catch (e) {
       console.error('Exception accessing Core tables:', e);
     }
     
-    return null;
-  };
-
-  useEffect(() => {
-    const fetchReportData = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        
-        console.log(`Fetching report data for archetype: ${archetypeId}, isInsightsReport: ${isInsightsReport}`);
-        
-        // Different approach based on whether it's an insights report or a deep dive report
-        if (isInsightsReport) {
-          // For insights reports, try fetching data with our consolidated function
-          const result = await fetchArchetypeData(archetypeId);
-          
-          if (result?.data) {
-            console.log(`Found report data in ${result.source}`);
-            setReportData(result.data);
-            setIsValidAccess(true);
-            setUsingFallbackData(result.source !== 'Analysis_Archetype_Full_Reports');
-          } else {
-            console.warn('No database data found, using in-memory data');
-            
-            // Get in-memory data from context as last resort
-            const localArchetypeData = getArchetypeDetailedById(archetypeId as ArchetypeId);
-            
-            if (localArchetypeData) {
-              console.log('Using local archetype data');
-              
-              // Convert to expected report format
-              const localReportData = {
-                archetype_id: localArchetypeData.id,
-                archetype_name: localArchetypeData.name,
-                short_description: localArchetypeData.short_description || '',
-                long_description: localArchetypeData.long_description || '',
-                key_characteristics: localArchetypeData.key_characteristics || [],
-                strengths: localArchetypeData.enhanced?.swot?.strengths || [],
-                weaknesses: localArchetypeData.enhanced?.swot?.weaknesses || [],
-                opportunities: localArchetypeData.enhanced?.swot?.opportunities || [],
-                threats: localArchetypeData.enhanced?.swot?.threats || [],
-                strategic_recommendations: localArchetypeData.enhanced?.strategicPriorities || [],
-                family_id: localArchetypeData.familyId,
-                family_name: localArchetypeData.familyName
-              };
-              
-              setDataSource('local data');
-              setReportData(localReportData);
-              setIsValidAccess(true);
-              setUsingFallbackData(true);
-            } else {
-              console.error('No data found for archetype:', archetypeId);
-              setError(new Error('No report data found for this archetype'));
-              setIsValidAccess(false);
-            }
-          }
-        } else {
-          // For deep dive reports, check the token against report_requests table
-          if (!token) {
-            setIsValidAccess(false);
-            setError(new Error('Access token required for deep dive reports'));
-            return;
-          }
-          
-          try {
-            // Validate the token
-            const { data: requestData, error: requestError } = await supabase
-              .from('report_requests')
-              .select('*')
-              .eq('access_token', token)
-              .eq('archetype_id', archetypeId)
-              .maybeSingle();
-              
-            if (requestError) {
-              console.error('Invalid access token or archetype:', requestError);
-              setIsValidAccess(false);
-              setError(new Error(`Access validation error: ${requestError.message}`));
-              return;
-            }
-            
-            if (!requestData) {
-              setIsValidAccess(false);
-              setError(new Error('Invalid access token'));
-              return;
-            }
-            
-            // Check if token is expired
-            if (requestData.expires_at && new Date(requestData.expires_at) < new Date()) {
-              console.log('Token expired:', requestData.expires_at);
-              setIsValidAccess(false);
-              setError(new Error('Access token has expired'));
-              return;
-            }
-            
-            // Token is valid, fetch report data using our consolidated function
-            const result = await fetchArchetypeData(archetypeId);
-            
-            if (result?.data) {
-              console.log(`Found report data in ${result.source} for deep dive report`);
-              setReportData(result.data);
-              setUserData(requestData.assessment_result || null);
-              setIsValidAccess(true);
-              setUsingFallbackData(result.source !== 'Analysis_Archetype_Full_Reports');
-            } else {
-              // Last resort - try local data
-              const localArchetypeData = getArchetypeDetailedById(archetypeId as ArchetypeId);
-              
-              if (localArchetypeData) {
-                console.log('Using local data for deep dive report');
-                const localReportData = {
-                  archetype_id: localArchetypeData.id,
-                  archetype_name: localArchetypeData.name,
-                  short_description: localArchetypeData.short_description || '',
-                  long_description: localArchetypeData.long_description || '',
-                  key_characteristics: localArchetypeData.key_characteristics || [],
-                  strengths: localArchetypeData.enhanced?.swot?.strengths || [],
-                  weaknesses: localArchetypeData.enhanced?.swot?.weaknesses || [],
-                  opportunities: localArchetypeData.enhanced?.swot?.opportunities || [],
-                  threats: localArchetypeData.enhanced?.swot?.threats || [],
-                  family_id: localArchetypeData.familyId
-                };
-                
-                setDataSource('local data');
-                setReportData(localReportData);
-                setUserData(requestData.assessment_result || null);
-                setIsValidAccess(true);
-                setUsingFallbackData(true);
-              } else {
-                console.error('No data found for deep dive report:', archetypeId);
-                setError(new Error('No report data found for this archetype'));
-                setIsValidAccess(false);
-              }
-            }
-          } catch (tokenValidationError) {
-            console.error('Error validating token:', tokenValidationError);
-            setError(tokenValidationError as Error);
-            setIsValidAccess(false);
-          }
-        }
-      } catch (error) {
-        console.error('Error in useReportData:', error);
-        setError(error as Error);
-        
-        // Last resort - try to use local data even if there was an error
-        const localArchetypeData = getArchetypeDetailedById(archetypeId as ArchetypeId);
-        if (localArchetypeData) {
-          console.log('Using local data after error as emergency fallback');
-          const emergencyData = {
-            archetype_id: localArchetypeData.id,
-            archetype_name: localArchetypeData.name,
-            short_description: localArchetypeData.short_description,
-            long_description: localArchetypeData.long_description,
-            key_characteristics: localArchetypeData.key_characteristics || [],
-          };
-          setReportData(emergencyData);
-          setUsingFallbackData(true);
-          setIsValidAccess(true);
-        } else {
-          setIsValidAccess(false);
-        }
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    // Last resort - try local data
+    const localArchetypeData = getArchetypeDetailedById(archetypeId as ArchetypeId);
     
-    fetchReportData();
+    if (localArchetypeData) {
+      console.log('Using local data for report');
+      const localReportData = {
+        archetype_id: localArchetypeData.id,
+        archetype_name: localArchetypeData.name,
+        short_description: localArchetypeData.short_description || '',
+        long_description: localArchetypeData.long_description || '',
+        key_characteristics: localArchetypeData.key_characteristics || [],
+        strengths: localArchetypeData.enhanced?.swot?.strengths || [],
+        weaknesses: localArchetypeData.enhanced?.swot?.weaknesses || [],
+        opportunities: localArchetypeData.enhanced?.swot?.opportunities || [],
+        threats: localArchetypeData.enhanced?.swot?.threats || [],
+        family_id: localArchetypeData.familyId
+      };
+      
+      setDataSource('local data');
+      setUsingFallbackData(true);
+      return localReportData;
+    }
+    
+    return null;
   }, [archetypeId, token, isInsightsReport, getArchetypeDetailedById]);
 
+  // Use React Query for data fetching with proper caching
+  const { 
+    data: reportData, 
+    isLoading, 
+    error,
+    refetch
+  } = useQuery({
+    queryKey: ['reportData', archetypeId, token, isInsightsReport],
+    queryFn: fetchArchetypeData,
+    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
+    retry: 1, // Only retry once
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  });
+
+  // Handle retry functionality
+  const retry = async () => {
+    toast.loading("Retrying connection...");
+    try {
+      await refetch();
+      toast.success("Connection successful!");
+    } catch (e) {
+      toast.error("Connection failed. Please try again.");
+    }
+  };
+
+  // Create average data for comparison
+  const averageData = {
+    archetype_id: 'All_Average',
+    archetype_name: 'Population Average',
+    "Demo_Average Age": 40,
+    "Demo_Average Family Size": 3.0,
+    "Risk_Average Risk Score": 1.0,
+    "Cost_Medical & RX Paid Amount PMPY": 5000
+  };
+
   return {
-    isLoading,
-    isValidAccess,
     reportData,
     userData,
     averageData,
+    isLoading,
+    isValidAccess,
+    error: error as Error | null,
     usingFallbackData,
     dataSource,
-    error
+    retry
   };
 };
