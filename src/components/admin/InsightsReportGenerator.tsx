@@ -19,7 +19,8 @@ interface ArchetypeListItem {
 }
 
 const InsightsReportGenerator: React.FC = () => {
-  const [connectionStatus, setConnectionStatus] = useState<'idle' | 'checking' | 'connected' | 'error'>('idle');
+  // Change 'idle' to 'unchecked' to match the expected type
+  const [connectionStatus, setConnectionStatus] = useState<'unchecked' | 'checking' | 'connected' | 'error'>('unchecked');
   const [timeoutWarning, setTimeoutWarning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [archetypes, setArchetypes] = useState<ArchetypeListItem[]>([]);
