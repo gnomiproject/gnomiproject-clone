@@ -1,7 +1,19 @@
 
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import SimpleReportLinks from '@/components/admin/reports/SimpleReportLinks';
+
+// Static list of archetypes - no data fetching
+const archetypes = [
+  { id: 'a1', name: 'Savvy Healthcare Navigators', family: 'a' },
+  { id: 'a2', name: 'Complex Condition Managers', family: 'a' },
+  { id: 'a3', name: 'Proactive Care Consumers', family: 'a' },
+  { id: 'b1', name: 'Resourceful Adapters', family: 'b' },
+  { id: 'b2', name: 'Healthcare Pragmatists', family: 'b' },
+  { id: 'b3', name: 'Care Channel Optimizers', family: 'b' },
+  { id: 'c1', name: 'Scalable Access Architects', family: 'c' },
+  { id: 'c2', name: 'Care Adherence Advocates', family: 'c' },
+  { id: 'c3', name: 'Engaged Healthcare Consumers', family: 'c' }
+];
 
 const Admin = () => {
   return (
@@ -17,14 +29,46 @@ const Admin = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-8">
+            {/* Insights Reports Section */}
             <div>
               <h2 className="text-xl font-semibold mb-4">Insights Reports</h2>
-              <SimpleReportLinks reportType="insights" />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {archetypes.map(archetype => (
+                  <a 
+                    key={`insights-${archetype.id}`}
+                    href={`/insights/report/${archetype.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block p-4 border rounded hover:bg-gray-100 transition-colors"
+                  >
+                    <span className="inline-block px-2 py-1 mr-2 bg-gray-200 rounded text-sm">
+                      {archetype.family.toUpperCase()}
+                    </span>
+                    {archetype.name}
+                  </a>
+                ))}
+              </div>
             </div>
             
+            {/* Deep Dive Reports Section */}
             <div>
               <h2 className="text-xl font-semibold mb-4">Deep Dive Reports</h2>
-              <SimpleReportLinks reportType="deepdive" />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {archetypes.map(archetype => (
+                  <a 
+                    key={`deepdive-${archetype.id}`}
+                    href={`/report/${archetype.id}/admin-view`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block p-4 border rounded hover:bg-gray-100 transition-colors"
+                  >
+                    <span className="inline-block px-2 py-1 mr-2 bg-gray-200 rounded text-sm">
+                      {archetype.family.toUpperCase()}
+                    </span>
+                    {archetype.name}
+                  </a>
+                ))}
+              </div>
             </div>
             
             <div className="mt-8 p-4 bg-gray-50 rounded-lg">

@@ -19,15 +19,15 @@ export const supabase = createClient<Database>(
     },
     global: {
       fetch: (...args) => {
-        // Reduce timeout to 10 seconds to fail faster
+        // Increase timeout to prevent rapid retries
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000);
+        const timeoutId = setTimeout(() => controller.abort(), 30000);
         
         // @ts-ignore
         return fetch(...args, { 
           signal: controller.signal,
-          // Add strong cache policy
-          cache: 'force-cache'
+          // Use standard cache policy instead of force-cache
+          cache: 'default'
         })
         .then(response => {
           clearTimeout(timeoutId);
@@ -45,7 +45,7 @@ export const supabase = createClient<Database>(
     },
     // Enhance realtime subscription settings
     realtime: {
-      timeout: 10000
+      timeout: 30000 // Increased from 10000
     }
   }
 );
