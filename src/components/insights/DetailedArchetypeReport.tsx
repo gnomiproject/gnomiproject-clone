@@ -89,9 +89,19 @@ const DetailedArchetypeReport = ({ archetypeId, onRetakeAssessment }: DetailedAr
     );
   }
   
+  // Create a default fallback for basic props to prevent null errors
+  // This ensures ArchetypeContent always receives something valid
+  const safeArchetypeData = {
+    ...archetypeData,
+    name: archetypeData.name || `Archetype ${archetypeId.toUpperCase()}`,
+    hexColor: archetypeData.hexColor || '#6E59A5',
+    color: archetypeData.color || '#6E59A5',
+    familyName: archetypeData.familyName || archetypeData.family_name || 'Healthcare Archetype'
+  };
+  
   return (
     <ArchetypeContent 
-      archetypeData={archetypeData}
+      archetypeData={safeArchetypeData}
       archetypeId={archetypeId}
       onRetakeAssessment={onRetakeAssessment}
     />

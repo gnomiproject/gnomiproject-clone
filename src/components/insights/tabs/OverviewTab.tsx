@@ -10,6 +10,17 @@ interface OverviewTabProps {
 }
 
 const OverviewTab = ({ archetypeData, familyColor }: OverviewTabProps) => {
+  if (!archetypeData) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <p className="text-gray-500">No archetype data available to display.</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Use fallbacks for all required fields
   const familyName = archetypeData.familyName || archetypeData.family_name || "Healthcare Archetype Family";
   const longDescription = archetypeData.long_description || archetypeData.short_description || 
     (archetypeData.summary?.description) || "This archetype represents organizations with specific healthcare management approaches and characteristics.";
@@ -29,10 +40,11 @@ const OverviewTab = ({ archetypeData, familyColor }: OverviewTabProps) => {
   }
   
   const industries = archetypeData.industries || "Various industries including healthcare, finance, and technology";
+  const safeColor = familyColor || '#6E59A5';
 
   return (
     <Card>
-      <CardHeader style={{ borderBottom: `4px solid ${familyColor}` }}>
+      <CardHeader style={{ borderBottom: `4px solid ${safeColor}` }}>
         <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-2">
           <div>
             <CardTitle className="text-2xl font-bold">
@@ -41,7 +53,7 @@ const OverviewTab = ({ archetypeData, familyColor }: OverviewTabProps) => {
             <p className="text-gray-600 mt-1">{familyName}</p>
           </div>
           <div className="inline-flex items-center px-3 py-1 rounded-full text-sm" 
-            style={{ backgroundColor: `${familyColor}20`, color: familyColor }}>
+            style={{ backgroundColor: `${safeColor}20`, color: safeColor }}>
             Family: {familyName}
           </div>
         </div>
