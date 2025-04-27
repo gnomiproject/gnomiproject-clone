@@ -36,7 +36,7 @@ const Admin = () => {
                 {archetypes.map(archetype => (
                   <a 
                     key={`insights-${archetype.id}`}
-                    href={`/insights/report/${archetype.id}`}
+                    href={`/admin/insights-report/${archetype.id}?_admin=true`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="block p-4 border rounded hover:bg-gray-100 transition-colors"
@@ -57,7 +57,7 @@ const Admin = () => {
                 {archetypes.map(archetype => (
                   <a 
                     key={`deepdive-${archetype.id}`}
-                    href={`/report/${archetype.id}/admin-view`}
+                    href={`/admin/report/${archetype.id}?_admin=true`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="block p-4 border rounded hover:bg-gray-100 transition-colors"

@@ -1,16 +1,15 @@
 
 import { QueryClient } from '@tanstack/react-query';
+import { isAdmin } from '@/integrations/supabase/client';
 
+// Create query client with settings optimized based on user mode
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      // Significantly increased stale time to reduce unnecessary refetches
-      staleTime: 1000 * 60 * 60, // 60 minutes
-      // More aggressive caching - using 'gcTime' instead of 'cacheTime' which is deprecated
-      gcTime: 1000 * 60 * 120, // 2 hours
-      // Only retry once to avoid hammering the API during issues
-      retry: 1,
-      // Disable automatic refetching completely
+      // Admin mode uses more aggressive settings to reduce load
+      staleTime: isAdmin ? 1000 * 60 * 60 * 24 : 1000 * 60 * 60, // 24 hours for admin, 1 hour for normal
+      gcTime: isAdmin ? 1000 * 60 * 60 * 24 : 1000 * 60 * 120, // 24 hours for admin, 2 hours for normal
+      retry: isAdmin ? 0 : 1, // No retries for admin to avoid hammering API
       refetchOnWindowFocus: false,
       refetchOnReconnect: false,
       refetchOnMount: false,

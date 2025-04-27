@@ -12,6 +12,7 @@ import NotFound from '@/pages/NotFound';
 import Admin from '@/pages/Admin';
 import ReportView from '@/pages/ReportView';
 import ReportViewer from '@/pages/ReportViewer';
+import AdminReportViewer from '@/pages/AdminReportViewer';
 
 const version = "0.0.1";
 
@@ -31,6 +32,11 @@ function App() {
             <Route path="/report/:archetypeId" element={<ReportViewer />} />
             <Route path="/report/:archetypeId/:token" element={<ReportViewer />} />
             <Route path="/report/:archetypeId/admin-view" element={<ReportViewer />} />
+            
+            {/* New dedicated admin routes with minimal processing */}
+            <Route path="/admin/insights-report/:archetypeId" element={<AdminReportViewer />} />
+            <Route path="/admin/report/:archetypeId" element={<AdminReportViewer />} />
+            
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
