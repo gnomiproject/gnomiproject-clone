@@ -15,13 +15,18 @@ const AdminReportViewer = () => {
   const { archetypeId = '' } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const [debugMode, setDebugMode] = useState(false);
+  const [debugMode, setDebugMode] = useState(true); // Set debug mode on by default
+  
+  // Console log for initial mount
+  console.log('AdminReportViewer: Initial render with params:', { archetypeId, path: location.pathname, search: location.search });
   
   // Determine report type based on URL and parameters
   const searchParams = new URLSearchParams(location.search);
   const queryReportType = searchParams.get('type') || 'deepdive';
   const isInsightsReport = location.pathname.includes('insights-report') || queryReportType === 'insights';
   const reportType = isInsightsReport ? 'insights' : 'deepdive';
+  
+  console.log('AdminReportViewer: Report type determined:', { reportType, isInsightsReport, queryReportType });
   
   // Use the custom hook for data fetching with explicit parameters
   const { data: rawData, loading, error, dataSource, refreshData } = useAdminReportData({
@@ -32,18 +37,20 @@ const AdminReportViewer = () => {
 
   useEffect(() => {
     // Log debugging information when component mounts or parameters change
-    console.log('AdminReportViewer: Mounted/Updated with params:', {
+    console.log('AdminReportViewer: Effect triggered:', {
       archetypeId,
       reportType,
       isInsightsReport,
       hasData: !!rawData,
-      dataSource
+      dataSource,
+      rawDataKeys: rawData ? Object.keys(rawData) : [],
+      error: error?.message || 'none'
     });
     
     return () => {
       console.log('AdminReportViewer: Unmounting component');
     };
-  }, [archetypeId, reportType, rawData, dataSource]);
+  }, [archetypeId, reportType, rawData, dataSource, error]);
 
   // Mock user data for admin view
   const mockUserData = {
@@ -64,6 +71,7 @@ const AdminReportViewer = () => {
   };
 
   const handleRefresh = () => {
+    console.log('AdminReportViewer: Refreshing data');
     refreshData();
     toast({
       title: "Refreshing report data",
@@ -79,22 +87,22 @@ const AdminReportViewer = () => {
     });
   };
 
+  console.log('AdminReportViewer: Rendering with state:', { loading, error: error?.message, hasData: !!rawData });
+
   return (
     <div className="container mx-auto py-8 px-4">
-      {/* Debug toggle button (visible only in development) */}
-      {import.meta.env.DEV && (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={toggleDebugMode}
-          className="absolute top-4 right-4 flex items-center gap-2"
-        >
-          <Bug className="h-4 w-4" />
-          {debugMode ? "Hide Debug Info" : "Show Debug Info"}
-        </Button>
-      )}
+      {/* Debug toggle button (visible in all environments temporarily) */}
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={toggleDebugMode}
+        className="absolute top-4 right-4 flex items-center gap-2"
+      >
+        <Bug className="h-4 w-4" />
+        {debugMode ? "Hide Debug Info" : "Show Debug Info"}
+      </Button>
       
-      {/* Debug information panel */}
+      {/* Debug information panel (always visible for now) */}
       {debugMode && (
         <Card className="mb-6 border-amber-300 bg-amber-50">
           <CardHeader className="pb-2">
@@ -118,6 +126,8 @@ const AdminReportViewer = () => {
               <div>{String(!!error)}</div>
               <div><strong>Has Data:</strong></div>
               <div>{String(!!rawData)}</div>
+              <div><strong>Raw Data Keys:</strong></div>
+              <div>{rawData ? Object.keys(rawData).join(', ') : 'No data'}</div>
             </div>
             {error && (
               <div className="mt-4 p-2 bg-red-100 text-red-800 rounded">
@@ -145,7 +155,7 @@ const AdminReportViewer = () => {
           <CardContent>
             <p className="mb-6">{error?.message || 'No data found for this archetype'}</p>
             <div className="flex flex-wrap gap-4">
-              <Button onClick={() => window.location.reload()} className="flex items-center gap-2">
+              <Button onClick={handleRefresh} className="flex items-center gap-2">
                 <RefreshCw className="h-4 w-4" /> Try Again
               </Button>
               <Button variant="outline" onClick={() => navigate('/admin')} className="flex items-center gap-2">
@@ -200,6 +210,7 @@ const AdminReportViewer = () => {
               {isInsightsReport ? (
                 <div className="space-y-6">
                   <div className="bg-white rounded-lg shadow overflow-hidden mb-12">
+                    {console.log('AdminReportViewer: About to render InsightsReportContent with:', rawData)}
                     <InsightsReportContent archetype={rawData} />
                   </div>
                 </div>
