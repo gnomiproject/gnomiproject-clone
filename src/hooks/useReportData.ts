@@ -39,9 +39,11 @@ export const useReportData = ({
   const [error, setError] = useState<Error | null>(null);
   const [dataSource, setDataSource] = useState<string>('');
 
-  // Load report data on mount
+  // Load report data on mount - ensure this effect runs unconditionally
   useEffect(() => {
     let isMounted = true;
+    
+    // Define a function to be called inside the effect
     const loadReportData = async () => {
       // Always reset states at the start of data loading
       if (isMounted) {
@@ -66,18 +68,38 @@ export const useReportData = ({
           return;
         }
         
+        // Always validate if there's at least an archetypeId to work with
+        if (!archetypeId) {
+          if (isMounted) {
+            setError(new Error('Missing archetype ID'));
+            setIsLoading(false);
+            setIsValidAccess(false);
+          }
+          return;
+        }
+        
         // Validate token and fetch report data
-        const { data: accessData, error: accessError } = await supabase
-          .from('report_requests')
-          .select('id, archetype_id, name, organization, email, created_at')
-          .eq('archetype_id', archetypeId)
-          .eq('access_token', token)
-          .gt('expires_at', new Date().toISOString())
-          .maybeSingle();
+        let accessData = null;
+        let accessError = null;
+        
+        // Only validate token if one was provided
+        if (token) {
+          const accessResult = await supabase
+            .from('report_requests')
+            .select('id, archetype_id, name, organization, email, created_at')
+            .eq('archetype_id', archetypeId)
+            .eq('access_token', token)
+            .gt('expires_at', new Date().toISOString())
+            .maybeSingle();
+            
+          accessData = accessResult.data;
+          accessError = accessResult.error;
+        }
         
         if (accessError) throw accessError;
         
-        if (!accessData) {
+        // If token validation fails, mark access as invalid
+        if (token && !accessData) {
           if (isMounted) {
             setIsValidAccess(false);
             setError(new Error('Invalid or expired access token'));
@@ -86,7 +108,7 @@ export const useReportData = ({
           return;
         }
         
-        // If token is valid, fetch the report data
+        // If no token was provided or token is valid, fetch report data
         const reportTable = isInsightsReport ? 'level3_report_data' : 'level4_deepdive_report_data';
         const { data: fetchedReportData, error: reportError } = await supabase
           .from(reportTable)
@@ -138,8 +160,10 @@ export const useReportData = ({
       }
     };
     
+    // Call the function
     loadReportData();
     
+    // Cleanup function
     return () => {
       isMounted = false;
     };

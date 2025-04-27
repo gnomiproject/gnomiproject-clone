@@ -34,8 +34,13 @@ const convertJsonToStringArray = (jsonArray: Json | null): string[] => {
   return [];
 };
 
-// Function to fetch archetype data from Supabase
+// Function to fetch archetype data from Supabase - extract this outside hook
 const fetchArchetypeData = async (archetypeId: ArchetypeId, skipCache: boolean = false) => {
+  // Verify a valid archetype ID was provided
+  if (!archetypeId) {
+    throw new Error('Invalid archetype ID provided');
+  }
+  
   console.log("Fetching data for archetypeId:", archetypeId);
   
   // Check cache first if not explicitly skipping
@@ -77,7 +82,7 @@ export const useGetArchetype = (archetypeId: ArchetypeId, skipCache: boolean = f
   const processingRef = useRef(false);
   const processedDataRef = useRef<string | null>(null);
   
-  // Use React Query for data fetching with proper caching
+  // Use React Query for data fetching with proper caching and no conditional hook usage
   const { 
     isLoading, 
     error, 
@@ -89,7 +94,7 @@ export const useGetArchetype = (archetypeId: ArchetypeId, skipCache: boolean = f
     staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
     gcTime: 10 * 60 * 1000, // Keep unused data for 10 minutes
     retry: 1, // Only retry once
-    enabled: Boolean(archetypeId),
+    enabled: Boolean(archetypeId), // Only run query if archetypeId is provided
     refetchOnWindowFocus: false, // Prevent refetching when window regains focus
     refetchOnMount: false, // Prevent refetching on component mount if data exists
   });

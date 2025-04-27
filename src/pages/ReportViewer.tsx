@@ -9,7 +9,6 @@ import { isValidArchetypeId } from '@/utils/archetypeValidation';
 import { ArchetypeId, ArchetypeDetailedData } from '@/types/archetype';
 import { useArchetypes } from '@/hooks/useArchetypes';
 import { useGetArchetype } from '@/hooks/useGetArchetype';
-import { useReportData } from '@/hooks/useReportData';
 import { toast } from 'sonner';
 import ArchetypeError from '@/components/insights/ArchetypeError';
 import { Button } from '@/components/ui/button';
@@ -20,11 +19,32 @@ const ReportViewer = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { getArchetypeDetailedById } = useArchetypes();
+  
+  // Declare all state variables at the top
   const [initialLoading, setInitialLoading] = useState(true);
   const [isInsightsReport, setIsInsightsReport] = useState(false);
   const [isAdminView, setIsAdminView] = useState(false);
   const [isRetrying, setIsRetrying] = useState(false);
   const [skipCache, setSkipCache] = useState(false);
+  const [reportData, setReportData] = useState<any>(null);
+  const [userData, setUserData] = useState<any>(null);
+  const [averageData, setAverageData] = useState<any>(null);
+  const [isValidAccess, setIsValidAccess] = useState(true);
+  const [loadingReport, setLoadingReport] = useState(false);
+  const [reportError, setReportError] = useState<Error | null>(null);
+  
+  // First check validity of archetypeId
+  const validArchetypeId = isValidArchetypeId(archetypeId);
+  
+  // Call hooks unconditionally - move this before any conditional logic
+  const { 
+    archetypeData: archetypeApiData, 
+    isLoading: archetypeLoading, 
+    error: archetypeError, 
+    dataSource,
+    refetch: refetchArchetype,
+    refreshData: refreshArchetypeData
+  } = useGetArchetype(validArchetypeId ? archetypeId as ArchetypeId : 'a1' as ArchetypeId, skipCache);
   
   // Determine if we're viewing an insights report based on the route
   useEffect(() => {
@@ -42,16 +62,45 @@ const ReportViewer = () => {
     return () => clearTimeout(timer);
   }, []);
   
-  // Always call the hook regardless of the path
-  // This ensures consistent hook order on every render
-  const { 
-    archetypeData: archetypeApiData, 
-    isLoading: archetypeLoading, 
-    error: archetypeError, 
-    dataSource,
-    refetch: refetchArchetype,
-    refreshData: refreshArchetypeData
-  } = useGetArchetype(archetypeId as ArchetypeId, skipCache);
+  useEffect(() => {
+    if (!validArchetypeId) return;
+    
+    let isMounted = true;
+    const loadReportData = async () => {
+      if (!isInsightsReport && token && !isAdminView) {
+        setLoadingReport(true);
+        try {
+          // We can't use hooks conditionally, so this needs to be restructured
+          // Instead of calling the hook here, we'll use a function that doesn't involve hooks
+          const reportDataResult = await fetch(`/api/report/${archetypeId}/${token}`);
+          const data = await reportDataResult.json();
+          
+          if (isMounted) {
+            setReportData(data?.reportData || null);
+            setUserData(data?.userData || null);
+            setAverageData(data?.averageData || null);
+            setIsValidAccess(data?.isValidAccess || false);
+            setReportError(data?.error ? new Error(data.error) : null);
+          }
+        } catch (error) {
+          if (isMounted) {
+            console.error("Error in report data loading:", error);
+            setReportError(error as Error);
+          }
+        } finally {
+          if (isMounted) {
+            setLoadingReport(false);
+          }
+        }
+      }
+    };
+    
+    loadReportData();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [archetypeId, token, isInsightsReport, isAdminView, skipCache]);
   
   // Function to handle retry when there's a connection error
   const handleRetry = async () => {
@@ -78,73 +127,6 @@ const ReportViewer = () => {
     }
   };
   
-  // FIXED: Move this validation outside of the conditional rendering
-  // so it doesn't break the hooks order
-  if (!isValidArchetypeId(archetypeId)) {
-    return (
-      <ReportError 
-        title="Invalid Archetype ID"
-        message="The requested archetype ID is not valid. Please check the URL or take the assessment again."
-        actionLabel="Take Assessment"
-        onAction={() => navigate('/assessment')}
-      />
-    );
-  }
-
-  // Define all hooks and variables needed for both paths
-  const [reportData, setReportData] = useState<any>(null);
-  const [userData, setUserData] = useState<any>(null);
-  const [averageData, setAverageData] = useState<any>(null);
-  const [isValidAccess, setIsValidAccess] = useState(true);
-  const [loadingReport, setLoadingReport] = useState(false);
-  const [reportError, setReportError] = useState<Error | null>(null);
-  
-  // For deep dive reports with tokens, use the useReportData hook
-  useEffect(() => {
-    let isMounted = true;
-    
-    const loadReportData = async () => {
-      if (!isInsightsReport && token && !isAdminView) {
-        setLoadingReport(true);
-        try {
-          // Use the hook in a non-conditional way
-          const { reportData: hookReportData, userData: hookUserData, 
-                  averageData: hookAverageData, isValidAccess: hookIsValidAccess, 
-                  error: hookError } = useReportData({ 
-            archetypeId, 
-            token, 
-            isInsightsReport: false,
-            skipCache 
-          });
-          
-          // Only update state if component is still mounted
-          if (isMounted) {
-            setReportData(hookReportData);
-            setUserData(hookUserData);
-            setAverageData(hookAverageData);
-            setIsValidAccess(hookIsValidAccess);
-            setReportError(hookError);
-          }
-        } catch (error) {
-          if (isMounted) {
-            console.error("Error in report data loading:", error);
-            setReportError(error as Error);
-          }
-        } finally {
-          if (isMounted) {
-            setLoadingReport(false);
-          }
-        }
-      }
-    };
-    
-    loadReportData();
-    
-    return () => {
-      isMounted = false;
-    };
-  }, [archetypeId, token, isInsightsReport, isAdminView, skipCache]);
-  
   // Function to refresh report data
   const handleRefreshReportData = async () => {
     setSkipCache(true);
@@ -156,23 +138,21 @@ const ReportViewer = () => {
     }, 100);
   };
 
-  // Setup admin view mock data for DeepDiveReport
-  const adminUserData = {
-    name: 'Admin Viewer',
-    organization: 'Admin Organization',
-    created_at: new Date().toISOString(),
-    email: 'admin@example.com'
-  };
+  // Now handle UI rendering based on state
   
-  const defaultAverageData = {
-    archetype_id: 'All_Average',
-    archetype_name: 'Population Average',
-    "Demo_Average Age": 40,
-    "Demo_Average Family Size": 3.0,
-    "Risk_Average Risk Score": 1.0,
-    "Cost_Medical & RX Paid Amount PMPY": 5000
-  };
+  // First, validate archetypeId
+  if (!validArchetypeId) {
+    return (
+      <ReportError 
+        title="Invalid Archetype ID"
+        message="The requested archetype ID is not valid. Please check the URL or take the assessment again."
+        actionLabel="Take Assessment"
+        onAction={() => navigate('/assessment')}
+      />
+    );
+  }
 
+  // Show loading state
   if (initialLoading || archetypeLoading || loadingReport) {
     return <ReportLoadingState />;
   }
@@ -211,6 +191,23 @@ const ReportViewer = () => {
     }
   }
   
+  // Setup admin view mock data for DeepDiveReport
+  const adminUserData = {
+    name: 'Admin Viewer',
+    organization: 'Admin Organization',
+    created_at: new Date().toISOString(),
+    email: 'admin@example.com'
+  };
+  
+  const defaultAverageData = {
+    archetype_id: 'All_Average',
+    archetype_name: 'Population Average',
+    "Demo_Average Age": 40,
+    "Demo_Average Family Size": 3.0,
+    "Risk_Average Risk Score": 1.0,
+    "Cost_Medical & RX Paid Amount PMPY": 5000
+  };
+
   // Fallback to local data if there's an error or no data
   const localArchetypeData = getArchetypeDetailedById(archetypeId as ArchetypeId);
   

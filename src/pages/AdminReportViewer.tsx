@@ -8,6 +8,7 @@ import { RefreshCw, Home } from 'lucide-react';
 
 // Simplified admin-only report viewer with minimal processing
 const AdminReportViewer = () => {
+  // Always set these state variables unconditionally at the top level
   const { archetypeId = '' } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
@@ -22,6 +23,12 @@ const AdminReportViewer = () => {
   // Fetch minimal data on mount
   useEffect(() => {
     const fetchMinimalData = async () => {
+      if (!archetypeId) {
+        setError('No archetype ID provided');
+        setLoading(false);
+        return;
+      }
+      
       setLoading(true);
       try {
         // Try to get basic data with minimal fields
@@ -71,9 +78,10 @@ const AdminReportViewer = () => {
     setTimeout(() => window.location.reload(), 100);
   };
 
-  if (loading) {
-    return (
-      <div className="container mx-auto py-12 px-4">
+  // Always render a UI, but conditionally show different content based on state
+  return (
+    <div className="container mx-auto py-8 px-4">
+      {loading ? (
         <Card>
           <CardContent className="pt-6">
             <div className="flex flex-col items-center justify-center py-12">
@@ -82,13 +90,7 @@ const AdminReportViewer = () => {
             </div>
           </CardContent>
         </Card>
-      </div>
-    );
-  }
-
-  if (error || !rawData) {
-    return (
-      <div className="container mx-auto py-12 px-4">
+      ) : error || !rawData ? (
         <Card className="border-red-200">
           <CardHeader>
             <CardTitle className="text-red-600">Error Loading Report</CardTitle>
@@ -105,55 +107,51 @@ const AdminReportViewer = () => {
             </div>
           </CardContent>
         </Card>
-      </div>
-    );
-  }
-
-  return (
-    <div className="container mx-auto py-8 px-4">
-      <Card className="mb-6">
-        <CardHeader className="pb-2">
-          <div className="flex justify-between items-center">
-            <CardTitle>{rawData.archetype_name || `Archetype ${archetypeId}`}</CardTitle>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={handleRefresh}
-              className="flex items-center gap-2"
-            >
-              <RefreshCw className="h-3 w-3" />
-              Refresh
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="mb-4 text-sm text-gray-500">
-            <strong>Source:</strong> {dataSource} | <strong>Admin View Mode:</strong> {isInsightsReport ? 'Insights Report' : 'Deep Dive Report'}
-          </div>
-          
-          {/* Basic Archetype Information */}
-          <div className="mb-6">
-            <h2 className="text-lg font-semibold mb-2">Description</h2>
-            <p className="mb-4">{rawData.short_description || 'No description available'}</p>
-            
-            {rawData.long_description && (
-              <>
-                <h3 className="text-md font-medium mb-1">Full Description</h3>
-                <p className="text-sm">{rawData.long_description}</p>
-              </>
-            )}
-          </div>
-          
-          {/* Raw Data Explorer */}
-          <div>
-            <h2 className="text-lg font-semibold mb-2">Raw Data Explorer</h2>
-            <p className="text-xs text-gray-500 mb-2">For debugging only. This represents the raw data from the database.</p>
-            <div className="bg-gray-100 rounded p-4 overflow-auto max-h-96">
-              <pre className="text-xs">{JSON.stringify(rawData, null, 2)}</pre>
+      ) : (
+        <Card className="mb-6">
+          <CardHeader className="pb-2">
+            <div className="flex justify-between items-center">
+              <CardTitle>{rawData.archetype_name || `Archetype ${archetypeId}`}</CardTitle>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleRefresh}
+                className="flex items-center gap-2"
+              >
+                <RefreshCw className="h-3 w-3" />
+                Refresh
+              </Button>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardHeader>
+          <CardContent>
+            <div className="mb-4 text-sm text-gray-500">
+              <strong>Source:</strong> {dataSource} | <strong>Admin View Mode:</strong> {isInsightsReport ? 'Insights Report' : 'Deep Dive Report'}
+            </div>
+            
+            {/* Basic Archetype Information */}
+            <div className="mb-6">
+              <h2 className="text-lg font-semibold mb-2">Description</h2>
+              <p className="mb-4">{rawData.short_description || 'No description available'}</p>
+              
+              {rawData.long_description && (
+                <>
+                  <h3 className="text-md font-medium mb-1">Full Description</h3>
+                  <p className="text-sm">{rawData.long_description}</p>
+                </>
+              )}
+            </div>
+            
+            {/* Raw Data Explorer */}
+            <div>
+              <h2 className="text-lg font-semibold mb-2">Raw Data Explorer</h2>
+              <p className="text-xs text-gray-500 mb-2">For debugging only. This represents the raw data from the database.</p>
+              <div className="bg-gray-100 rounded p-4 overflow-auto max-h-96">
+                <pre className="text-xs">{JSON.stringify(rawData, null, 2)}</pre>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
       
       <div className="flex justify-between">
         <Button 

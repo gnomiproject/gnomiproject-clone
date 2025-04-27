@@ -23,20 +23,25 @@ function App() {
         <Navbar />
         <main>
           <Routes>
+            {/* Main application routes */}
             <Route path="/" element={<Index />} />
             <Route path="/assessment" element={<Assessment />} />
             <Route path="/insights" element={<Insights />} />
-            <Route path="/insights/report/:archetypeId" element={<ReportViewer />} />
             <Route path="/about" element={<About />} />
-            <Route path="/admin" element={<Admin />} />
+            
             {/* Standard report routes */}
+            <Route path="/insights/report/:archetypeId" element={<ReportViewer />} />
             <Route path="/report/:archetypeId" element={<ReportViewer />} />
             <Route path="/report/:archetypeId/:token" element={<ReportViewer />} />
             
-            {/* Admin-specific routes that use the lightweight AdminReportViewer */}
+            {/* Admin routes */}
+            <Route path="/admin" element={<Admin />} />
+            
+            {/* Admin-specific lightweight report viewers */}
             <Route path="/admin/insights-report/:archetypeId" element={<AdminReportViewer />} />
             <Route path="/admin/report/:archetypeId" element={<AdminReportViewer />} />
             
+            {/* 404 catch-all */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
