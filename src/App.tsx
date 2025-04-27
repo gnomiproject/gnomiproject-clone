@@ -33,6 +33,7 @@ function App() {
             <Route path="/insights/report/:archetypeId" element={<ReportViewer />} />
             <Route path="/report/:archetypeId" element={<ReportViewer />} />
             <Route path="/report/:archetypeId/:token" element={<ReportViewer />} />
+            <Route path="/report-view/:archetypeId" element={<ReportView />} /> {/* Legacy route */}
             
             {/* Admin routes */}
             <Route path="/admin" element={<Admin />} />

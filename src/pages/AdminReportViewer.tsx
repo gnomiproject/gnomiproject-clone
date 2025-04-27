@@ -17,10 +17,10 @@ const AdminReportViewer = () => {
   const [rawData, setRawData] = useState<any | null>(null);
   const [dataSource, setDataSource] = useState<string>('');
   
-  // Check if this is an insights report or deep dive based on URL
+  // Check if this is an insights report or deep dive based on URL - do this unconditionally
   const isInsightsReport = location.pathname.includes('insights-report');
 
-  // Fetch minimal data on mount
+  // Fetch minimal data on mount - no conditional hooks
   useEffect(() => {
     const fetchMinimalData = async () => {
       if (!archetypeId) {
@@ -30,35 +30,45 @@ const AdminReportViewer = () => {
       }
       
       setLoading(true);
+      setError(null);
+      
       try {
         // Try to get basic data with minimal fields
+        const primaryTable = isInsightsReport ? 'level3_report_data' : 'level4_deepdive_report_data';
+        const fallbackTable = isInsightsReport ? 'level4_deepdive_report_data' : 'level3_report_data';
+        
+        console.log(`AdminReportViewer: Fetching data for ${archetypeId} from ${primaryTable}`);
+        
         const { data, error } = await supabase
-          .from(isInsightsReport ? 'level3_report_data' : 'level4_deepdive_report_data')
+          .from(primaryTable)
           .select('archetype_id, archetype_name, short_description, long_description, family_id')
           .eq('archetype_id', archetypeId)
           .maybeSingle();
 
         if (error) throw error;
         
-        if (!data) {
-          // Fallback to other table if no data found
-          const { data: fallbackData, error: fallbackError } = await supabase
-            .from(isInsightsReport ? 'level4_deepdive_report_data' : 'level3_report_data')
-            .select('archetype_id, archetype_name, short_description, long_description, family_id')
-            .eq('archetype_id', archetypeId)
-            .maybeSingle();
-            
-          if (fallbackError) throw fallbackError;
-          
-          if (fallbackData) {
-            setRawData(fallbackData);
-            setDataSource(isInsightsReport ? 'level4_deepdive_report_data' : 'level3_report_data');
-          } else {
-            throw new Error('No data found for this archetype');
-          }
-        } else {
+        if (data) {
           setRawData(data);
-          setDataSource(isInsightsReport ? 'level3_report_data' : 'level4_deepdive_report_data');
+          setDataSource(primaryTable);
+          setLoading(false);
+          return;
+        }
+        
+        // If no data found in primary table, try fallback
+        console.log(`AdminReportViewer: No data found in ${primaryTable}, trying ${fallbackTable}`);
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from(fallbackTable)
+          .select('archetype_id, archetype_name, short_description, long_description, family_id')
+          .eq('archetype_id', archetypeId)
+          .maybeSingle();
+          
+        if (fallbackError) throw fallbackError;
+        
+        if (fallbackData) {
+          setRawData(fallbackData);
+          setDataSource(fallbackTable);
+        } else {
+          throw new Error('No data found for this archetype');
         }
       } catch (err: any) {
         console.error('Error fetching archetype data:', err);
@@ -71,11 +81,12 @@ const AdminReportViewer = () => {
     fetchMinimalData();
   }, [archetypeId, isInsightsReport]);
 
-  // Simple refresh function
+  // Simple refresh function - no hook calls
   const handleRefresh = () => {
     setLoading(true);
     setError(null);
-    setTimeout(() => window.location.reload(), 100);
+    // Force reload page
+    window.location.reload();
   };
 
   // Always render a UI, but conditionally show different content based on state

@@ -43,7 +43,6 @@ export const useReportData = ({
   useEffect(() => {
     let isMounted = true;
     
-    // Define a function to be called inside the effect
     const loadReportData = async () => {
       // Always reset states at the start of data loading
       if (isMounted) {
@@ -68,7 +67,7 @@ export const useReportData = ({
           return;
         }
         
-        // Always validate if there's at least an archetypeId to work with
+        // Check for valid archetypeId
         if (!archetypeId) {
           if (isMounted) {
             setError(new Error('Missing archetype ID'));
@@ -96,19 +95,24 @@ export const useReportData = ({
           accessError = accessResult.error;
         }
         
-        if (accessError) throw accessError;
+        // Handle validation errors but continue with fetching data
+        if (accessError) {
+          console.error('Token validation error:', accessError);
+        }
         
-        // If token validation fails, mark access as invalid
+        // If token validation fails, mark access as invalid but continue getting data
         if (token && !accessData) {
           if (isMounted) {
             setIsValidAccess(false);
             setError(new Error('Invalid or expired access token'));
-            setIsLoading(false);
           }
-          return;
+        } else {
+          if (isMounted) {
+            setIsValidAccess(true);
+          }
         }
         
-        // If no token was provided or token is valid, fetch report data
+        // Fetch report data regardless of token validity
         const reportTable = isInsightsReport ? 'level3_report_data' : 'level4_deepdive_report_data';
         const { data: fetchedReportData, error: reportError } = await supabase
           .from(reportTable)
@@ -116,10 +120,36 @@ export const useReportData = ({
           .eq('archetype_id', archetypeId)
           .maybeSingle();
         
-        if (reportError) throw reportError;
+        if (reportError) {
+          throw reportError;
+        }
         
         if (!fetchedReportData) {
-          throw new Error(`No report data found for archetype ${archetypeId}`);
+          console.warn(`No report data found for archetype ${archetypeId}. Trying fallback...`);
+          
+          // Try alternate table as fallback
+          const fallbackTable = isInsightsReport ? 'level4_deepdive_report_data' : 'level3_report_data';
+          const { data: fallbackData, error: fallbackError } = await supabase
+            .from(fallbackTable)
+            .select('*')
+            .eq('archetype_id', archetypeId)
+            .maybeSingle();
+          
+          if (fallbackError) throw fallbackError;
+          
+          if (!fallbackData) {
+            console.warn(`No fallback data found for archetype ${archetypeId}`);
+          } else {
+            if (isMounted) {
+              setReportData(fallbackData);
+              setDataSource(`${fallbackTable} (fallback)`);
+            }
+          }
+        } else {
+          if (isMounted) {
+            setReportData(fetchedReportData);
+            setDataSource(reportTable);
+          }
         }
         
         // Create average data
@@ -132,26 +162,23 @@ export const useReportData = ({
           "Cost_Medical & RX Paid Amount PMPY": 5000
         };
         
-        // Cache the result
-        reportCache.set(cacheKey, {
-          reportData: fetchedReportData,
-          userData: accessData,
-          averageData: defaultAverageData
-        });
-        
         if (isMounted) {
-          setReportData(fetchedReportData);
-          setUserData(accessData);
           setAverageData(defaultAverageData);
-          setIsValidAccess(true);
-          setDataSource(reportTable);
-          setError(null);
+          setUserData(accessData);
+        }
+        
+        // Cache the result if we have data
+        if (fetchedReportData) {
+          reportCache.set(cacheKey, {
+            reportData: fetchedReportData,
+            userData: accessData,
+            averageData: defaultAverageData
+          });
         }
       } catch (err) {
         console.error('Error loading report data:', err);
         if (isMounted) {
           setError(err instanceof Error ? err : new Error('Unknown error loading report'));
-          setIsValidAccess(false);
         }
       } finally {
         if (isMounted) {
@@ -174,15 +201,9 @@ export const useReportData = ({
     setIsLoading(true);
     setError(null);
     
-    // Force a reload by changing the timestamp
-    const timestamp = Date.now();
+    // Clear cache for this report
     const cacheKey = `report-${archetypeId}-${token}`;
     reportCache.delete(cacheKey);
-    
-    // The effect will run again due to the skipCache dependency
-    setTimeout(() => {
-      window.location.reload();
-    }, 100);
   };
   
   // Function to refresh data and skip cache
@@ -193,11 +214,6 @@ export const useReportData = ({
     // Clear cache for this report
     const cacheKey = `report-${archetypeId}-${token}`;
     reportCache.delete(cacheKey);
-    
-    // Force reload the page
-    setTimeout(() => {
-      window.location.reload();
-    }, 100);
     
     return Promise.resolve();
   };
