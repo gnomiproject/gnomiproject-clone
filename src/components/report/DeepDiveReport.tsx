@@ -45,36 +45,23 @@ const DeepDiveReport = ({
 }: DeepDiveReportProps) => {
   const isMobile = useIsMobile();
   
-  // Add debug logging to see the data structure
-  console.log('DeepDiveReport: Data received:', {
-    hasData: !!reportData,
-    dataType: typeof reportData,
-    dataKeys: reportData ? Object.keys(reportData) : [],
-    name: reportData?.name || reportData?.archetype_name,
-    id: reportData?.id || reportData?.archetype_id,
-    isNull: reportData === null,
-    isUndefined: reportData === undefined
-  });
-
-  // Debug log to see what's happening during render
+  // Debug logging to see the data structure coming in
   useEffect(() => {
     console.log('DeepDiveReport: Component mounted with data', {
       reportDataExists: !!reportData,
       reportDataKeys: reportData ? Object.keys(reportData) : [],
-      reportDataType: reportData ? typeof reportData : 'undefined',
-      name: reportData?.name || reportData?.archetype_name,
       id: reportData?.id || reportData?.archetype_id,
-      swot: reportData ? {
-        strengths: Array.isArray(reportData.strengths) ? reportData.strengths.length : typeof reportData.strengths,
-        weaknesses: Array.isArray(reportData.weaknesses) ? reportData.weaknesses.length : typeof reportData.weaknesses,
-        opportunities: Array.isArray(reportData.opportunities) ? reportData.opportunities.length : typeof reportData.opportunities,
-        threats: Array.isArray(reportData.threats) ? reportData.threats.length : typeof reportData.threats
-      } : 'none',
-      recommendations: reportData?.strategic_recommendations 
-        ? (Array.isArray(reportData.strategic_recommendations) 
-          ? reportData.strategic_recommendations.length 
-          : typeof reportData.strategic_recommendations)
-        : 'none'
+      name: reportData?.name || reportData?.archetype_name,
+      // Log specific properties we need
+      swotProperties: {
+        strengths: reportData?.strengths ? `${typeof reportData.strengths} (${Array.isArray(reportData.strengths) ? reportData.strengths.length : 'not array'})` : 'undefined',
+        weaknesses: reportData?.weaknesses ? `${typeof reportData.weaknesses} (${Array.isArray(reportData.weaknesses) ? reportData.weaknesses.length : 'not array'})` : 'undefined',
+        opportunities: reportData?.opportunities ? `${typeof reportData.opportunities} (${Array.isArray(reportData.opportunities) ? reportData.opportunities.length : 'not array'})` : 'undefined',
+        threats: reportData?.threats ? `${typeof reportData.threats} (${Array.isArray(reportData.threats) ? reportData.threats.length : 'not array'})` : 'undefined',
+      },
+      recommendations: reportData?.strategic_recommendations ? 
+        `${typeof reportData.strategic_recommendations} (${Array.isArray(reportData.strategic_recommendations) ? reportData.strategic_recommendations.length : 'not array'})` 
+        : 'undefined'
     });
     
     return () => {
@@ -82,7 +69,7 @@ const DeepDiveReport = ({
     };
   }, [reportData]);
   
-  // Apply safety checks before rendering anything
+  // Apply safety checks before rendering
   if (!reportData) {
     console.error('DeepDiveReport: No report data provided');
     return (
@@ -97,42 +84,22 @@ const DeepDiveReport = ({
     );
   }
   
-  // Create a safe copy of the data to work with
+  // Create a safe copy of the data 
   const safeReportData = {...reportData};
   
-  // Safety checks to ensure data is usable before attempting to render
-  const ensureDataSafety = () => {
-    // Create defaults for critical fields if they're missing
-    if (!Array.isArray(safeReportData.strengths)) safeReportData.strengths = [];
-    if (!Array.isArray(safeReportData.weaknesses)) safeReportData.weaknesses = [];
-    if (!Array.isArray(safeReportData.opportunities)) safeReportData.opportunities = [];
-    if (!Array.isArray(safeReportData.threats)) safeReportData.threats = [];
-    if (!Array.isArray(safeReportData.strategic_recommendations)) safeReportData.strategic_recommendations = [];
-    
-    // Log any problematic fields we had to fix
-    const problematicFields = [];
-    if (!Array.isArray(reportData.strengths)) problematicFields.push('strengths');
-    if (!Array.isArray(reportData.weaknesses)) problematicFields.push('weaknesses');
-    if (!Array.isArray(reportData.opportunities)) problematicFields.push('opportunities');
-    if (!Array.isArray(reportData.threats)) problematicFields.push('threats');
-    if (!Array.isArray(reportData.strategic_recommendations)) problematicFields.push('strategic_recommendations');
-    
-    if (problematicFields.length > 0) {
-      console.warn('DeepDiveReport: Fixed problematic fields:', problematicFields);
-    }
-    
-    return true;
-  };
+  // Ensure all required arrays exist
+  if (!Array.isArray(safeReportData.strengths)) safeReportData.strengths = [];
+  if (!Array.isArray(safeReportData.weaknesses)) safeReportData.weaknesses = [];
+  if (!Array.isArray(safeReportData.opportunities)) safeReportData.opportunities = [];
+  if (!Array.isArray(safeReportData.threats)) safeReportData.threats = [];
+  if (!Array.isArray(safeReportData.strategic_recommendations)) safeReportData.strategic_recommendations = [];
   
-  // Apply safety checks
-  ensureDataSafety();
+  // Define the archetype name and id safely
+  const archetypeName = safeReportData?.name || safeReportData?.archetype_name || 'Unknown Archetype';
+  const archetypeId = safeReportData?.id || safeReportData?.archetype_id || 'unknown';
   
   // Check if we're using fallback data
   const usingFallbackData = !safeReportData.strategic_recommendations || safeReportData.strategic_recommendations.length === 0;
-
-  // Get name and id safely from either format
-  const archetypeName = safeReportData?.name || safeReportData?.archetype_name || 'Unknown Archetype';
-  const archetypeId = safeReportData?.id || safeReportData?.archetype_id || 'unknown';
   
   return (
     <div className="bg-white min-h-screen">
@@ -151,7 +118,7 @@ const DeepDiveReport = ({
         </div>
       )}
       
-      {/* If using fallback data, show a banner */}
+      {/* Fallback data banner */}
       {usingFallbackData && !loading && (
         <FallbackBanner show={true} />
       )}

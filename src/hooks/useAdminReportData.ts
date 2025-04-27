@@ -30,81 +30,57 @@ export function useAdminReportData({ archetypeId, reportType, skipCache = false 
       setError(null);
       
       try {
-        // Determine primary table based on report type
-        const primaryTable = reportType === 'insights' ? 'level3_report_data' : 'level4_deepdive_report_data';
+        // Explicit table selection based on report type - no fallbacks to ensure we get the right data format
+        const tableName = reportType === 'insights' ? 'level3_report_data' : 'level4_deepdive_report_data';
         
-        console.log(`useAdminReportData: Fetching ${reportType} data for ${archetypeId} from ${primaryTable}`);
+        console.log(`useAdminReportData: Fetching data from ${tableName} for archetype ${archetypeId}`);
         
         const { data: fetchedData, error: fetchError } = await supabase
-          .from(primaryTable)
+          .from(tableName)
           .select('*')
           .eq('archetype_id', archetypeId)
           .maybeSingle();
 
         if (fetchError) {
-          console.error('useAdminReportData: Error from primary table:', fetchError);
+          console.error(`useAdminReportData: Error fetching data from ${tableName}:`, fetchError);
           throw fetchError;
         }
         
         if (fetchedData) {
-          console.log('useAdminReportData: Data found in primary table:', Object.keys(fetchedData));
+          console.log(`useAdminReportData: Successfully fetched data from ${tableName}:`, Object.keys(fetchedData));
           
-          // Ensure JSON fields are properly parsed
-          const processedData = standardizeArchetypeData(fetchedData, archetypeId, reportType);
+          // Process the data based on report type
+          const processedData = processRawData(fetchedData, reportType);
           
-          console.log('useAdminReportData: Processed data keys:', Object.keys(processedData));
+          console.log(`useAdminReportData: Processed ${reportType} data:`, 
+            { 
+              keys: Object.keys(processedData),
+              hasStrengths: Array.isArray(processedData.strengths),
+              strengthsLength: Array.isArray(processedData.strengths) ? processedData.strengths.length : 'not an array',
+              hasRecommendations: Array.isArray(processedData.strategic_recommendations),
+              recommendationsLength: Array.isArray(processedData.strategic_recommendations) ? processedData.strategic_recommendations.length : 'not an array'
+            }
+          );
+          
           setData(processedData);
-          setDataSource(primaryTable);
-          setLoading(false);
-          return;
-        }
-        
-        // If no data found in primary table, try fallback (other table)
-        const fallbackTable = reportType === 'insights' ? 'level4_deepdive_report_data' : 'level3_report_data';
-        console.log(`useAdminReportData: No data found in ${primaryTable}, trying ${fallbackTable}`);
-        
-        const { data: fallbackData, error: fallbackError } = await supabase
-          .from(fallbackTable)
-          .select('*')
-          .eq('archetype_id', archetypeId)
-          .maybeSingle();
-          
-        if (fallbackError) {
-          console.error('useAdminReportData: Error from fallback table:', fallbackError);
-          throw fallbackError;
-        }
-        
-        if (fallbackData) {
-          console.log('useAdminReportData: Data found in fallback table:', Object.keys(fallbackData));
-          
-          // Create a consistent data structure regardless of source
-          const processedFallbackData = standardizeArchetypeData(fallbackData, archetypeId, reportType);
-          
-          console.log('useAdminReportData: Processed fallback data keys:', Object.keys(processedFallbackData));
-          setData(processedFallbackData);
-          setDataSource(`${fallbackTable} (fallback)`);
-          setLoading(false);
+          setDataSource(tableName);
         } else {
-          console.log('useAdminReportData: No data found in either table');
+          console.log(`useAdminReportData: No data found in ${tableName} for archetype ${archetypeId}`);
           
-          // Last resort: Create minimal synthetic data for testing
-          const syntheticData = createSyntheticData(archetypeId, reportType);
-          
-          console.log('useAdminReportData: Using synthetic data:', Object.keys(syntheticData));
-          setData(syntheticData);
-          setDataSource('synthetic (no data found)');
-          setLoading(false);
+          // Create minimal synthetic data with appropriate format for each report type
+          const fallbackData = createFallbackData(archetypeId, reportType);
+          setData(fallbackData);
+          setDataSource('synthetic fallback');
         }
       } catch (err: any) {
-        console.error('useAdminReportData: Error fetching archetype data:', err);
+        console.error('useAdminReportData: Error in data fetch:', err);
         setError(err instanceof Error ? err : new Error(err.message || 'Failed to load report data'));
         
-        // Create fallback minimal data even on error
-        const errorFallbackData = createErrorFallbackData(archetypeId, reportType, err);
-        
-        console.log('useAdminReportData: Using error fallback data');
-        setData(errorFallbackData);
+        // Create appropriate fallback data even on error
+        const fallbackData = createFallbackData(archetypeId, reportType);
+        setData(fallbackData);
         setDataSource('error fallback');
+      } finally {
         setLoading(false);
       }
     };
@@ -112,87 +88,97 @@ export function useAdminReportData({ archetypeId, reportType, skipCache = false 
     fetchData();
   }, [archetypeId, reportType, skipCache]);
   
-  // Helper function to standardize data structure regardless of source
-  const standardizeArchetypeData = (sourceData: any, id: string, type: 'insights' | 'deepdive') => {
-    // Check for JSON fields that need parsing and handle them safely
-    const safeParseJSON = (value: any) => {
-      if (!value) return null;
-      
-      // If it's already an object, don't try to parse it again
-      if (typeof value === 'object' && value !== null) {
-        return value;
-      }
-      
-      // Try to parse string JSON
-      if (typeof value === 'string') {
+  // Process raw data from database
+  const processRawData = (rawData: any, type: 'insights' | 'deepdive') => {
+    if (!rawData) return null;
+    
+    // Make a clean copy to avoid mutations
+    const processedData = { ...rawData };
+    
+    // Process SWOT fields - ensure they are arrays
+    const ensureArray = (field: any): any[] => {
+      if (Array.isArray(field)) return field;
+      if (typeof field === 'string') {
         try {
-          return JSON.parse(value);
+          const parsed = JSON.parse(field);
+          return Array.isArray(parsed) ? parsed : [];
         } catch (e) {
-          console.warn('useAdminReportData: Failed to parse JSON string:', value);
-          return value; // Return original value if parsing fails
+          return [];
         }
       }
-      
-      return value;
+      return [];
     };
     
-    // Handle SWOT data which might be stored differently in different tables
-    const parsedSwotAnalysis = sourceData.swot_analysis ? safeParseJSON(sourceData.swot_analysis) : null;
+    // Handle SWOT analysis fields
+    if (rawData.swot_analysis) {
+      try {
+        // For deep dive reports with nested SWOT
+        const swot = typeof rawData.swot_analysis === 'string' 
+          ? JSON.parse(rawData.swot_analysis) 
+          : rawData.swot_analysis;
+          
+        processedData.strengths = ensureArray(swot.strengths);
+        processedData.weaknesses = ensureArray(swot.weaknesses);
+        processedData.opportunities = ensureArray(swot.opportunities);
+        processedData.threats = ensureArray(swot.threats);
+      } catch (e) {
+        console.warn('useAdminReportData: Error parsing SWOT analysis:', e);
+        processedData.strengths = [];
+        processedData.weaknesses = [];
+        processedData.opportunities = [];
+        processedData.threats = [];
+      }
+    } else {
+      // For reports with direct SWOT fields
+      processedData.strengths = ensureArray(rawData.strengths);
+      processedData.weaknesses = ensureArray(rawData.weaknesses);
+      processedData.opportunities = ensureArray(rawData.opportunities);
+      processedData.threats = ensureArray(rawData.threats);
+    }
     
-    // Extract SWOT data from either direct fields or nested swot_analysis
-    const strengths = sourceData.strengths ? 
-      safeParseJSON(sourceData.strengths) : 
-      (parsedSwotAnalysis?.strengths || []);
+    // Process strategic recommendations
+    try {
+      if (rawData.strategic_recommendations) {
+        processedData.strategic_recommendations = typeof rawData.strategic_recommendations === 'string'
+          ? JSON.parse(rawData.strategic_recommendations)
+          : Array.isArray(rawData.strategic_recommendations) 
+            ? rawData.strategic_recommendations 
+            : [];
+      } else {
+        processedData.strategic_recommendations = [];
+      }
       
-    const weaknesses = sourceData.weaknesses ? 
-      safeParseJSON(sourceData.weaknesses) : 
-      (parsedSwotAnalysis?.weaknesses || []);
-      
-    const opportunities = sourceData.opportunities ? 
-      safeParseJSON(sourceData.opportunities) : 
-      (parsedSwotAnalysis?.opportunities || []);
-      
-    const threats = sourceData.threats ? 
-      safeParseJSON(sourceData.threats) : 
-      (parsedSwotAnalysis?.threats || []);
+      // Ensure recommendations have the right structure
+      if (Array.isArray(processedData.strategic_recommendations)) {
+        processedData.strategic_recommendations = processedData.strategic_recommendations.map((rec: any, index: number) => ({
+          recommendation_number: rec.recommendation_number || index + 1,
+          title: rec.title || `Recommendation ${index + 1}`,
+          description: rec.description || 'No description available.'
+        }));
+      }
+    } catch (e) {
+      console.warn('useAdminReportData: Error processing strategic recommendations:', e);
+      processedData.strategic_recommendations = [];
+    }
     
-    // Parse strategic recommendations if it exists and is a string
-    const strategicRecommendations = sourceData.strategic_recommendations ? 
-      safeParseJSON(sourceData.strategic_recommendations) : 
-      [];
+    // Add consistent fields
+    processedData.id = processedData.archetype_id || archetypeId;
+    processedData.name = processedData.archetype_name || `Archetype ${archetypeId.toUpperCase()}`;
+    processedData.reportType = type === 'insights' ? 'Insights' : 'Deep Dive';
     
-    // Create a standard data structure that works for both report types
-    const archetypeId = id.toUpperCase();
-    
-    return {
-      ...sourceData,
-      // Ensure these key fields exist for both report types
-      code: archetypeId,
-      id: sourceData.archetype_id || id,
-      name: sourceData.archetype_name || `Archetype ${archetypeId}`,
-      reportType: type === 'insights' ? 'Insights' : 'Deep Dive',
-      // Ensure SWOT data is consistently structured as arrays
-      strengths: Array.isArray(strengths) ? strengths : [],
-      weaknesses: Array.isArray(weaknesses) ? weaknesses : [],
-      opportunities: Array.isArray(opportunities) ? opportunities : [],
-      threats: Array.isArray(threats) ? threats : [],
-      // Ensure strategic recommendations exist as an array
-      strategic_recommendations: Array.isArray(strategicRecommendations) ? strategicRecommendations : []
-    };
+    return processedData;
   };
   
-  // Helper function to create synthetic data
-  const createSyntheticData = (id: string, type: 'insights' | 'deepdive') => {
+  // Create appropriate fallback data
+  const createFallbackData = (id: string, type: 'insights' | 'deepdive') => {
     const archetypeId = id.toUpperCase();
     return {
       archetype_id: id,
-      archetype_name: `Archetype ${archetypeId}`,
-      short_description: "This is fallback data since no actual data was found in the database.",
-      code: archetypeId,
       id: id,
-      name: `Archetype ${archetypeId} (Synthetic)`,
+      archetype_name: `Archetype ${archetypeId}`,
+      name: `Archetype ${archetypeId}`,
+      short_description: `This is fallback data for Archetype ${archetypeId} ${type} report.`,
       reportType: type === 'insights' ? 'Insights' : 'Deep Dive',
-      // Add minimal required properties for report rendering
       strengths: ["Fallback strength 1", "Fallback strength 2"],
       weaknesses: ["Fallback weakness 1", "Fallback weakness 2"],
       opportunities: ["Fallback opportunity 1", "Fallback opportunity 2"],
@@ -200,33 +186,11 @@ export function useAdminReportData({ archetypeId, reportType, skipCache = false 
       strategic_recommendations: [
         { recommendation_number: 1, title: "Fallback recommendation", description: "This is a fallback recommendation" }
       ],
-      // Add other required fields that might be needed by both report types
-      Demo_Average_Age: 40,
-      Demo_Average_Family_Size: 3.0,
-      Risk_Average_Risk_Score: 1.0,
-      Cost_Medical_RX_Paid_Amount_PMPY: 5000
-    };
-  };
-  
-  // Helper function to create error fallback data
-  const createErrorFallbackData = (id: string, type: 'insights' | 'deepdive', err: any) => {
-    const archetypeId = id.toUpperCase();
-    return {
-      archetype_id: id,
-      archetype_name: `Archetype ${archetypeId} (Error Fallback)`,
-      short_description: `Error loading data: ${err.message || 'Unknown error'}`,
-      code: archetypeId,
-      id: id,
-      name: `Archetype ${archetypeId} (Error Fallback)`,
-      reportType: type === 'insights' ? 'Insights' : 'Deep Dive',
-      // Add minimal required properties for report rendering
-      strengths: ["Error fallback strength"],
-      weaknesses: ["Error fallback weakness"],
-      opportunities: ["Error fallback opportunity"],
-      threats: ["Error fallback threat"],
-      strategic_recommendations: [
-        { recommendation_number: 1, title: "Error fallback recommendation", description: "This is an error fallback recommendation" }
-      ]
+      // Add some metrics that might be needed for both report types
+      "Demo_Average Age": 40,
+      "Demo_Average Family Size": 3.0,
+      "Risk_Average Risk Score": 1.0,
+      "Cost_Medical & RX Paid Amount PMPY": 5000
     };
   };
 

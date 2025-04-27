@@ -13,6 +13,7 @@ import Admin from '@/pages/Admin';
 import ReportView from '@/pages/ReportView';
 import ReportViewer from '@/pages/ReportViewer';
 import AdminReportViewer from '@/pages/AdminReportViewer';
+import AdminReportDebug from '@/pages/AdminReportDebug';
 
 const version = "0.0.1";
 
@@ -41,6 +42,9 @@ function App() {
             {/* Admin-specific report viewers with clear type distinction */}
             <Route path="/admin/insights-report/:archetypeId" element={<AdminReportViewer />} />
             <Route path="/admin/report/:archetypeId" element={<AdminReportViewer />} />
+            
+            {/* Debug route */}
+            <Route path="/admin/debug/:archetypeId" element={<AdminReportDebug />} />
             
             {/* 404 catch-all */}
             <Route path="*" element={<NotFound />} />

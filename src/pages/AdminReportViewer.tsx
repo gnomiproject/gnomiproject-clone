@@ -18,53 +18,26 @@ const AdminReportViewer = () => {
   const location = useLocation();
   const [debugMode, setDebugMode] = useState(true); // Set debug mode on by default
   
-  // Console log for initial mount
-  console.log('AdminReportViewer: Initial render with params:', { archetypeId, path: location.pathname, search: location.search });
-  
-  // Determine report type based on URL and parameters
+  // Determine report type based on URL
   const searchParams = new URLSearchParams(location.search);
   const queryReportType = searchParams.get('type') || 'deepdive';
   const isInsightsReport = location.pathname.includes('insights-report') || queryReportType === 'insights';
   const reportType = isInsightsReport ? 'insights' : 'deepdive';
   
-  console.log('AdminReportViewer: Report type determined:', { reportType, isInsightsReport, queryReportType });
+  console.log('AdminReportViewer: Initial render with params:', { 
+    archetypeId, 
+    path: location.pathname, 
+    search: location.search,
+    reportType,
+    isInsightsReport
+  });
   
-  // Use the custom hook for data fetching with explicit parameters
+  // Use the admin report data hook
   const { data: rawData, loading, error, dataSource, refreshData } = useAdminReportData({
     archetypeId,
     reportType,
     skipCache: false
   });
-
-  // Extra validation for deep dive reports
-  useEffect(() => {
-    // Log debugging information when component mounts or parameters change
-    console.log('AdminReportViewer: Effect triggered:', {
-      archetypeId,
-      reportType,
-      isInsightsReport,
-      hasData: !!rawData,
-      dataSource,
-      rawDataKeys: rawData ? Object.keys(rawData) : [],
-      error: error?.message || 'none'
-    });
-
-    if (rawData) {
-      console.log('AdminReportViewer: SWOT data check:', {
-        strengths: Array.isArray(rawData.strengths) ? rawData.strengths.length : typeof rawData.strengths,
-        weaknesses: Array.isArray(rawData.weaknesses) ? rawData.weaknesses.length : typeof rawData.weaknesses,
-        opportunities: Array.isArray(rawData.opportunities) ? rawData.opportunities.length : typeof rawData.opportunities,
-        threats: Array.isArray(rawData.threats) ? rawData.threats.length : typeof rawData.threats,
-        strategic_recommendations: Array.isArray(rawData.strategic_recommendations) ? 
-          rawData.strategic_recommendations.length : 
-          typeof rawData.strategic_recommendations
-      });
-    }
-    
-    return () => {
-      console.log('AdminReportViewer: Unmounting component');
-    };
-  }, [archetypeId, reportType, rawData, dataSource, error]);
 
   // Mock user data for admin view
   const mockUserData = {
@@ -101,22 +74,26 @@ const AdminReportViewer = () => {
     });
   };
 
-  console.log('AdminReportViewer: Rendering with state:', { 
-    loading, 
-    error: error?.message, 
-    hasData: !!rawData,
-    rawDataType: rawData ? typeof rawData : 'undefined',
-    reportType,
-    isInsightsReport
-  });
+  // Log detailed information for debugging
+  useEffect(() => {
+    if (rawData) {
+      console.log('AdminReportViewer: Raw data received:', {
+        reportType,
+        keys: Object.keys(rawData),
+        dataSource,
+        strengths: Array.isArray(rawData.strengths) ? `Array[${rawData.strengths.length}]` : typeof rawData.strengths,
+        recommendations: Array.isArray(rawData.strategic_recommendations) ? 
+          `Array[${rawData.strategic_recommendations.length}]` : typeof rawData.strategic_recommendations
+      });
+    }
+  }, [rawData, dataSource, reportType]);
 
   // Prepare safe data for deep dive report
   const prepareDeepDiveData = (data: any): ArchetypeDetailedData => {
     if (!data) {
-      // Return minimal fallback data if no data is available
       return {
         id: archetypeId as any,
-        name: `Archetype ${archetypeId.toUpperCase()} (Fallback)`,
+        name: `Archetype ${archetypeId.toUpperCase()} (No Data)`,
         familyId: 'a' as any,
         strengths: [],
         weaknesses: [],
@@ -126,12 +103,21 @@ const AdminReportViewer = () => {
       } as ArchetypeDetailedData;
     }
     
-    // Ensure all required fields exist
+    console.log('AdminReportViewer: Preparing deep dive data with:', {
+      hasStrengths: Array.isArray(data.strengths),
+      strengthsCount: Array.isArray(data.strengths) ? data.strengths.length : 'not an array',
+      hasRecommendations: Array.isArray(data.strategic_recommendations),
+      recsCount: Array.isArray(data.strategic_recommendations) ? data.strategic_recommendations.length : 'not an array'
+    });
+    
+    // Create a clean copy with required fields
     const safeData = {
-      ...data,
       id: data.id || data.archetype_id || archetypeId,
       name: data.name || data.archetype_name || `Archetype ${archetypeId.toUpperCase()}`,
       familyId: data.family_id || 'a',
+      family_id: data.family_id || 'a',
+      long_description: data.long_description || data.executive_summary || 'No description available.',
+      short_description: data.short_description || 'No description available.',
       strengths: Array.isArray(data.strengths) ? data.strengths : [],
       weaknesses: Array.isArray(data.weaknesses) ? data.weaknesses : [],
       opportunities: Array.isArray(data.opportunities) ? data.opportunities : [],
@@ -140,13 +126,19 @@ const AdminReportViewer = () => {
         data.strategic_recommendations : []
     };
     
+    console.log('AdminReportViewer: Prepared deep dive data with:', {
+      id: safeData.id,
+      name: safeData.name,
+      strengthsCount: safeData.strengths.length,
+      recommendationsCount: safeData.strategic_recommendations.length
+    });
+    
     return safeData as ArchetypeDetailedData;
   };
 
-  // Return the component content based on various conditions
   return (
     <div className="container mx-auto py-8 px-4">
-      {/* Debug toggle button (visible in all environments temporarily) */}
+      {/* Debug toggle button */}
       <Button
         variant="outline"
         size="sm"
@@ -157,7 +149,7 @@ const AdminReportViewer = () => {
         {debugMode ? "Hide Debug Info" : "Show Debug Info"}
       </Button>
       
-      {/* Debug information panel (when debug mode is enabled) */}
+      {/* Debug information panel */}
       {debugMode && (
         <Card className="mb-6 border-amber-300 bg-amber-50">
           <CardHeader className="pb-2">
@@ -181,8 +173,6 @@ const AdminReportViewer = () => {
               <div>{String(!!error)}</div>
               <div><strong>Has Data:</strong></div>
               <div>{String(!!rawData)}</div>
-              <div><strong>Raw Data Type:</strong></div>
-              <div>{rawData ? typeof rawData : 'undefined'}</div>
               <div><strong>Raw Data Keys:</strong></div>
               <div>{rawData ? Object.keys(rawData).join(', ') : 'No data'}</div>
             </div>
@@ -201,6 +191,24 @@ const AdminReportViewer = () => {
                     <div><strong>Opportunities:</strong> {Array.isArray(rawData.opportunities) ? `Array[${rawData.opportunities.length}]` : typeof rawData.opportunities}</div>
                     <div><strong>Threats:</strong> {Array.isArray(rawData.threats) ? `Array[${rawData.threats.length}]` : typeof rawData.threats}</div>
                     <div><strong>Strategic Recommendations:</strong> {Array.isArray(rawData.strategic_recommendations) ? `Array[${rawData.strategic_recommendations.length}]` : typeof rawData.strategic_recommendations}</div>
+                  </div>
+                </details>
+                <details className="mt-2">
+                  <summary className="cursor-pointer font-medium">First 3 items of each array</summary>
+                  <div className="mt-2 p-2 bg-white rounded text-xs space-y-2">
+                    <div>
+                      <strong>Strengths (first 3):</strong><br/>
+                      {Array.isArray(rawData.strengths) 
+                        ? rawData.strengths.slice(0, 3).map((s: string, i: number) => <div key={i}>{i+1}. {s}</div>)
+                        : 'Not an array'}
+                    </div>
+                    <div>
+                      <strong>Strategic Recommendations (first 3):</strong><br/>
+                      {Array.isArray(rawData.strategic_recommendations) 
+                        ? rawData.strategic_recommendations.slice(0, 3).map((r: any, i: number) => 
+                            <div key={i}>{i+1}. {r.title || 'No title'}</div>)
+                        : 'Not an array'}
+                    </div>
                   </div>
                 </details>
               </div>
@@ -245,9 +253,9 @@ const AdminReportViewer = () => {
                   <CardTitle>
                     <div className="flex items-center gap-2">
                       <span className="px-2 py-1 bg-gray-200 rounded text-sm">
-                        {rawData.code || rawData.archetype_id?.toUpperCase()}
+                        {rawData.code || rawData.archetype_id?.toUpperCase() || archetypeId.toUpperCase()}
                       </span>
-                      {rawData.name || rawData.archetype_name}
+                      {rawData.name || rawData.archetype_name || `Archetype ${archetypeId.toUpperCase()}`}
                     </div>
                   </CardTitle>
                   <p className="text-sm text-gray-500">
