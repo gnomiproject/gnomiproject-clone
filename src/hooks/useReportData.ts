@@ -1,6 +1,7 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { getReportSchema, getDataSource } from '@/utils/reports/schemaUtils';
+import type { ReportType } from '@/utils/reports/schemaUtils';
 import { ArchetypeId } from '@/types/archetype';
 
 interface UseReportDataOptions {
@@ -39,12 +40,10 @@ export const useReportData = ({
   const [error, setError] = useState<Error | null>(null);
   const [dataSource, setDataSource] = useState<string>('');
 
-  // Load report data on mount - ensure this effect runs unconditionally
   useEffect(() => {
     let isMounted = true;
     
     const loadReportData = async () => {
-      // Always reset states at the start of data loading
       if (isMounted) {
         setIsLoading(true);
         setError(null);
@@ -76,12 +75,21 @@ export const useReportData = ({
           }
           return;
         }
+
+        // Get schema and data source based on report type
+        const reportType: ReportType = isInsightsReport ? 'insight' : 'deepDive';
+        const schema = getReportSchema(reportType);
+        const mainSection = isInsightsReport ? 'overview' : 'archetypeProfile';
+        const dataSourceTable = getDataSource(reportType, mainSection);
+
+        if (!dataSourceTable) {
+          throw new Error(`No data source found for report type: ${reportType}`);
+        }
         
         // Validate token and fetch report data
         let accessData = null;
         let accessError = null;
         
-        // Only validate token if one was provided
         if (token) {
           const accessResult = await supabase
             .from('report_requests')
@@ -95,12 +103,10 @@ export const useReportData = ({
           accessError = accessResult.error;
         }
         
-        // Handle validation errors but continue with fetching data
         if (accessError) {
           console.error('Token validation error:', accessError);
         }
         
-        // If token validation fails, mark access as invalid but continue getting data
         if (token && !accessData) {
           if (isMounted) {
             setIsValidAccess(false);
@@ -112,10 +118,9 @@ export const useReportData = ({
           }
         }
         
-        // Fetch report data regardless of token validity
-        const reportTable = isInsightsReport ? 'level3_report_data' : 'level4_deepdive_report_data';
+        // Fetch report data using schema-defined data source
         const { data: fetchedReportData, error: reportError } = await supabase
-          .from(reportTable)
+          .from(dataSourceTable)
           .select('*')
           .eq('archetype_id', archetypeId)
           .maybeSingle();
@@ -125,12 +130,18 @@ export const useReportData = ({
         }
         
         if (!fetchedReportData) {
-          console.warn(`No report data found for archetype ${archetypeId}. Trying fallback...`);
+          // Try alternate data source as fallback
+          const fallbackType: ReportType = isInsightsReport ? 'deepDive' : 'insight';
+          const fallbackSchema = getReportSchema(fallbackType);
+          const fallbackSection = isInsightsReport ? 'archetypeProfile' : 'overview';
+          const fallbackDataSource = getDataSource(fallbackType, fallbackSection);
           
-          // Try alternate table as fallback
-          const fallbackTable = isInsightsReport ? 'level4_deepdive_report_data' : 'level3_report_data';
+          if (!fallbackDataSource) {
+            throw new Error('No fallback data source available');
+          }
+
           const { data: fallbackData, error: fallbackError } = await supabase
-            .from(fallbackTable)
+            .from(fallbackDataSource)
             .select('*')
             .eq('archetype_id', archetypeId)
             .maybeSingle();
@@ -138,21 +149,17 @@ export const useReportData = ({
           if (fallbackError) throw fallbackError;
           
           if (!fallbackData) {
-            console.warn(`No fallback data found for archetype ${archetypeId}`);
-          } else {
-            if (isMounted) {
-              setReportData(fallbackData);
-              setDataSource(`${fallbackTable} (fallback)`);
-            }
+            console.warn(`No data found for archetype ${archetypeId} in either source`);
+          } else if (isMounted) {
+            setReportData(fallbackData);
+            setDataSource(`${fallbackDataSource} (fallback)`);
           }
-        } else {
-          if (isMounted) {
-            setReportData(fetchedReportData);
-            setDataSource(reportTable);
-          }
+        } else if (isMounted) {
+          setReportData(fetchedReportData);
+          setDataSource(dataSourceTable);
         }
         
-        // Create average data
+        // Create default average data
         const defaultAverageData = {
           archetype_id: 'All_Average',
           archetype_name: 'Population Average',
@@ -167,7 +174,7 @@ export const useReportData = ({
           setUserData(accessData);
         }
         
-        // Cache the result if we have data
+        // Cache successful results
         if (fetchedReportData) {
           reportCache.set(cacheKey, {
             reportData: fetchedReportData,
@@ -175,6 +182,7 @@ export const useReportData = ({
             averageData: defaultAverageData
           });
         }
+
       } catch (err) {
         console.error('Error loading report data:', err);
         if (isMounted) {
@@ -187,15 +195,13 @@ export const useReportData = ({
       }
     };
     
-    // Call the function
     loadReportData();
     
-    // Cleanup function
     return () => {
       isMounted = false;
     };
   }, [archetypeId, token, isInsightsReport, skipCache]);
-  
+
   // Function to retry loading data
   const retry = () => {
     setIsLoading(true);
@@ -230,3 +236,5 @@ export const useReportData = ({
     refreshData
   };
 };
+
+export default useReportData;
