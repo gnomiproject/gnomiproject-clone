@@ -1,25 +1,34 @@
+
 import React, { useState, useEffect } from 'react';
-import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { RefreshCw, Loader2, AlertTriangle } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import useReportGeneration from '@/hooks/useReportGeneration';
 import ReportDetailView from './ReportDetailView';
-import DatabaseConnectionStatus from './insights/DatabaseConnectionStatus';
-import GenerationResults from './insights/GenerationResults';
-import ArchetypeList, { Archetype } from './insights/ArchetypeList';
+import DatabaseConnectionStatus from './DatabaseConnectionStatus';
+import GenerationResults from './GenerationResults';
+import ArchetypeList from './insights/ArchetypeList';
+import { useArchetypeLoader } from '@/hooks/useArchetypeLoader';
+import { ReportActions } from './reports/ReportActions';
+import { GenerationResult } from '@/types/reports';
 
 export function InsightsReportGenerator() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [archetypes, setArchetypes] = useState<Archetype[]>([]);
-  const [generationResult, setGenerationResult] = useState(null);
-  const [error, setError] = useState<string | null>(null);
+  const [generationResult, setGenerationResult] = useState<GenerationResult | null>(null);
   const [selectedArchetype, setSelectedArchetype] = useState<string | null>(null);
   const [viewReportOpen, setViewReportOpen] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<'checking' | 'connected' | 'error' | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  
   const { generateAllReports, isGenerating } = useReportGeneration();
+  const { 
+    archetypes, 
+    setArchetypes,
+    isLoading, 
+    isRefreshing,
+    error: archetypesError,
+    loadArchetypes 
+  } = useArchetypeLoader();
 
   useEffect(() => {
     checkDatabaseConnection();
@@ -60,74 +69,7 @@ export function InsightsReportGenerator() {
     }
   };
 
-  const loadArchetypes = async () => {
-    setIsLoading(true);
-    setError(null);
-    setIsRefreshing(true);
-    
-    try {
-      console.log("Fetching archetypes from Core_Archetype_Overview...");
-      
-      const { data: archetypeData, error: archetypesError } = await supabase
-        .from('Core_Archetype_Overview')
-        .select('id, name');
-      
-      if (archetypesError) {
-        throw new Error(archetypesError.message);
-      }
-      
-      if (!archetypeData || archetypeData.length === 0) {
-        setError("No archetypes found in the database");
-        setArchetypes([]);
-        return;
-      }
-
-      const archetypeArray: Archetype[] = archetypeData.map(archetype => ({
-        id: archetype.id,
-        name: archetype.name || 'Unnamed Archetype',
-        code: archetype.id.toUpperCase(),
-        lastUpdated: null,
-        status: 'pending'
-      }));
-
-      // Check existing reports
-      const { data: reportData } = await supabase
-        .from('Analysis_Archetype_Full_Reports')
-        .select('archetype_id, last_updated');
-
-      if (reportData) {
-        archetypeArray.forEach(archetype => {
-          const report = reportData.find(r => r.archetype_id === archetype.id);
-          if (report) {
-            archetype.lastUpdated = report.last_updated;
-            // Use type assertion to explicitly type the status
-            archetype.status = report.last_updated ? 'success' : 'pending';
-          }
-        });
-      }
-
-      // Sort archetypes by code
-      archetypeArray.sort((a, b) => a.code.localeCompare(b.code));
-      
-      setArchetypes(archetypeArray);
-      toast.success("Archetype status refreshed", {
-        description: `Found ${archetypeArray.length} archetypes`
-      });
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
-      setError(errorMessage);
-      toast.error("Error Loading Archetypes", {
-        description: errorMessage,
-      });
-    } finally {
-      setIsLoading(false);
-      setIsRefreshing(false);
-    }
-  };
-
   const handleGenerateReports = async () => {
-    // Fix: Remove setIsGenerating(true) as it's not defined in this scope
-    // The isGenerating state is managed by the useReportGeneration hook
     setError(null);
     setGenerationResult(null);
 
@@ -144,7 +86,6 @@ export function InsightsReportGenerator() {
       setArchetypes(prev => {
         return prev.map(archetype => ({
           ...archetype,
-          // Use type assertion to explicitly type the status
           status: results.archetypeIds.includes(archetype.id) ? 'success' : 'error',
           lastUpdated: results.archetypeIds.includes(archetype.id) ? new Date().toLocaleString() : archetype.lastUpdated
         }));
@@ -210,40 +151,20 @@ export function InsightsReportGenerator() {
       
       {generationResult && <GenerationResults result={generationResult} />}
       
-      <div className="flex flex-col sm:flex-row items-center gap-4">
-        <Button 
-          onClick={handleGenerateReports} 
-          disabled={isGenerating || isLoading || connectionStatus === 'error' || !connectionStatus}
-          size="lg"
-        >
-          {isGenerating ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Generating Reports...
-            </>
-          ) : (
-            <>
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Generate All Reports
-            </>
-          )}
-        </Button>
-        
-        <Button 
-          variant="outline" 
-          onClick={loadArchetypes}
-          disabled={isLoading || isGenerating || connectionStatus === 'error' || !connectionStatus || isRefreshing}
-        >
-          <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-          {isRefreshing ? "Refreshing..." : "Refresh Status"}
-        </Button>
-      </div>
+      <ReportActions 
+        onGenerateReports={handleGenerateReports}
+        onRefresh={loadArchetypes}
+        isGenerating={isGenerating}
+        isLoading={isLoading}
+        isRefreshing={isRefreshing}
+        connectionStatus={connectionStatus}
+      />
 
       <div className="rounded-md border">
         <ArchetypeList
           archetypes={archetypes}
           isLoading={isLoading}
-          error={error}
+          error={archetypesError}
           onViewReport={handleViewReport}
           onCopyReportUrl={copyReportUrl}
         />
