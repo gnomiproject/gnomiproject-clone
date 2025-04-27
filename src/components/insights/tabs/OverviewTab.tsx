@@ -24,27 +24,38 @@ const OverviewTab = ({ archetypeData, familyColor }: OverviewTabProps) => {
     );
   }
 
-  // Extract fields based on schema
-  const archetypeName = archetypeData[overviewFields.find(f => f === 'archetype_name') || 'name'] || archetypeData.id?.toUpperCase();
-  const familyName = archetypeData[overviewFields.find(f => f === 'family_name') || 'familyName'] || "Healthcare Archetype Family";
-  const description = archetypeData[overviewFields.find(f => f === 'long_description') || 'long_description'] || 
+  // Extract fields based on schema with type safety
+  const archetypeName = archetypeData[overviewFields.find(f => f === 'archetype_name') as keyof ArchetypeDetailedData] || 
+                       archetypeData.name || 
+                       archetypeData.id?.toUpperCase();
+
+  const familyName = archetypeData[overviewFields.find(f => f === 'family_name') as keyof ArchetypeDetailedData] || 
+                    archetypeData.familyName || 
+                    "Healthcare Archetype Family";
+
+  const description = archetypeData[overviewFields.find(f => f === 'long_description') as keyof ArchetypeDetailedData] || 
                      archetypeData.short_description || 
                      archetypeData.summary?.description || 
                      "This archetype represents organizations with specific healthcare management approaches and characteristics.";
   
-  // Handle key characteristics with schema awareness
+  // Handle key characteristics with proper type checking
   let keyCharacteristics: string[] = [];
   const keyCharField = overviewFields.find(f => f === 'key_characteristics');
   
-  if (keyCharField && archetypeData[keyCharField]) {
-    const rawCharacteristics = archetypeData[keyCharField];
-    keyCharacteristics = Array.isArray(rawCharacteristics) ? rawCharacteristics :
-      typeof rawCharacteristics === 'string' ? rawCharacteristics.split('\n').filter(Boolean) :
-      archetypeData.summary?.keyCharacteristics || [];
+  if (keyCharField && keyCharField in archetypeData) {
+    const rawCharacteristics = archetypeData[keyCharField as keyof ArchetypeDetailedData];
+    if (Array.isArray(rawCharacteristics)) {
+      keyCharacteristics = rawCharacteristics.map(String);
+    } else if (typeof rawCharacteristics === 'string') {
+      keyCharacteristics = rawCharacteristics.split('\n').filter(Boolean);
+    }
+  } else if (archetypeData.summary?.keyCharacteristics) {
+    keyCharacteristics = archetypeData.summary.keyCharacteristics;
   }
   
-  const industries = archetypeData[overviewFields.find(f => f === 'industries') || 'industries'] || 
-    "Various industries including healthcare, finance, and technology";
+  const industries = archetypeData[overviewFields.find(f => f === 'industries') as keyof ArchetypeDetailedData] || 
+                    archetypeData.industries || 
+                    "Various industries including healthcare, finance, and technology";
   
   const safeColor = familyColor || '#6E59A5';
 
