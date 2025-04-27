@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,8 +29,7 @@ const ReportGenerator: React.FC = () => {
     setGenerationResult(null);
 
     try {
-      toast({
-        title: "Starting Batch Report Generation",
+      toast.message("Starting Batch Report Generation", {
         description: "Generating reports for all archetypes. Please wait...",
         duration: 5000,
       });
@@ -45,20 +43,16 @@ const ReportGenerator: React.FC = () => {
       
       if (archetypesError) {
         console.error("Error checking archetypes table:", archetypesError);
-        toast({
-          title: "Error Checking Database",
+        toast.error("Error Checking Database", {
           description: "Could not verify database structure. Check console for details.",
-          variant: "destructive",
           duration: 5000,
         });
         throw new Error(`Database check failed: ${archetypesError.message}`);
       } else {
         console.log(`Available archetypes: ${archetypesData?.length || 0} found`);
         if (archetypesData?.length === 0) {
-          toast({
-            title: "No Archetypes Found",
+          toast.error("No Archetypes Found", {
             description: "No archetype data was found in the database. Please check your data.",
-            variant: "destructive",
             duration: 5000,
           });
         }
@@ -75,21 +69,24 @@ const ReportGenerator: React.FC = () => {
         ? `Generated ${results.succeeded} of ${results.total} archetype reports successfully.`
         : 'No archetype reports were generated successfully.';
       
-      toast({
-        title: results.succeeded > 0 ? "Report Generation Complete" : "Report Generation Failed",
-        description: successMessage,
-        variant: results.succeeded > 0 ? "default" : "destructive",
-        duration: 5000,
-      });
+      if (results.succeeded > 0) {
+        toast.success("Report Generation Complete", {
+          description: successMessage,
+          duration: 5000,
+        });
+      } else {
+        toast.error("Report Generation Failed", {
+          description: successMessage,
+          duration: 5000,
+        });
+      }
       
     } catch (error) {
       console.error('Error generating reports:', error);
       setError(typeof error === 'string' ? error : (error as Error).message || 'Unknown error occurred');
       
-      toast({
-        title: "Error Generating Reports",
+      toast.error("Error Generating Reports", {
         description: typeof error === 'string' ? error : (error as Error).message || 'Unknown error occurred',
-        variant: "destructive",
         duration: 5000,
       });
     } finally {
@@ -100,8 +97,7 @@ const ReportGenerator: React.FC = () => {
   const handleTestDatabaseConnection = async () => {
     setDatabaseStatus('checking');
     try {
-      toast({
-        title: "Testing Database Connection",
+      toast.message("Testing Database Connection", {
         description: "Checking connection to Supabase...",
         duration: 3000,
       });
@@ -115,29 +111,23 @@ const ReportGenerator: React.FC = () => {
       if (error) {
         console.error("Database connection error:", error);
         setDatabaseStatus('error');
-        toast({
-          title: "Database Connection Failed",
+        toast.error("Database Connection Failed", {
           description: error.message,
-          variant: "destructive",
           duration: 5000,
         });
       } else {
         console.log("Database connection successful. Sample data:", data);
         setDatabaseStatus('connected');
-        toast({
-          title: "Database Connection Successful",
+        toast.success("Database Connection Successful", {
           description: `Connected successfully. Found ${data?.length || 0} archetypes.`,
-          variant: "default",
           duration: 5000,
         });
       }
     } catch (error) {
       console.error("Error testing database:", error);
       setDatabaseStatus('error');
-      toast({
-        title: "Connection Test Error",
+      toast.error("Connection Test Error", {
         description: typeof error === 'string' ? error : (error as Error).message || 'Unknown error testing connection',
-        variant: "destructive",
         duration: 5000,
       });
     }
@@ -147,10 +137,8 @@ const ReportGenerator: React.FC = () => {
     if (isValidArchetypeId(archetypeId)) {
       window.open(`/insights/report/${archetypeId}`, '_blank');
     } else {
-      toast({
-        title: "Invalid Archetype ID",
+      toast.error("Invalid Archetype ID", {
         description: `Cannot view report for invalid archetype: ${archetypeId}`,
-        variant: "destructive",
       });
     }
   };
