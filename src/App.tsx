@@ -26,6 +26,7 @@ function App() {
             <Route path="/insights" element={<Insights />} />
             <Route path="/about" element={<About />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/report/:archetypeId" element={<ReportViewer />} />
             <Route path="/report/:archetypeId/:token" element={<ReportViewer />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

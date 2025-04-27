@@ -41,6 +41,7 @@ const defaultAverageData = {
 };
 
 const ReportViewer = () => {
+  // Modified to handle both URL patterns - with or without token in the URL
   const { archetypeId = '', token = '' } = useParams();
   const navigate = useNavigate();
   const [isValidToken, setIsValidToken] = useState<boolean | null>(null);
@@ -61,38 +62,53 @@ const ReportViewer = () => {
       try {
         setIsLoading(true);
         
-        // Step 1: Check if the token is valid and get user data
-        const { data: userData, error: userError } = await supabase
-          .from('report_requests')
-          .select('*')
-          .eq('access_token', token)
-          .eq('archetype_id', archetypeId)
-          .maybeSingle();
+        // For token-based access check
+        let userDataResult = null;
+        
+        if (token) {
+          // Step 1: Check if the token is valid and get user data
+          const { data: userData, error: userError } = await supabase
+            .from('report_requests')
+            .select('*')
+            .eq('access_token', token)
+            .eq('archetype_id', archetypeId)
+            .maybeSingle();
 
-        if (userError) {
-          console.error('Error fetching user data:', userError);
-          setIsValidToken(false);
-          setIsLoading(false);
-          return;
+          if (userError) {
+            console.error('Error fetching user data:', userError);
+            setIsValidToken(false);
+            setIsLoading(false);
+            return;
+          }
+
+          if (!userData) {
+            setIsValidToken(false);
+            setIsLoading(false);
+            return;
+          }
+
+          // Check if the report has expired
+          const isExpired = userData.expires_at && new Date(userData.expires_at) < new Date();
+          if (isExpired) {
+            setIsValidToken(false);
+            setIsLoading(false);
+            toast.error('This report link has expired.');
+            return;
+          }
+
+          userDataResult = userData;
+          setUserData(userData);
+          setIsValidToken(true);
+        } else {
+          // If no token in URL, provide default user data for direct archetypeId access
+          setUserData({
+            name: 'Demo User',
+            organization: 'Demo Organization',
+            created_at: new Date().toISOString(),
+            email: 'demo@example.com'
+          });
+          setIsValidToken(true);
         }
-
-        if (!userData) {
-          setIsValidToken(false);
-          setIsLoading(false);
-          return;
-        }
-
-        // Check if the report has expired
-        const isExpired = userData.expires_at && new Date(userData.expires_at) < new Date();
-        if (isExpired) {
-          setIsValidToken(false);
-          setIsLoading(false);
-          toast.error('This report link has expired.');
-          return;
-        }
-
-        setUserData(userData);
-        setIsValidToken(true);
 
         // Step 2: Always fetch the average data first for proper comparisons
         const { data: avgData, error: avgError } = await supabase
@@ -149,7 +165,7 @@ const ReportViewer = () => {
       }
     };
 
-    if (token && archetypeId) {
+    if (archetypeId) {
       fetchReportData();
     }
   }, [token, archetypeId]);

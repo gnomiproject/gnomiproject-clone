@@ -36,7 +36,8 @@ const PremiumReport = ({ archetypeId, assessmentResult, assessmentAnswers, arche
       });
       
       const baseUrl = window.location.origin;
-      const reportLink = `${baseUrl}/report/${archetypeId}?token=${token}`;
+      // Make sure to use the correct route format that matches our App.tsx routes
+      const reportLink = `${baseUrl}/report/${archetypeId}/${token}`;
       
       setAccessToken(token);
       setAccessLink(reportLink);
