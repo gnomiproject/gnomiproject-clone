@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Users, Building, Map, User, Calendar, CreditCard } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -213,7 +212,10 @@ const formatComparison = (value: number, benchmark: number): string => {
   
   if (Math.abs(percentDiff) < 1) return 'On par with archetype average';
   
-  return `${percentDiff > 0 ? '+' : ''}${percentDiff.toFixed(1)}% vs. archetype average`;
+  // Format the benchmark/average value
+  const formattedAverage = benchmark.toLocaleString();
+  
+  return `${percentDiff > 0 ? '+' : ''}${percentDiff.toFixed(1)}% vs. archetype average (${formattedAverage})`;
 };
 
 // Generate data for comparison charts

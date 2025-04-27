@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { HelpCircle, Users, Activity, AlertTriangle, DollarSign } from 'lucide-react';
 import { toast } from 'sonner';
+import { calculatePercentageDifference, formatPercentageDifference } from '@/utils/reports/metricUtils';
 
 interface KeyMetricsTabProps {
   archetypeData: ArchetypeDetailedData;
@@ -17,9 +18,20 @@ interface MetricCardProps {
   icon: React.ReactNode;
   color?: string;
   isHighlighted?: boolean;
+  comparison?: string;
+  averageValue?: number;
 }
 
-const MetricCard = ({ title, value, description, icon, color = '#888888', isHighlighted = false }: MetricCardProps) => {
+const MetricCard = ({ 
+  title, 
+  value, 
+  description, 
+  icon, 
+  color = '#888888', 
+  isHighlighted = false,
+  comparison,
+  averageValue
+}: MetricCardProps) => {
   return (
     <Card className={`overflow-hidden ${isHighlighted ? 'ring-2' : ''}`} style={{ borderColor: isHighlighted ? color : undefined }}>
       <div className="h-1" style={{ backgroundColor: color }}></div>
@@ -49,6 +61,11 @@ const MetricCard = ({ title, value, description, icon, color = '#888888', isHigh
             maximumFractionDigits: 2
           }) : value}
         </div>
+        {comparison && averageValue && (
+          <p className="mt-2 text-sm text-gray-600">
+            {comparison} ({typeof averageValue === 'number' ? averageValue.toLocaleString() : averageValue})
+          </p>
+        )}
       </CardContent>
     </Card>
   );

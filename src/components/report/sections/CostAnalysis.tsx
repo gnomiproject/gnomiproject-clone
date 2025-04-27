@@ -1,9 +1,9 @@
-
 import React from 'react';
 import { DollarSign, TrendingDown, AlertTriangle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatNumber } from '@/utils/formatters';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { calculatePercentageDifference, formatPercentageDifference } from '@/utils/reports/metricUtils';
 
 interface CostAnalysisProps {
   reportData: any;
@@ -275,7 +275,13 @@ const formatComparison = (value: number, benchmark: number, betterDirection: 'hi
   }
   
   const direction = diff > 0 ? 'higher' : 'lower';
-  const text = `${Math.abs(percentDiff).toFixed(1)}% ${direction} than average`;
+  
+  // Format the benchmark/average value
+  const formattedAverage = betterDirection === 'lower' ? 
+    `$${benchmark.toLocaleString()}` : 
+    benchmark.toLocaleString();
+    
+  const text = `${Math.abs(percentDiff).toFixed(1)}% ${direction} than average (${formattedAverage})`;
   
   // Determine if this is positive or negative based on the direction
   const isPositive = 
