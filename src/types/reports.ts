@@ -13,3 +13,22 @@ export interface ReportSection {
 export type ReportSchema = {
   [sectionKey: string]: ReportSection;
 };
+
+// Report generation result types
+export interface GenerationResult {
+  total: number;
+  succeeded: number;
+  failed: number;
+  archetypeIds: string[];
+  errors?: string[];
+}
+
+export interface ReportGenerationResults {
+  total: number;
+  processed: number;
+  succeeded: number;
+  failed: number;
+  archetypeIds: string[];
+  errors: string[];
+}
+
