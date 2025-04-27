@@ -15,11 +15,12 @@ async function generateArchetypeReports(supabase: SupabaseClient): Promise<Repor
   console.log('Starting batch report generation for all archetypes...');
   
   try {
-    // First, verify database connection is active
+    // First, verify database connection is active with a simpler query
     console.log('Verifying database connection...');
     const { error: connectionError } = await supabase
       .from('Core_Archetype_Overview')
-      .select('count(*)', { count: 'exact', head: true });
+      .select('id')
+      .limit(1);
       
     if (connectionError) {
       console.error('Database connection error:', connectionError);
