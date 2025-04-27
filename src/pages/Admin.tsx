@@ -2,17 +2,17 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
-// Static list of archetypes - no data fetching
+// Static list of archetypes
 const archetypes = [
-  { id: 'a1', name: 'Savvy Healthcare Navigators', family: 'a' },
-  { id: 'a2', name: 'Complex Condition Managers', family: 'a' },
-  { id: 'a3', name: 'Proactive Care Consumers', family: 'a' },
-  { id: 'b1', name: 'Resourceful Adapters', family: 'b' },
-  { id: 'b2', name: 'Healthcare Pragmatists', family: 'b' },
-  { id: 'b3', name: 'Care Channel Optimizers', family: 'b' },
-  { id: 'c1', name: 'Scalable Access Architects', family: 'c' },
-  { id: 'c2', name: 'Care Adherence Advocates', family: 'c' },
-  { id: 'c3', name: 'Engaged Healthcare Consumers', family: 'c' }
+  { id: 'a1', name: 'Savvy Healthcare Navigators', family: 'a', code: 'A1' },
+  { id: 'a2', name: 'Complex Condition Managers', family: 'a', code: 'A2' },
+  { id: 'a3', name: 'Proactive Care Consumers', family: 'a', code: 'A3' },
+  { id: 'b1', name: 'Resourceful Adapters', family: 'b', code: 'B1' },
+  { id: 'b2', name: 'Healthcare Pragmatists', family: 'b', code: 'B2' },
+  { id: 'b3', name: 'Care Channel Optimizers', family: 'b', code: 'B3' },
+  { id: 'c1', name: 'Scalable Access Architects', family: 'c', code: 'C1' },
+  { id: 'c2', name: 'Care Adherence Advocates', family: 'c', code: 'C2' },
+  { id: 'c3', name: 'Engaged Healthcare Consumers', family: 'c', code: 'C3' }
 ];
 
 const Admin = () => {
@@ -36,14 +36,19 @@ const Admin = () => {
                 {archetypes.map(archetype => (
                   <a 
                     key={`insights-${archetype.id}`}
-                    href={`/admin/insights-report/${archetype.id}?_admin=true`}
+                    href={`/admin/insights-report/${archetype.id}?type=insights`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="block p-4 border rounded hover:bg-gray-100 transition-colors"
                   >
-                    <span className="inline-block px-2 py-1 mr-2 bg-gray-200 rounded text-sm">
-                      {archetype.family.toUpperCase()}
-                    </span>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="inline-block px-2 py-1 bg-gray-200 rounded text-sm">
+                        {archetype.code}
+                      </span>
+                      <span className="inline-block px-2 py-1 bg-gray-200 rounded text-sm">
+                        Family {archetype.family.toUpperCase()}
+                      </span>
+                    </div>
                     {archetype.name}
                   </a>
                 ))}
@@ -57,14 +62,19 @@ const Admin = () => {
                 {archetypes.map(archetype => (
                   <a 
                     key={`deepdive-${archetype.id}`}
-                    href={`/admin/report/${archetype.id}?_admin=true`}
+                    href={`/admin/report/${archetype.id}?type=deepdive`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="block p-4 border rounded hover:bg-gray-100 transition-colors"
                   >
-                    <span className="inline-block px-2 py-1 mr-2 bg-gray-200 rounded text-sm">
-                      {archetype.family.toUpperCase()}
-                    </span>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="inline-block px-2 py-1 bg-gray-200 rounded text-sm">
+                        {archetype.code}
+                      </span>
+                      <span className="inline-block px-2 py-1 bg-gray-200 rounded text-sm">
+                        Family {archetype.family.toUpperCase()}
+                      </span>
+                    </div>
                     {archetype.name}
                   </a>
                 ))}

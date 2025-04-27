@@ -38,7 +38,7 @@ function App() {
             {/* Admin routes */}
             <Route path="/admin" element={<Admin />} />
             
-            {/* Admin-specific lightweight report viewers */}
+            {/* Admin-specific report viewers with clear type distinction */}
             <Route path="/admin/insights-report/:archetypeId" element={<AdminReportViewer />} />
             <Route path="/admin/report/:archetypeId" element={<AdminReportViewer />} />
             

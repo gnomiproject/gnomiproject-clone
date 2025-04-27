@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,9 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Home } from 'lucide-react';
 
-// Simplified admin-only report viewer with minimal processing
 const AdminReportViewer = () => {
-  // Always set these state variables unconditionally at the top level
   const { archetypeId = '' } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
@@ -16,11 +13,15 @@ const AdminReportViewer = () => {
   const [error, setError] = useState<string | null>(null);
   const [rawData, setRawData] = useState<any | null>(null);
   const [dataSource, setDataSource] = useState<string>('');
-  
-  // Check if this is an insights report or deep dive based on URL - do this unconditionally
-  const isInsightsReport = location.pathname.includes('insights-report');
 
-  // Fetch minimal data on mount - no conditional hooks
+  // Get report type from URL parameter
+  const searchParams = new URLSearchParams(location.search);
+  const reportType = searchParams.get('type') || 'deepdive';
+  
+  // Check if this is an insights report based on URL and parameter
+  const isInsightsReport = location.pathname.includes('insights-report') || reportType === 'insights';
+
+  // Fetch minimal data on mount
   useEffect(() => {
     const fetchMinimalData = async () => {
       if (!archetypeId) {
@@ -37,8 +38,14 @@ const AdminReportViewer = () => {
         const primaryTable = isInsightsReport ? 'level3_report_data' : 'level4_deepdive_report_data';
         const fallbackTable = isInsightsReport ? 'level4_deepdive_report_data' : 'level3_report_data';
         
-        console.log(`AdminReportViewer: Fetching data for ${archetypeId} from ${primaryTable}`);
+        console.log(`AdminReportViewer: Fetching ${reportType} data for ${archetypeId} from ${primaryTable}`);
         
+        const { data: archetypeData } = await supabase
+          .from('Core_Archetype_Overview')
+          .select('name, code')
+          .eq('id', archetypeId)
+          .single();
+          
         const { data, error } = await supabase
           .from(primaryTable)
           .select('archetype_id, archetype_name, short_description, long_description, family_id')
@@ -48,7 +55,11 @@ const AdminReportViewer = () => {
         if (error) throw error;
         
         if (data) {
-          setRawData(data);
+          setRawData({
+            ...data,
+            code: archetypeData?.code || archetypeId.toUpperCase(),
+            reportType: isInsightsReport ? 'Insights' : 'Deep Dive'
+          });
           setDataSource(primaryTable);
           setLoading(false);
           return;
@@ -65,8 +76,12 @@ const AdminReportViewer = () => {
         if (fallbackError) throw fallbackError;
         
         if (fallbackData) {
-          setRawData(fallbackData);
-          setDataSource(fallbackTable);
+          setRawData({
+            ...fallbackData,
+            code: archetypeData?.code || archetypeId.toUpperCase(),
+            reportType: isInsightsReport ? 'Insights' : 'Deep Dive'
+          });
+          setDataSource(`${fallbackTable} (fallback)`);
         } else {
           throw new Error('No data found for this archetype');
         }
@@ -79,17 +94,8 @@ const AdminReportViewer = () => {
     };
     
     fetchMinimalData();
-  }, [archetypeId, isInsightsReport]);
+  }, [archetypeId, isInsightsReport, reportType]);
 
-  // Simple refresh function - no hook calls
-  const handleRefresh = () => {
-    setLoading(true);
-    setError(null);
-    // Force reload page
-    window.location.reload();
-  };
-
-  // Always render a UI, but conditionally show different content based on state
   return (
     <div className="container mx-auto py-8 px-4">
       {loading ? (
@@ -109,7 +115,7 @@ const AdminReportViewer = () => {
           <CardContent>
             <p className="mb-6">{error || 'No data found for this archetype'}</p>
             <div className="flex flex-wrap gap-4">
-              <Button onClick={handleRefresh} className="flex items-center gap-2">
+              <Button onClick={() => window.location.reload()} className="flex items-center gap-2">
                 <RefreshCw className="h-4 w-4" /> Try Again
               </Button>
               <Button variant="outline" onClick={() => navigate('/admin')} className="flex items-center gap-2">
@@ -122,11 +128,23 @@ const AdminReportViewer = () => {
         <Card className="mb-6">
           <CardHeader className="pb-2">
             <div className="flex justify-between items-center">
-              <CardTitle>{rawData.archetype_name || `Archetype ${archetypeId}`}</CardTitle>
+              <div className="space-y-1">
+                <CardTitle>
+                  <div className="flex items-center gap-2">
+                    <span className="px-2 py-1 bg-gray-200 rounded text-sm">
+                      {rawData.code}
+                    </span>
+                    {rawData.archetype_name || `Archetype ${archetypeId}`}
+                  </div>
+                </CardTitle>
+                <p className="text-sm text-gray-500">
+                  {rawData.reportType} Report View
+                </p>
+              </div>
               <Button 
                 variant="outline" 
                 size="sm" 
-                onClick={handleRefresh}
+                onClick={() => window.location.reload()}
                 className="flex items-center gap-2"
               >
                 <RefreshCw className="h-3 w-3" />
