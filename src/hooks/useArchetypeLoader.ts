@@ -1,85 +1,104 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Archetype } from '@/types/reports';
+
+export interface Archetype {
+  id: string;
+  code: string;
+  name: string;
+  status: 'pending' | 'success' | 'error';
+  lastUpdated: string | null;
+}
 
 export const useArchetypeLoader = () => {
+  const [archetypes, setArchetypes] = useState<Archetype[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [archetypes, setArchetypes] = useState<Archetype[]>([]);
   const [error, setError] = useState<string | null>(null);
-
-  const loadArchetypes = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    setIsRefreshing(true);
-    
+  
+  const loadArchetypes = async () => {
     try {
-      console.log("Fetching archetypes from Core_Archetype_Overview...");
+      setIsLoading(true);
+      setError(null);
       
-      const { data: archetypeData, error: archetypesError } = await supabase
-        .from('Core_Archetype_Overview')
-        .select('id, name');
+      // Try first to get data from Analysis_Archetype_Full_Reports
+      console.log('Fetching archetypes from Analysis_Archetype_Full_Reports...');
+      const { data: reportData, error: reportError } = await supabase
+        .from('Analysis_Archetype_Full_Reports')
+        .select('archetype_id, last_updated');
       
-      if (archetypesError) {
-        throw new Error(archetypesError.message);
+      if (reportError) {
+        console.warn('Error fetching from Analysis_Archetype_Full_Reports:', reportError);
       }
       
-      if (!archetypeData || archetypeData.length === 0) {
-        setError("No archetypes found in the database");
+      // Get core archetypes data
+      console.log('Fetching archetypes from Core_Archetype_Overview...');
+      const { data, error: archError } = await supabase
+        .from('Core_Archetype_Overview')
+        .select('id, name, family_id');
+        
+      if (archError) {
+        throw new Error(`Failed to load archetypes: ${archError.message}`);
+      }
+      
+      if (!data || data.length === 0) {
+        setError('No archetypes found in the database');
         setArchetypes([]);
         return;
       }
-
-      const archetypeArray: Archetype[] = archetypeData.map(archetype => ({
-        id: archetype.id,
-        name: archetype.name || 'Unnamed Archetype',
-        code: archetype.id.toUpperCase(),
-        lastUpdated: null,
-        status: 'pending'
-      }));
-
-      // Check existing reports
-      const { data: reportData } = await supabase
-        .from('Analysis_Archetype_Full_Reports')
-        .select('archetype_id, last_updated');
-
-      if (reportData) {
-        archetypeArray.forEach(archetype => {
-          const report = reportData.find(r => r.archetype_id === archetype.id);
-          if (report) {
-            archetype.lastUpdated = report.last_updated;
-            archetype.status = report.last_updated ? 'success' : 'pending';
-          }
-        });
-      }
-
-      // Sort archetypes by code
-      archetypeArray.sort((a, b) => a.code.localeCompare(b.code));
       
-      setArchetypes(archetypeArray);
-      toast.success("Archetype status refreshed", {
-        description: `Found ${archetypeArray.length} archetypes`
+      // Map core data and report status
+      const mappedData = data.map(arch => {
+        const reportEntry = reportData?.find(r => r.archetype_id === arch.id);
+        const code = arch.id.toUpperCase(); // Could be overridden if there's a custom code field
+        
+        return {
+          id: arch.id,
+          code: code,
+          name: arch.name,
+          status: reportEntry ? 'success' : 'pending',
+          lastUpdated: reportEntry?.last_updated 
+            ? new Date(reportEntry.last_updated).toLocaleString() 
+            : null
+        } as Archetype;
       });
+      
+      setArchetypes(mappedData);
+      console.log(`Loaded ${mappedData.length} archetypes`);
+      
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      console.error('Error in loadArchetypes:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error loading archetypes';
       setError(errorMessage);
-      toast.error("Error Loading Archetypes", {
-        description: errorMessage,
+      
+      toast.error('Failed to load archetypes', {
+        description: errorMessage
       });
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
     }
+  };
+  
+  const refreshArchetypes = () => {
+    setIsRefreshing(true);
+    loadArchetypes();
+  };
+  
+  // Initial load
+  useEffect(() => {
+    // Don't auto-load archetypes on mount - this will be triggered 
+    // after successful DB connection check
   }, []);
-
+  
   return {
     archetypes,
     setArchetypes,
     isLoading,
     isRefreshing,
     error,
-    loadArchetypes
+    loadArchetypes,
+    refreshArchetypes
   };
 };

@@ -1,16 +1,19 @@
 
-export interface Archetype {
-  id: string;
-  code: string;
-  name: string;
-  status: 'pending' | 'success' | 'error';
-  lastUpdated: string | null;
-}
+// Add or update these types in the existing file
 
 export interface GenerationResult {
   total: number;
   succeeded: number;
   failed: number;
-  errors?: string[];
   archetypeIds: string[];
+  errors?: string[];
+}
+
+export interface ReportGenerationResults {
+  total: number;
+  processed: number;
+  succeeded: number;
+  failed: number;
+  archetypeIds: string[];
+  errors: string[];
 }

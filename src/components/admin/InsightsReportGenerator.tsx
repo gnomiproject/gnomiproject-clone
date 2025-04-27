@@ -19,6 +19,7 @@ export function InsightsReportGenerator() {
   const [viewReportOpen, setViewReportOpen] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<'checking' | 'connected' | 'error' | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [timeoutWarning, setTimeoutWarning] = useState(false);
   
   const { generateAllReports, isGenerating } = useReportGeneration();
   const { 
@@ -34,36 +35,59 @@ export function InsightsReportGenerator() {
     checkDatabaseConnection();
   }, []);
 
+  // Add timeout warning after 5 seconds if still checking
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    
+    if (connectionStatus === 'checking') {
+      timeoutId = setTimeout(() => {
+        setTimeoutWarning(true);
+      }, 5000);
+    } else {
+      setTimeoutWarning(false);
+    }
+    
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [connectionStatus]);
+
   const checkDatabaseConnection = async () => {
     try {
       setConnectionStatus('checking');
-      console.log("Testing database connection...");
+      setTimeoutWarning(false);
+      setError(null);
+      console.log("Testing database connection to Supabase...");
       
-      const { data, error } = await supabase
+      // First try a simple query to check connection
+      const { data, error: connError } = await supabase
         .from('Core_Archetype_Overview')
         .select('count(*)', { count: 'exact', head: true });
       
-      if (error) {
-        console.error("Database connection error:", error);
+      if (connError) {
+        console.error("Database connection error:", connError);
         setConnectionStatus('error');
-        setError(`Database connection error: ${error.message}`);
+        setError(`Database connection error: ${connError.message}`);
         toast.error("Database Connection Failed", {
-          description: error.message,
+          description: connError.message,
         });
         return false;
       }
       
-      console.log("Database connection successful");
+      console.log("Database connection successful, count result:", data);
       setConnectionStatus('connected');
       toast.success("Database Connection Successful");
-      loadArchetypes();
+      
+      // Once connected, load archetypes data
+      await loadArchetypes();
       return true;
     } catch (err) {
       console.error("Error testing database:", err);
       setConnectionStatus('error');
-      setError(`Connection error: ${(err as Error).message}`);
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      setError(`Connection error: ${errorMessage}`);
       toast.error("Connection Error", {
-        description: (err as Error).message,
+        description: errorMessage,
       });
       return false;
     }
@@ -139,9 +163,10 @@ export function InsightsReportGenerator() {
       </div>
       
       <DatabaseConnectionStatus 
-        connectionStatus={connectionStatus}
+        status={connectionStatus}
         error={error}
-        onCheckConnection={checkDatabaseConnection}
+        onRetry={checkDatabaseConnection}
+        timeoutWarning={timeoutWarning}
       />
       
       {error && error !== 'No archetypes found in the database' && connectionStatus !== 'error' && (
