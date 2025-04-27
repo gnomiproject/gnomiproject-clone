@@ -21,7 +21,8 @@ const OverviewTab = ({ archetypeData, familyColor }: OverviewTabProps) => {
     if (Array.isArray(archetypeData.key_characteristics)) {
       keyCharacteristics = archetypeData.key_characteristics;
     } else if (typeof archetypeData.key_characteristics === 'string') {
-      keyCharacteristics = archetypeData.key_characteristics.split('\n').filter(Boolean);
+      // Using type assertion to handle the TypeScript error
+      keyCharacteristics = (archetypeData.key_characteristics as string).split('\n').filter(Boolean);
     }
   } else if (archetypeData.summary?.keyCharacteristics && Array.isArray(archetypeData.summary.keyCharacteristics)) {
     keyCharacteristics = archetypeData.summary.keyCharacteristics;
