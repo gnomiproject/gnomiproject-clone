@@ -1,109 +1,32 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Home } from 'lucide-react';
 import InsightsReportContent from '@/components/report/sections/InsightsReportContent';
 import ContactSection from '@/components/report/sections/ContactSection';
-import ReportIntroduction from '@/components/report/sections/ReportIntroduction';
 import DeepDiveReport from '@/components/report/DeepDiveReport';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAdminReportData } from '@/hooks/useAdminReportData';
+import { toast } from '@/components/ui/use-toast';
 
 const AdminReportViewer = () => {
   const { archetypeId = '' } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [rawData, setRawData] = useState<any | null>(null);
-  const [dataSource, setDataSource] = useState<string>('');
-
-  // Get report type from URL parameter
-  const searchParams = new URLSearchParams(location.search);
-  const reportType = searchParams.get('type') || 'deepdive';
   
-  // Check if this is an insights report based on URL and parameter
-  const isInsightsReport = location.pathname.includes('insights-report') || reportType === 'insights';
-
-  // Fetch minimal data on mount
-  useEffect(() => {
-    const fetchArchetypeData = async () => {
-      if (!archetypeId) {
-        setError('No archetype ID provided');
-        setLoading(false);
-        return;
-      }
-      
-      setLoading(true);
-      setError(null);
-      
-      try {
-        const primaryTable = isInsightsReport ? 'level3_report_data' : 'level4_deepdive_report_data';
-        const fallbackTable = isInsightsReport ? 'level4_deepdive_report_data' : 'level3_report_data';
-        
-        console.log(`AdminReportViewer: Fetching ${reportType} data for ${archetypeId} from ${primaryTable}`);
-        
-        const { data, error } = await supabase
-          .from(primaryTable)
-          .select('*')
-          .eq('archetype_id', archetypeId)
-          .maybeSingle();
-
-        if (error) throw error;
-        
-        if (data) {
-          // Use uppercase archetype ID as the code
-          const archetypeCode = archetypeId.toUpperCase();
-          
-          setRawData({
-            ...data,
-            code: archetypeCode,
-            id: data.archetype_id,
-            name: data.archetype_name,
-            reportType: isInsightsReport ? 'Insights' : 'Deep Dive'
-          });
-          setDataSource(primaryTable);
-          setLoading(false);
-          return;
-        }
-        
-        // If no data found in primary table, try fallback
-        console.log(`AdminReportViewer: No data found in ${primaryTable}, trying ${fallbackTable}`);
-        const { data: fallbackData, error: fallbackError } = await supabase
-          .from(fallbackTable)
-          .select('*')
-          .eq('archetype_id', archetypeId)
-          .maybeSingle();
-          
-        if (fallbackError) throw fallbackError;
-        
-        if (fallbackData) {
-          // Use uppercase archetype ID as the code
-          const archetypeCode = archetypeId.toUpperCase();
-          
-          setRawData({
-            ...fallbackData,
-            code: archetypeCode,
-            id: fallbackData.archetype_id,
-            name: fallbackData.archetype_name,
-            reportType: isInsightsReport ? 'Insights' : 'Deep Dive'
-          });
-          setDataSource(`${fallbackTable} (fallback)`);
-        } else {
-          throw new Error('No data found for this archetype');
-        }
-      } catch (err: any) {
-        console.error('Error fetching archetype data:', err);
-        setError(err.message || 'Failed to load report data');
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchArchetypeData();
-  }, [archetypeId, isInsightsReport, reportType]);
+  // Determine report type based on URL and parameters
+  const searchParams = new URLSearchParams(location.search);
+  const queryReportType = searchParams.get('type') || 'deepdive';
+  const isInsightsReport = location.pathname.includes('insights-report') || queryReportType === 'insights';
+  const reportType = isInsightsReport ? 'insights' : 'deepdive';
+  
+  // Use the custom hook for data fetching
+  const { data: rawData, loading, error, dataSource, refreshData } = useAdminReportData({
+    archetypeId,
+    reportType
+  });
 
   // Mock user data for admin view
   const mockUserData = {
@@ -123,6 +46,14 @@ const AdminReportViewer = () => {
     "Cost_Medical & RX Paid Amount PMPY": 5000
   };
 
+  const handleRefresh = () => {
+    refreshData();
+    toast({
+      title: "Refreshing report data",
+      description: "Fetching latest data for this archetype",
+    });
+  };
+
   return (
     <div className="container mx-auto py-8 px-4">
       {loading ? (
@@ -140,7 +71,7 @@ const AdminReportViewer = () => {
             <CardTitle className="text-red-600">Error Loading Report</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="mb-6">{error || 'No data found for this archetype'}</p>
+            <p className="mb-6">{error?.message || 'No data found for this archetype'}</p>
             <div className="flex flex-wrap gap-4">
               <Button onClick={() => window.location.reload()} className="flex items-center gap-2">
                 <RefreshCw className="h-4 w-4" /> Try Again
@@ -176,7 +107,7 @@ const AdminReportViewer = () => {
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  onClick={() => window.location.reload()}
+                  onClick={handleRefresh}
                   className="flex items-center gap-2"
                 >
                   <RefreshCw className="h-3 w-3" />
