@@ -33,6 +33,11 @@ const Admin = () => {
           </Tabs>
         </CardContent>
       </Card>
+      
+      <div className="text-sm text-gray-500 mt-4 p-4 bg-gray-50 rounded-lg">
+        <p><strong>Note:</strong> Reports will open in a new tab to prevent browser resource limitations.</p>
+        <p className="mt-2">If you encounter any issues with report loading, try clearing your browser cache or using a different browser.</p>
+      </div>
     </div>
   );
 };

@@ -19,15 +19,15 @@ export const supabase = createClient<Database>(
     },
     global: {
       fetch: (...args) => {
-        // Add reasonable timeout of 15 seconds (was 30s before)
+        // Reduce timeout to 10 seconds to fail faster
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 15000);
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
         
         // @ts-ignore
         return fetch(...args, { 
           signal: controller.signal,
-          // Add cache policy to help with redundant requests
-          cache: 'default'
+          // Add strong cache policy
+          cache: 'force-cache'
         })
         .then(response => {
           clearTimeout(timeoutId);
