@@ -1,4 +1,3 @@
-
 import { ReportSchema, ReportType } from "@/types/reports";
 import { insightReportSchema } from "@/schemas/insightReportSchema";
 import { deepDiveReportSchema } from "@/schemas/deepDiveReportSchema";

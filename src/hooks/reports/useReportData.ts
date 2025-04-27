@@ -1,8 +1,7 @@
-
 import { useState, useCallback, useEffect } from 'react';
+import { ReportType } from '@/types/reports';
 import { getDataSource } from '@/utils/reports/schemaMapping';
 import { supabase } from '@/integrations/supabase/client';
-import { ReportType } from '@/types/reports';
 import { getFromCache, setInCache, clearFromCache } from '@/utils/reports/reportCache';
 import { processReportData, AverageData } from '@/utils/reports/reportDataTransforms';
 import { toast } from "@/hooks/use-toast";

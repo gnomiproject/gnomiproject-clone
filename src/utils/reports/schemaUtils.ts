@@ -1,5 +1,5 @@
 
-import { ReportSchema, ReportField, ReportSection } from "@/types/reports";
+import { ReportSchema, ReportField, ReportSection, ReportType } from "@/types/reports";
 import { insightReportSchema } from "@/schemas/insightReportSchema";
 import { deepDiveReportSchema } from "@/schemas/deepDiveReportSchema";
 import { ReportDataSource, getTypeValidDataSource } from "./dataSourceUtils";
@@ -18,6 +18,6 @@ export const getReportFields = (type: ReportType, sectionKey: string): ReportFie
   return section?.fields || [];
 };
 
-export const getDataSource = (type: ReportType, sectionKey: string): ReportDataSource => {
+export const getDataSource = (type: ReportType): ReportDataSource => {
   return getTypeValidDataSource(type);
 };

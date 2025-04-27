@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { ReportType } from '@/types/reports';
 import type { ReportDataSource } from '@/utils/reports/dataSourceUtils';
@@ -122,10 +121,8 @@ export const fetchReportData = async (
   archetypeId: string,
   reportType: ReportType
 ): Promise<ArchetypeDetailedData | null> => {
-  // Get the appropriate data source table based on report type
   const dataSourceTable = getDataSource(reportType);
   
-  // Type assertion to satisfy TypeScript's constraint for Supabase table names
   const { data, error } = await supabase
     .from(dataSourceTable as any)
     .select('*')
