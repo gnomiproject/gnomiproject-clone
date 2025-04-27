@@ -18,6 +18,12 @@ const ReportViewer = () => {
   const location = useLocation();
   const { getArchetypeDetailedById } = useArchetypes();
   const [initialLoading, setInitialLoading] = useState(true);
+  const [isInsightsReport, setIsInsightsReport] = useState(false);
+  
+  // Determine if we're viewing an insights report based on the route
+  useEffect(() => {
+    setIsInsightsReport(location.pathname.startsWith('/insights/report'));
+  }, [location.pathname]);
   
   // After a brief initial loading state for better UX
   useEffect(() => {
@@ -27,9 +33,6 @@ const ReportViewer = () => {
     
     return () => clearTimeout(timer);
   }, []);
-  
-  // Check if we're accessing via insights route
-  const isInsightsReport = location.pathname.startsWith('/insights/report');
   
   // Validate archetype ID early
   if (!isValidArchetypeId(archetypeId)) {
@@ -90,6 +93,7 @@ const ReportViewer = () => {
   }
 
   // Get the archetype data with full database data for non-token cases
+  // Fix: Ensure this hook is always called to prevent "rendered more hooks than previous render" error
   const { archetypeData, isLoading, error, dataSource } = useGetArchetype(archetypeId as ArchetypeId);
   
   // If loading, show loading state

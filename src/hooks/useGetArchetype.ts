@@ -11,7 +11,7 @@ interface UseGetArchetype {
   isLoading: boolean;
   error: Error | null;
   refetch: () => Promise<any>;
-  dataSource: string; // Added dataSource property
+  dataSource: string;
 }
 
 // Helper function to safely convert JSONB arrays to string arrays
@@ -49,7 +49,7 @@ const fetchArchetypeData = async (archetypeId: ArchetypeId) => {
 export const useGetArchetype = (archetypeId: ArchetypeId): UseGetArchetype => {
   const [archetypeData, setArchetypeData] = useState<ArchetypeDetailedData | null>(null);
   const [familyData, setFamilyData] = useState<any | null>(null);
-  const [dataSource, setDataSource] = useState<string>(''); // Added dataSource state
+  const [dataSource, setDataSource] = useState<string>(''); 
   const { getArchetypeEnhanced, getFamilyById } = useArchetypes();
   
   // Process data on success - defined as a callback to avoid recreating on each render
@@ -63,7 +63,7 @@ export const useGetArchetype = (archetypeId: ArchetypeId): UseGetArchetype => {
         name: data.archetype_name || '',
         familyId: data.family_id as FamilyId || ('unknown' as FamilyId),
         familyName: data.family_name,
-        family_name: data.family_name, // Add for compatibility
+        family_name: data.family_name, // Add for compatibility with level3_report_data
         hexColor: data.hex_color,
         short_description: data.short_description,
         long_description: data.long_description,
@@ -156,7 +156,7 @@ export const useGetArchetype = (archetypeId: ArchetypeId): UseGetArchetype => {
       };
 
       setArchetypeData(formattedData);
-      setDataSource('level3_report_data'); // Set data source
+      setDataSource('level3_report_data');
       console.log("Formatted archetype data:", formattedData);
       
       // Set family data
@@ -208,7 +208,7 @@ export const useGetArchetype = (archetypeId: ArchetypeId): UseGetArchetype => {
     }
   }, [getFamilyById, getArchetypeEnhanced, archetypeId]);
   
-  // Use React Query for data fetching with proper caching
+  // Use React Query for data fetching with proper caching - ENSURE THIS HOOK IS ALWAYS CALLED
   const { 
     isLoading, 
     error, 
@@ -221,10 +221,16 @@ export const useGetArchetype = (archetypeId: ArchetypeId): UseGetArchetype => {
     retry: 1, // Only retry once
     enabled: !!archetypeId,
     refetchOnWindowFocus: false, // Prevent refetching when window regains focus
-    refetchOnMount: false // Prevent refetching on component mount if data exists
+    refetchOnMount: false, // Prevent refetching on component mount if data exists
+    // Fix: Remove conditional state updates inside the query callbacks
+    meta: {
+      onError: (err: Error) => {
+        console.log("Query error caught in meta handler");
+      }
+    }
   });
 
-  // Process data when it changes
+  // Process data in useEffect, not conditionally in render
   useEffect(() => {
     if (data) {
       processData(data);
@@ -239,6 +245,6 @@ export const useGetArchetype = (archetypeId: ArchetypeId): UseGetArchetype => {
     isLoading,
     error: error as Error | null,
     refetch: refetch as () => Promise<any>,
-    dataSource // Return the data source
+    dataSource
   };
 };
