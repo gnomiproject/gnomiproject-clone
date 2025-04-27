@@ -211,7 +211,7 @@ const AdminReportViewer = () => {
               {isInsightsReport ? (
                 <div className="space-y-6">
                   <div className="bg-white rounded-lg shadow overflow-hidden mb-12">
-                    {/* Fixed the issue on this line - no more void return */}
+                    {/* The key issue is here - return InsightsReportContent directly and don't wrap in a console.log */}
                     <InsightsReportContent archetype={rawData} />
                   </div>
                 </div>
