@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { ArchetypeId } from '@/types/archetype';
 import { toast } from 'sonner';
@@ -24,6 +24,10 @@ export const useReportData = ({ archetypeId, token, isInsightsReport, skipCache 
   const queryClient = useQueryClient();
   
   const { getArchetypeDetailedById } = useArchetypes();
+
+  // Add processing guard to prevent redundant processing
+  const processingRef = useRef(false);
+  const processedDataRef = useRef<string | null>(null);
 
   // This function consolidates our data fetching strategy
   const fetchArchetypeData = useCallback(async () => {
@@ -259,6 +263,9 @@ export const useReportData = ({ archetypeId, token, isInsightsReport, skipCache 
   // Handle retry functionality
   const retry = async () => {
     toast.loading("Retrying connection...");
+    // Reset processed data flag
+    processedDataRef.current = null;
+    
     try {
       await refetch();
       toast.success("Connection successful!");
@@ -270,6 +277,9 @@ export const useReportData = ({ archetypeId, token, isInsightsReport, skipCache 
   // Force refresh data
   const refreshData = async () => {
     toast.loading("Refreshing report data...");
+    
+    // Reset processed data flag
+    processedDataRef.current = null;
     
     // Clear cache for this report
     const cacheKey = `report-${archetypeId}-${isInsightsReport ? 'insights' : 'deepdive'}`;
@@ -298,11 +308,34 @@ export const useReportData = ({ archetypeId, token, isInsightsReport, skipCache 
     "Cost_Medical & RX Paid Amount PMPY": 5000
   };
 
+  // Track processed data to prevent redundant processing
+  useEffect(() => {
+    let isMounted = true;
+    
+    if (reportData && isMounted) {
+      // Check for redundant processing
+      const dataHash = JSON.stringify(reportData?.archetype_id);
+      
+      if (processedDataRef.current === dataHash) {
+        console.log(`Skipping redundant processing for report ${archetypeId}`);
+        return;
+      }
+      
+      console.log(`Processing report data for ${archetypeId} (hash: ${dataHash})`);
+      processedDataRef.current = dataHash;
+    }
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [reportData, archetypeId]);
+
   // Cleanup function for memory management
   useEffect(() => {
     return () => {
       // Clean up any heavy data on unmount
       console.log(`Cleaning up resources for ${archetypeId}`);
+      processedDataRef.current = null;
     };
   }, [archetypeId]);
 

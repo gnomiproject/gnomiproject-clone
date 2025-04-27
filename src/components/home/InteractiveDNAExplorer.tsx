@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import DNAHelix from './DNAHelix';
 import SectionTitle from '@/components/shared/SectionTitle';
 import { ArchetypeId } from '@/types/archetype';
@@ -28,54 +28,71 @@ const InteractiveDNAExplorer = () => {
     return null;
   }
 
-  // Handle step click on the DNA helix
-  const handleStepClick = (archetypeId: ArchetypeId) => {
-    setSelectedArchetype(archetypeId === selectedArchetype ? null : archetypeId);
+  // Handle step click on the DNA helix - memoized to prevent recreating on every render
+  const handleStepClick = useCallback((archetypeId: ArchetypeId) => {
+    console.log(`DNA Helix: clicked on archetype ${archetypeId}`);
+    setSelectedArchetype(prevArchetype => archetypeId === prevArchetype ? null : archetypeId);
     
     // Also select the corresponding family
     const familyId = archetypeId.charAt(0) as 'a' | 'b' | 'c';
     setSelectedFamily(familyId);
-  };
+  }, []);
 
-  // Handle family button click
-  const handleFamilyClick = (familyId: 'a' | 'b' | 'c') => {
-    setSelectedFamily(familyId === selectedFamily ? null : familyId);
+  // Handle family button click - memoized to prevent recreating on every render
+  const handleFamilyClick = useCallback((familyId: 'a' | 'b' | 'c') => {
+    console.log(`DNA Helix: clicked on family ${familyId}`);
+    setSelectedFamily(prevFamily => familyId === prevFamily ? null : familyId);
     
-    if (selectedArchetype && selectedArchetype.charAt(0) !== familyId) {
-      setSelectedArchetype(null);
-    }
-  };
+    // If the selected archetype is not in this family, deselect it
+    setSelectedArchetype(prevArchetype => {
+      if (prevArchetype && prevArchetype.charAt(0) !== familyId) {
+        return null;
+      }
+      return prevArchetype;
+    });
+  }, []);
 
   // Get the selected archetype's full data
-  const selectedArchetypeDetail = selectedArchetype ? 
-    archetypes?.find(a => a.id === selectedArchetype) : 
-    null;
+  const selectedArchetypeDetail = useMemo(() => {
+    if (!selectedArchetype || !archetypes) return null;
+    return archetypes.find(a => a.id === selectedArchetype);
+  }, [selectedArchetype, archetypes]);
 
   // Get the selected family information
-  const selectedFamilyInfo = selectedFamily ?
-    getFamilyById(selectedFamily as any) :
-    null;
+  const selectedFamilyInfo = useMemo(() => {
+    if (!selectedFamily) return null;
+    return getFamilyById(selectedFamily as any);
+  }, [selectedFamily, getFamilyById]);
     
   // Create a properly formatted archetype summary object that matches expected props
-  const selectedArchetypeSummary = selectedArchetype && selectedArchetypeDetail ? {
-    id: selectedArchetype,
-    familyId: selectedArchetype.charAt(0) as 'a' | 'b' | 'c',
-    name: selectedArchetypeDetail.name,
-    familyName: selectedFamilyInfo?.name || 'Unknown Family',
-    description: selectedArchetypeDetail.short_description || '',
-    keyCharacteristics: selectedArchetypeDetail.key_characteristics || []
-  } : null;
+  const selectedArchetypeSummary = useMemo(() => {
+    if (!selectedArchetype || !selectedArchetypeDetail) return null;
+    
+    return {
+      id: selectedArchetype,
+      familyId: selectedArchetype.charAt(0) as 'a' | 'b' | 'c',
+      name: selectedArchetypeDetail.name,
+      familyName: selectedFamilyInfo?.name || 'Unknown Family',
+      description: selectedArchetypeDetail.short_description || '',
+      keyCharacteristics: selectedArchetypeDetail.key_characteristics || []
+    };
+  }, [selectedArchetype, selectedArchetypeDetail, selectedFamilyInfo]);
   
   // Convert archetype summaries to the expected format for FamilyDetailView
-  const formattedArchetypeSummaries = archetypes?.map(archetype => ({
-    id: archetype.id,
-    familyId: archetype.family_id,
-    name: archetype.name,
-    familyName: getFamilyById(archetype.family_id)?.name || '',
-    description: archetype.short_description || '',
-    keyCharacteristics: archetype.key_characteristics || [],
-    color: archetype.hex_color,
-  })) || [];
+  // Memoized to avoid recalculating on every render
+  const formattedArchetypeSummaries = useMemo(() => {
+    if (!archetypes) return [];
+    
+    return archetypes.map(archetype => ({
+      id: archetype.id,
+      familyId: archetype.family_id,
+      name: archetype.name,
+      familyName: getFamilyById(archetype.family_id)?.name || '',
+      description: archetype.short_description || '',
+      keyCharacteristics: archetype.key_characteristics || [],
+      color: archetype.hex_color,
+    }));
+  }, [archetypes, getFamilyById]);
 
   if (isLoading) {
     return (
@@ -151,4 +168,3 @@ const formatFamilyInfo = (family: any) => {
 };
 
 export default InteractiveDNAExplorer;
-
