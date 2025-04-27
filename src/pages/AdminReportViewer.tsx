@@ -3,11 +3,16 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RefreshCw } from 'lucide-react';
 import { useAdminReportData } from '@/hooks/useAdminReportData';
 import InsightsReportContent from '@/components/report/sections/InsightsReportContent';
 import DeepDiveReportContent from '@/components/report/sections/DeepDiveReportContent';
 import { getReportSchema, ReportType } from '@/utils/reports/schemaUtils';
+import { OverviewTab } from '@/components/admin/report-sections/OverviewTab';
+import { SwotTab } from '@/components/admin/report-sections/SwotTab';
+import { MetricsTab } from '@/components/admin/report-sections/MetricsTab';
+import { RecommendationsTab } from '@/components/admin/report-sections/RecommendationsTab';
 
 const AdminReportViewer = () => {
   const { archetypeId = '' } = useParams();
@@ -18,6 +23,7 @@ const AdminReportViewer = () => {
     return path.includes('insights-report') ? 'insights' : 'deepdive';
   });
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [activeTab, setActiveTab] = useState('overview');
 
   // Get the schema for the current report type
   const schemaType: ReportType = reportType === 'insights' ? 'insight' : 'deepDive';
@@ -91,6 +97,37 @@ const AdminReportViewer = () => {
     );
   }
 
+  const renderAdminTabs = () => {
+    if (!reportData) return null;
+
+    return (
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="mb-6">
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="swot">SWOT Analysis</TabsTrigger>
+          <TabsTrigger value="metrics">Metrics</TabsTrigger>
+          <TabsTrigger value="recommendations">Recommendations</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="overview">
+          <OverviewTab report={reportData} />
+        </TabsContent>
+        
+        <TabsContent value="swot">
+          <SwotTab report={reportData} />
+        </TabsContent>
+        
+        <TabsContent value="metrics">
+          <MetricsTab report={reportData} />
+        </TabsContent>
+        
+        <TabsContent value="recommendations">
+          <RecommendationsTab report={reportData} />
+        </TabsContent>
+      </Tabs>
+    );
+  };
+
   return (
     <div className="bg-white">
       {/* Admin control bar */}
@@ -145,18 +182,27 @@ const AdminReportViewer = () => {
       </div>
 
       {/* Report content */}
-      <div className="container mx-auto pb-12">
+      <div className="container mx-auto py-8">
         {reportData ? (
           <>
-            {reportType === 'insights' ? (
-              <InsightsReportContent archetype={reportData} />
-            ) : (
-              <DeepDiveReportContent 
-                archetype={reportData} 
-                userData={adminUserData}
-                averageData={defaultAverageData}
-              />
-            )}
+            {/* Admin tabbed view for detailed sections */}
+            <div className="mb-8">
+              {renderAdminTabs()}
+            </div>
+            
+            {/* Full report preview */}
+            <div className="mt-12 border-t pt-8">
+              <h2 className="text-xl font-semibold mb-4">Full Report Preview</h2>
+              {reportType === 'insights' ? (
+                <InsightsReportContent archetype={reportData} />
+              ) : (
+                <DeepDiveReportContent 
+                  archetype={reportData} 
+                  userData={adminUserData}
+                  averageData={defaultAverageData}
+                />
+              )}
+            </div>
           </>
         ) : (
           <div className="py-12 text-center">
