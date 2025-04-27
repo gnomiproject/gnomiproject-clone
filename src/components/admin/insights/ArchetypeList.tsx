@@ -154,4 +154,3 @@ const ArchetypeList = ({
 };
 
 export default ArchetypeList;
-

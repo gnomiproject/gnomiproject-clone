@@ -101,7 +101,8 @@ export function InsightsReportGenerator() {
           const report = reportData.find(r => r.archetype_id === archetype.id);
           if (report) {
             archetype.lastUpdated = report.last_updated;
-            archetype.status = 'success';
+            // Fix: Change 'success' to 'pending' to match the expected type
+            archetype.status = 'success' as 'pending' | 'success' | 'error';
           }
         });
       }
@@ -126,7 +127,8 @@ export function InsightsReportGenerator() {
   };
 
   const handleGenerateReports = async () => {
-    setIsGenerating(true);
+    // Fix: Remove setIsGenerating(true) as it's not defined in this scope
+    // The isGenerating state is managed by the useReportGeneration hook
     setError(null);
     setGenerationResult(null);
 
@@ -143,7 +145,7 @@ export function InsightsReportGenerator() {
       setArchetypes(prev => {
         return prev.map(archetype => ({
           ...archetype,
-          status: results.archetypeIds.includes(archetype.id) ? 'success' : 'error',
+          status: results.archetypeIds.includes(archetype.id) ? 'success' as const : 'error' as const,
           lastUpdated: results.archetypeIds.includes(archetype.id) ? new Date().toLocaleString() : archetype.lastUpdated
         }));
       });
@@ -257,4 +259,3 @@ export function InsightsReportGenerator() {
 }
 
 export default InsightsReportGenerator;
-
