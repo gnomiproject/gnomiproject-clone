@@ -23,7 +23,15 @@ const MetricComparisonCard = ({
 }: MetricComparisonCardProps) => {
   // Calculate the percentage difference
   const difference = calculatePercentageDifference(value, average);
-  const { formatted, isPositive, isBetter } = formatPercentageDifference(difference, title);
+  const percentageText = formatPercentageDifference(difference);
+  
+  // Determine if this is better or worse (lower is better for costs, etc.)
+  const lowerIsBetter = title.toLowerCase().includes('cost') || 
+    title.toLowerCase().includes('emergency') || 
+    title.toLowerCase().includes('risk');
+  
+  // Determine if this is positive or negative
+  const isPositive = (difference > 0 && !lowerIsBetter) || (difference < 0 && lowerIsBetter);
   
   // Determine display text
   const comparisonWord = difference > 0 ? "higher than" : "lower than";
@@ -36,7 +44,7 @@ const MetricComparisonCard = ({
   const comparisonText = `${Math.abs(difference).toFixed(1)}% ${comparisonWord} average (${formattedAverage})`;
   
   // Determine color for the comparison text
-  const textColor = isBetter ? "text-green-600" : "text-amber-600";
+  const textColor = isPositive ? "text-green-600" : "text-amber-600";
   
   return (
     <Card className={`overflow-hidden ${className}`}>

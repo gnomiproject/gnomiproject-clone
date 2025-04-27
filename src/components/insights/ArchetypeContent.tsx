@@ -7,10 +7,10 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   ChartBarIcon, 
-  ClipboardDocumentCheckIcon, 
+  ClipboardCheckIcon, 
   ChartPieIcon, 
   HeartIcon, 
-  LightBulbIcon 
+  LightbulbIcon 
 } from 'lucide-react';
 import { useArchetypeMetrics } from '@/hooks/archetype/useArchetypeMetrics';
 import { formatNumber } from '@/utils/formatters';

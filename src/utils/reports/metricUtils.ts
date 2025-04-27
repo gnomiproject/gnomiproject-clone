@@ -46,3 +46,33 @@ export const getMetricComparisonText = (value: number, average: number, metricNa
   
   return { text, color };
 };
+
+/**
+ * Organize metrics by category
+ */
+export const organizeMetricsByCategory = (data: any) => {
+  // Create a map to store metrics by category
+  const organizedMetrics: { [key: string]: any[] } = {};
+  
+  // Parse the data object and organize metrics by their prefix
+  Object.keys(data).forEach(key => {
+    if (key.includes('_')) {
+      // Extract category from key (e.g., "Demo" from "Demo_Average Age")
+      const category = key.split('_')[0];
+      
+      // Create the category array if it doesn't exist
+      if (!organizedMetrics[category]) {
+        organizedMetrics[category] = [];
+      }
+      
+      // Add the metric to its category
+      organizedMetrics[category].push({
+        metric: key,
+        value: data[key],
+        category: category
+      });
+    }
+  });
+  
+  return organizedMetrics;
+};
