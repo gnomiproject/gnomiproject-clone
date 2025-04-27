@@ -1,12 +1,12 @@
-
-import { useState, useEffect, useCallback } from 'react';
-import { getDataSource } from '@/utils/reports/schemaUtils';
-import type { ReportType } from '@/utils/reports/schemaUtils';
+import { useState, useCallback, useEffect } from 'react';
+import { getDataSource } from '@/utils/reports/schemaMapping';
+import { supabase } from '@/integrations/supabase/client';
+import { ReportType } from '@/types/reports';
 import { getFromCache, setInCache, clearFromCache } from '@/utils/reports/reportCache';
 import { processReportData, AverageData } from '@/utils/reports/reportDataTransforms';
-import { fetchReportData, fetchTokenAccess } from './useFetchReportData';
 import { toast } from "@/hooks/use-toast";
 import { ArchetypeDetailedData } from '@/types/archetype';
+import { fetchTokenAccess, fetchReportData } from './useFetchReportData';
 
 interface UseReportDataOptions {
   archetypeId?: string;

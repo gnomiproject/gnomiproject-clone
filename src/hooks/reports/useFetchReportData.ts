@@ -1,8 +1,8 @@
-
 import { supabase } from '@/integrations/supabase/client';
-import { ReportType } from '@/utils/reports/schemaUtils';
+import { ReportType } from '@/types/reports';
 import type { ReportDataSource } from '@/utils/reports/dataSourceUtils';
 import { ArchetypeDetailedData } from '@/types/archetype';
+import { getDataSource } from '@/utils/reports/schemaMapping';
 
 interface TokenAccessResponse {
   data: {
@@ -119,9 +119,10 @@ const mapToArchetypeDetailedData = (data: any): ArchetypeDetailedData | null => 
 
 export const fetchReportData = async (
   archetypeId: string,
-  reportType: ReportType,
-  dataSourceTable: ReportDataSource
+  reportType: ReportType
 ): Promise<ArchetypeDetailedData | null> => {
+  const dataSourceTable = getDataSource(reportType);
+  
   const { data, error } = await supabase
     .from(dataSourceTable)
     .select('*')
@@ -130,8 +131,7 @@ export const fetchReportData = async (
 
   if (error) throw error;
   
-  // Map the raw data to our application model
-  return mapToArchetypeDetailedData(data);
+  return data ? mapToArchetypeDetailedData(data) : null;
 };
 
 export const fetchTokenAccess = async (archetypeId: string, token: string): Promise<TokenAccessResponse> => {
