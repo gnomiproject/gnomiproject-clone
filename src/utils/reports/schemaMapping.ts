@@ -36,14 +36,14 @@ export const findSharedFields = (insightSection: string, deepDiveSection: string
 };
 
 // Get corresponding deep dive sections for an insight section
-export const getCorrespondingDeepDiveSections = (insightSection: string): string[] => {
+export const getCorrespondingDeepDiveSections = (insightSection: string): readonly string[] => {
   return sectionMappings[insightSection as keyof typeof sectionMappings] || [];
 };
 
 // Get all fields from corresponding deep dive sections for an insight section
 export const getMappedDeepDiveFields = (insightSection: string): string[] => {
   const deepDiveSections = getCorrespondingDeepDiveSections(insightSection);
-  return deepDiveSections.flatMap(section => getDeepDiveFields(section));
+  return [...deepDiveSections].flatMap(section => getDeepDiveFields(section));
 };
 
 // Helper to check if a field exists in both report types
@@ -53,4 +53,3 @@ export const isSharedField = (fieldName: string): boolean => {
   
   return insightFields.includes(fieldName) && deepDiveFields.includes(fieldName);
 };
-
