@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface ReportErrorProps {
@@ -30,7 +30,7 @@ const ReportError = ({
         <div className="space-y-3">
           <Button 
             onClick={onAction} 
-            className="px-6 py-3 flex items-center gap-2 mx-auto"
+            className="w-full px-6 py-3 flex items-center justify-center gap-2"
             size="lg"
           >
             {actionLabel.toLowerCase().includes('try') && (
@@ -39,16 +39,22 @@ const ReportError = ({
             {actionLabel}
           </Button>
           
-          {secondaryAction && secondaryActionLabel && (
-            <div>
-              <Button
-                variant="link"
-                onClick={secondaryAction}
-                className="mt-2"
-              >
-                {secondaryActionLabel}
-              </Button>
-            </div>
+          {secondaryAction && secondaryActionLabel ? (
+            <Button
+              variant="outline"
+              onClick={secondaryAction}
+              className="w-full mt-3"
+            >
+              {secondaryActionLabel}
+            </Button>
+          ) : (
+            <Button
+              variant="ghost"
+              onClick={() => window.location.href = '/'}
+              className="w-full mt-2 flex items-center justify-center gap-2"
+            >
+              <Home className="h-4 w-4" /> Return Home
+            </Button>
           )}
         </div>
       </div>
