@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import DNAHelix from './DNAHelix';
 import SectionTitle from '@/components/shared/SectionTitle';
 import { ArchetypeId } from '@/types/archetype';
@@ -12,6 +12,18 @@ import FamilyDetailView from './FamilyDetailView';
 import EmptyExplorerState from './EmptyExplorerState';
 
 const InteractiveDNAExplorer = () => {
+  const renderCountRef = useRef(0);
+  
+  // Log component lifecycle
+  useEffect(() => {
+    renderCountRef.current += 1;
+    console.log(`InteractiveDNAExplorer: Mount/Render #${renderCountRef.current}`);
+    
+    return () => {
+      console.log('InteractiveDNAExplorer: Unmounting');
+    };
+  }, []);
+  
   const { 
     archetypes, 
     families, 
@@ -83,6 +95,8 @@ const InteractiveDNAExplorer = () => {
   const formattedArchetypeSummaries = useMemo(() => {
     if (!archetypes) return [];
     
+    console.log(`InteractiveDNAExplorer: Formatting archetype summaries (sequence #${renderCountRef.current})`);
+    
     return archetypes.map(archetype => ({
       id: archetype.id,
       familyId: archetype.family_id,
@@ -92,7 +106,7 @@ const InteractiveDNAExplorer = () => {
       keyCharacteristics: archetype.key_characteristics || [],
       color: archetype.hex_color,
     }));
-  }, [archetypes, getFamilyById]);
+  }, [archetypes, getFamilyById, renderCountRef]);
 
   if (isLoading) {
     return (

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useRef, useEffect } from 'react';
 import { useArchetypes } from '@/hooks/useArchetypes';
 import { ArchetypeId } from '@/types/archetype';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
@@ -22,6 +23,18 @@ interface ArchetypeReportProps {
 const ArchetypeReport = ({ archetypeId, reportData, dataSource }: ArchetypeReportProps) => {
   const { getArchetypeEnhanced, getFamilyById } = useArchetypes();
   const [activeTab, setActiveTab] = useState('overview');
+  const renderCountRef = useRef(0);
+  const processingRef = useRef(false);
+  
+  // Log component lifecycle for debugging
+  useEffect(() => {
+    renderCountRef.current += 1;
+    console.log(`ArchetypeReport: Mount/Render #${renderCountRef.current} for ${archetypeId}`);
+    
+    return () => {
+      console.log(`ArchetypeReport: Unmounting for ${archetypeId}`);
+    };
+  }, [archetypeId]);
   
   // If no data was provided, fallback to local data
   const localArchetype = getArchetypeEnhanced(archetypeId);

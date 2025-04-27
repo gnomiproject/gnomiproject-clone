@@ -1,5 +1,5 @@
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef, useEffect } from 'react';
 import { ArchetypeId } from '@/types/archetype';
 import { useArchetypes } from '@/hooks/useArchetypes';
 import ArchetypeContent from './ArchetypeContent';
@@ -12,12 +12,36 @@ interface DetailedArchetypeReportProps {
 
 const DetailedArchetypeReport = ({ archetypeId, onRetakeAssessment }: DetailedArchetypeReportProps) => {
   const { getArchetypeDetailedById } = useArchetypes();
+  const renderCountRef = useRef(0);
+  const processingRef = useRef(false);
   const { archetypeData: dbArchetypeData, isLoading } = useGetArchetype(archetypeId);
   
-  // Use memoization to prevent redundant calculations
+  // Log component lifecycle for debugging
+  useEffect(() => {
+    renderCountRef.current += 1;
+    console.log(`DetailedArchetypeReport: Mount/Render #${renderCountRef.current} for ${archetypeId}`);
+    
+    return () => {
+      console.log(`DetailedArchetypeReport: Unmounting for ${archetypeId}`);
+    };
+  }, [archetypeId]);
+  
+  // Use memoization with strict dependency tracking to prevent redundant calculations
   const archetypeData = useMemo(() => {
-    console.log(`DetailedArchetypeReport: Processing data for ${archetypeId}`);
-    return dbArchetypeData || getArchetypeDetailedById(archetypeId);
+    // Skip processing if already in progress
+    if (processingRef.current) {
+      console.log(`DetailedArchetypeReport: Skipping redundant processing for ${archetypeId} (already in progress)`);
+      return dbArchetypeData || getArchetypeDetailedById(archetypeId);
+    }
+    
+    try {
+      processingRef.current = true;
+      console.log(`DetailedArchetypeReport: Processing data for ${archetypeId} (sequence #${renderCountRef.current})`);
+      return dbArchetypeData || getArchetypeDetailedById(archetypeId);
+    } finally {
+      // Reset processing flag when done
+      processingRef.current = false;
+    }
   }, [dbArchetypeData, getArchetypeDetailedById, archetypeId]);
   
   // Skip rendering if loading to prevent flicker
