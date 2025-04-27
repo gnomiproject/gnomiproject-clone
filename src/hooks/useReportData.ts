@@ -6,7 +6,7 @@ import { getFromCache, setInCache, clearFromCache } from '@/utils/reports/report
 import { processReportData, AverageData } from '@/utils/reports/reportDataTransforms';
 import { toast } from "@/hooks/use-toast";
 import { ArchetypeDetailedData } from '@/types/archetype';
-import { fetchTokenAccess, fetchReportData } from './useFetchReportData';
+import { fetchTokenAccess, fetchReportData } from './reports/useFetchReportData';
 
 interface UseReportDataOptions {
   archetypeId?: string;
@@ -166,4 +166,3 @@ export const useReportData = ({
     refreshData
   };
 };
-

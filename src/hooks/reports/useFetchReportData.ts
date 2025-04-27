@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { ReportType } from '@/types/reports';
 import type { ReportDataSource } from '@/utils/reports/dataSourceUtils';
@@ -15,6 +16,33 @@ interface TokenAccessResponse {
   } | null;
   error: any;
 }
+
+export const fetchTokenAccess = async (archetypeId: string, token: string): Promise<TokenAccessResponse> => {
+  return await supabase
+    .from('report_requests')
+    .select('id, archetype_id, name, organization, email, created_at')
+    .eq('archetype_id', archetypeId)
+    .eq('access_token', token)
+    .gt('expires_at', new Date().toISOString())
+    .maybeSingle();
+};
+
+export const fetchReportData = async (
+  archetypeId: string,
+  reportType: ReportType
+): Promise<ArchetypeDetailedData | null> => {
+  const dataSourceTable = getDataSource(reportType);
+  
+  const { data, error } = await supabase
+    .from(dataSourceTable as any)
+    .select('*')
+    .eq('archetype_id', archetypeId)
+    .maybeSingle();
+
+  if (error) throw error;
+  
+  return data ? mapToArchetypeDetailedData(data) : null;
+};
 
 // Function to map raw database fields to our application model
 const mapToArchetypeDetailedData = (data: any): ArchetypeDetailedData | null => {
@@ -115,31 +143,4 @@ const mapToArchetypeDetailedData = (data: any): ArchetypeDetailedData | null => 
         : []
     }
   };
-};
-
-export const fetchReportData = async (
-  archetypeId: string,
-  reportType: ReportType
-): Promise<ArchetypeDetailedData | null> => {
-  const dataSourceTable = getDataSource(reportType);
-  
-  const { data, error } = await supabase
-    .from(dataSourceTable as any)
-    .select('*')
-    .eq('archetype_id', archetypeId)
-    .maybeSingle();
-
-  if (error) throw error;
-  
-  return data ? mapToArchetypeDetailedData(data) : null;
-};
-
-export const fetchTokenAccess = async (archetypeId: string, token: string): Promise<TokenAccessResponse> => {
-  return await supabase
-    .from('report_requests')
-    .select('id, archetype_id, name, organization, email, created_at')
-    .eq('archetype_id', archetypeId)
-    .eq('access_token', token)
-    .gt('expires_at', new Date().toISOString())
-    .maybeSingle();
 };
