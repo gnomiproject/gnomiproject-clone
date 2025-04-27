@@ -1,10 +1,10 @@
 
 import React from 'react';
-import { ArchetypeInsightsList } from './ArchetypeInsightsList';
-import { ArchetypeDeepDiveList } from './ArchetypeDeepDiveList';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Activity, FileSearch } from 'lucide-react';
+import { ArchetypeInsightsList } from './ArchetypeInsightsList';
+import { ArchetypeDeepDiveList } from './ArchetypeDeepDiveList';
 
 const AdminReportsPanel = () => {
   return (
