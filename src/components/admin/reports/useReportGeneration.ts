@@ -2,69 +2,128 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { v4 as uuidv4 } from 'uuid';
+import { calculatePercentageDifference } from '@/utils/reports/metricUtils';
 
+/**
+ * Hook to handle report generation and management
+ */
 export const useReportGeneration = () => {
-  const [isGenerating, setIsGenerating] = useState<string | null>(null);
-  const [isDeleting, setIsDeleting] = useState<string | null>(null);
-  const [lastGeneratedUrl, setLastGeneratedUrl] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [lastGeneratedUrl, setLastGeneratedUrl] = useState('');
 
+  /**
+   * Generate a report for a specific archetype
+   */
   const generateReport = async (archetypeId: string) => {
+    setIsGenerating(true);
+    
     try {
-      setIsGenerating(archetypeId);
-      const expiryDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-      const accessToken = crypto.randomUUID();
+      // Fetch the archetype data from the level4_deepdive_report_data table
+      const { data: archetypeData, error: archetypeError } = await supabase
+        .from('level4_deepdive_report_data')
+        .select('*')
+        .eq('archetype_id', archetypeId)
+        .single();
       
-      const { data, error } = await supabase
+      if (archetypeError) {
+        throw new Error(`Error fetching archetype data: ${archetypeError.message}`);
+      }
+      
+      // Fetch average data for comparisons
+      const { data: averageData, error: averageError } = await supabase
+        .from('level4_deepdive_report_data')
+        .select('*')
+        .eq('archetype_id', 'All_Average')
+        .single();
+        
+      if (averageError) {
+        console.warn(`Warning: Could not fetch average data: ${averageError.message}`);
+      }
+      
+      // Generate a unique access token
+      const accessToken = uuidv4();
+
+      // Calculate expiration date (30 days from now)
+      const expiryDate = new Date();
+      expiryDate.setDate(expiryDate.getDate() + 30);
+      
+      // Create a report request entry
+      const { data: reportData, error: reportError } = await supabase
         .from('report_requests')
         .insert({
+          id: uuidv4(),
           archetype_id: archetypeId,
           access_token: accessToken,
           status: 'active',
-          expires_at: expiryDate.toISOString(),
-          name: 'Admin Generated',
-          organization: 'Admin Access',
-          email: 'admin@example.com',
           created_at: new Date().toISOString(),
-          id: crypto.randomUUID()
+          expires_at: expiryDate.toISOString(),
+          name: 'Admin Generated Report',
+          organization: 'Admin',
+          email: 'admin@example.com'
         })
         .select();
+        
+      if (reportError) {
+        throw new Error(`Error creating report: ${reportError.message}`);
+      }
 
-      if (error) throw error;
-
-      const reportUrl = `${window.location.origin}/report/${archetypeId}/${accessToken}`;
-      setLastGeneratedUrl(reportUrl);
-      await navigator.clipboard.writeText(reportUrl);
-      toast.success('Report generated and link copied to clipboard');
+      // Generate the secure URL
+      const baseUrl = window.location.origin;
+      const reportUrl = `${baseUrl}/report/${archetypeId}/${accessToken}`;
       
-      return { data, url: reportUrl };
-    } catch (error) {
+      // Set the last generated URL for display
+      setLastGeneratedUrl(reportUrl);
+      
+      toast.success("Report Generated", {
+        description: `Successfully generated report for ${archetypeId.toLowerCase()} ${archetypeData.archetype_name || ''}`,
+      });
+      
+      return reportUrl;
+    } catch (error: any) {
+      toast.error("Report Generation Failed", {
+        description: error.message,
+      });
       console.error('Error generating report:', error);
-      toast.error('Failed to generate report: ' + (error as Error).message);
       throw error;
     } finally {
-      setIsGenerating(null);
+      setIsGenerating(false);
     }
   };
 
+  /**
+   * Delete a report
+   */
   const deleteReport = async (reportId: string) => {
+    setIsDeleting(true);
+    
     try {
-      setIsDeleting(reportId);
       const { error } = await supabase
         .from('report_requests')
         .delete()
         .eq('id', reportId);
-
-      if (error) throw error;
-      toast.success('Report deleted successfully');
-    } catch (error) {
+        
+      if (error) {
+        throw error;
+      }
+      
+      toast.success("Report Deleted", {
+        description: "The report access has been revoked.",
+      });
+    } catch (error: any) {
       console.error('Error deleting report:', error);
-      toast.error('Failed to delete report: ' + (error as Error).message);
+      
+      toast.error("Failed to Delete Report", {
+        description: error.message,
+      });
+      
       throw error;
     } finally {
-      setIsDeleting(null);
+      setIsDeleting(false);
     }
   };
-
+  
   return {
     generateReport,
     deleteReport,

@@ -30,3 +30,71 @@ export function organizeMetricsByCategory(metrics: any): OrganizedMetrics {
   console.log(`Organized into ${Object.keys(organized).length} categories`);
   return organized;
 }
+
+/**
+ * Calculates the percentage difference between two values
+ * @param value The current value
+ * @param average The average/baseline value to compare against
+ * @returns Percentage difference as a number (positive means higher than average)
+ */
+export function calculatePercentageDifference(value: number, average: number): number {
+  if (average === 0) return 0; // Avoid division by zero
+  return ((value - average) / average) * 100;
+}
+
+/**
+ * Formats the percentage difference with a + or - sign and determines if higher is better
+ * based on the metric type
+ * @param difference The calculated percentage difference
+ * @param metricName The name of the metric (used to determine if higher is better)
+ * @returns Formatted string with appropriate sign and color indication
+ */
+export function formatPercentageDifference(difference: number, metricName: string): {
+  formatted: string;
+  isPositive: boolean;
+  isBetter: boolean;
+} {
+  // Determine if a higher value is better for this metric (could be expanded based on metric types)
+  const higherIsBetter = !metricName.includes('Cost') && 
+                         !metricName.includes('Risk') && 
+                         !metricName.includes('Emergency') &&
+                         !metricName.includes('Inpatient') &&
+                         !metricName.includes('Non-Utilizers');
+  
+  const isPositive = difference > 0;
+  const sign = isPositive ? '+' : '';
+  const formatted = `${sign}${difference.toFixed(1)}%`;
+  
+  // Determine if the difference is "better" based on the metric type
+  const isBetter = (higherIsBetter && isPositive) || (!higherIsBetter && !isPositive);
+  
+  return {
+    formatted,
+    isPositive,
+    isBetter
+  };
+}
+
+/**
+ * Gets comparison text for a metric value compared to average
+ * @param value Current value
+ * @param average Average/baseline value
+ * @param metricName Name of the metric
+ * @returns Formatted comparison string with appropriate styling information
+ */
+export function getMetricComparisonText(value: number, average: number, metricName: string): {
+  text: string;
+  color: string;
+} {
+  const difference = calculatePercentageDifference(value, average);
+  const { formatted, isBetter } = formatPercentageDifference(difference, metricName);
+  
+  // Choose the appropriate text based on whether the difference is positive or negative
+  const comparisonWord = difference > 0 ? "higher" : "lower";
+  const text = `${Math.abs(difference).toFixed(1)}% ${comparisonWord} than average`;
+  
+  // Choose color based on whether this difference is "better" or "worse"
+  const color = isBetter ? "text-green-600" : "text-amber-600";
+  
+  return { text, color };
+}

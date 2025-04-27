@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { 
@@ -13,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, Download, FileText, Copy, Check } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { calculatePercentageDifference } from '@/utils/reports/metricUtils';
 
 interface ReportDetailViewProps {
   archetypeId: string | null;
@@ -33,6 +33,7 @@ const ReportDetailView = ({ archetypeId, isOpen, onClose }: ReportDetailViewProp
   const [archetypeName, setArchetypeName] = useState('');
   const [report, setReport] = useState<ReportData | null>(null);
   const [copied, setCopied] = useState(false);
+  const [averageData, setAverageData] = useState<any>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -57,6 +58,18 @@ const ReportDetailView = ({ archetypeId, isOpen, onClose }: ReportDetailViewProp
       if (archetypeData) {
         setArchetypeName(archetypeData.name);
       }
+
+      // Fetch the average data (All_Average)
+      const { data: avgData } = await supabase
+        .from('level4_deepdive_report_data')
+        .select('*')
+        .eq('archetype_id', 'All_Average')
+        .maybeSingle();
+
+      if (avgData) {
+        setAverageData(avgData);
+        console.log("Average data loaded:", avgData);
+      }
       
       // Get the full report data
       const { data: reportData } = await supabase
@@ -67,6 +80,13 @@ const ReportDetailView = ({ archetypeId, isOpen, onClose }: ReportDetailViewProp
       
       if (reportData) {
         setReport(reportData);
+
+        // Process metrics with correct percentages if we have average data
+        if (avgData && reportData.detailed_metrics) {
+          // Add percentage difference calculations to the metrics
+          const processedMetrics = processMetricsWithPercentages(reportData.detailed_metrics, avgData);
+          reportData.detailed_metrics = processedMetrics;
+        }
       } else {
         toast({
           title: "Report Not Found",
@@ -84,6 +104,35 @@ const ReportDetailView = ({ archetypeId, isOpen, onClose }: ReportDetailViewProp
     } finally {
       setLoading(false);
     }
+  };
+
+  // Process metrics to add correct percentage differences
+  const processMetricsWithPercentages = (metrics: any, averageData: any) => {
+    if (!metrics || !averageData) return metrics;
+
+    const processedMetrics = { ...metrics };
+    
+    // Go through metrics categories
+    Object.keys(processedMetrics).forEach(category => {
+      if (typeof processedMetrics[category] === 'object') {
+        // Process each metric in the category
+        Object.keys(processedMetrics[category]).forEach(metricKey => {
+          const fullMetricKey = `${category}_${metricKey}`;
+          const currentValue = processedMetrics[category][metricKey].value;
+          const avgValue = averageData[fullMetricKey];
+
+          if (currentValue && avgValue) {
+            const percentDiff = calculatePercentageDifference(currentValue, avgValue);
+            processedMetrics[category][metricKey].percentDifference = percentDiff;
+            processedMetrics[category][metricKey].formattedDifference = 
+              `${percentDiff > 0 ? '+' : ''}${percentDiff.toFixed(1)}%`;
+            processedMetrics[category][metricKey].average = avgValue;
+          }
+        });
+      }
+    });
+
+    return processedMetrics;
   };
 
   const exportReportData = () => {
@@ -139,13 +188,46 @@ const ReportDetailView = ({ archetypeId, isOpen, onClose }: ReportDetailViewProp
     return JSON.stringify(data, null, 2);
   };
 
+  // Enhanced display for detailed metrics
+  const renderDetailedMetrics = () => {
+    if (!report?.detailed_metrics) return <p>No detailed metrics available</p>;
+    
+    return (
+      <div className="space-y-6">
+        {Object.entries(report.detailed_metrics).map(([category, metrics]: [string, any]) => (
+          <div key={category} className="border rounded-lg p-4">
+            <h4 className="text-lg font-medium mb-3 capitalize">{category} Metrics</h4>
+            <div className="space-y-4">
+              {Object.entries(metrics).map(([metricName, metricData]: [string, any]) => (
+                <div key={metricName} className="bg-gray-50 p-3 rounded">
+                  <div className="flex justify-between">
+                    <span className="font-medium">{metricName}</span>
+                    <span className="font-bold">{metricData.value}</span>
+                  </div>
+                  {metricData.average && (
+                    <div className="text-sm flex justify-between mt-1">
+                      <span className="text-gray-500">Average: {metricData.average}</span>
+                      <span className={metricData.percentDifference > 0 ? "text-green-600" : "text-amber-600"}>
+                        {metricData.formattedDifference}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-auto">
         <DialogHeader>
           <DialogTitle className="text-xl flex items-center gap-2">
             <FileText className="h-5 w-5" />
-            {loading ? "Loading Report..." : `Report: ${archetypeName}`}
+            {loading ? "Loading Report..." : `Report: ${archetypeId ? archetypeId.toLowerCase() : ''} ${archetypeName}`}
           </DialogTitle>
           <DialogDescription>
             Review the generated report data for this archetype
@@ -193,9 +275,7 @@ const ReportDetailView = ({ archetypeId, isOpen, onClose }: ReportDetailViewProp
               
               <TabsContent value="metrics" className="p-4 border rounded-md mt-2">
                 <h3 className="text-lg font-medium mb-2">Detailed Metrics</h3>
-                <pre className="bg-gray-100 p-4 rounded-md text-sm overflow-auto max-h-96">
-                  {formatJson(report.detailed_metrics)}
-                </pre>
+                {renderDetailedMetrics()}
               </TabsContent>
               
               <TabsContent value="swot" className="p-4 border rounded-md mt-2">
