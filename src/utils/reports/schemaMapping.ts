@@ -8,7 +8,7 @@ export const sectionMappings = {
   overview: ['archetypeProfile'],
   metrics: ['demographics', 'costAnalysis', 'utilizationPatterns'],
   swot: ['swotAnalysis'],
-  diseaseAndCare: ['diseaseManagement', 'careGaps'],
+  diseaseAndCare: ['diseasePrevalence', 'careGaps'],
   recommendations: ['strategicRecommendations']
 } as const;
 
@@ -53,4 +53,16 @@ export const isSharedField = (fieldName: string): boolean => {
   const deepDiveFields = Object.values(deepDiveReportSchema).flatMap(section => section.fields);
   
   return insightFields.includes(fieldName) && deepDiveFields.includes(fieldName);
+};
+
+// Get fields for a specific report type and section
+export const getFieldsForReport = (reportType: ReportType, sectionKey: string): string[] => {
+  return reportType === 'insight' 
+    ? getInsightFields(sectionKey) 
+    : getDeepDiveFields(sectionKey);
+};
+
+// Get the appropriate data source based on report type
+export const getDataSource = (reportType: ReportType): string => {
+  return reportType === 'insight' ? 'level3_report_data' : 'level4_deepdive_report_data';
 };
