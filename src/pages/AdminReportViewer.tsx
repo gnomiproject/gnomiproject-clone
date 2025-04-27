@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -40,12 +41,17 @@ const AdminReportViewer = () => {
         
         console.log(`AdminReportViewer: Fetching ${reportType} data for ${archetypeId} from ${primaryTable}`);
         
-        const { data: archetypeData } = await supabase
+        // Get basic information about the archetype
+        const { data: archetypeData, error: archetypeError } = await supabase
           .from('Core_Archetype_Overview')
-          .select('name, code')
+          .select('name, id')
           .eq('id', archetypeId)
           .single();
           
+        if (archetypeError) {
+          console.warn('Error fetching archetype data:', archetypeError);
+        }
+        
         const { data, error } = await supabase
           .from(primaryTable)
           .select('archetype_id, archetype_name, short_description, long_description, family_id')
@@ -55,9 +61,12 @@ const AdminReportViewer = () => {
         if (error) throw error;
         
         if (data) {
+          // Use uppercase archetype ID as a fallback if we don't have a specific code
+          const archetypeCode = archetypeId.toUpperCase();
+          
           setRawData({
             ...data,
-            code: archetypeData?.code || archetypeId.toUpperCase(),
+            code: archetypeCode,
             reportType: isInsightsReport ? 'Insights' : 'Deep Dive'
           });
           setDataSource(primaryTable);
@@ -76,9 +85,12 @@ const AdminReportViewer = () => {
         if (fallbackError) throw fallbackError;
         
         if (fallbackData) {
+          // Use uppercase archetype ID as a fallback if we don't have a specific code
+          const archetypeCode = archetypeId.toUpperCase();
+          
           setRawData({
             ...fallbackData,
-            code: archetypeData?.code || archetypeId.toUpperCase(),
+            code: archetypeCode,
             reportType: isInsightsReport ? 'Insights' : 'Deep Dive'
           });
           setDataSource(`${fallbackTable} (fallback)`);
