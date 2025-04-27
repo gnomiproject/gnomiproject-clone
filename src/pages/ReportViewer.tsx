@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import ArchetypeReport from '@/components/insights/ArchetypeReport';
 import DeepDiveReport from '@/components/report/DeepDiveReport';
@@ -8,9 +8,10 @@ import { isValidArchetypeId } from '@/utils/archetypeValidation';
 import { ArchetypeId } from '@/types/archetype';
 import { useArchetypes } from '@/hooks/useArchetypes';
 import { useGetArchetype } from '@/hooks/useGetArchetype';
+import { useReportData } from '@/hooks/useReportData';
 
 const ReportViewer = () => {
-  const { archetypeId = '' } = useParams();
+  const { archetypeId = '', token } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const { getArchetypeDetailedById } = useArchetypes();
@@ -30,7 +31,49 @@ const ReportViewer = () => {
     );
   }
 
-  // Get the archetype data with full database data
+  // For deep dive reports with tokens, use the useReportData hook
+  if (!isInsightsReport && token) {
+    const { 
+      reportData, 
+      userData, 
+      averageData, 
+      isLoading, 
+      isValidAccess, 
+      error, 
+      dataSource 
+    } = useReportData({ 
+      archetypeId, 
+      token, 
+      isInsightsReport: false 
+    });
+
+    if (isLoading) {
+      // Show loading state
+      return <div className="flex justify-center items-center min-h-screen">Loading report data...</div>;
+    }
+
+    if (!isValidAccess || error) {
+      return (
+        <ReportError 
+          title="Access Denied"
+          message={`Unable to access this report: ${error?.message || 'Invalid or expired token'}`}
+          actionLabel="Back to Home"
+          onAction={() => navigate('/')}
+        />
+      );
+    }
+
+    return (
+      <DeepDiveReport 
+        reportData={reportData} 
+        userData={userData} 
+        averageData={averageData}
+        loading={isLoading}
+      />
+    );
+  }
+
+  // Get the archetype data with full database data for non-token cases
   const { archetypeData, isLoading, error, dataSource } = useGetArchetype(archetypeId as ArchetypeId);
   
   // Fallback to local data if there's an error or while loading
@@ -68,7 +111,7 @@ const ReportViewer = () => {
     "Cost_Medical & RX Paid Amount PMPY": 5000
   };
 
-  // Directly render the appropriate report type based on the route
+  // Render the appropriate report type based on the route
   return isInsightsReport ? (
     <ArchetypeReport 
       archetypeId={archetypeId as ArchetypeId} 

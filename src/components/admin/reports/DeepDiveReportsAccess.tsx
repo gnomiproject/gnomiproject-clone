@@ -57,19 +57,36 @@ const DeepDiveReportsAccess = () => {
   };
 
   const handleGenerateReport = async (archetypeId: string) => {
-    await generateReport(archetypeId);
-    refetch();
+    try {
+      const reportUrl = await generateReport(archetypeId);
+      console.log("Generated report with URL:", reportUrl);
+      refetch();
+    } catch (error) {
+      console.error("Error generating report:", error);
+      toast.error("Failed to generate report");
+    }
   };
 
   const handleDeleteReport = async (reportId: string) => {
-    await deleteReport(reportId);
-    refetch();
+    try {
+      await deleteReport(reportId);
+      toast.success("Report deleted successfully");
+      refetch();
+    } catch (error) {
+      console.error("Error deleting report:", error);
+      toast.error("Failed to delete report");
+    }
   };
 
   const copyReportLink = async (archetypeId: string, token: string) => {
     const url = `${window.location.origin}/report/${archetypeId}/${token}`;
-    await navigator.clipboard.writeText(url);
-    toast.success('Report link copied to clipboard');
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success('Report link copied to clipboard');
+    } catch (error) {
+      console.error("Error copying to clipboard:", error);
+      toast.error("Failed to copy to clipboard");
+    }
   };
 
   const openReportInNewTab = (archetypeId: string, token: string) => {
