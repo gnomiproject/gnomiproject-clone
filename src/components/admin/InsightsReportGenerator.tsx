@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -83,12 +82,12 @@ export function InsightsReportGenerator() {
         return;
       }
 
-      const archetypeArray = archetypeData.map(archetype => ({
+      const archetypeArray: Archetype[] = archetypeData.map(archetype => ({
         id: archetype.id,
         name: archetype.name || 'Unnamed Archetype',
         code: archetype.id.toUpperCase(),
         lastUpdated: null,
-        status: 'pending' as const
+        status: 'pending'
       }));
 
       // Check existing reports
@@ -101,8 +100,8 @@ export function InsightsReportGenerator() {
           const report = reportData.find(r => r.archetype_id === archetype.id);
           if (report) {
             archetype.lastUpdated = report.last_updated;
-            // Fix: Change 'success' to 'pending' to match the expected type
-            archetype.status = 'success' as 'pending' | 'success' | 'error';
+            // Use type assertion to explicitly type the status
+            archetype.status = report.last_updated ? 'success' : 'pending';
           }
         });
       }
@@ -145,7 +144,8 @@ export function InsightsReportGenerator() {
       setArchetypes(prev => {
         return prev.map(archetype => ({
           ...archetype,
-          status: results.archetypeIds.includes(archetype.id) ? 'success' as const : 'error' as const,
+          // Use type assertion to explicitly type the status
+          status: results.archetypeIds.includes(archetype.id) ? 'success' : 'error',
           lastUpdated: results.archetypeIds.includes(archetype.id) ? new Date().toLocaleString() : archetype.lastUpdated
         }));
       });
