@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { ArchetypeDetailedData, ArchetypeId } from '@/types/archetype';
 import ReportRequestForm, { FormData } from './premium-report/ReportRequestForm';
 import ReportAccessLink from './premium-report/ReportAccessLink';
+import { supabase } from '@/integrations/supabase/client';
 
 interface PremiumReportProps {
   archetypeId: ArchetypeId;
@@ -27,11 +28,29 @@ const PremiumReport = ({ archetypeId, assessmentResult, assessmentAnswers, arche
     try {
       const token = uuidv4();
       
+      // Store the request in the database to validate it later
+      const { error } = await supabase.from('report_requests').insert({
+        id: uuidv4(),
+        name: values.name,
+        email: values.email,
+        organization: values.organization,
+        archetype_id: archetypeId,
+        access_token: token,
+        status: 'pending',
+        assessment_result: assessmentResult || null,
+        assessment_answers: assessmentAnswers || null,
+        created_at: new Date().toISOString(),
+        // Set expiration to 30 days from now
+        expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+      
       console.log('Requesting full report:', {
         ...values,
         archetypeId,
-        assessmentResult,
-        assessmentAnswers,
         accessToken: token,
       });
       

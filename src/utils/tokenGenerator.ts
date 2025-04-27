@@ -3,16 +3,16 @@
  * Utility for generating and managing secure report access tokens
  */
 
+import { v4 as uuidv4 } from 'uuid';
+
 /**
  * Generate a secure token for accessing a specific archetype report
  * @param archetypeId The ID of the archetype
  * @returns The generated token
  */
 export const generateReportAccessToken = (archetypeId: string): string => {
-  // Generate a random token using current timestamp and a random component
-  const timestamp = Date.now().toString();
-  const randomComponent = Math.random().toString(36).substring(2, 15);
-  const token = `${timestamp}-${randomComponent}`;
+  // Generate a random token using UUID v4 for better security
+  const token = uuidv4();
   
   // Store the token in localStorage with archetype ID as key
   const storedTokens = JSON.parse(localStorage.getItem('admin_report_tokens') || '{}');

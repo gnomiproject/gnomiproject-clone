@@ -67,12 +67,16 @@ const ReportViewer = () => {
         
         if (token) {
           // Step 1: Check if the token is valid and get user data
+          console.log('Checking token validity:', { archetypeId, token });
+          
           const { data: userData, error: userError } = await supabase
             .from('report_requests')
             .select('*')
             .eq('access_token', token)
             .eq('archetype_id', archetypeId)
             .maybeSingle();
+
+          console.log('Token check result:', { userData, userError });
 
           if (userError) {
             console.error('Error fetching user data:', userError);
@@ -82,6 +86,7 @@ const ReportViewer = () => {
           }
 
           if (!userData) {
+            console.error('No user data found for token:', token);
             setIsValidToken(false);
             setIsLoading(false);
             return;
@@ -90,6 +95,7 @@ const ReportViewer = () => {
           // Check if the report has expired
           const isExpired = userData.expires_at && new Date(userData.expires_at) < new Date();
           if (isExpired) {
+            console.error('Report link expired');
             setIsValidToken(false);
             setIsLoading(false);
             toast.error('This report link has expired.');
@@ -100,7 +106,8 @@ const ReportViewer = () => {
           setUserData(userData);
           setIsValidToken(true);
         } else {
-          // If no token in URL, provide default user data for direct archetypeId access
+          // If no token in URL, check if it's an admin user or provide a demo view
+          console.log('No token provided, using demo mode');
           setUserData({
             name: 'Demo User',
             organization: 'Demo Organization',
