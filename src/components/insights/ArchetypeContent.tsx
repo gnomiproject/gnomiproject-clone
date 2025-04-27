@@ -19,13 +19,13 @@ const ArchetypeContent = ({ archetypeData, archetypeId, onRetakeAssessment }: Ar
   // Use different sources for key characteristics
   const keyCharacteristics = 
     archetypeData.key_characteristics || 
-    (archetypeData.traits?.map(trait => trait.name)) || 
-    (traits?.map(trait => trait.name)) ||
+    archetypeData.standard?.keyCharacteristics ||
+    archetypeData.summary?.keyCharacteristics ||
+    traits?.map(trait => trait.name) ||
     [];
   
   // Use different sources for industries
   const industries = archetypeData.industries || 
-    archetypeData.common_industries || 
     "Various industries including healthcare, finance, and technology";
     
   // Use different description sources with fallbacks
@@ -34,6 +34,16 @@ const ArchetypeContent = ({ archetypeData, archetypeId, onRetakeAssessment }: Ar
     archetypeData.short_description || 
     (archetypeData.summary?.description) || 
     "This archetype represents organizations with specific healthcare management approaches and characteristics.";
+    
+  // Get strategy focus with fallback
+  const strategyFocus = 
+    archetypeData.enhanced?.strategicPriorities?.[0]?.description || 
+    "Organizations with this archetype typically focus on optimizing healthcare delivery through strategic initiatives.";
+    
+  // Get challenges with fallback
+  const challenges = 
+    archetypeData.enhanced?.swot?.weaknesses?.join(". ") || 
+    "Common challenges include managing costs while maintaining quality of care.";
     
   return (
     <div className="text-left space-y-6">
@@ -72,15 +82,13 @@ const ArchetypeContent = ({ archetypeData, archetypeId, onRetakeAssessment }: Ar
         </CardHeader>
         <CardContent>
           <p className="text-gray-700 mb-4">
-            {archetypeData.strategy_focus || "Organizations with this archetype typically focus on optimizing healthcare delivery through strategic initiatives."}
+            {strategyFocus}
           </p>
           
-          {archetypeData.challenges && (
-            <div className="mt-4">
-              <h3 className="text-lg font-semibold mb-2">Common Challenges</h3>
-              <p className="text-gray-700">{archetypeData.challenges}</p>
-            </div>
-          )}
+          <div className="mt-4">
+            <h3 className="text-lg font-semibold mb-2">Common Challenges</h3>
+            <p className="text-gray-700">{challenges}</p>
+          </div>
         </CardContent>
       </Card>
       
