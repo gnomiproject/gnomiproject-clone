@@ -1,6 +1,3 @@
-
-// If this file doesn't exist yet, we'll create it
-
 export type ReportType = "insight" | "deepDive";
 
 export type ReportField = string;
@@ -13,4 +10,13 @@ export interface ReportSection {
 
 export interface ReportSchema {
   [sectionKey: string]: ReportSection;
+}
+
+export interface GenerationResult {
+  total: number;
+  processed: number;
+  succeeded: number;
+  failed: number;
+  archetypeIds: string[];
+  errors?: string[];
 }
