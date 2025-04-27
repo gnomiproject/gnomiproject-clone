@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, Database, RefreshCw } from "lucide-react";
@@ -23,6 +23,11 @@ const ReportGenerator = () => {
   }>(null);
   const [error, setError] = useState<string | null>(null);
   const [databaseStatus, setDatabaseStatus] = useState<'unchecked' | 'checking' | 'connected' | 'error'>('unchecked');
+
+  useEffect(() => {
+    // Check database connection when component mounts
+    handleTestDatabaseConnection();
+  }, []);
 
   const handleGenerateReports = async () => {
     setIsGenerating(true);
@@ -114,6 +119,9 @@ const ReportGenerator = () => {
           description: `Connected successfully. Found ${data?.length || 0} archetypes.`,
           duration: 5000,
         });
+
+        // Check additional required tables
+        checkRequiredTables();
       }
     } catch (error) {
       console.error("Error testing database:", error);
@@ -122,6 +130,40 @@ const ReportGenerator = () => {
         description: typeof error === 'string' ? error : (error as Error).message || 'Unknown error testing connection',
         duration: 5000,
       });
+    }
+  };
+
+  const checkRequiredTables = async () => {
+    try {
+      // Check level3_report_data table
+      const { data: level3Data, error: level3Error } = await supabase
+        .from('level3_report_data')
+        .select('count(*)', { count: 'exact', head: true });
+        
+      if (level3Error) {
+        console.warn("Warning: level3_report_data access error:", level3Error.message);
+      } else {
+        console.log(`Found ${level3Data?.count} rows in level3_report_data`);
+        if (!level3Data?.count || level3Data.count === 0) {
+          toast.warning("Missing Report Data", {
+            description: "level3_report_data table exists but contains no data. Reports generation may fail.",
+            duration: 7000,
+          });
+        }
+      }
+
+      // Check Analysis_Archetype_Full_Reports table
+      const { data: reportsData, error: reportsError } = await supabase
+        .from('Analysis_Archetype_Full_Reports')
+        .select('count(*)', { count: 'exact', head: true });
+        
+      if (reportsError) {
+        console.warn("Warning: Analysis_Archetype_Full_Reports access error:", reportsError.message);
+      } else {
+        console.log(`Found ${reportsData?.count} rows in Analysis_Archetype_Full_Reports`);
+      }
+    } catch (error) {
+      console.error("Error checking required tables:", error);
     }
   };
 
@@ -145,9 +187,13 @@ const ReportGenerator = () => {
       </CardHeader>
       
       <CardContent>
-        <DatabaseConnectionStatus status={databaseStatus} />
+        <DatabaseConnectionStatus 
+          status={databaseStatus} 
+          error={error || undefined}
+          onRetry={handleTestDatabaseConnection}
+        />
         
-        {error && <GenerationError error={error} />}
+        {error && databaseStatus !== 'error' && <GenerationError error={error} />}
         
         {generationResult && (
           <GenerationResults 

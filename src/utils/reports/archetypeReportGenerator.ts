@@ -15,6 +15,17 @@ async function generateArchetypeReports(supabase: SupabaseClient): Promise<Repor
   console.log('Starting batch report generation for all archetypes...');
   
   try {
+    // First, verify database connection is active
+    console.log('Verifying database connection...');
+    const { error: connectionError } = await supabase
+      .from('Core_Archetype_Overview')
+      .select('count(*)', { count: 'exact', head: true });
+      
+    if (connectionError) {
+      console.error('Database connection error:', connectionError);
+      throw new Error(`Database connection error: ${connectionError.message}`);
+    }
+    
     // Fetch all archetype data directly from level3_report_data
     console.log('Fetching archetype data from level3_report_data table...');
     const { data: archetypes, error: archetypesError } = await supabase
@@ -23,13 +34,30 @@ async function generateArchetypeReports(supabase: SupabaseClient): Promise<Repor
     
     if (archetypesError) {
       console.error('Error fetching data from level3_report_data:', archetypesError);
-      throw new Error(`Failed to fetch data: ${archetypesError.message}`);
+      throw new Error(`Failed to fetch data from level3_report_data: ${archetypesError.message}`);
     }
     
-    console.log(`Found ${archetypes?.length || 0} archetypes to process`);
+    console.log(`Found ${archetypes?.length || 0} archetypes to process from level3_report_data`);
     
     if (!archetypes || archetypes.length === 0) {
-      throw new Error('No archetype data found in level3_report_data table');
+      // Try fetching from Core_Archetype_Overview and Core_Archetypes_Metrics as fallback
+      console.log('No data found in level3_report_data, trying to fetch from Core tables as fallback...');
+      
+      const { data: overviewData, error: overviewError } = await supabase
+        .from('Core_Archetype_Overview')
+        .select('*');
+        
+      if (overviewError) {
+        console.error('Error fetching data from Core_Archetype_Overview:', overviewError);
+        throw new Error('No archetype data found in any table');
+      }
+      
+      if (!overviewData || overviewData.length === 0) {
+        throw new Error('No archetype data found in any table');
+      }
+      
+      console.log(`Found ${overviewData.length} archetypes in Core_Archetype_Overview`);
+      throw new Error('Level3 report data is missing. Please ensure level3_report_data table is populated with data.');
     }
     
     const results: ReportGenerationResults = {

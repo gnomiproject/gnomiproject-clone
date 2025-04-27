@@ -13,7 +13,8 @@ import {
   RefreshCw,
   Eye,
   ExternalLink,
-  Copy
+  Copy,
+  Database
 } from "lucide-react";
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -50,39 +51,98 @@ export function InsightsReportGenerator() {
   const [error, setError] = useState<string | null>(null);
   const [selectedArchetype, setSelectedArchetype] = useState<string | null>(null);
   const [viewReportOpen, setViewReportOpen] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState<'checking' | 'connected' | 'error' | null>(null);
 
   useEffect(() => {
-    loadArchetypes();
+    checkDatabaseConnection();
   }, []);
+
+  const checkDatabaseConnection = async () => {
+    try {
+      setConnectionStatus('checking');
+      console.log("Testing database connection...");
+      
+      // Simple query to check connection
+      const { data, error } = await supabase
+        .from('Core_Archetype_Overview')
+        .select('count(*)', { count: 'exact', head: true });
+      
+      if (error) {
+        console.error("Database connection error:", error);
+        setConnectionStatus('error');
+        setError(`Database connection error: ${error.message}`);
+        toast.error("Database Connection Failed", {
+          description: error.message,
+        });
+        return false;
+      }
+      
+      console.log("Database connection successful");
+      setConnectionStatus('connected');
+      toast.success("Database Connection Successful");
+      loadArchetypes();
+      return true;
+    } catch (err) {
+      console.error("Error testing database:", err);
+      setConnectionStatus('error');
+      setError(`Connection error: ${(err as Error).message}`);
+      toast.error("Connection Error", {
+        description: (err as Error).message,
+      });
+      return false;
+    }
+  };
 
   const loadArchetypes = async () => {
     setIsLoading(true);
     setError(null);
     
     try {
+      console.log("Fetching archetypes from Core_Archetype_Overview...");
+      
       // Fetch all archetypes with their IDs (which include the code)
       const { data: archetypeData, error: archetypesError } = await supabase
         .from('Core_Archetype_Overview')
         .select('id, name');
       
-      if (archetypesError) throw new Error(archetypesError.message);
+      if (archetypesError) {
+        console.error("Error fetching archetypes:", archetypesError);
+        setError(`Error fetching archetypes: ${archetypesError.message}`);
+        throw new Error(archetypesError.message);
+      }
+      
+      console.log("Fetched archetypes:", archetypeData);
+      
+      if (!archetypeData || archetypeData.length === 0) {
+        setError("No archetypes found in the database");
+        setArchetypes([]);
+        setIsLoading(false);
+        return;
+      }
       
       // For each archetype, check if it has an entry in the insights reports table
-      const archetypeArray: ArchetypeSummary[] = archetypeData?.map(archetype => ({
+      const archetypeArray: ArchetypeSummary[] = archetypeData.map(archetype => ({
         id: archetype.id,
         name: archetype.name || 'Unnamed Archetype',
         code: archetype.id, // Storing the ID (which is the code like A1, B2, etc.)
         lastUpdated: null,
         status: 'pending'
-      })) || [];
+      }));
       
       // Check which archetypes already have reports
       if (archetypeArray.length > 0) {
+        console.log("Checking for existing reports in Analysis_Archetype_Full_Reports...");
+        
         const { data: reportData, error: reportError } = await supabase
           .from('Analysis_Archetype_Full_Reports')
           .select('archetype_id, last_updated');
         
-        if (reportError) throw new Error(reportError.message);
+        if (reportError) {
+          console.error("Error fetching report data:", reportError);
+          throw new Error(`Error fetching report data: ${reportError.message}`);
+        }
+        
+        console.log("Fetched report data:", reportData);
         
         // Update status for archetypes with reports
         if (reportData && reportData.length > 0) {
@@ -93,6 +153,31 @@ export function InsightsReportGenerator() {
               archetype.status = 'success';
             }
           });
+        } else {
+          console.log("No existing reports found in Analysis_Archetype_Full_Reports");
+          
+          // Try fallback to level3_report_data
+          console.log("Checking level3_report_data as fallback...");
+          
+          const { data: level3Data, error: level3Error } = await supabase
+            .from('level3_report_data')
+            .select('archetype_id');
+            
+          if (level3Error) {
+            console.warn("Error checking level3_report_data:", level3Error);
+          } else if (level3Data && level3Data.length > 0) {
+            console.log("Found data in level3_report_data:", level3Data.length);
+            
+            archetypeArray.forEach(archetype => {
+              const reportExists = level3Data.some(r => r.archetype_id === archetype.id);
+              if (reportExists) {
+                archetype.status = 'success';
+                archetype.lastUpdated = 'From level3 data';
+              }
+            });
+          } else {
+            console.log("No data found in level3_report_data either");
+          }
         }
       }
       
@@ -203,7 +288,35 @@ export function InsightsReportGenerator() {
         </p>
       </div>
       
-      {error && (
+      {/* Connection Status */}
+      {connectionStatus === 'checking' && (
+        <Alert>
+          <Loader2 className="h-4 w-4 animate-spin" />
+          <AlertTitle>Testing Database Connection</AlertTitle>
+          <AlertDescription>Checking connection to Supabase database...</AlertDescription>
+        </Alert>
+      )}
+      
+      {connectionStatus === 'error' && (
+        <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Database Connection Failed</AlertTitle>
+          <AlertDescription>
+            <p>Unable to connect to the database. This will prevent loading or generating reports.</p>
+            {error && <p className="mt-2 text-sm">{error}</p>}
+          </AlertDescription>
+        </Alert>
+      )}
+      
+      {connectionStatus === 'connected' && (
+        <Alert>
+          <CheckCircle className="h-4 w-4" />
+          <AlertTitle>Database Connected</AlertTitle>
+          <AlertDescription>Successfully connected to Supabase database.</AlertDescription>
+        </Alert>
+      )}
+      
+      {error && error !== 'No archetypes found in the database' && connectionStatus !== 'error' && (
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
           <AlertTitle>Error</AlertTitle>
@@ -239,10 +352,29 @@ export function InsightsReportGenerator() {
         </Alert>
       )}
       
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col sm:flex-row items-center gap-4">
+        <Button 
+          onClick={() => checkDatabaseConnection()}
+          variant="outline"
+          disabled={connectionStatus === 'checking'}
+          size="lg"
+        >
+          {connectionStatus === 'checking' ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Testing Connection...
+            </>
+          ) : (
+            <>
+              <Database className="mr-2 h-4 w-4" />
+              Test DB Connection
+            </>
+          )}
+        </Button>
+        
         <Button 
           onClick={handleGenerateReports} 
-          disabled={isGenerating || isLoading}
+          disabled={isGenerating || isLoading || connectionStatus === 'error' || !connectionStatus}
           size="lg"
         >
           {isGenerating ? (
@@ -261,8 +393,9 @@ export function InsightsReportGenerator() {
         <Button 
           variant="outline" 
           onClick={loadArchetypes}
-          disabled={isLoading || isGenerating}
+          disabled={isLoading || isGenerating || connectionStatus === 'error' || !connectionStatus}
         >
+          <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
           Refresh Status
         </Button>
       </div>
@@ -291,7 +424,9 @@ export function InsightsReportGenerator() {
             ) : archetypes.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="text-center py-4">
-                  No archetypes found
+                  {error === 'No archetypes found in the database' ? 
+                    'No archetypes found in database. Make sure Core_Archetype_Overview table exists and contains data.' :
+                    'No archetypes found'}
                 </TableCell>
               </TableRow>
             ) : (
