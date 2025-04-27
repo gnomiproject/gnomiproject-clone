@@ -1,19 +1,60 @@
-
 import React from 'react';
 import { ArrowRight, Award, TrendingUp } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { formatPercent, formatNumber } from '@/utils/formatters';
+import { formatNumber } from '@/utils/formatters';
 import { gnomeImages } from '@/utils/gnomeImages';
-import { calculatePercentageDifference } from '@/utils/reports/metricUtils';
+import { getMetricComparisonText } from '@/utils/reports/metricUtils';
 
 interface ReportIntroductionProps {
   reportData: any;
   userData: any;
+  averageData: any;
 }
 
-const ReportIntroduction = ({ reportData, userData }: ReportIntroductionProps) => {
+interface MetricCardProps {
+  title: string;
+  value: number;
+  average: number;
+  metricName: string;
+  icon: React.ReactNode;
+  positive?: boolean;
+}
+
+const MetricCard = ({ 
+  title, 
+  value, 
+  average,
+  metricName,
+  icon, 
+  positive = true 
+}: MetricCardProps) => {
+  const { text, color } = getMetricComparisonText(value, average, metricName);
+  
+  return (
+    <div className="bg-white rounded-lg border p-4 shadow-sm">
+      <div className="flex justify-between items-start mb-2">
+        <h4 className="font-medium text-gray-600">{title}</h4>
+        <div className={`rounded-full p-2 ${positive ? 'bg-green-100' : 'bg-amber-100'}`}>
+          {icon}
+        </div>
+      </div>
+      <div className="mb-1">
+        <span className="text-2xl font-bold">{formatNumber(value, 'currency')}</span>
+      </div>
+      <p className={color}>
+        {text}
+      </p>
+    </div>
+  );
+};
+
+const ReportIntroduction = ({ reportData, userData, averageData }: { 
+  reportData: any; 
+  userData: any;
+  averageData: any;
+}) => {
   const formatArchetypeLabel = (id: string) => {
     const formattedId = id.toLowerCase();
     const familyId = formattedId[0];
@@ -26,15 +67,6 @@ const ReportIntroduction = ({ reportData, userData }: ReportIntroductionProps) =
   
   // Gnome image
   const gnomeImage = '/assets/gnomes/gnome_lefthand.png';
-
-  // Define averages for key metrics
-  // These should ideally be fetched from the averageData
-  const averages = {
-    "Cost_Medical & RX Paid Amount PEPY": 10000,
-    "Risk_Average Risk Score": 1.0,
-    "Util_Emergency Visits per 1k Members": 150,
-    "Util_Specialist Visits per 1k Members": 1326.63
-  };
 
   return (
     <div className="space-y-8">
@@ -82,52 +114,38 @@ const ReportIntroduction = ({ reportData, userData }: ReportIntroductionProps) =
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard 
           title="Annual Cost PEPY"
-          value={formatNumber(reportData["Cost_Medical & RX Paid Amount PEPY"] || 0, 'currency')}
-          comparison={calculateComparisonText(
-            reportData["Cost_Medical & RX Paid Amount PEPY"], 
-            averages["Cost_Medical & RX Paid Amount PEPY"],
-            "Cost"
-          )}
+          value={reportData["Cost_Medical & RX Paid Amount PEPY"] || 0}
+          average={averageData["Cost_Medical & RX Paid Amount PEPY"] || 0}
+          metricName="Cost_Medical & RX Paid Amount PEPY"
           icon={<TrendingUp className="h-5 w-5" />}
-          positive={reportData["Cost_Medical & RX Paid Amount PEPY"] < averages["Cost_Medical & RX Paid Amount PEPY"]}
+          positive={reportData["Cost_Medical & RX Paid Amount PEPY"] < averageData["Cost_Medical & RX Paid Amount PEPY"]}
         />
         
         <MetricCard 
           title="Risk Score"
-          value={formatNumber(reportData["Risk_Average Risk Score"] || 0, 'number', 2)}
-          comparison={calculateComparisonText(
-            reportData["Risk_Average Risk Score"], 
-            averages["Risk_Average Risk Score"],
-            "Risk"
-          )}
+          value={reportData["Risk_Average Risk Score"] || 0}
+          average={averageData["Risk_Average Risk Score"] || 0}
+          metricName="Risk_Average Risk Score"
           icon={<Award className="h-5 w-5" />}
-          positive={reportData["Risk_Average Risk Score"] < averages["Risk_Average Risk Score"]}
+          positive={reportData["Risk_Average Risk Score"] < averageData["Risk_Average Risk Score"]}
         />
         
         <MetricCard 
           title="ER Visits"
-          value={formatNumber(reportData["Util_Emergency Visits per 1k Members"] || 0, 'number', 0)}
-          suffix="per 1,000"
-          comparison={calculateComparisonText(
-            reportData["Util_Emergency Visits per 1k Members"], 
-            averages["Util_Emergency Visits per 1k Members"],
-            "Emergency"
-          )}
+          value={reportData["Util_Emergency Visits per 1k Members"] || 0}
+          average={averageData["Util_Emergency Visits per 1k Members"] || 0}
+          metricName="Util_Emergency Visits per 1k Members"
           icon={<Award className="h-5 w-5" />}
-          positive={reportData["Util_Emergency Visits per 1k Members"] < averages["Util_Emergency Visits per 1k Members"]}
+          positive={reportData["Util_Emergency Visits per 1k Members"] < averageData["Util_Emergency Visits per 1k Members"]}
         />
         
         <MetricCard 
           title="Specialist Visits"
-          value={formatNumber(reportData["Util_Specialist Visits per 1k Members"] || 0, 'number', 0)}
-          suffix="per 1,000"
-          comparison={calculateComparisonText(
-            reportData["Util_Specialist Visits per 1k Members"], 
-            averages["Util_Specialist Visits per 1k Members"],
-            "Specialist"
-          )}
+          value={reportData["Util_Specialist Visits per 1k Members"] || 0}
+          average={averageData["Util_Specialist Visits per 1k Members"] || 0}
+          metricName="Util_Specialist Visits per 1k Members"
           icon={<Award className="h-5 w-5" />}
-          positive={reportData["Util_Specialist Visits per 1k Members"] < averages["Util_Specialist Visits per 1k Members"]}
+          positive={reportData["Util_Specialist Visits per 1k Members"] < averageData["Util_Specialist Visits per 1k Members"]}
         />
       </div>
 
@@ -186,51 +204,6 @@ const ReportIntroduction = ({ reportData, userData }: ReportIntroductionProps) =
           </div>
         </CardContent>
       </Card>
-    </div>
-  );
-};
-
-// Helper function to calculate comparison text using the utility function
-const calculateComparisonText = (value: number, average: number, metricType: string): string => {
-  if (!value || !average) return 'No data available';
-  
-  const diff = calculatePercentageDifference(value, average);
-  const direction = diff > 0 ? 'higher' : 'lower';
-  
-  return `${Math.abs(diff).toFixed(1)}% ${direction} than average`;
-};
-
-// Reusable metric card component
-const MetricCard = ({ 
-  title, 
-  value, 
-  suffix = '', 
-  comparison, 
-  icon, 
-  positive = true 
-}: { 
-  title: string; 
-  value: string; 
-  suffix?: string; 
-  comparison: string; 
-  icon: React.ReactNode; 
-  positive?: boolean;
-}) => {
-  return (
-    <div className="bg-white rounded-lg border p-4 shadow-sm">
-      <div className="flex justify-between items-start mb-2">
-        <h4 className="font-medium text-gray-600">{title}</h4>
-        <div className={`rounded-full p-2 ${positive ? 'bg-green-100' : 'bg-amber-100'}`}>
-          {icon}
-        </div>
-      </div>
-      <div className="mb-1">
-        <span className="text-2xl font-bold">{value}</span>
-        {suffix && <span className="text-sm text-gray-600 ml-1">{suffix}</span>}
-      </div>
-      <p className={`text-sm ${positive ? 'text-green-600' : 'text-amber-600'}`}>
-        {comparison}
-      </p>
     </div>
   );
 };

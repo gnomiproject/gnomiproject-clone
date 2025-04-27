@@ -1,4 +1,3 @@
-
 import { OrganizedMetrics, ReportMetric } from './types';
 
 /**
@@ -82,19 +81,39 @@ export function formatPercentageDifference(difference: number, metricName: strin
  * @param metricName Name of the metric
  * @returns Formatted comparison string with appropriate styling information
  */
-export function getMetricComparisonText(value: number, average: number, metricName: string): {
+export interface ComparisonResult {
   text: string;
   color: string;
-} {
+  isPositive: boolean;
+  isBetter: boolean;
+}
+
+/**
+ * Gets a formatted comparison string that includes both the percentage difference and the average value
+ */
+export function getMetricComparisonText(value: number, average: number, metricName: string): ComparisonResult {
+  if (!value || !average) {
+    return {
+      text: 'No data available',
+      color: 'text-gray-500',
+      isPositive: false,
+      isBetter: false
+    };
+  }
+  
   const difference = calculatePercentageDifference(value, average);
-  const { formatted, isBetter } = formatPercentageDifference(difference, metricName);
+  const { formatted, isPositive, isBetter } = formatPercentageDifference(difference, metricName);
   
   // Choose the appropriate text based on whether the difference is positive or negative
   const comparisonWord = difference > 0 ? "higher" : "lower";
-  const text = `${Math.abs(difference).toFixed(1)}% ${comparisonWord} than average`;
   
-  // Choose color based on whether this difference is "better" or "worse"
+  // Format the average value based on whether it's a currency or regular number
+  const formattedAverage = metricName.toLowerCase().includes('cost') ? 
+    `$${average.toLocaleString()}` : 
+    average.toLocaleString();
+  
+  const text = `${Math.abs(difference).toFixed(1)}% ${comparisonWord} than average (${formattedAverage})`;
   const color = isBetter ? "text-green-600" : "text-amber-600";
   
-  return { text, color };
+  return { text, color, isPositive, isBetter };
 }
