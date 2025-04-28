@@ -824,7 +824,9 @@ export type Database = {
       }
       report_requests: {
         Row: {
+          access_count: number | null
           access_token: string | null
+          access_url: string | null
           archetype_id: string | null
           assessment_answers: Json | null
           assessment_result: Json | null
@@ -834,13 +836,16 @@ export type Database = {
           exact_employee_count: number | null
           expires_at: string | null
           id: string | null
+          last_accessed: string | null
           name: string | null
           organization: string | null
           session_id: string | null
           status: string | null
         }
         Insert: {
+          access_count?: number | null
           access_token?: string | null
+          access_url?: string | null
           archetype_id?: string | null
           assessment_answers?: Json | null
           assessment_result?: Json | null
@@ -850,13 +855,16 @@ export type Database = {
           exact_employee_count?: number | null
           expires_at?: string | null
           id?: string | null
+          last_accessed?: string | null
           name?: string | null
           organization?: string | null
           session_id?: string | null
           status?: string | null
         }
         Update: {
+          access_count?: number | null
           access_token?: string | null
+          access_url?: string | null
           archetype_id?: string | null
           assessment_answers?: Json | null
           assessment_result?: Json | null
@@ -866,6 +874,7 @@ export type Database = {
           exact_employee_count?: number | null
           expires_at?: string | null
           id?: string | null
+          last_accessed?: string | null
           name?: string | null
           organization?: string | null
           session_id?: string | null

@@ -53,10 +53,24 @@ const DeepDiveRequestForm = ({
         assessment_result: assessmentResult || null,
         assessment_answers: assessmentAnswers || null,
         created_at: new Date().toISOString(),
-        expires_at: expiryDate.toISOString()
+        expires_at: expiryDate.toISOString(),
+        access_url: accessUrl // Store the full URL
       });
 
       if (error) throw error;
+      
+      // Call the edge function to send the email
+      try {
+        const { error: funcError } = await supabase.functions.invoke("send-report-email", {
+          body: { reportId: archetypeId }
+        });
+        
+        if (funcError) {
+          console.warn("Email notification may not have been sent:", funcError);
+        }
+      } catch (emailError) {
+        console.error("Failed to trigger email notification:", emailError);
+      }
       
       // Show success message and set form as submitted
       toast.success("Request submitted successfully!", {

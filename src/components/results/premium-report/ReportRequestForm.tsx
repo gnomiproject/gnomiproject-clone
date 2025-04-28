@@ -99,7 +99,7 @@ const ReportRequestForm = ({ onSubmit, isSubmitting }: ReportRequestFormProps) =
             </FormItem>
           )}
         />
-        <div className="flex justify-end space-x-4 pt-4">
+        <div className="flex justify-start space-x-4 pt-4">
           <Button variant="outline" type="button" onClick={() => form.reset()}>
             Cancel
           </Button>

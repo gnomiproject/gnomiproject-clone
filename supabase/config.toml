@@ -1,1 +1,11 @@
+
 project_id = "qsecdncdiykzuimtaosp"
+
+[functions.send-report-email]
+verify_jwt = false
+
+[functions.create-increment-function]
+verify_jwt = false
+
+[functions.increment-counter]
+verify_jwt = false

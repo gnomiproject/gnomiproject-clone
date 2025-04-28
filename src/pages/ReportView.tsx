@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import InsightsReportContent from '@/components/report/sections/InsightsReportContent';
 import { useGetArchetype } from '@/hooks/useGetArchetype';
@@ -7,9 +7,17 @@ import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { isValidArchetypeId } from '@/utils/archetypeValidation';
 import { ArchetypeId } from '@/types/archetype';
+import { trackReportAccess } from '@/utils/reports/accessTracking';
 
 const ReportView = () => {
-  const { archetypeId } = useParams();
+  const { archetypeId, token } = useParams();
+  
+  // Track report access when component mounts
+  useEffect(() => {
+    if (archetypeId && token) {
+      trackReportAccess(archetypeId, token);
+    }
+  }, [archetypeId, token]);
   
   // Validate archetype ID
   if (!archetypeId || !isValidArchetypeId(archetypeId)) {
