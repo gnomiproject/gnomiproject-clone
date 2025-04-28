@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ArchetypeId, ArchetypeDetailedData } from '@/types/archetype';
 import ArchetypeNavTabs from './components/ArchetypeNavTabs';
@@ -8,6 +7,7 @@ import MetricsTab from './tabs/MetricsTab';
 import SwotTab from './tabs/SwotTab';
 import DiseaseAndCareTab from './tabs/DiseaseAndCareTab';
 import DeepDiveRequestForm from '@/components/results/DeepDiveRequestForm';
+import { getGnomeForArchetype } from '@/utils/gnomeImages';
 
 interface ArchetypeReportProps {
   archetypeId: ArchetypeId;
@@ -31,8 +31,12 @@ const ArchetypeReport = ({
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">
       <ArchetypeHeader 
         name={reportData.name || 'Unknown Archetype'} 
+        description={reportData.short_description || reportData.description || ''}
+        familyId={reportData.familyId}
         familyName={reportData.familyName || ''}
-        archetypeHexColor={familyColor} 
+        familyColor={familyColor}
+        archetypeHexColor={familyColor}
+        gnomeImage={getGnomeForArchetype(archetypeId)}
       />
       
       <ArchetypeNavTabs activeTab={activeTab} onTabChange={setActiveTab} />
