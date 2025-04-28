@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import ArchetypeReport from '@/components/insights/ArchetypeReport';
+import InsightsView from '@/components/insights/InsightsView';
 import DeepDiveReport from '@/components/report/DeepDiveReport';
 import ReportError from '@/components/report/ReportError';
 import ReportLoadingState from '@/components/report/ReportLoadingState';

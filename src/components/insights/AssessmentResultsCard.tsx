@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import { ArchetypeDetailedData, ArchetypeId } from '@/types/archetype';
 import { AssessmentResult } from '@/types/assessment';
 import AssessmentResultsHeader from './AssessmentResultsHeader';
-import ArchetypeReport from './ArchetypeReport';
+import InsightsView from './InsightsView';
 import ArchetypeError from './ArchetypeError';
 import ArchetypeLoadingSkeleton from './ArchetypeLoadingSkeleton';
 
@@ -25,7 +25,7 @@ const AssessmentResultsCard = ({
   onRetakeAssessment,
   assessmentResult,
   assessmentAnswers,
-  isLoading = false // Default to false
+  isLoading = false
 }: AssessmentResultsCardProps) => {
   const [error, setError] = useState<string | null>(null);
 
@@ -56,7 +56,7 @@ const AssessmentResultsCard = ({
           onRetakeAssessment={onRetakeAssessment}
           assessmentResult={assessmentResult}
         />
-        <ArchetypeReport 
+        <InsightsView
           archetypeId={selectedArchetype as ArchetypeId} 
           reportData={archetypeData}
           hideRequestSection={true}
