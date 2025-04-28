@@ -1,139 +1,136 @@
-import React, { useState } from 'react';
+
+import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import ReportRequestForm from './premium-report/ReportRequestForm';
-import ReportAccessLink from './premium-report/ReportAccessLink';
-import { supabase } from '@/integrations/supabase/client';
+import RetakeAssessmentLink from '../insights/RetakeAssessmentLink';
+import { FileText } from 'lucide-react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 import { v4 as uuidv4 } from 'uuid';
-import { ArchetypeDetailedData, ArchetypeId } from '@/types/archetype';
+import GnomeImage from '@/components/common/GnomeImage';
+import { Badge } from '@/components/ui/badge';
 
 interface DeepDiveRequestFormProps {
-  archetypeId: ArchetypeId;
+  archetypeId: string;
+  archetypeData: any;
   assessmentResult?: any;
   assessmentAnswers?: any;
-  archetypeData?: ArchetypeDetailedData;
 }
 
 const DeepDiveRequestForm = ({ 
   archetypeId, 
-  assessmentResult, 
-  assessmentAnswers,
-  archetypeData 
+  archetypeData,
+  assessmentResult,
+  assessmentAnswers 
 }: DeepDiveRequestFormProps) => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [accessLink, setAccessLink] = useState<string | null>(null);
-  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const onSubmit = async (values: any) => {
     setIsSubmitting(true);
-
+    
     try {
       const token = uuidv4();
+      const expiryDate = new Date();
+      expiryDate.setDate(expiryDate.getDate() + 30);
       
-      console.log('Submitting deep dive report request for archetypeId:', archetypeId);
-      
-      // Store the request in the database to validate it later
       const { error } = await supabase.from('report_requests').insert({
         id: uuidv4(),
         name: values.name,
         email: values.email,
         organization: values.organization,
+        comments: values.comments,
         archetype_id: archetypeId,
         access_token: token,
         status: 'pending',
         assessment_result: assessmentResult || null,
         assessment_answers: assessmentAnswers || null,
         created_at: new Date().toISOString(),
-        // Set expiration to 30 days from now
-        expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+        expires_at: expiryDate.toISOString()
       });
 
-      if (error) {
-        console.error('Error submitting report request:', error);
-        throw new Error(error.message);
-      }
+      if (error) throw error;
       
-      console.log('Deep dive report request submitted successfully with token:', token);
-      
-      const baseUrl = window.location.origin;
-      // Make sure to use the correct route format for deep dive reports that includes token
-      const reportLink = `${baseUrl}/report/${archetypeId}/${token}`;
-      
-      setAccessToken(token);
-      setAccessLink(reportLink);
-      
-      toast.success("Report request submitted successfully!", {
-        description: "Your secure link is ready below",
+      toast.success("Request submitted successfully!", {
+        description: "Please check your email for the report access information.",
       });
       
     } catch (error: any) {
       console.error("Error submitting report request:", error);
       toast.error("There was a problem submitting your request", {
-        description: error.message || "Please try again",
+        description: error.message,
       });
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Check for existing report token in session storage
-  React.useEffect(() => {
-    const checkExistingToken = async () => {
-      try {
-        // Check if we have a token for this archetype
-        const { data, error } = await supabase
-          .from('report_requests')
-          .select('access_token')
-          .eq('archetype_id', archetypeId)
-          .order('created_at', { ascending: false })
-          .limit(1);
-          
-        if (error) {
-          console.error('Error checking for existing report:', error);
-          return;
-        }
-        
-        // If we found a token, generate the link
-        if (data && data.length > 0) {
-          const token = data[0].access_token;
-          const baseUrl = window.location.origin;
-          const reportLink = `${baseUrl}/report/${archetypeId}/${token}`;
-          
-          setAccessToken(token);
-          setAccessLink(reportLink);
-          console.log('Using existing deep dive report token:', token);
-        }
-      } catch (err) {
-        console.error('Error checking for existing report:', err);
-      }
-    };
-    
-    if (archetypeId && !accessToken) {
-      checkExistingToken();
-    }
-  }, [archetypeId, accessToken]);
-
   return (
-    <Card className="border-0 shadow-none">
-      <CardHeader className="text-center">
-        <CardTitle>Deep Dive Report</CardTitle>
-        <CardDescription>
-          Get a comprehensive analysis tailored to your organization
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        {!accessLink && (
-          <ReportRequestForm onSubmit={onSubmit} isSubmitting={isSubmitting} />
-        )}
-        {accessLink && (
-          <>
-            <Separator className="my-4" />
-            <ReportAccessLink accessLink={accessLink} />
-          </>
-        )}
-      </CardContent>
-    </Card>
+    <>
+      <RetakeAssessmentLink />
+      <Card className="border-0 shadow-none">
+        <CardHeader className="text-center pb-2">
+          <CardTitle className="text-3xl font-bold mb-2">Want to go deeper on your archetype?</CardTitle>
+        </CardHeader>
+        <CardContent className="px-0">
+          <div className="bg-white rounded-lg p-6 shadow-sm border">
+            <div className="flex flex-col lg:flex-row gap-8">
+              <div className="flex-1 space-y-6">
+                <div className="flex items-start gap-3">
+                  <FileText className="h-6 w-6 mt-1 flex-shrink-0" />
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <h3 className="text-xl font-semibold">
+                        Get the Full {archetypeData.name} Report
+                      </h3>
+                      <Badge variant="secondary" className="bg-pink-100 text-pink-800 hover:bg-pink-100">
+                        FREE
+                      </Badge>
+                    </div>
+                    <p className="text-gray-600 mb-4">Deep Dive into This Archetype</p>
+                    <ul className="space-y-3">
+                      <li className="flex items-center gap-2 text-gray-700">
+                        <span className="text-red-500">✓</span>
+                        Comprehensive profile of the {archetypeData.name} archetype
+                      </li>
+                      <li className="flex items-center gap-2 text-gray-700">
+                        <span className="text-red-500">✓</span>
+                        Detailed analysis of healthcare utilization, cost trends, and condition prevalence
+                      </li>
+                      <li className="flex items-center gap-2 text-gray-700">
+                        <span className="text-red-500">✓</span>
+                        Key behaviors, strengths, and blind spots that define this group
+                      </li>
+                      <li className="flex items-center gap-2 text-gray-700">
+                        <span className="text-red-500">✓</span>
+                        Strategic opportunities to optimize care, access, and spend
+                      </li>
+                      <li className="flex items-center gap-2 text-gray-700">
+                        <span className="text-red-500">✓</span>
+                        Insight into the methodology behind the archetype model
+                      </li>
+                    </ul>
+                    <p className="text-gray-600 mt-6">
+                      Unlock a richer understanding of your population—delivered straight to your inbox.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="lg:w-1/3 flex-shrink-0">
+                <GnomeImage 
+                  type="presentation"
+                  className="w-full h-auto"
+                  alt="Healthcare gnome with presentation"
+                />
+              </div>
+            </div>
+            
+            <div className="mt-6">
+              <ReportRequestForm onSubmit={onSubmit} isSubmitting={isSubmitting} />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </>
   );
 };
 

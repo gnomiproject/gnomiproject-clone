@@ -34,6 +34,7 @@ const ReportRequestForm = ({ onSubmit, isSubmitting }: ReportRequestFormProps) =
       name: "",
       email: "",
       organization: "",
+      comments: "",
     },
   });
 
@@ -45,9 +46,9 @@ const ReportRequestForm = ({ onSubmit, isSubmitting }: ReportRequestFormProps) =
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Name</FormLabel>
+              <FormLabel>Full Name</FormLabel>
               <FormControl>
-                <Input placeholder="John Doe" {...field} />
+                <Input placeholder="Your name" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -60,7 +61,7 @@ const ReportRequestForm = ({ onSubmit, isSubmitting }: ReportRequestFormProps) =
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input placeholder="johndoe@example.com" {...field} />
+                <Input placeholder="your.email@company.com" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -73,25 +74,43 @@ const ReportRequestForm = ({ onSubmit, isSubmitting }: ReportRequestFormProps) =
             <FormItem>
               <FormLabel>Organization</FormLabel>
               <FormControl>
-                <Input placeholder="Acme Corp" {...field} />
+                <Input placeholder="Your company or organization" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Submitting...
-            </>
-          ) : (
-            <>
-              <Mail className="mr-2 h-4 w-4" />
-              Request Report
-            </>
+        <FormField
+          control={form.control}
+          name="comments"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Additional Comments (Optional)</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Any specific aspects of the archetype you're interested in..."
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
           )}
-        </Button>
+        />
+        <div className="flex justify-end space-x-4 pt-4">
+          <Button variant="outline" type="button" onClick={() => form.reset()}>
+            Cancel
+          </Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Submitting...
+              </>
+            ) : (
+              'Submit Request'
+            )}
+          </Button>
+        </div>
       </form>
     </Form>
   );
