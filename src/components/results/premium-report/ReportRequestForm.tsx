@@ -2,7 +2,8 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, Mail } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Loader2 } from "lucide-react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,6 +19,7 @@ export const formSchema = z.object({
   organization: z.string().min(2, {
     message: "Organization must be at least 2 characters.",
   }),
+  comments: z.string().optional(),
 });
 
 export type FormData = z.infer<typeof formSchema>;
@@ -87,8 +89,9 @@ const ReportRequestForm = ({ onSubmit, isSubmitting }: ReportRequestFormProps) =
             <FormItem>
               <FormLabel>Additional Comments (Optional)</FormLabel>
               <FormControl>
-                <Input
+                <Textarea
                   placeholder="Any specific aspects of the archetype you're interested in..."
+                  className="min-h-[100px]"
                   {...field}
                 />
               </FormControl>
