@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, Rocket, ChevronDown, StarHalf, Building2 } from "lucide-react";
+import { FileText, ChevronDown, StarHalf, PlusCircle } from "lucide-react";
 
 interface ArchetypeNavTabsProps {
   activeTab: string;
@@ -15,10 +15,6 @@ const ArchetypeNavTabs = ({ activeTab, onTabChange }: ArchetypeNavTabsProps) => 
         <FileText className="w-4 h-4 mr-2" />
         Overview
       </TabsTrigger>
-      <TabsTrigger value="priorities" className="data-[state=active]:bg-white" onClick={() => onTabChange('priorities')}>
-        <Rocket className="w-4 h-4 mr-2" />
-        Strategic Priorities
-      </TabsTrigger>
       <TabsTrigger value="metrics" className="data-[state=active]:bg-white" onClick={() => onTabChange('metrics')}>
         <ChevronDown className="w-4 h-4 mr-2" />
         Key Metrics
@@ -27,9 +23,9 @@ const ArchetypeNavTabs = ({ activeTab, onTabChange }: ArchetypeNavTabsProps) => 
         <StarHalf className="w-4 h-4 mr-2" />
         SWOT Analysis
       </TabsTrigger>
-      <TabsTrigger value="industries" className="data-[state=active]:bg-white" onClick={() => onTabChange('industries')}>
-        <Building2 className="w-4 h-4 mr-2" />
-        Industries
+      <TabsTrigger value="diseaseAndCare" className="data-[state=active]:bg-white" onClick={() => onTabChange('diseaseAndCare')}>
+        <PlusCircle className="w-4 h-4 mr-2" />
+        Disease & Care
       </TabsTrigger>
     </TabsList>
   );
