@@ -8,7 +8,7 @@ import NoAssessmentResults from '@/components/insights/NoAssessmentResults';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
 import { useGetArchetype } from '@/hooks/useGetArchetype';
-import DetailedArchetypeReport from '@/components/insights/DetailedArchetypeReport';
+import InsightsContainer from '@/components/insights/InsightsContainer';
 
 // Storage keys
 const INSIGHTS_STORAGE_KEY = 'healthcareArchetypeInsights';
@@ -191,7 +191,7 @@ const Insights = () => {
       <div className="max-w-5xl mx-auto">
         {/* Show assessment results if an archetype is selected */}
         {selectedArchetype && archetypeData ? (
-          <DetailedArchetypeReport
+          <InsightsContainer
             archetypeId={selectedArchetype}
             onRetakeAssessment={handleRetakeAssessment}
             assessmentResult={sessionResults}

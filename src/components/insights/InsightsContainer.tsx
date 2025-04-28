@@ -1,24 +1,22 @@
-
 import React, { useMemo, useRef, useEffect } from 'react';
 import { ArchetypeId } from '@/types/archetype';
 import { useArchetypes } from '@/hooks/useArchetypes';
-import ArchetypeContent from './ArchetypeContent';
 import { useGetArchetype } from '@/hooks/useGetArchetype';
-import ArchetypeReport from './ArchetypeReport';
+import InsightsView from './InsightsView';
 
-interface DetailedArchetypeReportProps {
+interface InsightsContainerProps {
   archetypeId: ArchetypeId;
   onRetakeAssessment: () => void;
   assessmentResult?: any;
   assessmentAnswers?: any;
 }
 
-const DetailedArchetypeReport = ({ 
+const InsightsContainer = ({ 
   archetypeId, 
   onRetakeAssessment,
   assessmentResult,
   assessmentAnswers 
-}: DetailedArchetypeReportProps) => {
+}: InsightsContainerProps) => {
   const { getArchetypeDetailedById } = useArchetypes();
   const renderCountRef = useRef(0);
   const processedRef = useRef(false);
@@ -108,7 +106,7 @@ const DetailedArchetypeReport = ({
   
   // Use ArchetypeReport directly instead of ArchetypeContent to ensure DeepDiveRequestForm is included
   return (
-    <ArchetypeReport 
+    <InsightsView 
       archetypeId={archetypeId}
       reportData={safeArchetypeData}
       assessmentResult={assessmentResult}
@@ -118,4 +116,4 @@ const DetailedArchetypeReport = ({
   );
 };
 
-export default DetailedArchetypeReport;
+export default InsightsContainer;
