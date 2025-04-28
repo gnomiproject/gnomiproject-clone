@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useArchetypes } from '@/hooks/useArchetypes';
@@ -13,7 +14,7 @@ import { useQueryClient } from '@tanstack/react-query';
 const INSIGHTS_STORAGE_KEY = 'healthcareArchetypeInsights';
 const SESSION_RESULTS_KEY = 'healthcareArchetypeSessionResults';
 const SESSION_ID_KEY = 'healthcareArchetypeSessionId';
-const SESSION_ANSWERS_KEY = 'healthcareArchetypeSessionAnswers';
+const SESSION_ANSWERS_KEY = 'healthcareArchetypeAnswers';
 
 const Insights = () => {
   const [selectedArchetype, setSelectedArchetype] = useState<ArchetypeId | null>(null);
@@ -166,6 +167,11 @@ const Insights = () => {
   // Get the archetype data if one is selected
   const archetypeData = selectedArchetype ? getArchetypeDetailedById(selectedArchetype) : null;
   const familyData = archetypeData?.familyId ? getFamilyById(archetypeData.familyId) : null;
+
+  // Debug
+  console.log("Selected archetype:", selectedArchetype);
+  console.log("Archetype data:", archetypeData);
+  console.log("Session results:", sessionResults);
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-6 md:px-12 pb-24 relative">

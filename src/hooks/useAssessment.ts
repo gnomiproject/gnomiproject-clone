@@ -132,7 +132,7 @@ export const useAssessment = () => {
         const assessmentResult = calculateArchetypeMatch(answers);
         setResult(assessmentResult);
         
-        // Clear previous archetype insights when a new assessment is completed
+        // Save results to localStorage for persistence
         localStorage.setItem(INSIGHTS_STORAGE_KEY, assessmentResult.primaryArchetype);
         
         // Save results to sessionStorage to persist during the session
@@ -147,11 +147,12 @@ export const useAssessment = () => {
         console.log("Assessment completed. Results:", assessmentResult);
         console.log("Navigating to insights page with sessionId:", sessionId);
         
-        // Changed: Navigate to the insights page with the results state
+        // Navigate to the insights page with the results state
         navigate(`/insights`, { 
           state: { 
             selectedArchetype: assessmentResult.primaryArchetype,
-            sessionId: sessionId
+            sessionId,
+            assessmentAnswers: answers
           } 
         });
       } catch (error) {
