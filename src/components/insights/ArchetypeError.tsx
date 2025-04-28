@@ -5,12 +5,18 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
 interface ArchetypeErrorProps {
+  message?: string; // Adding message prop as optional
   onRetry: () => void;
   onRetakeAssessment: () => void;
-  isRetrying: boolean;
+  isRetrying?: boolean; // Making isRetrying optional
 }
 
-const ArchetypeError = ({ onRetry, onRetakeAssessment, isRetrying }: ArchetypeErrorProps) => {
+const ArchetypeError = ({ 
+  message = "We couldn't connect to the database to load your archetype data.", 
+  onRetry, 
+  onRetakeAssessment, 
+  isRetrying = false 
+}: ArchetypeErrorProps) => {
   return (
     <div className="p-6 bg-red-50 border border-red-200 rounded-lg text-center">
       <div className="flex flex-col items-center gap-4">
@@ -18,7 +24,7 @@ const ArchetypeError = ({ onRetry, onRetakeAssessment, isRetrying }: ArchetypeEr
         <div>
           <h3 className="text-xl font-semibold text-red-700">Connection Error</h3>
           <p className="text-red-600 mb-4">
-            We couldn't connect to the database to load your archetype data.
+            {message}
           </p>
         </div>
         

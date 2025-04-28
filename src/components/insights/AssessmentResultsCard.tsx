@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
-import { ArchetypeDetailedData } from '@/types/archetype';
+import { ArchetypeDetailedData, ArchetypeId } from '@/types/archetype';
 import { AssessmentResult } from '@/types/assessment';
 import AssessmentResultsHeader from './AssessmentResultsHeader';
 import ArchetypeReport from './ArchetypeReport';
@@ -33,7 +33,11 @@ const AssessmentResultsCard = ({
   }
 
   if (error) {
-    return <ArchetypeError message={error} onRetry={onRetakeAssessment} />;
+    return <ArchetypeError 
+      message={error} 
+      onRetry={onRetakeAssessment} 
+      onRetakeAssessment={onRetakeAssessment} 
+    />;
   }
 
   const renderAssessmentResults = () => {
@@ -47,12 +51,12 @@ const AssessmentResultsCard = ({
           archetypeName={archetypeData.name || selectedArchetype} 
           archetypeId={selectedArchetype}
           familyName={familyData?.name || archetypeData.familyName || ''}
-          familyColor={archetypeData.hexColor || archetypeData.color} 
+          familyColor={archetypeData.hexColor || archetypeData.color || ''} 
           onRetakeAssessment={onRetakeAssessment}
           assessmentResult={assessmentResult}
         />
         <ArchetypeReport 
-          archetypeId={selectedArchetype} 
+          archetypeId={selectedArchetype as ArchetypeId} 
           reportData={archetypeData}
         />
       </div>
