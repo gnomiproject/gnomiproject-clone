@@ -122,79 +122,144 @@ const DeepDiveRequestForm = ({
     }
   };
 
+  // Get the archetype name from archetypeData if available
+  const archetypeName = archetypeData?.name || '';
+
   return (
-    <div className="bg-gray-50 p-6 rounded-md">
-      <h3 className="text-lg font-semibold text-gray-800 mb-4">Request a Detailed Report</h3>
-      {submitSuccessful ? (
-        <div className="text-green-600">
-          <p>Your request has been submitted successfully!</p>
-          <p className="mt-2">You can access your report <a href={accessUrl} className="text-blue-500 underline">here</a>.</p>
-        </div>
-      ) : (
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Your Name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+    <div className="py-8 px-6 md:px-10 bg-white rounded-lg">
+      <div className="max-w-5xl mx-auto">
+        <h2 className="text-2xl md:text-3xl font-bold text-center mb-6">Want to go deeper on your archetype?</h2>
+        
+        <div className="bg-white rounded-lg border border-gray-200 p-6 md:p-8">
+          <div className="flex flex-col md:flex-row gap-6">
+            <div className="flex-1">
+              <div className="flex items-start gap-3 mb-4">
+                <div className="text-red-600 font-bold">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-file-text">
+                    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" x2="8" y1="13" y2="13"></line>
+                    <line x1="16" x2="8" y1="17" y2="17"></line>
+                    <line x1="10" x2="8" y1="9" y2="9"></line>
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold">Get the Full {archetypeName} Report</h3>
+                  <div className="bg-red-50 text-red-800 text-xs font-semibold px-3 py-1 rounded-full inline-block mt-1">FREE</div>
+                </div>
+              </div>
+              
+              <p className="text-gray-700 mb-4">Deep Dive into This Archetype</p>
+              
+              <ul className="space-y-4 mb-6">
+                <li className="flex items-start gap-2">
+                  <span className="text-green-600 pt-1">✓</span>
+                  <span>Comprehensive profile of the {archetypeName} archetype</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-600 pt-1">✓</span>
+                  <span>Detailed analysis of healthcare utilization, cost trends, and condition prevalence</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-600 pt-1">✓</span>
+                  <span>Key behaviors, strengths, and blind spots that define this group</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-600 pt-1">✓</span>
+                  <span>Strategic opportunities to optimize care, access, and spend</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-600 pt-1">✓</span>
+                  <span>Insight into the methodology behind the archetype model</span>
+                </li>
+              </ul>
+              
+              <p className="text-gray-700 mb-6">Unlock a richer understanding of your population—delivered straight to your inbox.</p>
+              
+              {submitSuccessful ? (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-green-800">
+                  <h4 className="font-semibold text-lg mb-2">Thank You!</h4>
+                  <p className="mb-3">Your request has been submitted successfully!</p>
+                  <p>You can access your report <a href={accessUrl} className="text-blue-600 underline font-medium">here</a>.</p>
+                </div>
+              ) : (
+                <Button 
+                  onClick={form.handleSubmit(handleSubmit)} 
+                  className="bg-red-800 hover:bg-red-900 text-white font-medium px-6 py-3 rounded-md w-full md:w-auto"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? "Submitting..." : "Request your full report now"}
+                </Button>
               )}
-            />
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input placeholder="your@email.com" type="email" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="organization"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Organization (Optional)</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Your Organization" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="comments"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Comments (Optional)</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Any specific requirements or comments?"
-                      className="resize-none"
-                      {...field}
+            </div>
+            
+            {!submitSuccessful && (
+              <div className="md:w-96">
+                <Form {...form}>
+                  <form className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Your Name" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Submitting..." : "Submit Request"}
-            </Button>
-          </form>
-        </Form>
-      )}
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Email</FormLabel>
+                          <FormControl>
+                            <Input placeholder="your@email.com" type="email" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="organization"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Organization (Optional)</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Your Organization" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="comments"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Comments (Optional)</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="Any specific requirements or comments?"
+                              className="resize-none"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </form>
+                </Form>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
