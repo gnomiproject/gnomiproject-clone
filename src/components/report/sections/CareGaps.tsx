@@ -1,7 +1,7 @@
-
 import React from 'react';
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import GnomeImage from '@/components/common/GnomeImage';
 
 interface CareGapsProps {
   reportData: any;
@@ -9,9 +9,6 @@ interface CareGapsProps {
 }
 
 const CareGaps = ({ reportData, averageData }: CareGapsProps) => {
-  // Gnome image
-  const gnomeImage = '/assets/gnomes/gnome_clipboard.png';
-  
   // Use the care_gaps field from reportData or provide placeholder content
   const careGapsContent = reportData.care_gaps || "No care gaps analysis available for this archetype.";
   
@@ -36,13 +33,12 @@ const CareGaps = ({ reportData, averageData }: CareGapsProps) => {
           </p>
         </div>
         <div className="md:w-1/3 flex justify-center">
-          <img
-            src={gnomeImage}
-            alt="Care Gaps Gnome"
+          {/* Use the GnomeImage component */}
+          <GnomeImage 
+            type="clipboard" 
+            sectionType="care-gaps"
             className="max-h-64 object-contain"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = '/assets/gnomes/placeholder.svg';
-            }}
+            alt="Care Gaps Gnome"
           />
         </div>
       </div>

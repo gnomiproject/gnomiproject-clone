@@ -3,14 +3,34 @@
  * Utility for centralized access to gnome images
  * These images should be used across the application for consistency
  */
-export const gnomeImages = {
-  presentation: '/lovable-uploads/59457bb6-3645-40f3-a6f4-511dac08bb68.png', // Gnome with chart/presentation
-  clipboard: '/lovable-uploads/53d88d5c-51d8-471a-a8d4-6821283c0d48.png', // Gnome with clipboard
-  welcome: '/lovable-uploads/a9a90967-d910-43d8-b821-3c4d9cc6d67c.png', // Gnome with open arms
-  magnifying: '/lovable-uploads/c2bdaff1-11e2-4eaa-94ca-748fb236ac18.png', // Gnome with magnifying glass
-  lefthand: '/lovable-uploads/59457bb6-3645-40f3-a6f4-511dac08bb68.png', // Gnome with left hand up
-  placeholder: '/assets/gnomes/placeholder.svg' // Fallback image
+
+// Gnome image types with descriptive names
+export type GnomeImageType = 
+  | 'presentation'   // Gnome with presentation/chart
+  | 'clipboard'      // Gnome with clipboard
+  | 'welcome'        // Gnome with open arms
+  | 'magnifying'     // Gnome with magnifying glass
+  | 'charts'         // Gnome with charts/analytics
+  | 'profile'        // Gnome portrait style
+  | 'report'         // Gnome with report/document
+  | 'analysis'       // Gnome analyzing data
+  | 'placeholder';   // Fallback image
+
+// Map of gnome image paths
+export const gnomeImages: Record<GnomeImageType, string> = {
+  presentation: '/assets/gnomes/gnome_presentation.png',
+  clipboard: '/assets/gnomes/gnome_clipboard.png',
+  welcome: '/assets/gnomes/gnome_welcome.png', 
+  magnifying: '/assets/gnomes/gnome_magnifying.png',
+  charts: '/assets/gnomes/gnome_charts.png',
+  profile: '/assets/gnomes/gnome_profile.png',
+  report: '/assets/gnomes/gnome_report.png',
+  analysis: '/assets/gnomes/gnome_analysis.png',
+  placeholder: '/assets/gnomes/placeholder.svg'
 };
+
+// Fallback URL to use when an image fails to load
+export const fallbackGnomeImage = gnomeImages.placeholder;
 
 /**
  * Get a gnome image by archetype ID
@@ -18,8 +38,56 @@ export const gnomeImages = {
  * @returns The appropriate gnome image for this archetype
  */
 export const getGnomeForArchetype = (archetypeId: string): string => {
+  if (!archetypeId) return gnomeImages.placeholder;
+  
+  // Map archetype families to specific gnomes
   if (archetypeId.startsWith('a')) return gnomeImages.presentation;
   if (archetypeId.startsWith('b')) return gnomeImages.clipboard;
   if (archetypeId.startsWith('c')) return gnomeImages.magnifying;
+  if (archetypeId.startsWith('d')) return gnomeImages.charts;
+  if (archetypeId.startsWith('e')) return gnomeImages.profile;
+  if (archetypeId.startsWith('f')) return gnomeImages.welcome;
+  
   return gnomeImages.placeholder;
 };
+
+/**
+ * Get a gnome image by section type
+ * @param sectionType The report section type
+ * @returns The appropriate gnome image for this section
+ */
+export const getGnomeForSection = (sectionType: string): string => {
+  const sectionMap: Record<string, GnomeImageType> = {
+    'profile': 'profile',
+    'cost': 'charts',
+    'metrics': 'charts',
+    'demographics': 'clipboard',
+    'utilization': 'analysis',
+    'disease': 'magnifying',
+    'care': 'clipboard', 
+    'gaps': 'clipboard',
+    'risk': 'magnifying',
+    'recommendations': 'report',
+    'overview': 'presentation',
+    'executive': 'presentation',
+    'introduction': 'welcome'
+  };
+  
+  const imageType = Object.keys(sectionMap).find(key => 
+    sectionType.toLowerCase().includes(key)
+  );
+  
+  return imageType ? gnomeImages[sectionMap[imageType]] : gnomeImages.placeholder;
+};
+
+/**
+ * React component props for displaying a gnome image
+ */
+export interface GnomeImageProps {
+  type?: GnomeImageType;
+  archetypeId?: string;
+  sectionType?: string;
+  className?: string;
+  alt?: string;
+}
+
