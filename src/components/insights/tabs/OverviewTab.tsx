@@ -31,7 +31,7 @@ const OverviewTab = ({ archetypeData, familyColor }: OverviewTabProps) => {
         <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-2">
           <div>
             <CardTitle className="text-2xl font-bold">
-              {archetypeData?.name || archetypeId?.toUpperCase() || 'Unknown Archetype'}
+              {archetypeData?.name || archetypeData?.id?.toUpperCase() || 'Unknown Archetype'}
             </CardTitle>
             <p className="text-gray-600 mt-1">
               {archetypeData?.familyName || archetypeData?.family_name || "Healthcare Archetype Family"}

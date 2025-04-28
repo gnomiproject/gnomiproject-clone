@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { ArchetypeDetailedData } from '@/types/archetype';
 import MetricCard from '../metrics/MetricCard';
 
@@ -112,13 +111,6 @@ const MetricsTab = ({ archetypeData }: MetricsTabProps) => {
                 suffix="PMPY"
               />
             </div>
-          </div>
-          
-          <div className="mt-4 p-4 bg-blue-50 border border-blue-100 rounded-lg">
-            <p className="text-blue-700">For detailed benchmarking and trend analysis, request the full archetype report</p>
-            <Button className="mt-2 bg-blue-700 hover:bg-blue-800" size="sm">
-              Request Full Report
-            </Button>
           </div>
         </div>
       </CardContent>
