@@ -66,7 +66,7 @@ serve(async (req: Request) => {
     const { data, error } = await supabase
       .from('report_requests')
       .update({
-        access_count: supabase.rpc('increment_counter', { x: 1 }),
+        access_count: supabase.sql`access_count + 1`,
         last_accessed: new Date().toISOString()
       })
       .eq('archetype_id', archetypeId)

@@ -16,7 +16,7 @@ export const trackReportAccess = async (
       .from('report_requests')
       .update({
         last_accessed: new Date().toISOString(),
-        access_count: supabase.rpc('increment_counter', { x: 1 })
+        access_count: supabase.sql`access_count + 1`
       })
       .eq('archetype_id', archetypeId)
       .eq('access_token', accessToken);
@@ -39,10 +39,16 @@ export const trackReportAccess = async (
         console.error('Edge function fallback failed:', fallbackErr);
         
         // As a last resort, load an invisible tracking pixel
-        const url = new URL('/functions/v1/increment-counter', supabase.supabaseUrl ?? '');
+        // Get the base URL from the client's URL
+        const baseUrl = typeof window !== 'undefined' ? 
+          `${window.location.protocol}//${window.location.host}` : 
+          '';
+        
+        // Construct the function URL
+        const functionUrl = `${baseUrl}/functions/v1/increment-counter`;
         
         const img = new Image();
-        img.src = url.toString();
+        img.src = functionUrl;
         img.style.display = 'none';
         document.body.appendChild(img);
         

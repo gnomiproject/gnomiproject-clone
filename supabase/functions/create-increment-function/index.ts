@@ -36,21 +36,18 @@ serve(async (req: Request) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
     // Create the increment function if it doesn't exist
-    const { data, error } = await supabase.rpc('create_increment_counter_function');
+    const { error } = await supabase.rpc('create_increment_counter_function');
     
     if (error) {
       // If the function doesn't exist, we'll create it manually
-      const { error: sqlError } = await supabase.from('_rpc').update({}).select();
-      
-      if (sqlError) {
-        console.log('Creating increment_counter function via direct SQL');
+      // Use raw SQL to create the function
+      const { error: rawError } = await supabase
+        .from('_rpc')
+        .update({})
+        .select();
         
-        // Use raw SQL to create the function
-        const { error: createError } = await supabase.from('_rpc').update({}).select();
-        
-        if (createError) {
-          throw new Error(`Failed to create function: ${createError.message}`);
-        }
+      if (rawError) {
+        throw new Error(`Failed to create function: ${rawError.message}`);
       }
     }
     
