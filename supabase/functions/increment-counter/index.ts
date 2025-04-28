@@ -26,7 +26,21 @@ serve(async (req: Request) => {
 
   try {
     // Parse the request body
-    const { archetypeId, accessToken } = await req.json();
+    let archetypeId, accessToken;
+    
+    try {
+      const body = await req.json();
+      archetypeId = body.archetypeId;
+      accessToken = body.accessToken;
+    } catch (e) {
+      // If we can't parse JSON, try to extract from URL for tracking pixel fallback
+      const url = new URL(req.url);
+      const pathParts = url.pathname.split('/');
+      if (pathParts.length >= 5) {
+        archetypeId = pathParts[pathParts.length - 2];
+        accessToken = pathParts[pathParts.length - 1];
+      }
+    }
     
     if (!archetypeId || !accessToken) {
       return new Response(
@@ -61,6 +75,28 @@ serve(async (req: Request) => {
     
     if (error) {
       throw new Error(`Error incrementing access count: ${error.message}`);
+    }
+    
+    // For tracking pixel requests, return a 1x1 transparent GIF
+    if (req.headers.get('accept')?.includes('image/')) {
+      return new Response(
+        Uint8Array.from([
+          0x47, 0x49, 0x46, 0x38, 0x39, 0x61, 0x01, 0x00, 0x01, 0x00, 
+          0x80, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0x00, 0xFF, 0x00, 0x2C, 
+          0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x02, 
+          0x02, 0x44, 0x01, 0x00, 0x3B
+        ]),
+        {
+          headers: { 
+            ...corsHeaders, 
+            "Content-Type": "image/gif",
+            "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+            "Pragma": "no-cache",
+            "Expires": "0"
+          },
+          status: 200,
+        }
+      );
     }
     
     return new Response(

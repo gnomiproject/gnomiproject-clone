@@ -11,12 +11,12 @@ export const trackReportAccess = async (
   accessToken: string
 ): Promise<void> => {
   try {
-    // First, try to update the existing record via direct API call
+    // First, try to update the existing record
     const { error } = await supabase
       .from('report_requests')
       .update({
         last_accessed: new Date().toISOString(),
-        access_count: supabase.rpc('increment', { row_id: archetypeId })
+        access_count: supabase.rpc('increment_counter', { x: 1 })
       })
       .eq('archetype_id', archetypeId)
       .eq('access_token', accessToken);
@@ -24,20 +24,33 @@ export const trackReportAccess = async (
     if (error) {
       console.error('Error tracking report access via direct update:', error);
       
-      // As a fallback, load an invisible tracking pixel from our edge function
-      const supabaseUrl = supabase.supabaseUrl;
-      const trackingUrl = 
-        `${supabaseUrl}/functions/v1/send-report-email/track-access/${archetypeId}/${accessToken}`;
-      
-      const img = new Image();
-      img.src = trackingUrl;
-      img.style.display = 'none';
-      document.body.appendChild(img);
-      
-      // Remove the image after it has loaded (or failed to load)
-      img.onload = img.onerror = () => {
-        document.body.removeChild(img);
-      };
+      // As a fallback, call the increment-counter edge function
+      try {
+        const response = await supabase.functions.invoke('increment-counter', {
+          body: { archetypeId, accessToken }
+        });
+        
+        if (response.error) {
+          throw new Error(response.error.message);
+        }
+        
+        console.log('Tracked access via edge function:', response.data);
+      } catch (fallbackErr) {
+        console.error('Edge function fallback failed:', fallbackErr);
+        
+        // As a last resort, load an invisible tracking pixel
+        const url = new URL('/functions/v1/increment-counter', supabase.supabaseUrl ?? '');
+        
+        const img = new Image();
+        img.src = url.toString();
+        img.style.display = 'none';
+        document.body.appendChild(img);
+        
+        // Remove the image after it has loaded (or failed to load)
+        img.onload = img.onerror = () => {
+          document.body.removeChild(img);
+        };
+      }
     }
   } catch (err) {
     console.error('Error tracking report access:', err);
@@ -51,9 +64,15 @@ export const trackReportAccess = async (
  */
 export const createIncrementFunction = async (): Promise<void> => {
   try {
-    await supabase.rpc('create_increment_function');
+    // Call the edge function that will create the increment function in the database
+    const { error } = await supabase.functions.invoke('create-increment-function');
+    
+    if (error) {
+      throw new Error(error.message);
+    }
+    
     console.log('Increment function created successfully');
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating increment function:', error);
   }
 };
