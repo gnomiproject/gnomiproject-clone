@@ -3,6 +3,8 @@ import React from 'react';
 import { ArchetypeDetailedData } from '@/types/archetype';
 import ArchetypeNavTabs from './components/ArchetypeNavTabs';
 import ArchetypeHeader from './components/ArchetypeHeader';
+import { Tabs } from "@/components/ui/tabs";
+import { useState } from 'react';
 
 interface ArchetypeContentProps {
   archetypeData: ArchetypeDetailedData;
@@ -11,18 +13,25 @@ interface ArchetypeContentProps {
 }
 
 const ArchetypeContent = ({ archetypeData, archetypeId, onRetakeAssessment }: ArchetypeContentProps) => {
+  const [activeTab, setActiveTab] = useState('overview');
+
   return (
     <div className="rounded-lg overflow-hidden bg-white">
       <ArchetypeHeader 
-        archetypeName={archetypeData.name} 
-        hexColor={archetypeData.hexColor} 
-        familyName={archetypeData.familyName} 
+        name={archetypeData.name}
+        description={archetypeData.short_description || ''}
+        familyId={archetypeData.familyId || ''}
+        familyName={archetypeData.familyName || ''}
+        familyColor={archetypeData.hexColor || '#000000'}
+        archetypeHexColor={archetypeData.hexColor || '#000000'}
+        gnomeImage={`/assets/gnomes/${archetypeId}.png`}
       />
-      <ArchetypeNavTabs 
-        archetypeData={archetypeData} 
-        archetypeId={archetypeId}
-        onRetakeAssessment={onRetakeAssessment}
-      />
+      <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab}>
+        <ArchetypeNavTabs 
+          activeTab={activeTab} 
+          onTabChange={setActiveTab} 
+        />
+      </Tabs>
     </div>
   );
 };
