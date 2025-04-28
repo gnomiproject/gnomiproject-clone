@@ -13,13 +13,17 @@ interface AssessmentResultsCardProps {
   familyData: { name: string } | undefined;
   selectedArchetype: ArchetypeId;
   onRetakeAssessment: () => void;
+  assessmentResult?: any;
+  assessmentAnswers?: any;
 }
 
 const AssessmentResultsCard = ({ 
   archetypeData, 
   familyData, 
   selectedArchetype, 
-  onRetakeAssessment 
+  onRetakeAssessment,
+  assessmentResult,
+  assessmentAnswers
 }: AssessmentResultsCardProps) => {
   const [showError, setShowError] = useState<boolean>(false);
   const [isRetrying, setIsRetrying] = useState<boolean>(false);
@@ -104,6 +108,8 @@ const AssessmentResultsCard = ({
       <PremiumReport 
         archetypeId={selectedArchetype} 
         archetypeData={archetypeData} 
+        assessmentResult={assessmentResult}
+        assessmentAnswers={assessmentAnswers}
       />
     </div>
   );

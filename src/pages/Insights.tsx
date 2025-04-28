@@ -14,10 +14,12 @@ import { useQueryClient } from '@tanstack/react-query';
 const INSIGHTS_STORAGE_KEY = 'healthcareArchetypeInsights';
 const SESSION_RESULTS_KEY = 'healthcareArchetypeSessionResults';
 const SESSION_ID_KEY = 'healthcareArchetypeSessionId';
+const SESSION_ANSWERS_KEY = 'healthcareArchetypeSessionAnswers';
 
 const Insights = () => {
   const [selectedArchetype, setSelectedArchetype] = useState<ArchetypeId | null>(null);
   const [sessionResults, setSessionResults] = useState<AssessmentResult | null>(null);
+  const [sessionAnswers, setSessionAnswers] = useState<any | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const [hasFeedbackBeenClosed, setHasFeedbackBeenClosed] = useState(false);
@@ -28,11 +30,20 @@ const Insights = () => {
   // Use consistent hook calls - important for React's hook rules
   const { getArchetypeDetailedById, getFamilyById } = useArchetypes();
   
-  // Load session ID
+  // Load session ID and answers
   useEffect(() => {
     const storedSessionId = sessionStorage.getItem(SESSION_ID_KEY);
     if (storedSessionId) {
       setSessionId(storedSessionId);
+    }
+    
+    const answersStr = sessionStorage.getItem(SESSION_ANSWERS_KEY);
+    if (answersStr) {
+      try {
+        setSessionAnswers(JSON.parse(answersStr));
+      } catch (e) {
+        console.error("Could not parse assessment answers:", e);
+      }
     }
   }, []);
   
@@ -60,6 +71,12 @@ const Insights = () => {
       if (location.state.sessionId) {
         sessionStorage.setItem(SESSION_ID_KEY, location.state.sessionId);
         setSessionId(location.state.sessionId);
+      }
+      
+      // Store assessment answers if available in location state
+      if (location.state.assessmentAnswers) {
+        sessionStorage.setItem(SESSION_ANSWERS_KEY, JSON.stringify(location.state.assessmentAnswers));
+        setSessionAnswers(location.state.assessmentAnswers);
       }
       
       // Clear the location state to avoid persisting the selection on refresh
@@ -161,6 +178,8 @@ const Insights = () => {
             familyData={familyData}
             selectedArchetype={selectedArchetype}
             onRetakeAssessment={handleRetakeAssessment}
+            assessmentResult={sessionResults}
+            assessmentAnswers={sessionAnswers}
           />
         ) : (
           <NoAssessmentResults />

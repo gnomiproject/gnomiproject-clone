@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { ArchetypeDetailedData } from '@/types/archetype';
 import { insightReportSchema } from '@/schemas/insightReportSchema';
 import { useReportValidation } from '@/hooks/reports/useReportValidation';
@@ -85,13 +84,7 @@ const OverviewTab = ({ archetypeData, familyColor }: OverviewTabProps) => {
           <p className="text-gray-700">{industries}</p>
         </div>
         
-        <div className="mt-8 p-4 bg-purple-50 border border-purple-100 rounded-lg">
-          <h3 className="text-lg font-semibold text-purple-900">Want more detail?</h3>
-          <p className="text-purple-700">Get the full archetype report with comprehensive insights and strategies.</p>
-          <Button className="mt-2 bg-purple-700 hover:bg-purple-800" size="sm">
-            Request Full Report
-          </Button>
-        </div>
+        {/* Removing the duplicate "Want more detail?" section */}
       </CardContent>
     </Card>
   );

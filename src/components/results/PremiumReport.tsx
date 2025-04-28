@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -7,6 +8,7 @@ import { ArchetypeDetailedData, ArchetypeId } from '@/types/archetype';
 import ReportRequestForm, { FormData } from './premium-report/ReportRequestForm';
 import ReportAccessLink from './premium-report/ReportAccessLink';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface PremiumReportProps {
   archetypeId: ArchetypeId;
@@ -19,13 +21,15 @@ const PremiumReport = ({ archetypeId, assessmentResult, assessmentAnswers, arche
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [accessLink, setAccessLink] = useState<string | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
-  const { toast } = useToast();
+  const { toast: hookToast } = useToast();
 
   const onSubmit = async (values: FormData) => {
     setIsSubmitting(true);
 
     try {
       const token = uuidv4();
+      
+      console.log('Submitting report request for archetypeId:', archetypeId);
       
       // Store the request in the database to validate it later
       const { error } = await supabase.from('report_requests').insert({
@@ -44,14 +48,11 @@ const PremiumReport = ({ archetypeId, assessmentResult, assessmentAnswers, arche
       });
 
       if (error) {
+        console.error('Error submitting report request:', error);
         throw new Error(error.message);
       }
       
-      console.log('Requesting full report:', {
-        ...values,
-        archetypeId,
-        accessToken: token,
-      });
+      console.log('Report request submitted successfully with token:', token);
       
       const baseUrl = window.location.origin;
       // Make sure to use the correct route format for deep dive reports that includes token
@@ -60,23 +61,57 @@ const PremiumReport = ({ archetypeId, assessmentResult, assessmentAnswers, arche
       setAccessToken(token);
       setAccessLink(reportLink);
       
-      toast({
-        title: "Report Request Submitted",
-        description: "Your request for a detailed report has been received.",
+      toast.success("Report request submitted successfully!", {
+        description: "Your secure link is ready below",
       });
       
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error submitting report request:", error);
-      toast({
-        title: "Error",
-        description: "There was a problem submitting your request. Please try again.",
-        variant: "destructive",
+      toast.error("There was a problem submitting your request", {
+        description: error.message || "Please try again",
       });
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  // Check for existing report token in session storage
+  React.useEffect(() => {
+    const checkExistingToken = async () => {
+      try {
+        // Check if we have a token for this archetype
+        const { data, error } = await supabase
+          .from('report_requests')
+          .select('access_token')
+          .eq('archetype_id', archetypeId)
+          .order('created_at', { ascending: false })
+          .limit(1);
+          
+        if (error) {
+          console.error('Error checking for existing report:', error);
+          return;
+        }
+        
+        // If we found a token, generate the link
+        if (data && data.length > 0) {
+          const token = data[0].access_token;
+          const baseUrl = window.location.origin;
+          const reportLink = `${baseUrl}/report/${archetypeId}/${token}`;
+          
+          setAccessToken(token);
+          setAccessLink(reportLink);
+          console.log('Using existing report token:', token);
+        }
+      } catch (err) {
+        console.error('Error checking for existing report:', err);
+      }
+    };
+    
+    if (archetypeId && !accessToken) {
+      checkExistingToken();
+    }
+  }, [archetypeId, accessToken]);
+  
   return (
     <Card className="w-full">
       <CardHeader>
@@ -94,7 +129,9 @@ const PremiumReport = ({ archetypeId, assessmentResult, assessmentAnswers, arche
             Gain actionable strategic insights tailored to your organization's unique profile
           </p>
         </div>
-        <ReportRequestForm onSubmit={onSubmit} isSubmitting={isSubmitting} />
+        {!accessLink && (
+          <ReportRequestForm onSubmit={onSubmit} isSubmitting={isSubmitting} />
+        )}
       </CardContent>
       {accessLink && (
         <>
