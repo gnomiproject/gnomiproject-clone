@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useArchetypes } from '@/hooks/useArchetypes';
@@ -6,10 +5,10 @@ import { ArchetypeId } from '@/types/archetype';
 import { AssessmentResult } from '@/types/assessment';
 import MatchFeedbackMenu from '@/components/insights/MatchFeedbackMenu';
 import NoAssessmentResults from '@/components/insights/NoAssessmentResults';
-import AssessmentResultsCard from '@/components/insights/AssessmentResultsCard';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
 import { useGetArchetype } from '@/hooks/useGetArchetype';
+import DetailedArchetypeReport from '@/components/insights/DetailedArchetypeReport';
 
 // Storage keys
 const INSIGHTS_STORAGE_KEY = 'healthcareArchetypeInsights';
@@ -185,20 +184,18 @@ const Insights = () => {
     "Util_Emergency Visits per 1k Members": archetypeData["Util_Emergency Visits per 1k Members"]
   } : 'No data');
   console.log("Session results:", sessionResults);
+  console.log("Session answers:", sessionAnswers);
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-6 md:px-12 pb-24 relative">
       <div className="max-w-5xl mx-auto">
         {/* Show assessment results if an archetype is selected */}
         {selectedArchetype && archetypeData ? (
-          <AssessmentResultsCard
-            archetypeData={archetypeData}
-            familyData={familyData}
-            selectedArchetype={selectedArchetype}
+          <DetailedArchetypeReport
+            archetypeId={selectedArchetype}
             onRetakeAssessment={handleRetakeAssessment}
             assessmentResult={sessionResults}
             assessmentAnswers={sessionAnswers}
-            isLoading={isLoadingArchetype}
           />
         ) : (
           <NoAssessmentResults />

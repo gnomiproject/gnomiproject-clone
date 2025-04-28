@@ -4,13 +4,21 @@ import { ArchetypeId } from '@/types/archetype';
 import { useArchetypes } from '@/hooks/useArchetypes';
 import ArchetypeContent from './ArchetypeContent';
 import { useGetArchetype } from '@/hooks/useGetArchetype';
+import ArchetypeReport from './ArchetypeReport';
 
 interface DetailedArchetypeReportProps {
   archetypeId: ArchetypeId;
   onRetakeAssessment: () => void;
+  assessmentResult?: any;
+  assessmentAnswers?: any;
 }
 
-const DetailedArchetypeReport = ({ archetypeId, onRetakeAssessment }: DetailedArchetypeReportProps) => {
+const DetailedArchetypeReport = ({ 
+  archetypeId, 
+  onRetakeAssessment,
+  assessmentResult,
+  assessmentAnswers 
+}: DetailedArchetypeReportProps) => {
   const { getArchetypeDetailedById } = useArchetypes();
   const renderCountRef = useRef(0);
   const processedRef = useRef(false);
@@ -90,7 +98,6 @@ const DetailedArchetypeReport = ({ archetypeId, onRetakeAssessment }: DetailedAr
   }
   
   // Create a default fallback for basic props to prevent null errors
-  // This ensures ArchetypeContent always receives something valid
   const safeArchetypeData = {
     ...archetypeData,
     name: archetypeData.name || `Archetype ${archetypeId.toUpperCase()}`,
@@ -99,11 +106,14 @@ const DetailedArchetypeReport = ({ archetypeId, onRetakeAssessment }: DetailedAr
     familyName: archetypeData.familyName || archetypeData.family_name || 'Healthcare Archetype'
   };
   
+  // Use ArchetypeReport directly instead of ArchetypeContent to ensure DeepDiveRequestForm is included
   return (
-    <ArchetypeContent 
-      archetypeData={safeArchetypeData}
+    <ArchetypeReport 
       archetypeId={archetypeId}
-      onRetakeAssessment={onRetakeAssessment}
+      reportData={safeArchetypeData}
+      assessmentResult={assessmentResult}
+      assessmentAnswers={assessmentAnswers}
+      hideRequestSection={false}
     />
   );
 };

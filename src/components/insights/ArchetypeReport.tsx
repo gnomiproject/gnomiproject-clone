@@ -60,7 +60,7 @@ const ArchetypeReport = ({
       </div>
 
       {!hideRequestSection && (
-        <div className="border-t border-gray-100">
+        <div className="border-t border-gray-100 mt-6">
           <DeepDiveRequestForm
             archetypeId={archetypeId}
             assessmentResult={assessmentResult}
