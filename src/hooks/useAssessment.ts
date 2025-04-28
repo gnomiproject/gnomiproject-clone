@@ -145,10 +145,10 @@ export const useAssessment = () => {
         sessionStorage.setItem(SESSION_RESULTS_KEY, JSON.stringify(resultWithEmployeeCount));
         
         console.log("Assessment completed. Results:", assessmentResult);
-        console.log("Navigating directly to report with sessionId:", sessionId);
+        console.log("Navigating to insights page with sessionId:", sessionId);
         
-        // Navigate directly to the report page with the results and session ID
-        navigate(`/insights/report/${assessmentResult.primaryArchetype}`, { 
+        // Changed: Navigate to the insights page with the results state
+        navigate(`/insights`, { 
           state: { 
             selectedArchetype: assessmentResult.primaryArchetype,
             sessionId: sessionId
