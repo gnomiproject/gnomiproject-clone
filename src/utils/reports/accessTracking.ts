@@ -12,11 +12,22 @@ export const trackReportAccess = async (
 ): Promise<void> => {
   try {
     // First, try to update the existing record
+    // We'll first get the current count, then increment it
+    const { data: currentData } = await supabase
+      .from('report_requests')
+      .select('access_count')
+      .eq('archetype_id', archetypeId)
+      .eq('access_token', accessToken)
+      .single();
+      
+    const currentCount = currentData?.access_count || 0;
+    
+    // Now update with the incremented count
     const { error } = await supabase
       .from('report_requests')
       .update({
         last_accessed: new Date().toISOString(),
-        access_count: supabase.sql`access_count + 1`
+        access_count: currentCount + 1
       })
       .eq('archetype_id', archetypeId)
       .eq('access_token', accessToken);

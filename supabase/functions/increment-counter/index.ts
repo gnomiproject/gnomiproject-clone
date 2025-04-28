@@ -62,11 +62,25 @@ serve(async (req: Request) => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
+    // First get the current count
+    const { data: currentData, error: fetchError } = await supabase
+      .from('report_requests')
+      .select('access_count')
+      .eq('archetype_id', archetypeId)
+      .eq('access_token', accessToken)
+      .maybeSingle();
+      
+    if (fetchError) {
+      throw new Error(`Error fetching current access count: ${fetchError.message}`);
+    }
+    
+    const currentCount = currentData?.access_count || 0;
+    
     // Update the access count and last accessed timestamp
     const { data, error } = await supabase
       .from('report_requests')
       .update({
-        access_count: supabase.sql`access_count + 1`,
+        access_count: currentCount + 1,
         last_accessed: new Date().toISOString()
       })
       .eq('archetype_id', archetypeId)
@@ -102,7 +116,7 @@ serve(async (req: Request) => {
     return new Response(
       JSON.stringify({ 
         message: "Access count incremented", 
-        access_count: data?.[0]?.access_count || 0 
+        access_count: data?.[0]?.access_count || (currentCount + 1)
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
