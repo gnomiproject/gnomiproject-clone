@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useArchetypes } from '@/hooks/useArchetypes';
@@ -23,12 +24,38 @@ const Insights = () => {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const [hasFeedbackBeenClosed, setHasFeedbackBeenClosed] = useState(false);
+  const [isFormVisible, setIsFormVisible] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   
   // Use consistent hook calls - important for React's hook rules
   const { getArchetypeDetailedById, getFamilyById } = useArchetypes();
+
+  // Check if the user is interacting with a form
+  const handleFormVisibilityChange = (isVisible: boolean) => {
+    setIsFormVisible(isVisible);
+  };
+  
+  // Added effect to detect when user is focusing on form inputs
+  useEffect(() => {
+    const formInputs = document.querySelectorAll('input, textarea');
+    
+    const handleFocus = () => setIsFormVisible(true);
+    const handleBlur = () => setIsFormVisible(false);
+    
+    formInputs.forEach(input => {
+      input.addEventListener('focus', handleFocus);
+      input.addEventListener('blur', handleBlur);
+    });
+    
+    return () => {
+      formInputs.forEach(input => {
+        input.removeEventListener('focus', handleFocus);
+        input.removeEventListener('blur', handleBlur);
+      });
+    };
+  }, []);
   
   // Load session ID and answers
   useEffect(() => {
@@ -130,7 +157,7 @@ const Insights = () => {
       }
       
       scrollTimeout = window.setTimeout(() => {
-        if (!hasFeedbackBeenClosed && window.scrollY > 100) {
+        if (!hasFeedbackBeenClosed && window.scrollY > 100 && !isFormVisible) {
           setShowFeedback(true);
         }
         scrollTimeout = null;
@@ -144,7 +171,7 @@ const Insights = () => {
         window.clearTimeout(scrollTimeout);
       }
     };
-  }, [hasFeedbackBeenClosed]);
+  }, [hasFeedbackBeenClosed, isFormVisible]);
 
   // Handle retaking the assessment
   const handleRetakeAssessment = () => {
@@ -203,7 +230,7 @@ const Insights = () => {
       </div>
 
       {/* Feedback menu in bottom right corner - only show if archetype is selected and user has scrolled */}
-      {selectedArchetype && archetypeData && showFeedback && (
+      {selectedArchetype && archetypeData && showFeedback && !isFormVisible && (
         <div className="fixed bottom-6 right-6 z-10 animate-slide-in-from-bottom">
           <MatchFeedbackMenu 
             archetypeId={selectedArchetype} 

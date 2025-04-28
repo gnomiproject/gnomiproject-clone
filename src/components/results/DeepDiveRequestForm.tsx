@@ -19,6 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { ArchetypeId } from '@/types/archetype';
+import { useNavigate } from 'react-router-dom';
 
 // Add Google Analytics gtag to the Window interface
 declare global {
@@ -55,6 +56,7 @@ const DeepDiveRequestForm = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccessful, setSubmitSuccessful] = useState(false);
   const [accessUrl, setAccessUrl] = useState('');
+  const navigate = useNavigate();
   
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -66,6 +68,10 @@ const DeepDiveRequestForm = ({
       sessionId: localStorage.getItem('session_id') || ''
     },
   });
+
+  const handleRetakeAssessment = () => {
+    navigate('/assessment');
+  };
 
   const handleSubmit = async (data: z.infer<typeof FormSchema>) => {
     setIsSubmitting(true);
@@ -126,7 +132,24 @@ const DeepDiveRequestForm = ({
   const archetypeName = archetypeData?.name || '';
 
   return (
-    <div className="py-8 px-6 md:px-10 bg-white rounded-lg">
+    <div className="py-8 px-6 md:px-10 bg-gray-50">
+      {/* Retake Assessment Link */}
+      <div className="max-w-5xl mx-auto mb-8 text-center">
+        <p className="text-lg">
+          Want to try again?{" "}
+          <button 
+            onClick={handleRetakeAssessment} 
+            className="text-blue-600 font-medium hover:underline inline-flex items-center"
+          >
+            Retake the assessment
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1">
+              <path d="m13 5 7 7-7 7"></path>
+              <path d="M5 12h15"></path>
+            </svg>
+          </button>
+        </p>
+      </div>
+
       <div className="max-w-5xl mx-auto">
         <h2 className="text-2xl md:text-3xl font-bold text-center mb-6">Want to go deeper on your archetype?</h2>
         
@@ -191,10 +214,76 @@ const DeepDiveRequestForm = ({
                   {isSubmitting ? "Submitting..." : "Request your full report now"}
                 </Button>
               )}
+
+              <div className="md:hidden mt-8">
+                {!submitSuccessful && (
+                  <Form {...form}>
+                    <form className="space-y-4">
+                      <FormField
+                        control={form.control}
+                        name="name"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Name</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Your Name" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="email"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Email</FormLabel>
+                            <FormControl>
+                              <Input placeholder="your@email.com" type="email" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="organization"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Organization (Optional)</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Your Organization" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="comments"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Comments (Optional)</FormLabel>
+                            <FormControl>
+                              <Textarea
+                                placeholder="Any specific requirements or comments?"
+                                className="resize-none"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </form>
+                  </Form>
+                )}
+              </div>
             </div>
             
-            {!submitSuccessful && (
-              <div className="md:w-96">
+            {/* Form on desktop */}
+            <div className="hidden md:block md:w-96">
+              {!submitSuccessful && (
                 <Form {...form}>
                   <form className="space-y-4">
                     <FormField
@@ -255,8 +344,8 @@ const DeepDiveRequestForm = ({
                     />
                   </form>
                 </Form>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>
