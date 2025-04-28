@@ -9,6 +9,7 @@ import NoAssessmentResults from '@/components/insights/NoAssessmentResults';
 import AssessmentResultsCard from '@/components/insights/AssessmentResultsCard';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
+import { useGetArchetype } from '@/hooks/useGetArchetype';
 
 // Storage keys
 const INSIGHTS_STORAGE_KEY = 'healthcareArchetypeInsights';
@@ -117,7 +118,7 @@ const Insights = () => {
         staleTime: 5 * 60 * 1000 // 5 minutes
       });
     }
-  }, [location, queryClient]); // Removed selectedArchetype from deps to prevent loops
+  }, [location, queryClient]); 
 
   // Add scroll event listener to show feedback menu when scrolling
   // with throttling to avoid too many events
@@ -164,13 +165,25 @@ const Insights = () => {
     }
   };
 
-  // Get the archetype data if one is selected
-  const archetypeData = selectedArchetype ? getArchetypeDetailedById(selectedArchetype) : null;
+  // Use useGetArchetype hook to fetch the latest archetype data from the DB
+  const { archetypeData: fetchedArchetypeData, isLoading: isLoadingArchetype } = 
+    useGetArchetype(selectedArchetype as ArchetypeId);
+
+  // Get the archetype data from local cache if DB fetch is still loading
+  const localArchetypeData = selectedArchetype ? getArchetypeDetailedById(selectedArchetype) : null;
+  
+  // Use fetched data if available, otherwise fall back to local data
+  const archetypeData = fetchedArchetypeData || localArchetypeData;
   const familyData = archetypeData?.familyId ? getFamilyById(archetypeData.familyId) : null;
 
   // Debug
   console.log("Selected archetype:", selectedArchetype);
   console.log("Archetype data:", archetypeData);
+  console.log("Field values:", archetypeData ? {
+    "Demo_Average Family Size": archetypeData["Demo_Average Family Size"],
+    "Demo_Average Age": archetypeData["Demo_Average Age"],
+    "Util_Emergency Visits per 1k Members": archetypeData["Util_Emergency Visits per 1k Members"]
+  } : 'No data');
   console.log("Session results:", sessionResults);
 
   return (
@@ -185,6 +198,7 @@ const Insights = () => {
             onRetakeAssessment={handleRetakeAssessment}
             assessmentResult={sessionResults}
             assessmentAnswers={sessionAnswers}
+            isLoading={isLoadingArchetype}
           />
         ) : (
           <NoAssessmentResults />

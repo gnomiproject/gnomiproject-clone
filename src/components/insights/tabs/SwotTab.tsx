@@ -15,6 +15,15 @@ interface SwotTabProps {
 }
 
 const SwotTab = ({ archetypeData, swotData, hideRequestSection = false }: SwotTabProps) => {
+  // Add debug logging
+  console.log("SwotTab received data:", {
+    archetypeData: archetypeData?.id,
+    strengths: swotData?.strengths?.length || 0,
+    weaknesses: swotData?.weaknesses?.length || 0,
+    opportunities: swotData?.opportunities?.length || 0,
+    threats: swotData?.threats?.length || 0,
+  });
+
   return (
     <Card>
       <CardHeader>

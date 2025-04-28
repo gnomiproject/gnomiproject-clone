@@ -10,9 +10,21 @@ interface DiseaseAndCareTabProps {
 
 const DiseaseAndCareTab = ({ archetypeData, hideRequestSection = false }: DiseaseAndCareTabProps) => {
   const formatPercentage = (value: number | undefined) => {
-    if (value === undefined) return 'N/A';
+    if (value === undefined || value === null) return 'N/A';
     return `${(value * 100).toFixed(1)}%`;
   };
+
+  // Add debug logging
+  console.log("DiseaseAndCareTab received data:", {
+    heart: archetypeData["Dise_Heart Disease Prevalence"],
+    diabetes: archetypeData["Dise_Type 2 Diabetes Prevalence"],
+    mental: archetypeData["Dise_Mental Health Disorder Prevalence"],
+    substance: archetypeData["Dise_Substance Use Disorder Prevalence"],
+    rxAdherence: archetypeData["Gaps_Diabetes RX Adherence"],
+    behavioralHealth: archetypeData["Gaps_Behavioral Health FU ED Visit Mental Illness"],
+    breastScreening: archetypeData["Gaps_Cancer Screening Breast"],
+    wellnessVisit: archetypeData["Gaps_Wellness Visit Adults"]
+  });
 
   return (
     <Card>

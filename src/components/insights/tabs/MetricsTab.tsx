@@ -10,6 +10,21 @@ interface MetricsTabProps {
 }
 
 const MetricsTab = ({ archetypeData, hideRequestSection = false }: MetricsTabProps) => {
+  // Add debug logging to see what's coming in
+  console.log("MetricsTab received archetypeData:", {
+    familySize: archetypeData["Demo_Average Family Size"],
+    age: archetypeData["Demo_Average Age"],
+    states: archetypeData["Demo_Average States"],
+    erVisits: archetypeData["Util_Emergency Visits per 1k Members"],
+    specialistVisits: archetypeData["Util_Specialist Visits per 1k Members"],
+    inpatientAdmits: archetypeData["Util_Inpatient Admits per 1k Members"],
+    nonUtilizers: archetypeData["Util_Percent of Members who are Non-Utilizers"],
+    riskScore: archetypeData["Risk_Average Risk Score"],
+    sdohScore: archetypeData["SDOH_Average SDOH"],
+    costPEPY: archetypeData["Cost_Medical & RX Paid Amount PEPY"],
+    erSavings: archetypeData["Cost_Avoidable ER Potential Savings PMPY"]
+  });
+
   return (
     <Card>
       <CardHeader>
@@ -23,20 +38,20 @@ const MetricsTab = ({ archetypeData, hideRequestSection = false }: MetricsTabPro
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <MetricCard 
                 title="Average Family Size" 
-                value={archetypeData["Demo_Average Family Size"] || 0} 
+                value={archetypeData["Demo_Average Family Size"]} 
                 format="number" 
                 decimals={1}
               />
               <MetricCard 
                 title="Average Age" 
-                value={archetypeData["Demo_Average Age"] || 0} 
+                value={archetypeData["Demo_Average Age"]} 
                 format="number" 
                 decimals={1}
                 suffix="years"
               />
               <MetricCard 
                 title="Geographic Spread" 
-                value={archetypeData["Demo_Average States"] || 0} 
+                value={archetypeData["Demo_Average States"]} 
                 format="number" 
                 decimals={0}
                 suffix="states"
@@ -50,25 +65,25 @@ const MetricsTab = ({ archetypeData, hideRequestSection = false }: MetricsTabPro
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <MetricCard 
                 title="ER Visits per 1k" 
-                value={archetypeData["Util_Emergency Visits per 1k Members"] || 0} 
+                value={archetypeData["Util_Emergency Visits per 1k Members"]} 
                 format="number" 
                 decimals={0}
               />
               <MetricCard 
                 title="Specialist Visits per 1k" 
-                value={archetypeData["Util_Specialist Visits per 1k Members"] || 0} 
+                value={archetypeData["Util_Specialist Visits per 1k Members"]} 
                 format="number" 
                 decimals={0}
               />
               <MetricCard 
                 title="Hospital Admits per 1k" 
-                value={archetypeData["Util_Inpatient Admits per 1k Members"] || 0} 
+                value={archetypeData["Util_Inpatient Admits per 1k Members"]} 
                 format="number" 
                 decimals={0}
               />
               <MetricCard 
                 title="Non-Utilizers" 
-                value={archetypeData["Util_Percent of Members who are Non-Utilizers"] || 0} 
+                value={archetypeData["Util_Percent of Members who are Non-Utilizers"]} 
                 format="percent" 
                 decimals={1}
               />
@@ -81,13 +96,13 @@ const MetricsTab = ({ archetypeData, hideRequestSection = false }: MetricsTabPro
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <MetricCard 
                 title="Clinical Risk Score" 
-                value={archetypeData["Risk_Average Risk Score"] || 0} 
+                value={archetypeData["Risk_Average Risk Score"]} 
                 format="number" 
                 decimals={2}
               />
               <MetricCard 
                 title="SDOH Risk Score" 
-                value={archetypeData["SDOH_Average SDOH"] || 0} 
+                value={archetypeData["SDOH_Average SDOH"]} 
                 format="number" 
                 decimals={2}
               />
@@ -100,13 +115,13 @@ const MetricsTab = ({ archetypeData, hideRequestSection = false }: MetricsTabPro
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <MetricCard 
                 title="Total Healthcare Spend per Employee" 
-                value={archetypeData["Cost_Medical & RX Paid Amount PEPY"] || 0} 
+                value={archetypeData["Cost_Medical & RX Paid Amount PEPY"]} 
                 format="currency" 
                 decimals={0}
               />
               <MetricCard 
                 title="Avoidable ER Potential Savings" 
-                value={archetypeData["Cost_Avoidable ER Potential Savings PMPY"] || 0} 
+                value={archetypeData["Cost_Avoidable ER Potential Savings PMPY"]} 
                 format="currency" 
                 decimals={0}
                 suffix="PMPY"

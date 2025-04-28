@@ -1,53 +1,50 @@
 
 import React from 'react';
-import { formatNumber } from '@/utils/formatters';
-import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 
 interface MetricCardProps {
   title: string;
-  value: number;
-  format: 'number' | 'percent' | 'currency';
-  decimals?: number;
+  value: number | undefined | null;
+  format?: 'number' | 'percent' | 'currency';
   suffix?: string;
-  change?: number;
-  isPositive?: boolean;
+  decimals?: number;
 }
 
 const MetricCard = ({ 
   title, 
   value, 
-  format, 
-  decimals = 0,
+  format = 'number',
   suffix = '',
-  change,
-  isPositive
+  decimals = 0
 }: MetricCardProps) => {
-  const formattedValue = formatNumber(value, format, decimals);
   
+  const formatValue = (value: number | undefined | null): string => {
+    if (value === undefined || value === null) {
+      return 'N/A';
+    }
+
+    switch (format) {
+      case 'percent':
+        return `${(value * 100).toFixed(decimals)}%`;
+      case 'currency':
+        return `$${value.toLocaleString(undefined, {
+          minimumFractionDigits: decimals,
+          maximumFractionDigits: decimals
+        })}`;
+      case 'number':
+      default:
+        return value.toLocaleString(undefined, {
+          minimumFractionDigits: decimals,
+          maximumFractionDigits: decimals
+        });
+    }
+  };
+
   return (
-    <div className="bg-white border rounded-lg p-4 hover:shadow-md transition-shadow">
-      <p className="text-sm text-gray-600 mb-1">{title}</p>
-      <div className="text-2xl font-bold flex items-baseline">
-        <span>{formattedValue}</span>
-        {suffix && <span className="text-sm font-normal ml-1">{suffix}</span>}
-      </div>
-      
-      {change !== undefined && (
-        <div className="flex items-center mt-2">
-          {isPositive ? (
-            <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
-          ) : change === 0 ? (
-            <Minus className="h-4 w-4 text-gray-400 mr-1" />
-          ) : (
-            <TrendingDown className="h-4 w-4 text-red-500 mr-1" />
-          )}
-          <span className={`text-xs font-medium ${
-            isPositive ? 'text-green-500' : change === 0 ? 'text-gray-500' : 'text-red-500'
-          }`}>
-            {change > 0 ? '+' : ''}{change}%
-          </span>
-        </div>
-      )}
+    <div className="bg-gray-50 p-4 rounded-lg border border-gray-100 shadow-sm">
+      <p className="text-gray-600 text-sm mb-1">{title}</p>
+      <p className="text-2xl font-bold">
+        {formatValue(value)} {suffix}
+      </p>
     </div>
   );
 };
