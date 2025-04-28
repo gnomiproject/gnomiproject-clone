@@ -17,8 +17,14 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { TrackedEvent } from '@/types/events';
 import { ArchetypeId } from '@/types/archetype';
+
+// Add Google Analytics gtag to the Window interface
+declare global {
+  interface Window {
+    gtag?: (command: string, action: string, params: object) => void;
+  }
+}
 
 const FormSchema = z.object({
   name: z.string().min(2, {
@@ -60,7 +66,7 @@ const DeepDiveRequestForm = ({
     },
   });
 
-  const handleSubmit = async (data: FormSchema) => {
+  const handleSubmit = async (data: z.infer<typeof FormSchema>) => {
     setIsSubmitting(true);
     
     try {
