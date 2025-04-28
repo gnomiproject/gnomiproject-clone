@@ -1,29 +1,31 @@
-
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { useToast } from "@/hooks/use-toast";
-import { v4 as uuidv4 } from 'uuid';
-import { ArchetypeDetailedData, ArchetypeId } from '@/types/archetype';
-import ReportRequestForm, { FormData } from './premium-report/ReportRequestForm';
+import ReportRequestForm from './premium-report/ReportRequestForm';
 import ReportAccessLink from './premium-report/ReportAccessLink';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { v4 as uuidv4 } from 'uuid';
+import { ArchetypeDetailedData, ArchetypeId } from '@/types/archetype';
 
-interface PremiumReportProps {
+interface DeepDiveRequestFormProps {
   archetypeId: ArchetypeId;
   assessmentResult?: any;
   assessmentAnswers?: any;
   archetypeData?: ArchetypeDetailedData;
 }
 
-const PremiumReport = ({ archetypeId, assessmentResult, assessmentAnswers, archetypeData }: PremiumReportProps) => {
+const DeepDiveRequestForm = ({ 
+  archetypeId, 
+  assessmentResult, 
+  assessmentAnswers,
+  archetypeData 
+}: DeepDiveRequestFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [accessLink, setAccessLink] = useState<string | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
-  const { toast: hookToast } = useToast();
 
-  const onSubmit = async (values: FormData) => {
+  const onSubmit = async (values: any) => {
     setIsSubmitting(true);
 
     try {
@@ -111,41 +113,28 @@ const PremiumReport = ({ archetypeId, assessmentResult, assessmentAnswers, arche
       checkExistingToken();
     }
   }, [archetypeId, accessToken]);
-  
+
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>Full Deep Dive Report - Free & Comprehensive</CardTitle>
+    <Card className="border-0 shadow-none">
+      <CardHeader className="text-center">
+        <CardTitle>Deep Dive Report</CardTitle>
         <CardDescription>
-          Unlock Advanced Insights at No Cost - Packed with Strategic Recommendations
+          Get a comprehensive analysis tailored to your organization
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4">
-          <p className="text-blue-800 font-semibold">
-            🔍 Deep Dive Analysis: Completely Free & Insight-Packed
-          </p>
-          <p className="text-blue-700 text-sm mt-2">
-            Gain actionable strategic insights tailored to your organization's unique profile
-          </p>
-        </div>
         {!accessLink && (
           <ReportRequestForm onSubmit={onSubmit} isSubmitting={isSubmitting} />
         )}
+        {accessLink && (
+          <>
+            <Separator className="my-4" />
+            <ReportAccessLink accessLink={accessLink} />
+          </>
+        )}
       </CardContent>
-      {accessLink && (
-        <>
-          <Separator className="my-4" />
-          <ReportAccessLink accessLink={accessLink} />
-        </>
-      )}
-      <CardFooter>
-        <p className="text-xs text-gray-500 text-center w-full">
-          Your detailed, personalized deep dive report will be delivered directly to your email
-        </p>
-      </CardFooter>
     </Card>
   );
 };
 
-export default PremiumReport;
+export default DeepDiveRequestForm;
