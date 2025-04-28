@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ArchetypeId, ArchetypeDetailedData } from '@/types/archetype';
 import ArchetypeNavTabs from './components/ArchetypeNavTabs';
@@ -31,7 +32,7 @@ const ArchetypeReport = ({
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">
       <ArchetypeHeader 
         name={reportData.name || 'Unknown Archetype'} 
-        description={reportData.short_description || reportData.description || ''}
+        description={reportData.short_description || ''} 
         familyId={reportData.familyId}
         familyName={reportData.familyName || ''}
         familyColor={familyColor}
