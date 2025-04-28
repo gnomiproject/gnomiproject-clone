@@ -31,7 +31,7 @@ function App() {
             <Route path="/about" element={<About />} />
             
             {/* Report routes */}
-            <Route path="/insights/report/:archetypeId" element={<ReportViewer />} />
+            <Route path="/insights/report/:archetypeId" element={<Insights />} />
             <Route path="/report/:archetypeId" element={<ReportViewer />} />
             <Route path="/report/:archetypeId/:token" element={<ReportViewer />} />
             <Route path="/report-view/:archetypeId" element={<ReportView />} /> {/* Legacy route */}

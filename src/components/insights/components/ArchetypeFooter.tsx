@@ -26,9 +26,8 @@ const ArchetypeFooter = ({ archetypeHexColor }: ArchetypeFooterProps) => {
       return;
     }
     
-    // Use React Router's navigate instead of directly changing window.location
-    // This ensures we stay within the SPA and don't cause a full page reload
-    navigate(`/report/${archetypeId}`);
+    // Navigate to the insights/report/{archetypeId} route which should contain the PremiumReport component
+    navigate(`/insights/report/${archetypeId}`);
   };
 
   return (
