@@ -1,12 +1,15 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
+import { useNavigate } from 'react-router-dom';
 
 interface ArchetypeFooterProps {
   archetypeHexColor: string;
 }
 
 const ArchetypeFooter = ({ archetypeHexColor }: ArchetypeFooterProps) => {
+  const navigate = useNavigate();
+  
   // Get current archetype ID from URL if available
   const getArchetypeIdFromUrl = (): string | null => {
     const pathname = window.location.pathname;
@@ -18,13 +21,14 @@ const ArchetypeFooter = ({ archetypeHexColor }: ArchetypeFooterProps) => {
     // Get the current archetype ID from URL or use a default path
     const archetypeId = getArchetypeIdFromUrl();
     
-    // Construct the URL - if we have an archetypeId, include it in the path
-    const requestUrl = archetypeId 
-      ? `/report/${archetypeId}` 
-      : '/report';
-      
-    // Navigate to the report request page
-    window.location.href = requestUrl;
+    if (!archetypeId) {
+      console.error("No archetype ID found in URL");
+      return;
+    }
+    
+    // Use React Router's navigate instead of directly changing window.location
+    // This ensures we stay within the SPA and don't cause a full page reload
+    navigate(`/report/${archetypeId}`);
   };
 
   return (
