@@ -30,17 +30,22 @@ const ArchetypeReport = ({
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">
       <ArchetypeHeader 
         name={reportData.name || 'Unknown Archetype'} 
-        family={reportData.familyName || ''}
+        familyName={reportData.familyName || ''}
         color={reportData.hexColor || reportData.color || '#4B5563'} 
       />
       
       <ArchetypeNavTabs activeTab={activeTab} onTabChange={setActiveTab} />
       
       <div className="p-4 md:p-6">
-        {activeTab === 'overview' && <OverviewTab reportData={reportData} />}
-        {activeTab === 'metrics' && <MetricsTab reportData={reportData} />}
-        {activeTab === 'swot' && <SwotTab reportData={reportData} />}
-        {activeTab === 'disease-and-care' && <DiseaseAndCareTab reportData={reportData} />}
+        {activeTab === 'overview' && <OverviewTab archetypeData={reportData} />}
+        {activeTab === 'metrics' && <MetricsTab archetypeData={reportData} />}
+        {activeTab === 'swot' && <SwotTab archetypeData={reportData} swotData={{
+          strengths: reportData.strengths || [],
+          weaknesses: reportData.weaknesses || [],
+          opportunities: reportData.opportunities || [],
+          threats: reportData.threats || []
+        }} />}
+        {activeTab === 'disease-and-care' && <DiseaseAndCareTab archetypeData={reportData} />}
       </div>
 
       {!hideRequestSection && (
