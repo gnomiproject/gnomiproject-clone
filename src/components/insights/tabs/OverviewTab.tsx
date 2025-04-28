@@ -6,9 +6,10 @@ import { ArchetypeDetailedData } from "@/types/archetype";
 interface OverviewTabProps {
   archetypeData: ArchetypeDetailedData;
   familyColor: string;
+  hideRequestSection?: boolean;
 }
 
-const OverviewTab = ({ archetypeData, familyColor }: OverviewTabProps) => {
+const OverviewTab = ({ archetypeData, familyColor, hideRequestSection = false }: OverviewTabProps) => {
   // Get key characteristics with proper type handling
   const keyCharacteristics = 
     (archetypeData?.key_characteristics) || 

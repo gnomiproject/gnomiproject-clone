@@ -5,10 +5,10 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
 interface ArchetypeErrorProps {
-  message?: string; // Adding message prop as optional
+  message?: string; 
   onRetry: () => void;
   onRetakeAssessment: () => void;
-  isRetrying?: boolean; // Making isRetrying optional
+  isRetrying?: boolean;
 }
 
 const ArchetypeError = ({ 

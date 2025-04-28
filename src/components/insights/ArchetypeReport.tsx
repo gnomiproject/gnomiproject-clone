@@ -18,9 +18,10 @@ interface ArchetypeReportProps {
   archetypeId: ArchetypeId;
   reportData: any;
   dataSource?: string;
+  hideRequestSection?: boolean;
 }
 
-const ArchetypeReport = ({ archetypeId, reportData, dataSource }: ArchetypeReportProps) => {
+const ArchetypeReport = ({ archetypeId, reportData, dataSource, hideRequestSection = false }: ArchetypeReportProps) => {
   const { getArchetypeEnhanced, getFamilyById } = useArchetypes();
   const [activeTab, setActiveTab] = useState('overview');
   const renderCountRef = useRef(0);
@@ -92,7 +93,7 @@ const ArchetypeReport = ({ archetypeId, reportData, dataSource }: ArchetypeRepor
         <ArchetypeNavTabs activeTab={activeTab} onTabChange={setActiveTab} />
         
         <TabsContent value="overview" className="mt-6 space-y-8">
-          <OverviewTab archetypeData={archetype} familyColor={familyHexColor} />
+          <OverviewTab archetypeData={archetype} familyColor={familyHexColor} hideRequestSection={hideRequestSection} />
         </TabsContent>
         
         <TabsContent value="priorities" className="mt-6">
@@ -123,11 +124,11 @@ const ArchetypeReport = ({ archetypeId, reportData, dataSource }: ArchetypeRepor
         </TabsContent>
         
         <TabsContent value="metrics" className="mt-6">
-          <MetricsTab archetypeData={archetype} />
+          <MetricsTab archetypeData={archetype} hideRequestSection={hideRequestSection} />
         </TabsContent>
         
         <TabsContent value="swot" className="mt-6">
-          <SwotTab archetypeData={archetype} swotData={swotData} />
+          <SwotTab archetypeData={archetype} swotData={swotData} hideRequestSection={hideRequestSection} />
         </TabsContent>
         
         <TabsContent value="industries" className="mt-6">

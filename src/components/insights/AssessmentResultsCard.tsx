@@ -58,6 +58,7 @@ const AssessmentResultsCard = ({
         <ArchetypeReport 
           archetypeId={selectedArchetype as ArchetypeId} 
           reportData={archetypeData}
+          hideRequestSection={true}
         />
       </div>
     );

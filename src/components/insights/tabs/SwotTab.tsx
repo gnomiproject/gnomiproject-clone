@@ -11,9 +11,10 @@ interface SwotTabProps {
     opportunities: string[];
     threats: string[];
   };
+  hideRequestSection?: boolean;
 }
 
-const SwotTab = ({ archetypeData, swotData }: SwotTabProps) => {
+const SwotTab = ({ archetypeData, swotData, hideRequestSection = false }: SwotTabProps) => {
   return (
     <Card>
       <CardHeader>

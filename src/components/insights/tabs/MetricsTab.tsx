@@ -6,9 +6,10 @@ import MetricCard from '../metrics/MetricCard';
 
 interface MetricsTabProps {
   archetypeData: ArchetypeDetailedData;
+  hideRequestSection?: boolean;
 }
 
-const MetricsTab = ({ archetypeData }: MetricsTabProps) => {
+const MetricsTab = ({ archetypeData, hideRequestSection = false }: MetricsTabProps) => {
   return (
     <Card>
       <CardHeader>
