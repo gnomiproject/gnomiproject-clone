@@ -25,6 +25,8 @@ const DeepDiveReport = ({
     reportDataKeys: reportData ? Object.keys(reportData) : [],
     id: reportData?.id || reportData?.archetype_id,
     name: reportData?.name || reportData?.archetype_name,
+    userData: userData,
+    hasStrategicRecommendations: reportData?.strategic_recommendations && reportData.strategic_recommendations.length > 0
   });
   
   // Apply safety checks before rendering
@@ -52,8 +54,13 @@ const DeepDiveReport = ({
   if (!Array.isArray(safeReportData.threats)) safeReportData.threats = [];
   if (!Array.isArray(safeReportData.strategic_recommendations)) safeReportData.strategic_recommendations = [];
   
-  // Check if we're using fallback data
-  const usingFallbackData = !safeReportData.strategic_recommendations || safeReportData.strategic_recommendations.length === 0;
+  // Check if we're using fallback data - improve the detection logic
+  const usingFallbackData = (
+    !safeReportData.strategic_recommendations || 
+    safeReportData.strategic_recommendations.length === 0 ||
+    !userData ||
+    isAdminView
+  );
   
   return (
     <div className="bg-white min-h-screen">
@@ -72,8 +79,8 @@ const DeepDiveReport = ({
         </div>
       )}
       
-      {/* Fallback data banner */}
-      {usingFallbackData && !loading && (
+      {/* Fallback data banner - only show if not admin view to avoid duplicate banners */}
+      {usingFallbackData && !loading && !isAdminView && (
         <FallbackBanner show={true} />
       )}
       

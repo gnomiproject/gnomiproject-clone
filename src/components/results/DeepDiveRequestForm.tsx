@@ -1,175 +1,194 @@
-
-import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import ReportRequestForm from './premium-report/ReportRequestForm';
-import RetakeAssessmentLink from '../insights/RetakeAssessmentLink';
-import { FileText } from 'lucide-react';
+import React, { useState } from 'react';
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { v4 as uuidv4 } from 'uuid';
+import { addDays } from 'date-fns';
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { v4 as uuidv4 } from 'uuid';
-import GnomeImage from '@/components/common/GnomeImage';
-import { Badge } from '@/components/ui/badge';
+import { TrackedEvent } from '@/types/events';
+import { ArchetypeId } from '@/types/archetype';
+
+const FormSchema = z.object({
+  name: z.string().min(2, {
+    message: "Name must be at least 2 characters.",
+  }),
+  email: z.string().email({
+    message: "Invalid email address.",
+  }),
+  organization: z.string().optional(),
+  comments: z.string().optional(),
+  sessionId: z.string().optional()
+});
 
 interface DeepDiveRequestFormProps {
-  archetypeId: string;
-  archetypeData: any;
+  archetypeId: ArchetypeId;
   assessmentResult?: any;
   assessmentAnswers?: any;
+  archetypeData?: any;
 }
 
 const DeepDiveRequestForm = ({ 
   archetypeId, 
-  archetypeData,
   assessmentResult,
-  assessmentAnswers 
+  assessmentAnswers,
+  archetypeData 
 }: DeepDiveRequestFormProps) => {
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [isSubmitted, setIsSubmitted] = React.useState(false);
-  const [reportUrl, setReportUrl] = React.useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitSuccessful, setSubmitSuccessful] = useState(false);
+  const [accessUrl, setAccessUrl] = useState('');
+  
+  const form = useForm<z.infer<typeof FormSchema>>({
+    resolver: zodResolver(FormSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      organization: "",
+      comments: "",
+      sessionId: localStorage.getItem('session_id') || ''
+    },
+  });
 
-  const onSubmit = async (values: any) => {
+  const handleSubmit = async (data: FormSchema) => {
     setIsSubmitting(true);
     
     try {
-      const token = uuidv4();
-      const expiryDate = new Date();
-      expiryDate.setDate(expiryDate.getDate() + 30); // Expires in 30 days
+      console.log('Submitting form with data:', data);
+      console.log('Assessment result:', assessmentResult);
       
-      // Generate the access URL for the report
-      const baseUrl = window.location.origin;
-      const accessUrl = `${baseUrl}/report/${archetypeId}/${token}`;
-      setReportUrl(accessUrl);
+      // Extract exact employee count from assessment results if available
+      const exactEmployeeCount = assessmentResult?.exactData?.employeeCount || null;
+      console.log('Extracted exact employee count:', exactEmployeeCount);
       
-      // Insert the request into the database
-      const { error } = await supabase.from('report_requests').insert({
-        id: uuidv4(),
-        name: values.name,
-        email: values.email,
-        organization: values.organization,
-        comments: values.comments,
-        archetype_id: archetypeId,
-        access_token: token,
-        status: 'pending',
-        assessment_result: assessmentResult || null,
-        assessment_answers: assessmentAnswers || null,
-        created_at: new Date().toISOString(),
-        expires_at: expiryDate.toISOString(),
-        access_url: accessUrl // Store the full URL
-      });
+      const { data: response, error } = await supabase
+        .from('report_requests')
+        .insert({
+          archetype_id: archetypeId,
+          name: data.name,
+          email: data.email,
+          organization: data.organization || null,
+          comments: data.comments || null,
+          status: 'active',
+          access_token: uuidv4(),
+          created_at: new Date().toISOString(),
+          expires_at: addDays(new Date(), 30).toISOString(),
+          session_id: data.sessionId || null,
+          assessment_result: assessmentResult || null,
+          assessment_answers: assessmentAnswers || null,
+          exact_employee_count: exactEmployeeCount
+        })
+        .select('access_token')
+        .single();
 
-      if (error) throw error;
-      
-      // Call the edge function to send the email
-      try {
-        const { error: funcError } = await supabase.functions.invoke("send-report-email", {
-          body: { reportId: archetypeId }
-        });
-        
-        if (funcError) {
-          console.warn("Email notification may not have been sent:", funcError);
-        }
-      } catch (emailError) {
-        console.error("Failed to trigger email notification:", emailError);
+      if (error) {
+        throw error;
       }
       
-      // Show success message and set form as submitted
-      toast.success("Request submitted successfully!", {
-        description: "Please check your email for the report access information.",
+      console.log('Report request created:', response);
+      
+      // Set the URL and show success state
+      setSubmitSuccessful(true);
+      setAccessUrl(`${window.location.origin}/report/${archetypeId}/${response.access_token}`);
+      
+      // Track event
+      window.gtag?.('event', 'deep_dive_request', {
+        event_category: 'engagement',
+        event_label: archetypeId
       });
       
-      setIsSubmitted(true);
     } catch (error: any) {
-      console.error("Error submitting report request:", error);
-      toast.error("There was a problem submitting your request", {
-        description: error.message,
-      });
+      console.error('Error submitting report request:', error);
+      toast.error(`Error: ${error.message || 'Failed to submit request'}`);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <>
-      <RetakeAssessmentLink />
-      <Card className="border-0 shadow-none">
-        <CardHeader className="text-center pb-2">
-          <CardTitle className="text-3xl font-bold mb-2">Want to go deeper on your archetype?</CardTitle>
-        </CardHeader>
-        <CardContent className="px-0">
-          {isSubmitted ? (
-            <div className="bg-white rounded-lg p-6 shadow-sm border text-center">
-              <div className="mb-6">
-                <FileText className="h-10 w-10 mx-auto mb-2 text-green-500" />
-              </div>
-              <h3 className="text-xl font-semibold mb-4">Thank you for your request!</h3>
-              <p className="text-gray-600 mb-2">
-                Your report request has been submitted successfully.
-              </p>
-              <p className="text-gray-600">
-                Please check your email for information on accessing your full archetype report.
-              </p>
-            </div>
-          ) : (
-            <div className="bg-white rounded-lg p-6 shadow-sm border">
-              <div className="flex flex-col lg:flex-row gap-8">
-                <div className="flex-1 space-y-6">
-                  <div className="flex items-start gap-3">
-                    <FileText className="h-6 w-6 mt-1 flex-shrink-0" />
-                    <div>
-                      <div className="flex items-center gap-2 mb-2">
-                        <h3 className="text-xl font-semibold">
-                          Get the Full {archetypeData.name} Report
-                        </h3>
-                        <Badge variant="secondary" className="bg-pink-100 text-pink-800 hover:bg-pink-100">
-                          FREE
-                        </Badge>
-                      </div>
-                      <p className="text-gray-600 mb-4">Deep Dive into This Archetype</p>
-                      <ul className="space-y-3">
-                        <li className="flex items-center gap-2 text-gray-700">
-                          <span className="text-red-500">✓</span>
-                          Comprehensive profile of the {archetypeData.name} archetype
-                        </li>
-                        <li className="flex items-center gap-2 text-gray-700">
-                          <span className="text-red-500">✓</span>
-                          Detailed analysis of healthcare utilization, cost trends, and condition prevalence
-                        </li>
-                        <li className="flex items-center gap-2 text-gray-700">
-                          <span className="text-red-500">✓</span>
-                          Key behaviors, strengths, and blind spots that define this group
-                        </li>
-                        <li className="flex items-center gap-2 text-gray-700">
-                          <span className="text-red-500">✓</span>
-                          Strategic opportunities to optimize care, access, and spend
-                        </li>
-                        <li className="flex items-center gap-2 text-gray-700">
-                          <span className="text-red-500">✓</span>
-                          Insight into the methodology behind the archetype model
-                        </li>
-                      </ul>
-                      <p className="text-gray-600 mt-6">
-                        Unlock a richer understanding of your population—delivered straight to your inbox.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div className="lg:w-1/3 flex-shrink-0">
-                  <GnomeImage 
-                    type="presentation"
-                    className="w-full h-auto"
-                    alt="Healthcare gnome with presentation"
-                  />
-                </div>
-              </div>
-              
-              <div className="mt-6">
-                <ReportRequestForm onSubmit={onSubmit} isSubmitting={isSubmitting} />
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </>
+    <div className="bg-gray-50 p-6 rounded-md">
+      <h3 className="text-lg font-semibold text-gray-800 mb-4">Request a Detailed Report</h3>
+      {submitSuccessful ? (
+        <div className="text-green-600">
+          <p>Your request has been submitted successfully!</p>
+          <p>You can access your report <a href={accessUrl} className="text-blue-500 underline">here</a>.</p>
+        </div>
+      ) : (
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Your Name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input placeholder="your@email.com" type="email" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="organization"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Organization (Optional)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Your Organization" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="comments"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Comments (Optional)</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Any specific requirements or comments?"
+                      className="resize-none"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Submitting..." : "Submit Request"}
+            </Button>
+          </form>
+        </Form>
+      )}
+    </div>
   );
 };
 

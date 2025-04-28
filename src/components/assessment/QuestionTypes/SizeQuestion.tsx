@@ -20,6 +20,13 @@ const SizeQuestion = ({
 }: SizeQuestionProps) => {
   const [employeeCount, setEmployeeCount] = useState<string>(exactEmployeeCount?.toLocaleString() || '');
 
+  useEffect(() => {
+    // Update the displayed count when exactEmployeeCount changes
+    if (exactEmployeeCount !== undefined && exactEmployeeCount !== null) {
+      setEmployeeCount(exactEmployeeCount.toLocaleString());
+    }
+  }, [exactEmployeeCount]);
+
   // Map employee count to the appropriate range option
   const mapEmployeeCountToOption = (count: number): string => {
     if (count < 250) {
@@ -45,10 +52,12 @@ const SizeQuestion = ({
       
       if (setExactEmployeeCount && value) {
         const count = Number(value);
+        console.log('Setting exact employee count in SizeQuestion:', count);
         setExactEmployeeCount(count);
         const optionId = mapEmployeeCountToOption(count);
         onAnswerChange(question.id, optionId);
-      } else if (setExactEmployeeCount) {
+      } else if (setExactEmployeeCount && !value) {
+        console.log('Clearing exact employee count');
         setExactEmployeeCount(null);
       }
     }

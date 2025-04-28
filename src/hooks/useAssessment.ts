@@ -90,6 +90,7 @@ export const useAssessment = () => {
    * @param count The exact employee count
    */
   const setEmployeeCount = (count: number | null) => {
+    console.log('Setting exact employee count:', count);
     setExactEmployeeCount(count);
     if (count !== null) {
       sessionStorage.setItem(SESSION_EXACT_EMPLOYEE_COUNT_KEY, count.toString());
@@ -145,6 +146,7 @@ export const useAssessment = () => {
         sessionStorage.setItem(SESSION_RESULTS_KEY, JSON.stringify(resultWithEmployeeCount));
         
         console.log("Assessment completed. Results:", assessmentResult);
+        console.log("Exact employee count:", exactEmployeeCount);
         console.log("Navigating to insights page with sessionId:", sessionId);
         
         // Navigate to the insights page with the results state
@@ -152,7 +154,8 @@ export const useAssessment = () => {
           state: { 
             selectedArchetype: assessmentResult.primaryArchetype,
             sessionId,
-            assessmentAnswers: answers
+            assessmentAnswers: answers,
+            exactEmployeeCount
           } 
         });
       } catch (error) {

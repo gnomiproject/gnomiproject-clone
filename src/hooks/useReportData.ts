@@ -1,168 +1,231 @@
-import { useState, useCallback, useEffect } from 'react';
-import { ReportType } from '@/types/reports';
-import { getDataSource } from '@/utils/reports/schemaMapping';
-import { supabase } from '@/integrations/supabase/client';
-import { getFromCache, setInCache, clearFromCache } from '@/utils/reports/reportCache';
-import { processReportData, AverageData } from '@/utils/reports/reportDataTransforms';
-import { toast } from "@/hooks/use-toast";
-import { ArchetypeDetailedData } from '@/types/archetype';
-import { fetchTokenAccess, fetchReportData } from './reports/useFetchReportData';
 
-interface UseReportDataOptions {
-  archetypeId?: string;
-  token?: string;
-  isInsightsReport: boolean;
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { useQuery } from '@tanstack/react-query';
+import { ArchetypeId } from '@/types/archetype';
+import { trackReportAccess } from '@/utils/reports/accessTracking';
+
+interface UseReportDataProps {
+  archetypeId: ArchetypeId;
+  token: string;
+  isInsightsReport?: boolean;
   skipCache?: boolean;
 }
 
-interface UseReportDataResult {
-  reportData: ArchetypeDetailedData | null;
-  userData: any;
-  averageData: AverageData;
-  isLoading: boolean;
-  isValidAccess: boolean;
-  error: Error | null;
-  dataSource: string;
-  retry: () => void;
-  refreshData: () => Promise<void>;
-}
-
-export const useReportData = ({ 
-  archetypeId = '', 
-  token = '', 
-  isInsightsReport, 
-  skipCache = false 
-}: UseReportDataOptions): UseReportDataResult => {
-  const [reportData, setReportData] = useState<ArchetypeDetailedData | null>(null);
-  const [userData, setUserData] = useState<any>(null);
-  const [averageData, setAverageData] = useState<AverageData>(processReportData(null).averageData);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+export const useReportData = ({ archetypeId, token, isInsightsReport = false, skipCache = false }: UseReportDataProps) => {
   const [isValidAccess, setIsValidAccess] = useState<boolean>(false);
-  const [error, setError] = useState<Error | null>(null);
-  const [dataSource, setDataSource] = useState<string>('');
-
-  const loadReportData = useCallback(async () => {
-    if (!archetypeId) {
-      setError(new Error('Missing archetype ID'));
-      setIsLoading(false);
+  const [reportData, setReportData] = useState<any | null>(null);
+  const [userData, setUserData] = useState<any | null>(null);
+  const [averageData, setAverageData] = useState<any | null>(null);
+  
+  const fetchReportData = async () => {
+    // For insights report type, we don't need token validation
+    if (isInsightsReport) {
+      return null; 
+    }
+    
+    // Admin view automatically passes validation
+    if (token === 'admin-view') {
+      setIsValidAccess(true);
+      return null;
+    }
+    
+    console.log(`Fetching report data for archetype ${archetypeId} with token ${token}`);
+    
+    try {
+      // First validate the token
+      const { data: validationData, error: validationError } = await supabase
+        .from('report_requests')
+        .select('id, name, organization, email, created_at, exact_employee_count, assessment_result')
+        .eq('archetype_id', archetypeId)
+        .eq('access_token', token)
+        .eq('status', 'active')
+        .maybeSingle();
+        
+      if (validationError) {
+        console.error('Error validating report access:', validationError);
+        throw new Error('Unable to validate report access');
+      }
+      
+      if (!validationData) {
+        setIsValidAccess(false);
+        throw new Error('Invalid or expired access token');
+      }
+      
+      console.log('Report access validated:', validationData);
+      setIsValidAccess(true);
+      
+      // Track this report access
+      trackReportAccess(archetypeId, token);
+      
+      // Set user data from the report request
+      setUserData({
+        name: validationData.name,
+        organization: validationData.organization,
+        email: validationData.email,
+        created_at: validationData.created_at,
+        exact_employee_count: validationData.exact_employee_count,
+        assessment_result: validationData.assessment_result
+      });
+      
+      return validationData;
+    } catch (error) {
+      console.error('Error in report access validation:', error);
       setIsValidAccess(false);
+      throw error;
+    }
+  };
+  
+  // Use React Query to handle the data fetching
+  const { 
+    data: validationData,
+    isLoading: validationLoading,
+    error: validationError,
+    refetch: retryValidation
+  } = useQuery({
+    queryKey: ['report-validation', archetypeId, token],
+    queryFn: fetchReportData,
+    enabled: !!archetypeId && !!token && !isInsightsReport,
+    retry: 1,
+    staleTime: skipCache ? 0 : 1000 * 60 * 5  // 5 minutes
+  });
+  
+  // Fetch average data for comparisons
+  useEffect(() => {
+    const fetchAverageData = async () => {
+      try {
+        const { data: avgData, error: avgError } = await supabase
+          .from('level4_deepdive_report_data')
+          .select('*')
+          .eq('archetype_id', 'All_Average')
+          .maybeSingle();
+          
+        if (avgError) {
+          console.warn('Could not fetch average data:', avgError);
+          return;
+        }
+        
+        if (avgData) {
+          setAverageData(avgData);
+          console.log('Average comparison data loaded');
+        }
+      } catch (err) {
+        console.error('Error loading average data:', err);
+      }
+    };
+    
+    fetchAverageData();
+  }, []);
+  
+  // Fetch full archetype report data 
+  useEffect(() => {
+    // Skip this step for insights reports or if validation failed
+    if (isInsightsReport || (!isValidAccess && token !== 'admin-view')) {
       return;
     }
-
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      const cacheKey = `report-${archetypeId}-${token}`;
-      
-      // Check cache first if not skipping
-      if (!skipCache) {
-        const cachedData = getFromCache(cacheKey);
-        if (cachedData) {
-          setReportData(cachedData.data.reportData);
-          setUserData(cachedData.data.userData);
-          setAverageData(cachedData.data.averageData);
-          setIsValidAccess(true);
-          setDataSource('cache');
-          setIsLoading(false);
-          return;
-        }
-      }
-
-      // Determine report type and data source
-      const reportType: ReportType = isInsightsReport ? 'insight' : 'deepDive';
-      
-      // Validate token access if provided
-      if (token) {
-        const { data: accessData, error: accessError } = await fetchTokenAccess(archetypeId, token);
+    
+    const fetchArchetypeData = async () => {
+      try {
+        console.log(`Fetching detailed data for archetype ${archetypeId}`);
         
-        if (accessError) {
-          console.error('Token validation error:', accessError);
+        // Fetch from level4 data first (most detailed)
+        const { data: detailedData, error: detailedError } = await supabase
+          .from('level4_deepdive_report_data')
+          .select('*')
+          .eq('archetype_id', archetypeId)
+          .maybeSingle();
+          
+        if (detailedError) {
+          console.warn('Could not fetch level4 data:', detailedError);
         }
         
-        if (!accessData) {
-          setIsValidAccess(false);
-          setError(new Error('Invalid or expired access token'));
-          setIsLoading(false);
+        if (detailedData) {
+          console.log('Got detailed report data from level4');
+          setReportData(detailedData);
           return;
         }
         
-        setIsValidAccess(true);
-        setUserData(accessData);
-      } else {
-        setIsValidAccess(true);
+        // Fallback to fetching from SWOT and strategic recommendations
+        const { data: swotData, error: swotError } = await supabase
+          .from('Analysis_Archetype_SWOT')
+          .select('strengths, weaknesses, opportunities, threats')
+          .eq('archetype_id', archetypeId)
+          .maybeSingle();
+          
+        if (swotError) {
+          console.warn('Could not fetch SWOT data:', swotError);
+        }
+        
+        const { data: recData, error: recError } = await supabase
+          .from('Analysis_Archetype_Strategic_Recommendations')
+          .select('*')
+          .eq('archetype_id', archetypeId)
+          .order('recommendation_number', { ascending: true });
+          
+        if (recError) {
+          console.warn('Could not fetch recommendation data:', recError);
+        }
+        
+        // Fetch the core overview data
+        const { data: coreData, error: coreError } = await supabase
+          .from('Core_Archetype_Overview')
+          .select('*')
+          .eq('id', archetypeId)
+          .maybeSingle();
+          
+        if (coreError) {
+          console.warn('Could not fetch core data:', coreError);
+        }
+        
+        if (coreData) {
+          // Construct a full report data object
+          const combinedData = {
+            ...coreData,
+            archetype_id: coreData.id,
+            archetype_name: coreData.name,
+            strengths: swotData?.strengths || [],
+            weaknesses: swotData?.weaknesses || [],
+            opportunities: swotData?.opportunities || [],
+            threats: swotData?.threats || [],
+            strategic_recommendations: recData || []
+          };
+          
+          console.log('Constructed report data from multiple sources');
+          setReportData(combinedData);
+        }
+      } catch (err) {
+        console.error('Error loading report data:', err);
       }
-
-      // Fetch report data
-      const fetchedData = await fetchReportData(archetypeId, reportType);
-      
-      if (fetchedData) {
-        const processedData = processReportData(fetchedData);
-        setReportData(processedData.reportData);
-        setAverageData(processedData.averageData);
-        setDataSource(getDataSource(reportType));
-
-        // Cache successful results
-        setInCache(cacheKey, {
-          reportData: processedData.reportData,
-          userData,
-          averageData: processedData.averageData
-        });
-      }
-
-    } catch (err) {
-      console.error('Error loading report data:', err);
-      setError(err instanceof Error ? err : new Error('Unknown error loading report'));
-    } finally {
-      setIsLoading(false);
-    }
-  }, [archetypeId, token, isInsightsReport, skipCache]);
-
-  // Load data on mount and when dependencies change
+    };
+    
+    fetchArchetypeData();
+  }, [archetypeId, isValidAccess, isInsightsReport, token]);
+  
+  // Clear data when parameters change
   useEffect(() => {
-    loadReportData();
-  }, [loadReportData]);
-
-  const retry = useCallback(() => {
-    setIsLoading(true);
-    setError(null);
-    const cacheKey = `report-${archetypeId}-${token}`;
-    clearFromCache(cacheKey);
+    return () => {
+      setReportData(null);
+      setUserData(null);
+    };
   }, [archetypeId, token]);
-
-  const refreshData = useCallback(async () => {
-    toast({
-      title: "Refreshing Report Data",
-      description: "Fetching the latest information..."
-    });
-    
-    const cacheKey = `report-${archetypeId}-${token}`;
-    clearFromCache(cacheKey);
-    
-    try {
-      await loadReportData();
-      toast({
-        title: "Refresh Successful",
-        description: "Report data has been updated."
-      });
-    } catch (e) {
-      toast({
-        title: "Refresh Failed",
-        description: "Unable to update report data. Please try again.",
-        variant: "destructive"
-      });
-    }
-  }, [archetypeId, token, loadReportData]);
-
+  
+  const refreshData = () => {
+    setReportData(null);
+    setUserData(null);
+    retryValidation();
+  };
+  
   return {
     reportData,
     userData,
     averageData,
-    isLoading,
     isValidAccess,
-    error,
-    dataSource,
-    retry,
+    isLoading: validationLoading,
+    error: validationError,
+    retry: retryValidation,
     refreshData
   };
 };
+
+export default useReportData;

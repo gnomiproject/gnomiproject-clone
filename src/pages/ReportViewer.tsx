@@ -101,6 +101,15 @@ const ReportViewer = () => {
     refreshReportData();
   };
 
+  // Debug logging to help diagnose issues
+  useEffect(() => {
+    if (reportData) {
+      console.log('Report data loaded:', reportData);
+      console.log('User data:', userData);
+      console.log('Using fallback data:', !reportData.strategic_recommendations || reportData.strategic_recommendations.length === 0);
+    }
+  }, [reportData, userData]);
+
   // Show loading state if any data is still loading
   if (initialLoading || archetypeLoading || reportLoading) {
     return <ReportLoadingState />;
