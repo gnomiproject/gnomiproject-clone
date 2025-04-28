@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -127,7 +128,7 @@ const DeepDiveRequestForm = ({
       {submitSuccessful ? (
         <div className="text-green-600">
           <p>Your request has been submitted successfully!</p>
-          <p>You can access your report <a href={accessUrl} className="text-blue-500 underline">here</a>.</p>
+          <p className="mt-2">You can access your report <a href={accessUrl} className="text-blue-500 underline">here</a>.</p>
         </div>
       ) : (
         <Form {...form}>
