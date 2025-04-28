@@ -15,7 +15,6 @@ const InsightOverviewSection = ({ archetype }: InsightOverviewSectionProps) => {
   // Extract all relevant data from the schema's overview fields
   const shortDescription = archetype?.short_description || '';
   const longDescription = archetype?.long_description || '';
-  const executiveSummary = archetype?.executive_summary || '';
   const industries = archetype?.industries || '';
   
   // Handle key characteristics which might be in different formats
@@ -37,14 +36,6 @@ const InsightOverviewSection = ({ archetype }: InsightOverviewSectionProps) => {
         {shortDescription && (
           <div>
             <p className="text-gray-700">{shortDescription}</p>
-          </div>
-        )}
-        
-        {/* Executive Summary */}
-        {executiveSummary && (
-          <div>
-            <h3 className="text-lg font-semibold mb-2">Executive Summary</h3>
-            <p className="text-gray-700">{executiveSummary}</p>
           </div>
         )}
         
