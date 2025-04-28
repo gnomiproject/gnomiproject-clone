@@ -7,6 +7,26 @@ interface ArchetypeFooterProps {
 }
 
 const ArchetypeFooter = ({ archetypeHexColor }: ArchetypeFooterProps) => {
+  // Get current archetype ID from URL if available
+  const getArchetypeIdFromUrl = (): string | null => {
+    const pathname = window.location.pathname;
+    const matches = pathname.match(/\/insights\/report\/([^\/]+)/) || pathname.match(/\/insights\/(report\/)?([^\/]+)/);
+    return matches ? matches[1] || matches[2] : null;
+  };
+
+  const handleRequestClick = () => {
+    // Get the current archetype ID from URL or use a default path
+    const archetypeId = getArchetypeIdFromUrl();
+    
+    // Construct the URL - if we have an archetypeId, include it in the path
+    const requestUrl = archetypeId 
+      ? `/report/${archetypeId}` 
+      : '/report';
+      
+    // Navigate to the report request page
+    window.location.href = requestUrl;
+  };
+
   return (
     <div className="bg-gray-50 p-6 md:p-8 border-t">
       <div className="flex flex-col md:flex-row justify-between items-center gap-6">
@@ -17,9 +37,9 @@ const ArchetypeFooter = ({ archetypeHexColor }: ArchetypeFooterProps) => {
         <Button 
           className="text-white px-6 py-3"
           style={{ backgroundColor: archetypeHexColor }}
-          onClick={() => window.open('/contact', '_blank')}
+          onClick={handleRequestClick}
         >
-          Request Custom Analysis
+          Request Deep Dive Report
         </Button>
       </div>
     </div>

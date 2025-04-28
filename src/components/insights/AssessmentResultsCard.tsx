@@ -15,6 +15,7 @@ interface AssessmentResultsCardProps {
   onRetakeAssessment: () => void;
   assessmentResult?: AssessmentResult | null;
   assessmentAnswers?: any;
+  isLoading?: boolean; // Added isLoading prop
 }
 
 const AssessmentResultsCard = ({ 
@@ -23,12 +24,12 @@ const AssessmentResultsCard = ({
   selectedArchetype,
   onRetakeAssessment,
   assessmentResult,
-  assessmentAnswers
+  assessmentAnswers,
+  isLoading = false // Default to false
 }: AssessmentResultsCardProps) => {
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  if (loading) {
+  if (isLoading) {
     return <ArchetypeLoadingSkeleton />;
   }
 

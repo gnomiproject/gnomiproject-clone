@@ -29,7 +29,7 @@ const PremiumReport = ({ archetypeId, assessmentResult, assessmentAnswers, arche
     try {
       const token = uuidv4();
       
-      console.log('Submitting report request for archetypeId:', archetypeId);
+      console.log('Submitting deep dive report request for archetypeId:', archetypeId);
       
       // Store the request in the database to validate it later
       const { error } = await supabase.from('report_requests').insert({
@@ -52,7 +52,7 @@ const PremiumReport = ({ archetypeId, assessmentResult, assessmentAnswers, arche
         throw new Error(error.message);
       }
       
-      console.log('Report request submitted successfully with token:', token);
+      console.log('Deep dive report request submitted successfully with token:', token);
       
       const baseUrl = window.location.origin;
       // Make sure to use the correct route format for deep dive reports that includes token
@@ -100,7 +100,7 @@ const PremiumReport = ({ archetypeId, assessmentResult, assessmentAnswers, arche
           
           setAccessToken(token);
           setAccessLink(reportLink);
-          console.log('Using existing report token:', token);
+          console.log('Using existing deep dive report token:', token);
         }
       } catch (err) {
         console.error('Error checking for existing report:', err);
@@ -115,15 +115,15 @@ const PremiumReport = ({ archetypeId, assessmentResult, assessmentAnswers, arche
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>Full Report - Free & Comprehensive</CardTitle>
+        <CardTitle>Full Deep Dive Report - Free & Comprehensive</CardTitle>
         <CardDescription>
-          Unlock Deep Insights at No Cost - Packed with Strategic Recommendations
+          Unlock Advanced Insights at No Cost - Packed with Strategic Recommendations
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4">
           <p className="text-blue-800 font-semibold">
-            🔍 Full Report: Completely Free & Insight-Packed
+            🔍 Deep Dive Analysis: Completely Free & Insight-Packed
           </p>
           <p className="text-blue-700 text-sm mt-2">
             Gain actionable strategic insights tailored to your organization's unique profile
@@ -141,7 +141,7 @@ const PremiumReport = ({ archetypeId, assessmentResult, assessmentAnswers, arche
       )}
       <CardFooter>
         <p className="text-xs text-gray-500 text-center w-full">
-          Your detailed, personalized report will be delivered directly to your email
+          Your detailed, personalized deep dive report will be delivered directly to your email
         </p>
       </CardFooter>
     </Card>
