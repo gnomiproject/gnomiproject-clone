@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useArchetypes } from '@/hooks/useArchetypes';
 import { ArchetypeId } from '@/types/archetype';
@@ -42,7 +41,18 @@ const Insights = () => {
     const formInputs = document.querySelectorAll('input, textarea');
     
     const handleFocus = () => setIsFormVisible(true);
-    const handleBlur = () => setIsFormVisible(false);
+    const handleBlur = () => {
+      // Set a small delay to avoid flickering when switching between form fields
+      setTimeout(() => {
+        // Check if any form element is still focused
+        if (!document.activeElement || 
+            (document.activeElement.tagName !== 'INPUT' && 
+             document.activeElement.tagName !== 'TEXTAREA' &&
+             document.activeElement.tagName !== 'SELECT')) {
+          setIsFormVisible(false);
+        }
+      }, 100);
+    };
     
     formInputs.forEach(input => {
       input.addEventListener('focus', handleFocus);
