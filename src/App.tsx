@@ -8,10 +8,10 @@ import {
 } from 'react-router-dom'
 import ReportView from './pages/ReportView'
 import ReportViewer from './pages/ReportViewer'
-import { ToastContainer } from 'sonner'
+import { Toaster } from 'sonner'
 import NotFound from './pages/NotFound'
 import InsightsView from './components/insights/InsightsView'
-import { ArchetypeId } from './types/archetype'
+import { ArchetypeId, FamilyId } from './types/archetype'
 import { isValidArchetypeId } from './utils/archetypeValidation'
 import { Card } from '@/components/ui/card'
 import { DebugProvider } from '@/components/debug/DebugProvider';
@@ -53,7 +53,7 @@ function App() {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Router>
-        <ToastContainer />
+        <Toaster />
       </div>
     </DebugProvider>
   );
@@ -68,7 +68,7 @@ const InsightsContainer = () => {
     return <InsightsView archetypeId={archetypeId} reportData={{
       id: archetypeId,
       name: 'Sample Archetype',
-      familyId: 'sample',
+      familyId: 'a' as FamilyId, // Correctly typed as a valid FamilyId
       familyName: 'Sample Family',
       color: '#6E59A5',
       strengths: [],
