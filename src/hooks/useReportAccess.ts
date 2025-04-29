@@ -68,6 +68,25 @@ export const useReportAccess = ({ archetypeId, token, isAdminView = false }: Use
               error: deepDiveError.message
             }
           }));
+          
+          // Try the base level4 data with secure view if level4_report_secure fails
+          const { data: level4BaseData, error: level4BaseError } = await supabase
+            .from('level4_deepdive_report_data_secure')
+            .select('*')
+            .eq('archetype_id', archetypeId)
+            .maybeSingle();
+            
+          if (!level4BaseError && level4BaseData) {
+            console.log(`[useReportAccess] Got level4 data using base secure view for ${archetypeId}`);
+            setReportData(level4BaseData);
+            setDebugInfo(prev => ({
+              ...prev,
+              level4BaseQuery: {
+                success: true,
+                dataFound: true
+              }
+            }));
+          }
         } else if (deepDiveData) {
           console.log(`[useReportAccess] Got level4 deep dive data for ${archetypeId}`);
           setReportData(deepDiveData);
@@ -87,6 +106,25 @@ export const useReportAccess = ({ archetypeId, token, isAdminView = false }: Use
               dataFound: false
             }
           }));
+          
+          // Try the level3 secure view as fallback
+          const { data: level3Data, error: level3Error } = await supabase
+            .from('level3_report_secure')
+            .select('*')
+            .eq('archetype_id', archetypeId)
+            .maybeSingle();
+            
+          if (!level3Error && level3Data) {
+            console.log(`[useReportAccess] Got level3 data using secure view for ${archetypeId}`);
+            setReportData(level3Data);
+            setDebugInfo(prev => ({
+              ...prev,
+              level3Query: {
+                success: true,
+                dataFound: true
+              }
+            }));
+          }
         }
 
         // Fetch average data for comparisons
@@ -105,6 +143,25 @@ export const useReportAccess = ({ archetypeId, token, isAdminView = false }: Use
               error: avgError.message
             }
           }));
+          
+          // Try the base secure view for average data
+          const { data: avgBaseData, error: avgBaseError } = await supabase
+            .from('level4_deepdive_report_data_secure')
+            .select('*')
+            .eq('archetype_id', 'All_Average')
+            .maybeSingle();
+            
+          if (!avgBaseError && avgBaseData) {
+            console.log(`[useReportAccess] Got average data using base secure view`);
+            setAverageData(avgBaseData);
+            setDebugInfo(prev => ({
+              ...prev,
+              averageBaseQuery: {
+                success: true,
+                dataFound: true
+              }
+            }));
+          }
         } else if (avgData) {
           console.log(`[useReportAccess] Got average comparison data`);
           setAverageData(avgData);

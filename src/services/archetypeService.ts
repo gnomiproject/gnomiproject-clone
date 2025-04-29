@@ -21,14 +21,34 @@ export const fetchArchetypeData = async (archetypeId: ArchetypeId, skipCache: bo
   }
   
   try {
+    // Use the secure view instead of direct table access
     const { data, error: fetchError } = await supabase
-      .from('level3_report_data')
+      .from('level3_report_secure')
       .select('*')
       .eq('archetype_id', archetypeId)
       .maybeSingle();
 
     if (fetchError) {
       console.error("Error fetching archetype data:", fetchError);
+      
+      // If secure view fails, try falling back to Core_Archetype_Overview
+      const { data: coreData, error: coreError } = await supabase
+        .from('Core_Archetype_Overview')
+        .select('*')
+        .eq('id', archetypeId)
+        .maybeSingle();
+        
+      if (coreError) {
+        console.error("Error fetching core archetype data:", coreError);
+        throw coreError;
+      }
+      
+      if (coreData) {
+        console.log(`Found basic archetype data for ${archetypeId}`);
+        cacheArchetype(archetypeId, coreData);
+        return coreData;
+      }
+      
       throw fetchError;
     }
     

@@ -107,13 +107,37 @@ export const testRlsAccess = async () => {
       console.log('[Security] Note: level4 access errors may be expected if no valid report request exists');
     }
     
+    // Also test the new secure views for base tables
+    const { data: level3DataSecure, error: level3DataError } = await supabase
+      .from('level3_report_data_secure')
+      .select('count')
+      .limit(1);
+      
+    if (level3DataError) {
+      console.error('[Security] level3_report_data_secure access error:', level3DataError);
+      return { success: false, error: level3DataError };
+    }
+    
+    const { data: level4DeepDiveSecure, error: level4DeepDiveError } = await supabase
+      .from('level4_deepdive_report_data_secure')
+      .select('count')
+      .limit(1);
+      
+    if (level4DeepDiveError) {
+      console.error('[Security] level4_deepdive_report_data_secure access error:', level4DeepDiveError);
+      // This could also be expected for unauthorized users
+      console.log('[Security] Note: deepdive data access errors may be expected if no valid report request exists');
+    }
+    
     console.log('[Security] All accessible tables verified with secure views');
     return { 
       success: true, 
       results: { 
         archetypes: !!archetypes, 
         level3Data: !!level3Data, 
-        level4Data: !!level4Data 
+        level4Data: !!level4Data,
+        level3DataSecure: !!level3DataSecure,
+        level4DeepDiveSecure: !!level4DeepDiveSecure
       } 
     };
   } catch (error) {

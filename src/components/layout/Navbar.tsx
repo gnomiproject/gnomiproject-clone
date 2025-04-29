@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -17,15 +18,15 @@ const Navbar = () => {
       try {
         const result = await testRlsAccess();
         if (result.success) {
-          console.log('[RLS Test] Success: Database access is working correctly with RLS policies.');
+          console.log('[Security Test] Success: Database access is working correctly with secure views.');
         } else {
-          console.error('[RLS Test] Failed: There may be issues with RLS policies.', result.error);
+          console.error('[Security Test] Failed: There may be issues with database access policies.', result.error);
           toast.error('Database connection issue', {
             description: 'There was a problem accessing data. Please check the console for details.'
           });
         }
       } catch (error) {
-        console.error('[RLS Test] Test failed with exception:', error);
+        console.error('[Security Test] Test failed with exception:', error);
       }
     };
     
