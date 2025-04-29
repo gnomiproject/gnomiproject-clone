@@ -1,89 +1,130 @@
 
-import React from 'react'
-import {
-  BrowserRouter as Router,
-  Route,
-  Routes,
-  Navigate
-} from 'react-router-dom'
-import ReportView from './pages/ReportView'
-import ReportViewer from './pages/ReportViewer'
-import { Toaster } from 'sonner'
-import NotFound from './pages/NotFound'
-import InsightsView from './components/insights/InsightsView'
-import { ArchetypeId, FamilyId } from './types/archetype'
-import { isValidArchetypeId } from './utils/archetypeValidation'
-import { Card } from '@/components/ui/card'
-import { DebugProvider } from '@/components/debug/DebugProvider';
-import Home from './pages/Home'
+import React, { lazy, Suspense } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Toaster } from '@/components/ui/sonner';
+import Navbar from '@/components/layout/Navbar';
+import Index from '@/pages/Index';
+import NotFound from '@/pages/NotFound';
+
+// Direct import for the Assessment page to resolve dynamic import issues
+import Assessment from '@/pages/Assessment';
+
+// Lazy load other non-critical routes
+const Insights = lazy(() => import('@/pages/Insights'));
+const About = lazy(() => import('@/pages/About'));
+const Admin = lazy(() => import('@/pages/Admin'));
+const ReportView = lazy(() => import('@/pages/ReportView'));
+const ReportViewer = lazy(() => import('@/pages/ReportViewer'));
+const AdminReportViewer = lazy(() => import('@/pages/AdminReportViewer'));
+const AdminReportDebug = lazy(() => import('@/pages/AdminReportDebug'));
+const ReactQueryDevtools = lazy(() => 
+  import('@tanstack/react-query-devtools').then(module => ({
+    default: module.ReactQueryDevtools
+  }))
+);
+
+const version = "0.0.3"; // Version number
+
+// Loading fallback for lazy components
+const PageLoader = () => (
+  <div className="flex items-center justify-center min-h-[60vh]">
+    <div className="animate-pulse text-center">
+      <div className="h-8 bg-gray-200 rounded w-48 mx-auto mb-4"></div>
+      <div className="h-4 bg-gray-200 rounded w-64 mx-auto"></div>
+    </div>
+  </div>
+);
 
 function App() {
-  // We'll simplify this for now to avoid references to non-existent components
-  // A proper implementation would include auth checks
-  const currentUser = true;
-
   return (
-    <div className="App">
-      <Router>
-        <DebugProvider>
+    <BrowserRouter>
+      <div className="app">
+        <Navbar />
+        <main>
           <Routes>
-            {/* Home Page */}
-            <Route path="/" element={<Home />} />
+            {/* Main application routes */}
+            <Route path="/" element={<Index />} />
             
-            {/* Report Views */}
-            <Route path="/report/:archetypeId" element={<ReportView />} />
-            <Route path="/report/:archetypeId/:token" element={<ReportView />} />
-            <Route path="/report-viewer/:archetypeId/:token" element={<ReportViewer />} />
-
-            {/* Insights View - requires valid archetypeId */}
-            <Route
-              path="/insights/:archetypeId"
-              element={
-                currentUser ? (
-                  <InsightsContainer />
-                ) : (
-                  <Navigate to="/" replace />
-                )
-              }
-            />
-
-            {/* Not Found Route */}
+            {/* Direct render for Assessment to fix dynamic import issues */}
+            <Route path="/assessment" element={<Assessment />} />
+            
+            {/* All other routes are lazy loaded */}
+            <Route path="/insights" element={
+              <Suspense fallback={<PageLoader />}>
+                <Insights />
+              </Suspense>
+            } />
+            
+            <Route path="/about" element={
+              <Suspense fallback={<PageLoader />}>
+                <About />
+              </Suspense>
+            } />
+            
+            {/* Report routes */}
+            <Route path="/insights/report/:archetypeId" element={
+              <Suspense fallback={<PageLoader />}>
+                <Insights />
+              </Suspense>
+            } />
+            
+            <Route path="/report/:archetypeId" element={
+              <Suspense fallback={<PageLoader />}>
+                <ReportViewer />
+              </Suspense>
+            } />
+            
+            <Route path="/report/:archetypeId/:token" element={
+              <Suspense fallback={<PageLoader />}>
+                <ReportViewer />
+              </Suspense>
+            } />
+            
+            <Route path="/report-view/:archetypeId" element={
+              <Suspense fallback={<PageLoader />}>
+                <ReportView />
+              </Suspense>
+            } />
+            
+            {/* Admin routes */}
+            <Route path="/admin" element={
+              <Suspense fallback={<PageLoader />}>
+                <Admin />
+              </Suspense>
+            } />
+            
+            <Route path="/admin/insights-report/:archetypeId" element={
+              <Suspense fallback={<PageLoader />}>
+                <AdminReportViewer />
+              </Suspense>
+            } />
+            
+            <Route path="/admin/report/:archetypeId" element={
+              <Suspense fallback={<PageLoader />}>
+                <AdminReportViewer />
+              </Suspense>
+            } />
+            
+            <Route path="/admin/debug/:archetypeId" element={
+              <Suspense fallback={<PageLoader />}>
+                <AdminReportDebug />
+              </Suspense>
+            } />
+            
+            {/* 404 catch-all */}
             <Route path="*" element={<NotFound />} />
           </Routes>
-          <Toaster />
-        </DebugProvider>
-      </Router>
-    </div>
+        </main>
+        <Toaster />
+        {import.meta.env.DEV && (
+          <Suspense fallback={null}>
+            <ReactQueryDevtools initialIsOpen={false} />
+          </Suspense>
+        )}
+      </div>
+    </BrowserRouter>
   );
 }
 
-// Helper component for the insights route
-const InsightsContainer = () => {
-  // Get archetypeId from URL params
-  const archetypeId = window.location.pathname.split('/').pop() as ArchetypeId;
-  
-  if (archetypeId && isValidArchetypeId(archetypeId)) {
-    return <InsightsView archetypeId={archetypeId} reportData={{
-      id: archetypeId,
-      name: 'Sample Archetype',
-      familyId: 'a' as FamilyId, // Correctly typed as a valid FamilyId
-      familyName: 'Sample Family',
-      color: '#6E59A5',
-      strengths: [],
-      weaknesses: [],
-      opportunities: [],
-      threats: []
-    }} />;
-  } else {
-    return (
-      <Card className="p-6">
-        <h2>Invalid Archetype ID</h2>
-        <p>
-          The archetype ID is invalid. Please check the URL.
-        </p>
-      </Card>
-    );
-  }
-};
-
 export default App;
+export { version };

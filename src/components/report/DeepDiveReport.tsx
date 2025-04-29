@@ -2,7 +2,6 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import ReportContainer from './components/ReportContainer';
 import { debounce } from '@/utils/debounce';
-import { useDebug } from '@/components/debug/DebugProvider';
 
 interface DeepDiveReportProps {
   reportData: any;
@@ -21,39 +20,6 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
 }) => {
   // Add a simple state to track if navigation is in process
   const [isNavigating, setIsNavigating] = useState(false);
-  const { addDataSource } = useDebug();
-  
-  // Register data sources for debugging
-  React.useEffect(() => {
-    if (reportData) {
-      // Register the main report data
-      addDataSource({
-        tableName: 'Report Data',
-        fields: Object.keys(reportData),
-        queryParams: [
-          { name: 'archetype_id', value: reportData.archetype_id || reportData.id || 'unknown' }
-        ],
-        transformations: [
-          { 
-            field: 'SWOT Data', 
-            description: 'SWOT data might be directly on the report or nested in swot_analysis',
-            formula: 'data.strengths ?? data.swot_analysis?.strengths' 
-          }
-        ]
-      });
-    }
-    
-    if (averageData) {
-      // Register average data
-      addDataSource({
-        tableName: 'Average Data',
-        fields: Object.keys(averageData),
-        queryParams: [
-          { name: 'archetype_id', value: 'All_Average' }
-        ]
-      });
-    }
-  }, [reportData, averageData, addDataSource]);
   
   // Use memoized values to prevent unnecessary re-renders
   const memoizedReportData = useMemo(() => reportData, [reportData]);
