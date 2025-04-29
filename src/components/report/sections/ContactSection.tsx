@@ -2,6 +2,7 @@
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { format } from 'date-fns';
+import { Shield } from 'lucide-react';
 
 interface ContactSectionProps {
   userData: any;
@@ -10,9 +11,29 @@ interface ContactSectionProps {
 
 const ContactSection = ({ userData, isAdminView = false }: ContactSectionProps) => {
   // Format the date if available
-  const formattedDate = userData?.created_at 
+  const reportCreated = userData?.created_at 
     ? format(new Date(userData.created_at), 'MMM d, yyyy')
     : 'N/A';
+    
+  // Calculate expiration date (30 days from creation or from userData.expires_at)
+  const expiryDate = userData?.expires_at 
+    ? format(new Date(userData.expires_at), 'MMM d, yyyy')
+    : userData?.created_at
+      ? format(new Date(new Date(userData.created_at).getTime() + 30 * 24 * 60 * 60 * 1000), 'MMM d, yyyy')
+      : 'N/A';
+      
+  // Generate a "report ID" based on data or random if in admin view
+  const reportId = isAdminView 
+    ? "ADMIN-VIEW-ONLY" 
+    : userData?.id 
+      ? userData.id.substring(0, 8).toUpperCase()
+      : (Math.random().toString(36).substring(2, 10)).toUpperCase();
+      
+  // Get access information
+  const accessCount = userData?.access_count || 1; // Default to 1 for first view
+  const lastAccessed = userData?.last_accessed
+    ? format(new Date(userData.last_accessed), 'MMM d, yyyy')
+    : 'First view';
 
   return (
     <section className="my-12 print:my-8">
@@ -28,9 +49,13 @@ const ContactSection = ({ userData, isAdminView = false }: ContactSectionProps) 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <h3 className="text-lg font-semibold mb-2">Report Details</h3>
-            <p className="text-gray-600 mb-1">Report Generated: {formattedDate}</p>
-            <p className="text-gray-600 mb-1">Report ID: {isAdminView ? "ADMIN-VIEW-ONLY" : (Math.random().toString(36).substring(2, 10)).toUpperCase()}</p>
-            <p className="text-gray-600">Valid Until: {format(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), 'MMM d, yyyy')}</p>
+            <p className="text-gray-600 mb-1">Report Generated: {reportCreated}</p>
+            <p className="text-gray-600 mb-1">Report ID: {reportId}</p>
+            <p className="text-gray-600 mb-1">Valid Until: {expiryDate}</p>
+            <p className="text-gray-600">Access Count: {accessCount} {accessCount > 1 ? 'views' : 'view'}</p>
+            {accessCount > 1 && (
+              <p className="text-gray-600">Last Viewed: {lastAccessed}</p>
+            )}
           </div>
           
           <div>
@@ -45,6 +70,17 @@ const ContactSection = ({ userData, isAdminView = false }: ContactSectionProps) 
           <h3 className="text-lg font-semibold mb-2">Additional Support</h3>
           <p className="text-gray-700">
             For additional information or to discuss this report in more detail, please contact our customer support team at <a href="mailto:support@example.com" className="text-blue-600 hover:underline">support@example.com</a>.
+          </p>
+        </div>
+        
+        <div className="mt-6 p-4 border border-gray-200 rounded-md bg-white">
+          <div className="flex items-center mb-2">
+            <Shield className="h-5 w-5 text-green-600 mr-2" />
+            <h3 className="text-md font-semibold">Data Privacy Notice</h3>
+          </div>
+          <p className="text-sm text-gray-600">
+            This report contains confidential information specific to your organization. All data is encrypted and stored securely.
+            Your access link is unique and will expire on {expiryDate}.
           </p>
         </div>
       </Card>

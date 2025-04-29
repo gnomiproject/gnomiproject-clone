@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { format } from 'date-fns';
 
 interface ReportIntroductionProps {
   archetypeName: string;
@@ -15,6 +16,8 @@ const ReportIntroduction = ({
   isAdminView = false
 }: ReportIntroductionProps) => {
   const formattedArchetypeId = archetypeId.toUpperCase();
+  const reportDate = userData?.created_at ? format(new Date(userData.created_at), 'MMMM d, yyyy') : 'N/A';
+  const employeeCount = userData?.exact_employee_count || userData?.assessment_result?.exactData?.employeeCount;
   
   return (
     <div className="mb-12 print:mb-8">
@@ -46,6 +49,14 @@ const ReportIntroduction = ({
                 (userData?.organization || 'N/A')
               }
             </p>
+            <p className="text-sm text-gray-600 mt-1">
+              Report Date: {reportDate}
+            </p>
+            {employeeCount && (
+              <p className="text-sm text-gray-600 mt-1">
+                Organization Size: {employeeCount.toLocaleString()} employees
+              </p>
+            )}
           </div>
         </div>
         
@@ -86,6 +97,14 @@ const ReportIntroduction = ({
             <li>Use the SWOT Analysis to understand strengths and opportunities</li>
           </ul>
         </div>
+        
+        {employeeCount && (
+          <div className="mt-4 p-3 bg-blue-50 border border-blue-100 rounded-md">
+            <p className="text-blue-700 font-medium">
+              This report is personalized for an organization with approximately {employeeCount.toLocaleString()} employees.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

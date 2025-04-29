@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import InsightsView from '@/components/insights/InsightsView';
@@ -9,11 +10,13 @@ import { ArchetypeId, ArchetypeDetailedData } from '@/types/archetype';
 import { useArchetypes } from '@/hooks/useArchetypes';
 import { useGetArchetype } from '@/hooks/useGetArchetype';
 import { useReportData } from '@/hooks/useReportData';
+import { useReportUserData } from '@/hooks/useReportUserData';
 import { toast } from 'sonner';
 import ArchetypeError from '@/components/insights/ArchetypeError';
 import { Button } from '@/components/ui/button';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, Bug } from 'lucide-react';
 import InsightsReportContent from '@/components/report/sections/InsightsReportContent';
+import ReportUserDataTest from '@/components/report/ReportUserDataTest';
 
 const ReportViewer = () => {
   const { archetypeId = '', token } = useParams();
@@ -27,6 +30,7 @@ const ReportViewer = () => {
   const [isAdminView, setIsAdminView] = useState(false);
   const [isRetrying, setIsRetrying] = useState(false);
   const [skipCache, setSkipCache] = useState(false);
+  const [showDebugData, setShowDebugData] = useState(false);
   
   // Validate archetypeId (no conditional hook usage after this)
   const validArchetypeId = isValidArchetypeId(archetypeId) ? archetypeId as ArchetypeId : 'a1' as ArchetypeId;
@@ -41,13 +45,19 @@ const ReportViewer = () => {
     refreshData: refreshArchetypeData
   } = useGetArchetype(validArchetypeId, skipCache);
   
+  // Use the updated user data hook for report access verification
+  const {
+    userData,
+    isLoading: userDataLoading,
+    isValid: isValidAccess,
+    error: userDataError
+  } = useReportUserData(token, validArchetypeId);
+  
   // Call useReportData hook unconditionally with safe defaults
   const {
     reportData,
-    userData,
     averageData,
     isLoading: reportLoading,
-    isValidAccess,
     error: reportError,
     retry: retryReportData,
     refreshData: refreshReportData
@@ -110,8 +120,13 @@ const ReportViewer = () => {
     }
   }, [reportData, userData]);
 
+  // Toggle debug data view
+  const toggleDebugData = () => {
+    setShowDebugData(!showDebugData);
+  };
+
   // Show loading state if any data is still loading
-  if (initialLoading || archetypeLoading || reportLoading) {
+  if (initialLoading || archetypeLoading || reportLoading || userDataLoading) {
     return <ReportLoadingState />;
   }
 
@@ -148,34 +163,37 @@ const ReportViewer = () => {
   }
   
   // Handle report token access errors
-  if (!isInsightsReport && token && !isAdminView && (!isValidAccess || reportError)) {
+  if (!isInsightsReport && token && !isAdminView && (!isValidAccess || userDataError)) {
     return (
       <ReportError 
         title="Access Denied"
-        message={`Unable to access this report: ${reportError?.message || 'Invalid or expired token'}`}
+        message={`Unable to access this report: ${userDataError?.message || 'Invalid or expired token'}`}
         actionLabel="Back to Home"
         onAction={() => navigate('/')}
       />
     );
   }
   
-  // Setup admin view mock data
-  const adminUserData = {
-    name: 'Admin Viewer',
-    organization: 'Admin Organization',
-    created_at: new Date().toISOString(),
-    email: 'admin@example.com'
-  };
+  // If debug mode is enabled, show the test component
+  if (showDebugData && !isInsightsReport) {
+    return (
+      <>
+        <div className="fixed right-6 top-24 z-50 flex gap-2">
+          <Button 
+            variant="outline"
+            size="sm"
+            onClick={toggleDebugData}
+            className="bg-white shadow-md hover:bg-gray-100"
+          >
+            <Bug className="h-4 w-4 mr-2" />
+            Hide Debug
+          </Button>
+        </div>
+        <ReportUserDataTest />
+      </>
+    );
+  }
   
-  const defaultAverageData = {
-    archetype_id: 'All_Average',
-    archetype_name: 'Population Average',
-    "Demo_Average Age": 40,
-    "Demo_Average Family Size": 3.0,
-    "Risk_Average Risk Score": 1.0,
-    "Cost_Medical & RX Paid Amount PMPY": 5000
-  };
-
   // Get local data as fallback
   const localArchetypeData = getArchetypeDetailedById(archetypeId as ArchetypeId);
   
@@ -193,8 +211,20 @@ const ReportViewer = () => {
 
   // Report data will use real database data or fallback to local data
   const finalReportData = reportData || archetypeApiData || localArchetypeData;
-  const finalUserData = userData || adminUserData;
-  const finalAverageData = averageData || defaultAverageData;
+  const finalUserData = userData || {
+    name: 'Admin Viewer',
+    organization: 'Admin Organization',
+    created_at: new Date().toISOString(),
+    email: 'admin@example.com'
+  };
+  const finalAverageData = averageData || {
+    archetype_id: 'All_Average',
+    archetype_name: 'Population Average',
+    "Demo_Average Age": 40,
+    "Demo_Average Family Size": 3.0,
+    "Risk_Average Risk Score": 1.0,
+    "Cost_Medical & RX Paid Amount PMPY": 5000
+  };
   
   // Render the appropriate report type
   if (isInsightsReport) {
@@ -222,7 +252,16 @@ const ReportViewer = () => {
     
     return (
       <div className="relative">
-        <div className="fixed right-6 top-24 z-50">
+        <div className="fixed right-6 top-24 z-50 flex gap-2">
+          <Button 
+            variant="outline"
+            size="sm"
+            onClick={toggleDebugData}
+            className="bg-white shadow-md hover:bg-gray-100"
+          >
+            <Bug className="h-4 w-4 mr-2" />
+            Debug Data
+          </Button>
           <Button 
             variant="outline"
             size="sm"

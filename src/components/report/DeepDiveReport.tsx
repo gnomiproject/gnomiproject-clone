@@ -3,10 +3,11 @@ import React from 'react';
 import { ArchetypeDetailedData } from '@/types/archetype';
 import FallbackBanner from './FallbackBanner';
 import DeepDiveReportContent from './sections/DeepDiveReportContent';
+import { ReportUserData } from '@/hooks/useReportUserData';
 
 interface DeepDiveReportProps {
   reportData: ArchetypeDetailedData;
-  userData?: any;
+  userData?: ReportUserData | any;
   averageData: any;
   loading?: boolean;
   isAdminView?: boolean;
@@ -62,6 +63,12 @@ const DeepDiveReport = ({
     isAdminView
   );
   
+  // Check if we have employee size data
+  const hasEmployeeData = !!(
+    userData?.exact_employee_count || 
+    (userData?.assessment_result?.exactData?.employeeCount)
+  );
+  
   return (
     <div className="bg-white min-h-screen">
       {/* Admin View Banner */}
@@ -82,6 +89,17 @@ const DeepDiveReport = ({
       {/* Fallback data banner - only show if not admin view to avoid duplicate banners */}
       {usingFallbackData && !loading && !isAdminView && (
         <FallbackBanner show={true} />
+      )}
+      
+      {/* Employee size context banner */}
+      {hasEmployeeData && !isAdminView && (
+        <div className="bg-blue-50 border-blue-200 border-b p-3 text-blue-800 text-sm">
+          <div className="container mx-auto">
+            <span>
+              <strong>Personalized Report</strong> - This report is tailored for an organization with approximately {(userData?.exact_employee_count || userData?.assessment_result?.exactData?.employeeCount).toLocaleString()} employees.
+            </span>
+          </div>
+        </div>
       )}
       
       <DeepDiveReportContent
