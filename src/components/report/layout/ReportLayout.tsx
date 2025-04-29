@@ -15,12 +15,32 @@ const ReportLayout: React.FC<ReportLayoutProps> = ({
   onNavigate,
   isAdminView = false
 }) => {
+  // Default sections for the navigation
+  const sections = [
+    { id: 'introduction', name: 'Introduction' },
+    { id: 'executive-summary', name: 'Executive Summary' },
+    { id: 'archetype-profile', name: 'Archetype Profile' },
+    { id: 'swot-analysis', name: 'SWOT Analysis' },
+    { id: 'demographics', name: 'Demographics' },
+    { id: 'cost-analysis', name: 'Cost Analysis' },
+    { id: 'utilization-patterns', name: 'Utilization Patterns' },
+    { id: 'disease-management', name: 'Disease Management' },
+    { id: 'care-gaps', name: 'Care Gaps' },
+    { id: 'risk-factors', name: 'Risk Factors' },
+    { id: 'recommendations', name: 'Recommendations' },
+    { id: 'contact', name: 'Contact' },
+  ];
+
   return (
     <div className="min-h-screen bg-white">
       <div className="flex flex-col md:flex-row">
         {/* Left Navigation */}
         <div className="md:sticky md:top-0 md:h-screen">
-          <LeftNavigation activeSectionId={activeSectionId} onNavigate={onNavigate} />
+          <LeftNavigation 
+            activeSectionId={activeSectionId} 
+            onNavigate={onNavigate} 
+            sections={sections}
+          />
         </div>
         
         {/* Main Content Area */}

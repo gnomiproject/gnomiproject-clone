@@ -38,17 +38,18 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
   const [showPrintButton, setShowPrintButton] = useState(false);
   const [activeSectionId, setActiveSectionId] = useState('introduction');
 
-  // Setup print handler
+  // Setup print handler with correct properties according to react-to-print API
   const handlePrint = useReactToPrint({
     documentTitle: `Healthcare Archetype Report - ${reportData?.archetype_name || 'Unknown'}`,
-    onBeforeGetContent: () => {
+    // The onBeforeGetContent and onAfterPrint need to be implemented differently
+    // as they're not directly supported in the options type
+    onBeforePrint: () => {
       document.body.classList.add('printing');
-      return Promise.resolve();
     },
     onAfterPrint: () => {
       document.body.classList.remove('printing');
     },
-    // Fix the API usage by using the correct property
+    // Use printRef instead of content
     printRef: () => reportRef.current,
   });
 

@@ -10,6 +10,7 @@ interface ReportDebugToolsProps {
   toggleDiagnostics: () => void;
   onRefreshData: () => void;
   isAdminView?: boolean;
+  debugInfo?: any;
 }
 
 const ReportDebugTools: React.FC<ReportDebugToolsProps> = ({
@@ -18,7 +19,8 @@ const ReportDebugTools: React.FC<ReportDebugToolsProps> = ({
   showDiagnostics,
   toggleDiagnostics,
   onRefreshData,
-  isAdminView
+  isAdminView,
+  debugInfo
 }) => {
   return (
     <div className="fixed right-6 top-24 z-50 flex gap-2">
