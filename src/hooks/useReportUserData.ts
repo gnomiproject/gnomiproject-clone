@@ -38,22 +38,7 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
         
         console.log(`Fetching user data for token: ${token} and archetype: ${archetypeId}`);
         
-        // Track this access - use direct update instead of RPC since the function isn't registered properly
-        const { data: accessUpdateData, error: accessUpdateError } = await supabase
-          .from('report_requests')
-          .update({
-            access_count: supabase.rpc('increment_counter', { x: 1 }),
-            last_accessed: new Date().toISOString()
-          })
-          .eq('access_token', token)
-          .eq('archetype_id', archetypeId)
-          .select('access_count, last_accessed');
-        
-        if (accessUpdateError) {
-          console.warn('Could not update access count:', accessUpdateError);
-        }
-        
-        // Fetch the report request data
+        // First, check if the report request exists and is valid
         const { data, error: fetchError } = await supabase
           .from('report_requests')
           .select('*')
@@ -77,6 +62,25 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
           throw new Error('This report link has expired');
         }
         
+        // If we get here, the token is valid, so now update the access count
+        const currentAccessCount = data.access_count || 0;
+        const newAccessCount = currentAccessCount + 1;
+        const currentTime = new Date().toISOString();
+        
+        // Track this access with a direct update
+        const { error: accessUpdateError } = await supabase
+          .from('report_requests')
+          .update({
+            access_count: newAccessCount,
+            last_accessed: currentTime
+          })
+          .eq('access_token', token)
+          .eq('archetype_id', archetypeId);
+        
+        if (accessUpdateError) {
+          console.warn('Could not update access count:', accessUpdateError);
+        }
+        
         console.log('Found valid report user data:', data);
         
         // Convert the data to the expected type, handling the assessment_result conversion
@@ -89,8 +93,8 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
           archetype_id: data.archetype_id,
           assessment_result: data.assessment_result ? (data.assessment_result as unknown as AssessmentResult) : null,
           exact_employee_count: data.exact_employee_count,
-          access_count: data.access_count || 0,
-          last_accessed: data.last_accessed,
+          access_count: newAccessCount, // Use the updated count
+          last_accessed: currentTime, // Use the updated timestamp
           expires_at: data.expires_at
         };
         
