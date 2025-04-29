@@ -12,6 +12,22 @@ import { ArchetypeId } from '@/types/archetype';
 const ArchetypesGridSection = () => {
   const { archetypes, isLoading, error } = useArchetypeBasics();
   const [isMigrating, setIsMigrating] = React.useState(false);
+  const [debugInfo, setDebugInfo] = React.useState<any>(null);
+  
+  React.useEffect(() => {
+    // Log to verify data access after RLS implementation
+    console.log('[RLS Test] ArchetypesGridSection data access:', {
+      hasArchetypes: Boolean(archetypes?.length),
+      archetypeCount: archetypes?.length || 0,
+      isLoading,
+      hasError: Boolean(error)
+    });
+    
+    if (error) {
+      console.error('[RLS Test] ArchetypesGridSection error:', error);
+      setDebugInfo(error);
+    }
+  }, [archetypes, isLoading, error]);
   
   const handleMigrateData = async () => {
     try {
@@ -33,6 +49,14 @@ const ArchetypesGridSection = () => {
       <div className="p-8 text-center">
         <p className="text-red-500">Failed to load archetypes. Please try again later.</p>
         <p className="text-sm text-gray-500 mt-2">Error: {(error as Error).message}</p>
+        {debugInfo && (
+          <details className="mt-4 text-left bg-gray-50 p-4 rounded-md">
+            <summary className="cursor-pointer text-sm text-gray-700">Debug Information</summary>
+            <pre className="text-xs mt-2 overflow-auto max-h-96">
+              {JSON.stringify(debugInfo, null, 2)}
+            </pre>
+          </details>
+        )}
       </div>
     );
   }

@@ -1,13 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Menu } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { BetaBadge } from '@/components/shared/BetaBadge';
+import { testRlsAccess } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const isMobile = useIsMobile();
+  
+  // Run RLS test on initial page load
+  useEffect(() => {
+    const runRlsTest = async () => {
+      try {
+        const result = await testRlsAccess();
+        if (result.success) {
+          console.log('[RLS Test] Success: Database access is working correctly with RLS policies.');
+        } else {
+          console.error('[RLS Test] Failed: There may be issues with RLS policies.', result.error);
+          toast.error('Database connection issue', {
+            description: 'There was a problem accessing data. Please check the console for details.'
+          });
+        }
+      } catch (error) {
+        console.error('[RLS Test] Test failed with exception:', error);
+      }
+    };
+    
+    runRlsTest();
+  }, []);
   
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);

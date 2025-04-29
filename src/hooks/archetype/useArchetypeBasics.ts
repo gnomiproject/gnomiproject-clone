@@ -1,4 +1,3 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Archetype, ArchetypeFamily, ArchetypeId, FamilyId } from '@/types/archetype';
@@ -8,11 +7,18 @@ export const useArchetypeBasics = () => {
   const archetypesQuery = useQuery({
     queryKey: ['archetype-basics'],
     queryFn: async () => {
+      console.log('[RLS Test] Fetching archetype basics...');
+      
       const { data: archetypes, error } = await supabase
         .from('Core_Archetype_Overview')
         .select('*');
 
-      if (error) throw error;
+      if (error) {
+        console.error('[RLS Test] Error fetching Core_Archetype_Overview:', error);
+        throw error;
+      }
+
+      console.log('[RLS Test] Successfully fetched archetypes, count:', archetypes?.length || 0);
 
       // Transform data to match our types
       return archetypes.map((archetype): Archetype => ({
@@ -37,11 +43,18 @@ export const useArchetypeBasics = () => {
   const familiesQuery = useQuery({
     queryKey: ['family-basics'],
     queryFn: async () => {
+      console.log('[RLS Test] Fetching family basics...');
+      
       const { data: families, error } = await supabase
         .from('Core_Archetype_Families')
         .select('*');
 
-      if (error) throw error;
+      if (error) {
+        console.error('[RLS Test] Error fetching Core_Archetype_Families:', error);
+        throw error;
+      }
+
+      console.log('[RLS Test] Successfully fetched families, count:', families?.length || 0);
 
       return families.map((family): ArchetypeFamily => ({
         id: family.id as FamilyId,

@@ -31,6 +31,12 @@ export const supabase = createClient<Database>(
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 30000);
         
+        // Log request for RLS testing
+        console.log('[RLS Test] Supabase request:', { 
+          url: args[0],
+          isAdmin: isAdminMode()
+        });
+        
         // @ts-ignore
         return fetch(...args, { 
           signal: controller.signal,
@@ -43,6 +49,7 @@ export const supabase = createClient<Database>(
         })
         .catch(error => {
           clearTimeout(timeoutId);
+          console.error('[RLS Test] Supabase request error:', error);
           throw error;
         });
       }
@@ -60,3 +67,56 @@ export const supabase = createClient<Database>(
 
 // Helper for detecting admin mode throughout the app
 export const isAdmin = isAdminMode();
+
+// Add a dedicated test function for RLS
+export const testRlsAccess = async () => {
+  try {
+    console.log('[RLS Test] Testing access to tables with new RLS policies...');
+    
+    // Test Core_Archetype_Overview
+    const { data: archetypes, error: archetypesError } = await supabase
+      .from('Core_Archetype_Overview')
+      .select('count')
+      .limit(1);
+      
+    if (archetypesError) {
+      console.error('[RLS Test] Core_Archetype_Overview access error:', archetypesError);
+      return { success: false, error: archetypesError };
+    }
+    
+    // Test Core_Archetype_Families
+    const { data: families, error: familiesError } = await supabase
+      .from('Core_Archetype_Families')
+      .select('count')
+      .limit(1);
+      
+    if (familiesError) {
+      console.error('[RLS Test] Core_Archetype_Families access error:', familiesError);
+      return { success: false, error: familiesError };
+    }
+    
+    // Test Core_Archetypes_Metrics
+    const { data: metrics, error: metricsError } = await supabase
+      .from('Core_Archetypes_Metrics')
+      .select('count')
+      .limit(1);
+      
+    if (metricsError) {
+      console.error('[RLS Test] Core_Archetypes_Metrics access error:', metricsError);
+      return { success: false, error: metricsError };
+    }
+    
+    console.log('[RLS Test] All tables accessible after RLS implementation');
+    return { 
+      success: true, 
+      results: { 
+        archetypes: !!archetypes, 
+        families: !!families, 
+        metrics: !!metrics 
+      } 
+    };
+  } catch (error) {
+    console.error('[RLS Test] Test failed with exception:', error);
+    return { success: false, error };
+  }
+};
