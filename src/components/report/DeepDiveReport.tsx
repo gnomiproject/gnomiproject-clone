@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { ArchetypeDetailedData } from '@/types/archetype';
 import ReportIntroduction from './sections/ReportIntroduction';
@@ -45,7 +44,7 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
     }
   };
   
-  // Section IDs
+  // Section IDs - ensure these match exactly with the navigation component
   const sectionIds = {
     introduction: 'introduction',
     archetypeProfile: 'archetype-profile',
