@@ -8,6 +8,7 @@ import { useReportUserData } from '@/hooks/useReportUserData';
 import { useReportAccess } from '@/hooks/useReportAccess';
 import DeepDiveReport from '@/components/report/DeepDiveReport';
 import { Card } from '@/components/ui/card';
+import { DebugProvider } from '@/components/debug/DebugProvider';
 
 // This is a simplified version of ReportViewer focused on token-based access
 const ReportViewer = () => {
@@ -151,27 +152,29 @@ const ReportViewer = () => {
   // Render the simplified report
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-gray-50">
-        {/* Debug toggle */}
-        {debugMode && (
-          <div className="fixed bottom-4 right-4 z-50">
-            <button
-              onClick={() => setDebugMode(!debugMode)}
-              className="bg-gray-800 text-white px-3 py-1 rounded text-xs shadow-lg"
-            >
-              {debugMode ? 'Hide Debug' : 'Show Debug'}
-            </button>
-          </div>
-        )}
-        
-        <DeepDiveReport
-          reportData={finalReportData}
-          userData={userData}
-          averageData={averageData}
-          isAdminView={isAdminView}
-          debugInfo={userDataDebugInfo}
-        />
-      </div>
+      <DebugProvider>
+        <div className="min-h-screen bg-gray-50">
+          {/* Debug toggle */}
+          {debugMode && (
+            <div className="fixed bottom-4 right-4 z-40">
+              <button
+                onClick={() => setDebugMode(!debugMode)}
+                className="bg-gray-800 text-white px-3 py-1 rounded text-xs shadow-lg"
+              >
+                {debugMode ? 'Hide Debug' : 'Show Debug'}
+              </button>
+            </div>
+          )}
+          
+          <DeepDiveReport
+            reportData={finalReportData}
+            userData={userData}
+            averageData={averageData}
+            isAdminView={isAdminView}
+            debugInfo={userDataDebugInfo}
+          />
+        </div>
+      </DebugProvider>
     </ErrorBoundary>
   );
 };

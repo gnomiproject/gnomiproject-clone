@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useGetArchetype } from '@/hooks/useGetArchetype';
 import { ArchetypeId } from '@/types/archetype';
 import { normalizeArchetypeId } from '@/utils/archetypeValidation';
+import { useDebug } from '@/components/debug/DebugProvider';
 
 interface UseReportAccessOptions {
   archetypeId: string;
@@ -20,6 +21,7 @@ export const useReportAccess = ({ archetypeId: rawArchetypeId, token, isAdminVie
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
   const [debugInfo, setDebugInfo] = useState<any>({});
+  const { addDataSource, trackQueryTime } = useDebug();
 
   // Normalize the archetype ID to handle case sensitivity
   const archetypeId = normalizeArchetypeId(rawArchetypeId);
@@ -62,6 +64,8 @@ export const useReportAccess = ({ archetypeId: rawArchetypeId, token, isAdminVie
 
         // Try case-insensitive search for more robust data retrieval
         const fetchWithCaseInsensitiveSearch = async (tableName: SecureTableName, archetypeIdParam: string) => {
+          const startTime = performance.now();
+          
           // Try exact match first
           const { data, error } = await supabase
             .from(tableName)
@@ -69,17 +73,49 @@ export const useReportAccess = ({ archetypeId: rawArchetypeId, token, isAdminVie
             .eq('archetype_id', archetypeIdParam)
             .maybeSingle();
             
+          const endTime = performance.now();
+          const queryTime = endTime - startTime;
+          
+          // Track query for debugging
+          addDataSource({
+            tableName,
+            fields: data ? Object.keys(data) : [],
+            queryParams: [
+              { name: 'archetype_id', value: archetypeIdParam }
+            ]
+          });
+          
+          trackQueryTime(tableName, queryTime);
+            
           if (!error && data) {
             return { data, error };
           }
           
           // If exact match fails, try case-insensitive search
           console.log(`[useReportAccess] Trying case-insensitive search in ${tableName}`);
-          return await supabase
+          const iCaseStartTime = performance.now();
+          
+          const result = await supabase
             .from(tableName)
             .select('*')
             .ilike('archetype_id', archetypeIdParam)
             .maybeSingle();
+            
+          const iCaseEndTime = performance.now();
+          const iCaseQueryTime = iCaseEndTime - iCaseStartTime;
+          
+          // Track query for debugging
+          addDataSource({
+            tableName,
+            fields: result.data ? Object.keys(result.data) : [],
+            queryParams: [
+              { name: 'archetype_id (ilike)', value: archetypeIdParam }
+            ]
+          });
+          
+          trackQueryTime(tableName, iCaseQueryTime);
+          
+          return result;
         };
 
         // Fetch detailed report data from level4 secure view
@@ -146,11 +182,26 @@ export const useReportAccess = ({ archetypeId: rawArchetypeId, token, isAdminVie
         }
 
         // Fetch average data for comparisons
+        const avgStartTime = performance.now();
         const { data: avgData, error: avgError } = await supabase
           .from('level4_report_secure' as const)
           .select('*')
           .eq('archetype_id', 'All_Average')
           .maybeSingle();
+          
+        const avgEndTime = performance.now();
+        const avgQueryTime = avgEndTime - avgStartTime;
+        
+        // Track query for debugging
+        addDataSource({
+          tableName: 'level4_report_secure',
+          fields: avgData ? Object.keys(avgData) : [],
+          queryParams: [
+            { name: 'archetype_id', value: 'All_Average' }
+          ]
+        });
+        
+        trackQueryTime('level4_report_secure (avg)', avgQueryTime);
 
         if (avgError) {
           console.warn(`[useReportAccess] Could not fetch average data: ${avgError.message}`);
@@ -163,11 +214,26 @@ export const useReportAccess = ({ archetypeId: rawArchetypeId, token, isAdminVie
           }));
           
           // Try the base secure view for average data
+          const avgBaseStartTime = performance.now();
           const { data: avgBaseData, error: avgBaseError } = await supabase
             .from('level4_deepdive_report_data_secure' as const)
             .select('*')
             .eq('archetype_id', 'All_Average')
             .maybeSingle();
+          
+          const avgBaseEndTime = performance.now();
+          const avgBaseQueryTime = avgBaseEndTime - avgBaseStartTime;
+          
+          // Track query for debugging
+          addDataSource({
+            tableName: 'level4_deepdive_report_data_secure',
+            fields: avgBaseData ? Object.keys(avgBaseData) : [],
+            queryParams: [
+              { name: 'archetype_id', value: 'All_Average' }
+            ]
+          });
+          
+          trackQueryTime('level4_deepdive_report_data_secure (avg)', avgBaseQueryTime);
             
           if (!avgBaseError && avgBaseData) {
             console.log(`[useReportAccess] Got average data using base secure view`);
@@ -205,7 +271,7 @@ export const useReportAccess = ({ archetypeId: rawArchetypeId, token, isAdminVie
     };
 
     fetchReportData();
-  }, [rawArchetypeId, archetypeId, token, isAdminView]);
+  }, [rawArchetypeId, archetypeId, token, isAdminView, addDataSource, trackQueryTime]);
 
   return {
     reportData,

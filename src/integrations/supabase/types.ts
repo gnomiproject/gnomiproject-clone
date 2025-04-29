@@ -789,6 +789,24 @@ export type Database = {
         }
         Relationships: []
       }
+      function_backups: {
+        Row: {
+          backup_timestamp: string | null
+          function_definition: string | null
+          function_name: string
+        }
+        Insert: {
+          backup_timestamp?: string | null
+          function_definition?: string | null
+          function_name: string
+        }
+        Update: {
+          backup_timestamp?: string | null
+          function_definition?: string | null
+          function_name?: string
+        }
+        Relationships: []
+      }
       gnomi_images: {
         Row: {
           id: number
@@ -2160,6 +2178,10 @@ export type Database = {
       has_level4_report_access: {
         Args: { archetype_id: string }
         Returns: boolean
+      }
+      increment_report_access: {
+        Args: { p_access_token: string; p_archetype_id: string }
+        Returns: Json
       }
       update_archetype_analysis: {
         Args: {
