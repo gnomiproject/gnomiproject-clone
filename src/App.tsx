@@ -15,6 +15,7 @@ import { ArchetypeId, FamilyId } from './types/archetype'
 import { isValidArchetypeId } from './utils/archetypeValidation'
 import { Card } from '@/components/ui/card'
 import { DebugProvider } from '@/components/debug/DebugProvider';
+import Home from './pages/Home'
 
 function App() {
   // We'll simplify this for now to avoid references to non-existent components
@@ -26,6 +27,9 @@ function App() {
       <Router>
         <DebugProvider>
           <Routes>
+            {/* Home Page */}
+            <Route path="/" element={<Home />} />
+            
             {/* Report Views */}
             <Route path="/report/:archetypeId" element={<ReportView />} />
             <Route path="/report/:archetypeId/:token" element={<ReportView />} />
@@ -41,12 +45,6 @@ function App() {
                   <Navigate to="/" replace />
                 )
               }
-            />
-
-            {/* Default Route */}
-            <Route
-              path="/"
-              element={<ReportViewer />}
             />
 
             {/* Not Found Route */}
