@@ -11,6 +11,9 @@ export const trackReportAccess = async (
   accessToken: string
 ): Promise<void> => {
   try {
+    // Log for debugging
+    console.log(`[trackReportAccess] Tracking access for ${archetypeId} with token ${accessToken.substring(0, 5)}...`);
+    
     // First, try to update the existing record
     // We'll first get the current count, then increment it
     const { data: currentData } = await supabase
@@ -48,26 +51,9 @@ export const trackReportAccess = async (
         console.log('Tracked access via edge function:', response.data);
       } catch (fallbackErr) {
         console.error('Edge function fallback failed:', fallbackErr);
-        
-        // As a last resort, load an invisible tracking pixel
-        // Get the base URL from the client's URL
-        const baseUrl = typeof window !== 'undefined' ? 
-          `${window.location.protocol}//${window.location.host}` : 
-          '';
-        
-        // Construct the function URL
-        const functionUrl = `${baseUrl}/functions/v1/increment-counter`;
-        
-        const img = new Image();
-        img.src = functionUrl;
-        img.style.display = 'none';
-        document.body.appendChild(img);
-        
-        // Remove the image after it has loaded (or failed to load)
-        img.onload = img.onerror = () => {
-          document.body.removeChild(img);
-        };
       }
+    } else {
+      console.log(`[trackReportAccess] Successfully updated access count to ${currentCount + 1}`);
     }
   } catch (err) {
     console.error('Error tracking report access:', err);
@@ -75,21 +61,49 @@ export const trackReportAccess = async (
 };
 
 /**
- * Creates a SQL function to increment a counter field
- * This is a utility function that can be used to create the necessary SQL function
- * Run this in your SQL console once
+ * Validate an access token directly
+ * @param archetypeId The ID of the archetype
+ * @param token The token to validate
+ * @returns Promise with validation result
  */
-export const createIncrementFunction = async (): Promise<void> => {
+export const validateReportToken = async (
+  archetypeId: string,
+  token: string
+): Promise<{ isValid: boolean; userData?: any; error?: Error }> => {
   try {
-    // Call the edge function that will create the increment function in the database
-    const { error } = await supabase.functions.invoke('create-increment-function');
+    console.log(`[validateReportToken] Validating token ${token.substring(0, 5)}... for ${archetypeId}`);
+    
+    const { data, error } = await supabase
+      .from('report_requests')
+      .select('*')
+      .eq('archetype_id', archetypeId)
+      .eq('access_token', token)
+      .eq('status', 'active')
+      .maybeSingle();
     
     if (error) {
-      throw new Error(error.message);
+      console.error('[validateReportToken] DB query error:', error);
+      return { isValid: false, error: new Error(`Database error: ${error.message}`) };
     }
     
-    console.log('Increment function created successfully');
-  } catch (error: any) {
-    console.error('Error creating increment function:', error);
+    if (!data) {
+      console.log('[validateReportToken] No matching record found');
+      return { isValid: false, error: new Error('Invalid or expired token') };
+    }
+    
+    if (data.expires_at && new Date(data.expires_at) < new Date()) {
+      console.log('[validateReportToken] Token expired:', data.expires_at);
+      return { isValid: false, error: new Error('Token has expired') };
+    }
+    
+    console.log('[validateReportToken] Token validated successfully');
+    return { isValid: true, userData: data };
+    
+  } catch (err) {
+    console.error('[validateReportToken] Error:', err);
+    return { 
+      isValid: false, 
+      error: err instanceof Error ? err : new Error('Unknown validation error') 
+    };
   }
 };

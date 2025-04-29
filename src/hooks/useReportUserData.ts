@@ -17,6 +17,7 @@ export interface ReportUserData {
   last_accessed: string | null;
   expires_at: string | null;
   access_url?: string;
+  access_token?: string; // Add access token for debugging
 }
 
 export const useReportUserData = (token: string | undefined, archetypeId: string | undefined) => {
@@ -24,6 +25,7 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isValid, setIsValid] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
+  const [debugInfo, setDebugInfo] = useState<any>(null);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -33,6 +35,11 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
         console.log('[useReportUserData] Missing token or archetypeId, aborting fetch');
         setIsLoading(false);
         setIsValid(false);
+        setDebugInfo({
+          reason: 'Missing token or archetypeId',
+          token: token ? `${token.substring(0, 5)}...` : null,
+          archetypeId
+        });
         return;
       }
       
@@ -53,6 +60,14 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
           
         if (fetchError) {
           console.error('[useReportUserData] Error fetching data:', fetchError);
+          setDebugInfo({
+            stage: 'database_query',
+            error: fetchError,
+            query: {
+              token: token.substring(0, 5) + '...',
+              archetypeId
+            }
+          });
           throw new Error(`Error fetching report user data: ${fetchError.message}`);
         }
         
@@ -61,6 +76,14 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
         if (!data) {
           console.log('[useReportUserData] No valid report request found');
           setIsValid(false);
+          setDebugInfo({
+            stage: 'data_validation',
+            result: 'no_data',
+            query: {
+              token: token.substring(0, 5) + '...',
+              archetypeId
+            }
+          });
           throw new Error('Invalid or expired access token');
         }
         
@@ -68,6 +91,12 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
         if (data.expires_at && new Date(data.expires_at) < new Date()) {
           console.log('[useReportUserData] Token has expired:', data.expires_at);
           setIsValid(false);
+          setDebugInfo({
+            stage: 'token_validation',
+            result: 'expired',
+            expires_at: data.expires_at,
+            current_time: new Date().toISOString()
+          });
           throw new Error('This report link has expired');
         }
         
@@ -88,8 +117,22 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
         
         if (accessUpdateError) {
           console.warn('[useReportUserData] Could not update access count:', accessUpdateError);
+          setDebugInfo(prev => ({
+            ...prev,
+            access_count_update: {
+              success: false,
+              error: accessUpdateError
+            }
+          }));
         } else {
           console.log('[useReportUserData] Access count updated to:', newAccessCount);
+          setDebugInfo(prev => ({
+            ...prev,
+            access_count_update: {
+              success: true,
+              new_count: newAccessCount
+            }
+          }));
         }
         
         console.log('[useReportUserData] Found valid report user data');
@@ -107,7 +150,8 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
           access_count: newAccessCount, // Use the updated count
           last_accessed: currentTime, // Use the updated timestamp
           expires_at: data.expires_at,
-          access_url: data.access_url // Include the access_url if available
+          access_url: data.access_url, // Include the access_url if available
+          access_token: token, // Add token for debugging purposes
         };
         
         console.log('[useReportUserData] Formatted user data:', {
@@ -115,16 +159,31 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
           name: typedUserData.name,
           organization: typedUserData.organization,
           archetypeId: typedUserData.archetype_id,
-          hasAssessmentData: !!typedUserData.assessment_result
+          hasAssessmentData: !!typedUserData.assessment_result,
+          token_preview: token.substring(0, 5) + '...'
         });
         
         setUserData(typedUserData);
         setIsValid(true);
+        setDebugInfo(prev => ({
+          ...prev,
+          final_result: 'success',
+          userData: {
+            id: typedUserData.id,
+            name: typedUserData.name,
+            organization: typedUserData.organization
+          }
+        }));
       } catch (err) {
         console.error('[useReportUserData] Error:', err);
         setError(err instanceof Error ? err : new Error('Unknown error fetching user data'));
         setUserData(null);
         setIsValid(false);
+        setDebugInfo(prev => ({
+          ...prev,
+          final_result: 'error',
+          error: err instanceof Error ? err.message : 'Unknown error'
+        }));
       } finally {
         setIsLoading(false);
         console.log('[useReportUserData] Fetch completed, isValid:', isValid);
@@ -138,6 +197,7 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
     userData,
     isLoading,
     isValid,
-    error
+    error,
+    debugInfo
   };
 };

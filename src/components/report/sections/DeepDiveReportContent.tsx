@@ -25,6 +25,12 @@ const DeepDiveReportContent = ({
   console.log('[DEBUG] DeepDiveReportContent received data:', {
     id: archetypeId,
     name: archetypeName,
+    userData: userData ? {
+      name: userData.name,
+      organization: userData.organization,
+      accessToken: userData.access_token ? `${userData.access_token.substring(0, 5)}...` : 'None',
+      lastAccessed: userData.last_accessed
+    } : 'No user data',
     hasStrategicRecommendations: !!archetype?.strategic_recommendations,
     recommendationsType: typeof archetype?.strategic_recommendations
   });
@@ -43,14 +49,24 @@ const DeepDiveReportContent = ({
             </span>
           </h1>
           <p className="text-gray-500 mt-2">
-            Simplified debugging view
+            Report for {userData?.organization || 'Unknown Organization'}
           </p>
           
           <div className="mt-8 bg-gray-50 p-4 rounded-lg">
-            <h2 className="font-semibold">Debug Information</h2>
+            <h2 className="font-semibold">Access Information</h2>
             <div className="mt-2 font-mono text-xs space-y-1">
               <p>User: {userData?.name || 'Not available'}</p>
               <p>Organization: {userData?.organization || 'Not available'}</p>
+              <p>Access Token: {userData?.access_token ? `${userData.access_token.substring(0, 5)}...` : 'Not available'}</p>
+              <p>Last Accessed: {userData?.last_accessed ? new Date(userData.last_accessed).toLocaleString() : 'Never'}</p>
+              <p>Access Count: {userData?.access_count || 0}</p>
+              <p>Has User Data: {userData ? 'Yes' : 'No'}</p>
+            </div>
+          </div>
+          
+          <div className="mt-4 bg-gray-50 p-4 rounded-lg">
+            <h2 className="font-semibold">Archetype Information</h2>
+            <div className="mt-2 font-mono text-xs space-y-1">
               <p>Data Type: {typeof archetype || 'Unknown'}</p>
               <p>Has Strategic Recommendations: {archetype?.strategic_recommendations ? 'Yes' : 'No'}</p>
               <p>Recommendations Type: {typeof archetype?.strategic_recommendations || 'Not available'}</p>
