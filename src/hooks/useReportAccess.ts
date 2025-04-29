@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useGetArchetype } from '@/hooks/useGetArchetype';
@@ -104,9 +105,17 @@ export const useReportAccess = ({ archetypeId: rawArchetypeId, token, isAdminVie
               ...prev,
               level4BaseQuery: {
                 success: true,
-                dataFound: true
+                dataFound: true,
+                hasSwotData: !!(level4BaseData.strengths || level4BaseData.swot_analysis?.strengths)
               }
             }));
+            
+            console.log("[useReportAccess] SWOT data in level4BaseData:", {
+              hasStrengthsArray: !!level4BaseData.strengths,
+              strengthsLength: level4BaseData.strengths ? level4BaseData.strengths.length : 0,
+              hasSwotAnalysis: !!level4BaseData.swot_analysis,
+              swotStrengthsLength: level4BaseData.swot_analysis?.strengths ? level4BaseData.swot_analysis.strengths.length : 0
+            });
           }
         } else if (deepDiveData) {
           console.log(`[useReportAccess] Got level4 deep dive data for ${archetypeId}`);
@@ -115,9 +124,17 @@ export const useReportAccess = ({ archetypeId: rawArchetypeId, token, isAdminVie
             ...prev,
             level4Query: {
               success: true,
-              dataFound: true
+              dataFound: true,
+              hasSwotData: !!(deepDiveData.strengths || deepDiveData.swot_analysis?.strengths)
             }
           }));
+          
+          console.log("[useReportAccess] SWOT data in deepDiveData:", {
+            hasStrengthsArray: !!deepDiveData.strengths,
+            strengthsLength: deepDiveData.strengths ? deepDiveData.strengths.length : 0,
+            hasSwotAnalysis: !!deepDiveData.swot_analysis,
+            swotStrengthsLength: deepDiveData.swot_analysis?.strengths ? deepDiveData.swot_analysis.strengths.length : 0
+          });
         } else {
           console.log(`[useReportAccess] No level4 data found for ${archetypeId}, falling back`);
           setDebugInfo(prev => ({
@@ -138,7 +155,51 @@ export const useReportAccess = ({ archetypeId: rawArchetypeId, token, isAdminVie
               ...prev,
               level3Query: {
                 success: true,
-                dataFound: true
+                dataFound: true,
+                hasSwotData: !!(level3Data.strengths || level3Data.swot_analysis?.strengths)
+              }
+            }));
+            
+            console.log("[useReportAccess] SWOT data in level3Data:", {
+              hasStrengthsArray: !!level3Data.strengths,
+              strengthsLength: level3Data.strengths ? level3Data.strengths.length : 0,
+              hasSwotAnalysis: !!level3Data.swot_analysis,
+              swotStrengthsLength: level3Data.swot_analysis?.strengths ? level3Data.swot_analysis.strengths.length : 0
+            });
+          }
+        }
+
+        // If we still don't have SWOT data, try getting it directly from the Analysis_Archetype_SWOT table
+        if (!reportData?.strengths && !reportData?.swot_analysis?.strengths) {
+          console.log(`[useReportAccess] No SWOT data found in report data, trying to fetch directly from SWOT table for ${archetypeId}`);
+          
+          const { data: swotData, error: swotError } = await supabase
+            .from('Analysis_Archetype_SWOT')
+            .select('strengths, weaknesses, opportunities, threats')
+            .eq('archetype_id', archetypeId)
+            .maybeSingle();
+            
+          if (!swotError && swotData && (swotData.strengths || swotData.weaknesses || swotData.opportunities || swotData.threats)) {
+            console.log(`[useReportAccess] Got SWOT data directly from SWOT table:`, swotData);
+            
+            // Update reportData with SWOT information
+            setReportData(prevData => ({
+              ...prevData,
+              strengths: swotData.strengths,
+              weaknesses: swotData.weaknesses,
+              opportunities: swotData.opportunities,
+              threats: swotData.threats,
+            }));
+            
+            setDebugInfo(prev => ({
+              ...prev,
+              swotQuery: {
+                success: true,
+                dataFound: true,
+                strengths: swotData.strengths ? swotData.strengths.length : 0,
+                weaknesses: swotData.weaknesses ? swotData.weaknesses.length : 0,
+                opportunities: swotData.opportunities ? swotData.opportunities.length : 0,
+                threats: swotData.threats ? swotData.threats.length : 0
               }
             }));
           }

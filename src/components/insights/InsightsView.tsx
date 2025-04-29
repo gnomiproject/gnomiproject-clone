@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { ArchetypeId, ArchetypeDetailedData } from '@/types/archetype';
 import ArchetypeNavTabs from './components/ArchetypeNavTabs';
@@ -31,7 +32,9 @@ const InsightsView = ({
     archetypeId,
     reportDataName: reportData?.name || reportData?.archetype_name,
     hasStrengths: Array.isArray(reportData?.strengths) && reportData.strengths.length > 0,
-    strengthsLength: reportData?.strengths ? reportData.strengths.length : 0
+    strengthsLength: reportData?.strengths ? reportData.strengths.length : 0,
+    hasSwotAnalysis: !!reportData?.swot_analysis,
+    swotAnalysisStrengths: reportData?.swot_analysis?.strengths ? reportData.swot_analysis.strengths.length : 0
   });
   
   // Enhanced logging for assessment data
@@ -71,13 +74,21 @@ const InsightsView = ({
   const familyId = reportData.familyId || reportData.family_id;
   const familyName = reportData.familyName || reportData.family_name || '';
 
-  // Handle SWOT data safely
+  // Process SWOT data with fallback to swot_analysis object if available
   const swotData = {
-    strengths: reportData.strengths || [],
-    weaknesses: reportData.weaknesses || [],
-    opportunities: reportData.opportunities || [],
-    threats: reportData.threats || []
+    strengths: reportData.strengths || (reportData.swot_analysis?.strengths) || [],
+    weaknesses: reportData.weaknesses || (reportData.swot_analysis?.weaknesses) || [],
+    opportunities: reportData.opportunities || (reportData.swot_analysis?.opportunities) || [],
+    threats: reportData.threats || (reportData.swot_analysis?.threats) || []
   };
+
+  // Debug log SWOT data
+  console.log('[InsightsView] Processed SWOT data:', {
+    strengths: swotData.strengths?.length || 0,
+    weaknesses: swotData.weaknesses?.length || 0,
+    opportunities: swotData.opportunities?.length || 0, 
+    threats: swotData.threats?.length || 0
+  });
 
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">
@@ -101,7 +112,7 @@ const InsightsView = ({
           />
         )}
         {activeTab === 'metrics' && <MetricsTab archetypeData={reportData} />}
-        {activeTab === 'swot' && <SwotTab archetypeData={reportData} swotData={swotData} />}
+        {activeTab === 'swot' && <SwotTab archetypeData={reportData} swotData={swotData} hideRequestSection={hideRequestSection} />}
         {activeTab === 'disease-and-care' && <DiseaseAndCareTab archetypeData={reportData} />}
       </div>
 

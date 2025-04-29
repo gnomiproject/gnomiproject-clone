@@ -789,6 +789,24 @@ export type Database = {
         }
         Relationships: []
       }
+      function_backups: {
+        Row: {
+          backup_timestamp: string | null
+          function_definition: string | null
+          function_name: string
+        }
+        Insert: {
+          backup_timestamp?: string | null
+          function_definition?: string | null
+          function_name: string
+        }
+        Update: {
+          backup_timestamp?: string | null
+          function_definition?: string | null
+          function_name?: string
+        }
+        Relationships: []
+      }
       gnomi_images: {
         Row: {
           id: number
