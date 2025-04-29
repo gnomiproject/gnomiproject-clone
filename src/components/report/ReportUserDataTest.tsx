@@ -45,13 +45,33 @@ const ReportUserDataTest = () => {
 
   // Extract assessment result data if available
   const assessmentResult = userData.assessment_result;
-  const primaryArchetype = assessmentResult?.primaryArchetype || {
+  
+  // Default values for primary and secondary archetypes
+  const primaryArchetype = assessmentResult ? {
+    id: assessmentResult.primaryArchetype || archetypeId,
+    name: typeof assessmentResult.primaryArchetype === 'object' 
+      ? assessmentResult.primaryArchetype.name 
+      : assessmentResult.primaryArchetype || 'Unknown',
+    matchPercentage: typeof assessmentResult.primaryArchetype === 'object'
+      ? assessmentResult.primaryArchetype.matchPercentage || assessmentResult.percentageMatch || 0
+      : assessmentResult.percentageMatch || 0
+  } : {
     id: archetypeId,
     name: 'Unknown',
     matchPercentage: 0
   };
   
-  const secondaryArchetype = assessmentResult?.secondaryArchetype || {
+  const secondaryArchetype = assessmentResult && assessmentResult.secondaryArchetype ? {
+    id: typeof assessmentResult.secondaryArchetype === 'object' 
+      ? assessmentResult.secondaryArchetype.id || ''
+      : '',
+    name: typeof assessmentResult.secondaryArchetype === 'object'
+      ? assessmentResult.secondaryArchetype.name || 'None'
+      : assessmentResult.secondaryArchetype || 'None',
+    matchPercentage: typeof assessmentResult.secondaryArchetype === 'object'
+      ? assessmentResult.secondaryArchetype.matchPercentage || 0
+      : 0
+  } : {
     id: '',
     name: 'None',
     matchPercentage: 0
@@ -106,7 +126,7 @@ const ReportUserDataTest = () => {
             <div>
               <p className="text-gray-500 text-sm">Primary Archetype</p>
               <div className="flex items-center gap-2">
-                <p className="font-medium">{primaryArchetype.name || archetypeId}</p>
+                <p className="font-medium">{primaryArchetype.name}</p>
                 {primaryArchetype.matchPercentage > 0 && (
                   <Badge variant="secondary">{primaryArchetype.matchPercentage}% Match</Badge>
                 )}
@@ -151,6 +171,13 @@ const ReportUserDataTest = () => {
                 {userData.expires_at ? format(new Date(userData.expires_at), 'PPP') : 'Never'}
               </p>
             </div>
+          </div>
+        </div>
+        
+        <div>
+          <h3 className="text-lg font-semibold mb-3">Access URL</h3>
+          <div className="bg-gray-50 p-3 rounded-md">
+            <p className="font-mono text-sm break-all">{userData.access_url || 'No URL stored'}</p>
           </div>
         </div>
         

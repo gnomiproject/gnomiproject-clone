@@ -76,6 +76,10 @@ const DeepDiveFormContainer = ({
         if (submissionData.archetypeId === archetypeId) {
           setSubmitSuccessful(true);
           setSubmittedEmail(submissionData.email || '');
+          // Also set the accessUrl if available
+          if (submissionData.accessUrl) {
+            setAccessUrl(submissionData.accessUrl);
+          }
         }
       } catch (e) {
         console.error("Could not parse report submission data:", e);
@@ -142,6 +146,8 @@ const DeepDiveFormContainer = ({
       const generatedUrl = `${window.location.origin}/report/${archetypeId}/${accessToken}`;
       setAccessUrl(generatedUrl); // Store URL for potential display
       
+      console.log('[DeepDiveFormContainer] Generated access URL:', generatedUrl);
+      
       // Ensure assessment result is properly formatted for database storage
       let formattedAssessmentResult = null;
       if (assessmentResult) {
@@ -178,9 +184,9 @@ const DeepDiveFormContainer = ({
           assessment_result: formattedAssessmentResult,
           assessment_answers: assessmentAnswers || null,
           exact_employee_count: exactEmployeeCount,
-          access_url: generatedUrl
+          access_url: generatedUrl // Make sure this is set
         })
-        .select('id, access_token');
+        .select('id, access_token, access_url');
 
       if (error) {
         console.error('[DeepDiveFormContainer] Error details:', error);
@@ -190,9 +196,11 @@ const DeepDiveFormContainer = ({
       console.log('[DeepDiveFormContainer] Report request created successfully:', response);
       
       // Store submission record in session storage to prevent multiple submissions
+      // Also store the accessUrl
       sessionStorage.setItem(REPORT_SUBMITTED_KEY, JSON.stringify({
         archetypeId: archetypeId,
         email: data.email,
+        accessUrl: generatedUrl,
         timestamp: new Date().toISOString()
       }));
       
@@ -229,6 +237,7 @@ const DeepDiveFormContainer = ({
       onRetakeAssessment={handleRetakeAssessment}
       onResetForm={resetFormSubmission}
       onSubmit={handleSubmit}
+      accessUrl={accessUrl} // Pass the accessUrl to the FormLayout
     />
   );
 };

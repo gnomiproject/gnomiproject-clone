@@ -75,6 +75,10 @@ export const useReportGeneration = () => {
       const expiryDate = new Date();
       expiryDate.setDate(expiryDate.getDate() + 30);
       
+      // Generate the secure URL
+      const baseUrl = window.location.origin;
+      const reportUrl = `${baseUrl}/report/${archetypeId}/${accessToken}`;
+      
       // Create a report request entry
       const { data: reportData, error: reportError } = await supabase
         .from('report_requests')
@@ -87,17 +91,14 @@ export const useReportGeneration = () => {
           expires_at: expiryDate.toISOString(),
           name: 'Admin Generated Report',
           organization: 'Admin',
-          email: 'admin@example.com'
+          email: 'admin@example.com',
+          access_url: reportUrl // Store the URL in the database
         })
         .select();
         
       if (reportError) {
         throw new Error(`Error creating report: ${reportError.message}`);
       }
-
-      // Generate the secure URL
-      const baseUrl = window.location.origin;
-      const reportUrl = `${baseUrl}/report/${archetypeId}/${accessToken}`;
       
       // Set the last generated URL for display
       setLastGeneratedUrl(reportUrl);
