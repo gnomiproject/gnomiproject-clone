@@ -61,7 +61,7 @@ export const useReportAccess = ({ archetypeId: rawArchetypeId, token, isAdminVie
         }
 
         // Try case-insensitive search for more robust data retrieval
-        const fetchWithCaseInsensitiveSearch = async <T extends SecureTableName>(tableName: T, archetypeIdParam: string) => {
+        const fetchWithCaseInsensitiveSearch = async (tableName: SecureTableName, archetypeIdParam: string) => {
           // Try exact match first
           const { data, error } = await supabase
             .from(tableName)
