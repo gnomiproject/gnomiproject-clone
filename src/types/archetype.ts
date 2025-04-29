@@ -104,6 +104,12 @@ export interface ArchetypeDetailedData {
     opportunities: string[];
     threats: string[];
   };
+  swot_analysis?: {
+    strengths: string[] | Json;
+    weaknesses: string[] | Json;
+    opportunities: string[] | Json;
+    threats: string[] | Json;
+  };
   distinctive_metrics?: Array<{
     metric: string;
     category: string;
@@ -120,10 +126,10 @@ export interface ArchetypeDetailedData {
   }>;
   
   // Add standalone properties for SWOT analysis 
-  strengths?: string[];
-  weaknesses?: string[];
-  opportunities?: string[];
-  threats?: string[];
+  strengths?: string[] | Json;
+  weaknesses?: string[] | Json;
+  opportunities?: string[] | Json;
+  threats?: string[] | Json;
   
   // Add missing properties needed by components
   fullDescription?: string;

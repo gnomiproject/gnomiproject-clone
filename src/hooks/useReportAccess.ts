@@ -106,7 +106,7 @@ export const useReportAccess = ({ archetypeId: rawArchetypeId, token, isAdminVie
               level4BaseQuery: {
                 success: true,
                 dataFound: true,
-                hasSwotData: !!(level4BaseData.strengths || level4BaseData.swot_analysis?.strengths)
+                hasSwotData: !!(level4BaseData.strengths || (level4BaseData.swot_analysis && level4BaseData.swot_analysis.strengths))
               }
             }));
             
@@ -114,7 +114,7 @@ export const useReportAccess = ({ archetypeId: rawArchetypeId, token, isAdminVie
               hasStrengthsArray: !!level4BaseData.strengths,
               strengthsLength: level4BaseData.strengths ? level4BaseData.strengths.length : 0,
               hasSwotAnalysis: !!level4BaseData.swot_analysis,
-              swotStrengthsLength: level4BaseData.swot_analysis?.strengths ? level4BaseData.swot_analysis.strengths.length : 0
+              swotStrengthsLength: level4BaseData.swot_analysis && level4BaseData.swot_analysis.strengths ? level4BaseData.swot_analysis.strengths.length : 0
             });
           }
         } else if (deepDiveData) {
@@ -125,7 +125,7 @@ export const useReportAccess = ({ archetypeId: rawArchetypeId, token, isAdminVie
             level4Query: {
               success: true,
               dataFound: true,
-              hasSwotData: !!(deepDiveData.strengths || deepDiveData.swot_analysis?.strengths)
+              hasSwotData: !!(deepDiveData.strengths || (deepDiveData.swot_analysis && deepDiveData.swot_analysis.strengths))
             }
           }));
           
@@ -133,7 +133,7 @@ export const useReportAccess = ({ archetypeId: rawArchetypeId, token, isAdminVie
             hasStrengthsArray: !!deepDiveData.strengths,
             strengthsLength: deepDiveData.strengths ? deepDiveData.strengths.length : 0,
             hasSwotAnalysis: !!deepDiveData.swot_analysis,
-            swotStrengthsLength: deepDiveData.swot_analysis?.strengths ? deepDiveData.swot_analysis.strengths.length : 0
+            swotStrengthsLength: deepDiveData.swot_analysis && deepDiveData.swot_analysis.strengths ? deepDiveData.swot_analysis.strengths.length : 0
           });
         } else {
           console.log(`[useReportAccess] No level4 data found for ${archetypeId}, falling back`);
@@ -156,7 +156,7 @@ export const useReportAccess = ({ archetypeId: rawArchetypeId, token, isAdminVie
               level3Query: {
                 success: true,
                 dataFound: true,
-                hasSwotData: !!(level3Data.strengths || level3Data.swot_analysis?.strengths)
+                hasSwotData: !!(level3Data.strengths || (level3Data.swot_analysis && level3Data.swot_analysis.strengths))
               }
             }));
             
@@ -164,13 +164,13 @@ export const useReportAccess = ({ archetypeId: rawArchetypeId, token, isAdminVie
               hasStrengthsArray: !!level3Data.strengths,
               strengthsLength: level3Data.strengths ? level3Data.strengths.length : 0,
               hasSwotAnalysis: !!level3Data.swot_analysis,
-              swotStrengthsLength: level3Data.swot_analysis?.strengths ? level3Data.swot_analysis.strengths.length : 0
+              swotStrengthsLength: level3Data.swot_analysis && level3Data.swot_analysis.strengths ? level3Data.swot_analysis.strengths.length : 0
             });
           }
         }
 
         // If we still don't have SWOT data, try getting it directly from the Analysis_Archetype_SWOT table
-        if (!reportData?.strengths && !reportData?.swot_analysis?.strengths) {
+        if (!reportData?.strengths && (!reportData?.swot_analysis || !reportData?.swot_analysis?.strengths)) {
           console.log(`[useReportAccess] No SWOT data found in report data, trying to fetch directly from SWOT table for ${archetypeId}`);
           
           const { data: swotData, error: swotError } = await supabase
@@ -189,6 +189,13 @@ export const useReportAccess = ({ archetypeId: rawArchetypeId, token, isAdminVie
               weaknesses: swotData.weaknesses,
               opportunities: swotData.opportunities,
               threats: swotData.threats,
+              // Also add to swot_analysis for compatibility
+              swot_analysis: {
+                strengths: swotData.strengths,
+                weaknesses: swotData.weaknesses,
+                opportunities: swotData.opportunities,
+                threats: swotData.threats
+              }
             }));
             
             setDebugInfo(prev => ({

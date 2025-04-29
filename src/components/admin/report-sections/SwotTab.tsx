@@ -43,10 +43,10 @@ export const SwotTab = ({ report }: SwotTabProps) => {
   // Get SWOT data from the report or swot_analysis
   const swotAnalysis = report?.swot_analysis || {};
   
-  const strengths = normalizeSwotData(report?.strengths || swotAnalysis?.strengths);
-  const weaknesses = normalizeSwotData(report?.weaknesses || swotAnalysis?.weaknesses);
-  const opportunities = normalizeSwotData(report?.opportunities || swotAnalysis?.opportunities);
-  const threats = normalizeSwotData(report?.threats || swotAnalysis?.threats);
+  const strengths = normalizeSwotData(report?.strengths || (swotAnalysis?.strengths));
+  const weaknesses = normalizeSwotData(report?.weaknesses || (swotAnalysis?.weaknesses));
+  const opportunities = normalizeSwotData(report?.opportunities || (swotAnalysis?.opportunities));
+  const threats = normalizeSwotData(report?.threats || (swotAnalysis?.threats));
 
   if (!report) return <p>No SWOT analysis available</p>;
 

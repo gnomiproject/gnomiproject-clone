@@ -33,7 +33,7 @@ const InsightsView = ({
     reportDataName: reportData?.name || reportData?.archetype_name,
     hasStrengths: Array.isArray(reportData?.strengths) && reportData.strengths.length > 0,
     strengthsLength: reportData?.strengths ? reportData.strengths.length : 0,
-    hasSwotAnalysis: !!reportData?.swot_analysis,
+    hasSwotAnalysis: !!(reportData?.swot_analysis),
     swotAnalysisStrengths: reportData?.swot_analysis?.strengths ? reportData.swot_analysis.strengths.length : 0
   });
   
@@ -76,10 +76,10 @@ const InsightsView = ({
 
   // Process SWOT data with fallback to swot_analysis object if available
   const swotData = {
-    strengths: reportData.strengths || (reportData.swot_analysis?.strengths) || [],
-    weaknesses: reportData.weaknesses || (reportData.swot_analysis?.weaknesses) || [],
-    opportunities: reportData.opportunities || (reportData.swot_analysis?.opportunities) || [],
-    threats: reportData.threats || (reportData.swot_analysis?.threats) || []
+    strengths: reportData.strengths || (reportData.swot_analysis && reportData.swot_analysis.strengths) || [],
+    weaknesses: reportData.weaknesses || (reportData.swot_analysis && reportData.swot_analysis.weaknesses) || [],
+    opportunities: reportData.opportunities || (reportData.swot_analysis && reportData.swot_analysis.opportunities) || [],
+    threats: reportData.threats || (reportData.swot_analysis && reportData.swot_analysis.threats) || []
   };
 
   // Debug log SWOT data
