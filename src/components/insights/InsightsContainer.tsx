@@ -6,6 +6,7 @@ import { useGetArchetype } from '@/hooks/useGetArchetype';
 import InsightsView from './InsightsView';
 import ArchetypeLoadingSkeleton from './ArchetypeLoadingSkeleton';
 import ArchetypeError from './ArchetypeError';
+import { toast } from 'sonner';
 
 interface InsightsContainerProps {
   archetypeId: ArchetypeId;
@@ -27,10 +28,15 @@ const InsightsContainer = ({
   const { archetypeData: dbArchetypeData, isLoading, error, refetch } = useGetArchetype(archetypeId);
   const [retrying, setRetrying] = React.useState(false);
   
-  // Log component lifecycle for debugging
+  // Log component lifecycle and assessment data for debugging
   useEffect(() => {
     renderCountRef.current += 1;
     console.log(`InsightsContainer: Mount/Render #${renderCountRef.current} for ${archetypeId}`);
+    console.log('Assessment data:', { 
+      assessmentResult,
+      assessmentAnswers,
+      hasExactEmployeeCount: assessmentResult?.exactData?.employeeCount ? 'Yes' : 'No'
+    });
     
     // Reset flags when archetypeId changes
     if (archetypeId) {
@@ -41,13 +47,15 @@ const InsightsContainer = ({
       mountedRef.current = false;
       console.log(`InsightsContainer: Unmounting for ${archetypeId}`);
     };
-  }, [archetypeId]);
+  }, [archetypeId, assessmentResult, assessmentAnswers]);
   
   // Handle retry logic
   const handleRetry = async () => {
     setRetrying(true);
     try {
       await refetch();
+    } catch (error: any) {
+      toast.error(`Failed to refresh archetype data: ${error.message}`);
     } finally {
       setRetrying(false);
     }
@@ -113,6 +121,12 @@ const InsightsContainer = ({
     color: archetypeData.color || '#6E59A5',
     familyName: archetypeData.familyName || archetypeData.family_name || 'Healthcare Archetype'
   };
+  
+  console.log('InsightsContainer rendering with assessment data:', {
+    hasAssessmentResult: !!assessmentResult,
+    hasAssessmentAnswers: !!assessmentAnswers,
+    exactEmployeeCount: assessmentResult?.exactData?.employeeCount
+  });
   
   return (
     <InsightsView 

@@ -43,6 +43,13 @@ const DeepDiveRequestForm = ({
   const [accessUrl, setAccessUrl] = useState('');
   const navigate = useNavigate();
   
+  // Debug logging to track what's being passed to the form
+  console.log('DeepDiveRequestForm: Received props', {
+    archetypeId,
+    assessmentResult,
+    assessmentAnswers
+  });
+  
   const form = useForm<FormData>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -80,6 +87,10 @@ const DeepDiveRequestForm = ({
     try {
       console.log('Submitting form with data:', data);
       console.log('Assessment result:', assessmentResult);
+      console.log('Assessment answers:', assessmentAnswers);
+      
+      // Generate a unique ID for the report request
+      const reportId = uuidv4();
       
       // Extract exact employee count from assessment results if available
       const exactEmployeeCount = assessmentResult?.exactData?.employeeCount || null;
@@ -88,10 +99,12 @@ const DeepDiveRequestForm = ({
       // Generate access token and construct URL
       const accessToken = uuidv4();
       const generatedUrl = `${window.location.origin}/report/${archetypeId}/${accessToken}`;
+      setAccessUrl(generatedUrl); // Store URL for potential display
       
       const { data: response, error } = await supabase
         .from('report_requests')
         .insert({
+          id: reportId, // Explicitly set the ID
           archetype_id: archetypeId,
           name: data.name,
           email: data.email,
@@ -105,16 +118,17 @@ const DeepDiveRequestForm = ({
           assessment_result: assessmentResult || null,
           assessment_answers: assessmentAnswers || null,
           exact_employee_count: exactEmployeeCount,
-          access_url: generatedUrl // Save the URL to the database
+          access_url: generatedUrl
         })
-        .select('access_token')
+        .select('id, access_token')
         .single();
 
       if (error) {
+        console.error('Error details:', error);
         throw error;
       }
       
-      console.log('Report request created:', response);
+      console.log('Report request created successfully:', response);
       
       // Store submission record in session storage to prevent multiple submissions
       sessionStorage.setItem(REPORT_SUBMITTED_KEY, JSON.stringify({
@@ -126,13 +140,14 @@ const DeepDiveRequestForm = ({
       // Set the success state
       setSubmitSuccessful(true);
       setSubmittedEmail(data.email);
-      setAccessUrl(generatedUrl);
       
       // Track event
       window.gtag?.('event', 'deep_dive_request', {
         event_category: 'engagement',
         event_label: archetypeId
       });
+      
+      toast.success(`Report request submitted successfully. We've sent a link to ${data.email}.`);
       
     } catch (error: any) {
       console.error('Error submitting report request:', error);
