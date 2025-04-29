@@ -5,6 +5,7 @@ import { ChartBar, TrendingUp, TrendingDown } from 'lucide-react';
 import { useDistinctiveMetrics } from '@/hooks/archetype/useDistinctiveMetrics';
 import { formatFieldValue } from '@/utils/reports/fieldFormatters';
 import { getMetricComparisonText } from '@/utils/reports/metricUtils';
+import { ArchetypeId } from '@/types/archetype';
 
 interface DistinctiveMetricsProps {
   metrics: Array<any>;
@@ -13,7 +14,13 @@ interface DistinctiveMetricsProps {
 
 const DistinctiveMetrics: React.FC<DistinctiveMetricsProps> = ({ metrics, archetypeId }) => {
   // Use the hook to get metrics if we don't have them passed as props
-  const { distinctiveMetrics: hookMetrics, isLoading } = useDistinctiveMetrics(archetypeId);
+  // Convert string to ArchetypeId type using type assertion if it's a valid archetype ID
+  const safeArchetypeId = archetypeId as ArchetypeId;
+  
+  const { distinctiveMetrics: hookMetrics, isLoading } = useDistinctiveMetrics(
+    // Only pass the ID if it appears to be a valid archetype ID format
+    archetypeId.match(/^[a-c][1-3]$/) ? safeArchetypeId : undefined
+  );
   
   // Use props metrics if available, otherwise use metrics from the hook
   const displayMetrics = metrics && metrics.length > 0 ? metrics : hookMetrics;

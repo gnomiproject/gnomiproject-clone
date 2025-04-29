@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card } from '@/components/ui/card';
-import { Industry, Building } from 'lucide-react';
+import { Building, Briefcase } from 'lucide-react';
 
 interface IndustryCompositionProps {
   industries: string;
