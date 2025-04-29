@@ -123,6 +123,7 @@ const DeepDiveReportContent = ({
       <Section id="recommendations">
         <StrategicRecommendations 
           reportData={archetype}
+          averageData={processedAverageData}
         />
       </Section>
       
