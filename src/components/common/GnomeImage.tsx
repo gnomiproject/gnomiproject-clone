@@ -78,7 +78,7 @@ const GnomeImage: React.FC<GnomeImageProps> = ({
   
   const handleError = () => {
     if (!hasError) {
-      console.warn(`Failed to load gnome image: ${src}`);
+      console.warn(`Failed to load gnome image from storage: ${src}`);
       setSrc(fallbackGnomeImage);
       setHasError(true);
     }

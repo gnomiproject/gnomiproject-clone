@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Heart } from 'lucide-react';
+import GnomeImage from '@/components/common/GnomeImage';
 
 interface DiseaseManagementProps {
   reportData: any;
@@ -8,9 +9,6 @@ interface DiseaseManagementProps {
 }
 
 const DiseaseManagement = ({ reportData, averageData }: DiseaseManagementProps) => {
-  // Gnome image
-  const gnomeImage = '/assets/gnomes/gnome_magnifying.png';
-
   return (
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row gap-8">
@@ -22,13 +20,11 @@ const DiseaseManagement = ({ reportData, averageData }: DiseaseManagementProps) 
           </p>
         </div>
         <div className="md:w-1/3 flex justify-center">
-          <img
-            src={gnomeImage}
-            alt="Disease Gnome"
+          <GnomeImage
+            type="magnifying"
+            sectionType="disease"
             className="max-h-64 object-contain"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = '/assets/gnomes/placeholder.svg';
-            }}
+            alt="Disease Gnome"
           />
         </div>
       </div>

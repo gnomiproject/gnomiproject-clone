@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Lightbulb } from 'lucide-react';
+import GnomeImage from '@/components/common/GnomeImage';
 
 interface StrategicRecommendationsProps {
   reportData: any;
@@ -8,9 +9,6 @@ interface StrategicRecommendationsProps {
 }
 
 const StrategicRecommendations = ({ reportData, averageData }: StrategicRecommendationsProps) => {
-  // Gnome image
-  const gnomeImage = '/assets/gnomes/gnome_charts.png';
-
   const recommendations = reportData.strategic_recommendations || [];
   const hasRecommendations = recommendations && recommendations.length > 0;
 
@@ -25,13 +23,11 @@ const StrategicRecommendations = ({ reportData, averageData }: StrategicRecommen
           </p>
         </div>
         <div className="md:w-1/3 flex justify-center">
-          <img
-            src={gnomeImage}
-            alt="Recommendations Gnome"
+          <GnomeImage
+            type="charts"
+            sectionType="recommendations"
             className="max-h-64 object-contain"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = '/assets/gnomes/placeholder.svg';
-            }}
+            alt="Recommendations Gnome"
           />
         </div>
       </div>

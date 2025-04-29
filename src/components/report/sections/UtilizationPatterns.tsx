@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Activity } from 'lucide-react';
+import GnomeImage from '@/components/common/GnomeImage';
 
 interface UtilizationPatternsProps {
   reportData: any;
@@ -8,9 +9,6 @@ interface UtilizationPatternsProps {
 }
 
 const UtilizationPatterns = ({ reportData, averageData }: UtilizationPatternsProps) => {
-  // Gnome image
-  const gnomeImage = '/assets/gnomes/gnome_clipboard.png';
-
   return (
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row gap-8">
@@ -22,13 +20,11 @@ const UtilizationPatterns = ({ reportData, averageData }: UtilizationPatternsPro
           </p>
         </div>
         <div className="md:w-1/3 flex justify-center">
-          <img
-            src={gnomeImage}
-            alt="Utilization Gnome"
+          <GnomeImage
+            type="clipboard"
+            sectionType="utilization"
             className="max-h-64 object-contain"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = '/assets/gnomes/placeholder.svg';
-            }}
+            alt="Utilization Gnome"
           />
         </div>
       </div>

@@ -1,4 +1,6 @@
 
+import { supabase } from '@/integrations/supabase/client';
+
 /**
  * Utility for centralized access to gnome images
  * These images should be used across the application for consistency
@@ -16,17 +18,22 @@ export type GnomeImageType =
   | 'analysis'       // Gnome analyzing data
   | 'placeholder';   // Fallback image
 
+// Base URL for Supabase storage bucket
+const STORAGE_BUCKET = 'gnome-images';
+const STORAGE_BASE_URL = `${supabase.storage.from(STORAGE_BUCKET).getPublicUrl('').data.publicUrl}/`;
+const LOCAL_FALLBACK_PATH = '/assets/gnomes/placeholder.svg';
+
 // Map of gnome image paths
 export const gnomeImages: Record<GnomeImageType, string> = {
-  presentation: '/assets/gnomes/gnome_presentation.png',
-  clipboard: '/assets/gnomes/gnome_clipboard.png',
-  welcome: '/assets/gnomes/gnome_welcome.png', 
-  magnifying: '/assets/gnomes/gnome_magnifying.png',
-  charts: '/assets/gnomes/gnome_charts.png',
-  profile: '/assets/gnomes/gnome_profile.png',
-  report: '/assets/gnomes/gnome_report.png',
-  analysis: '/assets/gnomes/gnome_analysis.png',
-  placeholder: '/assets/gnomes/placeholder.svg'
+  presentation: `${STORAGE_BASE_URL}gnome_presentation.png`,
+  clipboard: `${STORAGE_BASE_URL}gnome_clipboard.png`,
+  welcome: `${STORAGE_BASE_URL}gnome_welcome.png`, 
+  magnifying: `${STORAGE_BASE_URL}gnome_magnifying.png`,
+  charts: `${STORAGE_BASE_URL}gnome_charts.png`,
+  profile: `${STORAGE_BASE_URL}gnome_profile.png`,
+  report: `${STORAGE_BASE_URL}gnome_report.png`,
+  analysis: `${STORAGE_BASE_URL}gnome_analysis.png`,
+  placeholder: LOCAL_FALLBACK_PATH
 };
 
 // Fallback URL to use when an image fails to load
@@ -90,4 +97,3 @@ export interface GnomeImageProps {
   className?: string;
   alt?: string;
 }
-
