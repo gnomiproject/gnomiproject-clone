@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -34,6 +33,7 @@ const CareGaps = ({ reportData, averageData }: CareGapsProps) => {
           </p>
         </div>
         <div className="md:w-1/3 flex justify-center">
+          {/* Use the GnomeImage component */}
           <GnomeImage 
             type="clipboard" 
             sectionType="care-gaps"

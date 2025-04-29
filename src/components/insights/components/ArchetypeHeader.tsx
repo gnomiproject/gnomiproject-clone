@@ -59,8 +59,10 @@ const ArchetypeHeader = ({
           </div>
           
           <div className="flex-shrink-0 hidden md:block">
+            {/* Replace the old img with GnomeImage component */}
             <GnomeImage 
               archetypeId={familyId}
+              src={gnomeImage}
               className="h-48 object-contain"
               alt={`${name} Guide`}
             />
