@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Section } from '@/components/shared/Section';
 import ExecutiveSummary from './sections/ExecutiveSummary';
@@ -41,8 +40,6 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
   // Setup print handler with correct properties according to react-to-print API
   const handlePrint = useReactToPrint({
     documentTitle: `Healthcare Archetype Report - ${reportData?.archetype_name || 'Unknown'}`,
-    // The onBeforeGetContent and onAfterPrint need to be implemented differently
-    // as they're not directly supported in the options type
     onBeforePrint: () => {
       document.body.classList.add('printing');
       return Promise.resolve(); // Return a resolved Promise to satisfy TypeScript
@@ -50,8 +47,8 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
     onAfterPrint: () => {
       document.body.classList.remove('printing');
     },
-    // Use printRef instead of content
-    printRef: () => reportRef.current,
+    // Use content instead of printRef as per the react-to-print API
+    content: () => reportRef.current,
   });
 
   // Show print button only after report is fully loaded
