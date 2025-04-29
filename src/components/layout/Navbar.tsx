@@ -1,9 +1,9 @@
-
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Menu } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { BetaBadge } from '@/components/shared/BetaBadge';
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -21,6 +21,7 @@ const Navbar = () => {
           alt="g nomi logo" 
           className="h-8"
         />
+        <BetaBadge className="ml-2" />
       </Link>
       
       {isMobile ? (
