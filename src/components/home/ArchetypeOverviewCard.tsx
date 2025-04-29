@@ -44,7 +44,7 @@ const ArchetypeOverviewCard = ({
               color: familyInfo?.hex_color 
             }}
           >
-            Family {family_id.toUpperCase()} - {familyInfo?.name || ''}
+            Family {family_id}: {familyInfo?.name || ''}
           </div>
           
           <div>
@@ -93,4 +93,3 @@ const ArchetypeOverviewCard = ({
 };
 
 export default ArchetypeOverviewCard;
-

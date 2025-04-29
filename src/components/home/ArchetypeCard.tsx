@@ -47,7 +47,7 @@ const ArchetypeCard: React.FC<ArchetypeCardProps> = ({
             color: color
           }}
         >
-          {category}
+          Family {familyId}: {category}
         </div>
         
         {/* Title */}

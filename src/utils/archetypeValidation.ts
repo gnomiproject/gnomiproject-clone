@@ -17,7 +17,7 @@ export const isValidArchetypeId = (id: string): boolean => {
  * @returns The display name for the family
  */
 export const getFamilyDisplayName = (familyId: string): string => {
-  switch (familyId) {
+  switch (familyId.toLowerCase()) {
     case 'a': return 'Strategists';
     case 'b': return 'Pragmatists';
     case 'c': return 'Logisticians';
