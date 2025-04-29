@@ -37,6 +37,22 @@ const DeepDiveReportContent = ({
   const processedUserData = userData || {};
   const processedAverageData = averageData || {};
   
+  // Ensure all required arrays exist to prevent map function errors
+  const ensureArray = (data: any): any[] => {
+    if (Array.isArray(data)) return data;
+    return [];
+  };
+  
+  // Process archetype data to ensure all required properties exist and are in the right format
+  const processedArchetype = {
+    ...archetype,
+    strengths: ensureArray(archetype.strengths),
+    weaknesses: ensureArray(archetype.weaknesses),
+    opportunities: ensureArray(archetype.opportunities),
+    threats: ensureArray(archetype.threats),
+    strategic_recommendations: ensureArray(archetype.strategic_recommendations),
+  };
+  
   console.log('[DeepDiveReportContent] Rendering with archetype data:', {
     id: archetypeId,
     name: archetypeName,
@@ -50,7 +66,7 @@ const DeepDiveReportContent = ({
       <ErrorBoundary>
         <HomeIntroduction 
           userData={userData} 
-          archetypeData={archetype} 
+          archetypeData={processedArchetype} 
           averageData={averageData} 
         />
       </ErrorBoundary>
@@ -68,7 +84,7 @@ const DeepDiveReportContent = ({
       <Section id="executive-summary">
         <ErrorBoundary>
           <ExecutiveSummary 
-            archetypeData={archetype}
+            archetypeData={processedArchetype}
           />
         </ErrorBoundary>
       </Section>
@@ -76,8 +92,8 @@ const DeepDiveReportContent = ({
       <Section id="archetype-profile">
         <ErrorBoundary>
           <ArchetypeProfile 
-            archetypeData={archetype}
-            reportData={archetype} // Supporting both prop patterns
+            archetypeData={processedArchetype}
+            reportData={processedArchetype} // Supporting both prop patterns
           />
         </ErrorBoundary>
       </Section>
@@ -85,7 +101,7 @@ const DeepDiveReportContent = ({
       <Section id="swot-analysis">
         <ErrorBoundary>
           <SwotAnalysis 
-            reportData={archetype}
+            reportData={processedArchetype}
           />
         </ErrorBoundary>
       </Section>
@@ -93,7 +109,7 @@ const DeepDiveReportContent = ({
       <Section id="demographics">
         <ErrorBoundary>
           <DemographicsSection 
-            reportData={archetype}
+            reportData={processedArchetype}
             averageData={processedAverageData}
           />
         </ErrorBoundary>
@@ -102,7 +118,7 @@ const DeepDiveReportContent = ({
       <Section id="utilization">
         <ErrorBoundary>
           <UtilizationPatterns 
-            reportData={archetype}
+            reportData={processedArchetype}
             averageData={processedAverageData}
           />
         </ErrorBoundary>
@@ -111,7 +127,7 @@ const DeepDiveReportContent = ({
       <Section id="risk-factors">
         <ErrorBoundary>
           <RiskFactors 
-            reportData={archetype}
+            reportData={processedArchetype}
             averageData={processedAverageData}
           />
         </ErrorBoundary>
@@ -120,7 +136,7 @@ const DeepDiveReportContent = ({
       <Section id="cost-analysis">
         <ErrorBoundary>
           <CostAnalysis 
-            reportData={archetype}
+            reportData={processedArchetype}
             averageData={processedAverageData}
           />
         </ErrorBoundary>
@@ -129,7 +145,7 @@ const DeepDiveReportContent = ({
       <Section id="care-gaps">
         <ErrorBoundary>
           <CareGaps 
-            reportData={archetype}
+            reportData={processedArchetype}
             averageData={processedAverageData}
           />
         </ErrorBoundary>
@@ -138,7 +154,7 @@ const DeepDiveReportContent = ({
       <Section id="disease-management">
         <ErrorBoundary>
           <DiseaseManagement 
-            reportData={archetype}
+            reportData={processedArchetype}
             averageData={processedAverageData}
           />
         </ErrorBoundary>
@@ -147,7 +163,7 @@ const DeepDiveReportContent = ({
       <Section id="metrics-analysis">
         <ErrorBoundary>
           <MetricsAnalysis 
-            reportData={archetype}
+            reportData={processedArchetype}
             averageData={processedAverageData}
           />
         </ErrorBoundary>
@@ -156,8 +172,8 @@ const DeepDiveReportContent = ({
       <Section id="recommendations">
         <ErrorBoundary>
           <StrategicRecommendations 
-            reportData={archetype}
-            archetypeData={archetype} // Supporting both prop patterns
+            reportData={processedArchetype}
+            archetypeData={processedArchetype} // Supporting both prop patterns
             averageData={processedAverageData}
           />
         </ErrorBoundary>

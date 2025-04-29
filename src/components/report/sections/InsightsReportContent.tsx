@@ -24,6 +24,22 @@ const InsightsReportContent: React.FC<InsightsReportContentProps> = ({ archetype
   const name = archetype?.name || archetype?.archetype_name || 'Untitled Archetype';
   const id = archetype?.id || archetype?.archetype_id || '';
   
+  // Ensure all required arrays exist to prevent map function errors
+  const ensureArray = (data: any): any[] => {
+    if (Array.isArray(data)) return data;
+    return [];
+  };
+  
+  // Process archetype data to ensure all required properties exist and are in the right format
+  const processedArchetype = {
+    ...archetype,
+    strengths: ensureArray(archetype?.strengths),
+    weaknesses: ensureArray(archetype?.weaknesses),
+    opportunities: ensureArray(archetype?.opportunities),
+    threats: ensureArray(archetype?.threats),
+    strategic_recommendations: ensureArray(archetype?.strategic_recommendations),
+  };
+  
   return (
     <div className="max-w-7xl mx-auto py-8 space-y-12">
       <div className="flex justify-between items-start mb-6">
@@ -40,13 +56,13 @@ const InsightsReportContent: React.FC<InsightsReportContentProps> = ({ archetype
         </div>
       </div>
 
-      <InsightOverviewSection archetype={archetype} />
-      <InsightMetricsSection archetype={archetype} />
-      <InsightSwotSection archetype={archetype} />
-      <InsightCareSection archetype={archetype} />
+      <InsightOverviewSection archetype={processedArchetype} />
+      <InsightMetricsSection archetype={processedArchetype} />
+      <InsightSwotSection archetype={processedArchetype} />
+      <InsightCareSection archetype={processedArchetype} />
       
       <Section id="recommendations">
-        <RecommendationsSection reportData={archetype} averageData={{}} />
+        <RecommendationsSection reportData={processedArchetype} averageData={{}} />
       </Section>
     </div>
   );
