@@ -1,6 +1,10 @@
-
 import React from 'react';
-import { Activity } from 'lucide-react';
+import { ChartBar } from 'lucide-react';
+import CarePathwayUtilization from './utilization/CarePathwayUtilization';
+import HospitalServices from './utilization/HospitalServices';
+import DiagnosticServices from './utilization/DiagnosticServices';
+import SpecialPopulations from './utilization/SpecialPopulations';
+import UtilizationInsights from './utilization/UtilizationInsights';
 
 interface UtilizationPatternsProps {
   reportData: any;
@@ -16,15 +20,19 @@ const UtilizationPatterns = ({ reportData, averageData }: UtilizationPatternsPro
       <div className="flex flex-col md:flex-row gap-8">
         <div className="md:w-2/3">
           <h1 className="text-3xl font-bold mb-6">Utilization Patterns</h1>
-          <p className="text-lg">
-            This section shows how your members use healthcare services compared to similar organizations.
-            We'll expand this section in the next update.
+          <p className="text-lg mb-2">
+            Understanding how members access healthcare services provides crucial insights into population health management
+            and cost-saving opportunities.
+          </p>
+          <p className="text-gray-600">
+            This section analyzes care pathways, hospital utilization, diagnostic services, and special populations
+            to identify patterns and opportunities for improvement.
           </p>
         </div>
         <div className="md:w-1/3 flex justify-center">
           <img
             src={gnomeImage}
-            alt="Utilization Gnome"
+            alt="Utilization Patterns Analysis"
             className="max-h-64 object-contain"
             onError={(e) => {
               (e.target as HTMLImageElement).src = '/assets/gnomes/placeholder.svg';
@@ -33,11 +41,20 @@ const UtilizationPatterns = ({ reportData, averageData }: UtilizationPatternsPro
         </div>
       </div>
 
-      <div className="bg-blue-50 p-8 rounded-lg text-center">
-        <Activity className="h-12 w-12 text-blue-500 mx-auto mb-4" />
-        <h2 className="text-xl font-semibold mb-2">Coming Soon</h2>
-        <p>The full utilization patterns analysis will be available in the next update.</p>
-      </div>
+      {/* Care Pathway Utilization */}
+      <CarePathwayUtilization reportData={reportData} averageData={averageData} />
+
+      {/* Hospital Services */}
+      <HospitalServices reportData={reportData} averageData={averageData} />
+
+      {/* Diagnostic Services */}
+      <DiagnosticServices reportData={reportData} averageData={averageData} />
+
+      {/* Special Populations */}
+      <SpecialPopulations reportData={reportData} averageData={averageData} />
+
+      {/* Utilization Insights */}
+      <UtilizationInsights reportData={reportData} />
     </div>
   );
 };
