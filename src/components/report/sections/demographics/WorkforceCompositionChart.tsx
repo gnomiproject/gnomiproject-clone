@@ -1,70 +1,91 @@
 
 import React from 'react';
-import { Users } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { formatNumber } from '@/utils/formatters';
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 
 interface WorkforceCompositionChartProps {
-  reportData: any;
-  averageData: any;
+  percentFemale: number;
+  averagePercentFemale: number;
+  averageAge: number;
+  archetype: string;
 }
 
-const WorkforceCompositionChart: React.FC<WorkforceCompositionChartProps> = ({ reportData, averageData }) => {
-  // Prepare data for the chart
-  const chartData = [
-    {
-      name: 'Employees',
-      'Your Value': reportData["Demo_Average Employees"] || 0,
-      'Archetype Average': averageData["Demo_Average Employees"] || 0
-    },
-    {
-      name: 'Members',
-      'Your Value': reportData["Demo_Average Members"] || 0,
-      'Archetype Average': averageData["Demo_Average Members"] || 0
-    },
-    {
-      name: 'Female Population (%)',
-      'Your Value': (reportData["Demo_Average Percent Female"] || 0) * 100,
-      'Archetype Average': (averageData["Demo_Average Percent Female"] || 0) * 100
-    }
+const WorkforceCompositionChart: React.FC<WorkforceCompositionChartProps> = ({
+  percentFemale,
+  averagePercentFemale,
+  averageAge,
+  archetype
+}) => {
+  // Format gender data for the chart
+  const genderData = [
+    { name: 'Female', value: percentFemale || 0 },
+    { name: 'Male', value: 100 - (percentFemale || 0) }
   ];
-
+  
+  // Comparison data for the archetype vs average
+  const comparisonData = [
+    { name: `${archetype} (Female %)`, value: percentFemale || 0 },
+    { name: 'Average (Female %)', value: averagePercentFemale || 0 }
+  ];
+  
+  const COLORS = ['#8884d8', '#82ca9d'];
+  
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center text-lg">
-          <Users className="mr-2 h-5 w-5 text-blue-600" />
-          Workforce Composition
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="h-64">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-              data={chartData}
-              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip formatter={(value) => formatNumber(value as number, 'number', 0)} />
-              <Legend />
-              <Bar dataKey="Your Value" fill="#3b82f6" />
-              <Bar dataKey="Archetype Average" fill="#94a3b8" />
-            </BarChart>
-          </ResponsiveContainer>
+    <div className="bg-white rounded-lg border p-4 h-full">
+      <h3 className="text-lg font-medium mb-4">Workforce Composition</h3>
+      
+      <div className="flex flex-col md:flex-row">
+        <div className="md:w-1/2">
+          <h4 className="text-sm font-medium mb-2 text-center">Gender Distribution</h4>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={genderData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                >
+                  {genderData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(value) => `${value.toFixed(1)}%`} />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
         </div>
         
-        <div className="mt-4 text-sm text-gray-600">
-          <p>
-            This archetype has an average of {formatNumber(reportData["Demo_Average Employees"] || 0, 'number', 0)} employees 
-            and {formatNumber(reportData["Demo_Average Members"] || 0, 'number', 0)} total members. 
-            Women represent approximately {formatNumber(reportData["Demo_Average Percent Female"] || 0, 'percent', 1)} of the workforce.
-          </p>
+        <div className="md:w-1/2 mt-4 md:mt-0">
+          <h4 className="text-sm font-medium mb-2">Demographic Summary</h4>
+          <ul className="space-y-2 text-sm">
+            <li className="flex justify-between">
+              <span>Average Age:</span>
+              <span className="font-semibold">{averageAge ? averageAge.toFixed(1) : 'N/A'} years</span>
+            </li>
+            <li className="flex justify-between">
+              <span>Female Employees:</span>
+              <span className="font-semibold">{percentFemale ? percentFemale.toFixed(1) : 'N/A'}%</span>
+            </li>
+            <li className="flex justify-between">
+              <span>Average Female %:</span>
+              <span className="font-semibold">{averagePercentFemale ? averagePercentFemale.toFixed(1) : 'N/A'}%</span>
+            </li>
+            <li className="flex justify-between">
+              <span>Difference:</span>
+              <span className={`font-semibold ${percentFemale > averagePercentFemale ? 'text-green-600' : 'text-amber-600'}`}>
+                {percentFemale && averagePercentFemale
+                  ? (percentFemale - averagePercentFemale).toFixed(1) + '%'
+                  : 'N/A'}
+              </span>
+            </li>
+          </ul>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 

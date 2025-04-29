@@ -1,13 +1,14 @@
 
 import React from 'react';
-import { Users } from 'lucide-react';
+import { Users, User, Building2, MapPin, Users2, CalendarClock, DollarSign } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import WorkforceSummaryCard from './demographics/WorkforceSummaryCard';
 import WorkforceCompositionChart from './demographics/WorkforceCompositionChart';
 import GeographicPresence from './demographics/GeographicPresence';
 import DemographicInsights from './demographics/DemographicInsights';
+import { formatNumber } from '@/utils/formatters';
 import NavigationButtons from './demographics/NavigationButtons';
-import MetricComparisonCard from '../shared/MetricComparisonCard';
+import { calculateCostPerMember } from '@/utils/reports/costUtils';
 
 interface DemographicsSectionProps {
   reportData: any;
@@ -16,6 +17,7 @@ interface DemographicsSectionProps {
   nextSection?: string;
   previousSectionName?: string;
   nextSectionName?: string;
+  onNavigate?: (sectionId: string) => void;
 }
 
 const DemographicsSection: React.FC<DemographicsSectionProps> = ({ 
@@ -24,217 +26,177 @@ const DemographicsSection: React.FC<DemographicsSectionProps> = ({
   previousSection,
   nextSection,
   previousSectionName,
-  nextSectionName 
+  nextSectionName,
+  onNavigate
 }) => {
-  // Get demographic insights if available
-  const demographicInsights = reportData.demographic_insights || 
-    "No specific demographic insights available for this archetype.";
-
-  // Gnome image
-  const gnomeImage = '/assets/gnomes/gnome_clipboard.png';
+  // Extract demographic data
+  const employees = reportData?.["Demo_Average Employees"] || 0;
+  const members = reportData?.["Demo_Average Members"] || 0;
+  const familySize = reportData?.["Demo_Average Family Size"] || 0;
+  const states = reportData?.["Demo_Average States"] || 0;
+  const percentFemale = reportData?.["Demo_Average Percent Female"] || 0;
+  const age = reportData?.["Demo_Average Age"] || 0;
+  const salary = reportData?.["Demo_Average Salary"] || 0;
   
-  // Demographics metrics
-  const metrics = {
-    employees: reportData["Demo_Average Employees"] || 0,
-    members: reportData["Demo_Average Members"] || 0,
-    familySize: reportData["Demo_Average Family Size"] || 0,
-    states: reportData["Demo_Average States"] || 0,
-    percentFemale: reportData["Demo_Average Percent Female"] || 0,
-    age: reportData["Demo_Average Age"] || 0,
-    salary: reportData["Demo_Average Salary"] || 0
-  };
+  // Extract average data for comparison
+  const avgEmployees = averageData?.["Demo_Average Employees"] || 0;
+  const avgMembers = averageData?.["Demo_Average Members"] || 0;
+  const avgFamilySize = averageData?.["Demo_Average Family Size"] || 0;
+  const avgStates = averageData?.["Demo_Average States"] || 0;
+  const avgPercentFemale = averageData?.["Demo_Average Percent Female"] || 0;
+  const avgAge = averageData?.["Demo_Average Age"] || 0;
+  const avgSalary = averageData?.["Demo_Average Salary"] || 0;
   
-  // Get averages for comparison
-  const averages = {
-    employees: averageData["Demo_Average Employees"] || 0,
-    members: averageData["Demo_Average Members"] || 0,
-    familySize: averageData["Demo_Average Family Size"] || 0,
-    states: averageData["Demo_Average States"] || 0,
-    percentFemale: averageData["Demo_Average Percent Female"] || 0,
-    age: averageData["Demo_Average Age"] || 0,
-    salary: averageData["Demo_Average Salary"] || 0
-  };
+  // Demographic insights
+  const insights = reportData?.demographic_insights || '';
   
   return (
     <div className="space-y-8">
-      {/* Header Section with Image */}
-      <div className="flex flex-col md:flex-row gap-8">
+      <div className="flex flex-col md:flex-row gap-6">
         <div className="md:w-2/3">
-          <h1 className="text-3xl font-bold mb-6">Demographics</h1>
+          <h1 className="text-3xl font-bold mb-4">Demographics</h1>
+          
           <p className="text-lg mb-6">
-            Understanding the demographic composition of your workforce is essential for tailoring 
-            healthcare benefits effectively. This section examines key demographic characteristics 
-            of the {reportData.archetype_name} archetype and how they influence healthcare needs and costs.
+            Understanding your workforce demographics provides valuable context for healthcare needs and 
+            utilization patterns. This section analyzes key demographic characteristics of this 
+            archetype compared to others.
           </p>
         </div>
         <div className="md:w-1/3 flex justify-center">
-          <img
-            src={gnomeImage}
-            alt="Demographics Gnome"
-            className="max-h-64 object-contain"
+          <img 
+            src="/assets/gnomes/gnome_clipboard.png" 
+            alt="Demographics" 
+            className="max-h-48 object-contain"
             onError={(e) => {
               (e.target as HTMLImageElement).src = '/assets/gnomes/placeholder.svg';
             }}
           />
         </div>
       </div>
-
+      
       {/* Workforce Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <WorkforceSummaryCard 
           title="Employees"
-          value={metrics.employees}
-          average={averages.employees}
+          value={employees}
+          average={avgEmployees}
           icon={<Users className="h-5 w-5" />}
         />
         
         <WorkforceSummaryCard 
           title="Members"
-          value={metrics.members}
-          average={averages.members}
-          icon={<Users className="h-5 w-5" />}
+          value={members}
+          average={avgMembers}
+          icon={<Users2 className="h-5 w-5" />}
         />
         
         <WorkforceSummaryCard 
-          title="Family Size"
-          value={metrics.familySize}
-          average={averages.familySize}
+          title="Average Family Size"
+          value={familySize}
+          average={avgFamilySize}
           decimals={1}
-          icon={<Users className="h-5 w-5" />}
+          icon={<User className="h-5 w-5" />}
         />
         
         <WorkforceSummaryCard 
-          title="States"
-          value={metrics.states}
-          average={averages.states}
-          decimals={0}
-          icon={<Users className="h-5 w-5" />}
-        />
-      </div>
-
-      {/* Workforce Composition */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center text-lg">
-              <Users className="mr-2 h-5 w-5 text-blue-600" />
-              Workforce Demographics
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <WorkforceCompositionChart
-              percentFemale={metrics.percentFemale}
-              averagePercentFemale={averages.percentFemale}
-              averageAge={metrics.age}
-              archetype={reportData.archetype_name || reportData.name}
-            />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center text-lg">
-              <Users className="mr-2 h-5 w-5 text-blue-600" />
-              Geographic Presence
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <GeographicPresence 
-              states={metrics.states}
-              averageStates={averages.states}
-            />
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Additional Demographic Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <MetricComparisonCard
           title="Average Age"
-          value={metrics.age}
-          average={averages.age}
-          unit="years"
+          value={age}
+          average={avgAge}
+          decimals={1}
+          icon={<CalendarClock className="h-5 w-5" />}
         />
         
-        <MetricComparisonCard
+        <WorkforceSummaryCard 
+          title="States Present"
+          value={states}
+          average={avgStates}
+          icon={<MapPin className="h-5 w-5" />}
+        />
+        
+        <WorkforceSummaryCard 
           title="Average Salary"
-          value={metrics.salary}
-          average={averages.salary}
-          unit="USD"
+          value={salary}
+          average={avgSalary}
+          unit="$"
+          icon={<DollarSign className="h-5 w-5" />}
         />
       </div>
-
-      {/* Family Size Impact */}
-      <Card>
+      
+      {/* Workforce Composition and Geographic Presence */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+        <WorkforceCompositionChart 
+          percentFemale={percentFemale * 100} 
+          averagePercentFemale={avgPercentFemale * 100}
+          averageAge={age}
+          archetype={reportData?.archetype_name || reportData?.name || 'Archetype'}
+        />
+        
+        <GeographicPresence 
+          states={states} 
+          averageStates={avgStates}
+        />
+      </div>
+      
+      {/* Family Size and Cost Impact */}
+      <Card className="mt-6">
         <CardHeader>
           <CardTitle className="flex items-center text-lg">
-            <Users className="mr-2 h-5 w-5 text-blue-600" />
-            Family Size Impact on Healthcare Costs
+            <Building2 className="mr-2 h-5 w-5 text-blue-600" />
+            Family Size Impact
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <h3 className="font-medium text-lg mb-2">Per-Employee vs. Per-Member Metrics</h3>
-              <p className="text-gray-700">
-                With an average family size of <strong>{metrics.familySize.toFixed(1)}</strong> members per employee
-                (compared to the archetype average of {averages.familySize.toFixed(1)}), this affects how costs
-                are distributed across your population.
-              </p>
-              <p className="text-gray-700 mt-4">
-                Organizations with larger family sizes typically see a greater difference between their 
-                per-employee (PEPY) and per-member (PMPY) costs, as benefits extend to more dependents.
-              </p>
+        <CardContent className="space-y-4">
+          <p>
+            The average family size for this archetype is <strong>{familySize.toFixed(1)}</strong> members
+            per employee, compared to an average of <strong>{avgFamilySize.toFixed(1)}</strong> across 
+            all archetypes.
+          </p>
+          
+          {/* Cost impact section */}
+          {reportData["Cost_Medical & RX Paid Amount PEPY"] && (
+            <div className="mt-4">
+              <h4 className="font-medium mb-2">Impact on Cost Metrics</h4>
+              <div className="bg-blue-50 p-4 rounded-md">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-gray-600">Cost per Employee (PEPY)</p>
+                    <p className="text-xl font-bold">
+                      {formatNumber(reportData["Cost_Medical & RX Paid Amount PEPY"], 'currency')}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">Cost per Member (PMPY)</p>
+                    <p className="text-xl font-bold">
+                      {formatNumber(reportData["Cost_Medical & RX Paid Amount PMPY"], 'currency')}
+                    </p>
+                  </div>
+                </div>
+                <p className="text-sm mt-3">
+                  With a family size of {familySize.toFixed(1)}, each employee cost is divided among 
+                  {' '}{familySize.toFixed(1)} members, resulting in a per-member cost that is
+                  {' '}{((1 / familySize) * 100).toFixed(0)}% of the per-employee cost.
+                </p>
+              </div>
             </div>
-            <div className="bg-blue-50 rounded-lg p-4">
-              <h4 className="font-medium mb-2">Cost Impact</h4>
-              <ul className="space-y-2 text-sm">
-                <li className="flex justify-between">
-                  <span>PEPY/PMPY Ratio:</span>
-                  <strong>{calculateRatio(metrics.familySize).toFixed(2)}</strong>
-                </li>
-                <li className="flex justify-between">
-                  <span>Medical Cost per Employee:</span>
-                  <strong>${reportData["Cost_Medical Paid Amount PEPY"]?.toLocaleString() || 'N/A'}</strong>
-                </li>
-                <li className="flex justify-between">
-                  <span>Medical Cost per Member:</span>
-                  <strong>${reportData["Cost_Medical Paid Amount PMPY"]?.toLocaleString() || 'N/A'}</strong>
-                </li>
-                <li className="flex justify-between">
-                  <span>Rx Cost per Employee:</span>
-                  <strong>${reportData["Cost_RX Paid Amount PEPY"]?.toLocaleString() || 'N/A'}</strong>
-                </li>
-                <li className="flex justify-between">
-                  <span>Rx Cost per Member:</span>
-                  <strong>${reportData["Cost_RX Paid Amount PMPY"]?.toLocaleString() || 'N/A'}</strong>
-                </li>
-              </ul>
-            </div>
-          </div>
+          )}
         </CardContent>
       </Card>
-
+      
       {/* Demographic Insights */}
-      <DemographicInsights insights={demographicInsights} />
-
+      <DemographicInsights insights={insights} />
+      
       {/* Navigation Buttons */}
-      {previousSection && nextSection && (
+      {previousSection && nextSection && previousSectionName && nextSectionName && (
         <NavigationButtons
           previousSection={previousSection}
           nextSection={nextSection}
-          previousSectionName={previousSectionName || "Previous Section"}
-          nextSectionName={nextSectionName || "Next Section"}
+          previousSectionName={previousSectionName}
+          nextSectionName={nextSectionName}
+          onNavigate={onNavigate}
         />
       )}
     </div>
   );
-};
-
-// Helper function to calculate the typical ratio between PEPY and PMPY based on family size
-const calculateRatio = (familySize: number): number => {
-  if (!familySize || familySize < 1) return 1;
-  return familySize;
 };
 
 export default DemographicsSection;

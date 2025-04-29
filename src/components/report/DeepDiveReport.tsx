@@ -42,6 +42,14 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
     contact: 'contact'
   };
   
+  // Handler for section navigation
+  const handleNavigate = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+  
   return (
     <div className="bg-white min-h-screen">
       {/* Header - Keep consistent across report */}
@@ -60,22 +68,23 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
         {/* Introduction Section */}
         <section id={sectionIds.introduction} className="mb-16">
           <ReportIntroduction 
-            reportData={reportData} 
             userData={userData} 
             averageData={averageData}
             nextSection={sectionIds.archetypeProfile}
             nextSectionName="Archetype Profile"
+            onNavigate={handleNavigate}
           />
         </section>
         
         {/* Archetype Profile Section */}
         <section id={sectionIds.archetypeProfile} className="mb-16">
           <ArchetypeProfile 
-            reportData={reportData} 
+            archetypeData={reportData}
             previousSection={sectionIds.introduction}
             previousSectionName="Introduction"
             nextSection={sectionIds.demographics}
             nextSectionName="Demographics"
+            onNavigate={handleNavigate}
           />
         </section>
         
@@ -88,6 +97,7 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
             previousSectionName="Archetype Profile"
             nextSection={sectionIds.costAnalysis}
             nextSectionName="Cost Analysis"
+            onNavigate={handleNavigate}
           />
         </section>
         
@@ -100,6 +110,7 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
             previousSectionName="Demographics"
             nextSection={sectionIds.utilization}
             nextSectionName="Utilization Patterns"
+            onNavigate={handleNavigate}
           />
         </section>
         
@@ -112,6 +123,7 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
             previousSectionName="Cost Analysis"
             nextSection={sectionIds.diseaseManagement}
             nextSectionName="Disease Management"
+            onNavigate={handleNavigate}
           />
         </section>
         
@@ -124,6 +136,7 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
             previousSectionName="Utilization Patterns"
             nextSection={sectionIds.careGaps}
             nextSectionName="Care Gaps"
+            onNavigate={handleNavigate}
           />
         </section>
         
@@ -136,6 +149,7 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
             previousSectionName="Disease Management"
             nextSection={sectionIds.riskFactors}
             nextSectionName="Risk Factors"
+            onNavigate={handleNavigate}
           />
         </section>
         
@@ -148,17 +162,19 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
             previousSectionName="Care Gaps"
             nextSection={sectionIds.swotAnalysis}
             nextSectionName="SWOT Analysis"
+            onNavigate={handleNavigate}
           />
         </section>
         
         {/* SWOT Analysis Section */}
         <section id={sectionIds.swotAnalysis} className="mb-16">
           <SwotAnalysis 
-            reportData={reportData} 
+            reportData={reportData}
             previousSection={sectionIds.riskFactors}
             previousSectionName="Risk Factors"
             nextSection={sectionIds.recommendations}
             nextSectionName="Strategic Recommendations"
+            onNavigate={handleNavigate}
           />
         </section>
         
@@ -170,16 +186,18 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
             previousSectionName="SWOT Analysis"
             nextSection={sectionIds.contact}
             nextSectionName="Contact Us"
+            onNavigate={handleNavigate}
           />
         </section>
         
         {/* Contact Section */}
         <section id={sectionIds.contact} className="mb-16">
           <ContactSection 
-            reportData={reportData} 
             userData={userData}
+            archetype={reportData}
             previousSection={sectionIds.recommendations}
             previousSectionName="Strategic Recommendations"
+            onNavigate={handleNavigate}
           />
         </section>
 

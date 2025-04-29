@@ -1,85 +1,69 @@
 
 import React from 'react';
-import { formatNumber } from '@/utils/formatters';
+import { Card, CardContent } from "@/components/ui/card";
 import { calculatePercentageDifference } from '@/utils/reports/metricUtils';
 
 interface WorkforceSummaryCardProps {
   title: string;
   value: number;
-  averageValue: number;
+  average: number;
   icon: React.ReactNode;
-  suffix?: string;
-  isPercent?: boolean;
-  isCurrency?: boolean;
+  unit?: string;
   decimals?: number;
 }
 
-const WorkforceSummaryCard: React.FC<WorkforceSummaryCardProps> = ({
-  title,
-  value,
-  averageValue,
-  icon,
-  suffix = '',
-  isPercent = false,
-  isCurrency = false,
-  decimals = 0
+const WorkforceSummaryCard: React.FC<WorkforceSummaryCardProps> = ({ 
+  title, 
+  value, 
+  average, 
+  icon, 
+  unit = '', 
+  decimals = 0 
 }) => {
-  // Format the value based on its type
-  let formattedValue: string;
-  if (isPercent) {
-    formattedValue = formatNumber(value, 'percent', 1);
-  } else if (isCurrency) {
-    formattedValue = formatNumber(value, 'currency', 0);
-  } else {
-    formattedValue = formatNumber(value, 'number', decimals);
-  }
-
-  // Calculate comparison to average
-  const percentDiff = calculatePercentageDifference(value, averageValue);
-  const percentDiffText = `${percentDiff > 0 ? '+' : ''}${percentDiff.toFixed(1)}%`;
+  // Format the value with the appropriate number of decimal places
+  const formattedValue = value ? value.toLocaleString(undefined, { 
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals
+  }) : 'N/A';
   
-  // Determine comparison text
-  let comparisonText: string;
-  if (Math.abs(percentDiff) < 1) {
-    comparisonText = 'On par with archetype average';
-  } else {
-    // Format the average value appropriately
-    let formattedAverage: string;
-    if (isCurrency) {
-      formattedAverage = formatNumber(averageValue, 'currency', 0);
-    } else if (isPercent) {
-      formattedAverage = formatNumber(averageValue, 'percent', 1);
-    } else {
-      formattedAverage = formatNumber(averageValue, 'number', decimals);
-    }
-    
-    comparisonText = `${percentDiffText} vs. archetype average (${formattedAverage})`;
-  }
-
-  // Determine if this is positive or negative (context-sensitive)
-  // For some metrics like costs, lower is better
-  const isPositiveMetric = !title.toLowerCase().includes('cost');
-  const isPositiveComparison = isPositiveMetric ? percentDiff > 0 : percentDiff < 0;
+  // Calculate the percentage difference
+  const percentDiff = calculatePercentageDifference(value, average);
   
-  const comparisonColor = Math.abs(percentDiff) < 1 
-    ? 'text-gray-600' 
-    : isPositiveComparison ? 'text-green-600' : 'text-amber-600';
+  // Determine if higher or lower is better based on the metric name
+  const lowerIsBetter = title.toLowerCase().includes('cost') || title.toLowerCase().includes('risk');
+  
+  // Determine if this is positive or negative
+  const isPositive = (percentDiff > 0 && !lowerIsBetter) || (percentDiff < 0 && lowerIsBetter);
+  
+  // Determine display text
+  const comparisonWord = percentDiff > 0 ? "higher than" : "lower than";
+  const comparisonText = `${Math.abs(percentDiff).toFixed(1)}% ${comparisonWord} average`;
+  
+  // Determine color for the comparison text
+  const textColor = isPositive ? "text-green-600" : "text-amber-600";
   
   return (
-    <div className="bg-white rounded-lg border p-4">
-      <div className="flex items-center mb-2">
-        <div className="bg-blue-100 p-2 rounded-lg mr-3">
-          {icon}
+    <Card className="overflow-hidden">
+      <CardContent className="p-6">
+        <div className="flex items-center mb-2">
+          <div className="p-2 rounded-full bg-blue-100 text-blue-800 mr-2">
+            {icon}
+          </div>
+          <h3 className="text-sm font-medium text-gray-700">{title}</h3>
         </div>
-        <h3 className="font-medium">{title}</h3>
-      </div>
-      <div className="mt-2">
-        <div className="text-2xl font-bold">
-          {formattedValue} {suffix && <span className="text-sm font-normal">{suffix}</span>}
+        
+        <div className="mt-2">
+          <div className="flex items-baseline">
+            <span className="text-2xl font-bold">{formattedValue}</span>
+            {unit && <span className="text-gray-500 ml-1">{unit}</span>}
+          </div>
+          
+          <p className={`text-sm mt-1 ${textColor}`}>
+            {comparisonText}
+          </p>
         </div>
-        <p className={`text-sm mt-1 ${comparisonColor}`}>{comparisonText}</p>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 
