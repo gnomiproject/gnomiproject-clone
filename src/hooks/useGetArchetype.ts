@@ -19,24 +19,36 @@ interface UseGetArchetype {
 }
 
 export const useGetArchetype = (archetypeId: ArchetypeId, skipCache: boolean = false): UseGetArchetype => {
+  // Use refs for mutable state that shouldn't trigger re-renders
+  const archetypeDataRef = useRef<ArchetypeDetailedData | null>(null);
+  const familyDataRef = useRef<any | null>(null);
+  const dataSourceRef = useRef<string>('');
+  
+  // Use state only for values that should trigger re-renders when changed
   const [archetypeData, setArchetypeData] = useState<ArchetypeDetailedData | null>(null);
   const [familyData, setFamilyData] = useState<any | null>(null);
-  const [dataSource, setDataSource] = useState<string>(''); 
+  const [dataSource, setDataSource] = useState<string>('');
+  
   const { getArchetypeEnhanced, getFamilyById } = useArchetypes();
   const queryClient = useQueryClient();
   
   // Add processing guard to prevent redundant processing
   const processingRef = useRef(false);
   const processedDataRef = useRef<string | null>(null);
+  const processStatusRef = useRef({ complete: false, timestamp: 0 });
+  
+  // Use memoized query key to avoid unnecessary query invalidations
+  const queryKey = useMemo(() => ['archetype', archetypeId, skipCache], [archetypeId, skipCache]);
   
   // Use React Query for data fetching with proper caching
   const { 
     isLoading, 
     error, 
     refetch,
-    data 
+    data,
+    status
   } = useQuery({
-    queryKey: ['archetype', archetypeId, skipCache],
+    queryKey,
     queryFn: () => fetchArchetypeData(archetypeId, skipCache),
     staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
     gcTime: 10 * 60 * 1000, // Keep unused data for 10 minutes
@@ -44,25 +56,31 @@ export const useGetArchetype = (archetypeId: ArchetypeId, skipCache: boolean = f
     enabled: Boolean(archetypeId), // Only run query if archetypeId is provided
     refetchOnWindowFocus: false, // Prevent refetching when window regains focus
     refetchOnMount: false, // Prevent refetching on component mount if data exists
+    // Prevent excessive retries and backoff
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 10000),
   });
   
   // Process data on success - defined as a callback to avoid recreating on each render
   const processData = useCallback((data: any) => {
-    // Guard against redundant processing
+    // Skip processing if no data or if processing is in progress
+    if (!data || processingRef.current) {
+      return;
+    }
+    
+    // Guard against redundant processing with a 5-minute cache
     const dataHash = data ? JSON.stringify(data.archetype_id) : 'null';
-    if (processedDataRef.current === dataHash) {
-      console.log(`Skipping redundant processing for ${archetypeId}`);
+    const now = Date.now();
+    const fiveMinutesAgo = now - 5 * 60 * 1000;
+    
+    if (
+      processedDataRef.current === dataHash && 
+      processStatusRef.current.complete && 
+      processStatusRef.current.timestamp > fiveMinutesAgo
+    ) {
       return;
     }
     
-    console.log(`Processing data for ${archetypeId} (hash: ${dataHash})`);
-    processedDataRef.current = dataHash;
-    
-    if (processingRef.current) {
-      console.log(`Already processing data for ${archetypeId}, skipping`);
-      return;
-    }
-    
+    // Set processing flag to prevent concurrent processing
     processingRef.current = true;
     
     try {
@@ -71,13 +89,12 @@ export const useGetArchetype = (archetypeId: ArchetypeId, skipCache: boolean = f
         const { archetypeData: formattedData, familyData: processedFamilyData, dataSource: source } = 
           processArchetypeData(data, getFamilyById, getArchetypeEnhanced);
         
-        console.log("Data processed successfully:", {
-          hasArchetypeData: !!formattedData,
-          archetypeName: formattedData?.name,
-          familyName: processedFamilyData?.name,
-          dataSource: source
-        });
+        // Update refs first
+        archetypeDataRef.current = formattedData;
+        familyDataRef.current = processedFamilyData;
+        dataSourceRef.current = source;
         
+        // Then update state (triggers re-render)
         setArchetypeData(formattedData);
         setFamilyData(processedFamilyData);
         setDataSource(source);
@@ -86,17 +103,20 @@ export const useGetArchetype = (archetypeId: ArchetypeId, skipCache: boolean = f
         const { archetypeData: fallbackData, familyData: fallbackFamilyData, dataSource: fallbackSource } = 
           processFallbackData(archetypeId, getArchetypeEnhanced, getFamilyById);
         
-        console.log("Using fallback data:", {
-          hasArchetypeData: !!fallbackData,
-          archetypeName: fallbackData?.name,
-          familyName: fallbackFamilyData?.name,
-          dataSource: fallbackSource
-        });
+        // Update refs first
+        archetypeDataRef.current = fallbackData;
+        familyDataRef.current = fallbackFamilyData;
+        dataSourceRef.current = fallbackSource;
         
+        // Then update state (triggers re-render)
         setArchetypeData(fallbackData);
         setFamilyData(fallbackFamilyData);
         setDataSource(fallbackSource);
       }
+      
+      // Update processing status
+      processedDataRef.current = dataHash;
+      processStatusRef.current = { complete: true, timestamp: now };
     } finally {
       // Always reset the processing flag even if there's an error
       processingRef.current = false;
@@ -107,28 +127,35 @@ export const useGetArchetype = (archetypeId: ArchetypeId, skipCache: boolean = f
   const handleError = useCallback((error: Error) => {
     console.error("Error fetching archetype data:", error);
     
-    // Fallback to original archetype data structure on error
-    const { archetypeData: fallbackData, familyData: fallbackFamilyData, dataSource: fallbackSource } = 
-      processFallbackData(archetypeId, getArchetypeEnhanced, getFamilyById);
+    // Prevent concurrent processing
+    if (processingRef.current) return;
+    processingRef.current = true;
     
-    console.log("Using fallback data after error:", {
-      hasArchetypeData: !!fallbackData,
-      archetypeName: fallbackData?.name,
-      familyName: fallbackFamilyData?.name,
-      dataSource: fallbackSource
-    });
-    
-    setArchetypeData(fallbackData);
-    setFamilyData(fallbackFamilyData);
-    setDataSource(fallbackSource);
+    try {
+      // Fallback to original archetype data structure on error
+      const { archetypeData: fallbackData, familyData: fallbackFamilyData, dataSource: fallbackSource } = 
+        processFallbackData(archetypeId, getArchetypeEnhanced, getFamilyById);
+      
+      // Update refs first
+      archetypeDataRef.current = fallbackData;
+      familyDataRef.current = fallbackFamilyData;
+      dataSourceRef.current = fallbackSource;
+      
+      // Then update state (triggers re-render)
+      setArchetypeData(fallbackData);
+      setFamilyData(fallbackFamilyData);
+      setDataSource(fallbackSource);
+    } finally {
+      processingRef.current = false;
+    }
   }, [getFamilyById, getArchetypeEnhanced, archetypeId]);
 
-  // Force refresh data
-  const refreshData = async () => {
+  // Force refresh data with debounce to prevent rapid calls
+  const refreshData = useCallback(async () => {
     // Use standard toast method with title and description
     toast({
-      title: "Refreshing Archetype Data",
-      description: "Fetching the latest information..."
+      title: "Refreshing Data",
+      description: "Fetching the latest archetype information..."
     });
     
     // Clear cache for this archetype
@@ -136,10 +163,11 @@ export const useGetArchetype = (archetypeId: ArchetypeId, skipCache: boolean = f
     
     // Reset processed data flag to force re-processing
     processedDataRef.current = null;
+    processStatusRef.current = { complete: false, timestamp: 0 };
     
     // Invalidate query cache
     queryClient.invalidateQueries({
-      queryKey: ['archetype', archetypeId]
+      queryKey: queryKey
     });
     
     try {
@@ -155,35 +183,24 @@ export const useGetArchetype = (archetypeId: ArchetypeId, skipCache: boolean = f
         variant: "destructive" // Use destructive variant for error toasts
       });
     }
-  };
+  }, [archetypeId, queryClient, queryKey, refetch]);
 
   // Process data in useEffect, with improved dependency array and cleanup
   useEffect(() => {
     let isMounted = true;
     
-    // Only process data if component is still mounted
-    if (data && isMounted) {
+    if (status === 'success' && data && isMounted) {
       processData(data);
-    } else if (error && isMounted) {
+    } else if (status === 'error' && error && isMounted) {
       handleError(error as Error);
     }
     
     return () => {
-      // Mark component as unmounted to prevent state updates
       isMounted = false;
-      console.log(`Cleaning up resources for archetype ${archetypeId}`);
     };
-  }, [data, error, processData, handleError, archetypeId]);
+  }, [data, error, status, processData, handleError]);
 
-  // Cleanup function for memory management
-  useEffect(() => {
-    return () => {
-      // Clean up any heavy data on unmount
-      console.log(`Cleaning up resources for archetype ${archetypeId}`);
-      processedDataRef.current = null;
-    };
-  }, [archetypeId]);
-
+  // Return memoized result to prevent unnecessary re-renders of components using this hook
   return useMemo(() => ({ 
     archetypeData, 
     familyData, 
@@ -192,5 +209,13 @@ export const useGetArchetype = (archetypeId: ArchetypeId, skipCache: boolean = f
     refetch: refetch as () => Promise<any>,
     dataSource,
     refreshData
-  }), [archetypeData, familyData, isLoading, error, refetch, dataSource, refreshData]);
+  }), [
+    archetypeData, 
+    familyData, 
+    isLoading, 
+    error, 
+    refetch, 
+    dataSource, 
+    refreshData
+  ]);
 };

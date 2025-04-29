@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Section } from '@/components/shared/Section';
 import SectionTitle from '@/components/shared/SectionTitle';
 import KeyPriorities from './KeyPriorities';
@@ -8,6 +8,7 @@ import ExpectedImpact from './ExpectedImpact';
 import SuccessMetrics from './SuccessMetrics';
 import GnomeImage from '@/components/common/GnomeImage';
 import { ensureArray } from '@/utils/ensureArray';
+import { useRenderPerformance } from '@/components/shared/PerformanceMonitor';
 
 interface StrategicRecommendationsSectionProps {
   reportData?: any;
@@ -18,17 +19,18 @@ const StrategicRecommendationsSection: React.FC<StrategicRecommendationsSectionP
   reportData, 
   averageData 
 }) => {
-  // Extract strategic recommendations and ensure it's an array
-  const recommendations = reportData?.strategic_recommendations 
-    ? ensureArray(reportData.strategic_recommendations) 
-    : [];
-
-  // Log for debugging
-  console.log('[StrategicRecommendationsSection] Data:', {
-    hasData: !!reportData,
-    recCount: recommendations.length,
-    recommendations
-  });
+  // Monitor performance
+  useRenderPerformance('StrategicRecommendationsSection');
+  
+  // Memoize recommendations processing to avoid expensive operations on re-renders
+  const recommendations = useMemo(() => {
+    // Extract strategic recommendations and ensure it's an array
+    const recs = reportData?.strategic_recommendations 
+      ? ensureArray(reportData.strategic_recommendations) 
+      : [];
+    
+    return recs;
+  }, [reportData?.strategic_recommendations]);
 
   return (
     <Section id="strategic-recommendations">
@@ -66,4 +68,4 @@ const StrategicRecommendationsSection: React.FC<StrategicRecommendationsSectionP
   );
 };
 
-export default StrategicRecommendationsSection;
+export default React.memo(StrategicRecommendationsSection);

@@ -1,6 +1,7 @@
 
 import React, { useState, useCallback } from 'react';
 import ReportContainer from './components/ReportContainer';
+import { debounce } from '@/utils/debounce';
 
 interface DeepDiveReportProps {
   reportData: any;
@@ -20,28 +21,31 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
   // Add a simple state to track if navigation is in process
   const [isNavigating, setIsNavigating] = useState(false);
   
-  // Prevent rapid navigation clicks that could cause render loops
-  const handleSafeNavigate = useCallback((sectionId: string) => {
-    if (isNavigating) return; // Prevent rapid navigation
-    
-    setIsNavigating(true);
-    
-    // Find the section element
-    const sectionElement = document.getElementById(sectionId);
-    if (sectionElement) {
-      // Scroll to the section
-      sectionElement.scrollIntoView({ behavior: 'smooth' });
+  // Debounce navigation to prevent performance issues
+  const handleSafeNavigate = useCallback(
+    debounce((sectionId: string) => {
+      if (isNavigating) return; // Prevent rapid navigation
       
-      // Set focus to the section for accessibility
-      sectionElement.setAttribute('tabindex', '-1');
-      sectionElement.focus({ preventScroll: true });
-    }
-    
-    // Simple timeout to prevent navigation spam
-    setTimeout(() => {
-      setIsNavigating(false);
-    }, 800);
-  }, [isNavigating]);
+      setIsNavigating(true);
+      
+      // Find the section element
+      const sectionElement = document.getElementById(sectionId);
+      if (sectionElement) {
+        // Scroll to the section
+        sectionElement.scrollIntoView({ behavior: 'smooth' });
+        
+        // Set focus to the section for accessibility
+        sectionElement.setAttribute('tabindex', '-1');
+        sectionElement.focus({ preventScroll: true });
+      }
+      
+      // Simple timeout to prevent navigation spam
+      setTimeout(() => {
+        setIsNavigating(false);
+      }, 800);
+    }, 300),
+    [isNavigating]
+  );
 
   return (
     <ReportContainer
@@ -55,4 +59,4 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
   );
 };
 
-export default DeepDiveReport;
+export default React.memo(DeepDiveReport);

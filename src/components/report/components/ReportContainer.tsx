@@ -1,9 +1,9 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, Suspense, lazy } from 'react';
 import LeftNavigation from '../navigation/LeftNavigation';
 import PrintButton from './PrintButton';
 import { useReportNavigation } from '../hooks/useReportNavigation';
-import ReportBody from './ReportBody';
+import { debounce } from '@/utils/debounce';
 
 // Create sections array for LeftNavigation
 const REPORT_SECTIONS = [
@@ -20,6 +20,9 @@ const REPORT_SECTIONS = [
   { id: 'recommendations', name: 'Recommendations' },
   { id: 'contact', name: 'Contact' },
 ];
+
+// Lazy load ReportBody to improve initial load time
+const LazyReportBody = lazy(() => import('./ReportBody'));
 
 interface ReportContainerProps {
   reportData: any;
@@ -42,15 +45,18 @@ const ReportContainer: React.FC<ReportContainerProps> = ({
   // Use the passed onNavigate function if provided, otherwise use the hook
   const { activeSectionId, handleNavigate, isNavigating } = useReportNavigation();
   
-  // Function to handle navigation requests
-  const handleSectionNavigate = (sectionId: string) => {
-    // Use the provided onNavigate function if it exists, otherwise use the hook function
-    if (onNavigate) {
-      onNavigate(sectionId);
-    } else {
-      handleNavigate(sectionId);
-    }
-  };
+  // Debounce navigation to prevent rapid successive clicks
+  const debouncedNavigate = React.useMemo(
+    () => debounce((sectionId: string) => {
+      // Use the provided onNavigate function if it exists, otherwise use the hook function
+      if (onNavigate) {
+        onNavigate(sectionId);
+      } else {
+        handleNavigate(sectionId);
+      }
+    }, 300),
+    [onNavigate, handleNavigate]
+  );
   
   // Debug info
   const isDebugMode = isAdminView || window.location.search.includes('debug=true');
@@ -74,7 +80,7 @@ const ReportContainer: React.FC<ReportContainerProps> = ({
       <div className="hidden lg:block fixed left-0 top-0 h-full print:hidden z-10">
         <LeftNavigation 
           activeSectionId={activeSectionId}
-          onNavigate={handleSectionNavigate}
+          onNavigate={debouncedNavigate}
           sections={REPORT_SECTIONS}
         />
       </div>
@@ -90,22 +96,24 @@ const ReportContainer: React.FC<ReportContainerProps> = ({
         className="lg:pl-64 py-6 print:py-0 print:pl-0"
         ref={reportRef}
       >
-        <ReportBody
-          reportData={reportData}
-          userData={userData}
-          averageData={averageData}
-          isDebugMode={isDebugMode}
-          showDebugData={showDebugData}
-          showDiagnostics={showDiagnostics}
-          setShowDebugData={setShowDebugData}
-          setShowDiagnostics={setShowDiagnostics}
-          handleRefreshData={handleRefreshData}
-          isAdminView={isAdminView}
-          debugInfo={debugInfo}
-        />
+        <Suspense fallback={<div className="p-12 text-center">Loading report content...</div>}>
+          <LazyReportBody
+            reportData={reportData}
+            userData={userData}
+            averageData={averageData}
+            isDebugMode={isDebugMode}
+            showDebugData={showDebugData}
+            showDiagnostics={showDiagnostics}
+            setShowDebugData={setShowDebugData}
+            setShowDiagnostics={setShowDiagnostics}
+            handleRefreshData={handleRefreshData}
+            isAdminView={isAdminView}
+            debugInfo={debugInfo}
+          />
+        </Suspense>
       </div>
     </div>
   );
 };
 
-export default ReportContainer;
+export default React.memo(ReportContainer);

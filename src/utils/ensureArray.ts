@@ -1,27 +1,32 @@
 
 /**
  * Utility function to ensure a value is an array
- * Handles cases where the value might be:
- * - Already an array
- * - A string that contains JSON array
- * - A single value that should be wrapped in an array
- * - null/undefined which returns an empty array
+ * Handles various input formats and converts them safely to arrays
  */
-export function ensureArray<T>(value: unknown): T[] {
-  if (!value) return [];
+export function ensureArray<T>(value: any): T[] {
+  // If it's already an array, return it
+  if (Array.isArray(value)) return value;
   
-  if (Array.isArray(value)) return value as T[];
+  // If it's null or undefined, return empty array
+  if (value === null || value === undefined) return [];
   
+  // If it's a string, try to parse it as JSON
   if (typeof value === 'string') {
     try {
       const parsed = JSON.parse(value);
-      return Array.isArray(parsed) ? parsed : [value as T];
+      if (Array.isArray(parsed)) return parsed;
+      return [parsed as T]; // If it's a single object, wrap it
     } catch (e) {
-      // If parsing fails, treat the string as a single value
+      // If it's not valid JSON, return it as a single item
       return [value as T];
     }
   }
   
-  // For any other type, wrap it in an array
+  // If it's an object with values (like from Supabase), convert to array
+  if (typeof value === 'object') {
+    return Object.values(value);
+  }
+  
+  // Default: wrap in array
   return [value as T];
 }

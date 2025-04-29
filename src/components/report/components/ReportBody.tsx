@@ -1,19 +1,21 @@
 
-import React from 'react';
+import React, { lazy, Suspense, useEffect, useState } from 'react';
 import { Section } from '@/components/shared/Section';
-import ExecutiveSummary from '../sections/ExecutiveSummary';
-import ArchetypeProfile from '../sections/ArchetypeProfile';
-import ReportIntroduction from '../sections/ReportIntroduction';
-import SwotAnalysis from '../sections/SwotAnalysis';
-import DemographicsSection from '../sections/DemographicsSection';
-import CostAnalysis from '../sections/CostAnalysis';
-import UtilizationPatterns from '../sections/UtilizationPatterns';
-import DiseaseManagement from '../sections/DiseaseManagement';
-import CareGaps from '../sections/CareGaps';
-import RiskFactors from '../sections/RiskFactors';
-import StrategicRecommendationsSection from '../sections/strategic-recommendations/StrategicRecommendationsSection';
-import ContactSection from '../sections/ContactSection';
 import ReportDebugTools from '../ReportDebugTools';
+
+// Lazy load all section components for better initial loading performance
+const LazyReportIntroduction = lazy(() => import('../sections/ReportIntroduction'));
+const LazyExecutiveSummary = lazy(() => import('../sections/ExecutiveSummary'));
+const LazyArchetypeProfile = lazy(() => import('../sections/ArchetypeProfile'));
+const LazySwotAnalysis = lazy(() => import('../sections/SwotAnalysis'));
+const LazyDemographicsSection = lazy(() => import('../sections/DemographicsSection'));
+const LazyCostAnalysis = lazy(() => import('../sections/CostAnalysis'));
+const LazyUtilizationPatterns = lazy(() => import('../sections/UtilizationPatterns'));
+const LazyDiseaseManagement = lazy(() => import('../sections/DiseaseManagement'));
+const LazyCareGaps = lazy(() => import('../sections/CareGaps'));
+const LazyRiskFactors = lazy(() => import('../sections/RiskFactors'));
+const LazyStrategicRecommendationsSection = lazy(() => import('../sections/strategic-recommendations/StrategicRecommendationsSection'));
+const LazyContactSection = lazy(() => import('../sections/ContactSection'));
 
 interface ReportBodyProps {
   reportData: any;
@@ -29,6 +31,18 @@ interface ReportBodyProps {
   debugInfo?: any;
 }
 
+// Simple loading fallback component
+const SectionLoading = () => (
+  <div className="py-12 flex justify-center items-center">
+    <div className="animate-pulse space-y-4 w-full max-w-md">
+      <div className="h-8 bg-gray-200 rounded w-3/4"></div>
+      <div className="h-4 bg-gray-200 rounded w-full"></div>
+      <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+      <div className="h-4 bg-gray-200 rounded w-4/6"></div>
+    </div>
+  </div>
+);
+
 const ReportBody: React.FC<ReportBodyProps> = ({
   reportData,
   userData,
@@ -42,54 +56,129 @@ const ReportBody: React.FC<ReportBodyProps> = ({
   isAdminView,
   debugInfo
 }) => {
+  // Track which sections have been viewed to optimize rendering
+  const [viewedSections, setViewedSections] = useState<Set<string>>(new Set(['introduction']));
+  
+  // Intersection Observer to detect when sections come into view
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting && entry.target.id) {
+            setViewedSections(prev => new Set([...prev, entry.target.id]));
+          }
+        });
+      },
+      { threshold: 0.1 } // 10% of the section must be visible
+    );
+    
+    // Track all section elements
+    document.querySelectorAll('section[id]').forEach(section => {
+      observer.observe(section);
+    });
+    
+    return () => observer.disconnect();
+  }, []);
+  
+  // Helper to determine if a section should be rendered
+  const shouldRenderSection = (sectionId: string): boolean => {
+    return viewedSections.has(sectionId);
+  };
+
   return (
     <div className="max-w-5xl mx-auto px-4 print:px-8">
       <Section id="introduction">
-        <ReportIntroduction userData={userData} />
+        <Suspense fallback={<SectionLoading />}>
+          <LazyReportIntroduction userData={userData} />
+        </Suspense>
       </Section>
       
       <Section id="executive-summary">
-        <ExecutiveSummary archetypeData={reportData} />
+        {shouldRenderSection('executive-summary') ? (
+          <Suspense fallback={<SectionLoading />}>
+            <LazyExecutiveSummary archetypeData={reportData} />
+          </Suspense>
+        ) : <SectionLoading />}
       </Section>
       
       <Section id="archetype-profile">
-        <ArchetypeProfile reportData={reportData} />
+        {shouldRenderSection('archetype-profile') ? (
+          <Suspense fallback={<SectionLoading />}>
+            <LazyArchetypeProfile reportData={reportData} />
+          </Suspense>
+        ) : <SectionLoading />}
       </Section>
       
       <Section id="swot-analysis">
-        <SwotAnalysis reportData={reportData} />
+        {shouldRenderSection('swot-analysis') ? (
+          <Suspense fallback={<SectionLoading />}>
+            <LazySwotAnalysis reportData={reportData} />
+          </Suspense>
+        ) : <SectionLoading />}
       </Section>
       
       <Section id="demographics">
-        <DemographicsSection reportData={reportData} averageData={averageData} />
+        {shouldRenderSection('demographics') ? (
+          <Suspense fallback={<SectionLoading />}>
+            <LazyDemographicsSection reportData={reportData} averageData={averageData} />
+          </Suspense>
+        ) : <SectionLoading />}
       </Section>
       
       <Section id="cost-analysis">
-        <CostAnalysis reportData={reportData} averageData={averageData} />
+        {shouldRenderSection('cost-analysis') ? (
+          <Suspense fallback={<SectionLoading />}>
+            <LazyCostAnalysis reportData={reportData} averageData={averageData} />
+          </Suspense>
+        ) : <SectionLoading />}
       </Section>
       
       <Section id="utilization-patterns">
-        <UtilizationPatterns reportData={reportData} averageData={averageData} />
+        {shouldRenderSection('utilization-patterns') ? (
+          <Suspense fallback={<SectionLoading />}>
+            <LazyUtilizationPatterns reportData={reportData} averageData={averageData} />
+          </Suspense>
+        ) : <SectionLoading />}
       </Section>
       
       <Section id="disease-management">
-        <DiseaseManagement reportData={reportData} averageData={averageData} />
+        {shouldRenderSection('disease-management') ? (
+          <Suspense fallback={<SectionLoading />}>
+            <LazyDiseaseManagement reportData={reportData} averageData={averageData} />
+          </Suspense>
+        ) : <SectionLoading />}
       </Section>
       
       <Section id="care-gaps">
-        <CareGaps reportData={reportData} averageData={averageData} />
+        {shouldRenderSection('care-gaps') ? (
+          <Suspense fallback={<SectionLoading />}>
+            <LazyCareGaps reportData={reportData} averageData={averageData} />
+          </Suspense>
+        ) : <SectionLoading />}
       </Section>
       
       <Section id="risk-factors">
-        <RiskFactors reportData={reportData} averageData={averageData} />
+        {shouldRenderSection('risk-factors') ? (
+          <Suspense fallback={<SectionLoading />}>
+            <LazyRiskFactors reportData={reportData} averageData={averageData} />
+          </Suspense>
+        ) : <SectionLoading />}
       </Section>
       
       <Section id="recommendations">
-        <StrategicRecommendationsSection reportData={reportData} averageData={averageData} />
+        {shouldRenderSection('recommendations') ? (
+          <Suspense fallback={<SectionLoading />}>
+            <LazyStrategicRecommendationsSection reportData={reportData} averageData={averageData} />
+          </Suspense>
+        ) : <SectionLoading />}
       </Section>
       
       <Section id="contact">
-        <ContactSection userData={userData} />
+        {shouldRenderSection('contact') ? (
+          <Suspense fallback={<SectionLoading />}>
+            <LazyContactSection userData={userData} />
+          </Suspense>
+        ) : <SectionLoading />}
       </Section>
 
       {/* Debug tools for admin and debug mode */}
@@ -110,4 +199,4 @@ const ReportBody: React.FC<ReportBodyProps> = ({
   );
 };
 
-export default ReportBody;
+export default React.memo(ReportBody);

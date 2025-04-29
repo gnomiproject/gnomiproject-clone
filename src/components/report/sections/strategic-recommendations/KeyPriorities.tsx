@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { memo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Star } from 'lucide-react';
 
@@ -7,7 +7,8 @@ interface KeyPrioritiesProps {
   recommendations: any[];
 }
 
-const KeyPriorities: React.FC<KeyPrioritiesProps> = ({ recommendations }) => {
+// Base component implementation
+const KeyPrioritiesBase: React.FC<KeyPrioritiesProps> = ({ recommendations }) => {
   // Get the top 3 recommendations (or fewer if there aren't 3)
   const topRecommendations = recommendations.slice(0, 3);
 
@@ -43,4 +44,6 @@ const KeyPriorities: React.FC<KeyPrioritiesProps> = ({ recommendations }) => {
   );
 };
 
+// Export a memoized version to prevent unnecessary re-renders
+const KeyPriorities = memo(KeyPrioritiesBase);
 export default KeyPriorities;

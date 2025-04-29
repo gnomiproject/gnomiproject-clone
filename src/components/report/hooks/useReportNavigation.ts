@@ -1,5 +1,6 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { debounce } from '@/utils/debounce';
 
 interface UseReportNavigationProps {
   initialSectionId?: string;
@@ -8,13 +9,22 @@ interface UseReportNavigationProps {
 export const useReportNavigation = ({ initialSectionId = 'introduction' }: UseReportNavigationProps = {}) => {
   const [activeSectionId, setActiveSectionId] = useState(initialSectionId);
   const [isNavigating, setIsNavigating] = useState(false);
+  const lastNavigationTime = useRef(0);
+  const navigationDelayMs = 800; // Prevent rapid navigation requests
 
-  // Handle navigation with debouncing to prevent rapid successive calls
+  // Handle navigation with proper debouncing to prevent rapid successive calls
   const handleNavigate = useCallback((sectionId: string) => {
-    if (isNavigating) return;
+    const now = Date.now();
+    
+    // Prevent rapid navigation requests
+    if (now - lastNavigationTime.current < navigationDelayMs) {
+      console.log(`[Navigation] Skipping rapid navigation request to ${sectionId}`);
+      return;
+    }
     
     setIsNavigating(true);
     setActiveSectionId(sectionId);
+    lastNavigationTime.current = now;
     
     // Find element and scroll to it
     const element = document.getElementById(sectionId);
@@ -29,12 +39,13 @@ export const useReportNavigation = ({ initialSectionId = 'introduction' }: UseRe
     // Reset navigation state after a short delay
     setTimeout(() => {
       setIsNavigating(false);
-    }, 800);
-  }, [isNavigating]);
+    }, navigationDelayMs);
+  }, []);
 
-  // Also detect scroll position to update active section
+  // Detect scroll position to update active section, but with throttling
   useEffect(() => {
-    const handleScroll = () => {
+    // Throttle the scroll handler
+    const throttledScrollHandler = debounce(() => {
       if (isNavigating) return;
       
       // Get all section elements
@@ -55,26 +66,14 @@ export const useReportNavigation = ({ initialSectionId = 'introduction' }: UseRe
         }
       });
       
-      // Update active section if we found one
+      // Update active section if we found one and it's significantly visible
       if (mostVisibleSection && maxVisibility > 0.3) {
         const sectionId = mostVisibleSection.id;
         if (sectionId !== activeSectionId) {
           setActiveSectionId(sectionId);
         }
       }
-    };
-
-    // Throttle scroll handler
-    let ticking = false;
-    const throttledScrollHandler = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          handleScroll();
-          ticking = false;
-        });
-        ticking = true;
-      }
-    };
+    }, 200);
 
     window.addEventListener('scroll', throttledScrollHandler, { passive: true });
     

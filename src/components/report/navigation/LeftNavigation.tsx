@@ -1,5 +1,6 @@
 
 import React, { memo, useCallback } from 'react';
+import { useRenderPerformance } from '@/components/shared/PerformanceMonitor';
 
 interface Section {
   id: string;
@@ -12,19 +13,16 @@ interface LeftNavigationProps {
   sections: Section[];
 }
 
-const LeftNavigation: React.FC<LeftNavigationProps> = ({ 
+const LeftNavigationBase: React.FC<LeftNavigationProps> = ({ 
   activeSectionId, 
   onNavigate,
   sections
 }) => {
-  const handleNavigation = useCallback((sectionId: string) => {
-    // Avoid event handlers that could create closures on every render
-    // We'll apply the event in the JSX directly
-    onNavigate(sectionId);
-  }, [onNavigate]);
-
+  // Track render performance
+  useRenderPerformance('LeftNavigation');
+  
   return (
-    <div className="w-64 shrink-0 border-r border-gray-200 h-full bg-gray-50 print:hidden">
+    <div className="w-64 shrink-0 border-r border-gray-200 h-full bg-gray-50 print:hidden overflow-auto">
       <div className="p-4 border-b border-gray-200">
         <h3 className="font-semibold text-gray-800">Report Sections</h3>
       </div>
@@ -34,7 +32,7 @@ const LeftNavigation: React.FC<LeftNavigationProps> = ({
           {sections.map(section => (
             <li key={section.id}>
               <button
-                onClick={() => handleNavigation(section.id)}
+                onClick={() => onNavigate(section.id)}
                 className={`w-full text-left px-3 py-2 rounded-md flex items-center group transition-colors ${
                   activeSectionId === section.id 
                     ? 'bg-blue-100 text-blue-800 font-medium' 
@@ -63,4 +61,4 @@ const LeftNavigation: React.FC<LeftNavigationProps> = ({
 };
 
 // Export with React.memo to prevent unnecessary re-renders
-export default memo(LeftNavigation);
+export default memo(LeftNavigationBase);
