@@ -8,11 +8,33 @@ interface KeyCharacteristicsListProps {
   archetypeColor: string;
 }
 
+// Utility function to ensure we always have an array
+const ensureArray = (data: any): string[] => {
+  if (Array.isArray(data)) return data;
+  if (typeof data === 'string') {
+    try {
+      const parsed = JSON.parse(data);
+      return Array.isArray(parsed) ? parsed : [data];
+    } catch (e) {
+      // If it's not JSON parsable, return as a single item array
+      return [data];
+    }
+  }
+  return data ? [data] : [];
+};
+
 const KeyCharacteristicsList: React.FC<KeyCharacteristicsListProps> = ({ 
   characteristics,
   archetypeColor
 }) => {
-  if (!characteristics || characteristics.length === 0) {
+  // Log the characteristics data for debugging
+  console.log('[KeyCharacteristicsList] characteristics type:', typeof characteristics);
+  console.log('[KeyCharacteristicsList] characteristics value:', characteristics);
+  
+  // Ensure we have an array to work with
+  const characteristicsArray = ensureArray(characteristics);
+  
+  if (!characteristicsArray || characteristicsArray.length === 0) {
     return (
       <Card className="p-6">
         <h4 className="text-lg font-medium mb-2">Key Characteristics</h4>
@@ -25,7 +47,7 @@ const KeyCharacteristicsList: React.FC<KeyCharacteristicsListProps> = ({
     <Card className="p-6">
       <h4 className="text-lg font-medium mb-4">Key Characteristics</h4>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {characteristics.map((characteristic, index) => (
+        {characteristicsArray.map((characteristic, index) => (
           <div 
             key={index} 
             className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100"
