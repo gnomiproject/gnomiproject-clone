@@ -36,7 +36,7 @@ const ArchetypeProfile: React.FC<ArchetypeProfileProps> = ({ archetypeData, repo
   }
 
   const displayName = data.name || data.archetype_name || 'Unknown Archetype';
-  const archetypeColor = data.hexColor || data.hex_color || '#6E59A5';
+  const archetypeColor = data.hexColor || '#6E59A5';
   
   return (
     <div className="space-y-6">
