@@ -20,20 +20,28 @@ export const fetchArchetypeData = async (archetypeId: ArchetypeId, skipCache: bo
     return cachedData;
   }
   
-  const { data, error: fetchError } = await supabase
-    .from('level3_report_data')
-    .select('*')
-    .eq('archetype_id', archetypeId)
-    .maybeSingle();
+  try {
+    const { data, error: fetchError } = await supabase
+      .from('level3_report_data')
+      .select('*')
+      .eq('archetype_id', archetypeId)
+      .maybeSingle();
 
-  if (fetchError) {
-    throw fetchError;
-  }
-  
-  // Store in cache
-  if (data) {
-    cacheArchetype(archetypeId, data);
-  }
+    if (fetchError) {
+      console.error("Error fetching archetype data:", fetchError);
+      throw fetchError;
+    }
+    
+    if (data) {
+      // Store in cache
+      cacheArchetype(archetypeId, data);
+    } else {
+      console.log(`No data found in database for archetype ${archetypeId}`);
+    }
 
-  return data;
+    return data;
+  } catch (error) {
+    console.error("Error in fetchArchetypeData:", error);
+    throw error;
+  }
 };

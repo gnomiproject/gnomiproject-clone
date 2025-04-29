@@ -17,13 +17,16 @@ const StrategicRecommendations: React.FC<StrategicRecommendationsProps> = ({
   // Use reportData as primary, fall back to archetypeData
   const data = reportData || archetypeData;
   
+  // Safely extract the name and recommendations
+  const archetypeName = data?.name || data?.archetype_name || 'Unknown';
+  
   // Extract strategic recommendations from the report data
   const recommendations = data?.strategic_recommendations || [];
   
   // Add debug logging
   console.log('[StrategicRecommendations] Rendering with data:', {
     hasData: !!data,
-    dataName: data?.name || data?.archetype_name || 'Unknown',
+    dataName: archetypeName,
     recommendationsCount: Array.isArray(recommendations) ? recommendations.length : 'not an array',
     recommendationsType: typeof recommendations
   });
@@ -36,7 +39,7 @@ const StrategicRecommendations: React.FC<StrategicRecommendationsProps> = ({
       <SectionTitle title="Strategic Recommendations" />
       <div className="bg-white rounded-lg p-6 shadow-sm">
         <p className="text-gray-600 mb-6">
-          Based on our analysis of {data?.name || data?.archetype_name || 'this healthcare archetype'}, we recommend the following strategies:
+          Based on our analysis of {archetypeName}, we recommend the following strategies:
         </p>
         
         {validRecommendations.length > 0 ? (

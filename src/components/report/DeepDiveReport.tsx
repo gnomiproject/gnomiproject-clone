@@ -23,11 +23,11 @@ const DeepDiveReport = ({
   // Debug logging to see the data structure coming in
   console.log('DeepDiveReport: Component mounted with data', {
     reportDataExists: !!reportData,
-    reportDataKeys: reportData ? Object.keys(reportData) : [],
-    id: reportData?.id || reportData?.archetype_id,
-    name: reportData?.name || reportData?.archetype_name,
-    userData: userData,
-    hasStrategicRecommendations: reportData?.strategic_recommendations && reportData.strategic_recommendations.length > 0
+    reportDataType: typeof reportData,
+    reportName: reportData?.name || reportData?.archetype_name,
+    reportId: reportData?.id || reportData?.archetype_id,
+    hasStrategicRecommendations: reportData?.strategic_recommendations && reportData.strategic_recommendations.length > 0,
+    strategicRecommendationsType: reportData?.strategic_recommendations ? typeof reportData.strategic_recommendations : 'undefined'
   });
   
   // Apply safety checks before rendering
@@ -48,12 +48,17 @@ const DeepDiveReport = ({
   // Create a safe copy of the data 
   const safeReportData = {...reportData};
   
-  // Ensure all required arrays exist
+  // Ensure all required arrays exist and handle different data structures
   if (!Array.isArray(safeReportData.strengths)) safeReportData.strengths = [];
   if (!Array.isArray(safeReportData.weaknesses)) safeReportData.weaknesses = [];
   if (!Array.isArray(safeReportData.opportunities)) safeReportData.opportunities = [];
   if (!Array.isArray(safeReportData.threats)) safeReportData.threats = [];
   if (!Array.isArray(safeReportData.strategic_recommendations)) safeReportData.strategic_recommendations = [];
+  
+  // Ensure name field exists
+  if (!safeReportData.name && safeReportData.archetype_name) {
+    safeReportData.name = safeReportData.archetype_name;
+  }
   
   // Check if we're using fallback data - improve the detection logic
   const usingFallbackData = (

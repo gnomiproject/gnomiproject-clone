@@ -18,7 +18,7 @@ interface ArchetypeReportProps {
   hideRequestSection?: boolean;
 }
 
-const ArchetypeReport = ({ 
+const InsightsView = ({ 
   archetypeId, 
   reportData, 
   assessmentResult,
@@ -26,7 +26,14 @@ const ArchetypeReport = ({
   hideRequestSection = false
 }: ArchetypeReportProps) => {
   const [activeTab, setActiveTab] = React.useState('overview');
-  const familyColor = reportData.hexColor || reportData.color || '#4B5563';
+  const familyColor = reportData.hexColor || reportData.color || reportData.hex_color || '#4B5563';
+  
+  console.log('[InsightsView] Rendering with data:', {
+    archetypeId,
+    reportDataName: reportData?.name || reportData?.archetype_name,
+    hasStrengths: Array.isArray(reportData?.strengths) && reportData.strengths.length > 0,
+    strengthsLength: reportData?.strengths ? reportData.strengths.length : 0
+  });
   
   // Enhanced logging for assessment data
   useEffect(() => {
@@ -36,8 +43,7 @@ const ArchetypeReport = ({
         archetypeId,
         primaryArchetype: assessmentResult.primaryArchetype,
         hasExactData: !!assessmentResult.exactData,
-        exactEmployeeCount: assessmentResult?.exactData?.employeeCount,
-        fullAssessmentResult: JSON.stringify(assessmentResult)
+        exactEmployeeCount: assessmentResult?.exactData?.employeeCount
       });
       
       // Ensure exactData exists in the assessment result
@@ -60,13 +66,27 @@ const ArchetypeReport = ({
     }
   }, [assessmentResult, archetypeId]);
 
+  // Ensure we have all the required properties
+  const name = reportData.name || reportData.archetype_name || 'Unknown Archetype';
+  const shortDescription = reportData.short_description || '';
+  const familyId = reportData.familyId || reportData.family_id;
+  const familyName = reportData.familyName || reportData.family_name || '';
+
+  // Handle SWOT data safely
+  const swotData = {
+    strengths: reportData.strengths || [],
+    weaknesses: reportData.weaknesses || [],
+    opportunities: reportData.opportunities || [],
+    threats: reportData.threats || []
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">
       <ArchetypeHeader 
-        name={reportData.name || 'Unknown Archetype'} 
-        description={reportData.short_description || ''} 
-        familyId={reportData.familyId}
-        familyName={reportData.familyName || ''}
+        name={name} 
+        description={shortDescription} 
+        familyId={familyId}
+        familyName={familyName}
         familyColor={familyColor}
         archetypeHexColor={familyColor}
         gnomeImage={getGnomeForArchetype(archetypeId)}
@@ -82,12 +102,7 @@ const ArchetypeReport = ({
           />
         )}
         {activeTab === 'metrics' && <MetricsTab archetypeData={reportData} />}
-        {activeTab === 'swot' && <SwotTab archetypeData={reportData} swotData={{
-          strengths: reportData.strengths || [],
-          weaknesses: reportData.weaknesses || [],
-          opportunities: reportData.opportunities || [],
-          threats: reportData.threats || []
-        }} />}
+        {activeTab === 'swot' && <SwotTab archetypeData={reportData} swotData={swotData} />}
         {activeTab === 'disease-and-care' && <DiseaseAndCareTab archetypeData={reportData} />}
       </div>
 
@@ -105,4 +120,4 @@ const ArchetypeReport = ({
   );
 };
 
-export default ArchetypeReport;
+export default InsightsView;

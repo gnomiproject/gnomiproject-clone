@@ -13,7 +13,12 @@ interface InsightsReportContentProps {
 
 const InsightsReportContent: React.FC<InsightsReportContentProps> = ({ archetype }) => {
   // Debug logging to see the data structure
-  console.log('InsightsReportContent: Data received:', archetype);
+  console.log('InsightsReportContent: Data received:', {
+    id: archetype?.id || archetype?.archetype_id,
+    name: archetype?.name || archetype?.archetype_name,
+    hasStrengths: !!archetype?.strengths,
+    hasRecommendations: Array.isArray(archetype?.strategic_recommendations) && archetype.strategic_recommendations.length > 0
+  });
 
   // Safely extract name and ID from either format (admin or regular)
   const name = archetype?.name || archetype?.archetype_name || 'Untitled Archetype';

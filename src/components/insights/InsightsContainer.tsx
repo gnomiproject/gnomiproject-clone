@@ -25,7 +25,19 @@ const InsightsContainer = ({
   const renderCountRef = useRef(0);
   const processedRef = useRef(false);
   const mountedRef = useRef(true);
-  const { archetypeData: dbArchetypeData, isLoading, error, refetch } = useGetArchetype(archetypeId);
+  
+  // Debug calls to identify load sequence
+  console.log(`[InsightsContainer] Beginning data fetch for ${archetypeId}`);
+  
+  // Skip cache here to ensure we get fresh data
+  const { 
+    archetypeData: dbArchetypeData, 
+    isLoading, 
+    error, 
+    refetch,
+    dataSource 
+  } = useGetArchetype(archetypeId, false); 
+  
   const [retrying, setRetrying] = React.useState(false);
   
   // Enhanced logging for assessment data tracing
@@ -37,7 +49,7 @@ const InsightsContainer = ({
       assessmentResultKeys: assessmentResult ? Object.keys(assessmentResult) : null,
       hasExactData: assessmentResult?.exactData ? 'Yes' : 'No',
       exactEmployeeCount: assessmentResult?.exactData?.employeeCount,
-      fullAssessmentResult: assessmentResult ? JSON.stringify(assessmentResult) : null
+      dataSource: dataSource
     });
     
     // Ensure exactData exists in assessmentResult
@@ -59,7 +71,7 @@ const InsightsContainer = ({
       mountedRef.current = false;
       console.log(`[InsightsContainer] Unmounting for ${archetypeId}`);
     };
-  }, [archetypeId, assessmentResult]);
+  }, [archetypeId, assessmentResult, dataSource]);
   
   // Handle retry logic
   const handleRetry = async () => {
@@ -88,8 +100,13 @@ const InsightsContainer = ({
     // Get data from API or fallback to local data
     const data = dbArchetypeData || getArchetypeDetailedById(archetypeId);
     
-    // Log warning if no data is found
-    if (!data) {
+    if (data) {
+      console.log(`[InsightsContainer] Data found:`, { 
+        name: data.name || data.archetype_name,
+        id: data.id || data.archetype_id,
+        familyId: data.familyId || data.family_id
+      });
+    } else {
       console.warn(`[InsightsContainer] No data found for archetype ${archetypeId}`);
     }
     
@@ -128,9 +145,9 @@ const InsightsContainer = ({
   // Create a default fallback for basic props to prevent null errors
   const safeArchetypeData = {
     ...archetypeData,
-    name: archetypeData.name || `Archetype ${archetypeId.toUpperCase()}`,
-    hexColor: archetypeData.hexColor || '#6E59A5',
-    color: archetypeData.color || '#6E59A5',
+    name: archetypeData.name || archetypeData.archetype_name || `Archetype ${archetypeId.toUpperCase()}`,
+    hexColor: archetypeData.hexColor || archetypeData.hex_color || '#6E59A5',
+    color: archetypeData.color || archetypeData.hex_color || '#6E59A5',
     familyName: archetypeData.familyName || archetypeData.family_name || 'Healthcare Archetype'
   };
   

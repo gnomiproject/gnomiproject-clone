@@ -29,7 +29,7 @@ export const useGetArchetype = (archetypeId: ArchetypeId, skipCache: boolean = f
   const processingRef = useRef(false);
   const processedDataRef = useRef<string | null>(null);
   
-  // Use React Query for data fetching with proper caching and no conditional hook usage
+  // Use React Query for data fetching with proper caching
   const { 
     isLoading, 
     error, 
@@ -71,6 +71,13 @@ export const useGetArchetype = (archetypeId: ArchetypeId, skipCache: boolean = f
         const { archetypeData: formattedData, familyData: processedFamilyData, dataSource: source } = 
           processArchetypeData(data, getFamilyById, getArchetypeEnhanced);
         
+        console.log("Data processed successfully:", {
+          hasArchetypeData: !!formattedData,
+          archetypeName: formattedData?.name,
+          familyName: processedFamilyData?.name,
+          dataSource: source
+        });
+        
         setArchetypeData(formattedData);
         setFamilyData(processedFamilyData);
         setDataSource(source);
@@ -78,6 +85,13 @@ export const useGetArchetype = (archetypeId: ArchetypeId, skipCache: boolean = f
         // Fallback to original archetype data structure
         const { archetypeData: fallbackData, familyData: fallbackFamilyData, dataSource: fallbackSource } = 
           processFallbackData(archetypeId, getArchetypeEnhanced, getFamilyById);
+        
+        console.log("Using fallback data:", {
+          hasArchetypeData: !!fallbackData,
+          archetypeName: fallbackData?.name,
+          familyName: fallbackFamilyData?.name,
+          dataSource: fallbackSource
+        });
         
         setArchetypeData(fallbackData);
         setFamilyData(fallbackFamilyData);
@@ -96,6 +110,13 @@ export const useGetArchetype = (archetypeId: ArchetypeId, skipCache: boolean = f
     // Fallback to original archetype data structure on error
     const { archetypeData: fallbackData, familyData: fallbackFamilyData, dataSource: fallbackSource } = 
       processFallbackData(archetypeId, getArchetypeEnhanced, getFamilyById);
+    
+    console.log("Using fallback data after error:", {
+      hasArchetypeData: !!fallbackData,
+      archetypeName: fallbackData?.name,
+      familyName: fallbackFamilyData?.name,
+      dataSource: fallbackSource
+    });
     
     setArchetypeData(fallbackData);
     setFamilyData(fallbackFamilyData);
@@ -163,7 +184,6 @@ export const useGetArchetype = (archetypeId: ArchetypeId, skipCache: boolean = f
     };
   }, [archetypeId]);
 
-  // Memoize the return value to prevent unnecessary re-renders
   return useMemo(() => ({ 
     archetypeData, 
     familyData, 
