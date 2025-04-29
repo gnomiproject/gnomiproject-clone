@@ -2,12 +2,6 @@
 import React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-interface NavigationSection {
-  id: string;
-  name: string;
-  icon?: React.ReactNode;
-}
-
 interface LeftNavigationProps {
   activeSectionId: string;
   onNavigate: (sectionId: string) => void;
@@ -17,16 +11,17 @@ const LeftNavigation: React.FC<LeftNavigationProps> = ({
   activeSectionId, 
   onNavigate 
 }) => {
-  const sections: NavigationSection[] = [
+  const sections = [
     { id: 'introduction', name: 'Introduction' },
+    { id: 'executive-summary', name: 'Executive Summary' },
     { id: 'archetype-profile', name: 'Archetype Profile' },
+    { id: 'swot-analysis', name: 'SWOT Analysis' },
     { id: 'demographics', name: 'Demographics' },
     { id: 'cost-analysis', name: 'Cost Analysis' },
     { id: 'utilization-patterns', name: 'Utilization Patterns' },
     { id: 'disease-management', name: 'Disease Management' },
     { id: 'care-gaps', name: 'Care Gaps' },
     { id: 'risk-factors', name: 'Risk Factors' },
-    { id: 'swot-analysis', name: 'SWOT Analysis' },
     { id: 'recommendations', name: 'Recommendations' },
     { id: 'contact', name: 'Contact' },
   ];

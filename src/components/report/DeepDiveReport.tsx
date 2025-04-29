@@ -36,6 +36,7 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
 }) => {
   const reportRef = React.useRef<HTMLDivElement>(null);
   const [showPrintButton, setShowPrintButton] = useState(false);
+  const [activeSectionId, setActiveSectionId] = useState('introduction');
 
   // Setup print handler
   const handlePrint = useReactToPrint({
@@ -57,30 +58,39 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
     }
   }, [reportData]);
 
+  // Handle navigation
+  const handleNavigate = (sectionId: string) => {
+    setActiveSectionId(sectionId);
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   // Store the theme color from report data
   const themeColor = reportData?.hexColor || reportData?.hex_color || "#4B5563";
 
   // Debug info
   const isDebugMode = isAdminView || window.location.search.includes('debug=true');
+  
+  // Setup report debug tools props
+  const [showDebugData, setShowDebugData] = useState(false);
+  const [showDiagnostics, setShowDiagnostics] = useState(false);
+  
+  const handleRefreshData = () => {
+    // Refresh data logic would go here
+    console.log("Refreshing report data");
+    window.location.reload();
+  };
 
   return (
     <div className="relative min-h-screen bg-gray-50">
       {/* Left navigation only on larger screens */}
       <div className="hidden lg:block fixed left-0 top-0 h-full print:hidden">
-        <LeftNavigation sections={[
-          { id: 'introduction', label: 'Introduction' },
-          { id: 'executive-summary', label: 'Executive Summary' },
-          { id: 'archetype-profile', label: 'Archetype Profile' },
-          { id: 'swot-analysis', label: 'SWOT Analysis' },
-          { id: 'demographics', label: 'Demographics' },
-          { id: 'cost-analysis', label: 'Cost Analysis' },
-          { id: 'utilization-patterns', label: 'Utilization Patterns' },
-          { id: 'disease-management', label: 'Disease Management' },
-          { id: 'care-gaps', label: 'Care Gaps' },
-          { id: 'risk-factors', label: 'Risk & SDOH Factors' },
-          { id: 'recommendations', label: 'Recommendations' },
-          { id: 'contact', label: 'Contact' }
-        ]} />
+        <LeftNavigation 
+          activeSectionId={activeSectionId}
+          onNavigate={handleNavigate}
+        />
       </div>
       
       {/* Print button */}
@@ -103,11 +113,11 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
       >
         <div className="max-w-5xl mx-auto px-4 print:px-8">
           <Section id="introduction">
-            <ReportIntroduction reportData={reportData} userData={userData} />
+            <ReportIntroduction />
           </Section>
           
           <Section id="executive-summary">
-            <ExecutiveSummary reportData={reportData} />
+            <ExecutiveSummary />
           </Section>
           
           <Section id="archetype-profile">
@@ -143,7 +153,7 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
           </Section>
           
           <Section id="recommendations">
-            <Recommendations reportData={reportData} />
+            <Recommendations />
           </Section>
           
           <Section id="contact">
@@ -154,10 +164,12 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
           {isDebugMode && (
             <Section id="debug" className="print:hidden">
               <ReportDebugTools 
-                reportData={reportData} 
-                userData={userData}
-                averageData={averageData}
-                debugInfo={debugInfo}
+                showDebugData={showDebugData}
+                toggleDebugData={() => setShowDebugData(!showDebugData)}
+                showDiagnostics={showDiagnostics}
+                toggleDiagnostics={() => setShowDiagnostics(!showDiagnostics)}
+                onRefreshData={handleRefreshData}
+                isAdminView={isAdminView}
               />
             </Section>
           )}
