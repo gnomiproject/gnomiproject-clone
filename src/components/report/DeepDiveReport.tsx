@@ -1,159 +1,198 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { ArchetypeDetailedData } from '@/types/archetype';
-import FallbackBanner from './FallbackBanner';
-import DeepDiveReportContent from './sections/DeepDiveReportContent';
-import { ReportUserData } from '@/hooks/useReportUserData';
+import ReportIntroduction from './sections/ReportIntroduction';
+import ArchetypeProfile from './sections/ArchetypeProfile';
+import DemographicsSection from './sections/DemographicsSection';
+import CostAnalysis from './sections/CostAnalysis';
+import UtilizationPatterns from './sections/UtilizationPatterns';
+import DiseaseManagement from './sections/DiseaseManagement';
+import CareGaps from './sections/CareGaps';
+import RiskFactors from './sections/RiskFactors';
+import SwotAnalysis from './sections/SwotAnalysis';
+import StrategicRecommendations from './sections/StrategicRecommendations';
+import ContactSection from './sections/ContactSection';
 
 interface DeepDiveReportProps {
   reportData: ArchetypeDetailedData;
-  userData?: ReportUserData | any;
+  userData: any;
   averageData: any;
-  loading?: boolean;
   isAdminView?: boolean;
   debugInfo?: any;
 }
 
-const DeepDiveReport = ({ 
-  reportData, 
-  userData, 
-  averageData, 
-  loading = false,
+const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
+  reportData,
+  userData,
+  averageData,
   isAdminView = false,
   debugInfo
-}: DeepDiveReportProps) => {
-  // Debug logging to see the data structure coming in
-  console.log('DeepDiveReport: Component mounted with data', {
-    reportDataExists: !!reportData,
-    reportDataType: typeof reportData,
-    reportName: reportData?.name || reportData?.archetype_name,
-    reportId: reportData?.id || reportData?.archetype_id,
-    userDataExists: !!userData,
-    tokenAccess: !isAdminView && userData?.access_token ? 
-      `Using token: ${userData.access_token.substring(0, 5)}...` : 
-      'Not using token access',
-    hasStrategicRecommendations: reportData?.strategic_recommendations && 
-      (Array.isArray(reportData.strategic_recommendations) ? 
-        reportData.strategic_recommendations.length > 0 : 
-        Object.keys(reportData.strategic_recommendations).length > 0)
-  });
-  
-  // Apply safety checks before rendering
-  if (!reportData) {
-    console.error('DeepDiveReport: No report data provided');
-    return (
-      <div className="bg-white min-h-screen p-8">
-        <div className="container mx-auto">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-red-800">
-            <h2 className="text-lg font-semibold mb-2">Error Loading Report</h2>
-            <p>Unable to load report data. Please try refreshing the page.</p>
-            
-            {debugInfo && (
-              <div className="mt-4 p-3 bg-red-100 rounded text-xs font-mono overflow-auto">
-                <p>Debug Info:</p>
-                <pre>{JSON.stringify(debugInfo, null, 2)}</pre>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  }
-  
-  // Create a safe copy of the data 
-  const safeReportData = {...reportData};
-  
-  // Ensure all required arrays exist
-  if (!Array.isArray(safeReportData.strengths)) safeReportData.strengths = [];
-  if (!Array.isArray(safeReportData.weaknesses)) safeReportData.weaknesses = [];
-  if (!Array.isArray(safeReportData.opportunities)) safeReportData.opportunities = [];
-  if (!Array.isArray(safeReportData.threats)) safeReportData.threats = [];
-  
-  // Handle strategic_recommendations being either an array or an object (or missing)
-  if (!safeReportData.strategic_recommendations) {
-    safeReportData.strategic_recommendations = [];
-  } else if (!Array.isArray(safeReportData.strategic_recommendations) && typeof safeReportData.strategic_recommendations === 'object') {
-    // Convert object to array if needed
-    safeReportData.strategic_recommendations = Object.values(safeReportData.strategic_recommendations);
-  }
-  
-  // Ensure name field exists
-  if (!safeReportData.name && safeReportData.archetype_name) {
-    safeReportData.name = safeReportData.archetype_name;
-  }
-  
-  // Check if we're using fallback data
-  const usingFallbackData = (
-    !safeReportData.strategic_recommendations || 
-    (Array.isArray(safeReportData.strategic_recommendations) && safeReportData.strategic_recommendations.length === 0) ||
-    !userData ||
-    isAdminView
-  );
-  
-  // Check if we have employee size data
-  const hasEmployeeData = !!(
-    userData?.exact_employee_count || 
-    (userData?.assessment_result?.exactData?.employeeCount)
-  );
-  
-  // Token-based access debug info
-  const hasTokenAccess = !isAdminView && userData?.access_token;
+}) => {
+  // Section IDs for navigation
+  const sectionIds = {
+    introduction: 'introduction',
+    archetypeProfile: 'archetype-profile',
+    demographics: 'demographics',
+    costAnalysis: 'cost-analysis',
+    utilization: 'utilization-patterns',
+    diseaseManagement: 'disease-management',
+    careGaps: 'care-gaps',
+    riskFactors: 'risk-factors',
+    swotAnalysis: 'swot-analysis',
+    recommendations: 'recommendations',
+    contact: 'contact'
+  };
   
   return (
     <div className="bg-white min-h-screen">
-      {/* Token access debug banner */}
-      {hasTokenAccess && (
-        <div className="bg-green-50 border-green-200 border-b p-4 text-green-800 text-sm sticky top-0 z-50">
-          <div className="container mx-auto">
-            <div className="flex justify-between items-center">
-              <span>
-                <strong>Token Access:</strong> Using token {userData.access_token.substring(0, 5)}...
-                {userData.access_count > 1 && ` (Viewed ${userData.access_count} times)`}
-              </span>
-              <span className="text-xs bg-green-100 px-2 py-1 rounded">
-                {new Date(userData.last_accessed || userData.created_at).toLocaleString()}
-              </span>
-            </div>
+      {/* Header - Keep consistent across report */}
+      <header className="bg-blue-50 border-b border-blue-100 py-4 px-6 mb-8 print:hidden">
+        <div className="container mx-auto">
+          <h1 className="text-2xl font-bold text-blue-800">
+            Healthcare Archetype Deep Dive Report
+          </h1>
+          <p className="text-blue-600">
+            {reportData.archetype_name || reportData.name}
+          </p>
+        </div>
+      </header>
+      
+      <div className="container mx-auto px-4 pb-16">
+        {/* Introduction Section */}
+        <section id={sectionIds.introduction} className="mb-16">
+          <ReportIntroduction 
+            reportData={reportData} 
+            userData={userData} 
+            averageData={averageData}
+            nextSection={sectionIds.archetypeProfile}
+            nextSectionName="Archetype Profile"
+          />
+        </section>
+        
+        {/* Archetype Profile Section */}
+        <section id={sectionIds.archetypeProfile} className="mb-16">
+          <ArchetypeProfile 
+            reportData={reportData} 
+            previousSection={sectionIds.introduction}
+            previousSectionName="Introduction"
+            nextSection={sectionIds.demographics}
+            nextSectionName="Demographics"
+          />
+        </section>
+        
+        {/* Demographics Section */}
+        <section id={sectionIds.demographics} className="mb-16">
+          <DemographicsSection 
+            reportData={reportData} 
+            averageData={averageData}
+            previousSection={sectionIds.archetypeProfile}
+            previousSectionName="Archetype Profile"
+            nextSection={sectionIds.costAnalysis}
+            nextSectionName="Cost Analysis"
+          />
+        </section>
+        
+        {/* Cost Analysis Section */}
+        <section id={sectionIds.costAnalysis} className="mb-16">
+          <CostAnalysis 
+            reportData={reportData} 
+            averageData={averageData}
+            previousSection={sectionIds.demographics}
+            previousSectionName="Demographics"
+            nextSection={sectionIds.utilization}
+            nextSectionName="Utilization Patterns"
+          />
+        </section>
+        
+        {/* Utilization Section */}
+        <section id={sectionIds.utilization} className="mb-16">
+          <UtilizationPatterns 
+            reportData={reportData} 
+            averageData={averageData}
+            previousSection={sectionIds.costAnalysis}
+            previousSectionName="Cost Analysis"
+            nextSection={sectionIds.diseaseManagement}
+            nextSectionName="Disease Management"
+          />
+        </section>
+        
+        {/* Disease Management Section */}
+        <section id={sectionIds.diseaseManagement} className="mb-16">
+          <DiseaseManagement 
+            reportData={reportData} 
+            averageData={averageData}
+            previousSection={sectionIds.utilization}
+            previousSectionName="Utilization Patterns"
+            nextSection={sectionIds.careGaps}
+            nextSectionName="Care Gaps"
+          />
+        </section>
+        
+        {/* Care Gaps Section */}
+        <section id={sectionIds.careGaps} className="mb-16">
+          <CareGaps 
+            reportData={reportData} 
+            averageData={averageData}
+            previousSection={sectionIds.diseaseManagement}
+            previousSectionName="Disease Management"
+            nextSection={sectionIds.riskFactors}
+            nextSectionName="Risk Factors"
+          />
+        </section>
+        
+        {/* Risk Factors Section */}
+        <section id={sectionIds.riskFactors} className="mb-16">
+          <RiskFactors 
+            reportData={reportData} 
+            averageData={averageData}
+            previousSection={sectionIds.careGaps}
+            previousSectionName="Care Gaps"
+            nextSection={sectionIds.swotAnalysis}
+            nextSectionName="SWOT Analysis"
+          />
+        </section>
+        
+        {/* SWOT Analysis Section */}
+        <section id={sectionIds.swotAnalysis} className="mb-16">
+          <SwotAnalysis 
+            reportData={reportData} 
+            previousSection={sectionIds.riskFactors}
+            previousSectionName="Risk Factors"
+            nextSection={sectionIds.recommendations}
+            nextSectionName="Strategic Recommendations"
+          />
+        </section>
+        
+        {/* Strategic Recommendations Section */}
+        <section id={sectionIds.recommendations} className="mb-16">
+          <StrategicRecommendations 
+            reportData={reportData}
+            previousSection={sectionIds.swotAnalysis}
+            previousSectionName="SWOT Analysis"
+            nextSection={sectionIds.contact}
+            nextSectionName="Contact Us"
+          />
+        </section>
+        
+        {/* Contact Section */}
+        <section id={sectionIds.contact} className="mb-16">
+          <ContactSection 
+            reportData={reportData} 
+            userData={userData}
+            previousSection={sectionIds.recommendations}
+            previousSectionName="Strategic Recommendations"
+          />
+        </section>
+
+        {/* Debug info for development and admin views */}
+        {(isAdminView || import.meta.env.DEV) && debugInfo && (
+          <div className="mt-20 p-4 border-t border-gray-200 pt-8">
+            <h2 className="text-lg font-semibold mb-2">Debug Information</h2>
+            <pre className="bg-gray-50 p-4 rounded-md text-xs overflow-auto max-h-96">
+              {JSON.stringify(debugInfo, null, 2)}
+            </pre>
           </div>
-        </div>
-      )}
-      
-      {/* Admin View Banner */}
-      {isAdminView && (
-        <div className="bg-yellow-50 border-yellow-200 border-b p-4 text-yellow-800 text-sm sticky top-0 z-50 flex justify-between items-center">
-          <span>
-            <strong>Admin View</strong> - Viewing with placeholder user data. User-specific metrics may not be accurate.
-          </span>
-          <button 
-            className="text-yellow-700 hover:text-yellow-900 font-medium text-xs bg-yellow-100 hover:bg-yellow-200 px-3 py-1 rounded"
-            onClick={() => window.print()}
-          >
-            Print Report
-          </button>
-        </div>
-      )}
-      
-      {/* Fallback data banner - only show if not admin view to avoid duplicate banners */}
-      {usingFallbackData && !loading && !isAdminView && (
-        <FallbackBanner show={true} />
-      )}
-      
-      {/* Employee size context banner */}
-      {hasEmployeeData && !isAdminView && (
-        <div className="bg-blue-50 border-blue-200 border-b p-3 text-blue-800 text-sm">
-          <div className="container mx-auto">
-            <span>
-              <strong>Personalized Report</strong> - This report is tailored for an organization with approximately {(userData?.exact_employee_count || userData?.assessment_result?.exactData?.employeeCount).toLocaleString()} employees.
-            </span>
-          </div>
-        </div>
-      )}
-      
-      <DeepDiveReportContent
-        archetype={safeReportData}
-        userData={userData}
-        averageData={averageData}
-      />
+        )}
+      </div>
     </div>
   );
 };

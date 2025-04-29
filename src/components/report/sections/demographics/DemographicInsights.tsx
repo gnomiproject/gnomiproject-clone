@@ -4,11 +4,11 @@ import { Building } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface DemographicInsightsProps {
-  insights: string;
+  insights: string | string[];
 }
 
 const DemographicInsights: React.FC<DemographicInsightsProps> = ({ insights }) => {
-  // Process insights text to create structured content if it's just a plain string
+  // Process insights text to create structured content
   const processedInsights = React.useMemo(() => {
     if (!insights) return ["No demographic insights available."];
     
