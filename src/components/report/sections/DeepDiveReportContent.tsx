@@ -5,6 +5,7 @@ import { Section } from '@/components/shared/Section';
 import SectionTitle from '@/components/shared/SectionTitle';
 import StrategicRecommendations from './StrategicRecommendations';
 import GnomeImage from '@/components/common/GnomeImage';
+import HomeIntroduction from './HomeIntroduction';
 
 interface DeepDiveReportContentProps {
   archetype: any;
@@ -41,43 +42,36 @@ const DeepDiveReportContent = ({
   return (
     <div className="container mx-auto p-6">
       <ErrorBoundary>
-        <div className="bg-white rounded-lg p-6 shadow-sm mb-8">
-          <h1 className="text-3xl font-bold">
-            {archetypeName} Report 
-            <span className="ml-2 text-sm bg-gray-100 px-2 py-1 rounded text-gray-600 align-middle">
-              {archetypeId ? archetypeId.toUpperCase() : 'ID UNKNOWN'}
-            </span>
-          </h1>
-          <p className="text-gray-500 mt-2">
-            Report for {userData?.organization || 'Unknown Organization'}
-          </p>
-          
-          <div className="mt-8 bg-gray-50 p-4 rounded-lg">
-            <h2 className="font-semibold">Access Information</h2>
+        {/* Home & Introduction Section */}
+        <HomeIntroduction 
+          userData={userData}
+          archetypeData={safeArchetype}
+          averageData={averageData}
+        />
+      </ErrorBoundary>
+      
+      {/* Debug information - shown in a less prominent way */}
+      <ErrorBoundary>
+        <Section id="debug-info" className="print:hidden">
+          <details className="mt-4 bg-gray-50 p-4 rounded-lg text-sm">
+            <summary className="font-medium cursor-pointer">Debug Information</summary>
             <div className="mt-2 font-mono text-xs space-y-1">
+              <p>Archetype ID: {archetypeId}</p>
+              <p>Archetype Name: {archetypeName}</p>
               <p>User: {userData?.name || 'Not available'}</p>
               <p>Organization: {userData?.organization || 'Not available'}</p>
               <p>Access Token: {userData?.access_token ? `${userData.access_token.substring(0, 5)}...` : 'Not available'}</p>
               <p>Last Accessed: {userData?.last_accessed ? new Date(userData.last_accessed).toLocaleString() : 'Never'}</p>
-              <p>Access Count: {userData?.access_count || 0}</p>
               <p>Has User Data: {userData ? 'Yes' : 'No'}</p>
-            </div>
-          </div>
-          
-          <div className="mt-4 bg-gray-50 p-4 rounded-lg">
-            <h2 className="font-semibold">Archetype Information</h2>
-            <div className="mt-2 font-mono text-xs space-y-1">
-              <p>Data Type: {typeof archetype || 'Unknown'}</p>
               <p>Has Strategic Recommendations: {archetype?.strategic_recommendations ? 'Yes' : 'No'}</p>
               <p>Recommendations Type: {typeof archetype?.strategic_recommendations || 'Not available'}</p>
               <p>Has SWOT Data: {archetype?.strengths ? 'Yes' : 'No'}</p>
             </div>
-          </div>
-          
-          <div className="mt-4 flex justify-center">
-            <GnomeImage type="presentation" showDebug={true} />
-          </div>
-        </div>
+            <div className="mt-4 flex justify-center">
+              <GnomeImage type="presentation" showDebug={true} />
+            </div>
+          </details>
+        </Section>
       </ErrorBoundary>
       
       <Section id="recommendations">
