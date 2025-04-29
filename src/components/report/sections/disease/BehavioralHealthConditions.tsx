@@ -84,9 +84,7 @@ const BehavioralHealthConditions = ({ reportData, averageData }: BehavioralHealt
                 <XAxis 
                   dataKey="name" 
                   tickSize={0}
-                  tickPadding={10}
-                  tickRotation={-45}
-                  tick={{ fontSize: 12 }}
+                  tick={{ fontSize: 12, angle: -45, textAnchor: 'end' }}
                   scale="point"
                   padding={{ left: 10, right: 10 }}
                 />
