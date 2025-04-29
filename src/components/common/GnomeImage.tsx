@@ -1,97 +1,53 @@
 
 import React from 'react';
-import { gnomeImages, fallbackGnomeImage, getGnomeForArchetype, getGnomeForSection, GnomeImageType } from '@/utils/gnomeImages';
+import { gnomeImages, fallbackGnomeImage } from '@/utils/gnomeImages';
 
 interface GnomeImageProps {
-  /**
-   * Specific gnome type to display
-   */
-  type?: GnomeImageType;
-  
-  /**
-   * Archetype ID to determine gnome type from
-   */
-  archetypeId?: string;
-  
-  /**
-   * Section type to determine gnome type from
-   */
-  sectionType?: string;
-  
-  /**
-   * CSS class names
-   */
+  type?: string;
   className?: string;
-  
-  /**
-   * Alt text for accessibility
-   */
   alt?: string;
-  
-  /**
-   * Optional additional props
-   */
-  [key: string]: any;
+  showDebug?: boolean;
 }
 
-/**
- * Component for consistently displaying gnome images throughout the application
- * with intelligent fallbacks
- */
 const GnomeImage: React.FC<GnomeImageProps> = ({ 
-  type, 
-  archetypeId, 
-  sectionType,
-  className = 'h-48 object-contain',
+  type = 'placeholder', 
+  className = 'h-48 object-contain', 
   alt = 'Healthcare Gnome',
-  ...props 
+  showDebug = false
 }) => {
-  // Determine the image source with priority:
-  // 1. Explicit type
-  // 2. Archetype ID based
-  // 3. Section type based
-  // 4. Default placeholder
-  const getImageSource = (): string => {
+  // Get image source with fallback
+  const getImageSource = () => {
     if (type && gnomeImages[type]) {
       return gnomeImages[type];
     }
-    
-    if (archetypeId) {
-      return getGnomeForArchetype(archetypeId);
-    }
-    
-    if (sectionType) {
-      return getGnomeForSection(sectionType);
-    }
-    
     return fallbackGnomeImage;
   };
   
   const [src, setSrc] = React.useState<string>(getImageSource());
   const [hasError, setHasError] = React.useState(false);
   
-  // Update source if props change
-  React.useEffect(() => {
-    setSrc(getImageSource());
-    setHasError(false);
-  }, [type, archetypeId, sectionType]);
-  
   const handleError = () => {
+    console.error(`Failed to load gnome image: ${src}`);
     if (!hasError) {
-      console.warn(`Failed to load gnome image: ${src}`);
       setSrc(fallbackGnomeImage);
       setHasError(true);
     }
   };
   
   return (
-    <img
-      src={src}
-      alt={alt}
-      className={className}
-      onError={handleError}
-      {...props}
-    />
+    <div className="relative">
+      <img
+        src={src}
+        alt={alt}
+        className={className}
+        onError={handleError}
+      />
+      {showDebug && (
+        <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-1 text-xs">
+          {hasError ? 'Using fallback' : `Type: ${type}`}
+        </div>
+      )}
+    </div>
   );
 };
 
