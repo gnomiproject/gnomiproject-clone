@@ -2161,6 +2161,10 @@ export type Database = {
         Args: { archetype_id: string }
         Returns: boolean
       }
+      increment_report_access: {
+        Args: { p_access_token: string; p_archetype_id: string }
+        Returns: Json
+      }
       update_archetype_analysis: {
         Args: {
           p_archetype_id: string
