@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { v4 as uuidv4 } from 'uuid';
@@ -21,6 +21,9 @@ declare global {
   }
 }
 
+// Session storage key for submitted report
+const REPORT_SUBMITTED_KEY = 'healthcareArchetypeReportSubmitted';
+
 interface DeepDiveRequestFormProps {
   archetypeId: ArchetypeId;
   assessmentResult?: any;
@@ -36,6 +39,7 @@ const DeepDiveRequestForm = ({
 }: DeepDiveRequestFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccessful, setSubmitSuccessful] = useState(false);
+  const [submittedEmail, setSubmittedEmail] = useState('');
   const [accessUrl, setAccessUrl] = useState('');
   const navigate = useNavigate();
   
@@ -49,6 +53,22 @@ const DeepDiveRequestForm = ({
       sessionId: localStorage.getItem('session_id') || ''
     },
   });
+
+  // Check if user has already submitted a report in this session
+  useEffect(() => {
+    const hasSubmittedReport = sessionStorage.getItem(REPORT_SUBMITTED_KEY);
+    if (hasSubmittedReport) {
+      try {
+        const submissionData = JSON.parse(hasSubmittedReport);
+        if (submissionData.archetypeId === archetypeId) {
+          setSubmitSuccessful(true);
+          setSubmittedEmail(submissionData.email || '');
+        }
+      } catch (e) {
+        console.error("Could not parse report submission data:", e);
+      }
+    }
+  }, [archetypeId]);
 
   const handleRetakeAssessment = () => {
     navigate('/assessment');
@@ -65,6 +85,10 @@ const DeepDiveRequestForm = ({
       const exactEmployeeCount = assessmentResult?.exactData?.employeeCount || null;
       console.log('Extracted exact employee count:', exactEmployeeCount);
       
+      // Generate access token and construct URL
+      const accessToken = uuidv4();
+      const generatedUrl = `${window.location.origin}/report/${archetypeId}/${accessToken}`;
+      
       const { data: response, error } = await supabase
         .from('report_requests')
         .insert({
@@ -74,13 +98,14 @@ const DeepDiveRequestForm = ({
           organization: data.organization || null,
           comments: data.comments || null,
           status: 'active',
-          access_token: uuidv4(),
+          access_token: accessToken,
           created_at: new Date().toISOString(),
           expires_at: addDays(new Date(), 30).toISOString(),
           session_id: data.sessionId || null,
           assessment_result: assessmentResult || null,
           assessment_answers: assessmentAnswers || null,
-          exact_employee_count: exactEmployeeCount
+          exact_employee_count: exactEmployeeCount,
+          access_url: generatedUrl // Save the URL to the database
         })
         .select('access_token')
         .single();
@@ -91,9 +116,17 @@ const DeepDiveRequestForm = ({
       
       console.log('Report request created:', response);
       
-      // Set the URL and show success state
+      // Store submission record in session storage to prevent multiple submissions
+      sessionStorage.setItem(REPORT_SUBMITTED_KEY, JSON.stringify({
+        archetypeId: archetypeId,
+        email: data.email,
+        timestamp: new Date().toISOString()
+      }));
+      
+      // Set the success state
       setSubmitSuccessful(true);
-      setAccessUrl(`${window.location.origin}/report/${archetypeId}/${response.access_token}`);
+      setSubmittedEmail(data.email);
+      setAccessUrl(generatedUrl);
       
       // Track event
       window.gtag?.('event', 'deep_dive_request', {
@@ -126,7 +159,7 @@ const DeepDiveRequestForm = ({
               <DeepDiveBenefits archetypeName={archetypeName} />
               
               {submitSuccessful ? (
-                <DeepDiveSuccessState accessUrl={accessUrl} />
+                <DeepDiveSuccessState email={submittedEmail} />
               ) : (
                 <Button 
                   onClick={form.handleSubmit(handleSubmit)} 
