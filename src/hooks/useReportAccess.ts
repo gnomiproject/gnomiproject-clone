@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useGetArchetype } from '@/hooks/useGetArchetype';
 import { ArchetypeId } from '@/types/archetype';
 import { normalizeArchetypeId } from '@/utils/archetypeValidation';
+import { normalizeSwotData } from '@/utils/swot/normalizeSwotData';
 
 interface UseReportAccessOptions {
   archetypeId: string;
@@ -83,7 +84,10 @@ export const useReportAccess = ({ archetypeId: rawArchetypeId, token, isAdminVie
         };
 
         // Fetch detailed report data from level4 secure view
-        const { data: deepDiveData, error: deepDiveError } = await fetchWithCaseInsensitiveSearch('level4_report_secure', archetypeId);
+        const { data: deepDiveData, error: deepDiveError } = await fetchWithCaseInsensitiveSearch(
+          'level4_report_secure' as SecureTableName, 
+          archetypeId
+        );
 
         if (deepDiveError) {
           console.warn(`[useReportAccess] Could not fetch level4 data: ${deepDiveError.message}`);
@@ -96,44 +100,95 @@ export const useReportAccess = ({ archetypeId: rawArchetypeId, token, isAdminVie
           }));
           
           // Try the base level4 data with secure view if level4_report_secure fails
-          const { data: level4BaseData, error: level4BaseError } = await fetchWithCaseInsensitiveSearch('level4_deepdive_report_data_secure', archetypeId);
+          const { data: level4BaseData, error: level4BaseError } = await fetchWithCaseInsensitiveSearch(
+            'level4_deepdive_report_data_secure' as SecureTableName, 
+            archetypeId
+          );
             
           if (!level4BaseError && level4BaseData) {
             console.log(`[useReportAccess] Got level4 data using base secure view for ${archetypeId}`);
-            setReportData(level4BaseData);
+            
+            // Process SWOT data to ensure proper structure
+            const processedData = {
+              ...level4BaseData,
+              // Ensure SWOT data exists in a consistent format
+              strengths: level4BaseData.strengths || (level4BaseData.swot_analysis?.strengths) || [],
+              weaknesses: level4BaseData.weaknesses || (level4BaseData.swot_analysis?.weaknesses) || [],
+              opportunities: level4BaseData.opportunities || (level4BaseData.swot_analysis?.opportunities) || [],
+              threats: level4BaseData.threats || (level4BaseData.swot_analysis?.threats) || []
+            };
+            
+            // Also ensure the swot_analysis object exists for backward compatibility
+            if (!processedData.swot_analysis) {
+              processedData.swot_analysis = {
+                strengths: processedData.strengths,
+                weaknesses: processedData.weaknesses,
+                opportunities: processedData.opportunities,
+                threats: processedData.threats
+              };
+            }
+            
+            setReportData(processedData);
             setDebugInfo(prev => ({
               ...prev,
               level4BaseQuery: {
                 success: true,
                 dataFound: true,
-                hasSwotData: !!(level4BaseData.strengths || (level4BaseData.swot_analysis && level4BaseData.swot_analysis.strengths))
+                hasSwotData: !!(
+                  normalizeSwotData(processedData.strengths).length > 0 || 
+                  normalizeSwotData(processedData.swot_analysis?.strengths).length > 0
+                )
               }
             }));
             
             console.log("[useReportAccess] SWOT data in level4BaseData:", {
-              hasStrengthsArray: !!level4BaseData.strengths,
-              strengthsLength: level4BaseData.strengths ? level4BaseData.strengths.length : 0,
-              hasSwotAnalysis: !!level4BaseData.swot_analysis,
-              swotStrengthsLength: level4BaseData.swot_analysis && level4BaseData.swot_analysis.strengths ? level4BaseData.swot_analysis.strengths.length : 0
+              hasStrengthsArray: !!(normalizeSwotData(processedData.strengths).length > 0),
+              strengthsLength: normalizeSwotData(processedData.strengths).length,
+              hasSwotAnalysis: !!(processedData.swot_analysis),
+              swotStrengthsLength: processedData.swot_analysis ? normalizeSwotData(processedData.swot_analysis.strengths).length : 0
             });
           }
         } else if (deepDiveData) {
           console.log(`[useReportAccess] Got level4 deep dive data for ${archetypeId}`);
-          setReportData(deepDiveData);
+          
+          // Process SWOT data to ensure proper structure
+          const processedData = {
+            ...deepDiveData,
+            // Ensure SWOT data exists in a consistent format
+            strengths: deepDiveData.strengths || (deepDiveData.swot_analysis?.strengths) || [],
+            weaknesses: deepDiveData.weaknesses || (deepDiveData.swot_analysis?.weaknesses) || [],
+            opportunities: deepDiveData.opportunities || (deepDiveData.swot_analysis?.opportunities) || [],
+            threats: deepDiveData.threats || (deepDiveData.swot_analysis?.threats) || []
+          };
+          
+          // Also ensure the swot_analysis object exists for backward compatibility
+          if (!processedData.swot_analysis) {
+            processedData.swot_analysis = {
+              strengths: processedData.strengths,
+              weaknesses: processedData.weaknesses,
+              opportunities: processedData.opportunities,
+              threats: processedData.threats
+            };
+          }
+          
+          setReportData(processedData);
           setDebugInfo(prev => ({
             ...prev,
             level4Query: {
               success: true,
               dataFound: true,
-              hasSwotData: !!(deepDiveData.strengths || (deepDiveData.swot_analysis && deepDiveData.swot_analysis.strengths))
+              hasSwotData: !!(
+                normalizeSwotData(processedData.strengths).length > 0 || 
+                normalizeSwotData(processedData.swot_analysis?.strengths).length > 0
+              )
             }
           }));
           
           console.log("[useReportAccess] SWOT data in deepDiveData:", {
-            hasStrengthsArray: !!deepDiveData.strengths,
-            strengthsLength: deepDiveData.strengths ? deepDiveData.strengths.length : 0,
-            hasSwotAnalysis: !!deepDiveData.swot_analysis,
-            swotStrengthsLength: deepDiveData.swot_analysis && deepDiveData.swot_analysis.strengths ? deepDiveData.swot_analysis.strengths.length : 0
+            hasStrengthsArray: !!(normalizeSwotData(processedData.strengths).length > 0),
+            strengthsLength: normalizeSwotData(processedData.strengths).length,
+            hasSwotAnalysis: !!(processedData.swot_analysis),
+            swotStrengthsLength: processedData.swot_analysis ? normalizeSwotData(processedData.swot_analysis.strengths).length : 0
           });
         } else {
           console.log(`[useReportAccess] No level4 data found for ${archetypeId}, falling back`);
@@ -146,25 +201,52 @@ export const useReportAccess = ({ archetypeId: rawArchetypeId, token, isAdminVie
           }));
           
           // Try the level3 secure view as fallback
-          const { data: level3Data, error: level3Error } = await fetchWithCaseInsensitiveSearch('level3_report_secure', archetypeId);
+          const { data: level3Data, error: level3Error } = await fetchWithCaseInsensitiveSearch(
+            'level3_report_secure' as SecureTableName, 
+            archetypeId
+          );
             
           if (!level3Error && level3Data) {
             console.log(`[useReportAccess] Got level3 data using secure view for ${archetypeId}`);
-            setReportData(level3Data);
+            
+            // Process SWOT data to ensure proper structure
+            const processedData = {
+              ...level3Data,
+              // Ensure SWOT data exists in a consistent format
+              strengths: level3Data.strengths || (level3Data.swot_analysis?.strengths) || [],
+              weaknesses: level3Data.weaknesses || (level3Data.swot_analysis?.weaknesses) || [],
+              opportunities: level3Data.opportunities || (level3Data.swot_analysis?.opportunities) || [],
+              threats: level3Data.threats || (level3Data.swot_analysis?.threats) || []
+            };
+            
+            // Also ensure the swot_analysis object exists for backward compatibility
+            if (!processedData.swot_analysis) {
+              processedData.swot_analysis = {
+                strengths: processedData.strengths,
+                weaknesses: processedData.weaknesses,
+                opportunities: processedData.opportunities,
+                threats: processedData.threats
+              };
+            }
+            
+            setReportData(processedData);
             setDebugInfo(prev => ({
               ...prev,
               level3Query: {
                 success: true,
                 dataFound: true,
-                hasSwotData: !!(level3Data.strengths || (level3Data.swot_analysis && level3Data.swot_analysis.strengths))
+                hasSwotData: !!(
+                  normalizeSwotData(processedData.strengths).length > 0 || 
+                  normalizeSwotData(processedData.swot_analysis?.strengths).length > 0
+                )
               }
             }));
             
             console.log("[useReportAccess] SWOT data in level3Data:", {
-              hasStrengthsArray: !!level3Data.strengths,
-              strengthsLength: level3Data.strengths ? level3Data.strengths.length : 0,
-              hasSwotAnalysis: !!level3Data.swot_analysis,
-              swotStrengthsLength: level3Data.swot_analysis && level3Data.swot_analysis.strengths ? level3Data.swot_analysis.strengths.length : 0
+              hasStrengthsArray: !!(normalizeSwotData(processedData.strengths).length > 0),
+              strengthsLength: normalizeSwotData(processedData.strengths).length,
+              hasSwotAnalysis: !!(processedData.swot_analysis),
+              swotStrengthsLength: processedData.swot_analysis ? normalizeSwotData(processedData.swot_analysis.strengths).length : 0
             });
           }
         }
@@ -183,30 +265,34 @@ export const useReportAccess = ({ archetypeId: rawArchetypeId, token, isAdminVie
             console.log(`[useReportAccess] Got SWOT data directly from SWOT table:`, swotData);
             
             // Update reportData with SWOT information
-            setReportData(prevData => ({
-              ...prevData,
-              strengths: swotData.strengths,
-              weaknesses: swotData.weaknesses,
-              opportunities: swotData.opportunities,
-              threats: swotData.threats,
-              // Also add to swot_analysis for compatibility
-              swot_analysis: {
+            setReportData(prevData => {
+              const updatedData = {
+                ...prevData,
                 strengths: swotData.strengths,
                 weaknesses: swotData.weaknesses,
                 opportunities: swotData.opportunities,
-                threats: swotData.threats
-              }
-            }));
+                threats: swotData.threats,
+                // Also add to swot_analysis for compatibility
+                swot_analysis: {
+                  strengths: swotData.strengths,
+                  weaknesses: swotData.weaknesses,
+                  opportunities: swotData.opportunities,
+                  threats: swotData.threats
+                }
+              };
+              
+              return updatedData;
+            });
             
             setDebugInfo(prev => ({
               ...prev,
               swotQuery: {
                 success: true,
                 dataFound: true,
-                strengths: swotData.strengths ? swotData.strengths.length : 0,
-                weaknesses: swotData.weaknesses ? swotData.weaknesses.length : 0,
-                opportunities: swotData.opportunities ? swotData.opportunities.length : 0,
-                threats: swotData.threats ? swotData.threats.length : 0
+                strengths: normalizeSwotData(swotData.strengths).length,
+                weaknesses: normalizeSwotData(swotData.weaknesses).length,
+                opportunities: normalizeSwotData(swotData.opportunities).length,
+                threats: normalizeSwotData(swotData.threats).length
               }
             }));
           }

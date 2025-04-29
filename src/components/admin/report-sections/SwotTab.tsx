@@ -1,45 +1,12 @@
 
 import React from 'react';
+import { normalizeSwotData } from '@/utils/swot/normalizeSwotData';
 
 interface SwotTabProps {
   report: any;
 }
 
 export const SwotTab = ({ report }: SwotTabProps) => {
-  // Helper function to normalize SWOT data
-  const normalizeSwotData = (data: any): string[] => {
-    if (!data) return [];
-    
-    // If it's already an array of strings, return it
-    if (Array.isArray(data) && typeof data[0] === 'string') {
-      return data;
-    }
-    
-    // If it's an array of objects with text property
-    if (Array.isArray(data) && typeof data[0] === 'object' && data[0]?.text) {
-      return data.map(item => item.text || '');
-    }
-    
-    // If it's a JSON string, parse it
-    if (typeof data === 'string' && (data.startsWith('[') || data.startsWith('{'))) {
-      try {
-        const parsed = JSON.parse(data);
-        if (Array.isArray(parsed)) {
-          return parsed.map(item => typeof item === 'string' ? item : (item.text || JSON.stringify(item)));
-        }
-      } catch (e) {
-        return [data];
-      }
-    }
-    
-    // For a single string
-    if (typeof data === 'string') {
-      return [data];
-    }
-    
-    return [];
-  };
-
   // Get SWOT data from the report or swot_analysis
   const swotAnalysis = report?.swot_analysis || {};
   

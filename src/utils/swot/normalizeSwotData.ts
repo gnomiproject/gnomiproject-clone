@@ -1,0 +1,51 @@
+
+import { Json } from '@/types/archetype';
+
+/**
+ * Normalizes SWOT data from various possible formats into a string array
+ */
+export const normalizeSwotData = (data: any): string[] => {
+  if (!data) return [];
+  
+  // If it's already an array of strings, return it
+  if (Array.isArray(data) && data.every(item => typeof item === 'string')) {
+    return data;
+  }
+  
+  // If it's an array of objects with text property (common format in our DB)
+  if (Array.isArray(data) && data.length > 0 && typeof data[0] === 'object' && data[0]?.text) {
+    return data.map(item => item.text || '');
+  }
+  
+  // If it's a JSON string, try to parse it
+  if (typeof data === 'string' && (data.startsWith('[') || data.startsWith('{'))) {
+    try {
+      const parsed = JSON.parse(data);
+      if (Array.isArray(parsed)) {
+        return parsed.map(item => typeof item === 'string' ? item : (item.text || JSON.stringify(item)));
+      }
+    } catch (e) {
+      // If parsing fails, treat as a single string
+      return [data];
+    }
+  }
+  
+  // If it's a plain string (not JSON), treat as a single item
+  if (typeof data === 'string') {
+    return [data];
+  }
+  
+  // For Json type from Supabase, convert to string array
+  if (typeof data === 'object' && data !== null) {
+    if (Array.isArray(data)) {
+      return data.map(item => {
+        if (typeof item === 'string') return item;
+        if (typeof item === 'object' && item !== null && 'text' in item) return item.text;
+        return JSON.stringify(item);
+      });
+    }
+  }
+  
+  // Fallback: convert whatever we have to string array
+  return Array.isArray(data) ? data.map(String) : [String(data)];
+};

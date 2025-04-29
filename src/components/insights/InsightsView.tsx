@@ -9,6 +9,7 @@ import SwotTab from './tabs/SwotTab';
 import DiseaseAndCareTab from './tabs/DiseaseAndCareTab';
 import DeepDiveRequestForm from '@/components/results/DeepDiveRequestForm';
 import { getGnomeForArchetype } from '@/utils/gnomeImages';
+import { normalizeSwotData } from '@/utils/swot/normalizeSwotData';
 
 interface ArchetypeReportProps {
   archetypeId: ArchetypeId;
@@ -31,10 +32,10 @@ const InsightsView = ({
   console.log('[InsightsView] Rendering with data:', {
     archetypeId,
     reportDataName: reportData?.name || reportData?.archetype_name,
-    hasStrengths: Array.isArray(reportData?.strengths) && reportData.strengths.length > 0,
-    strengthsLength: reportData?.strengths ? reportData.strengths.length : 0,
+    hasStrengths: Array.isArray(normalizeSwotData(reportData?.strengths)) && normalizeSwotData(reportData?.strengths).length > 0,
+    strengthsLength: reportData?.strengths ? normalizeSwotData(reportData.strengths).length : 0,
     hasSwotAnalysis: !!(reportData?.swot_analysis),
-    swotAnalysisStrengths: reportData?.swot_analysis?.strengths ? reportData.swot_analysis.strengths.length : 0
+    swotAnalysisStrengths: reportData?.swot_analysis?.strengths ? normalizeSwotData(reportData.swot_analysis.strengths).length : 0
   });
   
   // Enhanced logging for assessment data
@@ -84,10 +85,10 @@ const InsightsView = ({
 
   // Debug log SWOT data
   console.log('[InsightsView] Processed SWOT data:', {
-    strengths: swotData.strengths?.length || 0,
-    weaknesses: swotData.weaknesses?.length || 0,
-    opportunities: swotData.opportunities?.length || 0, 
-    threats: swotData.threats?.length || 0
+    strengths: normalizeSwotData(swotData.strengths).length || 0,
+    weaknesses: normalizeSwotData(swotData.weaknesses).length || 0,
+    opportunities: normalizeSwotData(swotData.opportunities).length || 0, 
+    threats: normalizeSwotData(swotData.threats).length || 0
   });
 
   return (

@@ -4,47 +4,13 @@ import { Card } from '@/components/ui/card';
 import { Section } from '@/components/shared/Section';
 import SectionTitle from '@/components/shared/SectionTitle';
 import { insightReportSchema } from '@/schemas/insightReportSchema';
+import { normalizeSwotData } from '@/utils/swot/normalizeSwotData';
 
 interface InsightSwotSectionProps {
   archetype: any;
 }
 
 const InsightSwotSection = ({ archetype }: InsightSwotSectionProps) => {
-  // Helper function to normalize SWOT data regardless of format
-  const normalizeSwotData = (data: any): string[] => {
-    if (!data) return [];
-    
-    // If it's already an array of strings, return it
-    if (Array.isArray(data) && typeof data[0] === 'string') {
-      return data;
-    }
-    
-    // If it's an array of objects with text property (common format in our DB)
-    if (Array.isArray(data) && typeof data[0] === 'object' && data[0]?.text) {
-      return data.map(item => item.text || '');
-    }
-    
-    // If it's a JSON string, parse it
-    if (typeof data === 'string' && (data.startsWith('[') || data.startsWith('{'))) {
-      try {
-        const parsed = JSON.parse(data);
-        if (Array.isArray(parsed)) {
-          return parsed.map(item => typeof item === 'string' ? item : (item.text || JSON.stringify(item)));
-        }
-      } catch (e) {
-        // If parsing fails, treat as a single string
-        return [data];
-      }
-    }
-    
-    // For a single string
-    if (typeof data === 'string') {
-      return [data];
-    }
-    
-    return [];
-  };
-
   // Extract SWOT data with fallback to swot_analysis if available
   const strengths = normalizeSwotData(archetype?.strengths || (archetype?.swot_analysis && archetype?.swot_analysis?.strengths));
   const weaknesses = normalizeSwotData(archetype?.weaknesses || (archetype?.swot_analysis && archetype?.swot_analysis?.weaknesses));
@@ -54,8 +20,8 @@ const InsightSwotSection = ({ archetype }: InsightSwotSectionProps) => {
   // Debug log
   console.log('InsightSwotSection data:', { 
     hasSwotAnalysis: !!(archetype?.swot_analysis),
-    directStrengths: archetype?.strengths ? archetype.strengths.length : 0,
-    nestedStrengths: archetype?.swot_analysis?.strengths ? archetype.swot_analysis.strengths.length : 0,
+    directStrengths: archetype?.strengths ? strengths.length : 0,
+    nestedStrengths: archetype?.swot_analysis?.strengths ? normalizeSwotData(archetype.swot_analysis.strengths).length : 0,
     normalizedStrengths: strengths.length,
     normalizedWeaknesses: weaknesses.length,
     normalizedOpportunities: opportunities.length,

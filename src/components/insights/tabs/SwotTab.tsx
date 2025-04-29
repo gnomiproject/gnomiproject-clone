@@ -2,14 +2,15 @@
 import React, { useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArchetypeDetailedData } from '@/types/archetype';
+import { normalizeSwotData } from '@/utils/swot/normalizeSwotData';
 
 interface SwotTabProps {
   archetypeData: ArchetypeDetailedData;
   swotData: {
-    strengths: string[];
-    weaknesses: string[];
-    opportunities: string[];
-    threats: string[];
+    strengths: any;
+    weaknesses: any;
+    opportunities: any;
+    threats: any;
   };
   hideRequestSection?: boolean;
 }
@@ -21,14 +22,10 @@ const SwotTab = ({ archetypeData, swotData, hideRequestSection = false }: SwotTa
       archetypeId: archetypeData?.id,
       archetypeName: archetypeData?.name,
       swotData: swotData || 'No SWOT data',
-      strengths: swotData?.strengths?.length || 0,
-      weaknesses: swotData?.weaknesses?.length || 0,
-      opportunities: swotData?.opportunities?.length || 0,
-      threats: swotData?.threats?.length || 0,
-      rawStrengths: swotData?.strengths,
-      rawWeaknesses: swotData?.weaknesses,
-      rawOpportunities: swotData?.opportunities,
-      rawThreats: swotData?.threats,
+      strengths: swotData?.strengths ? normalizeSwotData(swotData.strengths).length : 0,
+      weaknesses: swotData?.weaknesses ? normalizeSwotData(swotData.weaknesses).length : 0,
+      opportunities: swotData?.opportunities ? normalizeSwotData(swotData.opportunities).length : 0,
+      threats: swotData?.threats ? normalizeSwotData(swotData.threats).length : 0
     });
     
     // Check if there's nested SWOT data in archetypeData.swot_analysis
@@ -37,47 +34,11 @@ const SwotTab = ({ archetypeData, swotData, hideRequestSection = false }: SwotTa
     }
   }, [archetypeData, swotData]);
 
-  // Normalize the SWOT data to handle different formats and convert to string arrays if needed
-  const normalizeSwotItems = (items: any): string[] => {
-    if (!items) return [];
-    
-    // If it's already a string array, return it
-    if (Array.isArray(items) && typeof items[0] === 'string') {
-      return items;
-    }
-    
-    // If it's an array of objects with a 'text' property (common format in our DB)
-    if (Array.isArray(items) && typeof items[0] === 'object' && items[0]?.text) {
-      return items.map(item => item.text || '');
-    }
-    
-    // If it's a JSON string, try to parse it
-    if (typeof items === 'string' && (items.startsWith('[') || items.startsWith('{'))) {
-      try {
-        const parsed = JSON.parse(items);
-        if (Array.isArray(parsed)) {
-          return parsed.map(item => typeof item === 'string' ? item : (item.text || JSON.stringify(item)));
-        }
-      } catch (e) {
-        // If parsing fails, treat as a single string
-        return [items];
-      }
-    }
-    
-    // If it's a plain string (not JSON), treat as a single item
-    if (typeof items === 'string') {
-      return [items];
-    }
-    
-    // Fallback: convert whatever we have to string and return as array
-    return [String(items)];
-  };
-
   // Prepare normalized SWOT data
-  const strengths = normalizeSwotItems(swotData?.strengths);
-  const weaknesses = normalizeSwotItems(swotData?.weaknesses);
-  const opportunities = normalizeSwotItems(swotData?.opportunities);
-  const threats = normalizeSwotItems(swotData?.threats);
+  const strengths = normalizeSwotData(swotData?.strengths);
+  const weaknesses = normalizeSwotData(swotData?.weaknesses);
+  const opportunities = normalizeSwotData(swotData?.opportunities);
+  const threats = normalizeSwotData(swotData?.threats);
 
   return (
     <Card>
