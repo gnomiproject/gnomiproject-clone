@@ -18,10 +18,13 @@ const NavigationButtons: React.FC<NavigationButtonsProps> = ({
   nextSectionName,
   onNavigate
 }) => {
-  const handleNavigation = (sectionId: string) => {
+  const handleNavigation = (e: React.MouseEvent<HTMLButtonElement>, sectionId: string) => {
+    e.preventDefault();
+    
     if (onNavigate) {
       onNavigate(sectionId);
     } else {
+      // Fallback to direct DOM manipulation if no onNavigate provided
       const element = document.getElementById(sectionId);
       if (element) {
         element.scrollIntoView({ behavior: 'smooth' });
@@ -33,16 +36,18 @@ const NavigationButtons: React.FC<NavigationButtonsProps> = ({
     <div className="flex justify-between items-center mt-10 print:hidden">
       <Button
         variant="outline"
-        onClick={() => handleNavigation(previousSection)}
+        onClick={(e) => handleNavigation(e, previousSection)}
         className="flex items-center gap-2"
+        type="button"
       >
         <ArrowLeft className="h-4 w-4" /> 
         {previousSectionName}
       </Button>
       
       <Button
-        onClick={() => handleNavigation(nextSection)}
+        onClick={(e) => handleNavigation(e, nextSection)}
         className="flex items-center gap-2"
+        type="button"
       >
         {nextSectionName}
         <ArrowRight className="h-4 w-4" />

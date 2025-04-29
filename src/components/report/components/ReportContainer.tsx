@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import LeftNavigation from '../navigation/LeftNavigation';
 import PrintButton from './PrintButton';
 import { useReportNavigation } from '../hooks/useReportNavigation';
@@ -36,8 +36,8 @@ const ReportContainer: React.FC<ReportContainerProps> = ({
   isAdminView = false,
   debugInfo
 }) => {
-  const reportRef = React.useRef<HTMLDivElement>(null);
-  const { activeSectionId, handleNavigate } = useReportNavigation();
+  const reportRef = useRef<HTMLDivElement>(null);
+  const { activeSectionId, handleNavigate, isNavigating } = useReportNavigation();
   
   // Debug info
   const isDebugMode = isAdminView || window.location.search.includes('debug=true');
@@ -58,7 +58,7 @@ const ReportContainer: React.FC<ReportContainerProps> = ({
   return (
     <div className="relative min-h-screen bg-gray-50">
       {/* Left navigation only on larger screens */}
-      <div className="hidden lg:block fixed left-0 top-0 h-full print:hidden">
+      <div className="hidden lg:block fixed left-0 top-0 h-full print:hidden z-10">
         <LeftNavigation 
           activeSectionId={activeSectionId}
           onNavigate={handleNavigate}
