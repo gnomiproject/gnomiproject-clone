@@ -3,7 +3,6 @@ import React from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Info } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import GnomeImage from '@/components/common/GnomeImage';
 
 interface ArchetypeHeaderProps {
   name: string;
@@ -59,12 +58,13 @@ const ArchetypeHeader = ({
           </div>
           
           <div className="flex-shrink-0 hidden md:block">
-            {/* Replace the old img with GnomeImage component */}
-            <GnomeImage 
-              archetypeId={familyId}
-              src={gnomeImage}
-              className="h-48 object-contain"
+            <img 
+              src={gnomeImage || `/assets/gnomes/${familyId ? `gnome_${familyId.toLowerCase()}.png` : 'placeholder.svg'}`}
               alt={`${name} Guide`}
+              className="h-48 object-contain"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = '/assets/gnomes/placeholder.svg';
+              }}
             />
           </div>
         </div>

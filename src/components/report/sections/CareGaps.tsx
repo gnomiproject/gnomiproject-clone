@@ -1,7 +1,7 @@
+
 import React from 'react';
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import GnomeImage from '@/components/common/GnomeImage';
 
 interface CareGapsProps {
   reportData: any;
@@ -22,6 +22,9 @@ const CareGaps = ({ reportData, averageData }: CareGapsProps) => {
 
   const hasMetrics = gapMetrics.length > 0;
 
+  // Gnome image
+  const gnomeImage = '/assets/gnomes/gnome_clipboard.png';
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row gap-8">
@@ -33,12 +36,13 @@ const CareGaps = ({ reportData, averageData }: CareGapsProps) => {
           </p>
         </div>
         <div className="md:w-1/3 flex justify-center">
-          {/* Use the GnomeImage component */}
-          <GnomeImage 
-            type="clipboard" 
-            sectionType="care-gaps"
-            className="max-h-64 object-contain"
+          <img
+            src={gnomeImage}
             alt="Care Gaps Gnome"
+            className="max-h-64 object-contain"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = '/assets/gnomes/placeholder.svg';
+            }}
           />
         </div>
       </div>
