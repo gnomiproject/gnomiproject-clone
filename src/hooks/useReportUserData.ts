@@ -27,7 +27,10 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
 
   useEffect(() => {
     const fetchUserData = async () => {
+      console.log(`[useReportUserData] Starting fetch with token: ${token?.substring(0, 5)}... and archetype: ${archetypeId}`);
+      
       if (!token || !archetypeId) {
+        console.log('[useReportUserData] Missing token or archetypeId, aborting fetch');
         setIsLoading(false);
         setIsValid(false);
         return;
@@ -37,7 +40,7 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
         setIsLoading(true);
         setError(null);
         
-        console.log(`Fetching user data for token: ${token} and archetype: ${archetypeId}`);
+        console.log(`[useReportUserData] Fetching user data for token: ${token.substring(0, 5)}... and archetype: ${archetypeId}`);
         
         // First, check if the report request exists and is valid
         const { data, error: fetchError } = await supabase
@@ -49,16 +52,21 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
           .maybeSingle();
           
         if (fetchError) {
+          console.error('[useReportUserData] Error fetching data:', fetchError);
           throw new Error(`Error fetching report user data: ${fetchError.message}`);
         }
         
+        console.log('[useReportUserData] Query result:', data ? 'Data found' : 'No data found');
+        
         if (!data) {
+          console.log('[useReportUserData] No valid report request found');
           setIsValid(false);
           throw new Error('Invalid or expired access token');
         }
         
         // Check if the token has expired
         if (data.expires_at && new Date(data.expires_at) < new Date()) {
+          console.log('[useReportUserData] Token has expired:', data.expires_at);
           setIsValid(false);
           throw new Error('This report link has expired');
         }
@@ -79,10 +87,12 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
           .eq('archetype_id', archetypeId);
         
         if (accessUpdateError) {
-          console.warn('Could not update access count:', accessUpdateError);
+          console.warn('[useReportUserData] Could not update access count:', accessUpdateError);
+        } else {
+          console.log('[useReportUserData] Access count updated to:', newAccessCount);
         }
         
-        console.log('Found valid report user data:', data);
+        console.log('[useReportUserData] Found valid report user data');
         
         // Convert the data to the expected type, handling the assessment_result conversion
         const typedUserData: ReportUserData = {
@@ -100,15 +110,24 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
           access_url: data.access_url // Include the access_url if available
         };
         
+        console.log('[useReportUserData] Formatted user data:', {
+          id: typedUserData.id,
+          name: typedUserData.name,
+          organization: typedUserData.organization,
+          archetypeId: typedUserData.archetype_id,
+          hasAssessmentData: !!typedUserData.assessment_result
+        });
+        
         setUserData(typedUserData);
         setIsValid(true);
       } catch (err) {
-        console.error('Error in useReportUserData:', err);
+        console.error('[useReportUserData] Error:', err);
         setError(err instanceof Error ? err : new Error('Unknown error fetching user data'));
         setUserData(null);
         setIsValid(false);
       } finally {
         setIsLoading(false);
+        console.log('[useReportUserData] Fetch completed, isValid:', isValid);
       }
     };
     

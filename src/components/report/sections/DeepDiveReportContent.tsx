@@ -2,6 +2,7 @@
 import React from 'react';
 import { ArchetypeDetailedData } from '@/types/archetype';
 import { Section } from '@/components/shared/Section';
+import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import ReportIntroduction from './ReportIntroduction';
 import ExecutiveSummary from './ExecutiveSummary';
 import ArchetypeProfile from './ArchetypeProfile';
@@ -35,100 +36,137 @@ const DeepDiveReportContent = ({
   // Process data for use in components
   const processedUserData = userData || {};
   const processedAverageData = averageData || {};
+  
+  console.log('[DeepDiveReportContent] Rendering with archetype data:', {
+    id: archetypeId,
+    name: archetypeName,
+    hasStrengths: Array.isArray(archetype.strengths) && archetype.strengths.length > 0,
+    hasRecommendations: Array.isArray(archetype.strategic_recommendations) && archetype.strategic_recommendations.length > 0
+  });
 
   return (
     <div className="container mx-auto p-6">
       {/* New Home Introduction Section */}
-      <HomeIntroduction 
-        userData={userData} 
-        archetypeData={archetype} 
-        averageData={averageData} 
-      />
+      <ErrorBoundary>
+        <HomeIntroduction 
+          userData={userData} 
+          archetypeData={archetype} 
+          averageData={averageData} 
+        />
+      </ErrorBoundary>
       
       {/* Original Report Introduction */}
-      <ReportIntroduction 
-        archetypeName={archetypeName} 
-        archetypeId={archetypeId} 
-        userData={userData}
-        isAdminView={false}
-      />
+      <ErrorBoundary>
+        <ReportIntroduction 
+          archetypeName={archetypeName} 
+          archetypeId={archetypeId} 
+          userData={userData}
+          isAdminView={false}
+        />
+      </ErrorBoundary>
       
       <Section id="executive-summary">
-        <ExecutiveSummary 
-          archetypeData={archetype}
-        />
+        <ErrorBoundary>
+          <ExecutiveSummary 
+            archetypeData={archetype}
+          />
+        </ErrorBoundary>
       </Section>
       
       <Section id="archetype-profile">
-        <ArchetypeProfile 
-          archetypeData={archetype}
-        />
+        <ErrorBoundary>
+          <ArchetypeProfile 
+            archetypeData={archetype}
+            reportData={archetype} // Supporting both prop patterns
+          />
+        </ErrorBoundary>
       </Section>
       
       <Section id="swot-analysis">
-        <SwotAnalysis 
-          reportData={archetype}
-        />
+        <ErrorBoundary>
+          <SwotAnalysis 
+            reportData={archetype}
+          />
+        </ErrorBoundary>
       </Section>
       
       <Section id="demographics">
-        <DemographicsSection 
-          reportData={archetype}
-          averageData={processedAverageData}
-        />
+        <ErrorBoundary>
+          <DemographicsSection 
+            reportData={archetype}
+            averageData={processedAverageData}
+          />
+        </ErrorBoundary>
       </Section>
       
       <Section id="utilization">
-        <UtilizationPatterns 
-          reportData={archetype}
-          averageData={processedAverageData}
-        />
+        <ErrorBoundary>
+          <UtilizationPatterns 
+            reportData={archetype}
+            averageData={processedAverageData}
+          />
+        </ErrorBoundary>
       </Section>
       
       <Section id="risk-factors">
-        <RiskFactors 
-          reportData={archetype}
-          averageData={processedAverageData}
-        />
+        <ErrorBoundary>
+          <RiskFactors 
+            reportData={archetype}
+            averageData={processedAverageData}
+          />
+        </ErrorBoundary>
       </Section>
       
       <Section id="cost-analysis">
-        <CostAnalysis 
-          reportData={archetype}
-          averageData={processedAverageData}
-        />
+        <ErrorBoundary>
+          <CostAnalysis 
+            reportData={archetype}
+            averageData={processedAverageData}
+          />
+        </ErrorBoundary>
       </Section>
       
       <Section id="care-gaps">
-        <CareGaps 
-          reportData={archetype}
-          averageData={processedAverageData}
-        />
+        <ErrorBoundary>
+          <CareGaps 
+            reportData={archetype}
+            averageData={processedAverageData}
+          />
+        </ErrorBoundary>
       </Section>
       
       <Section id="disease-management">
-        <DiseaseManagement 
-          reportData={archetype}
-          averageData={processedAverageData}
-        />
+        <ErrorBoundary>
+          <DiseaseManagement 
+            reportData={archetype}
+            averageData={processedAverageData}
+          />
+        </ErrorBoundary>
       </Section>
       
       <Section id="metrics-analysis">
-        <MetricsAnalysis 
-          reportData={archetype}
-          averageData={processedAverageData}
-        />
+        <ErrorBoundary>
+          <MetricsAnalysis 
+            reportData={archetype}
+            averageData={processedAverageData}
+          />
+        </ErrorBoundary>
       </Section>
       
       <Section id="recommendations">
-        <StrategicRecommendations 
-          reportData={archetype}
-          averageData={processedAverageData}
-        />
+        <ErrorBoundary>
+          <StrategicRecommendations 
+            reportData={archetype}
+            archetypeData={archetype} // Supporting both prop patterns
+            averageData={processedAverageData}
+          />
+        </ErrorBoundary>
       </Section>
       
       <Section id="contact">
-        <ContactSection userData={userData || {}} />
+        <ErrorBoundary>
+          <ContactSection userData={userData || {}} />
+        </ErrorBoundary>
       </Section>
     </div>
   );

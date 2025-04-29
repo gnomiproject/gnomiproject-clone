@@ -12,6 +12,14 @@ const ArchetypeProfile: React.FC<ArchetypeProfileProps> = ({ archetypeData, repo
   // Use archetypeData as primary, fall back to reportData
   const data = archetypeData || reportData;
 
+  // Add debugging
+  console.log('[ArchetypeProfile] Rendering with data:', {
+    hasData: !!data,
+    name: data?.name || data?.archetype_name || 'Unknown',
+    hasDescription: !!data?.long_description,
+    hasCharacteristics: !!data?.key_characteristics
+  });
+
   if (!data) {
     return (
       <div className="space-y-6">
@@ -23,11 +31,13 @@ const ArchetypeProfile: React.FC<ArchetypeProfileProps> = ({ archetypeData, repo
     );
   }
 
+  const displayName = data.name || data.archetype_name || 'Unknown Archetype';
+  
   return (
     <div className="space-y-6">
       <SectionTitle title="Archetype Profile" />
       <div className="bg-white rounded-lg p-6 shadow-sm">
-        <h3 className="text-xl font-semibold mb-3">{data.name || data.archetype_name}</h3>
+        <h3 className="text-xl font-semibold mb-3">{displayName}</h3>
         
         <div className="space-y-4">
           <div>
