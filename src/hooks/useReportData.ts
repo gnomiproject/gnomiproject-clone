@@ -95,8 +95,9 @@ export const useReportData = ({ archetypeId, token, isInsightsReport = false, sk
   useEffect(() => {
     const fetchAverageData = async () => {
       try {
+        // Use the secure view instead of direct table access
         const { data: avgData, error: avgError } = await supabase
-          .from('level4_deepdive_report_data')
+          .from('level4_report_secure')
           .select('*')
           .eq('archetype_id', 'All_Average')
           .maybeSingle();
@@ -129,9 +130,9 @@ export const useReportData = ({ archetypeId, token, isInsightsReport = false, sk
       try {
         console.log(`Fetching detailed data for archetype ${archetypeId}`);
         
-        // Fetch from level4 data first (most detailed)
+        // Fetch from level4 secure view first (most detailed)
         const { data: detailedData, error: detailedError } = await supabase
-          .from('level4_deepdive_report_data')
+          .from('level4_report_secure')
           .select('*')
           .eq('archetype_id', archetypeId)
           .maybeSingle();

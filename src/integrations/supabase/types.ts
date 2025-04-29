@@ -61,6 +61,13 @@ export type Database = {
             referencedRelation: "level3_report_data"
             referencedColumns: ["archetype_id"]
           },
+          {
+            foreignKeyName: "Analysis_Archetype_Deep_Dive_Reports_archetype_id_fkey"
+            columns: ["archetype_id"]
+            isOneToOne: false
+            referencedRelation: "level3_report_secure"
+            referencedColumns: ["archetype_id"]
+          },
         ]
       }
       Analysis_Archetype_Distinctive_Metrics: {
@@ -110,6 +117,13 @@ export type Database = {
             columns: ["archetype_id"]
             isOneToOne: false
             referencedRelation: "level3_report_data"
+            referencedColumns: ["archetype_id"]
+          },
+          {
+            foreignKeyName: "Analysis_Archetype_Distinctive_Metrics_archetype_id_fkey"
+            columns: ["archetype_id"]
+            isOneToOne: false
+            referencedRelation: "level3_report_secure"
             referencedColumns: ["archetype_id"]
           },
         ]
@@ -166,6 +180,13 @@ export type Database = {
             referencedRelation: "level3_report_data"
             referencedColumns: ["archetype_id"]
           },
+          {
+            foreignKeyName: "Analysis_Archetype_Full_Reports_Archetype_id_fkey"
+            columns: ["archetype_id"]
+            isOneToOne: true
+            referencedRelation: "level3_report_secure"
+            referencedColumns: ["archetype_id"]
+          },
         ]
       }
       Analysis_Archetype_Strategic_Recommendations: {
@@ -211,6 +232,13 @@ export type Database = {
             referencedRelation: "level3_report_data"
             referencedColumns: ["archetype_id"]
           },
+          {
+            foreignKeyName: "Analysis_Archetype_Strategic_Recommendations_archetype_id_fkey"
+            columns: ["archetype_id"]
+            isOneToOne: false
+            referencedRelation: "level3_report_secure"
+            referencedColumns: ["archetype_id"]
+          },
         ]
       }
       Analysis_Archetype_SWOT: {
@@ -254,6 +282,13 @@ export type Database = {
             columns: ["archetype_id"]
             isOneToOne: true
             referencedRelation: "level3_report_data"
+            referencedColumns: ["archetype_id"]
+          },
+          {
+            foreignKeyName: "Analysis_Archetype_SWOT_archetype_id_fkey"
+            columns: ["archetype_id"]
+            isOneToOne: true
+            referencedRelation: "level3_report_secure"
             referencedColumns: ["archetype_id"]
           },
         ]
@@ -953,7 +988,175 @@ export type Database = {
         }
         Relationships: []
       }
+      level3_report_secure: {
+        Row: {
+          archetype_id: string | null
+          archetype_name: string | null
+          common_traits: Json | null
+          "Cost_Avoidable ER Potential Savings PMPY": number | null
+          "Cost_Medical & RX Paid Amount PEPY": number | null
+          "Cost_Medical & RX Paid Amount PMPY": number | null
+          "Cost_Medical Paid Amount PEPY": number | null
+          "Cost_RX Paid Amount PEPY": number | null
+          "Demo_Average Age": number | null
+          "Demo_Average Employees": number | null
+          "Demo_Average Family Size": number | null
+          "Demo_Average Percent Female": number | null
+          "Demo_Average States": number | null
+          detailed_metrics: Json | null
+          "Dise_Heart Disease Prevalence": number | null
+          "Dise_Mental Health Disorder Prevalence": number | null
+          "Dise_Substance Use Disorder Prevalence": number | null
+          "Dise_Type 2 Diabetes Prevalence": number | null
+          distinctive_metrics: Json | null
+          executive_summary: string | null
+          family_id: string | null
+          family_industries: string | null
+          family_long_description: string | null
+          family_name: string | null
+          family_short_description: string | null
+          "Gaps_Behavioral Health FU ED Visit Mental Illness": number | null
+          "Gaps_Cancer Screening Breast": number | null
+          "Gaps_Diabetes RX Adherence": number | null
+          "Gaps_Wellness Visit Adults": number | null
+          hex_color: string | null
+          industries: string | null
+          key_characteristics: string | null
+          key_findings: Json | null
+          long_description: string | null
+          opportunities: Json | null
+          "Risk_Average Risk Score": number | null
+          "SDOH_Average SDOH": number | null
+          short_description: string | null
+          strategic_recommendations: Json | null
+          strengths: Json | null
+          threats: Json | null
+          "Util_Emergency Visits per 1k Members": number | null
+          "Util_Inpatient Admits per 1k Members": number | null
+          "Util_Percent of Members who are Non-Utilizers": number | null
+          "Util_Specialist Visits per 1k Members": number | null
+          weaknesses: Json | null
+        }
+        Relationships: []
+      }
       level4_deepdive_report_data: {
+        Row: {
+          archetype_id: string | null
+          archetype_name: string | null
+          archetype_overview: Json | null
+          benefits_structure: string | null
+          care_gaps: string | null
+          cost_analysis: string | null
+          "Cost_Avoidable ER Potential Savings PMPY": number | null
+          "Cost_Medical & RX Paid Amount PEPY": number | null
+          "Cost_Medical & RX Paid Amount PMPY": number | null
+          "Cost_Medical Paid Amount PEPY": number | null
+          "Cost_Medical Paid Amount PMPY": number | null
+          "Cost_RX Paid Amount PEPY": number | null
+          "Cost_RX Paid Amount PMPY": number | null
+          "Cost_Specialty RX Allowed Amount PMPM": number | null
+          "Demo_Average Age": number | null
+          "Demo_Average Employees": number | null
+          "Demo_Average Family Size": number | null
+          "Demo_Average Members": number | null
+          "Demo_Average Percent Female": number | null
+          "Demo_Average Salary": number | null
+          "Demo_Average States": number | null
+          "Demo_Median Employees": number | null
+          "Demo_Median Members": number | null
+          demographic_insights: string | null
+          detailed_metrics: Json | null
+          "Dise_Cancer Prevalence": number | null
+          "Dise_COPD Prevalence": number | null
+          "Dise_Heart Disease Prevalence": number | null
+          "Dise_Hypertension Prevalence": number | null
+          "Dise_Infertility Prevalence": number | null
+          "Dise_Mental Health Disorder Prevalence": number | null
+          "Dise_Multiple Sclerosis Prevalence": number | null
+          "Dise_Substance Use Disorder Prevalence": number | null
+          "Dise_Type 1 Diabetes Prevalence": number | null
+          "Dise_Type 2 Diabetes Prevalence": number | null
+          "Dise_Vitamin D Deficiency Prevalence": number | null
+          disease_prevalence: string | null
+          distinctive_metrics: Json | null
+          executive_summary: string | null
+          family_id: string | null
+          "Gaps_Behavioral Health FU Antidepressant Med Man": number | null
+          "Gaps_Behavioral Health FU Care Children ADHDMeds": number | null
+          "Gaps_Behavioral Health FU ED Visit Alcohol Other Drug Abuse":
+            | number
+            | null
+          "Gaps_Behavioral Health FU ED Visit Mental Illness": number | null
+          "Gaps_Behavioral Health FU High Intensity Care SUD": number | null
+          "Gaps_Behavioral Health FU Hospitalization Mental Illness":
+            | number
+            | null
+          "Gaps_Cancer Screening Breast": number | null
+          "Gaps_Cancer Screening Cervical": number | null
+          "Gaps_Cancer Screening Colon": number | null
+          "Gaps_Diabetes Annual Exam": number | null
+          "Gaps_Diabetes HbA1C Test": number | null
+          "Gaps_Diabetes Retinal Screening": number | null
+          "Gaps_Diabetes RX Adherence": number | null
+          "Gaps_Hyperlipidemia RX Adherence": number | null
+          "Gaps_Hypertension Annual Exam": number | null
+          "Gaps_Hypertension RX Adherence": number | null
+          "Gaps_Immunization HPV": number | null
+          "Gaps_Immunization Meningitis": number | null
+          "Gaps_Immunization TDAP": number | null
+          "Gaps_Wellness Visit Adults": number | null
+          "Gaps_Wellness Visit Ages 1-2": number | null
+          "Gaps_Wellness Visit Ages 1-20": number | null
+          "Gaps_Wellness Visit Ages 12-20": number | null
+          "Gaps_Wellness Visit Ages 2-7": number | null
+          "Gaps_Wellness Visit Ages 7-12": number | null
+          hex_color: string | null
+          industries: string | null
+          key_characteristics: string | null
+          key_findings: Json | null
+          long_description: string | null
+          recommendations: string | null
+          "Risk_Average Risk Score": number | null
+          "SDOH_Average Amenities Access": number | null
+          "SDOH_Average Childcare Access": number | null
+          "SDOH_Average Digital Access": number | null
+          "SDOH_Average Economic Insecurity": number | null
+          "SDOH_Average Food Access": number | null
+          "SDOH_Average Health Literacy": number | null
+          "SDOH_Average Healthcare Access": number | null
+          "SDOH_Average Neighborhood": number | null
+          "SDOH_Average SDOH": number | null
+          "SDOH_Average Transportation": number | null
+          "SDOH_Average Womens Health": number | null
+          short_description: string | null
+          strategic_recommendations: Json | null
+          swot_analysis: Json | null
+          top_distinctive_metrics: Json | null
+          "Util_Cesarean Sections": number | null
+          "Util_Dialysis Service per 1k Members": number | null
+          "Util_Emergency Visits per 1k Members": number | null
+          "Util_Inpatient Admits per 1k Members": number | null
+          "Util_Inpatient Days per 1k Members": number | null
+          "Util_Lab Services per 1k Members": number | null
+          "Util_Live Births": number | null
+          "Util_Observational Stays per 1k Members": number | null
+          "Util_Outpatient Surgeries per 1k Members": number | null
+          "Util_PCP Visits per 1k Members": number | null
+          "Util_Percent of Allowed Amount Spent on High Cost Claimants":
+            | number
+            | null
+          "Util_Percent of Members who are High Cost Claimants": number | null
+          "Util_Percent of Members who are Non-Utilizers": number | null
+          "Util_Preventative Visits per 1k Members": number | null
+          "Util_Radiology Services per 1k Members": number | null
+          "Util_Specialist Visits per 1k Members": number | null
+          "Util_Telehealth Adoption": number | null
+          "Util_Urgent Care Visits per 1k Members": number | null
+          utilization_patterns: string | null
+        }
+        Relationships: []
+      }
+      level4_report_secure: {
         Row: {
           archetype_id: string | null
           archetype_name: string | null
@@ -1480,6 +1683,14 @@ export type Database = {
       create_test_table_if_not_exists: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      has_level3_report_access: {
+        Args: { archetype_id: string }
+        Returns: boolean
+      }
+      has_level4_report_access: {
+        Args: { archetype_id: string }
+        Returns: boolean
       }
       update_archetype_analysis: {
         Args: {

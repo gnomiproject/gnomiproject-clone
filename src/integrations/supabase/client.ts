@@ -71,9 +71,9 @@ export const isAdmin = isAdminMode();
 // Add a dedicated test function for RLS
 export const testRlsAccess = async () => {
   try {
-    console.log('[RLS Test] Testing access to tables with new RLS policies...');
+    console.log('[RLS Test] Testing access to tables with new RLS policies and secure views...');
     
-    // Test Core_Archetype_Overview
+    // Test Core_Archetype_Overview - this table isn't behind a secure view
     const { data: archetypes, error: archetypesError } = await supabase
       .from('Core_Archetype_Overview')
       .select('count')
@@ -84,35 +84,36 @@ export const testRlsAccess = async () => {
       return { success: false, error: archetypesError };
     }
     
-    // Test Core_Archetype_Families
-    const { data: families, error: familiesError } = await supabase
-      .from('Core_Archetype_Families')
+    // Test level3_report_secure view instead of the table directly
+    const { data: level3Data, error: level3Error } = await supabase
+      .from('level3_report_secure')
       .select('count')
       .limit(1);
       
-    if (familiesError) {
-      console.error('[RLS Test] Core_Archetype_Families access error:', familiesError);
-      return { success: false, error: familiesError };
+    if (level3Error) {
+      console.error('[RLS Test] level3_report_secure access error:', level3Error);
+      return { success: false, error: level3Error };
     }
     
-    // Test Core_Archetypes_Metrics
-    const { data: metrics, error: metricsError } = await supabase
-      .from('Core_Archetypes_Metrics')
+    // Test level4_report_secure view instead of the table directly
+    const { data: level4Data, error: level4Error } = await supabase
+      .from('level4_report_secure')
       .select('count')
       .limit(1);
       
-    if (metricsError) {
-      console.error('[RLS Test] Core_Archetypes_Metrics access error:', metricsError);
-      return { success: false, error: metricsError };
+    if (level4Error) {
+      console.error('[RLS Test] level4_report_secure access error:', level4Error);
+      // Don't fail on level4 error as it's expected for unauthorized users
+      console.log('[RLS Test] Note: level4 access errors may be expected if no valid report request exists');
     }
     
-    console.log('[RLS Test] All tables accessible after RLS implementation');
+    console.log('[RLS Test] All accessible tables verified after secure view implementation');
     return { 
       success: true, 
       results: { 
         archetypes: !!archetypes, 
-        families: !!families, 
-        metrics: !!metrics 
+        level3Data: !!level3Data, 
+        level4Data: !!level4Data 
       } 
     };
   } catch (error) {

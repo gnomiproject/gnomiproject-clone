@@ -52,9 +52,9 @@ export const useReportAccess = ({ archetypeId, token, isAdminView = false }: Use
           console.log(`[useReportAccess] Validating token: ${token.substring(0, 5)}...`);
         }
 
-        // Fetch detailed report data from level4 data table
+        // Fetch detailed report data from level4 secure view
         const { data: deepDiveData, error: deepDiveError } = await supabase
-          .from('level4_deepdive_report_data')
+          .from('level4_report_secure')
           .select('*')
           .eq('archetype_id', archetypeId)
           .maybeSingle();
@@ -91,7 +91,7 @@ export const useReportAccess = ({ archetypeId, token, isAdminView = false }: Use
 
         // Fetch average data for comparisons
         const { data: avgData, error: avgError } = await supabase
-          .from('level4_deepdive_report_data')
+          .from('level4_report_secure')
           .select('*')
           .eq('archetype_id', 'All_Average')
           .maybeSingle();
