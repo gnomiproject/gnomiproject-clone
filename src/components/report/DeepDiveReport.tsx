@@ -45,6 +45,7 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
     // as they're not directly supported in the options type
     onBeforePrint: () => {
       document.body.classList.add('printing');
+      return Promise.resolve(); // Return a resolved Promise to satisfy TypeScript
     },
     onAfterPrint: () => {
       document.body.classList.remove('printing');
