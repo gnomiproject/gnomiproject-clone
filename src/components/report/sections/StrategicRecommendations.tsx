@@ -20,22 +20,32 @@ const StrategicRecommendations: React.FC<StrategicRecommendationsProps> = ({
   // Safely extract the name
   const archetypeName = data?.name || data?.archetype_name || 'Unknown';
   
-  // Helper function to ensure we're working with an array
+  // Enhanced helper function to ensure we're working with an array
   const ensureArray = (data: any): any[] => {
+    // If it's already an array, return it
     if (Array.isArray(data)) return data;
+    
+    // If it's a string, try to parse it as JSON
     if (typeof data === 'string' && data) {
       try {
         const parsed = JSON.parse(data);
         if (Array.isArray(parsed)) return parsed;
+        if (parsed && typeof parsed === 'object') return [parsed]; // Single object becomes array with one item
+        return []; // String parsed successfully but result is not an array or object
       } catch (e) {
-        // If parsing fails, return empty array
-        return [];
+        // If parsing fails, return string as single item in array
+        return [{ description: data }];
       }
     }
+    
+    // If it's a non-null object but not an array, convert object values to array
     if (data && typeof data === 'object' && !Array.isArray(data)) {
-      // If it's an object but not an array, convert object values to array
-      return Object.values(data);
+      if (Object.keys(data).length > 0) {
+        return Object.values(data);
+      }
     }
+    
+    // Default to empty array for null, undefined, or other non-convertible types
     return [];
   };
   
@@ -49,7 +59,8 @@ const StrategicRecommendations: React.FC<StrategicRecommendationsProps> = ({
     recommendationsBeforeProcess: data?.strategic_recommendations,
     recommendationsAfterProcess: recommendations,
     recommendationsCount: recommendations.length,
-    recommendationsType: typeof data?.strategic_recommendations
+    recommendationsType: typeof data?.strategic_recommendations,
+    recommendationsIsArray: Array.isArray(data?.strategic_recommendations)
   });
   
   return (

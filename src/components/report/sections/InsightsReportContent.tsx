@@ -17,8 +17,10 @@ const InsightsReportContent: React.FC<InsightsReportContentProps> = ({ archetype
     id: archetype?.id || archetype?.archetype_id,
     name: archetype?.name || archetype?.archetype_name,
     hasStrengths: !!archetype?.strengths,
-    hasRecommendations: Array.isArray(archetype?.strategic_recommendations) && archetype.strategic_recommendations.length > 0,
-    recommendationsType: typeof archetype?.strategic_recommendations
+    hasRecommendations: !!archetype?.strategic_recommendations,
+    recommendationsType: typeof archetype?.strategic_recommendations,
+    recommendationsIsArray: Array.isArray(archetype?.strategic_recommendations),
+    recommendationsValue: archetype?.strategic_recommendations
   });
 
   // Safely extract name and ID from either format (admin or regular)
@@ -32,10 +34,15 @@ const InsightsReportContent: React.FC<InsightsReportContentProps> = ({ archetype
       try {
         const parsed = JSON.parse(data);
         if (Array.isArray(parsed)) return parsed;
+        if (parsed && typeof parsed === 'object') return [parsed];
+        return [data]; // String as single item
       } catch (e) {
         // If parsing fails, return string as single item array
         return [data];
       }
+    }
+    if (data && typeof data === 'object' && !Array.isArray(data)) {
+      return Object.values(data);
     }
     return [];
   };
@@ -49,6 +56,16 @@ const InsightsReportContent: React.FC<InsightsReportContentProps> = ({ archetype
     threats: ensureArray(archetype?.threats),
     strategic_recommendations: ensureArray(archetype?.strategic_recommendations),
   };
+
+  // Additional debug logging for processed data
+  console.log('InsightsReportContent: Processed data:', {
+    processedStrengthsType: typeof processedArchetype.strengths,
+    processedStrengthsIsArray: Array.isArray(processedArchetype.strengths),
+    processedStrengthsLength: processedArchetype.strengths.length,
+    processedRecommendationsType: typeof processedArchetype.strategic_recommendations,
+    processedRecommendationsIsArray: Array.isArray(processedArchetype.strategic_recommendations),
+    processedRecommendationsLength: processedArchetype.strategic_recommendations.length
+  });
   
   return (
     <div className="max-w-7xl mx-auto py-8 space-y-12">
