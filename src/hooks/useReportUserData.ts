@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { AssessmentResult } from '@/types/assessment';
+import { normalizeArchetypeId } from '@/utils/archetypeValidation';
 
 export interface ReportUserData {
   id: string;
@@ -47,14 +48,23 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
         setIsLoading(true);
         setError(null);
         
-        console.log(`[useReportUserData] Fetching user data for token: ${token.substring(0, 5)}... and archetype: ${archetypeId}`);
+        // Normalize the archetype ID to handle case sensitivity
+        const normalizedArchetypeId = normalizeArchetypeId(archetypeId);
+        
+        console.log(`[useReportUserData] Fetching user data for token: ${token.substring(0, 5)}... and normalized archetype: ${normalizedArchetypeId}`);
+        setDebugInfo({
+          stage: 'initial',
+          originalArchetypeId: archetypeId,
+          normalizedArchetypeId,
+          tokenPreview: token.substring(0, 5) + '...'
+        });
         
         // First, check if the report request exists and is valid
         const { data, error: fetchError } = await supabase
           .from('report_requests')
           .select('*')
           .eq('access_token', token)
-          .eq('archetype_id', archetypeId)
+          .eq('archetype_id', normalizedArchetypeId)
           .eq('status', 'active')
           .maybeSingle();
           
@@ -65,13 +75,86 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
             error: fetchError,
             query: {
               token: token.substring(0, 5) + '...',
-              archetypeId
+              archetypeId: normalizedArchetypeId
             }
           });
           throw new Error(`Error fetching report user data: ${fetchError.message}`);
         }
         
         console.log('[useReportUserData] Query result:', data ? 'Data found' : 'No data found');
+        
+        // If no data with normalized ID, try case-insensitive search
+        if (!data) {
+          console.log('[useReportUserData] Trying case-insensitive search for archetype ID');
+          
+          const { data: insensitiveData, error: insensitiveError } = await supabase
+            .from('report_requests')
+            .select('*')
+            .eq('access_token', token)
+            .ilike('archetype_id', archetypeId)
+            .eq('status', 'active')
+            .maybeSingle();
+            
+          if (insensitiveError) {
+            console.error('[useReportUserData] Error with case-insensitive search:', insensitiveError);
+          } else if (insensitiveData) {
+            console.log('[useReportUserData] Found data using case-insensitive search:', insensitiveData.archetype_id);
+            // Use this data instead
+            setDebugInfo(prev => ({
+              ...prev,
+              stage: 'case_insensitive_match',
+              matchedArchetypeId: insensitiveData.archetype_id
+            }));
+            
+            // Check if the token has expired
+            if (insensitiveData.expires_at && new Date(insensitiveData.expires_at) < new Date()) {
+              console.log('[useReportUserData] Token has expired:', insensitiveData.expires_at);
+              setIsValid(false);
+              setDebugInfo(prev => ({
+                ...prev,
+                stage: 'token_validation',
+                result: 'expired',
+                expires_at: insensitiveData.expires_at,
+                current_time: new Date().toISOString()
+              }));
+              throw new Error('This report link has expired');
+            }
+            
+            // Update access count for the matched data
+            const currentAccessCount = insensitiveData.access_count || 0;
+            const newAccessCount = currentAccessCount + 1;
+            const currentTime = new Date().toISOString();
+            
+            await supabase
+              .from('report_requests')
+              .update({
+                access_count: newAccessCount,
+                last_accessed: currentTime
+              })
+              .eq('id', insensitiveData.id);
+              
+            const typedUserData: ReportUserData = {
+              id: insensitiveData.id,
+              name: insensitiveData.name,
+              organization: insensitiveData.organization,
+              email: insensitiveData.email,
+              created_at: insensitiveData.created_at,
+              archetype_id: insensitiveData.archetype_id,
+              assessment_result: insensitiveData.assessment_result ? (insensitiveData.assessment_result as unknown as AssessmentResult) : null,
+              exact_employee_count: insensitiveData.exact_employee_count,
+              access_count: newAccessCount,
+              last_accessed: currentTime,
+              expires_at: insensitiveData.expires_at,
+              access_url: insensitiveData.access_url,
+              access_token: token,
+            };
+            
+            setUserData(typedUserData);
+            setIsValid(true);
+            setIsLoading(false);
+            return;
+          }
+        }
         
         if (!data) {
           console.log('[useReportUserData] No valid report request found');
@@ -81,7 +164,7 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
             result: 'no_data',
             query: {
               token: token.substring(0, 5) + '...',
-              archetypeId
+              archetypeId: normalizedArchetypeId
             }
           });
           throw new Error('Invalid or expired access token');
@@ -113,7 +196,7 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
             last_accessed: currentTime
           })
           .eq('access_token', token)
-          .eq('archetype_id', archetypeId);
+          .eq('archetype_id', normalizedArchetypeId);
         
         if (accessUpdateError) {
           console.warn('[useReportUserData] Could not update access count:', accessUpdateError);

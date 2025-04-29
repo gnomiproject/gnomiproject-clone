@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { isValidArchetypeId } from '@/utils/archetypeValidation';
+import { isValidArchetypeId, normalizeArchetypeId } from '@/utils/archetypeValidation';
 import { toast } from 'sonner';
 import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import { useReportUserData } from '@/hooks/useReportUserData';
@@ -11,16 +11,20 @@ import { Card } from '@/components/ui/card';
 
 // This is a simplified version of ReportViewer focused on token-based access
 const ReportViewer = () => {
-  const { archetypeId, token } = useParams();
+  const { archetypeId: rawArchetypeId, token } = useParams();
   const [debugMode, setDebugMode] = useState(true);
+  
+  // Normalize the archetype ID to handle case sensitivity
+  const archetypeId = rawArchetypeId ? normalizeArchetypeId(rawArchetypeId) : undefined;
   
   // Debug logging for URL parameters
   useEffect(() => {
     console.log('[ReportViewer] URL parameters:', {
-      archetypeId,
+      rawArchetypeId,
+      normalizedArchetypeId: archetypeId,
       token: token ? `${token.substring(0, 5)}...` : 'missing',
     });
-  }, [archetypeId, token]);
+  }, [archetypeId, rawArchetypeId, token]);
   
   // Simple helper for valid access
   const isAdminView = token === 'admin-view';
@@ -33,7 +37,7 @@ const ReportViewer = () => {
         <h2 className="text-xl font-semibold text-red-600">Invalid Archetype ID</h2>
         <p className="text-gray-600 mt-2">The requested archetype report could not be found.</p>
         <pre className="mt-4 text-xs bg-gray-100 p-2 rounded overflow-auto">
-          URL parameters: archetypeId={archetypeId}, token={token?.substring(0, 5) + '...'}
+          URL parameters: archetypeId={rawArchetypeId} (normalized: {archetypeId}), token={token?.substring(0, 5) + '...'}
         </pre>
       </Card>
     );
@@ -70,7 +74,7 @@ const ReportViewer = () => {
           <p className="text-gray-600">Loading report with token access...</p>
           {debugMode && (
             <div className="mt-4 text-xs bg-gray-50 p-3 rounded w-full">
-              <p>Parameters: archetypeId={archetypeId}, token={token?.substring(0, 5)}...</p>
+              <p>Parameters: archetypeId={rawArchetypeId} (normalized: {archetypeId}), token={token?.substring(0, 5)}...</p>
               <p>User data loading: {userDataLoading ? 'Yes' : 'No'}</p>
               <p>Report data loading: {reportLoading ? 'Yes' : 'No'}</p>
             </div>
@@ -112,6 +116,12 @@ const ReportViewer = () => {
         >
           Retry
         </button>
+        {debugMode && (
+          <div className="mt-4 text-xs bg-gray-50 p-3 rounded">
+            <p>Archetype ID: {archetypeId} (original: {rawArchetypeId})</p>
+            <p>Error details: {reportError.toString()}</p>
+          </div>
+        )}
       </Card>
     );
   }
@@ -122,7 +132,7 @@ const ReportViewer = () => {
       <Card className="p-6 m-4">
         <h2 className="text-xl font-semibold text-yellow-600">Report Not Found</h2>
         <p className="text-gray-600 mt-2">
-          Could not find report data for archetype: {archetypeId}
+          Could not find report data for archetype: {archetypeId} (original: {rawArchetypeId})
         </p>
         {debugMode && (
           <div className="mt-4 text-xs bg-gray-50 p-3 rounded">

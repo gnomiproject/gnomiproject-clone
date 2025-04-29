@@ -40,7 +40,22 @@ export const fetchArchetypeData = async (archetypeId: ArchetypeId, skipCache: bo
         
       if (coreError) {
         console.error("Error fetching core archetype data:", coreError);
-        throw coreError;
+        
+        // Try one more fallback with case-insensitive search
+        const { data: insensitiveData, error: insensitiveError } = await supabase
+          .from('Core_Archetype_Overview')
+          .select('*')
+          .ilike('id', archetypeId)
+          .maybeSingle();
+          
+        if (insensitiveError || !insensitiveData) {
+          console.error("Error with case-insensitive archetype search:", insensitiveError);
+          throw coreError;
+        }
+        
+        console.log(`Found archetype data with case-insensitive search for ${archetypeId}`);
+        cacheArchetype(archetypeId, insensitiveData);
+        return insensitiveData;
       }
       
       if (coreData) {

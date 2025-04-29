@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useGetArchetype } from '@/hooks/useGetArchetype';
 import { ArchetypeId } from '@/types/archetype';
+import { normalizeArchetypeId } from '@/utils/archetypeValidation';
 
 interface UseReportAccessOptions {
   archetypeId: string;
@@ -10,13 +11,16 @@ interface UseReportAccessOptions {
   isAdminView?: boolean;
 }
 
-export const useReportAccess = ({ archetypeId, token, isAdminView = false }: UseReportAccessOptions) => {
+export const useReportAccess = ({ archetypeId: rawArchetypeId, token, isAdminView = false }: UseReportAccessOptions) => {
   const [reportData, setReportData] = useState<any | null>(null);
   const [averageData, setAverageData] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
   const [debugInfo, setDebugInfo] = useState<any>({});
 
+  // Normalize the archetype ID to handle case sensitivity
+  const archetypeId = normalizeArchetypeId(rawArchetypeId);
+  
   // Get archetypeData using the existing hook
   const {
     archetypeData,
@@ -31,11 +35,12 @@ export const useReportAccess = ({ archetypeId, token, isAdminView = false }: Use
         setIsLoading(true);
         setError(null);
 
-        console.log(`[useReportAccess] Fetching report data for ${archetypeId} with token ${token.substring(0, 5)}...`);
+        console.log(`[useReportAccess] Fetching report data for ${rawArchetypeId} (normalized: ${archetypeId}) with token ${token.substring(0, 5)}...`);
         setDebugInfo(prev => ({
           ...prev,
           fetchStarted: true,
-          archetypeId,
+          originalArchetypeId: rawArchetypeId,
+          normalizedArchetypeId: archetypeId,
           tokenPreview: token.substring(0, 5) + '...',
           isAdminView
         }));
@@ -52,12 +57,30 @@ export const useReportAccess = ({ archetypeId, token, isAdminView = false }: Use
           console.log(`[useReportAccess] Validating token: ${token.substring(0, 5)}...`);
         }
 
+        // Try case-insensitive search for more robust data retrieval
+        const fetchWithCaseInsensitiveSearch = async (tableName: string, archetypeIdParam: string) => {
+          // Try exact match first
+          const { data, error } = await supabase
+            .from(tableName)
+            .select('*')
+            .eq('archetype_id', archetypeIdParam)
+            .maybeSingle();
+            
+          if (!error && data) {
+            return { data, error };
+          }
+          
+          // If exact match fails, try case-insensitive search
+          console.log(`[useReportAccess] Trying case-insensitive search in ${tableName}`);
+          return await supabase
+            .from(tableName)
+            .select('*')
+            .ilike('archetype_id', archetypeIdParam)
+            .maybeSingle();
+        };
+
         // Fetch detailed report data from level4 secure view
-        const { data: deepDiveData, error: deepDiveError } = await supabase
-          .from('level4_report_secure')
-          .select('*')
-          .eq('archetype_id', archetypeId)
-          .maybeSingle();
+        const { data: deepDiveData, error: deepDiveError } = await fetchWithCaseInsensitiveSearch('level4_report_secure', archetypeId);
 
         if (deepDiveError) {
           console.warn(`[useReportAccess] Could not fetch level4 data: ${deepDiveError.message}`);
@@ -70,11 +93,7 @@ export const useReportAccess = ({ archetypeId, token, isAdminView = false }: Use
           }));
           
           // Try the base level4 data with secure view if level4_report_secure fails
-          const { data: level4BaseData, error: level4BaseError } = await supabase
-            .from('level4_deepdive_report_data_secure')
-            .select('*')
-            .eq('archetype_id', archetypeId)
-            .maybeSingle();
+          const { data: level4BaseData, error: level4BaseError } = await fetchWithCaseInsensitiveSearch('level4_deepdive_report_data_secure', archetypeId);
             
           if (!level4BaseError && level4BaseData) {
             console.log(`[useReportAccess] Got level4 data using base secure view for ${archetypeId}`);
@@ -108,11 +127,7 @@ export const useReportAccess = ({ archetypeId, token, isAdminView = false }: Use
           }));
           
           // Try the level3 secure view as fallback
-          const { data: level3Data, error: level3Error } = await supabase
-            .from('level3_report_secure')
-            .select('*')
-            .eq('archetype_id', archetypeId)
-            .maybeSingle();
+          const { data: level3Data, error: level3Error } = await fetchWithCaseInsensitiveSearch('level3_report_secure', archetypeId);
             
           if (!level3Error && level3Data) {
             console.log(`[useReportAccess] Got level3 data using secure view for ${archetypeId}`);
@@ -187,7 +202,7 @@ export const useReportAccess = ({ archetypeId, token, isAdminView = false }: Use
     };
 
     fetchReportData();
-  }, [archetypeId, token, isAdminView]);
+  }, [rawArchetypeId, archetypeId, token, isAdminView]);
 
   return {
     reportData,
