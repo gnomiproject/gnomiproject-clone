@@ -22,9 +22,9 @@ function App() {
   const currentUser = true;
 
   return (
-    <DebugProvider>
-      <div className="App">
-        <Router>
+    <div className="App">
+      <Router>
+        <DebugProvider>
           <Routes>
             {/* Report Views */}
             <Route path="/report/:archetypeId" element={<ReportView />} />
@@ -52,10 +52,10 @@ function App() {
             {/* Not Found Route */}
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </Router>
-        <Toaster />
-      </div>
-    </DebugProvider>
+          <Toaster />
+        </DebugProvider>
+      </Router>
+    </div>
   );
 }
 
