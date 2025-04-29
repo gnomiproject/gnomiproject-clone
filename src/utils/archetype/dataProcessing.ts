@@ -1,3 +1,4 @@
+
 import { ArchetypeDetailedData, ArchetypeId, FamilyId } from '@/types/archetype';
 
 // Helper function to normalize property names across different data sources
@@ -18,6 +19,20 @@ export const normalizePropertyNames = (data: any): any => {
   
   if (normalized.family_name && !normalized.familyName) {
     normalized.familyName = normalized.family_name;
+  }
+
+  // Handle key_characteristics to ensure it's usable as an array
+  if (normalized.key_characteristics) {
+    // If it's a string, split it by newlines
+    if (typeof normalized.key_characteristics === 'string') {
+      normalized.key_characteristics = normalized.key_characteristics
+        .split('\n')
+        .filter(Boolean);
+    } 
+    // If it's neither an array nor a string, make it an empty array
+    else if (!Array.isArray(normalized.key_characteristics)) {
+      normalized.key_characteristics = [];
+    }
   }
   
   return normalized;
@@ -54,6 +69,17 @@ export const processArchetypeData = (
     // Normalize the property names to ensure both snake_case and camelCase are available
     const normalizedData = normalizePropertyNames(data);
     
+    // Handle key_characteristics specifically to ensure it's an array
+    const keyCharacteristics = (() => {
+      if (Array.isArray(normalizedData.key_characteristics)) {
+        return normalizedData.key_characteristics;
+      } else if (typeof normalizedData.key_characteristics === 'string') {
+        return normalizedData.key_characteristics.split('\n').filter(Boolean);
+      } else {
+        return [];
+      }
+    })();
+    
     return {
       archetypeData: {
         ...normalizedData,
@@ -62,6 +88,7 @@ export const processArchetypeData = (
         familyId: familyId,
         familyName: data.family_name || (family?.name || ''),
         hexColor: data.hex_color || data.hexColor || '#6E59A5',
+        key_characteristics: keyCharacteristics
       },
       familyData: family,
       dataSource: 'Database'

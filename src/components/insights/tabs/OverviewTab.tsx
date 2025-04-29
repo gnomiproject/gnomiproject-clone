@@ -10,12 +10,24 @@ interface OverviewTabProps {
 }
 
 const OverviewTab = ({ archetypeData, familyColor, hideRequestSection = false }: OverviewTabProps) => {
-  // Get key characteristics with proper type handling
-  const keyCharacteristics = 
-    (archetypeData?.key_characteristics) || 
-    (archetypeData?.standard?.keyCharacteristics) ||
-    (archetypeData?.summary?.keyCharacteristics) ||
-    [];
+  // Get key characteristics with proper type handling and ensure it's an array
+  const keyCharacteristics = (() => {
+    const kc = archetypeData?.key_characteristics || 
+      archetypeData?.standard?.keyCharacteristics ||
+      archetypeData?.summary?.keyCharacteristics || 
+      [];
+    
+    // Handle different formats of key_characteristics
+    if (Array.isArray(kc)) {
+      return kc;
+    } else if (typeof kc === 'string') {
+      // Split string by newline if it's a string
+      return kc.split('\n').filter(Boolean);
+    } else {
+      // Return empty array if it's neither an array nor a string
+      return [];
+    }
+  })();
     
   const industries = archetypeData?.industries || 
     "Various industries including healthcare, finance, and technology";
@@ -49,7 +61,7 @@ const OverviewTab = ({ archetypeData, familyColor, hideRequestSection = false }:
           {longDescription}
         </p>
         
-        {keyCharacteristics && keyCharacteristics.length > 0 && (
+        {keyCharacteristics.length > 0 && (
           <div className="mt-6">
             <h3 className="text-lg font-semibold mb-2">Key Characteristics</h3>
             <ul className="list-disc list-inside space-y-2">
