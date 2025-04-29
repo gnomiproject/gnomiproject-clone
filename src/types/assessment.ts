@@ -21,4 +21,7 @@ export type AssessmentResult = {
   score: number;
   percentageMatch: number;
   resultTier: 'Basic' | 'Detailed' | 'Comprehensive';
+  exactData?: {
+    employeeCount: number | null;
+  };
 };
