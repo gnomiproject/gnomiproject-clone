@@ -47,13 +47,26 @@ const WorkforceCompositionChart: React.FC<WorkforceCompositionChartProps> = ({
                   outerRadius={80}
                   fill="#8884d8"
                   dataKey="value"
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  label={({ name, percent }) => {
+                    // Fix: Add type guard before calling toFixed
+                    const formattedPercent = typeof percent === 'number' 
+                      ? `${(percent * 100).toFixed(0)}%` 
+                      : `${percent}%`;
+                    return `${name} ${formattedPercent}`;
+                  }}
                 >
                   {genderData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value) => `${value.toFixed(1)}%`} />
+                <Tooltip 
+                  formatter={(value) => {
+                    // Fix: Add type guard before calling toFixed
+                    return typeof value === 'number' 
+                      ? `${value.toFixed(1)}%` 
+                      : `${value}%`;
+                  }} 
+                />
               </PieChart>
             </ResponsiveContainer>
           </div>

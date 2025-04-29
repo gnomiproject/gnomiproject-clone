@@ -1,95 +1,85 @@
 
 import React from 'react';
-import { Card } from '@/components/ui/card';
-import { format } from 'date-fns';
-import { Shield } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface ContactSectionProps {
   userData: any;
-  isAdminView?: boolean;
 }
 
-const ContactSection = ({ userData, isAdminView = false }: ContactSectionProps) => {
-  // Format the date if available
-  const reportCreated = userData?.created_at 
-    ? format(new Date(userData.created_at), 'MMM d, yyyy')
-    : 'N/A';
-    
-  // Calculate expiration date (30 days from creation or from userData.expires_at)
-  const expiryDate = userData?.expires_at 
-    ? format(new Date(userData.expires_at), 'MMM d, yyyy')
-    : userData?.created_at
-      ? format(new Date(new Date(userData.created_at).getTime() + 30 * 24 * 60 * 60 * 1000), 'MMM d, yyyy')
-      : 'N/A';
-      
-  // Generate a "report ID" based on data or random if in admin view
-  const reportId = isAdminView 
-    ? "ADMIN-VIEW-ONLY" 
-    : userData?.id 
-      ? userData.id.substring(0, 8).toUpperCase()
-      : (Math.random().toString(36).substring(2, 10)).toUpperCase();
-      
-  // Get access information
-  const accessCount = userData?.access_count || 1; // Default to 1 for first view
-  const lastAccessed = userData?.last_accessed
-    ? format(new Date(userData.last_accessed), 'MMM d, yyyy')
-    : 'First view';
-
+const ContactSection: React.FC<ContactSectionProps> = ({ userData }) => {
+  const contactName = userData?.name || 'Your Healthcare Strategist';
+  const contactEmail = userData?.email || 'support@healthcarearchetypes.com';
+  const organization = userData?.organization || 'Your Organization';
+  
   return (
-    <section className="my-12 print:my-8">
-      <h2 className="text-2xl font-bold mb-6 print:mb-4">Contact Information</h2>
-      
-      <Card className="p-6 bg-gray-50 border border-gray-200 mb-8">
-        {isAdminView ? (
-          <div className="bg-yellow-50 border-yellow-200 border p-4 rounded mb-4">
-            <p className="text-yellow-800"><strong>Admin View Note:</strong> This contact information is generated as a placeholder. In a real user report, this would show the actual user details who requested the report.</p>
-          </div>
-        ) : null}
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <h3 className="text-lg font-semibold mb-2">Report Details</h3>
-            <p className="text-gray-600 mb-1">Report Generated: {reportCreated}</p>
-            <p className="text-gray-600 mb-1">Report ID: {reportId}</p>
-            <p className="text-gray-600 mb-1">Valid Until: {expiryDate}</p>
-            <p className="text-gray-600">Access Count: {accessCount} {accessCount > 1 ? 'views' : 'view'}</p>
-            {accessCount > 1 && (
-              <p className="text-gray-600">Last Viewed: {lastAccessed}</p>
-            )}
-          </div>
-          
-          <div>
-            <h3 className="text-lg font-semibold mb-2">Contact Info</h3>
-            <p className="text-gray-600 mb-1">Name: {userData?.name || 'N/A'}</p>
-            <p className="text-gray-600 mb-1">Email: {userData?.email || 'N/A'}</p>
-            <p className="text-gray-600">Organization: {userData?.organization || 'N/A'}</p>
-          </div>
-        </div>
-        
-        <div className="mt-6">
-          <h3 className="text-lg font-semibold mb-2">Additional Support</h3>
-          <p className="text-gray-700">
-            For additional information or to discuss this report in more detail, please contact our customer support team at <a href="mailto:support@example.com" className="text-blue-600 hover:underline">support@example.com</a>.
-          </p>
-        </div>
-        
-        <div className="mt-6 p-4 border border-gray-200 rounded-md bg-white">
-          <div className="flex items-center mb-2">
-            <Shield className="h-5 w-5 text-green-600 mr-2" />
-            <h3 className="text-md font-semibold">Data Privacy Notice</h3>
-          </div>
-          <p className="text-sm text-gray-600">
-            This report contains confidential information specific to your organization. All data is encrypted and stored securely.
-            Your access link is unique and will expire on {expiryDate}.
-          </p>
-        </div>
-      </Card>
-      
-      <div className="text-center text-gray-500 text-sm mt-8 print:mt-4">
-        <p>This report is confidential and intended only for the recipient. Not for redistribution.</p>
-        <p className="mt-1">© {new Date().getFullYear()} HealthArchetypes - All rights reserved.</p>
+    <div className="space-y-6">
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">Contact Information</h2>
+        <p className="text-gray-600">
+          Have questions about this report or need further assistance? Reach out to our team.
+        </p>
       </div>
-    </section>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle>Your Report Details</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <dl className="space-y-2">
+              <div className="flex justify-between">
+                <dt className="font-medium text-gray-600">Report For:</dt>
+                <dd>{contactName}</dd>
+              </div>
+              <div className="flex justify-between">
+                <dt className="font-medium text-gray-600">Organization:</dt>
+                <dd>{organization}</dd>
+              </div>
+              <div className="flex justify-between">
+                <dt className="font-medium text-gray-600">Contact Email:</dt>
+                <dd>
+                  <a href={`mailto:${contactEmail}`} className="text-blue-600 hover:underline">
+                    {contactEmail}
+                  </a>
+                </dd>
+              </div>
+            </dl>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle>Next Steps</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-2">
+              <li className="flex gap-2 items-start">
+                <span className="flex-shrink-0 h-5 w-5 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center">1</span>
+                <span>Schedule a follow-up call with your healthcare strategist</span>
+              </li>
+              <li className="flex gap-2 items-start">
+                <span className="flex-shrink-0 h-5 w-5 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center">2</span>
+                <span>Share this report with your benefits team</span>
+              </li>
+              <li className="flex gap-2 items-start">
+                <span className="flex-shrink-0 h-5 w-5 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center">3</span>
+                <span>Review the strategic recommendations and prioritize actions</span>
+              </li>
+            </ul>
+          </CardContent>
+        </Card>
+      </div>
+      
+      <Card className="mt-6 bg-blue-50">
+        <CardContent className="p-6">
+          <h3 className="font-semibold text-lg mb-2">Thank You</h3>
+          <p>
+            Thank you for using our Healthcare Archetype Analysis tool. We're committed to helping you improve 
+            healthcare outcomes for your organization.
+          </p>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArchetypeDetailedData } from '@/types/archetype';
 import ReportIntroduction from './sections/ReportIntroduction';
 import ArchetypeProfile from './sections/ArchetypeProfile';
@@ -11,6 +11,7 @@ import RiskFactors from './sections/RiskFactors';
 import SwotAnalysis from './sections/SwotAnalysis';
 import StrategicRecommendations from './sections/StrategicRecommendations';
 import ContactSection from './sections/ContactSection';
+import ReportLayout from './layout/ReportLayout';
 
 interface DeepDiveReportProps {
   reportData: ArchetypeDetailedData;
@@ -27,7 +28,19 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
   isAdminView = false,
   debugInfo
 }) => {
-  // Section IDs for navigation
+  // Track active section
+  const [activeSectionId, setActiveSectionId] = useState('introduction');
+  
+  // Handle scroll to section
+  const handleNavigate = (sectionId: string) => {
+    setActiveSectionId(sectionId);
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+  
+  // Section IDs
   const sectionIds = {
     introduction: 'introduction',
     archetypeProfile: 'archetype-profile',
@@ -42,16 +55,38 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
     contact: 'contact'
   };
   
-  // Handler for section navigation
-  const handleNavigate = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
+  // Intersection Observer for active section tracking
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveSectionId(entry.target.id);
+          }
+        });
+      },
+      { threshold: 0.2 }
+    );
+    
+    Object.values(sectionIds).forEach((id) => {
+      const element = document.getElementById(id);
+      if (element) observer.observe(element);
+    });
+    
+    return () => {
+      Object.values(sectionIds).forEach((id) => {
+        const element = document.getElementById(id);
+        if (element) observer.unobserve(element);
+      });
+    };
+  }, [reportData]);
   
   return (
-    <div className="bg-white min-h-screen">
+    <ReportLayout 
+      activeSectionId={activeSectionId} 
+      onNavigate={handleNavigate}
+      isAdminView={isAdminView}
+    >
       {/* Header - Keep consistent across report */}
       <header className="bg-blue-50 border-b border-blue-100 py-4 px-6 mb-8 print:hidden">
         <div className="container mx-auto">
@@ -68,11 +103,7 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
         {/* Introduction Section */}
         <section id={sectionIds.introduction} className="mb-16">
           <ReportIntroduction 
-            userData={userData} 
-            averageData={averageData}
-            nextSection={sectionIds.archetypeProfile}
-            nextSectionName="Archetype Profile"
-            onNavigate={handleNavigate}
+            userData={userData}
           />
         </section>
         
@@ -80,11 +111,6 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
         <section id={sectionIds.archetypeProfile} className="mb-16">
           <ArchetypeProfile 
             archetypeData={reportData}
-            previousSection={sectionIds.introduction}
-            previousSectionName="Introduction"
-            nextSection={sectionIds.demographics}
-            nextSectionName="Demographics"
-            onNavigate={handleNavigate}
           />
         </section>
         
@@ -93,11 +119,6 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
           <DemographicsSection 
             reportData={reportData} 
             averageData={averageData}
-            previousSection={sectionIds.archetypeProfile}
-            previousSectionName="Archetype Profile"
-            nextSection={sectionIds.costAnalysis}
-            nextSectionName="Cost Analysis"
-            onNavigate={handleNavigate}
           />
         </section>
         
@@ -106,11 +127,6 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
           <CostAnalysis 
             reportData={reportData} 
             averageData={averageData}
-            previousSection={sectionIds.demographics}
-            previousSectionName="Demographics"
-            nextSection={sectionIds.utilization}
-            nextSectionName="Utilization Patterns"
-            onNavigate={handleNavigate}
           />
         </section>
         
@@ -119,11 +135,6 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
           <UtilizationPatterns 
             reportData={reportData} 
             averageData={averageData}
-            previousSection={sectionIds.costAnalysis}
-            previousSectionName="Cost Analysis"
-            nextSection={sectionIds.diseaseManagement}
-            nextSectionName="Disease Management"
-            onNavigate={handleNavigate}
           />
         </section>
         
@@ -132,11 +143,6 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
           <DiseaseManagement 
             reportData={reportData} 
             averageData={averageData}
-            previousSection={sectionIds.utilization}
-            previousSectionName="Utilization Patterns"
-            nextSection={sectionIds.careGaps}
-            nextSectionName="Care Gaps"
-            onNavigate={handleNavigate}
           />
         </section>
         
@@ -145,11 +151,6 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
           <CareGaps 
             reportData={reportData} 
             averageData={averageData}
-            previousSection={sectionIds.diseaseManagement}
-            previousSectionName="Disease Management"
-            nextSection={sectionIds.riskFactors}
-            nextSectionName="Risk Factors"
-            onNavigate={handleNavigate}
           />
         </section>
         
@@ -158,11 +159,6 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
           <RiskFactors 
             reportData={reportData} 
             averageData={averageData}
-            previousSection={sectionIds.careGaps}
-            previousSectionName="Care Gaps"
-            nextSection={sectionIds.swotAnalysis}
-            nextSectionName="SWOT Analysis"
-            onNavigate={handleNavigate}
           />
         </section>
         
@@ -170,11 +166,6 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
         <section id={sectionIds.swotAnalysis} className="mb-16">
           <SwotAnalysis 
             reportData={reportData}
-            previousSection={sectionIds.riskFactors}
-            previousSectionName="Risk Factors"
-            nextSection={sectionIds.recommendations}
-            nextSectionName="Strategic Recommendations"
-            onNavigate={handleNavigate}
           />
         </section>
         
@@ -182,11 +173,6 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
         <section id={sectionIds.recommendations} className="mb-16">
           <StrategicRecommendations 
             reportData={reportData}
-            previousSection={sectionIds.swotAnalysis}
-            previousSectionName="SWOT Analysis"
-            nextSection={sectionIds.contact}
-            nextSectionName="Contact Us"
-            onNavigate={handleNavigate}
           />
         </section>
         
@@ -194,10 +180,6 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
         <section id={sectionIds.contact} className="mb-16">
           <ContactSection 
             userData={userData}
-            archetype={reportData}
-            previousSection={sectionIds.recommendations}
-            previousSectionName="Strategic Recommendations"
-            onNavigate={handleNavigate}
           />
         </section>
 
@@ -211,7 +193,7 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
           </div>
         )}
       </div>
-    </div>
+    </ReportLayout>
   );
 };
 
