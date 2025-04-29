@@ -6,6 +6,7 @@ import { Json } from '@/types/archetype';
  * This handles multiple data formats that might exist in different tables
  */
 export const normalizeSwotData = (data: any): string[] => {
+  // Return empty array if data is null, undefined, or empty
   if (!data) return [];
   
   // If it's already an array of strings, return it
@@ -15,12 +16,13 @@ export const normalizeSwotData = (data: any): string[] => {
   
   // If it's an array of objects with text property (common format in our DB)
   if (Array.isArray(data) && data.length > 0 && typeof data[0] === 'object' && data[0]?.text) {
-    return data.map(item => item.text || '');
+    return data.map(item => item?.text || '');
   }
   
   // Handle direct arrays of objects with text or description properties
   if (Array.isArray(data) && data.length > 0 && typeof data[0] === 'object') {
     return data.map(item => {
+      if (!item) return '';
       if (item.text) return item.text;
       if (item.description) return item.description;
       return JSON.stringify(item);
@@ -59,10 +61,10 @@ export const normalizeSwotData = (data: any): string[] => {
           if ('description' in item) return item.description;
         }
         return JSON.stringify(item);
-      });
+      }).filter(Boolean); // Remove any possible null or undefined values
     }
   }
   
   // Fallback: convert whatever we have to string array
-  return Array.isArray(data) ? data.map(String) : [String(data)];
+  return Array.isArray(data) ? data.map(item => String(item || '')).filter(Boolean) : [String(data)];
 };

@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArchetypeDetailedData } from '@/types/archetype';
@@ -15,8 +16,8 @@ interface SwotTabProps {
 }
 
 const SwotTab = ({ archetypeData, swotData, hideRequestSection = false }: SwotTabProps) => {
-  // Use simpler direct data access approach - use directly provided SWOT data if available,
-  // otherwise get it directly from archetypeData
+  // Get SWOT data with proper fallback strategy, using direct fields as primary source
+  // and using safe optional chaining to prevent TypeScript errors
   const strengths = normalizeSwotData(swotData?.strengths || archetypeData?.strengths);
   const weaknesses = normalizeSwotData(swotData?.weaknesses || archetypeData?.weaknesses);
   const opportunities = normalizeSwotData(swotData?.opportunities || archetypeData?.opportunities);

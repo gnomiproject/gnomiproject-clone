@@ -11,7 +11,7 @@ interface InsightSwotSectionProps {
 }
 
 const InsightSwotSection = ({ archetype }: InsightSwotSectionProps) => {
-  // Extract SWOT data directly from the archetype object
+  // Extract SWOT data directly from the archetype object using normalizeSwotData to ensure consistent format
   const strengths = normalizeSwotData(archetype?.strengths);
   const weaknesses = normalizeSwotData(archetype?.weaknesses);
   const opportunities = normalizeSwotData(archetype?.opportunities);

@@ -7,7 +7,7 @@ interface SwotTabProps {
 }
 
 export const SwotTab = ({ report }: SwotTabProps) => {
-  // Get SWOT data directly from the report
+  // Get SWOT data directly from the report using normalizeSwotData
   const strengths = normalizeSwotData(report?.strengths);
   const weaknesses = normalizeSwotData(report?.weaknesses);
   const opportunities = normalizeSwotData(report?.opportunities);

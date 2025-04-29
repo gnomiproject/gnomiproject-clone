@@ -19,7 +19,7 @@ const SwotAnalysis: React.FC<SwotAnalysisProps> = ({ reportData, archetypeData, 
   // Use reportData as primary, fall back to archetypeData
   const data = reportData || archetypeData;
 
-  // Get SWOT data directly from the data or from props if provided
+  // Get SWOT data safely using normalizeSwotData
   const strengths = normalizeSwotData(propSwotData?.strengths || data?.strengths);
   const weaknesses = normalizeSwotData(propSwotData?.weaknesses || data?.weaknesses);
   const opportunities = normalizeSwotData(propSwotData?.opportunities || data?.opportunities);
