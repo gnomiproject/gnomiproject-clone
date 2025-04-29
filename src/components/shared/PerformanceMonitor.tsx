@@ -61,14 +61,16 @@ export const useRenderPerformance = (componentName: string) => {
   };
 };
 
-// Fix the TypeScript error by properly specifying the types
+// Fix the TypeScript error by correctly typing the HOC
 export function withPerformanceMonitoring<P extends object>(
   Component: React.ComponentType<P>,
   componentName: string
 ): React.FC<P> {
+  // Use React.memo to prevent re-renders when props don't change
   const MemoizedComponent = React.memo(Component);
   
-  const MonitoredComponent = (props: P) => {
+  // Define a properly typed component that forwards refs
+  const MonitoredComponent: React.FC<P> = (props: P) => {
     useRenderPerformance(componentName);
     
     return (
