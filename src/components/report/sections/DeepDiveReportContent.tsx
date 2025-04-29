@@ -67,7 +67,7 @@ const DeepDiveReportContent = ({
       
       <Section id="swot-analysis">
         <SwotAnalysis 
-          archetypeData={archetype}
+          reportData={archetype}
         />
       </Section>
       
@@ -128,7 +128,7 @@ const DeepDiveReportContent = ({
       </Section>
       
       <Section id="contact">
-        <ContactSection userData={userData} />
+        <ContactSection userData={userData || {}} />
       </Section>
     </div>
   );

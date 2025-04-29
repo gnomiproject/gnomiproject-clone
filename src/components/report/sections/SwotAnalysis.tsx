@@ -1,75 +1,98 @@
 
 import React from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { ArchetypeDetailedData } from '@/types/archetype';
+import SectionTitle from '@/components/shared/SectionTitle';
 
-interface SwotAnalysisProps {
-  archetypeData: ArchetypeDetailedData;
+export interface SwotAnalysisProps {
+  reportData?: ArchetypeDetailedData;
+  archetypeData?: ArchetypeDetailedData;
+  swotData?: {
+    strengths?: any[];
+    weaknesses?: any[];
+    opportunities?: any[];
+    threats?: any[];
+  };
 }
 
-const SwotAnalysis = ({ archetypeData }: SwotAnalysisProps) => {
-  // Get SWOT data from the archetype data
-  const strengths = archetypeData.enhanced?.swot?.strengths || 
-                   archetypeData.strengths || 
-                   [];
-                   
-  const weaknesses = archetypeData.enhanced?.swot?.weaknesses || 
-                    archetypeData.weaknesses || 
-                    [];
-                    
-  const opportunities = archetypeData.enhanced?.swot?.opportunities || 
-                       archetypeData.opportunities || 
-                       [];
-                       
-  const threats = archetypeData.enhanced?.swot?.threats || 
-                 archetypeData.threats || 
-                 [];
+const SwotAnalysis: React.FC<SwotAnalysisProps> = ({ reportData, archetypeData, swotData: propSwotData }) => {
+  // Use reportData as primary, fall back to archetypeData
+  const data = reportData || archetypeData;
+
+  // Check if swotData was provided directly, otherwise extract from archetype data
+  const swotData = propSwotData || {
+    strengths: data?.strengths || [],
+    weaknesses: data?.weaknesses || [],
+    opportunities: data?.opportunities || [],
+    threats: data?.threats || []
+  };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>SWOT Analysis</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="p-4 bg-green-50 rounded-lg">
-            <h3 className="font-semibold text-green-700 mb-2">Strengths</h3>
-            <ul className="list-disc list-inside space-y-2">
-              {strengths.map((strength, index) => (
-                <li key={index} className="text-green-600">{strength}</li>
-              ))}
-            </ul>
+    <div className="space-y-6">
+      <SectionTitle title="SWOT Analysis" />
+      <div className="bg-white rounded-lg p-6 shadow-sm">
+        <p className="text-gray-600 mb-6">
+          This analysis identifies the key strengths, weaknesses, opportunities, and threats related to {data?.name || data?.archetype_name}.
+        </p>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Strengths Section */}
+          <div className="border border-green-200 bg-green-50 rounded-lg p-4">
+            <h3 className="font-semibold text-lg text-green-700 mb-3">Strengths</h3>
+            {swotData.strengths && swotData.strengths.length > 0 ? (
+              <ul className="list-disc pl-5 space-y-1">
+                {swotData.strengths.map((strength, idx) => (
+                  <li key={idx} className="text-gray-700">{typeof strength === 'string' ? strength : strength.text}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-gray-600 italic">No specific strengths identified.</p>
+            )}
           </div>
-
-          <div className="p-4 bg-amber-50 rounded-lg">
-            <h3 className="font-semibold text-amber-700 mb-2">Weaknesses</h3>
-            <ul className="list-disc list-inside space-y-2">
-              {weaknesses.map((weakness, index) => (
-                <li key={index} className="text-amber-600">{weakness}</li>
-              ))}
-            </ul>
+          
+          {/* Weaknesses Section */}
+          <div className="border border-amber-200 bg-amber-50 rounded-lg p-4">
+            <h3 className="font-semibold text-lg text-amber-700 mb-3">Weaknesses</h3>
+            {swotData.weaknesses && swotData.weaknesses.length > 0 ? (
+              <ul className="list-disc pl-5 space-y-1">
+                {swotData.weaknesses.map((weakness, idx) => (
+                  <li key={idx} className="text-gray-700">{typeof weakness === 'string' ? weakness : weakness.text}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-gray-600 italic">No specific weaknesses identified.</p>
+            )}
           </div>
-
-          <div className="p-4 bg-blue-50 rounded-lg">
-            <h3 className="font-semibold text-blue-700 mb-2">Opportunities</h3>
-            <ul className="list-disc list-inside space-y-2">
-              {opportunities.map((opportunity, index) => (
-                <li key={index} className="text-blue-600">{opportunity}</li>
-              ))}
-            </ul>
+          
+          {/* Opportunities Section */}
+          <div className="border border-blue-200 bg-blue-50 rounded-lg p-4">
+            <h3 className="font-semibold text-lg text-blue-700 mb-3">Opportunities</h3>
+            {swotData.opportunities && swotData.opportunities.length > 0 ? (
+              <ul className="list-disc pl-5 space-y-1">
+                {swotData.opportunities.map((opportunity, idx) => (
+                  <li key={idx} className="text-gray-700">{typeof opportunity === 'string' ? opportunity : opportunity.text}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-gray-600 italic">No specific opportunities identified.</p>
+            )}
           </div>
-
-          <div className="p-4 bg-red-50 rounded-lg">
-            <h3 className="font-semibold text-red-700 mb-2">Threats</h3>
-            <ul className="list-disc list-inside space-y-2">
-              {threats.map((threat, index) => (
-                <li key={index} className="text-red-600">{threat}</li>
-              ))}
-            </ul>
+          
+          {/* Threats Section */}
+          <div className="border border-red-200 bg-red-50 rounded-lg p-4">
+            <h3 className="font-semibold text-lg text-red-700 mb-3">Threats</h3>
+            {swotData.threats && swotData.threats.length > 0 ? (
+              <ul className="list-disc pl-5 space-y-1">
+                {swotData.threats.map((threat, idx) => (
+                  <li key={idx} className="text-gray-700">{typeof threat === 'string' ? threat : threat.text}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-gray-600 italic">No specific threats identified.</p>
+            )}
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 
