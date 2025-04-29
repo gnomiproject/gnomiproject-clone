@@ -147,7 +147,7 @@ const InsightsContainer = ({
     ...archetypeData,
     name: archetypeData.name || archetypeData.archetype_name || `Archetype ${archetypeId.toUpperCase()}`,
     hexColor: archetypeData.hexColor || archetypeData.hex_color || '#6E59A5',
-    color: archetypeData.color || archetypeData.hex_color || '#6E59A5',
+    color: archetypeData.color || archetypeData.hexColor || '#6E59A5',
     familyName: archetypeData.familyName || archetypeData.family_name || 'Healthcare Archetype'
   };
   

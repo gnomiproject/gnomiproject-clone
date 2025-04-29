@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { ArchetypeId, ArchetypeDetailedData } from '@/types/archetype';
 import ArchetypeNavTabs from './components/ArchetypeNavTabs';
@@ -26,7 +25,7 @@ const InsightsView = ({
   hideRequestSection = false
 }: ArchetypeReportProps) => {
   const [activeTab, setActiveTab] = React.useState('overview');
-  const familyColor = reportData.hexColor || reportData.color || reportData.hex_color || '#4B5563';
+  const familyColor = reportData.hexColor || reportData.color || '#4B5563';
   
   console.log('[InsightsView] Rendering with data:', {
     archetypeId,
