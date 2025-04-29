@@ -1,22 +1,30 @@
 
 import * as React from "react"
-
 import { cn } from "@/lib/utils"
 
 const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
   ({ className, type, autoFocus, ...props }, ref) => {
     const inputRef = React.useRef<HTMLInputElement>(null);
     
-    // Handle autoFocus safely with a slight delay to avoid conflicts
+    // Handle autoFocus safely without using the autoFocus prop
     React.useEffect(() => {
+      // Only attempt to focus if explicitly requested via prop
       if (autoFocus && inputRef.current) {
-        // Small delay to avoid focus conflicts
+        // Use a more significant delay to avoid race conditions with other elements
         const timer = setTimeout(() => {
-          // Only focus if there's no active element or if the body has focus
-          if (!document.activeElement || document.activeElement === document.body) {
-            inputRef.current?.focus();
+          try {
+            // Check if document is visible and able to receive focus
+            if (document.visibilityState === 'visible' && 
+                (!document.activeElement || document.activeElement === document.body)) {
+              console.log('Input attempting to focus safely');
+              inputRef.current?.focus({ preventScroll: true });
+            } else {
+              console.log('Input skipping focus - document has active element already');
+            }
+          } catch (e) {
+            console.warn('Focus attempt failed:', e);
           }
-        }, 100);
+        }, 300);
         
         return () => clearTimeout(timer);
       }

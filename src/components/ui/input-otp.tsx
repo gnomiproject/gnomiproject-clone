@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import { OTPInput, OTPInputContext } from "input-otp"
 import { Dot } from "lucide-react"
@@ -12,15 +13,25 @@ const InputOTP = React.forwardRef<
   const otpRef = React.useRef(null);
   
   React.useEffect(() => {
-    if (autoFocus && otpRef.current) {
-      // Small delay to avoid focus conflicts
+    if (autoFocus) {
+      // Use a significant delay to avoid conflicts with other focus attempts
       const timer = setTimeout(() => {
-        // Attempt to focus only if there's no active element
-        const input = document.querySelector('[data-input-otp-focus="true"]');
-        if (input && (!document.activeElement || document.activeElement === document.body)) {
-          (input as HTMLElement).focus();
+        try {
+          // Only attempt focus if no other element is focused
+          if (document.visibilityState === 'visible' &&
+              (!document.activeElement || document.activeElement === document.body)) {
+            console.log('OTP attempting to focus safely');
+            const input = document.querySelector('[data-input-otp-focus="true"]');
+            if (input) {
+              (input as HTMLElement).focus({ preventScroll: true });
+            }
+          } else {
+            console.log('OTP skipping focus - document has active element already');
+          }
+        } catch (e) {
+          console.warn('OTP focus attempt failed:', e);
         }
-      }, 100);
+      }, 500);
       
       return () => clearTimeout(timer);
     }
