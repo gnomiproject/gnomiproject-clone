@@ -17,7 +17,7 @@ const ArchetypeHeader = ({ archetypeData, familyData }: ArchetypeHeaderProps) =>
     <div>
       <div className="text-center mb-6">
         <span className={cn(`inline-block bg-${familyColor}/10 text-${familyColor} rounded-full px-4 py-1 text-sm font-medium`)}>
-          family {archetypeData.familyId}: {familyName}
+          Family {archetypeData.familyId}: {familyName}
         </span>
       </div>
 

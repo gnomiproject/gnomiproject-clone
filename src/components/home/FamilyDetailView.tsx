@@ -21,7 +21,7 @@ const FamilyDetailView: React.FC<FamilyDetailViewProps> = ({
   return (
     <div className={`animate-fade-in p-6 bg-white rounded-lg shadow-sm border-l-4 border-family-${familyInfo.id}`}>
       <h3 className={`text-2xl font-bold mb-3 text-family-${familyInfo.id}`}>
-        family {familyInfo.id}: {familyInfo.name.toLowerCase()}
+        Family {familyInfo.id}: {familyInfo.name.toLowerCase()}
       </h3>
       
       <p className="text-gray-600 mb-4">{familyInfo.description}</p>

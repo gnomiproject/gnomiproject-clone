@@ -47,7 +47,7 @@ const ArchetypeHeader = ({
                 backgroundColor: `${familyColor}20`, 
                 color: familyColor 
               }}>
-                {`Family ${familyId?.toUpperCase() || 'Unknown'}`}
+                {`Family ${familyId?.toLowerCase() || 'unknown'}`}
               </Badge>
             </div>
             

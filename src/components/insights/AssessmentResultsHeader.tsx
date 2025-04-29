@@ -30,7 +30,7 @@ const AssessmentResultsHeader = ({
       
       <div className="text-center mb-6">
         <Badge className={`bg-family-${archetypeId.charAt(0)}/10 text-family-${archetypeId.charAt(0)} hover:bg-family-${archetypeId.charAt(0)}/20 border-0 px-4 py-2 rounded-full text-sm`}>
-          Family {archetypeId.charAt(0).toUpperCase()}: {familyName}
+          Family {archetypeId.charAt(0)}: {familyName}
         </Badge>
       </div>
 
