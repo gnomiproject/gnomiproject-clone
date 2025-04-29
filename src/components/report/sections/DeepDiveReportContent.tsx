@@ -7,6 +7,7 @@ import StrategicRecommendations from './StrategicRecommendations';
 import GnomeImage from '@/components/common/GnomeImage';
 import HomeIntroduction from './HomeIntroduction';
 import ArchetypeProfileSection from './ArchetypeProfileSection';
+import DemographicsSection from './DemographicsSection';
 
 interface DeepDiveReportContentProps {
   archetype: any;
@@ -54,6 +55,14 @@ const DeepDiveReportContent = ({
       {/* Archetype Profile Section */}
       <ErrorBoundary>
         <ArchetypeProfileSection archetypeData={safeArchetype} />
+      </ErrorBoundary>
+      
+      {/* Demographics Section */}
+      <ErrorBoundary>
+        <DemographicsSection 
+          reportData={safeArchetype} 
+          averageData={averageData} 
+        />
       </ErrorBoundary>
       
       {/* Debug information - shown in a less prominent way */}
