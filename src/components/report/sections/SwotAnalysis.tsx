@@ -2,7 +2,6 @@
 import React from 'react';
 import { ArchetypeDetailedData } from '@/types/archetype';
 import SectionTitle from '@/components/shared/SectionTitle';
-import { normalizeSwotData } from '@/utils/swot/normalizeSwotData';
 
 export interface SwotAnalysisProps {
   reportData?: ArchetypeDetailedData;
@@ -20,19 +19,11 @@ const SwotAnalysis: React.FC<SwotAnalysisProps> = ({ reportData, archetypeData, 
   const data = reportData || archetypeData;
 
   // Check if swotData was provided directly, otherwise extract from archetype data
-  const rawSwotData = propSwotData || {
+  const swotData = propSwotData || {
     strengths: data?.strengths || [],
     weaknesses: data?.weaknesses || [],
     opportunities: data?.opportunities || [],
     threats: data?.threats || []
-  };
-  
-  // Normalize all SWOT data to string arrays
-  const swotData = {
-    strengths: normalizeSwotData(rawSwotData.strengths),
-    weaknesses: normalizeSwotData(rawSwotData.weaknesses),
-    opportunities: normalizeSwotData(rawSwotData.opportunities),
-    threats: normalizeSwotData(rawSwotData.threats)
   };
 
   return (
@@ -50,7 +41,7 @@ const SwotAnalysis: React.FC<SwotAnalysisProps> = ({ reportData, archetypeData, 
             {swotData.strengths && swotData.strengths.length > 0 ? (
               <ul className="list-disc pl-5 space-y-1">
                 {swotData.strengths.map((strength, idx) => (
-                  <li key={idx} className="text-gray-700">{strength}</li>
+                  <li key={idx} className="text-gray-700">{typeof strength === 'string' ? strength : strength.text}</li>
                 ))}
               </ul>
             ) : (
@@ -64,7 +55,7 @@ const SwotAnalysis: React.FC<SwotAnalysisProps> = ({ reportData, archetypeData, 
             {swotData.weaknesses && swotData.weaknesses.length > 0 ? (
               <ul className="list-disc pl-5 space-y-1">
                 {swotData.weaknesses.map((weakness, idx) => (
-                  <li key={idx} className="text-gray-700">{weakness}</li>
+                  <li key={idx} className="text-gray-700">{typeof weakness === 'string' ? weakness : weakness.text}</li>
                 ))}
               </ul>
             ) : (
@@ -78,7 +69,7 @@ const SwotAnalysis: React.FC<SwotAnalysisProps> = ({ reportData, archetypeData, 
             {swotData.opportunities && swotData.opportunities.length > 0 ? (
               <ul className="list-disc pl-5 space-y-1">
                 {swotData.opportunities.map((opportunity, idx) => (
-                  <li key={idx} className="text-gray-700">{opportunity}</li>
+                  <li key={idx} className="text-gray-700">{typeof opportunity === 'string' ? opportunity : opportunity.text}</li>
                 ))}
               </ul>
             ) : (
@@ -92,7 +83,7 @@ const SwotAnalysis: React.FC<SwotAnalysisProps> = ({ reportData, archetypeData, 
             {swotData.threats && swotData.threats.length > 0 ? (
               <ul className="list-disc pl-5 space-y-1">
                 {swotData.threats.map((threat, idx) => (
-                  <li key={idx} className="text-gray-700">{threat}</li>
+                  <li key={idx} className="text-gray-700">{typeof threat === 'string' ? threat : threat.text}</li>
                 ))}
               </ul>
             ) : (

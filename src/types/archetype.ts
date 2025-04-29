@@ -27,25 +27,14 @@ export interface ArchetypeFamily {
   commonTraits?: string[];
 }
 
-// Add a JSON type definition that will help with Supabase's data
-export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
-
-// Define a strongly-typed SWOT structure
-export interface SwotAnalysis {
-  strengths: string[] | Json;
-  weaknesses: string[] | Json;
-  opportunities: string[] | Json;
-  threats: string[] | Json;
-}
-
 // Analysis table interfaces
 export interface ArchetypeDetailed extends Archetype {
-  swot?: SwotAnalysis;
-  swot_analysis?: SwotAnalysis;
-  strengths?: string[] | Json;
-  weaknesses?: string[] | Json;
-  opportunities?: string[] | Json;
-  threats?: string[] | Json;
+  swot?: {
+    strengths: string[];
+    weaknesses: string[];
+    opportunities: string[];
+    threats: string[];
+  };
   distinctive_metrics?: Array<{
     metric: string;
     category: string;
@@ -61,6 +50,9 @@ export interface ArchetypeDetailed extends Archetype {
     metrics_references?: any[];
   }>;
 }
+
+// Add a JSON type definition that will help with Supabase's data
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export interface ArchetypeDetailedData {
   id: ArchetypeId;
@@ -86,7 +78,12 @@ export interface ArchetypeDetailedData {
     keyInsights: any[];
   };
   enhanced?: {
-    swot: SwotAnalysis;
+    swot: {
+      strengths: string[];
+      weaknesses: string[];
+      opportunities: string[];
+      threats: string[];
+    };
     strategicPriorities: any[];
     costSavings: any[];
     riskProfile?: {
@@ -101,14 +98,12 @@ export interface ArchetypeDetailedData {
   };
   // Add full compatibility with ArchetypeDetailed
   family_id?: FamilyId;
-  swot?: SwotAnalysis;
-  swot_analysis?: SwotAnalysis;
-  // Add standalone properties for SWOT analysis 
-  strengths?: string[] | Json;
-  weaknesses?: string[] | Json;
-  opportunities?: string[] | Json;
-  threats?: string[] | Json;
-  
+  swot?: {
+    strengths: string[];
+    weaknesses: string[];
+    opportunities: string[];
+    threats: string[];
+  };
   distinctive_metrics?: Array<{
     metric: string;
     category: string;
@@ -123,6 +118,12 @@ export interface ArchetypeDetailedData {
     description: string;
     metrics_references?: any[];
   }>;
+  
+  // Add standalone properties for SWOT analysis 
+  strengths?: string[];
+  weaknesses?: string[];
+  opportunities?: string[];
+  threats?: string[];
   
   // Add missing properties needed by components
   fullDescription?: string;

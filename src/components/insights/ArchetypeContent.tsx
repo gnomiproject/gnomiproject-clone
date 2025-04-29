@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArchetypeDetailedData, ArchetypeId } from '@/types/archetype';
@@ -16,7 +15,6 @@ import { useArchetypeMetrics } from '@/hooks/archetype/useArchetypeMetrics';
 import { formatNumber } from '@/utils/formatters';
 import MetricsAnalysis from '../report/sections/MetricsAnalysis';
 import { getArchetypeColorHex } from '@/data/colors';
-import { normalizeSwotData } from '@/utils/swot/normalizeSwotData';
 
 interface ArchetypeContentProps {
   archetypeData: ArchetypeDetailedData;
@@ -55,10 +53,10 @@ const ArchetypeContent = ({ archetypeData, archetypeId, onRetakeAssessment }: Ar
   const familyName = archetypeData?.familyName || archetypeData?.family_name || "Healthcare Archetype Family";
     
   // Get strengths, weaknesses, opportunities, threats with fallbacks
-  const strengths = normalizeSwotData(archetypeData?.strengths || (archetypeData?.enhanced?.swot?.strengths) || []);
-  const weaknesses = normalizeSwotData(archetypeData?.weaknesses || (archetypeData?.enhanced?.swot?.weaknesses) || []);
-  const opportunities = normalizeSwotData(archetypeData?.opportunities || (archetypeData?.enhanced?.swot?.opportunities) || []);
-  const threats = normalizeSwotData(archetypeData?.threats || (archetypeData?.enhanced?.swot?.threats) || []);
+  const strengths = archetypeData?.strengths || (archetypeData?.enhanced?.swot?.strengths) || [];
+  const weaknesses = archetypeData?.weaknesses || (archetypeData?.enhanced?.swot?.weaknesses) || [];
+  const opportunities = archetypeData?.opportunities || (archetypeData?.enhanced?.swot?.opportunities) || [];
+  const threats = archetypeData?.threats || (archetypeData?.enhanced?.swot?.threats) || [];
   
   // Get strategic recommendations with fallback
   const strategicRecommendations = archetypeData?.strategic_recommendations || 
@@ -438,7 +436,7 @@ const ArchetypeContent = ({ archetypeData, archetypeId, onRetakeAssessment }: Ar
                 </p>
                 
                 <ul className="space-y-4">
-                  {Array.isArray(strategicRecommendations) && strategicRecommendations.slice(0, 5).map((rec: any, index: number) => (
+                  {strategicRecommendations.slice(0, 5).map((rec: any, index: number) => (
                     <li key={`rec-${index}`} className="flex items-start gap-3">
                       <div className="bg-purple-100 text-purple-800 rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">
                         {index + 1}
@@ -450,12 +448,12 @@ const ArchetypeContent = ({ archetypeData, archetypeId, onRetakeAssessment }: Ar
                       </div>
                     </li>
                   ))}
-                  {(!Array.isArray(strategicRecommendations) || strategicRecommendations.length === 0) && (
+                  {strategicRecommendations.length === 0 && (
                     <li className="text-gray-500">No specific recommendations available for this archetype</li>
                   )}
                 </ul>
                 
-                {Array.isArray(strategicRecommendations) && strategicRecommendations.length > 5 && (
+                {strategicRecommendations.length > 5 && (
                   <p className="text-sm text-gray-600 italic">
                     Showing 5 of {strategicRecommendations.length} recommendations available
                   </p>
@@ -465,7 +463,7 @@ const ArchetypeContent = ({ archetypeData, archetypeId, onRetakeAssessment }: Ar
                   <h3 className="font-semibold text-indigo-800">Access detailed implementation strategies</h3>
                   <p className="text-indigo-700">
                     Get the full archetype report with {
-                      Array.isArray(strategicRecommendations) && strategicRecommendations.length > 5 ? 
+                      strategicRecommendations.length > 5 ? 
                       `all ${strategicRecommendations.length} recommendations and` : ''
                     } comprehensive implementation guidance.
                   </p>
