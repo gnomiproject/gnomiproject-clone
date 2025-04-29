@@ -1,5 +1,5 @@
 
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
 import { AssessmentQuestion } from '@/types/assessment';
 
 export const useQuestionValidation = (

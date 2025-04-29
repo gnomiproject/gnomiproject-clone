@@ -2,7 +2,6 @@
 import React from 'react';
 import { useAssessment } from '../hooks/useAssessment';
 import { useQuestionValidation } from '@/hooks/useQuestionValidation';
-import { useIsMobile } from '@/hooks/use-mobile';
 import CalculationLoader from '../components/assessment/CalculationLoader';
 import AssessmentLayout from '../components/assessment/AssessmentLayout';
 

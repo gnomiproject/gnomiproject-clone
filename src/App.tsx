@@ -6,8 +6,10 @@ import Navbar from '@/components/layout/Navbar';
 import Index from '@/pages/Index';
 import NotFound from '@/pages/NotFound';
 
-// Lazy load non-critical routes to improve initial loading performance
-const Assessment = lazy(() => import('@/pages/Assessment'));
+// Direct import for the Assessment page to resolve dynamic import issues
+import Assessment from '@/pages/Assessment';
+
+// Lazy load other non-critical routes
 const Insights = lazy(() => import('@/pages/Insights'));
 const About = lazy(() => import('@/pages/About'));
 const Admin = lazy(() => import('@/pages/Admin'));
@@ -21,7 +23,7 @@ const ReactQueryDevtools = lazy(() =>
   }))
 );
 
-const version = "0.0.3"; // Updated version number
+const version = "0.0.3"; // Version number
 
 // Loading fallback for lazy components
 const PageLoader = () => (
@@ -40,16 +42,13 @@ function App() {
         <Navbar />
         <main>
           <Routes>
-            {/* Main application routes - Index is critical, so not lazy loaded */}
+            {/* Main application routes */}
             <Route path="/" element={<Index />} />
             
-            {/* All other routes are lazy loaded */}
-            <Route path="/assessment" element={
-              <Suspense fallback={<PageLoader />}>
-                <Assessment />
-              </Suspense>
-            } />
+            {/* Direct render for Assessment to fix dynamic import issues */}
+            <Route path="/assessment" element={<Assessment />} />
             
+            {/* All other routes are lazy loaded */}
             <Route path="/insights" element={
               <Suspense fallback={<PageLoader />}>
                 <Insights />
@@ -85,7 +84,7 @@ function App() {
               <Suspense fallback={<PageLoader />}>
                 <ReportView />
               </Suspense>
-            } /> {/* Legacy route */}
+            } />
             
             {/* Admin routes */}
             <Route path="/admin" element={
