@@ -22,13 +22,16 @@ const DeepDiveReportContent = ({
   const archetypeId = archetype?.id || archetype?.archetype_id || '';
   
   // Debug logging
-  console.log('[DEBUG] DeepDiveReportContent data:', {
+  console.log('[DEBUG] DeepDiveReportContent received data:', {
     id: archetypeId,
     name: archetypeName,
     hasStrategicRecommendations: !!archetype?.strategic_recommendations,
     recommendationsType: typeof archetype?.strategic_recommendations
   });
 
+  // Make a safe copy of the data to avoid mutation issues
+  const safeArchetype = {...archetype};
+  
   return (
     <div className="container mx-auto p-6">
       <ErrorBoundary>
@@ -36,7 +39,7 @@ const DeepDiveReportContent = ({
           <h1 className="text-3xl font-bold">
             {archetypeName} Report 
             <span className="ml-2 text-sm bg-gray-100 px-2 py-1 rounded text-gray-600 align-middle">
-              {archetypeId.toUpperCase()}
+              {archetypeId ? archetypeId.toUpperCase() : 'ID UNKNOWN'}
             </span>
           </h1>
           <p className="text-gray-500 mt-2">
@@ -48,9 +51,10 @@ const DeepDiveReportContent = ({
             <div className="mt-2 font-mono text-xs space-y-1">
               <p>User: {userData?.name || 'Not available'}</p>
               <p>Organization: {userData?.organization || 'Not available'}</p>
-              <p>Data Type: {typeof archetype}</p>
+              <p>Data Type: {typeof archetype || 'Unknown'}</p>
               <p>Has Strategic Recommendations: {archetype?.strategic_recommendations ? 'Yes' : 'No'}</p>
-              <p>Recommendations Type: {typeof archetype?.strategic_recommendations}</p>
+              <p>Recommendations Type: {typeof archetype?.strategic_recommendations || 'Not available'}</p>
+              <p>Has SWOT Data: {archetype?.strengths ? 'Yes' : 'No'}</p>
             </div>
           </div>
           
@@ -63,8 +67,8 @@ const DeepDiveReportContent = ({
       <Section id="recommendations">
         <ErrorBoundary>
           <StrategicRecommendations 
-            reportData={archetype}
-            archetypeData={archetype}
+            reportData={safeArchetype}
+            archetypeData={safeArchetype}
             averageData={averageData}
           />
         </ErrorBoundary>

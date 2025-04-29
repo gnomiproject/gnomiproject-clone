@@ -7,6 +7,7 @@ import { RefreshCw } from 'lucide-react';
 import InsightsReportContent from '@/components/report/sections/InsightsReportContent';
 import DeepDiveReportContent from '@/components/report/sections/DeepDiveReportContent';
 import { useAdminReportData } from '@/hooks/useAdminReportData';
+import ErrorBoundary from '@/components/shared/ErrorBoundary';
 
 const AdminReportViewer = () => {
   const { archetypeId = '' } = useParams();
@@ -15,6 +16,17 @@ const AdminReportViewer = () => {
     const path = window.location.pathname;
     return path.includes('insights-report') ? 'insights' : 'deepdive';
   });
+  
+  const navigate = useNavigate();
+
+  // Debug current route
+  useEffect(() => {
+    console.log('AdminReportViewer Path:', {
+      pathname: window.location.pathname,
+      reportType,
+      archetypeId
+    });
+  }, [reportType, archetypeId]);
 
   const {
     data: reportData,
@@ -46,7 +58,12 @@ const AdminReportViewer = () => {
     setReportType(newType);
     const basePath = '/admin/';
     const path = newType === 'insights' ? 'insights-report' : 'report';
-    window.location.href = `${basePath}${path}/${archetypeId}`;
+    navigate(`${basePath}${path}/${archetypeId}`);
+  };
+
+  // Safe way to get to debug data view
+  const goToDebugView = () => {
+    navigate(`/admin/debug/${archetypeId}`);
   };
 
   if (loading) {
@@ -119,7 +136,7 @@ const AdminReportViewer = () => {
             <Button 
               size="sm"
               variant="secondary"
-              onClick={() => window.location.href = `/admin/debug/${archetypeId}`}
+              onClick={goToDebugView}
             >
               Debug Data
             </Button>
@@ -128,25 +145,27 @@ const AdminReportViewer = () => {
       </div>
 
       {/* Report content using same components as user view */}
-      <div className="container mx-auto py-8">
-        {reportData && reportType === 'insights' ? (
-          <InsightsReportContent archetype={reportData} />
-        ) : reportData && reportType === 'deepdive' ? (
-          <DeepDiveReportContent 
-            archetype={reportData} 
-            userData={{
-              name: 'Admin View',
-              organization: 'Admin Organization',
-              created_at: new Date().toISOString()
-            }}
-            averageData={{}}
-          />
-        ) : (
-          <div className="text-center py-12">
-            <p className="text-lg text-gray-500">No report data available</p>
-          </div>
-        )}
-      </div>
+      <ErrorBoundary>
+        <div className="container mx-auto py-8">
+          {reportData && reportType === 'insights' ? (
+            <InsightsReportContent archetype={reportData} />
+          ) : reportData && reportType === 'deepdive' ? (
+            <DeepDiveReportContent 
+              archetype={reportData} 
+              userData={{
+                name: 'Admin View',
+                organization: 'Admin Organization',
+                created_at: new Date().toISOString()
+              }}
+              averageData={{}}
+            />
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-lg text-gray-500">No report data available</p>
+            </div>
+          )}
+        </div>
+      </ErrorBoundary>
     </div>
   );
 };

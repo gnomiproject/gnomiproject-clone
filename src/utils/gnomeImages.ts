@@ -16,9 +16,8 @@ export type GnomeImageType =
   | 'analysis'       // Gnome analyzing data
   | 'placeholder';   // Fallback image
 
-// Map of gnome image paths
+// Map of gnome image paths - using placeholder for all types to avoid 404s
 export const gnomeImages: Record<GnomeImageType, string> = {
-  // Using relative paths to ensure they work properly
   presentation: '/assets/gnomes/placeholder.svg',
   clipboard: '/assets/gnomes/placeholder.svg',
   welcome: '/assets/gnomes/placeholder.svg', 

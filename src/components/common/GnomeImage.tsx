@@ -17,9 +17,10 @@ const GnomeImage: React.FC<GnomeImageProps> = ({
 }) => {
   // Get image source with fallback
   const getImageSource = () => {
-    if (type && gnomeImages[type]) {
-      return gnomeImages[type];
+    if (type && gnomeImages[type as any]) {
+      return gnomeImages[type as any];
     }
+    console.warn(`GnomeImage: Unknown type "${type}", using fallback`);
     return fallbackGnomeImage;
   };
   
