@@ -8,16 +8,11 @@ interface ProfileNavigationProps {
 }
 
 const ProfileNavigation: React.FC<ProfileNavigationProps> = ({ onNavigate }) => {
-  const handleNavigation = (e: React.MouseEvent<HTMLButtonElement>, sectionId: string) => {
+  const handleNavigation = (sectionId: string) => (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     
     if (onNavigate) {
       onNavigate(sectionId);
-    } else {
-      const element = document.getElementById(sectionId);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
-      }
     }
   };
 
@@ -25,7 +20,7 @@ const ProfileNavigation: React.FC<ProfileNavigationProps> = ({ onNavigate }) => 
     <div className="flex justify-between mt-8">
       <Button 
         variant="outline"
-        onClick={(e) => handleNavigation(e, 'introduction')}
+        onClick={handleNavigation('introduction')}
         className="flex items-center gap-2"
         type="button"
       >
@@ -34,7 +29,7 @@ const ProfileNavigation: React.FC<ProfileNavigationProps> = ({ onNavigate }) => 
       </Button>
       
       <Button 
-        onClick={(e) => handleNavigation(e, 'recommendations')}
+        onClick={handleNavigation('recommendations')}
         className="flex items-center gap-2"
         type="button"
       >

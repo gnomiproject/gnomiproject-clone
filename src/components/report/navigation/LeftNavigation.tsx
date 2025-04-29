@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { ChevronRight } from 'lucide-react';
 
 interface Section {
   id: string;
@@ -18,8 +17,8 @@ const LeftNavigation: React.FC<LeftNavigationProps> = ({
   onNavigate,
   sections
 }) => {
-  // Prevent default behavior and use the onNavigate callback
-  const handleNavigation = (e: React.MouseEvent<HTMLButtonElement>, sectionId: string) => {
+  // Simple click handler that calls the onNavigate callback with the section ID
+  const handleClick = (sectionId: string) => (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     onNavigate(sectionId);
   };
@@ -35,7 +34,7 @@ const LeftNavigation: React.FC<LeftNavigationProps> = ({
           {sections.map(section => (
             <li key={section.id}>
               <button
-                onClick={(e) => handleNavigation(e, section.id)}
+                onClick={handleClick(section.id)}
                 className={`w-full text-left px-3 py-2 rounded-md flex items-center group transition-colors ${
                   activeSectionId === section.id 
                     ? 'bg-blue-100 text-blue-800 font-medium' 
@@ -43,10 +42,7 @@ const LeftNavigation: React.FC<LeftNavigationProps> = ({
                 }`}
                 type="button"
               >
-                {activeSectionId === section.id && (
-                  <ChevronRight className="h-4 w-4 mr-2 text-blue-600" />
-                )}
-                <span className={activeSectionId !== section.id ? "ml-6" : ""}>
+                <span className="ml-2">
                   {section.name}
                 </span>
               </button>
@@ -58,7 +54,7 @@ const LeftNavigation: React.FC<LeftNavigationProps> = ({
       <div className="p-4 mt-4">
         <div className="bg-gray-100 p-3 rounded-md">
           <p className="text-xs text-gray-600">
-            Navigate through sections using the links above or use page scrolling to browse the complete report.
+            Navigate through sections using the links above to browse the complete report.
           </p>
         </div>
       </div>
