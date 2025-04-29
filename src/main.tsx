@@ -45,6 +45,21 @@ window.addEventListener('error', (e) => {
   });
 });
 
+// Simplified React mounting process
+const rootElement = document.getElementById('root');
+if (!rootElement) {
+  console.error('Root element not found in DOM');
+} else {
+  ReactDOM.createRoot(rootElement).render(
+    <React.StrictMode>
+      <QueryClientProvider client={queryClient}>
+        <App />
+      </QueryClientProvider>
+    </React.StrictMode>
+  );
+  console.log('Main.tsx: Application mounted successfully');
+}
+
 // Track DOM focus events with preview-specific handling
 if (typeof window !== 'undefined') {
   document.addEventListener('focusin', (event) => {
@@ -82,41 +97,4 @@ if (typeof window !== 'undefined') {
       console.warn('Multiple autofocus elements detected, this may cause focus conflicts');
     }
   });
-}
-
-// Use a more controlled mount process with preview-specific handling
-const mountApp = () => {
-  try {
-    const rootElement = document.getElementById('root');
-    if (!rootElement) {
-      console.error('Root element not found in DOM');
-      return;
-    }
-
-    ReactDOM.createRoot(rootElement).render(
-      <React.StrictMode>
-        <QueryClientProvider client={queryClient}>
-          <App />
-        </QueryClientProvider>
-      </React.StrictMode>
-    );
-    console.log('Main.tsx: Application mounted successfully');
-  } catch (error) {
-    console.error('Failed to mount application:', error);
-  }
-};
-
-// Adaptive mounting strategy based on environment
-if (window.location.hostname.includes('lovableproject')) {
-  // In preview, use a small delay to ensure DOM is fully ready
-  console.log('Using preview-optimized mounting strategy');
-  window.addEventListener('DOMContentLoaded', () => {
-    setTimeout(mountApp, 100);
-  });
-} else if ('requestIdleCallback' in window) {
-  // Use requestIdleCallback for non-critical initialization in regular browsers
-  window.requestIdleCallback(mountApp);
-} else {
-  // Fallback to setTimeout
-  setTimeout(mountApp, 1);
 }
