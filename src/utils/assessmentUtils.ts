@@ -168,13 +168,17 @@ export const calculateArchetypeMatch = (answers: Record<string, string>): Assess
   // Calculate a percentage match (simplified for now)
   const percentageMatch = Math.floor(Math.random() * 6) + 80; // 80-85% match
   
+  // Return the result including the required exactData property
   return {
     primaryArchetype,
     secondaryArchetype,
     tertiaryArchetype,
     score: 1.0,
     percentageMatch,
-    resultTier: resultTier as 'Basic' | 'Detailed' | 'Comprehensive'
+    resultTier: resultTier as 'Basic' | 'Detailed' | 'Comprehensive',
+    exactData: {
+      employeeCount: null
+    }
   };
 };
 
