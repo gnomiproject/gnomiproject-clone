@@ -10,10 +10,19 @@ import { queryClient } from './lib/queryClient'
 // Add comprehensive logging to track application initialization and resource loading issues
 console.log('Main.tsx: Application initializing');
 
-// Track network errors
+// Track network errors with proper type checking for different HTML elements
 window.addEventListener('error', (e) => {
-  if (e.target instanceof HTMLScriptElement || e.target instanceof HTMLLinkElement || e.target instanceof HTMLImageElement) {
-    console.warn('Resource error:', e.target.src || e.target.href, '- Target:', e.target.tagName);
+  if (e.target instanceof HTMLElement) {
+    // Determine the resource URL based on element type
+    let resourceUrl = '';
+    
+    if (e.target instanceof HTMLScriptElement || e.target instanceof HTMLImageElement) {
+      resourceUrl = e.target.src;
+    } else if (e.target instanceof HTMLLinkElement) {
+      resourceUrl = e.target.href;
+    }
+    
+    console.warn('Resource error:', resourceUrl, '- Target:', e.target.tagName);
   }
 });
 
