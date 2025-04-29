@@ -27,6 +27,7 @@ interface ReportContainerProps {
   averageData?: any;
   isAdminView?: boolean;
   debugInfo?: any;
+  onNavigate?: (sectionId: string) => void;
 }
 
 const ReportContainer: React.FC<ReportContainerProps> = ({ 
@@ -34,10 +35,22 @@ const ReportContainer: React.FC<ReportContainerProps> = ({
   userData, 
   averageData, 
   isAdminView = false,
-  debugInfo
+  debugInfo,
+  onNavigate
 }) => {
   const reportRef = useRef<HTMLDivElement>(null);
+  // Use the passed onNavigate function if provided, otherwise use the hook
   const { activeSectionId, handleNavigate, isNavigating } = useReportNavigation();
+  
+  // Function to handle navigation requests
+  const handleSectionNavigate = (sectionId: string) => {
+    // Use the provided onNavigate function if it exists, otherwise use the hook function
+    if (onNavigate) {
+      onNavigate(sectionId);
+    } else {
+      handleNavigate(sectionId);
+    }
+  };
   
   // Debug info
   const isDebugMode = isAdminView || window.location.search.includes('debug=true');
@@ -61,7 +74,7 @@ const ReportContainer: React.FC<ReportContainerProps> = ({
       <div className="hidden lg:block fixed left-0 top-0 h-full print:hidden z-10">
         <LeftNavigation 
           activeSectionId={activeSectionId}
-          onNavigate={handleNavigate}
+          onNavigate={handleSectionNavigate}
           sections={REPORT_SECTIONS}
         />
       </div>
