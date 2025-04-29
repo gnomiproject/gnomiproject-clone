@@ -25,7 +25,7 @@ export const normalizePropertyNames = (data: any): any => {
   if (normalized.key_characteristics) {
     // If it's a string, split it by newlines
     if (typeof normalized.key_characteristics === 'string') {
-      normalized.key_characteristics = normalized.key_characteristics
+      normalized.key_characteristics = (normalized.key_characteristics as string)
         .split('\n')
         .filter(Boolean);
     } 
@@ -74,7 +74,7 @@ export const processArchetypeData = (
       if (Array.isArray(normalizedData.key_characteristics)) {
         return normalizedData.key_characteristics;
       } else if (typeof normalizedData.key_characteristics === 'string') {
-        return normalizedData.key_characteristics.split('\n').filter(Boolean);
+        return (normalizedData.key_characteristics as string).split('\n').filter(Boolean);
       } else {
         return [];
       }

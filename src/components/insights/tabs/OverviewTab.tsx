@@ -21,8 +21,8 @@ const OverviewTab = ({ archetypeData, familyColor, hideRequestSection = false }:
     if (Array.isArray(kc)) {
       return kc;
     } else if (typeof kc === 'string') {
-      // Split string by newline if it's a string
-      return kc.split('\n').filter(Boolean);
+      // Use type assertion to tell TypeScript this is definitely a string
+      return (kc as string).split('\n').filter(Boolean);
     } else {
       // Return empty array if it's neither an array nor a string
       return [];
