@@ -11,6 +11,9 @@ interface UseReportAccessOptions {
   isAdminView?: boolean;
 }
 
+// Define valid table names to satisfy TypeScript
+type SecureTableName = 'level4_report_secure' | 'level4_deepdive_report_data_secure' | 'level3_report_secure';
+
 export const useReportAccess = ({ archetypeId: rawArchetypeId, token, isAdminView = false }: UseReportAccessOptions) => {
   const [reportData, setReportData] = useState<any | null>(null);
   const [averageData, setAverageData] = useState<any | null>(null);
@@ -58,7 +61,7 @@ export const useReportAccess = ({ archetypeId: rawArchetypeId, token, isAdminVie
         }
 
         // Try case-insensitive search for more robust data retrieval
-        const fetchWithCaseInsensitiveSearch = async (tableName: string, archetypeIdParam: string) => {
+        const fetchWithCaseInsensitiveSearch = async <T extends SecureTableName>(tableName: T, archetypeIdParam: string) => {
           // Try exact match first
           const { data, error } = await supabase
             .from(tableName)
@@ -144,7 +147,7 @@ export const useReportAccess = ({ archetypeId: rawArchetypeId, token, isAdminVie
 
         // Fetch average data for comparisons
         const { data: avgData, error: avgError } = await supabase
-          .from('level4_report_secure')
+          .from('level4_report_secure' as const)
           .select('*')
           .eq('archetype_id', 'All_Average')
           .maybeSingle();
@@ -161,7 +164,7 @@ export const useReportAccess = ({ archetypeId: rawArchetypeId, token, isAdminVie
           
           // Try the base secure view for average data
           const { data: avgBaseData, error: avgBaseError } = await supabase
-            .from('level4_deepdive_report_data_secure')
+            .from('level4_deepdive_report_data_secure' as const)
             .select('*')
             .eq('archetype_id', 'All_Average')
             .maybeSingle();
