@@ -3,11 +3,11 @@ import React from 'react';
 import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import { Section } from '@/components/shared/Section';
 import SectionTitle from '@/components/shared/SectionTitle';
-import StrategicRecommendations from './StrategicRecommendations';
 import GnomeImage from '@/components/common/GnomeImage';
 import HomeIntroduction from './HomeIntroduction';
 import ArchetypeProfileSection from './ArchetypeProfileSection';
 import DemographicsSection from './DemographicsSection';
+import StrategicRecommendationsSection from './strategic-recommendations/StrategicRecommendationsSection';
 
 interface DeepDiveReportContentProps {
   archetype: any;
@@ -65,6 +65,14 @@ const DeepDiveReportContent = ({
         />
       </ErrorBoundary>
       
+      {/* Strategic Recommendations Section */}
+      <ErrorBoundary>
+        <StrategicRecommendationsSection
+          reportData={safeArchetype}
+          averageData={averageData}
+        />
+      </ErrorBoundary>
+      
       {/* Debug information - shown in a less prominent way */}
       <ErrorBoundary>
         <Section id="debug-info" className="print:hidden">
@@ -88,16 +96,6 @@ const DeepDiveReportContent = ({
           </details>
         </Section>
       </ErrorBoundary>
-      
-      <Section id="recommendations">
-        <ErrorBoundary>
-          <StrategicRecommendations 
-            reportData={safeArchetype}
-            archetypeData={safeArchetype}
-            averageData={averageData}
-          />
-        </ErrorBoundary>
-      </Section>
     </div>
   );
 };

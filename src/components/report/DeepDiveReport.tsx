@@ -26,10 +26,21 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
     
     setIsNavigating(true);
     
+    // Find the section element
+    const sectionElement = document.getElementById(sectionId);
+    if (sectionElement) {
+      // Scroll to the section
+      sectionElement.scrollIntoView({ behavior: 'smooth' });
+      
+      // Set focus to the section for accessibility
+      sectionElement.setAttribute('tabindex', '-1');
+      sectionElement.focus({ preventScroll: true });
+    }
+    
     // Simple timeout to prevent navigation spam
     setTimeout(() => {
       setIsNavigating(false);
-    }, 500);
+    }, 800);
   }, [isNavigating]);
 
   return (
@@ -39,6 +50,7 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
       averageData={averageData}
       isAdminView={isAdminView}
       debugInfo={debugInfo}
+      onNavigate={handleSafeNavigate}
     />
   );
 };

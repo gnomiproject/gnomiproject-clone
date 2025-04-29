@@ -19,7 +19,7 @@ const ProfileNavigation: React.FC<ProfileNavigationProps> = ({ onNavigate }) => 
   const handleNavigateRecommendations = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     if (onNavigate) {
-      onNavigate('recommendations');
+      onNavigate('strategic-recommendations');
     }
   }, [onNavigate]);
 
