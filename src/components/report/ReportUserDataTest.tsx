@@ -51,7 +51,7 @@ const ReportUserDataTest = () => {
     );
   }
 
-  // Handle possible nulls for assessment data
+  // Handle possible nulls for assessment data - safely access nested properties
   const assessmentResult = userData?.assessment_result || {};
   
   return (
@@ -112,37 +112,37 @@ const ReportUserDataTest = () => {
                   value={userData?.archetype_id || 'N/A'} 
                   badge 
                 />
-                {assessmentResult.primaryArchetype && (
+                {assessmentResult && typeof assessmentResult === 'object' && 'primaryArchetype' in assessmentResult && (
                   <InfoItem 
                     label="Primary Archetype" 
-                    value={assessmentResult.primaryArchetype} 
+                    value={String(assessmentResult.primaryArchetype)} 
                     badge 
                   />
                 )}
-                {assessmentResult.percentageMatch && (
+                {assessmentResult && typeof assessmentResult === 'object' && 'percentageMatch' in assessmentResult && (
                   <InfoItem 
                     label="Match Percentage" 
                     value={`${assessmentResult.percentageMatch}%`}
                   />
                 )}
-                {assessmentResult.secondaryArchetype && (
+                {assessmentResult && typeof assessmentResult === 'object' && 'secondaryArchetype' in assessmentResult && (
                   <InfoItem 
                     label="Secondary Archetype" 
-                    value={assessmentResult.secondaryArchetype}
+                    value={String(assessmentResult.secondaryArchetype)}
                     badge
                   />
                 )}
-                {assessmentResult.tertiaryArchetype && (
+                {assessmentResult && typeof assessmentResult === 'object' && 'tertiaryArchetype' in assessmentResult && (
                   <InfoItem 
                     label="Tertiary Archetype" 
-                    value={assessmentResult.tertiaryArchetype}
+                    value={String(assessmentResult.tertiaryArchetype)}
                     badge
                   />
                 )}
-                {assessmentResult.resultTier && (
+                {assessmentResult && typeof assessmentResult === 'object' && 'resultTier' in assessmentResult && (
                   <InfoItem
                     label="Result Tier"
-                    value={assessmentResult.resultTier}
+                    value={String(assessmentResult.resultTier)}
                   />
                 )}
                 <InfoItem
@@ -153,7 +153,7 @@ const ReportUserDataTest = () => {
             </div>
           </div>
           
-          {userData?.access_url && (
+          {userData && 'access_url' in userData && userData.access_url && (
             <div className="p-4 bg-muted rounded-md">
               <div className="flex flex-col space-y-2">
                 <h3 className="text-md font-medium">Report Access URL</h3>
@@ -167,7 +167,7 @@ const ReportUserDataTest = () => {
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    onClick={() => copyToClipboard(userData.access_url)}
+                    onClick={() => copyToClipboard(userData.access_url as string)}
                   >
                     <Clipboard className="h-4 w-4" />
                   </Button>
@@ -176,7 +176,7 @@ const ReportUserDataTest = () => {
                     size="sm" 
                     asChild
                   >
-                    <a href={userData.access_url} target="_blank" rel="noopener noreferrer">
+                    <a href={userData.access_url as string} target="_blank" rel="noopener noreferrer">
                       <ExternalLink className="h-4 w-4" />
                     </a>
                   </Button>

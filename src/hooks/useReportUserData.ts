@@ -16,6 +16,7 @@ export interface ReportUserData {
   access_count: number;
   last_accessed: string | null;
   expires_at: string | null;
+  access_url?: string;
 }
 
 export const useReportUserData = (token: string | undefined, archetypeId: string | undefined) => {
@@ -95,7 +96,8 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
           exact_employee_count: data.exact_employee_count,
           access_count: newAccessCount, // Use the updated count
           last_accessed: currentTime, // Use the updated timestamp
-          expires_at: data.expires_at
+          expires_at: data.expires_at,
+          access_url: data.access_url // Include the access_url if available
         };
         
         setUserData(typedUserData);
