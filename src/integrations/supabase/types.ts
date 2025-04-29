@@ -789,6 +789,24 @@ export type Database = {
         }
         Relationships: []
       }
+      gnomi_images: {
+        Row: {
+          id: number
+          name: string
+          url: string | null
+        }
+        Insert: {
+          id?: number
+          name: string
+          url?: string | null
+        }
+        Update: {
+          id?: number
+          name?: string
+          url?: string | null
+        }
+        Relationships: []
+      }
       insights_feedback: {
         Row: {
           archetype_id: string | null

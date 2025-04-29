@@ -7,17 +7,46 @@ import { cn } from "@/lib/utils"
 const InputOTP = React.forwardRef<
   React.ElementRef<typeof OTPInput>,
   React.ComponentPropsWithoutRef<typeof OTPInput>
->(({ className, containerClassName, ...props }, ref) => (
-  <OTPInput
-    ref={ref}
-    containerClassName={cn(
-      "flex items-center gap-2 has-[:disabled]:opacity-50",
-      containerClassName
-    )}
-    className={cn("disabled:cursor-not-allowed", className)}
-    {...props}
-  />
-))
+>(({ className, containerClassName, autoFocus, ...props }, ref) => {
+  // Handle autoFocus safely with useEffect
+  const otpRef = React.useRef(null);
+  
+  React.useEffect(() => {
+    if (autoFocus && otpRef.current) {
+      // Small delay to avoid focus conflicts
+      const timer = setTimeout(() => {
+        // Attempt to focus only if there's no active element
+        const input = document.querySelector('[data-input-otp-focus="true"]');
+        if (input && (!document.activeElement || document.activeElement === document.body)) {
+          (input as HTMLElement).focus();
+        }
+      }, 100);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [autoFocus]);
+  
+  return (
+    <OTPInput
+      ref={(node) => {
+        // Handle both refs
+        if (typeof ref === 'function') {
+          ref(node);
+        } else if (ref) {
+          ref.current = node;
+        }
+        otpRef.current = node;
+      }}
+      containerClassName={cn(
+        "flex items-center gap-2 has-[:disabled]:opacity-50",
+        containerClassName
+      )}
+      className={cn("disabled:cursor-not-allowed", className)}
+      // Remove autoFocus from being passed to DOM
+      {...props}
+    />
+  );
+})
 InputOTP.displayName = "InputOTP"
 
 const InputOTPGroup = React.forwardRef<
