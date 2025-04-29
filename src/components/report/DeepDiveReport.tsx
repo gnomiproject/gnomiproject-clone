@@ -1,204 +1,169 @@
-import React, { useState, useEffect } from 'react';
-import { ArchetypeDetailedData } from '@/types/archetype';
-import ReportIntroduction from './sections/ReportIntroduction';
+
+import React, { useEffect, useState } from 'react';
+import { Section } from '@/components/shared/Section';
+import ExecutiveSummary from './sections/ExecutiveSummary';
 import ArchetypeProfile from './sections/ArchetypeProfile';
+import ReportIntroduction from './sections/ReportIntroduction';
+import SwotAnalysis from './sections/SwotAnalysis';
 import DemographicsSection from './sections/DemographicsSection';
 import CostAnalysis from './sections/CostAnalysis';
 import UtilizationPatterns from './sections/UtilizationPatterns';
 import DiseaseManagement from './sections/DiseaseManagement';
 import CareGaps from './sections/CareGaps';
 import RiskFactors from './sections/RiskFactors';
-import SwotAnalysis from './sections/SwotAnalysis';
-import StrategicRecommendations from './sections/StrategicRecommendations';
+import Recommendations from './sections/Recommendations';
 import ContactSection from './sections/ContactSection';
-import ReportLayout from './layout/ReportLayout';
+import ReportDebugTools from './ReportDebugTools';
+import LeftNavigation from './navigation/LeftNavigation';
+import { useReactToPrint } from 'react-to-print';
+import { Printer } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface DeepDiveReportProps {
-  reportData: ArchetypeDetailedData;
-  userData: any;
-  averageData: any;
+  reportData: any;
+  userData?: any;
+  averageData?: any;
   isAdminView?: boolean;
   debugInfo?: any;
 }
 
-const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
-  reportData,
-  userData,
-  averageData,
+const DeepDiveReport: React.FC<DeepDiveReportProps> = ({ 
+  reportData, 
+  userData, 
+  averageData, 
   isAdminView = false,
   debugInfo
 }) => {
-  // Track active section
-  const [activeSectionId, setActiveSectionId] = useState('introduction');
-  
-  // Handle scroll to section
-  const handleNavigate = (sectionId: string) => {
-    console.log(`Navigating to section: ${sectionId}`);
-    setActiveSectionId(sectionId);
-    const element = document.getElementById(sectionId);
-    if (element) {
-      console.log(`Scrolling to element with id: ${sectionId}`);
-      element.scrollIntoView({ behavior: 'smooth' });
-    } else {
-      console.warn(`Element with id ${sectionId} not found`);
-    }
-  };
-  
-  // Section IDs - ensure these match exactly with the navigation component
-  const sectionIds = {
-    introduction: 'introduction',
-    archetypeProfile: 'archetype-profile',
-    demographics: 'demographics',
-    costAnalysis: 'cost-analysis',
-    utilization: 'utilization-patterns',
-    diseaseManagement: 'disease-management',
-    careGaps: 'care-gaps',
-    riskFactors: 'risk-factors',
-    swotAnalysis: 'swot-analysis',
-    recommendations: 'recommendations',
-    contact: 'contact'
-  };
-  
-  // Intersection Observer for active section tracking
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            console.log(`Section ${entry.target.id} is now visible`);
-            setActiveSectionId(entry.target.id);
-          }
-        });
-      },
-      { threshold: 0.2 }
-    );
-    
-    Object.values(sectionIds).forEach((id) => {
-      const element = document.getElementById(id);
-      if (element) observer.observe(element);
-    });
-    
-    return () => {
-      Object.values(sectionIds).forEach((id) => {
-        const element = document.getElementById(id);
-        if (element) observer.unobserve(element);
-      });
-    };
-  }, [reportData]);
-  
-  return (
-    <ReportLayout 
-      activeSectionId={activeSectionId} 
-      onNavigate={handleNavigate}
-      isAdminView={isAdminView}
-    >
-      {/* Header - Keep consistent across report */}
-      <header className="bg-blue-50 border-b border-blue-100 py-4 px-6 mb-8 print:hidden">
-        <div className="container mx-auto">
-          <h1 className="text-2xl font-bold text-blue-800">
-            Healthcare Archetype Deep Dive Report
-          </h1>
-          <p className="text-blue-600">
-            {reportData.archetype_name || reportData.name}
-          </p>
-        </div>
-      </header>
-      
-      <div className="container mx-auto px-4 pb-16">
-        {/* Introduction Section */}
-        <section id={sectionIds.introduction} className="mb-16">
-          <ReportIntroduction 
-            userData={userData}
-          />
-        </section>
-        
-        {/* Archetype Profile Section */}
-        <section id={sectionIds.archetypeProfile} className="mb-16">
-          <ArchetypeProfile 
-            archetypeData={reportData}
-          />
-        </section>
-        
-        {/* Demographics Section */}
-        <section id={sectionIds.demographics} className="mb-16">
-          <DemographicsSection 
-            reportData={reportData} 
-            averageData={averageData}
-          />
-        </section>
-        
-        {/* Cost Analysis Section */}
-        <section id={sectionIds.costAnalysis} className="mb-16">
-          <CostAnalysis 
-            reportData={reportData} 
-            averageData={averageData}
-          />
-        </section>
-        
-        {/* Utilization Section */}
-        <section id={sectionIds.utilization} className="mb-16">
-          <UtilizationPatterns 
-            reportData={reportData} 
-            averageData={averageData}
-          />
-        </section>
-        
-        {/* Disease Management Section */}
-        <section id={sectionIds.diseaseManagement} className="mb-16">
-          <DiseaseManagement 
-            reportData={reportData} 
-            averageData={averageData}
-          />
-        </section>
-        
-        {/* Care Gaps Section */}
-        <section id={sectionIds.careGaps} className="mb-16">
-          <CareGaps 
-            reportData={reportData} 
-            averageData={averageData}
-          />
-        </section>
-        
-        {/* Risk Factors Section */}
-        <section id={sectionIds.riskFactors} className="mb-16">
-          <RiskFactors 
-            reportData={reportData} 
-            averageData={averageData}
-          />
-        </section>
-        
-        {/* SWOT Analysis Section */}
-        <section id={sectionIds.swotAnalysis} className="mb-16">
-          <SwotAnalysis 
-            reportData={reportData}
-          />
-        </section>
-        
-        {/* Strategic Recommendations Section */}
-        <section id={sectionIds.recommendations} className="mb-16">
-          <StrategicRecommendations 
-            reportData={reportData}
-          />
-        </section>
-        
-        {/* Contact Section */}
-        <section id={sectionIds.contact} className="mb-16">
-          <ContactSection 
-            userData={userData}
-          />
-        </section>
+  const reportRef = React.useRef<HTMLDivElement>(null);
+  const [showPrintButton, setShowPrintButton] = useState(false);
 
-        {/* Debug info for development and admin views */}
-        {(isAdminView || import.meta.env.DEV) && debugInfo && (
-          <div className="mt-20 p-4 border-t border-gray-200 pt-8">
-            <h2 className="text-lg font-semibold mb-2">Debug Information</h2>
-            <pre className="bg-gray-50 p-4 rounded-md text-xs overflow-auto max-h-96">
-              {JSON.stringify(debugInfo, null, 2)}
-            </pre>
-          </div>
-        )}
+  // Setup print handler
+  const handlePrint = useReactToPrint({
+    content: () => reportRef.current,
+    documentTitle: `Healthcare Archetype Report - ${reportData?.archetype_name || 'Unknown'}`,
+    onBeforeGetContent: () => {
+      document.body.classList.add('printing');
+      return Promise.resolve();
+    },
+    onAfterPrint: () => {
+      document.body.classList.remove('printing');
+    }
+  });
+
+  // Show print button only after report is fully loaded
+  useEffect(() => {
+    if (reportData) {
+      setShowPrintButton(true);
+    }
+  }, [reportData]);
+
+  // Store the theme color from report data
+  const themeColor = reportData?.hexColor || reportData?.hex_color || "#4B5563";
+
+  // Debug info
+  const isDebugMode = isAdminView || window.location.search.includes('debug=true');
+
+  return (
+    <div className="relative min-h-screen bg-gray-50">
+      {/* Left navigation only on larger screens */}
+      <div className="hidden lg:block fixed left-0 top-0 h-full print:hidden">
+        <LeftNavigation sections={[
+          { id: 'introduction', label: 'Introduction' },
+          { id: 'executive-summary', label: 'Executive Summary' },
+          { id: 'archetype-profile', label: 'Archetype Profile' },
+          { id: 'swot-analysis', label: 'SWOT Analysis' },
+          { id: 'demographics', label: 'Demographics' },
+          { id: 'cost-analysis', label: 'Cost Analysis' },
+          { id: 'utilization-patterns', label: 'Utilization Patterns' },
+          { id: 'disease-management', label: 'Disease Management' },
+          { id: 'care-gaps', label: 'Care Gaps' },
+          { id: 'risk-factors', label: 'Risk & SDOH Factors' },
+          { id: 'recommendations', label: 'Recommendations' },
+          { id: 'contact', label: 'Contact' }
+        ]} />
       </div>
-    </ReportLayout>
+      
+      {/* Print button */}
+      {showPrintButton && (
+        <div className="fixed bottom-6 right-6 z-10 print:hidden">
+          <Button 
+            onClick={handlePrint}
+            className="flex items-center gap-2 bg-white border shadow-md hover:bg-gray-50"
+          >
+            <Printer size={18} />
+            <span>Print Report</span>
+          </Button>
+        </div>
+      )}
+
+      {/* Main report content */}
+      <div 
+        className="lg:pl-64 py-6 print:py-0 print:pl-0"
+        ref={reportRef}
+      >
+        <div className="max-w-5xl mx-auto px-4 print:px-8">
+          <Section id="introduction">
+            <ReportIntroduction reportData={reportData} userData={userData} />
+          </Section>
+          
+          <Section id="executive-summary">
+            <ExecutiveSummary reportData={reportData} />
+          </Section>
+          
+          <Section id="archetype-profile">
+            <ArchetypeProfile reportData={reportData} />
+          </Section>
+          
+          <Section id="swot-analysis">
+            <SwotAnalysis reportData={reportData} />
+          </Section>
+          
+          <Section id="demographics">
+            <DemographicsSection reportData={reportData} averageData={averageData} />
+          </Section>
+          
+          <Section id="cost-analysis">
+            <CostAnalysis reportData={reportData} averageData={averageData} />
+          </Section>
+          
+          <Section id="utilization-patterns">
+            <UtilizationPatterns reportData={reportData} averageData={averageData} />
+          </Section>
+          
+          <Section id="disease-management">
+            <DiseaseManagement reportData={reportData} averageData={averageData} />
+          </Section>
+          
+          <Section id="care-gaps">
+            <CareGaps reportData={reportData} averageData={averageData} />
+          </Section>
+          
+          <Section id="risk-factors">
+            <RiskFactors reportData={reportData} averageData={averageData} />
+          </Section>
+          
+          <Section id="recommendations">
+            <Recommendations reportData={reportData} />
+          </Section>
+          
+          <Section id="contact">
+            <ContactSection userData={userData} />
+          </Section>
+
+          {/* Debug tools for admin and debug mode */}
+          {isDebugMode && (
+            <Section id="debug" className="print:hidden">
+              <ReportDebugTools 
+                reportData={reportData} 
+                userData={userData}
+                averageData={averageData}
+                debugInfo={debugInfo}
+              />
+            </Section>
+          )}
+        </div>
+      </div>
+    </div>
   );
 };
 
