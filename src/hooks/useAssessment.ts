@@ -56,7 +56,7 @@ export const useAssessment = () => {
     if (storedEmployeeCount) {
       try {
         const count = Number(storedEmployeeCount);
-        console.log('Loaded exact employee count from session storage:', count);
+        console.log('[useAssessment] Loaded exact employee count from session storage:', count);
         setExactEmployeeCount(count);
       } catch (error) {
         console.error('Error parsing stored employee count:', error);
@@ -93,7 +93,7 @@ export const useAssessment = () => {
    * @param count The exact employee count
    */
   const setEmployeeCount = (count: number | null) => {
-    console.log('Setting exact employee count:', count);
+    console.log('[useAssessment] Setting exact employee count:', count);
     setExactEmployeeCount(count);
     if (count !== null) {
       sessionStorage.setItem(SESSION_EXACT_EMPLOYEE_COUNT_KEY, count.toString());
@@ -134,36 +134,38 @@ export const useAssessment = () => {
       try {
         // Calculate the result based on answers
         const assessmentResult = calculateArchetypeMatch(answers);
-        setResult(assessmentResult);
         
-        // Save results to localStorage for persistence
-        localStorage.setItem(INSIGHTS_STORAGE_KEY, assessmentResult.primaryArchetype);
-        
-        // Save results to sessionStorage to persist during the session
-        const resultWithEmployeeCount = {
+        // Ensure exactData is always included
+        const resultWithEmployeeCount: AssessmentResult = {
           ...assessmentResult,
           exactData: {
             employeeCount: exactEmployeeCount
           }
         };
         
-        console.log("Saving assessment result with exact employee count:", {
-          primaryArchetype: assessmentResult.primaryArchetype,
+        setResult(resultWithEmployeeCount);
+        
+        // Save results to localStorage for persistence
+        localStorage.setItem(INSIGHTS_STORAGE_KEY, resultWithEmployeeCount.primaryArchetype);
+        
+        // Save results to sessionStorage to persist during the session
+        console.log("[useAssessment] Saving assessment result with exact employee count:", {
+          primaryArchetype: resultWithEmployeeCount.primaryArchetype,
           exactEmployeeCount: exactEmployeeCount,
-          hasExactData: true, // explicitly show this is being included
+          hasExactData: true,
           fullResult: JSON.stringify(resultWithEmployeeCount)
         });
         
         sessionStorage.setItem(SESSION_RESULTS_KEY, JSON.stringify(resultWithEmployeeCount));
         
-        console.log("Assessment completed. Results:", resultWithEmployeeCount);
-        console.log("Exact employee count:", exactEmployeeCount);
-        console.log("Navigating to insights page with sessionId:", sessionId);
+        console.log("[useAssessment] Assessment completed. Results:", resultWithEmployeeCount);
+        console.log("[useAssessment] Exact employee count:", exactEmployeeCount);
+        console.log("[useAssessment] Navigating to insights page with sessionId:", sessionId);
         
         // Navigate to the insights page with the results state
         navigate(`/insights`, { 
           state: { 
-            selectedArchetype: assessmentResult.primaryArchetype,
+            selectedArchetype: resultWithEmployeeCount.primaryArchetype,
             sessionId,
             assessmentAnswers: answers,
             exactEmployeeCount

@@ -31,14 +31,24 @@ const InsightsContainer = ({
   // Enhanced logging for assessment data tracing
   useEffect(() => {
     renderCountRef.current += 1;
-    console.log(`InsightsContainer: Mount/Render #${renderCountRef.current} for ${archetypeId}`);
-    console.log('InsightsContainer assessment data check:', { 
+    console.log(`[InsightsContainer] Mount/Render #${renderCountRef.current} for ${archetypeId}`);
+    console.log('[InsightsContainer] Assessment data check:', { 
       hasAssessmentResult: !!assessmentResult,
       assessmentResultKeys: assessmentResult ? Object.keys(assessmentResult) : null,
       hasExactData: assessmentResult?.exactData ? 'Yes' : 'No',
       exactEmployeeCount: assessmentResult?.exactData?.employeeCount,
       fullAssessmentResult: assessmentResult ? JSON.stringify(assessmentResult) : null
     });
+    
+    // Ensure exactData exists in assessmentResult
+    if (assessmentResult && !assessmentResult.exactData) {
+      console.log('[InsightsContainer] Adding exactData to assessment result');
+      const storedEmployeeCount = sessionStorage.getItem('healthcareArchetypeExactEmployeeCount');
+      assessmentResult.exactData = {
+        employeeCount: storedEmployeeCount ? Number(storedEmployeeCount) : null
+      };
+      console.log('[InsightsContainer] Updated assessment result:', assessmentResult);
+    }
     
     // Reset flags when archetypeId changes
     if (archetypeId) {
@@ -47,7 +57,7 @@ const InsightsContainer = ({
     
     return () => {
       mountedRef.current = false;
-      console.log(`InsightsContainer: Unmounting for ${archetypeId}`);
+      console.log(`[InsightsContainer] Unmounting for ${archetypeId}`);
     };
   }, [archetypeId, assessmentResult]);
   
@@ -67,20 +77,20 @@ const InsightsContainer = ({
   const archetypeData = useMemo(() => {
     // Skip processing if already done or component unmounted
     if (processedRef.current || !mountedRef.current) {
-      console.log(`InsightsContainer: Skipping redundant processing for ${archetypeId}`);
+      console.log(`[InsightsContainer] Skipping redundant processing for ${archetypeId}`);
       return dbArchetypeData || getArchetypeDetailedById(archetypeId);
     }
     
     // Set processing flag immediately before any operations
     processedRef.current = true;
-    console.log(`InsightsContainer: Processing data for ${archetypeId} (sequence #${renderCountRef.current})`);
+    console.log(`[InsightsContainer] Processing data for ${archetypeId} (sequence #${renderCountRef.current})`);
     
     // Get data from API or fallback to local data
     const data = dbArchetypeData || getArchetypeDetailedById(archetypeId);
     
     // Log warning if no data is found
     if (!data) {
-      console.warn(`InsightsContainer: No data found for archetype ${archetypeId}`);
+      console.warn(`[InsightsContainer] No data found for archetype ${archetypeId}`);
     }
     
     return data;
@@ -124,7 +134,7 @@ const InsightsContainer = ({
     familyName: archetypeData.familyName || archetypeData.family_name || 'Healthcare Archetype'
   };
   
-  console.log('InsightsContainer rendering with assessment data:', {
+  console.log('[InsightsContainer] Rendering with assessment data:', {
     hasAssessmentResult: !!assessmentResult,
     hasAssessmentAnswers: !!assessmentAnswers,
     exactEmployeeCount: assessmentResult?.exactData?.employeeCount

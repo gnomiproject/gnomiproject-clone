@@ -31,7 +31,7 @@ const ArchetypeReport = ({
   // Enhanced logging for assessment data
   useEffect(() => {
     if (assessmentResult) {
-      console.log('InsightsView: Using assessment result data', {
+      console.log('[InsightsView] Using assessment result data', {
         hasAssessmentResult: true,
         archetypeId,
         primaryArchetype: assessmentResult.primaryArchetype,
@@ -39,8 +39,24 @@ const ArchetypeReport = ({
         exactEmployeeCount: assessmentResult?.exactData?.employeeCount,
         fullAssessmentResult: JSON.stringify(assessmentResult)
       });
+      
+      // Ensure exactData exists in the assessment result
+      if (!assessmentResult.exactData) {
+        const storedEmployeeCount = sessionStorage.getItem('healthcareArchetypeExactEmployeeCount');
+        if (storedEmployeeCount) {
+          console.log('[InsightsView] Adding exactData from session storage:', storedEmployeeCount);
+          assessmentResult.exactData = {
+            employeeCount: Number(storedEmployeeCount)
+          };
+        } else {
+          console.log('[InsightsView] No employee count found in session storage, adding empty exactData');
+          assessmentResult.exactData = {
+            employeeCount: null
+          };
+        }
+      }
     } else {
-      console.log('InsightsView: No assessment result data');
+      console.log('[InsightsView] No assessment result data');
     }
   }, [assessmentResult, archetypeId]);
 

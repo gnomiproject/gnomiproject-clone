@@ -23,6 +23,7 @@ declare global {
 
 // Session storage key for submitted report
 const REPORT_SUBMITTED_KEY = 'healthcareArchetypeReportSubmitted';
+const SESSION_EXACT_EMPLOYEE_COUNT_KEY = 'healthcareArchetypeExactEmployeeCount';
 
 interface DeepDiveFormContainerProps {
   archetypeId: ArchetypeId;
@@ -45,7 +46,7 @@ const DeepDiveFormContainer = ({
   
   // Extended debug logging to trace the data flow
   useEffect(() => {
-    console.log('DeepDiveFormContainer: Assessment data received', {
+    console.log('[DeepDiveFormContainer] Assessment data received', {
       archetypeId,
       hasAssessmentResult: !!assessmentResult,
       assessmentResultKeys: assessmentResult ? Object.keys(assessmentResult) : null,
@@ -111,15 +112,30 @@ const DeepDiveFormContainer = ({
     setIsSubmitting(true);
     
     try {
-      console.log('Submitting form with data:', data);
-      console.log('Assessment result before submission:', assessmentResult);
+      console.log('[DeepDiveFormContainer] Submitting form with data:', data);
+      console.log('[DeepDiveFormContainer] Assessment result before submission:', assessmentResult);
       
       // Generate a unique ID for the report request
       const reportId = uuidv4();
       
-      // Extract exact employee count from assessment results if available
-      const exactEmployeeCount = assessmentResult?.exactData?.employeeCount || null;
-      console.log('Extracted exact employee count for submission:', exactEmployeeCount);
+      // Get exact employee count with multiple fallbacks
+      let exactEmployeeCount = null;
+      
+      // First try assessment result
+      if (assessmentResult?.exactData?.employeeCount !== undefined) {
+        exactEmployeeCount = assessmentResult.exactData.employeeCount;
+        console.log('[DeepDiveFormContainer] Using employee count from assessmentResult:', exactEmployeeCount);
+      }
+      // Then try session storage
+      else {
+        const storedCount = sessionStorage.getItem(SESSION_EXACT_EMPLOYEE_COUNT_KEY);
+        if (storedCount) {
+          exactEmployeeCount = Number(storedCount);
+          console.log('[DeepDiveFormContainer] Using employee count from session storage:', exactEmployeeCount);
+        }
+      }
+      
+      console.log('[DeepDiveFormContainer] Final exact employee count for submission:', exactEmployeeCount);
       
       // Generate access token and construct URL
       const accessToken = uuidv4();
@@ -127,17 +143,23 @@ const DeepDiveFormContainer = ({
       setAccessUrl(generatedUrl); // Store URL for potential display
       
       // Ensure assessment result is properly formatted for database storage
-      const formattedAssessmentResult = assessmentResult ? {
-        primaryArchetype: assessmentResult.primaryArchetype,
-        secondaryArchetype: assessmentResult.secondaryArchetype,
-        tertiaryArchetype: assessmentResult.tertiaryArchetype,
-        score: assessmentResult.score,
-        percentageMatch: assessmentResult.percentageMatch,
-        resultTier: assessmentResult.resultTier,
-        exactData: assessmentResult.exactData || null
-      } : null;
+      let formattedAssessmentResult = null;
+      if (assessmentResult) {
+        formattedAssessmentResult = {
+          primaryArchetype: assessmentResult.primaryArchetype,
+          secondaryArchetype: assessmentResult.secondaryArchetype,
+          tertiaryArchetype: assessmentResult.tertiaryArchetype,
+          score: assessmentResult.score,
+          percentageMatch: assessmentResult.percentageMatch,
+          resultTier: assessmentResult.resultTier,
+          exactData: { 
+            employeeCount: exactEmployeeCount 
+          }
+        };
+      }
       
-      console.log('Formatted assessment result for DB:', formattedAssessmentResult);
+      console.log('[DeepDiveFormContainer] Formatted assessment result for DB:', formattedAssessmentResult);
+      console.log('[DeepDiveFormContainer] About to insert into Supabase with employee count:', exactEmployeeCount);
       
       const { data: response, error } = await supabase
         .from('report_requests')
@@ -158,15 +180,14 @@ const DeepDiveFormContainer = ({
           exact_employee_count: exactEmployeeCount,
           access_url: generatedUrl
         })
-        .select('id, access_token')
-        .single();
+        .select('id, access_token');
 
       if (error) {
-        console.error('Error details:', error);
+        console.error('[DeepDiveFormContainer] Error details:', error);
         throw error;
       }
       
-      console.log('Report request created successfully:', response);
+      console.log('[DeepDiveFormContainer] Report request created successfully:', response);
       
       // Store submission record in session storage to prevent multiple submissions
       sessionStorage.setItem(REPORT_SUBMITTED_KEY, JSON.stringify({
@@ -188,7 +209,7 @@ const DeepDiveFormContainer = ({
       toast.success(`Report request submitted successfully. We've sent a link to ${data.email}.`);
       
     } catch (error: any) {
-      console.error('Error submitting report request:', error);
+      console.error('[DeepDiveFormContainer] Error submitting report request:', error);
       toast.error(`Error: ${error.message || 'Failed to submit request'}`);
     } finally {
       setIsSubmitting(false);

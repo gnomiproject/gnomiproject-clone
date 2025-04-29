@@ -19,7 +19,7 @@ const DeepDiveRequestForm = ({
   // Add debugging to trace the exact employee count data
   useEffect(() => {
     if (assessmentResult) {
-      console.log('DeepDiveRequestForm: Assessment data check', {
+      console.log('[DeepDiveRequestForm] Assessment data check', {
         hasAssessmentResult: true,
         archetypeId,
         primaryArchetype: assessmentResult.primaryArchetype,
@@ -28,8 +28,20 @@ const DeepDiveRequestForm = ({
         exactEmployeeCount: assessmentResult?.exactData?.employeeCount,
         fullAssessmentResult: JSON.stringify(assessmentResult)
       });
+      
+      // Check if we need to ensure exactData exists
+      if (!assessmentResult.exactData) {
+        console.warn('[DeepDiveRequestForm] exactData property missing from assessmentResult');
+        const storedEmployeeCount = sessionStorage.getItem('healthcareArchetypeExactEmployeeCount');
+        if (storedEmployeeCount) {
+          console.log('[DeepDiveRequestForm] Found employee count in session storage:', storedEmployeeCount);
+          assessmentResult.exactData = {
+            employeeCount: Number(storedEmployeeCount)
+          };
+        }
+      }
     } else {
-      console.log('DeepDiveRequestForm: No assessment result data available');
+      console.log('[DeepDiveRequestForm] No assessment result data available');
     }
   }, [assessmentResult, archetypeId]);
 

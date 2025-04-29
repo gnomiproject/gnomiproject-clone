@@ -52,13 +52,18 @@ const SizeQuestion = ({
       
       if (setExactEmployeeCount && value) {
         const count = Number(value);
-        console.log('Setting exact employee count in SizeQuestion:', count);
+        console.log('[SizeQuestion] Setting exact employee count:', count);
         setExactEmployeeCount(count);
+        
+        // Also explicitly save to session storage as a backup
+        sessionStorage.setItem('healthcareArchetypeExactEmployeeCount', count.toString());
+        
         const optionId = mapEmployeeCountToOption(count);
         onAnswerChange(question.id, optionId);
       } else if (setExactEmployeeCount && !value) {
-        console.log('Clearing exact employee count');
+        console.log('[SizeQuestion] Clearing exact employee count');
         setExactEmployeeCount(null);
+        sessionStorage.removeItem('healthcareArchetypeExactEmployeeCount');
       }
     }
   };
