@@ -2,26 +2,33 @@
 import React, { memo, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { throttle } from '@/utils/debounce';
 
 interface ProfileNavigationProps {
   onNavigate?: (sectionId: string) => void;
 }
 
 const ProfileNavigation: React.FC<ProfileNavigationProps> = ({ onNavigate }) => {
-  // Using useCallback to prevent recreation of these functions on each render
+  // Using throttle for navigation to ensure UI responsiveness
+  const throttledNavigate = useCallback(
+    throttle((sectionId: string) => {
+      if (onNavigate) {
+        onNavigate(sectionId);
+      }
+    }, 300),
+    [onNavigate]
+  );
+
+  // Using useCallback for event handlers to prevent recreation on each render
   const handleNavigateIntroduction = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    if (onNavigate) {
-      onNavigate('introduction');
-    }
-  }, [onNavigate]);
+    throttledNavigate('introduction');
+  }, [throttledNavigate]);
 
   const handleNavigateRecommendations = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    if (onNavigate) {
-      onNavigate('strategic-recommendations');
-    }
-  }, [onNavigate]);
+    throttledNavigate('strategic-recommendations');
+  }, [throttledNavigate]);
 
   return (
     <div className="flex justify-between mt-8">

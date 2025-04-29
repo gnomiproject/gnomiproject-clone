@@ -61,10 +61,11 @@ export const useRenderPerformance = (componentName: string) => {
   };
 };
 
-export const withPerformanceMonitoring = <P extends object>(
+// Fix the TypeScript error by properly specifying the types
+export function withPerformanceMonitoring<P extends object>(
   Component: React.ComponentType<P>,
   componentName: string
-) => {
+): React.FC<P> {
   const MemoizedComponent = React.memo(Component);
   
   const MonitoredComponent = (props: P) => {
@@ -79,4 +80,4 @@ export const withPerformanceMonitoring = <P extends object>(
   
   MonitoredComponent.displayName = `Monitored(${componentName})`;
   return MonitoredComponent;
-};
+}

@@ -2,6 +2,7 @@
 import React, { memo, useCallback } from 'react';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { throttle } from '@/utils/debounce';
 
 interface NavigationButtonsProps {
   previousSection: string;
@@ -18,20 +19,27 @@ const NavigationButtons: React.FC<NavigationButtonsProps> = ({
   nextSectionName,
   onNavigate
 }) => {
-  // Using useCallback to prevent recreation of these functions on each render
+  // Using throttle instead of debounce for faster response on button clicks
+  // while still preventing multiple rapid clicks
+  const throttledNavigate = useCallback(
+    throttle((sectionId: string) => {
+      if (onNavigate) {
+        onNavigate(sectionId);
+      }
+    }, 300),
+    [onNavigate]
+  );
+
+  // Creating separate handlers to maintain clear intent in the event handlers
   const handleNavigatePrevious = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    if (onNavigate) {
-      onNavigate(previousSection);
-    }
-  }, [onNavigate, previousSection]);
+    throttledNavigate(previousSection);
+  }, [throttledNavigate, previousSection]);
 
   const handleNavigateNext = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    if (onNavigate) {
-      onNavigate(nextSection);
-    }
-  }, [onNavigate, nextSection]);
+    throttledNavigate(nextSection);
+  }, [throttledNavigate, nextSection]);
 
   return (
     <div className="flex justify-between items-center mt-10 print:hidden">

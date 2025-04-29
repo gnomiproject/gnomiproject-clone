@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import ReportContainer from './components/ReportContainer';
 import { debounce } from '@/utils/debounce';
 
@@ -21,7 +21,12 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
   // Add a simple state to track if navigation is in process
   const [isNavigating, setIsNavigating] = useState(false);
   
-  // Debounce navigation to prevent performance issues
+  // Use memoized values to prevent unnecessary re-renders
+  const memoizedReportData = useMemo(() => reportData, [reportData]);
+  const memoizedUserData = useMemo(() => userData, [userData]);
+  const memoizedAverageData = useMemo(() => averageData, [averageData]);
+  
+  // Optimized debounced navigation with useCallback to prevent recreation on each render
   const handleSafeNavigate = useCallback(
     debounce((sectionId: string) => {
       if (isNavigating) return; // Prevent rapid navigation
@@ -39,7 +44,7 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
         sectionElement.focus({ preventScroll: true });
       }
       
-      // Simple timeout to prevent navigation spam
+      // Reset navigation state after animation completes
       setTimeout(() => {
         setIsNavigating(false);
       }, 800);
@@ -49,9 +54,9 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
 
   return (
     <ReportContainer
-      reportData={reportData}
-      userData={userData}
-      averageData={averageData}
+      reportData={memoizedReportData}
+      userData={memoizedUserData}
+      averageData={memoizedAverageData}
       isAdminView={isAdminView}
       debugInfo={debugInfo}
       onNavigate={handleSafeNavigate}
@@ -59,4 +64,5 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
   );
 };
 
+// Use React.memo to prevent unnecessary re-renders
 export default React.memo(DeepDiveReport);

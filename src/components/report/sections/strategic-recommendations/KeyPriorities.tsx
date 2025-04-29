@@ -1,7 +1,8 @@
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Star } from 'lucide-react';
+import { memoizedEnsureArray } from '@/utils/ensureArray';
 
 interface KeyPrioritiesProps {
   recommendations: any[];
@@ -9,9 +10,17 @@ interface KeyPrioritiesProps {
 
 // Base component implementation
 const KeyPrioritiesBase: React.FC<KeyPrioritiesProps> = ({ recommendations }) => {
+  // Use memoizedEnsureArray to safely handle recommendations data
+  const safeRecommendations = useMemo(() => 
+    memoizedEnsureArray<any>(recommendations, 'recommendations'),
+  [recommendations]);
+  
   // Get the top 3 recommendations (or fewer if there aren't 3)
-  const topRecommendations = recommendations.slice(0, 3);
+  const topRecommendations = useMemo(() => 
+    safeRecommendations.slice(0, 3),
+  [safeRecommendations]);
 
+  // Early return for empty data case
   if (topRecommendations.length === 0) {
     return (
       <Card className="p-6">

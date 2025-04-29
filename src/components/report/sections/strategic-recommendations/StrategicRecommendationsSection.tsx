@@ -7,7 +7,7 @@ import ImplementationRoadmap from './ImplementationRoadmap';
 import ExpectedImpact from './ExpectedImpact';
 import SuccessMetrics from './SuccessMetrics';
 import GnomeImage from '@/components/common/GnomeImage';
-import { ensureArray } from '@/utils/ensureArray';
+import { memoizedEnsureArray } from '@/utils/ensureArray';
 import { useRenderPerformance } from '@/components/shared/PerformanceMonitor';
 
 interface StrategicRecommendationsSectionProps {
@@ -24,9 +24,9 @@ const StrategicRecommendationsSection: React.FC<StrategicRecommendationsSectionP
   
   // Memoize recommendations processing to avoid expensive operations on re-renders
   const recommendations = useMemo(() => {
-    // Extract strategic recommendations and ensure it's an array
+    // Extract strategic recommendations using the memoized function for better performance
     const recs = reportData?.strategic_recommendations 
-      ? ensureArray(reportData.strategic_recommendations) 
+      ? memoizedEnsureArray(reportData.strategic_recommendations, 'strategic_recommendations') 
       : [];
     
     return recs;

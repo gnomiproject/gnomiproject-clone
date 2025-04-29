@@ -1,9 +1,10 @@
 
-import React, { useState, useRef, Suspense, lazy } from 'react';
+import React, { useState, useRef, Suspense, lazy, useCallback } from 'react';
 import LeftNavigation from '../navigation/LeftNavigation';
 import PrintButton from './PrintButton';
 import { useReportNavigation } from '../hooks/useReportNavigation';
 import { debounce } from '@/utils/debounce';
+import { useRenderPerformance } from '@/components/shared/PerformanceMonitor';
 
 // Create sections array for LeftNavigation
 const REPORT_SECTIONS = [
@@ -24,6 +25,14 @@ const REPORT_SECTIONS = [
 // Lazy load ReportBody to improve initial load time
 const LazyReportBody = lazy(() => import('./ReportBody'));
 
+// Loading placeholder
+const LoadingFallback = () => (
+  <div className="p-12 flex flex-col items-center justify-center space-y-4">
+    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+    <p className="text-gray-600">Loading report content...</p>
+  </div>
+);
+
 interface ReportContainerProps {
   reportData: any;
   userData?: any;
@@ -41,13 +50,17 @@ const ReportContainer: React.FC<ReportContainerProps> = ({
   debugInfo,
   onNavigate
 }) => {
+  // Track performance
+  useRenderPerformance('ReportContainer');
+  
   const reportRef = useRef<HTMLDivElement>(null);
+  
   // Use the passed onNavigate function if provided, otherwise use the hook
   const { activeSectionId, handleNavigate, isNavigating } = useReportNavigation();
   
   // Debounce navigation to prevent rapid successive clicks
-  const debouncedNavigate = React.useMemo(
-    () => debounce((sectionId: string) => {
+  const debouncedNavigate = useCallback(
+    debounce((sectionId: string) => {
       // Use the provided onNavigate function if it exists, otherwise use the hook function
       if (onNavigate) {
         onNavigate(sectionId);
@@ -65,11 +78,11 @@ const ReportContainer: React.FC<ReportContainerProps> = ({
   const [showDebugData, setShowDebugData] = useState(false);
   const [showDiagnostics, setShowDiagnostics] = useState(false);
   
-  const handleRefreshData = () => {
+  const handleRefreshData = useCallback(() => {
     // Refresh data logic would go here
     console.log("Refreshing report data");
     window.location.reload();
-  };
+  }, []);
 
   // Store the theme color from report data
   const themeColor = reportData?.hexColor || reportData?.hex_color || "#4B5563";
@@ -91,12 +104,12 @@ const ReportContainer: React.FC<ReportContainerProps> = ({
         documentTitle={`Healthcare Archetype Report - ${reportData?.archetype_name || 'Unknown'}`} 
       />
 
-      {/* Main report content */}
+      {/* Main report content with improved error handling and lazy loading */}
       <div 
         className="lg:pl-64 py-6 print:py-0 print:pl-0"
         ref={reportRef}
       >
-        <Suspense fallback={<div className="p-12 text-center">Loading report content...</div>}>
+        <Suspense fallback={<LoadingFallback />}>
           <LazyReportBody
             reportData={reportData}
             userData={userData}
