@@ -1,9 +1,14 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart } from '@/components/ui/chart';
 import { formatPercent } from '@/utils/formatters';
 import { Brain } from 'lucide-react';
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent
+} from "@/components/ui/chart";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 interface BehavioralHealthConditionsProps {
   reportData: any;
@@ -63,63 +68,63 @@ const BehavioralHealthConditions = ({ reportData, averageData }: BehavioralHealt
         </div>
         
         <div className="h-72 w-full">
-          <BarChart 
-            data={chartData}
-            indexBy="name"
-            keys={["population", "benchmark"]}
-            colors={["#8b5cf6", "#c4b5fd"]}
-            margin={{ top: 10, right: 10, bottom: 40, left: 40 }}
-            padding={0.3}
-            labelTextColor="inherit:darker(1.2)"
-            labelSkipWidth={16}
-            labelSkipHeight={16}
-            legends={[
-              {
-                dataFrom: 'keys',
-                anchor: 'bottom',
-                direction: 'row',
-                translateY: 40,
-                itemWidth: 100,
-                itemHeight: 20,
-                itemsSpacing: 2,
-                symbolSize: 12,
-                itemDirection: 'left-to-right',
-                data: [
-                  { id: 'population', label: 'Your Population' },
-                  { id: 'benchmark', label: 'Benchmark' },
-                ]
-              }
-            ]}
-            axisLeft={{
-              format: (value) => `${value}%`,
+          <ChartContainer
+            config={{
+              population: { color: "#8b5cf6" },
+              benchmark: { color: "#c4b5fd" }
             }}
-            axisBottom={{
-              tickSize: 0,
-              tickPadding: 10,
-              tickRotation: -45,
-            }}
-            theme={{
-              tooltip: {
-                container: {
-                  background: '#ffffff',
-                  fontSize: '12px',
-                  borderRadius: '4px',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
-                  padding: '5px 9px',
-                }
-              }
-            }}
-            tooltip={({ id, value, color, indexValue }) => (
-              <div style={{ color: 'inherit' }}>
-                <strong>{indexValue}</strong>
-                <br />
-                <span style={{ color }}>
-                  {id === 'population' ? 'Your Population: ' : 'Benchmark: '}
-                  {value}%
-                </span>
-              </div>
-            )}
-          />
+          >
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={chartData}
+                margin={{ top: 10, right: 10, bottom: 40, left: 40 }}
+                barSize={20}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis 
+                  dataKey="name" 
+                  tickSize={0}
+                  tickPadding={10}
+                  tickRotation={-45}
+                  tick={{ fontSize: 12 }}
+                  scale="point"
+                  padding={{ left: 10, right: 10 }}
+                />
+                <YAxis 
+                  label={{ value: '%', angle: -90, position: 'insideLeft' }}
+                  tickFormatter={(value) => `${value}`}
+                />
+                <Tooltip
+                  content={({ active, payload, label }) => {
+                    if (active && payload && payload.length) {
+                      return (
+                        <div className="bg-white p-2 border border-gray-200 shadow-md rounded-md">
+                          <p className="font-medium">{label}</p>
+                          <p className="text-purple-600">
+                            Your Population: {payload[0].value}%
+                          </p>
+                          <p className="text-purple-400">
+                            Benchmark: {payload[1].value}%
+                          </p>
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
+                <Legend 
+                  verticalAlign="bottom" 
+                  height={36} 
+                  payload={[
+                    { value: 'Your Population', type: 'square', color: '#8b5cf6' },
+                    { value: 'Benchmark', type: 'square', color: '#c4b5fd' }
+                  ]}
+                />
+                <Bar dataKey="population" name="Your Population" fill="#8b5cf6" />
+                <Bar dataKey="benchmark" name="Benchmark" fill="#c4b5fd" />
+              </BarChart>
+            </ResponsiveContainer>
+          </ChartContainer>
         </div>
         
         <div className="mt-6">

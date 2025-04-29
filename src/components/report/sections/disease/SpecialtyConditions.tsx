@@ -1,16 +1,15 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatPercent } from '@/utils/formatters';
 import { calculatePercentageDifference } from '@/utils/reports/metricUtils';
-import { Cancer, Pill, Flask, Eye, Syringe } from 'lucide-react';
+import { Activity, Beaker, Pill, Eye, Syringe } from 'lucide-react';
 
 interface SpecialtyConditionsProps {
   reportData: any;
   averageData: any;
 }
 
-const SpecialtyConditionsProps = ({ reportData, averageData }: SpecialtyConditionsProps) => {
+const SpecialtyConditions = ({ reportData, averageData }: SpecialtyConditionsProps) => {
   // Check if we have valid data
   if (!reportData) return null;
 
@@ -19,13 +18,13 @@ const SpecialtyConditionsProps = ({ reportData, averageData }: SpecialtyConditio
     { 
       id: 'Dise_Cancer Prevalence', 
       label: 'Cancer', 
-      icon: <Cancer className="h-6 w-6 text-pink-500" />,
+      icon: <Activity className="h-6 w-6 text-pink-500" />,
       description: 'Includes all active cancer diagnoses and treatments'
     },
     { 
       id: 'Dise_Multiple Sclerosis Prevalence', 
       label: 'Multiple Sclerosis', 
-      icon: <Flask className="h-6 w-6 text-purple-500" />,
+      icon: <Beaker className="h-6 w-6 text-purple-500" />,
       description: 'Chronic autoimmune disease affecting the central nervous system'
     },
     { 
@@ -60,7 +59,7 @@ const SpecialtyConditionsProps = ({ reportData, averageData }: SpecialtyConditio
     <Card>
       <CardHeader className="border-b border-gray-100">
         <CardTitle className="flex items-center gap-2">
-          <Flask className="h-5 w-5 text-blue-600" />
+          <Beaker className="h-5 w-5 text-blue-600" />
           <span>Specialty Conditions</span>
         </CardTitle>
       </CardHeader>
@@ -134,4 +133,4 @@ const SpecialtyConditionsProps = ({ reportData, averageData }: SpecialtyConditio
   );
 };
 
-export default SpecialtyConditionsProps;
+export default SpecialtyConditions;
