@@ -81,6 +81,27 @@ const DeepDiveRequestForm = ({
     navigate('/assessment');
   };
 
+  const resetFormSubmission = () => {
+    // Remove the submission record from session storage
+    sessionStorage.removeItem(REPORT_SUBMITTED_KEY);
+    
+    // Reset state
+    setSubmitSuccessful(false);
+    setSubmittedEmail('');
+    setAccessUrl('');
+    
+    // Reset form fields
+    form.reset({
+      name: "",
+      email: "",
+      organization: "",
+      comments: "",
+      sessionId: localStorage.getItem('session_id') || ''
+    });
+    
+    toast.info("Form reset successfully. You can submit a new request.");
+  };
+
   const handleSubmit = async (data: FormData) => {
     setIsSubmitting(true);
     
@@ -174,7 +195,17 @@ const DeepDiveRequestForm = ({
               <DeepDiveBenefits archetypeName={archetypeName} />
               
               {submitSuccessful ? (
-                <DeepDiveSuccessState email={submittedEmail} />
+                <div className="space-y-4">
+                  <DeepDiveSuccessState email={submittedEmail} />
+                  
+                  {/* Reset button (only shown after successful submission) */}
+                  <Button 
+                    onClick={resetFormSubmission}
+                    className="bg-gray-500 hover:bg-gray-600 text-white font-medium px-6 py-3 rounded-md w-full md:w-auto"
+                  >
+                    Reset Form (Testing Only)
+                  </Button>
+                </div>
               ) : (
                 <Button 
                   onClick={form.handleSubmit(handleSubmit)} 
