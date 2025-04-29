@@ -5,6 +5,7 @@
 
 @layer base {
   :root {
+    --font-sans: "harmonia-sans", "Harmonia Sans Pro", system-ui, sans-serif;
     --background: 210 40% 98%;
     --foreground: 222.2 84% 4.9%;
 
@@ -54,6 +55,7 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+    font-family: var(--font-sans);
   }
 }
 
