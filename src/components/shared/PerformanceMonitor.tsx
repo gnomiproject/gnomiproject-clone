@@ -61,7 +61,7 @@ export const useRenderPerformance = (componentName: string) => {
   };
 };
 
-// Fix the TypeScript error by correctly typing the HOC
+// Simplified HOC for performance monitoring
 export function withPerformanceMonitoring<P extends object>(
   Component: React.ComponentType<P>,
   componentName: string
@@ -69,13 +69,12 @@ export function withPerformanceMonitoring<P extends object>(
   // Use React.memo to prevent re-renders when props don't change
   const MemoizedComponent = React.memo(Component);
   
-  // Define a properly typed component that forwards refs
-  const MonitoredComponent: React.FC<P> = (props: P) => {
+  const MonitoredComponent: React.FC<P> = (props) => {
     useRenderPerformance(componentName);
     
     return (
       <RenderCounter componentName={componentName}>
-        <MemoizedComponent {...props} />
+        <MemoizedComponent {...props as any} />
       </RenderCounter>
     );
   };
