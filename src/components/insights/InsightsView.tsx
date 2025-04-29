@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ArchetypeId, ArchetypeDetailedData } from '@/types/archetype';
 import ArchetypeNavTabs from './components/ArchetypeNavTabs';
 import ArchetypeHeader from './components/ArchetypeHeader';
@@ -28,15 +28,18 @@ const ArchetypeReport = ({
   const [activeTab, setActiveTab] = React.useState('overview');
   const familyColor = reportData.hexColor || reportData.color || '#4B5563';
   
-  // Log assessment data for debugging
-  React.useEffect(() => {
+  // Enhanced logging for assessment data
+  useEffect(() => {
     if (assessmentResult) {
       console.log('InsightsView: Assessment result data', {
         hasAssessmentResult: true,
         archetypeId,
         primaryArchetype: assessmentResult.primaryArchetype,
+        hasExactData: !!assessmentResult.exactData,
         exactEmployeeCount: assessmentResult?.exactData?.employeeCount
       });
+    } else {
+      console.log('InsightsView: No assessment result data');
     }
   }, [assessmentResult, archetypeId]);
 

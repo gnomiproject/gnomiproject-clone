@@ -98,6 +98,7 @@ const Insights = () => {
     
     if (location.state?.selectedArchetype) {
       console.log("Setting archetype from location state:", location.state.selectedArchetype);
+      console.log("Location state exact employee count:", location.state.exactEmployeeCount);
       // Source 1: Direct navigation from Results
       newArchetype = location.state.selectedArchetype;
       
@@ -125,6 +126,12 @@ const Insights = () => {
         console.log("Found session results in storage");
         try {
           assessmentResults = JSON.parse(sessionResultsStr);
+          console.log("Parsed assessment results:", {
+            primaryArchetype: assessmentResults.primaryArchetype,
+            resultTier: assessmentResults.resultTier,
+            hasExactData: !!assessmentResults.exactData,
+            exactEmployeeCount: assessmentResults.exactData?.employeeCount
+          });
           setSessionResults(assessmentResults);
           newArchetype = assessmentResults.primaryArchetype;
           console.log("Using archetype from session storage:", newArchetype);

@@ -149,12 +149,13 @@ export const useAssessment = () => {
         
         console.log("Saving assessment result with exact employee count:", {
           primaryArchetype: assessmentResult.primaryArchetype,
-          exactEmployeeCount: exactEmployeeCount
+          exactEmployeeCount: exactEmployeeCount,
+          hasExactData: true // explicitly show this is being included
         });
         
         sessionStorage.setItem(SESSION_RESULTS_KEY, JSON.stringify(resultWithEmployeeCount));
         
-        console.log("Assessment completed. Results:", assessmentResult);
+        console.log("Assessment completed. Results:", resultWithEmployeeCount);
         console.log("Exact employee count:", exactEmployeeCount);
         console.log("Navigating to insights page with sessionId:", sessionId);
         

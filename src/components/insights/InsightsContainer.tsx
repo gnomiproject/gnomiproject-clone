@@ -28,14 +28,16 @@ const InsightsContainer = ({
   const { archetypeData: dbArchetypeData, isLoading, error, refetch } = useGetArchetype(archetypeId);
   const [retrying, setRetrying] = React.useState(false);
   
-  // Log component lifecycle and assessment data for debugging
+  // Enhanced logging for assessment data
   useEffect(() => {
     renderCountRef.current += 1;
     console.log(`InsightsContainer: Mount/Render #${renderCountRef.current} for ${archetypeId}`);
     console.log('Assessment data:', { 
-      assessmentResult,
-      assessmentAnswers,
-      hasExactEmployeeCount: assessmentResult?.exactData?.employeeCount ? 'Yes' : 'No'
+      hasAssessmentResult: !!assessmentResult,
+      assessmentResultStructure: assessmentResult ? Object.keys(assessmentResult) : null,
+      hasAssessmentAnswers: !!assessmentAnswers,
+      hasExactData: assessmentResult?.exactData ? 'Yes' : 'No',
+      exactEmployeeCount: assessmentResult?.exactData?.employeeCount
     });
     
     // Reset flags when archetypeId changes

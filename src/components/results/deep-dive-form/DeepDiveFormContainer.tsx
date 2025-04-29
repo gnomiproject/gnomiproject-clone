@@ -43,12 +43,14 @@ const DeepDiveFormContainer = ({
   const [accessUrl, setAccessUrl] = useState('');
   const navigate = useNavigate();
   
-  // Debug logging to track what's being passed to the form
+  // Extended debug logging to track what's being passed to the form
   console.log('DeepDiveFormContainer: Received props', {
     archetypeId,
-    assessmentResult,
-    assessmentAnswers,
-    exactEmployeeCount: assessmentResult?.exactData?.employeeCount || null
+    hasAssessmentResult: !!assessmentResult,
+    assessmentResultStructure: assessmentResult ? Object.keys(assessmentResult) : null,
+    hasExactData: assessmentResult?.exactData ? 'Yes' : 'No',
+    exactEmployeeCount: assessmentResult?.exactData?.employeeCount || null,
+    assessmentAnswers: assessmentAnswers ? 'Present' : 'Missing'
   });
   
   const form = useForm<FormData>({

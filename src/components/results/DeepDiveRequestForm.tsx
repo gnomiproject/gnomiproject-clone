@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ArchetypeId } from '@/types/archetype';
 import DeepDiveFormContainer from './deep-dive-form/DeepDiveFormContainer';
 
@@ -16,15 +16,21 @@ const DeepDiveRequestForm = ({
   assessmentAnswers,
   archetypeData 
 }: DeepDiveRequestFormProps) => {
-  // Ensure we're passing the complete assessment result that contains exactData
-  if (assessmentResult) {
-    console.log('DeepDiveRequestForm: Passing data to form', {
-      archetypeId,
-      hasAssessmentResult: !!assessmentResult,
-      hasExactEmployeeCount: !!assessmentResult?.exactData?.employeeCount,
-      exactEmployeeCount: assessmentResult?.exactData?.employeeCount
-    });
-  }
+  // Add more detailed debug logging
+  useEffect(() => {
+    if (assessmentResult) {
+      console.log('DeepDiveRequestForm: Assessment result data', {
+        hasAssessmentResult: true,
+        archetypeId,
+        primaryArchetype: assessmentResult.primaryArchetype,
+        resultTier: assessmentResult.resultTier,
+        hasExactData: !!assessmentResult?.exactData,
+        exactEmployeeCount: assessmentResult?.exactData?.employeeCount
+      });
+    } else {
+      console.log('DeepDiveRequestForm: No assessment result data available');
+    }
+  }, [assessmentResult, archetypeId]);
 
   return (
     <DeepDiveFormContainer
