@@ -36,7 +36,7 @@ const FormLayout = ({
         <CardHeader>
           <CardTitle className="text-xl md:text-2xl flex items-center justify-between">
             Get your {archetypeName} Deep Dive Report
-            <RetakeAssessmentLink onClick={onRetakeAssessment} />
+            <RetakeAssessmentLink onRetakeClick={onRetakeAssessment} />
           </CardTitle>
           <CardDescription>
             Complete the form below to receive your personalized report.
@@ -61,7 +61,7 @@ const FormLayout = ({
                 />
               </div>
               <div>
-                <DeepDiveBenefits />
+                <DeepDiveBenefits archetypeName={archetypeName} />
               </div>
             </div>
           )}

@@ -3,8 +3,10 @@ import React from 'react';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage, Form } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 import { UseFormReturn } from "react-hook-form";
 import { z } from "zod";
+import { Loader } from "lucide-react";
 
 const FormSchema = z.object({
   name: z.string().min(2, {
@@ -22,13 +24,17 @@ type FormData = z.infer<typeof FormSchema>;
 
 interface DeepDiveFormSectionProps {
   form: UseFormReturn<FormData>;
+  onSubmit: (data: FormData) => Promise<void>;
+  isSubmitting: boolean;
   className?: string;
 }
 
-const DeepDiveFormSection = ({ form, className }: DeepDiveFormSectionProps) => {
+const DeepDiveFormSection = ({ form, onSubmit, isSubmitting, className }: DeepDiveFormSectionProps) => {
+  const handleSubmit = form.handleSubmit(onSubmit);
+
   return (
     <Form {...form}>
-      <form className={`space-y-4 ${className}`}>
+      <form onSubmit={handleSubmit} className={`space-y-4 ${className}`}>
         <FormField
           control={form.control}
           name="name"
@@ -85,6 +91,21 @@ const DeepDiveFormSection = ({ form, className }: DeepDiveFormSectionProps) => {
             </FormItem>
           )}
         />
+
+        <Button 
+          type="submit" 
+          className="w-full mt-6" 
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? (
+            <>
+              <Loader className="mr-2 h-4 w-4 animate-spin" />
+              Submitting...
+            </>
+          ) : (
+            "Request Deep Dive Report"
+          )}
+        </Button>
       </form>
     </Form>
   );

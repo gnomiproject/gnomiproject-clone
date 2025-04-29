@@ -1,27 +1,23 @@
 
 import React from 'react';
+import { Button } from '@/components/ui/button';
+import { RefreshCw } from 'lucide-react';
 
 interface RetakeAssessmentLinkProps {
-  onRetakeAssessment: () => void;
+  onRetakeClick: () => void;
 }
 
-const RetakeAssessmentLink = ({ onRetakeAssessment }: RetakeAssessmentLinkProps) => {
+const RetakeAssessmentLink = ({ onRetakeClick }: RetakeAssessmentLinkProps) => {
   return (
-    <div className="max-w-5xl mx-auto mb-8 text-center">
-      <p className="text-lg">
-        Want to try again?{" "}
-        <button 
-          onClick={onRetakeAssessment} 
-          className="text-blue-600 font-medium hover:underline inline-flex items-center"
-        >
-          Retake the assessment
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1">
-            <path d="m13 5 7 7-7 7"></path>
-            <path d="M5 12h15"></path>
-          </svg>
-        </button>
-      </p>
-    </div>
+    <Button 
+      onClick={onRetakeClick} 
+      variant="ghost" 
+      size="sm" 
+      className="text-xs flex items-center gap-1 text-muted-foreground"
+    >
+      <RefreshCw className="h-3 w-3" />
+      Retake assessment
+    </Button>
   );
 };
 
