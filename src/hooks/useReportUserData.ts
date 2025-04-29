@@ -38,11 +38,16 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
         
         console.log(`Fetching user data for token: ${token} and archetype: ${archetypeId}`);
         
-        // Track this access
-        const { data: accessUpdateData, error: accessUpdateError } = await supabase.rpc(
-          'increment_report_access',
-          { p_access_token: token, p_archetype_id: archetypeId }
-        );
+        // Track this access - use direct update instead of RPC since the function isn't registered properly
+        const { data: accessUpdateData, error: accessUpdateError } = await supabase
+          .from('report_requests')
+          .update({
+            access_count: supabase.rpc('increment_counter', { x: 1 }),
+            last_accessed: new Date().toISOString()
+          })
+          .eq('access_token', token)
+          .eq('archetype_id', archetypeId)
+          .select('access_count, last_accessed');
         
         if (accessUpdateError) {
           console.warn('Could not update access count:', accessUpdateError);
@@ -73,7 +78,23 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
         }
         
         console.log('Found valid report user data:', data);
-        setUserData(data as ReportUserData);
+        
+        // Convert the data to the expected type, handling the assessment_result conversion
+        const typedUserData: ReportUserData = {
+          id: data.id,
+          name: data.name,
+          organization: data.organization,
+          email: data.email,
+          created_at: data.created_at,
+          archetype_id: data.archetype_id,
+          assessment_result: data.assessment_result ? (data.assessment_result as unknown as AssessmentResult) : null,
+          exact_employee_count: data.exact_employee_count,
+          access_count: data.access_count || 0,
+          last_accessed: data.last_accessed,
+          expires_at: data.expires_at
+        };
+        
+        setUserData(typedUserData);
         setIsValid(true);
       } catch (err) {
         console.error('Error in useReportUserData:', err);

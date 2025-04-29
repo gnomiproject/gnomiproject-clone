@@ -5,7 +5,6 @@ import { useReportUserData } from '@/hooks/useReportUserData';
 import { Card } from '@/components/ui/card';
 import { format } from 'date-fns';
 import { Separator } from '@/components/ui/separator';
-import { JSONTree } from 'react-json-tree';
 
 const ReportUserDataTest = () => {
   const { archetypeId = '', token = '' } = useParams();
