@@ -60,7 +60,7 @@ const DiseaseInsights = ({ reportData }: DiseaseInsightsProps) => {
           </p>
         </div>
         
-        <div className="space-y-6">
+        <div className="space-y-4">
           {insights.map((insight, index) => (
             <div 
               key={insight.key || `insight-${index}`}

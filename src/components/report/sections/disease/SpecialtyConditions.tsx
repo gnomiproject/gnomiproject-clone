@@ -1,8 +1,9 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatPercent } from '@/utils/formatters';
 import { calculatePercentageDifference } from '@/utils/reports/metricUtils';
-import { Activity, Beaker, Pill, Eye, Syringe } from 'lucide-react';
+import { Activity, Beaker, Pill, Eye } from 'lucide-react';
 
 interface SpecialtyConditionsProps {
   reportData: any;
@@ -30,7 +31,7 @@ const SpecialtyConditions = ({ reportData, averageData }: SpecialtyConditionsPro
     { 
       id: 'Dise_Infertility Prevalence', 
       label: 'Infertility', 
-      icon: <Syringe className="h-6 w-6 text-blue-500" />,
+      icon: <Eye className="h-6 w-6 text-blue-500" />,
       description: 'Includes diagnosis and treatment for infertility'
     },
     { 
@@ -41,7 +42,7 @@ const SpecialtyConditions = ({ reportData, averageData }: SpecialtyConditionsPro
     },
   ];
 
-  // Calculate the total specialty condition burden (as percentage points)
+  // Calculate the total specialty condition burden
   const totalBurden = conditions.reduce((sum, condition) => {
     return sum + (reportData[condition.id] || 0);
   }, 0);
@@ -81,7 +82,7 @@ const SpecialtyConditions = ({ reportData, averageData }: SpecialtyConditionsPro
           )}
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {conditions.map(condition => {
             const value = reportData[condition.id] || 0;
             const avgValue = averageData && averageData[condition.id] ? averageData[condition.id] : 0;

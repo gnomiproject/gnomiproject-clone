@@ -68,57 +68,32 @@ const MskConditions = ({ reportData, averageData }: MskConditionsProps) => {
           )}
         </div>
         
-        <div className="relative overflow-hidden">
-          <div className="bg-gradient-to-r from-blue-50 to-blue-100 h-60 rounded-lg p-6">
-            <div className="grid grid-cols-3 gap-6 h-full">
-              {conditionsData.map((condition, index) => {
-                const barHeight = `${Math.min(80, condition.value * 200)}%`;
-                const avgHeight = `${Math.min(80, condition.avgValue * 200)}%`;
-                const diffClass = condition.diff > 0 ? "text-amber-600" : "text-green-600";
-                
-                return (
-                  <div key={condition.id} className="flex flex-col items-center justify-end h-full">
-                    <div className="w-full flex justify-center gap-2 mb-2">
-                      {/* Your population bar */}
-                      <div className="relative w-8">
-                        <div 
-                          className="absolute bottom-0 w-full bg-blue-600 rounded-t-sm"
-                          style={{ height: barHeight }}
-                        ></div>
-                      </div>
-                      
-                      {/* Benchmark bar */}
-                      <div className="relative w-8">
-                        <div 
-                          className="absolute bottom-0 w-full bg-gray-300 rounded-t-sm"
-                          style={{ height: avgHeight }}
-                        ></div>
-                      </div>
-                    </div>
-                    
-                    <div className="text-center mt-2">
-                      <div className="font-medium text-sm">{condition.label}</div>
-                      <div className="text-xl font-bold mt-1">{formatPercent(condition.value)}</div>
-                      <div className={`text-xs ${diffClass}`}>
-                        {condition.diff > 0 ? '+' : ''}{Math.round(condition.diffPercentage)}% vs avg
-                      </div>
-                    </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {conditionsData.map((condition, index) => {
+            const diffClass = condition.diff > 0 ? "text-amber-600" : "text-green-600";
+            
+            return (
+              <div key={condition.id} className="p-4 bg-gray-50 rounded-lg">
+                <h4 className="font-medium text-center">{condition.label}</h4>
+                <div className="mt-3 text-center">
+                  <div className="text-2xl font-bold">{formatPercent(condition.value)}</div>
+                  <div className={`text-sm ${diffClass}`}>
+                    {condition.diff > 0 ? '+' : ''}{Math.round(condition.diffPercentage)}% vs avg
                   </div>
-                );
-              })}
-            </div>
-          </div>
-          
-          <div className="mt-4 flex justify-center gap-8">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-blue-600 rounded"></div>
-              <span className="text-xs text-gray-600">Your Population</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-gray-300 rounded"></div>
-              <span className="text-xs text-gray-600">Benchmark</span>
-            </div>
-          </div>
+                </div>
+                
+                <div className="mt-3 flex justify-center items-center gap-3">
+                  <div className="text-xs text-gray-500">Avg: {formatPercent(condition.avgValue)}</div>
+                  <div className="w-24 h-2 bg-gray-200 rounded-full">
+                    <div 
+                      className={`h-full rounded-full ${condition.diff > 0 ? 'bg-amber-500' : 'bg-green-500'}`}
+                      style={{ width: `${Math.min(100, Math.max(5, (condition.value / Math.max(condition.value, condition.avgValue)) * 100))}%` }}
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
         
         <div className="mt-6 p-4 bg-gray-50 rounded-lg">
