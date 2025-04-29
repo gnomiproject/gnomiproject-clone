@@ -18,26 +18,24 @@ export type GnomeImageType =
   | 'analysis'       // Gnome analyzing data
   | 'placeholder';   // Fallback image
 
-// Base URL for Supabase storage bucket
-const STORAGE_BUCKET = 'gnome-images';
-const STORAGE_BASE_URL = `${supabase.storage.from(STORAGE_BUCKET).getPublicUrl('').data.publicUrl}/`;
-const LOCAL_FALLBACK_PATH = '/assets/gnomes/placeholder.svg';
-
-// Map of gnome image paths
-export const gnomeImages: Record<GnomeImageType, string> = {
-  presentation: `${STORAGE_BASE_URL}gnome_presentation.png`,
-  clipboard: `${STORAGE_BASE_URL}gnome_clipboard.png`,
-  welcome: `${STORAGE_BASE_URL}gnome_welcome.png`, 
-  magnifying: `${STORAGE_BASE_URL}gnome_magnifying.png`,
-  charts: `${STORAGE_BASE_URL}gnome_charts.png`,
-  profile: `${STORAGE_BASE_URL}gnome_profile.png`,
-  report: `${STORAGE_BASE_URL}gnome_report.png`,
-  analysis: `${STORAGE_BASE_URL}gnome_analysis.png`,
-  placeholder: LOCAL_FALLBACK_PATH
+// Local fallback paths for when Supabase storage is not accessible
+const LOCAL_IMAGES = {
+  presentation: '/lovable-uploads/ffbc016f-5a01-4009-b6d2-d2b1ff146bdc.png',
+  clipboard: '/lovable-uploads/c44c4897-43c2-48a4-8e58-df83da99bcb0.png',
+  welcome: '/lovable-uploads/12da516f-6471-47a3-9861-9c4d50ab9415.png',
+  magnifying: '/lovable-uploads/81530cfd-8e54-4bfc-8fda-6658f15d9b8b.png',
+  charts: '/lovable-uploads/a45e4edb-76b0-4c38-8037-eb866148d144.png',
+  profile: '/lovable-uploads/1cc408c3-b095-48b1-8087-b96fa079c8be.png',
+  report: '/lovable-uploads/c7752575-8c92-44b3-a9ae-8ee62f19c77a.png',
+  analysis: '/lovable-uploads/3efcc8b7-0e2d-4a2b-bb23-fa686f18c691.png',
+  placeholder: '/assets/gnomes/placeholder.svg'
 };
 
+// Default to using local images first to ensure the app loads
+export const gnomeImages: Record<GnomeImageType, string> = { ...LOCAL_IMAGES };
+
 // Fallback URL to use when an image fails to load
-export const fallbackGnomeImage = gnomeImages.placeholder;
+export const fallbackGnomeImage = LOCAL_IMAGES.placeholder;
 
 /**
  * Get a gnome image by archetype ID
@@ -97,3 +95,40 @@ export interface GnomeImageProps {
   className?: string;
   alt?: string;
 }
+
+// Initialize Supabase storage connection - but do this async to not block app loading
+(async () => {
+  try {
+    console.log('Initializing gnome images from Supabase storage...');
+    const STORAGE_BUCKET = 'gnome-images';
+    const { data: bucketInfo, error: bucketError } = await supabase.storage.getBucket(STORAGE_BUCKET);
+    
+    if (bucketError || !bucketInfo) {
+      console.warn('Failed to access the gnome-images bucket:', bucketError?.message);
+      return;
+    }
+    
+    const { data: publicUrl } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl('');
+    if (!publicUrl || !publicUrl.publicUrl) {
+      console.warn('Failed to get public URL for gnome-images bucket');
+      return;
+    }
+    
+    const STORAGE_BASE_URL = publicUrl.publicUrl;
+    
+    // Update gnome images with Supabase URLs if bucket exists and is accessible
+    gnomeImages.presentation = `${STORAGE_BASE_URL}gnome_presentation.png`;
+    gnomeImages.clipboard = `${STORAGE_BASE_URL}gnome_clipboard.png`;
+    gnomeImages.welcome = `${STORAGE_BASE_URL}gnome_welcome.png`; 
+    gnomeImages.magnifying = `${STORAGE_BASE_URL}gnome_magnifying.png`;
+    gnomeImages.charts = `${STORAGE_BASE_URL}gnome_charts.png`;
+    gnomeImages.profile = `${STORAGE_BASE_URL}gnome_profile.png`;
+    gnomeImages.report = `${STORAGE_BASE_URL}gnome_report.png`;
+    gnomeImages.analysis = `${STORAGE_BASE_URL}gnome_analysis.png`;
+    
+    console.log('Gnome images successfully initialized from Supabase storage');
+  } catch (error) {
+    console.error('Error initializing gnome images from Supabase:', error);
+    // App will continue to use local images as fallback
+  }
+})();
