@@ -5,24 +5,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatNumber } from '@/utils/formatters';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { calculatePercentageDifference, formatPercentageDifference } from '@/utils/reports/metricUtils';
-import NavigationButtons from './demographics/NavigationButtons';
 
 interface CostAnalysisProps {
   reportData: any;
   averageData: any;
-  previousSection?: string;
-  nextSection?: string;
-  previousSectionName?: string;
-  nextSectionName?: string;
 }
 
 const CostAnalysis = ({ 
   reportData, 
-  averageData, 
-  previousSection, 
-  nextSection,
-  previousSectionName,
-  nextSectionName 
+  averageData 
 }: CostAnalysisProps) => {
   // Format cost data for charts
   const costComparisonData = generateCostComparisonData(reportData, averageData);
@@ -219,16 +210,6 @@ const CostAnalysis = ({
           </div>
         </CardContent>
       </Card>
-
-      {/* Navigation Buttons */}
-      {previousSection && nextSection && (
-        <NavigationButtons
-          previousSection={previousSection}
-          nextSection={nextSection}
-          previousSectionName={previousSectionName || "Previous Section"}
-          nextSectionName={nextSectionName || "Next Section"}
-        />
-      )}
     </div>
   );
 };
