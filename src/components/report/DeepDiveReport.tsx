@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { ArchetypeDetailedData } from '@/types/archetype';
 import ReportIntroduction from './sections/ReportIntroduction';
@@ -33,10 +34,14 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
   
   // Handle scroll to section
   const handleNavigate = (sectionId: string) => {
+    console.log(`Navigating to section: ${sectionId}`);
     setActiveSectionId(sectionId);
     const element = document.getElementById(sectionId);
     if (element) {
+      console.log(`Scrolling to element with id: ${sectionId}`);
       element.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      console.warn(`Element with id ${sectionId} not found`);
     }
   };
   
@@ -61,6 +66,7 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
+            console.log(`Section ${entry.target.id} is now visible`);
             setActiveSectionId(entry.target.id);
           }
         });

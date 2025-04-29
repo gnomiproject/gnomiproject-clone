@@ -22,7 +22,7 @@ const LeftNavigation: React.FC<LeftNavigationProps> = ({
     { id: 'archetype-profile', name: 'Archetype Profile' },
     { id: 'demographics', name: 'Demographics' },
     { id: 'cost-analysis', name: 'Cost Analysis' },
-    { id: 'utilization', name: 'Utilization Patterns' },
+    { id: 'utilization-patterns', name: 'Utilization Patterns' },
     { id: 'disease-management', name: 'Disease Management' },
     { id: 'care-gaps', name: 'Care Gaps' },
     { id: 'risk-factors', name: 'Risk Factors' },
