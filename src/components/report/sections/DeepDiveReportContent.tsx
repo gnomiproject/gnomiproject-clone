@@ -55,79 +55,79 @@ const DeepDiveReportContent = ({
       
       <Section id="executive-summary">
         <ExecutiveSummary 
-          archetype={archetype}
+          archetypeData={archetype}
         />
       </Section>
       
       <Section id="archetype-profile">
         <ArchetypeProfile 
-          archetype={archetype}
+          archetypeData={archetype}
         />
       </Section>
       
       <Section id="swot-analysis">
         <SwotAnalysis 
-          archetype={archetype}
+          archetypeData={archetype}
         />
       </Section>
       
       <Section id="demographics">
         <DemographicsSection 
-          archetype={archetype}
+          reportData={archetype}
           averageData={processedAverageData}
         />
       </Section>
       
       <Section id="utilization">
         <UtilizationPatterns 
-          archetype={archetype}
+          reportData={archetype}
           averageData={processedAverageData}
         />
       </Section>
       
       <Section id="risk-factors">
         <RiskFactors 
-          archetype={archetype}
+          reportData={archetype}
           averageData={processedAverageData}
         />
       </Section>
       
       <Section id="cost-analysis">
         <CostAnalysis 
-          archetype={archetype}
+          reportData={archetype}
           averageData={processedAverageData}
         />
       </Section>
       
       <Section id="care-gaps">
         <CareGaps 
-          archetype={archetype}
+          reportData={archetype}
           averageData={processedAverageData}
         />
       </Section>
       
       <Section id="disease-management">
         <DiseaseManagement 
-          archetype={archetype}
+          reportData={archetype}
           averageData={processedAverageData}
         />
       </Section>
       
       <Section id="metrics-analysis">
         <MetricsAnalysis 
-          archetype={archetype}
+          reportData={archetype}
           averageData={processedAverageData}
         />
       </Section>
       
       <Section id="recommendations">
         <StrategicRecommendations 
-          archetype={archetype}
+          reportData={archetype}
         />
       </Section>
       
       <Section id="contact">
-        <ContactSection />
+        <ContactSection userData={userData} />
       </Section>
     </div>
   );
