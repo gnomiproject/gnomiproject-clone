@@ -1,120 +1,81 @@
 
-import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import InsightsView from '@/components/insights/InsightsView';
-import DeepDiveReport from '@/components/report/DeepDiveReport';
-import ReportError from '@/components/report/ReportError';
-import ReportLoadingState from '@/components/report/ReportLoadingState';
-import ReportDiagnosticTool from '@/components/report/ReportDiagnosticTool';
-import ErrorBoundary from '@/components/shared/ErrorBoundary';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { isValidArchetypeId } from '@/utils/archetypeValidation';
-import { ArchetypeId, ArchetypeDetailedData } from '@/types/archetype';
 import { useArchetypes } from '@/hooks/useArchetypes';
-import { useGetArchetype } from '@/hooks/useGetArchetype';
-import { useReportData } from '@/hooks/useReportData';
-import { useReportUserData } from '@/hooks/useReportUserData';
 import { toast } from 'sonner';
-import ArchetypeError from '@/components/insights/ArchetypeError';
-import { Button } from '@/components/ui/button';
-import { RefreshCw, Bug, LayoutDashboard } from 'lucide-react';
-import InsightsReportContent from '@/components/report/sections/InsightsReportContent';
-import ReportUserDataTest from '@/components/report/ReportUserDataTest';
+import ErrorBoundary from '@/components/shared/ErrorBoundary';
+import ReportDiagnosticTool from '@/components/report/ReportDiagnosticTool';
+import { useReportAccess } from '@/hooks/useReportAccess';
+import {
+  ReportLoadingStateHandler,
+  DiagnosticsStateHandler,
+  ValidationErrorStateHandler,
+  ConnectionErrorStateHandler,
+  AccessErrorStateHandler,
+  DebugStateHandler,
+  NoDataErrorStateHandler
+} from '@/components/report/states/ReportViewerStates';
+import InsightsReportContainer from '@/components/report/containers/InsightsReportContainer';
+import DeepDiveReportContainer from '@/components/report/containers/DeepDiveReportContainer';
 
 const ReportViewer = () => {
-  const { archetypeId = '', token } = useParams();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { getArchetypeDetailedById } = useArchetypes();
-  
-  // State variables declared together
-  const [initialLoading, setInitialLoading] = useState(true);
-  const [isInsightsReport, setIsInsightsReport] = useState(false);
-  const [isAdminView, setIsAdminView] = useState(false);
-  const [isRetrying, setIsRetrying] = useState(false);
-  const [skipCache, setSkipCache] = useState(false);
+  // Custom hook for data and access management
+  const {
+    archetypeId,
+    token,
+    isInsightsReport,
+    isAdminView,
+    initialLoading,
+    skipCache,
+    setSkipCache,
+    isRetrying,
+    setIsRetrying,
+    
+    // Data and states
+    archetypeData,
+    archetypeLoading,
+    archetypeError,
+    dataSource,
+    reportData,
+    averageData,
+    reportLoading,
+    reportError,
+    userData,
+    userDataLoading,
+    isValidAccess,
+    userDataError,
+    
+    // Actions
+    handleRetry,
+    refreshArchetypeData,
+    refreshReportData
+  } = useReportAccess();
+
+  // Local state for debug/diagnostic UI toggles
   const [showDebugData, setShowDebugData] = useState(false);
   const [showDiagnostics, setShowDiagnostics] = useState(false);
   
-  // Debug logging for URL parameters
-  useEffect(() => {
-    console.log('[ReportViewer] Mounted with URL parameters:', {
-      archetypeId,
-      token: token ? `${token.substring(0, 5)}...` : 'missing',
-      pathname: location.pathname
+  const navigate = useNavigate();
+  const { getArchetypeDetailedById } = useArchetypes();
+  
+  // Handle API errors even if we continue
+  if (archetypeError && !archetypeError.message?.includes('timeout')) {
+    console.error('[ReportViewer] Error loading archetype data:', archetypeError);
+    toast.error(`Error loading data: ${archetypeError.message}`, { 
+      id: 'archetype-load-error',
+      duration: 5000
     });
-  }, [archetypeId, token, location]);
+  }
   
-  // Validate archetypeId (no conditional hook usage after this)
-  const validArchetypeId = isValidArchetypeId(archetypeId) ? archetypeId as ArchetypeId : 'a1' as ArchetypeId;
+  // Get local data as fallback
+  const localArchetypeData = getArchetypeDetailedById(archetypeId);
   
-  // Call hooks UNCONDITIONALLY, regardless of validArchetypeId
-  const { 
-    archetypeData: archetypeApiData, 
-    isLoading: archetypeLoading, 
-    error: archetypeError, 
-    dataSource,
-    refetch: refetchArchetype,
-    refreshData: refreshArchetypeData
-  } = useGetArchetype(validArchetypeId, skipCache);
+  // Toggle functions for debug UI
+  const toggleDebugData = () => setShowDebugData(!showDebugData);
+  const toggleDiagnostics = () => setShowDiagnostics(!showDiagnostics);
   
-  // Use the updated user data hook for report access verification
-  const {
-    userData,
-    isLoading: userDataLoading,
-    isValid: isValidAccess,
-    error: userDataError
-  } = useReportUserData(token, validArchetypeId);
-  
-  // Call useReportData hook unconditionally with safe defaults
-  const {
-    reportData,
-    averageData,
-    isLoading: reportLoading,
-    error: reportError,
-    retry: retryReportData,
-    refreshData: refreshReportData
-  } = useReportData({
-    archetypeId: validArchetypeId,
-    token: token || '',
-    isInsightsReport,
-    skipCache
-  });
-
-  // Determine report type using useEffect
-  useEffect(() => {
-    setIsInsightsReport(location.pathname.startsWith('/insights/report'));
-    setIsAdminView(token === 'admin-view');
-    
-    console.log('[ReportViewer] Report type determined:', {
-      isInsightsReport: location.pathname.startsWith('/insights/report'),
-      isAdminView: token === 'admin-view',
-      token: token ? `${token.substring(0, 5)}...` : 'missing'
-    });
-  }, [location.pathname, token]);
-  
-  // Initial loading timer effect
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setInitialLoading(false);
-    }, 800); // Increased from 600ms to give hooks more time to load
-    
-    return () => clearTimeout(timer);
-  }, []);
-  
-  // Function to handle retry when there's a connection error
-  const handleRetry = async () => {
-    setIsRetrying(true);
-    try {
-      await refetchArchetype();
-      toast.success("Reconnected successfully");
-    } catch (err) {
-      toast.error("Connection failed. Please try again.");
-    } finally {
-      setIsRetrying(false);
-    }
-  };
-
-  // Function to refresh data - simplified
+  // Function to refresh data
   const handleRefreshData = async () => {
     setSkipCache(true);
     try {
@@ -126,155 +87,88 @@ const ReportViewer = () => {
       setSkipCache(false);
     }
   };
-  
-  // Function to refresh report data - simplified
+
+  // Function to refresh report data
   const handleRefreshReportData = () => {
     refreshReportData();
     toast.success("Refreshing report data...");
   };
-
-  // Debug logging for data availability
-  useEffect(() => {
-    if (reportData) {
-      console.log('[ReportViewer] Report data loaded:', {
-        id: reportData.id || reportData.archetype_id,
-        name: reportData.name || reportData.archetype_name,
-        hasStrengths: Array.isArray(reportData.strengths) && reportData.strengths.length > 0,
-        hasRecommendations: Array.isArray(reportData.strategic_recommendations) && reportData.strategic_recommendations.length > 0
-      });
-      console.log('[ReportViewer] User data:', userData ? {
-        name: userData.name,
-        organization: userData.organization,
-        createdAt: userData.created_at
-      } : 'Not available');
-    }
-  }, [reportData, userData]);
-
-  // Toggle debug data view
-  const toggleDebugData = () => {
-    setShowDebugData(!showDebugData);
-  };
   
-  // Toggle diagnostics view
-  const toggleDiagnostics = () => {
-    setShowDiagnostics(!showDiagnostics);
-  };
-
-  // Show loading state if any data is still loading
-  if (initialLoading || archetypeLoading || reportLoading || userDataLoading) {
-    return <ReportLoadingState />;
-  }
+  // Special state handlers - these components will return null if their condition isn't met
   
-  // If diagnostics mode is enabled, show the diagnostic tool
-  if (showDiagnostics) {
-    return (
-      <>
-        <div className="fixed right-6 top-24 z-50 flex gap-2">
-          <Button 
-            variant="outline"
-            size="sm"
-            onClick={toggleDiagnostics}
-            className="bg-white shadow-md hover:bg-gray-100"
-          >
-            <LayoutDashboard className="h-4 w-4 mr-2" />
-            Back to Report
-          </Button>
-        </div>
-        <ErrorBoundary>
-          <ReportDiagnosticTool />
-        </ErrorBoundary>
-      </>
-    );
-  }
-
-  // Handle validation error after all hooks have been called
-  if (!isValidArchetypeId(archetypeId)) {
-    return (
-      <ReportError 
-        title="Invalid Archetype ID"
-        message="The requested archetype ID is not valid. Please check the URL or take the assessment again."
-        actionLabel="Take Assessment"
-        onAction={() => navigate('/assessment')}
-      />
-    );
-  }
-
-  // Handle connection errors
-  if (archetypeError && archetypeError.message?.includes('timeout')) {
-    return (
-      <ArchetypeError 
-        onRetry={handleRetry}
-        onRetakeAssessment={() => navigate('/assessment')}
-        isRetrying={isRetrying}
-      />
-    );
-  }
+  // 1. Loading state
+  const loadingState = (
+    <ReportLoadingStateHandler
+      initialLoading={initialLoading}
+      archetypeLoading={archetypeLoading}
+      reportLoading={reportLoading}
+      userDataLoading={userDataLoading}
+    />
+  );
+  if (loadingState) return loadingState;
   
-  // Handle API errors but continue
-  if (archetypeError) {
-    console.error('[ReportViewer] Error loading archetype data:', archetypeError);
-    toast.error(`Error loading data: ${archetypeError.message}`, { 
-      id: 'archetype-load-error',
-      duration: 5000
-    });
-  }
+  // 2. Diagnostics view
+  const diagnosticsState = (
+    <DiagnosticsStateHandler
+      showDiagnostics={showDiagnostics}
+      toggleDiagnostics={toggleDiagnostics}
+    />
+  );
+  if (diagnosticsState) return diagnosticsState;
   
-  // Handle report token access errors
-  if (!isInsightsReport && token && !isAdminView && (!isValidAccess || userDataError)) {
-    console.error('[ReportViewer] Access denied:', {
-      isValidAccess,
-      error: userDataError?.message
-    });
-    
-    return (
-      <ReportError 
-        title="Access Denied"
-        message={`Unable to access this report: ${userDataError?.message || 'Invalid or expired token'}`}
-        actionLabel="Back to Home"
-        onAction={() => navigate('/')}
-      />
-    );
-  }
+  // 3. Validation error
+  const validationErrorState = (
+    <ValidationErrorStateHandler
+      isValidArchetype={isValidArchetypeId(archetypeId)}
+    />
+  );
+  if (validationErrorState) return validationErrorState;
   
-  // If debug mode is enabled, show the test component
-  if (showDebugData && !isInsightsReport) {
-    return (
-      <>
-        <div className="fixed right-6 top-24 z-50 flex gap-2">
-          <Button 
-            variant="outline"
-            size="sm"
-            onClick={toggleDebugData}
-            className="bg-white shadow-md hover:bg-gray-100"
-          >
-            <Bug className="h-4 w-4 mr-2" />
-            Hide Debug
-          </Button>
-        </div>
-        <ReportUserDataTest />
-      </>
-    );
-  }
+  // 4. Connection error
+  const connectionErrorState = (
+    <ConnectionErrorStateHandler
+      archetypeError={archetypeError}
+      onRetry={handleRetry}
+      isRetrying={isRetrying}
+    />
+  );
+  if (connectionErrorState) return connectionErrorState;
   
-  // Get local data as fallback
-  const localArchetypeData = getArchetypeDetailedById(archetypeId as ArchetypeId);
+  // 5. Access error
+  const accessErrorState = (
+    <AccessErrorStateHandler
+      isInsightsReport={isInsightsReport}
+      token={token}
+      isAdminView={isAdminView}
+      isValidAccess={isValidAccess}
+      userDataError={userDataError}
+    />
+  );
+  if (accessErrorState) return accessErrorState;
   
-  // If no data is available, show error
-  if (!localArchetypeData && !archetypeApiData && !reportData) {
-    console.error('[ReportViewer] No data available for archetype:', archetypeId);
-    
-    return (
-      <ReportError 
-        title="Report Not Available"
-        message="We couldn't load the report data for this archetype. Please try again or take the assessment again."
-        actionLabel="Take Assessment"
-        onAction={() => navigate('/assessment')}
-      />
-    );
-  }
+  // 6. Debug state
+  const debugState = (
+    <DebugStateHandler
+      showDebugData={showDebugData}
+      toggleDebugData={toggleDebugData}
+      isInsightsReport={isInsightsReport}
+    />
+  );
+  if (debugState) return debugState;
+  
+  // 7. No data error
+  const noDataErrorState = (
+    <NoDataErrorStateHandler
+      localArchetypeData={localArchetypeData}
+      archetypeApiData={archetypeData}
+      reportData={reportData}
+      archetypeId={archetypeId}
+    />
+  );
+  if (noDataErrorState) return noDataErrorState;
 
   // Report data will use real database data or fallback to local data
-  const finalReportData = reportData || archetypeApiData || localArchetypeData;
+  const finalReportData = reportData || archetypeData || localArchetypeData;
   const finalUserData = userData || {
     name: 'Admin Viewer',
     organization: 'Admin Organization',
@@ -296,72 +190,35 @@ const ReportViewer = () => {
     isAdminView
   });
   
-  // Render the appropriate report type
+  // Render the appropriate report type based on the URL and data
   if (isInsightsReport) {
     return (
-      <div className="relative">
-        <div className="fixed right-6 top-24 z-50 flex gap-2">
-          <Button 
-            variant="outline"
-            size="sm"
-            onClick={handleRefreshData}
-            className="bg-white shadow-md hover:bg-gray-100"
-          >
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Refresh Data
-          </Button>
-        </div>
-        <ErrorBoundary>
-          <div className="container mx-auto">
-            <InsightsReportContent archetype={finalReportData} />
-          </div>
-        </ErrorBoundary>
-      </div>
+      <ErrorBoundary>
+        <InsightsReportContainer
+          reportData={finalReportData}
+          showDebugData={showDebugData}
+          toggleDebugData={toggleDebugData}
+          showDiagnostics={showDiagnostics}
+          toggleDiagnostics={toggleDiagnostics}
+          refreshArchetypeData={handleRefreshData}
+        />
+      </ErrorBoundary>
     );
   } else {
-    // For deep dive report (regular or admin view)
-    const typedReportData = finalReportData as unknown as ArchetypeDetailedData;
-    
     return (
-      <div className="relative">
-        <div className="fixed right-6 top-24 z-50 flex gap-2">
-          <Button 
-            variant="outline"
-            size="sm"
-            onClick={toggleDiagnostics}
-            className="bg-white shadow-md hover:bg-gray-100"
-          >
-            <LayoutDashboard className="h-4 w-4 mr-2" />
-            Diagnostics
-          </Button>
-          <Button 
-            variant="outline"
-            size="sm"
-            onClick={toggleDebugData}
-            className="bg-white shadow-md hover:bg-gray-100"
-          >
-            <Bug className="h-4 w-4 mr-2" />
-            Debug Data
-          </Button>
-          <Button 
-            variant="outline"
-            size="sm"
-            onClick={isAdminView ? handleRefreshData : handleRefreshReportData}
-            className="bg-white shadow-md hover:bg-gray-100"
-          >
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Refresh Data
-          </Button>
-        </div>
-        <ErrorBoundary>
-          <DeepDiveReport 
-            reportData={typedReportData} 
-            userData={finalUserData} 
-            averageData={finalAverageData}
-            isAdminView={isAdminView}
-          />
-        </ErrorBoundary>
-      </div>
+      <ErrorBoundary>
+        <DeepDiveReportContainer
+          reportData={finalReportData}
+          userData={finalUserData}
+          averageData={finalAverageData}
+          isAdminView={isAdminView}
+          showDebugData={showDebugData}
+          toggleDebugData={toggleDebugData}
+          showDiagnostics={showDiagnostics}
+          toggleDiagnostics={toggleDiagnostics}
+          refreshData={isAdminView ? handleRefreshData : handleRefreshReportData}
+        />
+      </ErrorBoundary>
     );
   }
 };
