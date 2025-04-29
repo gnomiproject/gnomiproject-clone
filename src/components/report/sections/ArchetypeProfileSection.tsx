@@ -68,7 +68,7 @@ const ArchetypeProfileSection: React.FC<ArchetypeProfileSectionProps> = ({ arche
         {/* Key Characteristics */}
         <KeyCharacteristicsList 
           characteristics={archetypeData.key_characteristics || []} 
-          archetypeColor={archetypeData.hexColor || archetypeData.hex_color || '#6E59A5'}
+          archetypeColor={archetypeData.hexColor || '#6E59A5'}
         />
         
         {/* Industry Composition */}

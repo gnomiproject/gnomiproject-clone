@@ -10,7 +10,7 @@ interface ArchetypeIdentityCardProps {
 const ArchetypeIdentityCard: React.FC<ArchetypeIdentityCardProps> = ({ archetype }) => {
   const familyName = archetype.familyName || archetype.family_name || '';
   const archetypeName = archetype.name || archetype.archetype_name || 'Unknown Archetype';
-  const archetypeColor = archetype.hexColor || archetype.hex_color || '#6E59A5';
+  const archetypeColor = archetype.hexColor || '#6E59A5';
   
   return (
     <Card className="overflow-hidden">
