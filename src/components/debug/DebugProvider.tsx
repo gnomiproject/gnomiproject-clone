@@ -34,7 +34,7 @@ interface DebugProviderProps {
 }
 
 export const DebugProvider: React.FC<DebugProviderProps> = ({ children }) => {
-  const { isDebugMode, debugOptions, toggleDebugMode } = useDebugMode();
+  const { isDebugMode, debugOptions, toggleDebugMode, toggleDebugOption } = useDebugMode();
   const [dataSources, setDataSources] = useState<TableData[]>([]);
   const [queryTimes, setQueryTimes] = useState<Record<string, number>>({});
   const [showLineagePanel, setShowLineagePanel] = useState(false);

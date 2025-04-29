@@ -1,30 +1,15 @@
 
-import { useLocation } from "react-router-dom";
-import { useEffect } from "react";
-import Button from '@/components/shared/Button';
-import { Link } from "react-router-dom";
+import React from 'react';
+import { Link } from 'react-router-dom';
 
 const NotFound = () => {
-  const location = useLocation();
-
-  useEffect(() => {
-    console.error(
-      "404 Error: User attempted to access non-existent route:",
-      location.pathname
-    );
-  }, [location.pathname]);
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-6">
-      <div className="text-center">
-        <h1 className="text-6xl font-bold text-gray-900 mb-4">404</h1>
-        <p className="text-xl text-gray-600 mb-8">Oops! We couldn't find the page you're looking for</p>
-        <Link to="/">
-          <Button>
-            Return to Home
-          </Button>
-        </Link>
-      </div>
+    <div className="flex flex-col items-center justify-center min-h-screen p-4">
+      <h1 className="text-4xl font-bold mb-4">404 - Page Not Found</h1>
+      <p className="text-gray-600 mb-8">The page you are looking for doesn't exist.</p>
+      <Link to="/" className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded">
+        Return Home
+      </Link>
     </div>
   );
 };
