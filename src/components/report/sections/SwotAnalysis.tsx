@@ -19,21 +19,11 @@ const SwotAnalysis: React.FC<SwotAnalysisProps> = ({ reportData, archetypeData, 
   // Use reportData as primary, fall back to archetypeData
   const data = reportData || archetypeData;
 
-  // Check if swotData was provided directly, otherwise extract from archetype data
-  const rawSwotData = propSwotData || {
-    strengths: data?.strengths || [],
-    weaknesses: data?.weaknesses || [],
-    opportunities: data?.opportunities || [],
-    threats: data?.threats || []
-  };
-  
-  // Normalize all SWOT data to string arrays
-  const swotData = {
-    strengths: normalizeSwotData(rawSwotData.strengths),
-    weaknesses: normalizeSwotData(rawSwotData.weaknesses),
-    opportunities: normalizeSwotData(rawSwotData.opportunities),
-    threats: normalizeSwotData(rawSwotData.threats)
-  };
+  // Get SWOT data directly from the data or from props if provided
+  const strengths = normalizeSwotData(propSwotData?.strengths || data?.strengths);
+  const weaknesses = normalizeSwotData(propSwotData?.weaknesses || data?.weaknesses);
+  const opportunities = normalizeSwotData(propSwotData?.opportunities || data?.opportunities);
+  const threats = normalizeSwotData(propSwotData?.threats || data?.threats);
 
   return (
     <div className="space-y-6">
@@ -47,9 +37,9 @@ const SwotAnalysis: React.FC<SwotAnalysisProps> = ({ reportData, archetypeData, 
           {/* Strengths Section */}
           <div className="border border-green-200 bg-green-50 rounded-lg p-4">
             <h3 className="font-semibold text-lg text-green-700 mb-3">Strengths</h3>
-            {swotData.strengths && swotData.strengths.length > 0 ? (
+            {strengths && strengths.length > 0 ? (
               <ul className="list-disc pl-5 space-y-1">
-                {swotData.strengths.map((strength, idx) => (
+                {strengths.map((strength, idx) => (
                   <li key={idx} className="text-gray-700">{strength}</li>
                 ))}
               </ul>
@@ -61,9 +51,9 @@ const SwotAnalysis: React.FC<SwotAnalysisProps> = ({ reportData, archetypeData, 
           {/* Weaknesses Section */}
           <div className="border border-amber-200 bg-amber-50 rounded-lg p-4">
             <h3 className="font-semibold text-lg text-amber-700 mb-3">Weaknesses</h3>
-            {swotData.weaknesses && swotData.weaknesses.length > 0 ? (
+            {weaknesses && weaknesses.length > 0 ? (
               <ul className="list-disc pl-5 space-y-1">
-                {swotData.weaknesses.map((weakness, idx) => (
+                {weaknesses.map((weakness, idx) => (
                   <li key={idx} className="text-gray-700">{weakness}</li>
                 ))}
               </ul>
@@ -75,9 +65,9 @@ const SwotAnalysis: React.FC<SwotAnalysisProps> = ({ reportData, archetypeData, 
           {/* Opportunities Section */}
           <div className="border border-blue-200 bg-blue-50 rounded-lg p-4">
             <h3 className="font-semibold text-lg text-blue-700 mb-3">Opportunities</h3>
-            {swotData.opportunities && swotData.opportunities.length > 0 ? (
+            {opportunities && opportunities.length > 0 ? (
               <ul className="list-disc pl-5 space-y-1">
-                {swotData.opportunities.map((opportunity, idx) => (
+                {opportunities.map((opportunity, idx) => (
                   <li key={idx} className="text-gray-700">{opportunity}</li>
                 ))}
               </ul>
@@ -89,9 +79,9 @@ const SwotAnalysis: React.FC<SwotAnalysisProps> = ({ reportData, archetypeData, 
           {/* Threats Section */}
           <div className="border border-red-200 bg-red-50 rounded-lg p-4">
             <h3 className="font-semibold text-lg text-red-700 mb-3">Threats</h3>
-            {swotData.threats && swotData.threats.length > 0 ? (
+            {threats && threats.length > 0 ? (
               <ul className="list-disc pl-5 space-y-1">
-                {swotData.threats.map((threat, idx) => (
+                {threats.map((threat, idx) => (
                   <li key={idx} className="text-gray-700">{threat}</li>
                 ))}
               </ul>

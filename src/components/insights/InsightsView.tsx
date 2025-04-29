@@ -9,7 +9,6 @@ import SwotTab from './tabs/SwotTab';
 import DiseaseAndCareTab from './tabs/DiseaseAndCareTab';
 import DeepDiveRequestForm from '@/components/results/DeepDiveRequestForm';
 import { getGnomeForArchetype } from '@/utils/gnomeImages';
-import { normalizeSwotData } from '@/utils/swot/normalizeSwotData';
 
 interface ArchetypeReportProps {
   archetypeId: ArchetypeId;
@@ -28,15 +27,6 @@ const InsightsView = ({
 }: ArchetypeReportProps) => {
   const [activeTab, setActiveTab] = React.useState('overview');
   const familyColor = reportData.hexColor || reportData.color || '#4B5563';
-  
-  console.log('[InsightsView] Rendering with data:', {
-    archetypeId,
-    reportDataName: reportData?.name || reportData?.archetype_name,
-    hasStrengths: Array.isArray(normalizeSwotData(reportData?.strengths)) && normalizeSwotData(reportData?.strengths).length > 0,
-    strengthsLength: reportData?.strengths ? normalizeSwotData(reportData.strengths).length : 0,
-    hasSwotAnalysis: !!(reportData?.swot_analysis),
-    swotAnalysisStrengths: reportData?.swot_analysis?.strengths ? normalizeSwotData(reportData.swot_analysis.strengths).length : 0
-  });
   
   // Enhanced logging for assessment data
   useEffect(() => {
@@ -75,22 +65,6 @@ const InsightsView = ({
   const familyId = reportData.familyId || reportData.family_id;
   const familyName = reportData.familyName || reportData.family_name || '';
 
-  // Process SWOT data with fallback to swot_analysis object if available
-  const swotData = {
-    strengths: reportData.strengths || (reportData.swot_analysis && reportData.swot_analysis.strengths) || [],
-    weaknesses: reportData.weaknesses || (reportData.swot_analysis && reportData.swot_analysis.weaknesses) || [],
-    opportunities: reportData.opportunities || (reportData.swot_analysis && reportData.swot_analysis.opportunities) || [],
-    threats: reportData.threats || (reportData.swot_analysis && reportData.swot_analysis.threats) || []
-  };
-
-  // Debug log SWOT data
-  console.log('[InsightsView] Processed SWOT data:', {
-    strengths: normalizeSwotData(swotData.strengths).length || 0,
-    weaknesses: normalizeSwotData(swotData.weaknesses).length || 0,
-    opportunities: normalizeSwotData(swotData.opportunities).length || 0, 
-    threats: normalizeSwotData(swotData.threats).length || 0
-  });
-
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">
       <ArchetypeHeader 
@@ -113,7 +87,7 @@ const InsightsView = ({
           />
         )}
         {activeTab === 'metrics' && <MetricsTab archetypeData={reportData} />}
-        {activeTab === 'swot' && <SwotTab archetypeData={reportData} swotData={swotData} hideRequestSection={hideRequestSection} />}
+        {activeTab === 'swot' && <SwotTab archetypeData={reportData} />}
         {activeTab === 'disease-and-care' && <DiseaseAndCareTab archetypeData={reportData} />}
       </div>
 

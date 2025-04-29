@@ -11,22 +11,11 @@ interface InsightSwotSectionProps {
 }
 
 const InsightSwotSection = ({ archetype }: InsightSwotSectionProps) => {
-  // Extract SWOT data with fallback to swot_analysis if available
-  const strengths = normalizeSwotData(archetype?.strengths || (archetype?.swot_analysis && archetype?.swot_analysis?.strengths));
-  const weaknesses = normalizeSwotData(archetype?.weaknesses || (archetype?.swot_analysis && archetype?.swot_analysis?.weaknesses));
-  const opportunities = normalizeSwotData(archetype?.opportunities || (archetype?.swot_analysis && archetype?.swot_analysis?.opportunities));
-  const threats = normalizeSwotData(archetype?.threats || (archetype?.swot_analysis && archetype?.swot_analysis?.threats));
-
-  // Debug log
-  console.log('InsightSwotSection data:', { 
-    hasSwotAnalysis: !!(archetype?.swot_analysis),
-    directStrengths: archetype?.strengths ? strengths.length : 0,
-    nestedStrengths: archetype?.swot_analysis?.strengths ? normalizeSwotData(archetype.swot_analysis.strengths).length : 0,
-    normalizedStrengths: strengths.length,
-    normalizedWeaknesses: weaknesses.length,
-    normalizedOpportunities: opportunities.length,
-    normalizedThreats: threats.length
-  });
+  // Extract SWOT data directly from the archetype object
+  const strengths = normalizeSwotData(archetype?.strengths);
+  const weaknesses = normalizeSwotData(archetype?.weaknesses);
+  const opportunities = normalizeSwotData(archetype?.opportunities);
+  const threats = normalizeSwotData(archetype?.threats);
 
   return (
     <Section id="swot-analysis">

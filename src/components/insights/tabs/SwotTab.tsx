@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArchetypeDetailedData } from '@/types/archetype';
@@ -6,39 +5,36 @@ import { normalizeSwotData } from '@/utils/swot/normalizeSwotData';
 
 interface SwotTabProps {
   archetypeData: ArchetypeDetailedData;
-  swotData: {
-    strengths: any;
-    weaknesses: any;
-    opportunities: any;
-    threats: any;
+  swotData?: {
+    strengths?: any;
+    weaknesses?: any;
+    opportunities?: any;
+    threats?: any;
   };
   hideRequestSection?: boolean;
 }
 
 const SwotTab = ({ archetypeData, swotData, hideRequestSection = false }: SwotTabProps) => {
-  // Enhanced debug logging to identify SWOT data issues
+  // Use simpler direct data access approach - use directly provided SWOT data if available,
+  // otherwise get it directly from archetypeData
+  const strengths = normalizeSwotData(swotData?.strengths || archetypeData?.strengths);
+  const weaknesses = normalizeSwotData(swotData?.weaknesses || archetypeData?.weaknesses);
+  const opportunities = normalizeSwotData(swotData?.opportunities || archetypeData?.opportunities);
+  const threats = normalizeSwotData(swotData?.threats || archetypeData?.threats);
+  
+  // Debug logging for troubleshooting
   useEffect(() => {
-    console.log("SwotTab received data:", {
-      archetypeId: archetypeData?.id,
-      archetypeName: archetypeData?.name,
-      swotData: swotData || 'No SWOT data',
-      strengths: swotData?.strengths ? normalizeSwotData(swotData.strengths).length : 0,
-      weaknesses: swotData?.weaknesses ? normalizeSwotData(swotData.weaknesses).length : 0,
-      opportunities: swotData?.opportunities ? normalizeSwotData(swotData.opportunities).length : 0,
-      threats: swotData?.threats ? normalizeSwotData(swotData.threats).length : 0
+    console.log("SwotTab data available:", {
+      directStrengths: archetypeData?.strengths ? normalizeSwotData(archetypeData.strengths).length : 0,
+      directWeaknesses: archetypeData?.weaknesses ? normalizeSwotData(archetypeData.weaknesses).length : 0,
+      directOpportunities: archetypeData?.opportunities ? normalizeSwotData(archetypeData.opportunities).length : 0,
+      directThreats: archetypeData?.threats ? normalizeSwotData(archetypeData.threats).length : 0,
+      normalizedStrengths: strengths.length,
+      normalizedWeaknesses: weaknesses.length,
+      normalizedOpportunities: opportunities.length,
+      normalizedThreats: threats.length
     });
-    
-    // Check if there's nested SWOT data in archetypeData.swot_analysis
-    if (archetypeData?.swot_analysis) {
-      console.log("Found nested SWOT data in archetypeData.swot_analysis", archetypeData.swot_analysis);
-    }
-  }, [archetypeData, swotData]);
-
-  // Prepare normalized SWOT data
-  const strengths = normalizeSwotData(swotData?.strengths);
-  const weaknesses = normalizeSwotData(swotData?.weaknesses);
-  const opportunities = normalizeSwotData(swotData?.opportunities);
-  const threats = normalizeSwotData(swotData?.threats);
+  }, [archetypeData, strengths, weaknesses, opportunities, threats]);
 
   return (
     <Card>

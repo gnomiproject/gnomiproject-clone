@@ -3,6 +3,7 @@ import { Json } from '@/types/archetype';
 
 /**
  * Normalizes SWOT data from various possible formats into a string array
+ * This handles multiple data formats that might exist in different tables
  */
 export const normalizeSwotData = (data: any): string[] => {
   if (!data) return [];
@@ -17,12 +18,25 @@ export const normalizeSwotData = (data: any): string[] => {
     return data.map(item => item.text || '');
   }
   
+  // Handle direct arrays of objects with text or description properties
+  if (Array.isArray(data) && data.length > 0 && typeof data[0] === 'object') {
+    return data.map(item => {
+      if (item.text) return item.text;
+      if (item.description) return item.description;
+      return JSON.stringify(item);
+    });
+  }
+  
   // If it's a JSON string, try to parse it
   if (typeof data === 'string' && (data.startsWith('[') || data.startsWith('{'))) {
     try {
       const parsed = JSON.parse(data);
       if (Array.isArray(parsed)) {
-        return parsed.map(item => typeof item === 'string' ? item : (item.text || JSON.stringify(item)));
+        return parsed.map(item => {
+          if (typeof item === 'string') return item;
+          if (item && typeof item === 'object' && 'text' in item) return item.text;
+          return JSON.stringify(item);
+        });
       }
     } catch (e) {
       // If parsing fails, treat as a single string
@@ -40,7 +54,10 @@ export const normalizeSwotData = (data: any): string[] => {
     if (Array.isArray(data)) {
       return data.map(item => {
         if (typeof item === 'string') return item;
-        if (typeof item === 'object' && item !== null && 'text' in item) return item.text;
+        if (typeof item === 'object' && item !== null) {
+          if ('text' in item) return item.text;
+          if ('description' in item) return item.description;
+        }
         return JSON.stringify(item);
       });
     }
