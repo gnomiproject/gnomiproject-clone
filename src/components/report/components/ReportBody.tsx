@@ -11,7 +11,7 @@ import UtilizationPatterns from '../sections/UtilizationPatterns';
 import DiseaseManagement from '../sections/DiseaseManagement';
 import CareGaps from '../sections/CareGaps';
 import RiskFactors from '../sections/RiskFactors';
-import Recommendations from '../sections/Recommendations';
+import StrategicRecommendationsSection from '../sections/strategic-recommendations/StrategicRecommendationsSection';
 import ContactSection from '../sections/ContactSection';
 import ReportDebugTools from '../ReportDebugTools';
 
@@ -85,7 +85,7 @@ const ReportBody: React.FC<ReportBodyProps> = ({
       </Section>
       
       <Section id="recommendations">
-        <Recommendations archetypeData={reportData} />
+        <StrategicRecommendationsSection reportData={reportData} averageData={averageData} />
       </Section>
       
       <Section id="contact">
