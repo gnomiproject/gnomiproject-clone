@@ -84,7 +84,24 @@ const BehavioralHealthConditions = ({ reportData, averageData }: BehavioralHealt
                 <XAxis 
                   dataKey="name" 
                   tickSize={0}
-                  tick={{ fontSize: 12, angle: -45, textAnchor: 'end' }}
+                  tick={(props) => {
+                    const { x, y, payload } = props;
+                    return (
+                      <g transform={`translate(${x},${y})`}>
+                        <text 
+                          x={0} 
+                          y={0} 
+                          dy={16} 
+                          textAnchor="end" 
+                          fill="#666"
+                          transform="rotate(-45)"
+                          fontSize={12}
+                        >
+                          {payload.value}
+                        </text>
+                      </g>
+                    );
+                  }}
                   scale="point"
                   padding={{ left: 10, right: 10 }}
                 />
