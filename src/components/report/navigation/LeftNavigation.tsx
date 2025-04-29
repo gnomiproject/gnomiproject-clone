@@ -2,30 +2,22 @@
 import React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
+interface Section {
+  id: string;
+  name: string;
+}
+
 interface LeftNavigationProps {
   activeSectionId: string;
   onNavigate: (sectionId: string) => void;
+  sections: Section[];
 }
 
 const LeftNavigation: React.FC<LeftNavigationProps> = ({ 
   activeSectionId, 
-  onNavigate 
+  onNavigate,
+  sections
 }) => {
-  const sections = [
-    { id: 'introduction', name: 'Introduction' },
-    { id: 'executive-summary', name: 'Executive Summary' },
-    { id: 'archetype-profile', name: 'Archetype Profile' },
-    { id: 'swot-analysis', name: 'SWOT Analysis' },
-    { id: 'demographics', name: 'Demographics' },
-    { id: 'cost-analysis', name: 'Cost Analysis' },
-    { id: 'utilization-patterns', name: 'Utilization Patterns' },
-    { id: 'disease-management', name: 'Disease Management' },
-    { id: 'care-gaps', name: 'Care Gaps' },
-    { id: 'risk-factors', name: 'Risk Factors' },
-    { id: 'recommendations', name: 'Recommendations' },
-    { id: 'contact', name: 'Contact' },
-  ];
-
   return (
     <div className="w-64 shrink-0 border-r border-gray-200 h-full bg-gray-50 print:hidden">
       <div className="p-4 border-b border-gray-200">

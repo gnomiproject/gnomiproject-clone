@@ -40,7 +40,6 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
 
   // Setup print handler
   const handlePrint = useReactToPrint({
-    content: () => reportRef.current,
     documentTitle: `Healthcare Archetype Report - ${reportData?.archetype_name || 'Unknown'}`,
     onBeforeGetContent: () => {
       document.body.classList.add('printing');
@@ -48,7 +47,9 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
     },
     onAfterPrint: () => {
       document.body.classList.remove('printing');
-    }
+    },
+    // Fix the API usage by using the correct property
+    printRef: () => reportRef.current,
   });
 
   // Show print button only after report is fully loaded
@@ -83,6 +84,22 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
     window.location.reload();
   };
 
+  // Create sections array for LeftNavigation
+  const sections = [
+    { id: 'introduction', name: 'Introduction' },
+    { id: 'executive-summary', name: 'Executive Summary' },
+    { id: 'archetype-profile', name: 'Archetype Profile' },
+    { id: 'swot-analysis', name: 'SWOT Analysis' },
+    { id: 'demographics', name: 'Demographics' },
+    { id: 'cost-analysis', name: 'Cost Analysis' },
+    { id: 'utilization-patterns', name: 'Utilization Patterns' },
+    { id: 'disease-management', name: 'Disease Management' },
+    { id: 'care-gaps', name: 'Care Gaps' },
+    { id: 'risk-factors', name: 'Risk Factors' },
+    { id: 'recommendations', name: 'Recommendations' },
+    { id: 'contact', name: 'Contact' },
+  ];
+
   return (
     <div className="relative min-h-screen bg-gray-50">
       {/* Left navigation only on larger screens */}
@@ -90,6 +107,7 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
         <LeftNavigation 
           activeSectionId={activeSectionId}
           onNavigate={handleNavigate}
+          sections={sections}
         />
       </div>
       
@@ -113,11 +131,11 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
       >
         <div className="max-w-5xl mx-auto px-4 print:px-8">
           <Section id="introduction">
-            <ReportIntroduction />
+            <ReportIntroduction userData={userData} />
           </Section>
           
           <Section id="executive-summary">
-            <ExecutiveSummary />
+            <ExecutiveSummary archetypeData={reportData} />
           </Section>
           
           <Section id="archetype-profile">
@@ -153,7 +171,7 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
           </Section>
           
           <Section id="recommendations">
-            <Recommendations />
+            <Recommendations archetypeData={reportData} />
           </Section>
           
           <Section id="contact">
@@ -170,6 +188,7 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
                 toggleDiagnostics={() => setShowDiagnostics(!showDiagnostics)}
                 onRefreshData={handleRefreshData}
                 isAdminView={isAdminView}
+                debugInfo={debugInfo}
               />
             </Section>
           )}
