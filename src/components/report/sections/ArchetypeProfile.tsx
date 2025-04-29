@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { memo } from 'react';
 import { ArchetypeDetailedData } from '@/types/archetype';
 import SectionTitle from '@/components/shared/SectionTitle';
 import GnomePlaceholder from './introduction/GnomePlaceholder';
@@ -12,7 +12,8 @@ export interface ArchetypeProfileProps {
   reportData?: ArchetypeDetailedData;  // Added for backward compatibility
 }
 
-const ArchetypeProfile: React.FC<ArchetypeProfileProps> = ({ archetypeData, reportData }) => {
+// Base component implementation
+const ArchetypeProfileBase: React.FC<ArchetypeProfileProps> = ({ archetypeData, reportData }) => {
   // Use archetypeData as primary, fall back to reportData
   const data = archetypeData || reportData;
 
@@ -90,5 +91,8 @@ const ArchetypeProfile: React.FC<ArchetypeProfileProps> = ({ archetypeData, repo
     </div>
   );
 };
+
+// Wrap the component with React.memo to prevent unnecessary re-renders
+const ArchetypeProfile = memo(ArchetypeProfileBase);
 
 export default ArchetypeProfile;

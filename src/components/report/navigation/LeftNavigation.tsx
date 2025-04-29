@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { memo, useCallback } from 'react';
 
 interface Section {
   id: string;
@@ -17,11 +17,11 @@ const LeftNavigation: React.FC<LeftNavigationProps> = ({
   onNavigate,
   sections
 }) => {
-  // Simple click handler that calls the onNavigate callback with the section ID
-  const handleClick = (sectionId: string) => (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
+  const handleNavigation = useCallback((sectionId: string) => {
+    // Avoid event handlers that could create closures on every render
+    // We'll apply the event in the JSX directly
     onNavigate(sectionId);
-  };
+  }, [onNavigate]);
 
   return (
     <div className="w-64 shrink-0 border-r border-gray-200 h-full bg-gray-50 print:hidden">
@@ -34,7 +34,7 @@ const LeftNavigation: React.FC<LeftNavigationProps> = ({
           {sections.map(section => (
             <li key={section.id}>
               <button
-                onClick={handleClick(section.id)}
+                onClick={() => handleNavigation(section.id)}
                 className={`w-full text-left px-3 py-2 rounded-md flex items-center group transition-colors ${
                   activeSectionId === section.id 
                     ? 'bg-blue-100 text-blue-800 font-medium' 
@@ -62,4 +62,5 @@ const LeftNavigation: React.FC<LeftNavigationProps> = ({
   );
 };
 
-export default LeftNavigation;
+// Export with React.memo to prevent unnecessary re-renders
+export default memo(LeftNavigation);

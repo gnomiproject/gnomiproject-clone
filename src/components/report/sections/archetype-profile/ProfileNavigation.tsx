@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { memo, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 
@@ -8,19 +8,26 @@ interface ProfileNavigationProps {
 }
 
 const ProfileNavigation: React.FC<ProfileNavigationProps> = ({ onNavigate }) => {
-  const handleNavigation = (sectionId: string) => (e: React.MouseEvent<HTMLButtonElement>) => {
+  // Using useCallback to prevent recreation of these functions on each render
+  const handleNavigateIntroduction = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    
     if (onNavigate) {
-      onNavigate(sectionId);
+      onNavigate('introduction');
     }
-  };
+  }, [onNavigate]);
+
+  const handleNavigateRecommendations = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    if (onNavigate) {
+      onNavigate('recommendations');
+    }
+  }, [onNavigate]);
 
   return (
     <div className="flex justify-between mt-8">
       <Button 
         variant="outline"
-        onClick={handleNavigation('introduction')}
+        onClick={handleNavigateIntroduction}
         className="flex items-center gap-2"
         type="button"
       >
@@ -29,7 +36,7 @@ const ProfileNavigation: React.FC<ProfileNavigationProps> = ({ onNavigate }) => 
       </Button>
       
       <Button 
-        onClick={handleNavigation('recommendations')}
+        onClick={handleNavigateRecommendations}
         className="flex items-center gap-2"
         type="button"
       >
@@ -40,4 +47,5 @@ const ProfileNavigation: React.FC<ProfileNavigationProps> = ({ onNavigate }) => 
   );
 };
 
-export default ProfileNavigation;
+// Export with React.memo to prevent unnecessary re-renders
+export default memo(ProfileNavigation);

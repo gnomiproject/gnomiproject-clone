@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { memo, useCallback } from 'react';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -18,19 +18,26 @@ const NavigationButtons: React.FC<NavigationButtonsProps> = ({
   nextSectionName,
   onNavigate
 }) => {
-  const handleNavigation = (sectionId: string) => (e: React.MouseEvent<HTMLButtonElement>) => {
+  // Using useCallback to prevent recreation of these functions on each render
+  const handleNavigatePrevious = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    
     if (onNavigate) {
-      onNavigate(sectionId);
+      onNavigate(previousSection);
     }
-  };
+  }, [onNavigate, previousSection]);
+
+  const handleNavigateNext = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    if (onNavigate) {
+      onNavigate(nextSection);
+    }
+  }, [onNavigate, nextSection]);
 
   return (
     <div className="flex justify-between items-center mt-10 print:hidden">
       <Button
         variant="outline"
-        onClick={handleNavigation(previousSection)}
+        onClick={handleNavigatePrevious}
         className="flex items-center gap-2"
         type="button"
       >
@@ -39,7 +46,7 @@ const NavigationButtons: React.FC<NavigationButtonsProps> = ({
       </Button>
       
       <Button
-        onClick={handleNavigation(nextSection)}
+        onClick={handleNavigateNext}
         className="flex items-center gap-2"
         type="button"
       >
@@ -50,4 +57,5 @@ const NavigationButtons: React.FC<NavigationButtonsProps> = ({
   );
 };
 
-export default NavigationButtons;
+// Export with React.memo to prevent unnecessary re-renders
+export default memo(NavigationButtons);

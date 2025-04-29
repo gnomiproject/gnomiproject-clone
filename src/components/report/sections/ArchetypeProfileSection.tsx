@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { memo } from 'react';
 import { ArchetypeDetailedData } from '@/types/archetype';
 import SectionTitle from '@/components/shared/SectionTitle';
 import { Section } from '@/components/shared/Section';
@@ -17,7 +17,12 @@ export interface ArchetypeProfileSectionProps {
   archetypeData: ArchetypeDetailedData;
 }
 
-const ArchetypeProfileSection: React.FC<ArchetypeProfileSectionProps> = ({ archetypeData }) => {
+// The main component logic
+const ArchetypeProfileSectionBase: React.FC<ArchetypeProfileSectionProps> = ({ archetypeData }) => {
+  // Console log for debugging render cycles
+  console.log('[ArchetypeProfileSection] Rendering with data:', 
+    archetypeData?.name || archetypeData?.archetype_name || 'Unknown');
+  
   if (!archetypeData) {
     return (
       <Section id="archetype-profile">
@@ -61,20 +66,18 @@ const ArchetypeProfileSection: React.FC<ArchetypeProfileSectionProps> = ({ arche
 
       <div className="space-y-8">
         {/* Archetype Identity Card */}
-        <ArchetypeIdentityCard 
-          archetype={archetypeData} 
-        />
+        <ArchetypeIdentityCard archetype={archetypeData} />
         
         {/* Key Characteristics */}
-        <KeyCharacteristicsList 
-          characteristics={archetypeData.key_characteristics || []} 
-          archetypeColor={archetypeData.hexColor || '#6E59A5'}
-        />
+        {archetypeData.key_characteristics && (
+          <KeyCharacteristicsList 
+            characteristics={archetypeData.key_characteristics} 
+            archetypeColor={archetypeData.hexColor || '#6E59A5'}
+          />
+        )}
         
         {/* Industry Composition */}
-        <IndustryComposition 
-          industries={archetypeData.industries || ''} 
-        />
+        <IndustryComposition industries={archetypeData.industries || ''} />
         
         {/* Distinctive Metrics */}
         <DistinctiveMetrics 
@@ -83,10 +86,13 @@ const ArchetypeProfileSection: React.FC<ArchetypeProfileSectionProps> = ({ arche
         />
         
         {/* Navigation */}
-        <ProfileNavigation />
+        <ProfileNavigation onNavigate={id => console.log(`Navigation to ${id} will be handled by parent`)} />
       </div>
     </Section>
   );
 };
+
+// Wrap with React.memo to prevent unnecessary re-renders
+const ArchetypeProfileSection = memo(ArchetypeProfileSectionBase);
 
 export default ArchetypeProfileSection;
