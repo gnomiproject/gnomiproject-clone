@@ -147,6 +147,23 @@ export const useReportData = ({ archetypeId, token, isInsightsReport = false, sk
           return;
         }
         
+        // Fallback to fetching from level3 secure view
+        const { data: level3Data, error: level3Error } = await supabase
+          .from('level3_report_secure')
+          .select('*')
+          .eq('archetype_id', archetypeId)
+          .maybeSingle();
+          
+        if (level3Error) {
+          console.warn('Could not fetch level3 data:', level3Error);
+        }
+        
+        if (level3Data) {
+          console.log('Got report data from level3');
+          setReportData(level3Data);
+          return;
+        }
+        
         // Fallback to fetching from SWOT and strategic recommendations
         const { data: swotData, error: swotError } = await supabase
           .from('Analysis_Archetype_SWOT')

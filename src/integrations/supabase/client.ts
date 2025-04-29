@@ -31,8 +31,8 @@ export const supabase = createClient<Database>(
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 30000);
         
-        // Log request for RLS testing
-        console.log('[RLS Test] Supabase request:', { 
+        // Log request for security testing
+        console.log('[Security] Supabase request:', { 
           url: args[0],
           isAdmin: isAdminMode()
         });
@@ -49,7 +49,7 @@ export const supabase = createClient<Database>(
         })
         .catch(error => {
           clearTimeout(timeoutId);
-          console.error('[RLS Test] Supabase request error:', error);
+          console.error('[Security] Supabase request error:', error);
           throw error;
         });
       }
@@ -68,10 +68,10 @@ export const supabase = createClient<Database>(
 // Helper for detecting admin mode throughout the app
 export const isAdmin = isAdminMode();
 
-// Add a dedicated test function for RLS
+// Add a dedicated test function for security
 export const testRlsAccess = async () => {
   try {
-    console.log('[RLS Test] Testing access to tables with new RLS policies and secure views...');
+    console.log('[Security] Testing access to tables with new secure views...');
     
     // Test Core_Archetype_Overview - this table isn't behind a secure view
     const { data: archetypes, error: archetypesError } = await supabase
@@ -80,7 +80,7 @@ export const testRlsAccess = async () => {
       .limit(1);
       
     if (archetypesError) {
-      console.error('[RLS Test] Core_Archetype_Overview access error:', archetypesError);
+      console.error('[Security] Core_Archetype_Overview access error:', archetypesError);
       return { success: false, error: archetypesError };
     }
     
@@ -91,7 +91,7 @@ export const testRlsAccess = async () => {
       .limit(1);
       
     if (level3Error) {
-      console.error('[RLS Test] level3_report_secure access error:', level3Error);
+      console.error('[Security] level3_report_secure access error:', level3Error);
       return { success: false, error: level3Error };
     }
     
@@ -102,12 +102,12 @@ export const testRlsAccess = async () => {
       .limit(1);
       
     if (level4Error) {
-      console.error('[RLS Test] level4_report_secure access error:', level4Error);
+      console.error('[Security] level4_report_secure access error:', level4Error);
       // Don't fail on level4 error as it's expected for unauthorized users
-      console.log('[RLS Test] Note: level4 access errors may be expected if no valid report request exists');
+      console.log('[Security] Note: level4 access errors may be expected if no valid report request exists');
     }
     
-    console.log('[RLS Test] All accessible tables verified after secure view implementation');
+    console.log('[Security] All accessible tables verified with secure views');
     return { 
       success: true, 
       results: { 
@@ -117,7 +117,7 @@ export const testRlsAccess = async () => {
       } 
     };
   } catch (error) {
-    console.error('[RLS Test] Test failed with exception:', error);
+    console.error('[Security] Test failed with exception:', error);
     return { success: false, error };
   }
 };
