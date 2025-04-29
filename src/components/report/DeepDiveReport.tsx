@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Section } from '@/components/shared/Section';
 import ExecutiveSummary from './sections/ExecutiveSummary';
@@ -42,13 +43,13 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
     documentTitle: `Healthcare Archetype Report - ${reportData?.archetype_name || 'Unknown'}`,
     onBeforePrint: () => {
       document.body.classList.add('printing');
-      return Promise.resolve(); // Return a resolved Promise to satisfy TypeScript
+      return Promise.resolve();
     },
     onAfterPrint: () => {
       document.body.classList.remove('printing');
     },
-    // Use content instead of printRef as per the react-to-print API
-    content: () => reportRef.current,
+    // Use the contentRef property instead of content
+    contentRef: reportRef,
   });
 
   // Show print button only after report is fully loaded
