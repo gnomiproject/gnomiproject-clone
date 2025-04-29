@@ -16,6 +16,16 @@ const DeepDiveRequestForm = ({
   assessmentAnswers,
   archetypeData 
 }: DeepDiveRequestFormProps) => {
+  // Ensure we're passing the complete assessment result that contains exactData
+  if (assessmentResult) {
+    console.log('DeepDiveRequestForm: Passing data to form', {
+      archetypeId,
+      hasAssessmentResult: !!assessmentResult,
+      hasExactEmployeeCount: !!assessmentResult?.exactData?.employeeCount,
+      exactEmployeeCount: assessmentResult?.exactData?.employeeCount
+    });
+  }
+
   return (
     <DeepDiveFormContainer
       archetypeId={archetypeId}

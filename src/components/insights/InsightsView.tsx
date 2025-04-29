@@ -27,6 +27,18 @@ const ArchetypeReport = ({
 }: ArchetypeReportProps) => {
   const [activeTab, setActiveTab] = React.useState('overview');
   const familyColor = reportData.hexColor || reportData.color || '#4B5563';
+  
+  // Log assessment data for debugging
+  React.useEffect(() => {
+    if (assessmentResult) {
+      console.log('InsightsView: Assessment result data', {
+        hasAssessmentResult: true,
+        archetypeId,
+        primaryArchetype: assessmentResult.primaryArchetype,
+        exactEmployeeCount: assessmentResult?.exactData?.employeeCount
+      });
+    }
+  }, [assessmentResult, archetypeId]);
 
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">

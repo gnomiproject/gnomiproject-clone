@@ -15,7 +15,7 @@ interface AssessmentResultsCardProps {
   onRetakeAssessment: () => void;
   assessmentResult?: AssessmentResult | null;
   assessmentAnswers?: any;
-  isLoading?: boolean; // Added isLoading prop
+  isLoading?: boolean;
 }
 
 const AssessmentResultsCard = ({ 
@@ -28,6 +28,17 @@ const AssessmentResultsCard = ({
   isLoading = false
 }: AssessmentResultsCardProps) => {
   const [error, setError] = useState<string | null>(null);
+
+  // Log the assessment result for debugging
+  React.useEffect(() => {
+    if (assessmentResult) {
+      console.log("AssessmentResultsCard: Using assessment result:", {
+        primaryArchetype: assessmentResult.primaryArchetype,
+        hasExactData: !!assessmentResult.exactData,
+        employeeCount: assessmentResult?.exactData?.employeeCount
+      });
+    }
+  }, [assessmentResult]);
 
   if (isLoading) {
     return <ArchetypeLoadingSkeleton />;
@@ -59,6 +70,8 @@ const AssessmentResultsCard = ({
         <InsightsView
           archetypeId={selectedArchetype as ArchetypeId} 
           reportData={archetypeData}
+          assessmentResult={assessmentResult}
+          assessmentAnswers={assessmentAnswers}
           hideRequestSection={true}
         />
       </div>

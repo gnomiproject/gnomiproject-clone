@@ -35,6 +35,7 @@ export const useAssessment = () => {
     if (!storedSessionId) {
       storedSessionId = uuidv4();
       sessionStorage.setItem(SESSION_ID_KEY, storedSessionId);
+      localStorage.setItem('session_id', storedSessionId); // Also store in localStorage for persistence
     }
     setSessionId(storedSessionId);
   }, []);
@@ -54,7 +55,9 @@ export const useAssessment = () => {
     const storedEmployeeCount = sessionStorage.getItem(SESSION_EXACT_EMPLOYEE_COUNT_KEY);
     if (storedEmployeeCount) {
       try {
-        setExactEmployeeCount(Number(storedEmployeeCount));
+        const count = Number(storedEmployeeCount);
+        console.log('Loaded exact employee count from session storage:', count);
+        setExactEmployeeCount(count);
       } catch (error) {
         console.error('Error parsing stored employee count:', error);
       }
@@ -143,6 +146,12 @@ export const useAssessment = () => {
             employeeCount: exactEmployeeCount
           }
         };
+        
+        console.log("Saving assessment result with exact employee count:", {
+          primaryArchetype: assessmentResult.primaryArchetype,
+          exactEmployeeCount: exactEmployeeCount
+        });
+        
         sessionStorage.setItem(SESSION_RESULTS_KEY, JSON.stringify(resultWithEmployeeCount));
         
         console.log("Assessment completed. Results:", assessmentResult);

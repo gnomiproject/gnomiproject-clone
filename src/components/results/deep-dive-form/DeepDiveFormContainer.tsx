@@ -47,7 +47,8 @@ const DeepDiveFormContainer = ({
   console.log('DeepDiveFormContainer: Received props', {
     archetypeId,
     assessmentResult,
-    assessmentAnswers
+    assessmentAnswers,
+    exactEmployeeCount: assessmentResult?.exactData?.employeeCount || null
   });
   
   const form = useForm<FormData>({
@@ -125,7 +126,7 @@ const DeepDiveFormContainer = ({
       const { data: response, error } = await supabase
         .from('report_requests')
         .insert({
-          id: reportId, // Explicitly set the ID
+          id: reportId,
           archetype_id: archetypeId,
           name: data.name,
           email: data.email,
