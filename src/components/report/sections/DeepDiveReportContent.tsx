@@ -1,8 +1,10 @@
 
 import React from 'react';
-import { ArchetypeDetailedData } from '@/types/archetype';
+import InsightOverviewSection from './InsightOverviewSection';
+import InsightMetricsSection from './InsightMetricsSection';
+import InsightSwotSection from './InsightSwotSection';
+import InsightCareSection from './InsightCareSection';
 import { Section } from '@/components/shared/Section';
-import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import ReportIntroduction from './ReportIntroduction';
 import ExecutiveSummary from './ExecutiveSummary';
 import ArchetypeProfile from './ArchetypeProfile';
@@ -17,9 +19,10 @@ import MetricsAnalysis from './MetricsAnalysis';
 import StrategicRecommendations from './StrategicRecommendations';
 import ContactSection from './ContactSection';
 import HomeIntroduction from './HomeIntroduction';
+import ErrorBoundary from '@/components/shared/ErrorBoundary';
 
 interface DeepDiveReportContentProps {
-  archetype: ArchetypeDetailedData;
+  archetype: any;
   userData?: any;
   averageData?: any;
 }
@@ -40,6 +43,15 @@ const DeepDiveReportContent = ({
   // Ensure all required arrays exist to prevent map function errors
   const ensureArray = (data: any): any[] => {
     if (Array.isArray(data)) return data;
+    if (typeof data === 'string' && data) {
+      try {
+        const parsed = JSON.parse(data);
+        if (Array.isArray(parsed)) return parsed;
+      } catch (e) {
+        // If parsing fails, return string as single item array
+        return [data];
+      }
+    }
     return [];
   };
   
@@ -56,8 +68,10 @@ const DeepDiveReportContent = ({
   console.log('[DeepDiveReportContent] Rendering with archetype data:', {
     id: archetypeId,
     name: archetypeName,
-    hasStrengths: Array.isArray(archetype.strengths) && archetype.strengths.length > 0,
-    hasRecommendations: Array.isArray(archetype.strategic_recommendations) && archetype.strategic_recommendations.length > 0
+    hasStrengths: Array.isArray(processedArchetype.strengths) && processedArchetype.strengths.length > 0,
+    hasRecommendations: Array.isArray(processedArchetype.strategic_recommendations) && processedArchetype.strategic_recommendations.length > 0,
+    recommendationsType: typeof archetype.strategic_recommendations,
+    processedRecommendationsType: typeof processedArchetype.strategic_recommendations
   });
 
   return (

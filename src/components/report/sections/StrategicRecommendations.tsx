@@ -17,22 +17,40 @@ const StrategicRecommendations: React.FC<StrategicRecommendationsProps> = ({
   // Use reportData as primary, fall back to archetypeData
   const data = reportData || archetypeData;
   
-  // Safely extract the name and recommendations
+  // Safely extract the name
   const archetypeName = data?.name || data?.archetype_name || 'Unknown';
   
-  // Extract strategic recommendations from the report data
-  const recommendations = data?.strategic_recommendations || [];
+  // Helper function to ensure we're working with an array
+  const ensureArray = (data: any): any[] => {
+    if (Array.isArray(data)) return data;
+    if (typeof data === 'string' && data) {
+      try {
+        const parsed = JSON.parse(data);
+        if (Array.isArray(parsed)) return parsed;
+      } catch (e) {
+        // If parsing fails, return empty array
+        return [];
+      }
+    }
+    if (data && typeof data === 'object' && !Array.isArray(data)) {
+      // If it's an object but not an array, convert object values to array
+      return Object.values(data);
+    }
+    return [];
+  };
+  
+  // Extract strategic recommendations from the report data and ensure it's an array
+  const recommendations = ensureArray(data?.strategic_recommendations);
   
   // Add debug logging
   console.log('[StrategicRecommendations] Rendering with data:', {
     hasData: !!data,
     dataName: archetypeName,
-    recommendationsCount: Array.isArray(recommendations) ? recommendations.length : 'not an array',
-    recommendationsType: typeof recommendations
+    recommendationsBeforeProcess: data?.strategic_recommendations,
+    recommendationsAfterProcess: recommendations,
+    recommendationsCount: recommendations.length,
+    recommendationsType: typeof data?.strategic_recommendations
   });
-  
-  // Check if recommendations exists and is an array
-  const validRecommendations = Array.isArray(recommendations) ? recommendations : [];
   
   return (
     <div className="space-y-6">
@@ -42,9 +60,9 @@ const StrategicRecommendations: React.FC<StrategicRecommendationsProps> = ({
           Based on our analysis of {archetypeName}, we recommend the following strategies:
         </p>
         
-        {validRecommendations.length > 0 ? (
+        {recommendations.length > 0 ? (
           <div className="space-y-6">
-            {validRecommendations.map((recommendation: any, index: number) => (
+            {recommendations.map((recommendation: any, index: number) => (
               <div key={index} className="border-l-4 border-blue-500 pl-4 py-1">
                 <h3 className="font-semibold text-lg">{recommendation.title || `Recommendation ${index + 1}`}</h3>
                 <p className="text-gray-600">{recommendation.description || 'No description available.'}</p>

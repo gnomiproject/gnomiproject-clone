@@ -17,7 +17,8 @@ const InsightsReportContent: React.FC<InsightsReportContentProps> = ({ archetype
     id: archetype?.id || archetype?.archetype_id,
     name: archetype?.name || archetype?.archetype_name,
     hasStrengths: !!archetype?.strengths,
-    hasRecommendations: Array.isArray(archetype?.strategic_recommendations) && archetype.strategic_recommendations.length > 0
+    hasRecommendations: Array.isArray(archetype?.strategic_recommendations) && archetype.strategic_recommendations.length > 0,
+    recommendationsType: typeof archetype?.strategic_recommendations
   });
 
   // Safely extract name and ID from either format (admin or regular)
@@ -27,6 +28,15 @@ const InsightsReportContent: React.FC<InsightsReportContentProps> = ({ archetype
   // Ensure all required arrays exist to prevent map function errors
   const ensureArray = (data: any): any[] => {
     if (Array.isArray(data)) return data;
+    if (typeof data === 'string' && data) {
+      try {
+        const parsed = JSON.parse(data);
+        if (Array.isArray(parsed)) return parsed;
+      } catch (e) {
+        // If parsing fails, return string as single item array
+        return [data];
+      }
+    }
     return [];
   };
   
