@@ -12,7 +12,7 @@ interface UseReportAccessOptions {
 }
 
 // Define valid table names to satisfy TypeScript
-type SecureTableName = 'level4_report_secure' | 'level4_deepdive_report_data_secure' | 'level3_report_secure';
+type SecureTableName = 'level4_report_secure' | 'level4_deepdive_report_data_secure' | 'level3_report_secure' | 'level3_report_data_secure';
 
 export const useReportAccess = ({ archetypeId: rawArchetypeId, token, isAdminView = false }: UseReportAccessOptions) => {
   const [reportData, setReportData] = useState<any | null>(null);
@@ -147,7 +147,7 @@ export const useReportAccess = ({ archetypeId: rawArchetypeId, token, isAdminVie
 
         // Fetch average data for comparisons
         const { data: avgData, error: avgError } = await supabase
-          .from('level4_report_secure' as const)
+          .from('level4_report_secure' as SecureTableName)
           .select('*')
           .eq('archetype_id', 'All_Average')
           .maybeSingle();
@@ -164,7 +164,7 @@ export const useReportAccess = ({ archetypeId: rawArchetypeId, token, isAdminVie
           
           // Try the base secure view for average data
           const { data: avgBaseData, error: avgBaseError } = await supabase
-            .from('level4_deepdive_report_data_secure' as const)
+            .from('level4_deepdive_report_data_secure' as SecureTableName)
             .select('*')
             .eq('archetype_id', 'All_Average')
             .maybeSingle();
