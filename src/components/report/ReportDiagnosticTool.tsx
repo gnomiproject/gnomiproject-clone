@@ -78,10 +78,10 @@ const ReportDiagnosticTool: React.FC = () => {
         }
 
         console.log('Diagnostic - Archetype data found:', {
-          name: archetypeData.archetype_name || archetypeData.name,
-          hasStrengths: Array.isArray(archetypeData.strengths) ? archetypeData.strengths.length : 'N/A',
-          hasRecommendations: Array.isArray(archetypeData.strategic_recommendations) ? 
-            archetypeData.strategic_recommendations.length : 'N/A'
+          name: archetypeData.archetype_name || 'Unknown',
+          hasStrengths: archetypeData.strategic_recommendations ? 
+            (Array.isArray(archetypeData.strategic_recommendations) ? 
+              archetypeData.strategic_recommendations.length : 'N/A') : 'N/A'
         });
 
         setReportData({
@@ -163,7 +163,6 @@ const ReportDiagnosticTool: React.FC = () => {
                   archetype_id: reportData.archetypeData.archetype_id,
                   archetype_name: reportData.archetypeData.archetype_name,
                   short_description: reportData.archetypeData.short_description,
-                  strengths: reportData.archetypeData.strengths,
                   strategic_recommendations: reportData.archetypeData.strategic_recommendations?.slice(0, 2)
                 }, null, 2)}
               </pre>
