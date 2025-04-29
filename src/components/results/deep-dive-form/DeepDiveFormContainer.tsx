@@ -43,15 +43,17 @@ const DeepDiveFormContainer = ({
   const [accessUrl, setAccessUrl] = useState('');
   const navigate = useNavigate();
   
-  // Extended debug logging to track what's being passed to the form
-  console.log('DeepDiveFormContainer: Received props', {
-    archetypeId,
-    hasAssessmentResult: !!assessmentResult,
-    assessmentResultStructure: assessmentResult ? Object.keys(assessmentResult) : null,
-    hasExactData: assessmentResult?.exactData ? 'Yes' : 'No',
-    exactEmployeeCount: assessmentResult?.exactData?.employeeCount || null,
-    assessmentAnswers: assessmentAnswers ? 'Present' : 'Missing'
-  });
+  // Extended debug logging to trace the data flow
+  useEffect(() => {
+    console.log('DeepDiveFormContainer: Assessment data received', {
+      archetypeId,
+      hasAssessmentResult: !!assessmentResult,
+      assessmentResultKeys: assessmentResult ? Object.keys(assessmentResult) : null,
+      hasExactData: assessmentResult?.exactData ? 'Yes' : 'No',
+      exactEmployeeCount: assessmentResult?.exactData?.employeeCount,
+      fullAssessmentResult: assessmentResult ? JSON.stringify(assessmentResult) : null
+    });
+  }, [assessmentResult, archetypeId]);
   
   const form = useForm<FormData>({
     resolver: zodResolver(FormSchema),
@@ -110,20 +112,32 @@ const DeepDiveFormContainer = ({
     
     try {
       console.log('Submitting form with data:', data);
-      console.log('Assessment result:', assessmentResult);
-      console.log('Assessment answers:', assessmentAnswers);
+      console.log('Assessment result before submission:', assessmentResult);
       
       // Generate a unique ID for the report request
       const reportId = uuidv4();
       
       // Extract exact employee count from assessment results if available
       const exactEmployeeCount = assessmentResult?.exactData?.employeeCount || null;
-      console.log('Extracted exact employee count:', exactEmployeeCount);
+      console.log('Extracted exact employee count for submission:', exactEmployeeCount);
       
       // Generate access token and construct URL
       const accessToken = uuidv4();
       const generatedUrl = `${window.location.origin}/report/${archetypeId}/${accessToken}`;
       setAccessUrl(generatedUrl); // Store URL for potential display
+      
+      // Ensure assessment result is properly formatted for database storage
+      const formattedAssessmentResult = assessmentResult ? {
+        primaryArchetype: assessmentResult.primaryArchetype,
+        secondaryArchetype: assessmentResult.secondaryArchetype,
+        tertiaryArchetype: assessmentResult.tertiaryArchetype,
+        score: assessmentResult.score,
+        percentageMatch: assessmentResult.percentageMatch,
+        resultTier: assessmentResult.resultTier,
+        exactData: assessmentResult.exactData || null
+      } : null;
+      
+      console.log('Formatted assessment result for DB:', formattedAssessmentResult);
       
       const { data: response, error } = await supabase
         .from('report_requests')
@@ -139,7 +153,7 @@ const DeepDiveFormContainer = ({
           created_at: new Date().toISOString(),
           expires_at: addDays(new Date(), 30).toISOString(),
           session_id: data.sessionId || null,
-          assessment_result: assessmentResult || null,
+          assessment_result: formattedAssessmentResult,
           assessment_answers: assessmentAnswers || null,
           exact_employee_count: exactEmployeeCount,
           access_url: generatedUrl

@@ -28,16 +28,16 @@ const InsightsContainer = ({
   const { archetypeData: dbArchetypeData, isLoading, error, refetch } = useGetArchetype(archetypeId);
   const [retrying, setRetrying] = React.useState(false);
   
-  // Enhanced logging for assessment data
+  // Enhanced logging for assessment data tracing
   useEffect(() => {
     renderCountRef.current += 1;
     console.log(`InsightsContainer: Mount/Render #${renderCountRef.current} for ${archetypeId}`);
-    console.log('Assessment data:', { 
+    console.log('InsightsContainer assessment data check:', { 
       hasAssessmentResult: !!assessmentResult,
-      assessmentResultStructure: assessmentResult ? Object.keys(assessmentResult) : null,
-      hasAssessmentAnswers: !!assessmentAnswers,
+      assessmentResultKeys: assessmentResult ? Object.keys(assessmentResult) : null,
       hasExactData: assessmentResult?.exactData ? 'Yes' : 'No',
-      exactEmployeeCount: assessmentResult?.exactData?.employeeCount
+      exactEmployeeCount: assessmentResult?.exactData?.employeeCount,
+      fullAssessmentResult: assessmentResult ? JSON.stringify(assessmentResult) : null
     });
     
     // Reset flags when archetypeId changes
@@ -49,7 +49,7 @@ const InsightsContainer = ({
       mountedRef.current = false;
       console.log(`InsightsContainer: Unmounting for ${archetypeId}`);
     };
-  }, [archetypeId, assessmentResult, assessmentAnswers]);
+  }, [archetypeId, assessmentResult]);
   
   // Handle retry logic
   const handleRetry = async () => {

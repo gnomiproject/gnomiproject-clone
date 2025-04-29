@@ -16,16 +16,17 @@ const DeepDiveRequestForm = ({
   assessmentAnswers,
   archetypeData 
 }: DeepDiveRequestFormProps) => {
-  // Add more detailed debug logging
+  // Add debugging to trace the exact employee count data
   useEffect(() => {
     if (assessmentResult) {
-      console.log('DeepDiveRequestForm: Assessment result data', {
+      console.log('DeepDiveRequestForm: Assessment data check', {
         hasAssessmentResult: true,
         archetypeId,
         primaryArchetype: assessmentResult.primaryArchetype,
         resultTier: assessmentResult.resultTier,
         hasExactData: !!assessmentResult?.exactData,
-        exactEmployeeCount: assessmentResult?.exactData?.employeeCount
+        exactEmployeeCount: assessmentResult?.exactData?.employeeCount,
+        fullAssessmentResult: JSON.stringify(assessmentResult)
       });
     } else {
       console.log('DeepDiveRequestForm: No assessment result data available');

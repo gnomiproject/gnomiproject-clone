@@ -31,12 +31,13 @@ const ArchetypeReport = ({
   // Enhanced logging for assessment data
   useEffect(() => {
     if (assessmentResult) {
-      console.log('InsightsView: Assessment result data', {
+      console.log('InsightsView: Using assessment result data', {
         hasAssessmentResult: true,
         archetypeId,
         primaryArchetype: assessmentResult.primaryArchetype,
         hasExactData: !!assessmentResult.exactData,
-        exactEmployeeCount: assessmentResult?.exactData?.employeeCount
+        exactEmployeeCount: assessmentResult?.exactData?.employeeCount,
+        fullAssessmentResult: JSON.stringify(assessmentResult)
       });
     } else {
       console.log('InsightsView: No assessment result data');

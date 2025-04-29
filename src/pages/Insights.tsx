@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useArchetypes } from '@/hooks/useArchetypes';
@@ -15,6 +16,7 @@ const INSIGHTS_STORAGE_KEY = 'healthcareArchetypeInsights';
 const SESSION_RESULTS_KEY = 'healthcareArchetypeSessionResults';
 const SESSION_ID_KEY = 'healthcareArchetypeSessionId';
 const SESSION_ANSWERS_KEY = 'healthcareArchetypeAnswers';
+const SESSION_EXACT_EMPLOYEE_COUNT_KEY = 'healthcareArchetypeExactEmployeeCount';
 
 const Insights = () => {
   const [selectedArchetype, setSelectedArchetype] = useState<ArchetypeId | null>(null);
@@ -72,12 +74,15 @@ const Insights = () => {
     const storedSessionId = sessionStorage.getItem(SESSION_ID_KEY);
     if (storedSessionId) {
       setSessionId(storedSessionId);
+      console.log('Loaded session ID from storage:', storedSessionId);
     }
     
     const answersStr = sessionStorage.getItem(SESSION_ANSWERS_KEY);
     if (answersStr) {
       try {
-        setSessionAnswers(JSON.parse(answersStr));
+        const parsedAnswers = JSON.parse(answersStr);
+        setSessionAnswers(parsedAnswers);
+        console.log('Loaded session answers from storage');
       } catch (e) {
         console.error("Could not parse assessment answers:", e);
       }
@@ -105,6 +110,13 @@ const Insights = () => {
       // Store in localStorage to persist across refreshes
       localStorage.setItem(INSIGHTS_STORAGE_KEY, newArchetype);
       
+      // Save the exact employee count to session storage if available
+      if (location.state.exactEmployeeCount !== undefined) {
+        const count = location.state.exactEmployeeCount;
+        console.log("Saving exact employee count to session storage:", count);
+        sessionStorage.setItem(SESSION_EXACT_EMPLOYEE_COUNT_KEY, count !== null ? count.toString() : '');
+      }
+      
       // Set session ID if available in location state
       if (location.state.sessionId) {
         sessionStorage.setItem(SESSION_ID_KEY, location.state.sessionId);
@@ -130,7 +142,8 @@ const Insights = () => {
             primaryArchetype: assessmentResults.primaryArchetype,
             resultTier: assessmentResults.resultTier,
             hasExactData: !!assessmentResults.exactData,
-            exactEmployeeCount: assessmentResults.exactData?.employeeCount
+            exactEmployeeCount: assessmentResults.exactData?.employeeCount,
+            fullData: JSON.stringify(assessmentResults)
           });
           setSessionResults(assessmentResults);
           newArchetype = assessmentResults.primaryArchetype;
@@ -221,14 +234,9 @@ const Insights = () => {
 
   // Debug
   console.log("Selected archetype:", selectedArchetype);
-  console.log("Archetype data:", archetypeData);
-  console.log("Field values:", archetypeData ? {
-    "Demo_Average Family Size": archetypeData["Demo_Average Family Size"],
-    "Demo_Average Age": archetypeData["Demo_Average Age"],
-    "Util_Emergency Visits per 1k Members": archetypeData["Util_Emergency Visits per 1k Members"]
-  } : 'No data');
-  console.log("Session results:", sessionResults);
+  console.log("Session results full data:", sessionResults);
   console.log("Session answers:", sessionAnswers);
+  console.log("Exact employee count:", sessionResults?.exactData?.employeeCount);
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-6 md:px-12 pb-24 relative">
