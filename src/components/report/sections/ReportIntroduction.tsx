@@ -88,16 +88,20 @@ const ReportIntroduction = ({
         <div className="h-0.5 w-full bg-gray-300 mt-2"></div>
       </div>
       
-      {/* Welcome section */}
+      {/* Welcome section - NO DATA DEPENDENCIES */}
       <div className="bg-gradient-to-r from-blue-50 to-teal-50 border border-teal-100 rounded-lg p-6 mb-6">
-        <h2 className="text-xl font-semibold text-gray-800 mb-3">Welcome to Your Healthcare Journey</h2>
+        <h2 className="text-xl font-semibold text-gray-800 mb-3">Welcome to Your Healthcare Insights</h2>
         
         <p className="text-gray-700 mb-3">
-          Thank you for completing the healthcare assessment and taking this important step toward optimizing your organization's healthcare strategy. Your commitment to better understanding your healthcare profile demonstrates forward-thinking leadership.
+          Thank you for completing the healthcare assessment. Your commitment to understanding and optimizing your organization's healthcare strategy demonstrates forward-thinking leadership that can make a meaningful difference for your team members.
+        </p>
+        
+        <p className="text-gray-700 mb-3">
+          This personalized deep dive report has been specially created to provide you with valuable insights based on your assessment responses. We've analyzed key metrics and patterns to offer you a comprehensive view of your organization's healthcare profile.
         </p>
         
         <p className="text-gray-700">
-          We've created this personalized deep dive report specifically for you, using your assessment responses to provide targeted insights and recommendations. We're excited to partner with you on your journey toward more effective, efficient healthcare for your team members.
+          In the following pages, you'll discover targeted recommendations and actionable strategies designed to help you make informed decisions. We're excited to partner with you on your journey toward more effective, efficient healthcare solutions.
         </p>
       </div>
       
@@ -126,22 +130,22 @@ const ReportIntroduction = ({
         
         <p className="text-gray-700 mb-4">
           This comprehensive deep dive report provides an in-depth analysis of your organization's healthcare archetype, 
-          including detailed metrics, strategic recommendations, and actionable insights tailored specifically to {displayArchetypeName}.
+          including detailed metrics, strategic recommendations, and actionable insights tailored specifically to your profile.
         </p>
         
         <p className="text-gray-700 mb-4">
           The report examines key health factors across demographics, utilization patterns, risk factors, 
           cost analysis, care gaps, and disease management. Each section includes comparison data against 
-          population averages to provide context for the findings, with special attention to the areas where {displayArchetypeName} typically excel or face challenges.
+          population averages to provide context for the findings, with special attention to the areas where your organization may excel or face challenges.
         </p>
         
         <div className="mt-5">
           <h3 className="text-lg font-semibold mb-2">How to Use This Report</h3>
           <ul className="list-disc list-inside space-y-1 text-gray-700">
-            <li>Review each section for detailed analysis relevant to {displayArchetypeName}</li>
+            <li>Review each section for detailed analysis relevant to your organization</li>
             <li>Use the navigation sidebar to jump between sections</li>
-            <li>Focus on the Strategic Recommendations for actionable steps designed for your archetype</li>
-            <li>Use the SWOT Analysis to understand strengths and opportunities unique to your archetype classification</li>
+            <li>Focus on the Strategic Recommendations for actionable steps</li>
+            <li>Use the SWOT Analysis to understand strengths and opportunities</li>
           </ul>
         </div>
       </div>
