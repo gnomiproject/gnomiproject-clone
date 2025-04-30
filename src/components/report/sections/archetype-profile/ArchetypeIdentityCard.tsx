@@ -5,9 +5,10 @@ import { Card } from '@/components/ui/card';
 
 interface ArchetypeIdentityCardProps {
   archetype: ArchetypeDetailedData;
+  archetypeBadge?: string;
 }
 
-const ArchetypeIdentityCard: React.FC<ArchetypeIdentityCardProps> = ({ archetype }) => {
+const ArchetypeIdentityCard: React.FC<ArchetypeIdentityCardProps> = ({ archetype, archetypeBadge }) => {
   const familyName = archetype.familyName || archetype.family_name || '';
   const archetypeName = archetype.name || archetype.archetype_name || 'Unknown Archetype';
   const archetypeColor = archetype.hexColor || '#6E59A5';
@@ -20,12 +21,15 @@ const ArchetypeIdentityCard: React.FC<ArchetypeIdentityCardProps> = ({ archetype
       />
       <div className="p-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
-          <div>
+          <div className="flex items-center gap-3">
             <h3 className="text-2xl font-bold">{archetypeName}</h3>
-            {familyName && (
-              <p className="text-gray-600">
-                <span className="font-medium">Family:</span> {familyName}
-              </p>
+            {archetypeBadge && (
+              <div 
+                className="px-2 py-1 rounded-md text-white text-sm font-bold"
+                style={{ backgroundColor: archetypeColor }}
+              >
+                {archetypeBadge}
+              </div>
             )}
           </div>
           

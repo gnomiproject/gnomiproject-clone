@@ -22,7 +22,8 @@ const ArchetypeProfileBase: React.FC<ArchetypeProfileProps> = ({ archetypeData, 
     hasData: !!data,
     name: data?.name || data?.archetype_name || 'Unknown',
     hasDescription: !!data?.long_description,
-    hasCharacteristics: !!data?.key_characteristics
+    hasCharacteristics: !!data?.key_characteristics,
+    hasOverview: !!data?.archetype_overview
   });
 
   if (!data) {
@@ -38,6 +39,16 @@ const ArchetypeProfileBase: React.FC<ArchetypeProfileProps> = ({ archetypeData, 
 
   const displayName = data.name || data.archetype_name || 'Unknown Archetype';
   const archetypeColor = data.hexColor || '#6E59A5';
+  
+  // Extract the archetype ID to create the badge (e.g., "B2" from "B2_Steady_Returns")
+  const archetypeId = data.id || data.archetype_id || '';
+  const archetypeBadge = archetypeId.includes('_') ? archetypeId.split('_')[0] : archetypeId;
+  
+  // Get the archetype overview if available
+  const archetypeOverview = data.archetype_overview ? 
+    typeof data.archetype_overview === 'string' ? 
+      data.archetype_overview : 
+      JSON.stringify(data.archetype_overview) : null;
   
   return (
     <div className="space-y-6">
@@ -61,14 +72,34 @@ const ArchetypeProfileBase: React.FC<ArchetypeProfileProps> = ({ archetypeData, 
           style={{ background: archetypeColor }}
         />
         <div className="p-6">
-          <h3 className="text-xl font-semibold mb-3">{displayName}</h3>
+          <div className="flex items-center gap-3 mb-3">
+            <h3 className="text-xl font-semibold">{displayName}</h3>
+            {archetypeBadge && (
+              <div 
+                className="px-2 py-1 rounded-md text-white text-sm font-bold"
+                style={{ backgroundColor: archetypeColor }}
+              >
+                {archetypeBadge}
+              </div>
+            )}
+          </div>
           
           <div className="space-y-4">
+            {/* Description */}
             <div>
               <h4 className="text-lg font-medium mb-2">Description</h4>
               <p className="text-gray-600">{data.long_description || 'No detailed description available.'}</p>
             </div>
             
+            {/* Archetype Overview from level4 table */}
+            {archetypeOverview && (
+              <div>
+                <h4 className="text-lg font-medium mb-2">Archetype Overview</h4>
+                <p className="text-gray-600 whitespace-pre-line">{archetypeOverview}</p>
+              </div>
+            )}
+            
+            {/* Key Characteristics */}
             <div>
               <h4 className="text-lg font-medium mb-2">Key Characteristics</h4>
               {data.key_characteristics ? (
@@ -81,6 +112,7 @@ const ArchetypeProfileBase: React.FC<ArchetypeProfileProps> = ({ archetypeData, 
               )}
             </div>
             
+            {/* Common Industries */}
             <div>
               <h4 className="text-lg font-medium mb-2">Common Industries</h4>
               <IndustryComposition industries={data.industries || ''} />

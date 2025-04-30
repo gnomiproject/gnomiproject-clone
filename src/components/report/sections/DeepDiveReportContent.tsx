@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import { Section } from '@/components/shared/Section';
@@ -40,6 +41,8 @@ const DeepDiveReportContent = ({
       familyId: archetype?.family_id || archetype?.familyId,
       familyName,
       shortDescription: shortDescription ? shortDescription.substring(0, 50) + '...' : 'None',
+      hasOverview: !!archetype?.archetype_overview,
+      overviewType: archetype?.archetype_overview ? typeof archetype.archetype_overview : 'None',
       userData: userData ? {
         name: userData.name,
         organization: userData.organization,
@@ -182,6 +185,7 @@ const DeepDiveReportContent = ({
               <p>Access Token: {userData?.access_token ? `${userData.access_token.substring(0, 5)}...` : 'Not available'}</p>
               <p>Last Accessed: {userData?.last_accessed ? new Date(userData.last_accessed).toLocaleString() : 'Never'}</p>
               <p>Has User Data: {userData ? 'Yes' : 'No'}</p>
+              <p>Has Archetype Overview: {archetype?.archetype_overview ? 'Yes' : 'No'}</p>
               <p>Has Strategic Recommendations: {archetype?.strategic_recommendations ? 'Yes' : 'No'}</p>
               <p>Has SWOT Data: {archetype?.strengths || archetype?.swot_analysis ? 'Yes' : 'No'}</p>
               <p>Raw Archetype Data Structure: {Object.keys(archetype || {}).join(', ')}</p>

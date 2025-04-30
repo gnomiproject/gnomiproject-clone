@@ -34,6 +34,16 @@ const ArchetypeProfileSectionBase: React.FC<ArchetypeProfileSectionProps> = ({ a
     );
   }
 
+  // Extract the archetype ID to create the badge (e.g., "B2" from "B2_Steady_Returns")
+  const archetypeId = archetypeData.id || archetypeData.archetype_id || '';
+  const archetypeBadge = archetypeId.includes('_') ? archetypeId.split('_')[0] : archetypeId;
+  
+  // Get the archetype overview if available
+  const archetypeOverview = archetypeData.archetype_overview ? 
+    typeof archetypeData.archetype_overview === 'string' ? 
+      archetypeData.archetype_overview : 
+      JSON.stringify(archetypeData.archetype_overview) : null;
+
   return (
     <Section id="archetype-profile">
       {/* Breadcrumb Navigation */}
@@ -66,7 +76,20 @@ const ArchetypeProfileSectionBase: React.FC<ArchetypeProfileSectionProps> = ({ a
 
       <div className="space-y-8">
         {/* Archetype Identity Card */}
-        <ArchetypeIdentityCard archetype={archetypeData} />
+        <ArchetypeIdentityCard 
+          archetype={archetypeData} 
+          archetypeBadge={archetypeBadge}
+        />
+        
+        {/* Archetype Overview */}
+        {archetypeOverview && (
+          <Card className="p-6">
+            <h3 className="text-xl font-semibold mb-4">Archetype Overview</h3>
+            <div className="prose prose-gray max-w-none">
+              <p className="whitespace-pre-line">{archetypeOverview}</p>
+            </div>
+          </Card>
+        )}
         
         {/* Key Characteristics */}
         {archetypeData.key_characteristics && (
