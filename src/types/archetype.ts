@@ -132,6 +132,7 @@ export interface ArchetypeDetailedData {
   // These are the fields we need from the database tables
   archetype_id?: string;  // Add this property to fix the type error
   archetype_name?: string; // Add this property to fix the type error
+  archetype_overview?: string | Json; // Add this property to fix the current error
   
   // New properties from level3_report_data with correct naming
   // Demographics metrics

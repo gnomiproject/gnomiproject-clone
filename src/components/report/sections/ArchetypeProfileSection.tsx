@@ -39,10 +39,12 @@ const ArchetypeProfileSectionBase: React.FC<ArchetypeProfileSectionProps> = ({ a
   const archetypeBadge = archetypeId.includes('_') ? archetypeId.split('_')[0] : archetypeId;
   
   // Get the archetype overview if available
-  const archetypeOverview = archetypeData.archetype_overview ? 
-    typeof archetypeData.archetype_overview === 'string' ? 
-      archetypeData.archetype_overview : 
-      JSON.stringify(archetypeData.archetype_overview) : null;
+  let archetypeOverview = null;
+  if (archetypeData.archetype_overview) {
+    archetypeOverview = typeof archetypeData.archetype_overview === 'string' 
+      ? archetypeData.archetype_overview 
+      : JSON.stringify(archetypeData.archetype_overview);
+  }
 
   return (
     <Section id="archetype-profile">

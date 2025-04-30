@@ -45,10 +45,12 @@ const ArchetypeProfileBase: React.FC<ArchetypeProfileProps> = ({ archetypeData, 
   const archetypeBadge = archetypeId.includes('_') ? archetypeId.split('_')[0] : archetypeId;
   
   // Get the archetype overview if available
-  const archetypeOverview = data.archetype_overview ? 
-    typeof data.archetype_overview === 'string' ? 
-      data.archetype_overview : 
-      JSON.stringify(data.archetype_overview) : null;
+  let archetypeOverview = null;
+  if (data.archetype_overview) {
+    archetypeOverview = typeof data.archetype_overview === 'string' 
+      ? data.archetype_overview 
+      : JSON.stringify(data.archetype_overview);
+  }
   
   return (
     <div className="space-y-6">
