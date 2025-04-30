@@ -16,7 +16,7 @@ export const BetaBadge: React.FC<BetaBadgeProps> = ({ className }) => {
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <div className={`inline-block bg-teal-500 text-white px-2 py-0.5 text-xs font-bold rounded ml-2 align-super cursor-help ${className || ''}`}>
+          <div className={`inline-block bg-teal-500 text-white px-2 py-0.5 text-xs font-bold rounded ml-2 align-super cursor-help print:hidden ${className || ''}`}>
             BETA
           </div>
         </TooltipTrigger>

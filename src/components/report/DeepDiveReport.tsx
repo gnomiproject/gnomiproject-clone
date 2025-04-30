@@ -4,6 +4,7 @@ import ReportContainer from './components/ReportContainer';
 import { debounce } from '@/utils/debounce';
 import ReportLoadingState from './ReportLoadingState';
 import ReportError from './ReportError';
+import BetaBadge from '@/components/shared/BetaBadge';
 
 interface DeepDiveReportProps {
   reportData: any;
@@ -99,15 +100,27 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
     [isNavigating]
   );
 
+  // Add beta badge instead of debug toggle
+  const renderBetaBadge = () => {
+    return (
+      <div className="fixed bottom-4 right-4 z-50 print:hidden">
+        <BetaBadge className="shadow-lg" />
+      </div>
+    );
+  };
+
   return (
-    <ReportContainer
-      reportData={memoizedReportData}
-      userData={memoizedUserData}
-      averageData={memoizedAverageData}
-      isAdminView={isAdminView}
-      debugInfo={debugInfo}
-      onNavigate={handleSafeNavigate}
-    />
+    <>
+      {renderBetaBadge()}
+      <ReportContainer
+        reportData={memoizedReportData}
+        userData={memoizedUserData}
+        averageData={memoizedAverageData}
+        isAdminView={isAdminView}
+        debugInfo={debugInfo}
+        onNavigate={handleSafeNavigate}
+      />
+    </>
   );
 };
 

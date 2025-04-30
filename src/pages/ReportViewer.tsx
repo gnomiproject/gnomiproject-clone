@@ -14,7 +14,7 @@ import ReportError from '@/components/report/ReportError';
 // This is a simplified version of ReportViewer focused on token-based access
 const ReportViewer = () => {
   const { archetypeId: rawArchetypeId, token } = useParams();
-  const [debugMode, setDebugMode] = useState(true);
+  const [debugMode, setDebugMode] = useState(false); // Changed to false to hide debug by default
   
   // Normalize the archetype ID to handle case sensitivity
   const archetypeId = rawArchetypeId ? normalizeArchetypeId(rawArchetypeId) : undefined;
@@ -133,17 +133,7 @@ const ReportViewer = () => {
   return (
     <ErrorBoundary>
       <div className="min-h-screen bg-gray-50">
-        {/* Debug toggle */}
-        {debugMode && (
-          <div className="fixed bottom-4 right-4 z-50">
-            <button
-              onClick={() => setDebugMode(!debugMode)}
-              className="bg-gray-800 text-white px-3 py-1 rounded text-xs shadow-lg"
-            >
-              {debugMode ? 'Hide Debug' : 'Show Debug'}
-            </button>
-          </div>
-        )}
+        {/* Debug toggle removed */}
         
         <DeepDiveReport
           reportData={finalReportData}
