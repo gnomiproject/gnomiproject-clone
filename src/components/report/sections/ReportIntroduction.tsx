@@ -81,12 +81,25 @@ const ReportIntroduction = ({
         <div className="h-0.5 w-full bg-gray-300 mt-2"></div>
       </div>
       
+      {/* Welcome section */}
+      <div className="bg-blue-50 border border-blue-100 rounded-lg p-6 mb-6">
+        <h2 className="text-xl font-semibold text-gray-800 mb-3">Let's Dive Deep</h2>
+        
+        <p className="text-gray-700 mb-3">
+          Thanks for requesting a closer look at your healthcare archetype. This report unpacks the patterns your organization shares with others like it—based on data from hundreds of employers and millions of covered lives.
+        </p>
+        
+        <p className="text-gray-700 mb-3">
+          Inside, you'll find insights to help you understand your workforce's healthcare behaviors, compare yourself to similar companies, and explore ideas for smarter benefits decisions.
+        </p>
+        
+        <p className="text-gray-700">
+          We're excited to help you turn these insights into action. Let's get started.
+        </p>
+      </div>
+      
       <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
         <h2 className="text-xl font-semibold mb-4">About This Report</h2>
-        
-        <p className="text-gray-700 mb-4">
-          Welcome! Thank you for completing the healthcare assessment. This personalized report has been created based on your responses to provide valuable insights that can help optimize your organization's healthcare strategy. We're excited to partner with you on your journey toward better healthcare outcomes for your entire team.
-        </p>
         
         <p className="text-gray-700 mb-4">
           This comprehensive deep dive report provides an in-depth analysis of your organization's healthcare profile, 
