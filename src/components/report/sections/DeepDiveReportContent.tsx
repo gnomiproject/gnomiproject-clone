@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import { Section } from '@/components/shared/Section';
@@ -6,7 +7,13 @@ import GnomeImage from '@/components/common/GnomeImage';
 import HomeIntroduction from './HomeIntroduction';
 import ArchetypeProfileSection from './ArchetypeProfileSection';
 import DemographicsSection from './DemographicsSection';
+import UtilizationPatterns from './UtilizationPatterns';
+import DiseaseManagement from './DiseaseManagement';
+import CareGaps from './CareGaps';
+import RiskFactors from './RiskFactors';
+import CostAnalysis from './CostAnalysis';
 import StrategicRecommendationsSection from './strategic-recommendations/StrategicRecommendationsSection';
+import ContactSection from './ContactSection';
 
 interface DeepDiveReportContentProps {
   archetype: any;
@@ -55,12 +62,24 @@ const DeepDiveReportContent = ({
   safeArchetype.family_name = familyName;
   safeArchetype.short_description = shortDescription;
   
+  // If no archetype data, show error
+  if (!archetype) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="bg-red-50 text-red-700 p-4 rounded-lg">
+          <h2 className="text-xl font-bold">Report Data Missing</h2>
+          <p>Unable to load report data. Please try refreshing the page.</p>
+        </div>
+      </div>
+    );
+  }
+  
   // Ensure we're passing the complete archetype data to all components
   // Sections arranged in the new requested order
   return (
     <div className="container mx-auto p-6">
+      {/* Introduction Section */}
       <ErrorBoundary>
-        {/* Home & Introduction Section */}
         <HomeIntroduction 
           userData={userData}
           archetypeData={safeArchetype}
@@ -81,12 +100,57 @@ const DeepDiveReportContent = ({
         />
       </ErrorBoundary>
       
+      {/* Utilization Patterns Section */}
+      <ErrorBoundary>
+        <Section id="utilization-patterns">
+          <SectionTitle title="Utilization Patterns" />
+          <UtilizationPatterns reportData={safeArchetype} averageData={averageData} />
+        </Section>
+      </ErrorBoundary>
+      
+      {/* Disease Management Section */}
+      <ErrorBoundary>
+        <Section id="disease-management">
+          <SectionTitle title="Disease Management" />
+          <DiseaseManagement reportData={safeArchetype} averageData={averageData} />
+        </Section>
+      </ErrorBoundary>
+      
+      {/* Care Gaps Section */}
+      <ErrorBoundary>
+        <Section id="care-gaps">
+          <SectionTitle title="Care Gaps" />
+          <CareGaps reportData={safeArchetype} averageData={averageData} />
+        </Section>
+      </ErrorBoundary>
+      
+      {/* Risk Factors Section */}
+      <ErrorBoundary>
+        <Section id="risk-factors">
+          <SectionTitle title="Risk Factors" />
+          <RiskFactors reportData={safeArchetype} averageData={averageData} />
+        </Section>
+      </ErrorBoundary>
+      
+      {/* Cost Analysis Section */}
+      <ErrorBoundary>
+        <Section id="cost-analysis">
+          <SectionTitle title="Cost Analysis" />
+          <CostAnalysis reportData={safeArchetype} averageData={averageData} />
+        </Section>
+      </ErrorBoundary>
+      
       {/* Strategic Recommendations Section */}
       <ErrorBoundary>
         <StrategicRecommendationsSection
           reportData={safeArchetype}
           averageData={averageData}
         />
+      </ErrorBoundary>
+      
+      {/* Contact Section */}
+      <ErrorBoundary>
+        <ContactSection userData={userData} />
       </ErrorBoundary>
       
       {/* Debug information - shown in a less prominent way */}

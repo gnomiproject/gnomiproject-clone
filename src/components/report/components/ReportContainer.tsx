@@ -6,7 +6,7 @@ import { useReportNavigation } from '../hooks/useReportNavigation';
 import { debounce } from '@/utils/debounce';
 import { useRenderPerformance } from '@/components/shared/PerformanceMonitor';
 
-// Create sections array for LeftNavigation - REORDERED according to requirements
+// Create sections array for LeftNavigation
 const REPORT_SECTIONS = [
   { id: 'introduction', name: 'Introduction' },
   { id: 'archetype-profile', name: 'Archetype Profile' },
@@ -84,6 +84,24 @@ const ReportContainer: React.FC<ReportContainerProps> = ({
 
   // Store the theme color from report data
   const themeColor = reportData?.hexColor || reportData?.hex_color || "#4B5563";
+
+  // Add debug logging to help troubleshoot loading issues
+  console.log("[ReportContainer] Rendering with:", {
+    hasReportData: !!reportData, 
+    reportDataType: reportData ? typeof reportData : 'none',
+    reportDataKeys: reportData ? Object.keys(reportData) : [],
+    activeSectionId
+  });
+
+  if (!reportData) {
+    console.error("[ReportContainer] No report data available");
+    return (
+      <div className="p-8 bg-red-50 border border-red-200 rounded text-center">
+        <h2 className="text-xl font-bold text-red-700">Report Data Missing</h2>
+        <p className="mt-2 text-red-600">Unable to load report data. Please try refreshing the page.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="relative min-h-screen bg-gray-50">

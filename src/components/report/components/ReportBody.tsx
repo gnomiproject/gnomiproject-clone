@@ -1,3 +1,4 @@
+
 import React, { lazy, Suspense, useEffect, useState } from 'react';
 import { Section } from '@/components/shared/Section';
 import ReportDebugTools from '../ReportDebugTools';
@@ -40,6 +41,14 @@ const SectionLoading = () => (
   </div>
 );
 
+// Error fallback component
+const SectionError = ({ message }: { message: string }) => (
+  <div className="py-8 px-4 border border-red-200 bg-red-50 rounded-lg">
+    <h3 className="text-lg font-medium text-red-800">Error Loading Section</h3>
+    <p className="text-red-700 mt-2">{message}</p>
+  </div>
+);
+
 const ReportBody: React.FC<ReportBodyProps> = ({
   reportData,
   userData,
@@ -55,6 +64,9 @@ const ReportBody: React.FC<ReportBodyProps> = ({
 }) => {
   // Track which sections have been viewed to optimize rendering
   const [viewedSections, setViewedSections] = useState<Set<string>>(new Set(['introduction']));
+  
+  // State to track section loading errors
+  const [sectionErrors, setSectionErrors] = useState<Record<string, string>>({});
   
   // Intersection Observer to detect when sections come into view
   useEffect(() => {
@@ -86,12 +98,30 @@ const ReportBody: React.FC<ReportBodyProps> = ({
   console.log('[ReportBody] Rendering with data:', {
     hasReportData: !!reportData, 
     hasUserData: !!userData,
-    viewedSections: Array.from(viewedSections)
+    viewedSections: Array.from(viewedSections),
+    reportDataSample: reportData ? {
+      id: reportData.id || reportData.archetype_id,
+      name: reportData.name || reportData.archetype_name,
+    } : 'No data'
   });
+
+  // Error handling function for section rendering errors
+  const handleSectionError = (sectionId: string, error: any) => {
+    console.error(`Error rendering section ${sectionId}:`, error);
+    setSectionErrors(prev => ({
+      ...prev,
+      [sectionId]: error?.message || 'Unknown error loading this section'
+    }));
+  };
+
+  // Verify that reportData is available
+  if (!reportData) {
+    return <SectionError message="No report data available. Please refresh the page and try again." />;
+  }
 
   return (
     <div className="max-w-5xl mx-auto px-4 print:px-8">
-      {/* REORDERED SECTIONS according to requirements */}
+      {/* Sections in the specified order */}
       <Section id="introduction">
         <Suspense fallback={<SectionLoading />}>
           <LazyReportIntroduction userData={userData} />
@@ -101,7 +131,11 @@ const ReportBody: React.FC<ReportBodyProps> = ({
       <Section id="archetype-profile">
         {shouldRenderSection('archetype-profile') ? (
           <Suspense fallback={<SectionLoading />}>
-            <LazyArchetypeProfile reportData={reportData} />
+            {sectionErrors['archetype-profile'] ? (
+              <SectionError message={sectionErrors['archetype-profile']} />
+            ) : (
+              <LazyArchetypeProfile reportData={reportData} />
+            )}
           </Suspense>
         ) : <SectionLoading />}
       </Section>
@@ -109,7 +143,11 @@ const ReportBody: React.FC<ReportBodyProps> = ({
       <Section id="demographics">
         {shouldRenderSection('demographics') ? (
           <Suspense fallback={<SectionLoading />}>
-            <LazyDemographicsSection reportData={reportData} averageData={averageData} />
+            {sectionErrors['demographics'] ? (
+              <SectionError message={sectionErrors['demographics']} />
+            ) : (
+              <LazyDemographicsSection reportData={reportData} averageData={averageData} />
+            )}
           </Suspense>
         ) : <SectionLoading />}
       </Section>
@@ -117,7 +155,11 @@ const ReportBody: React.FC<ReportBodyProps> = ({
       <Section id="utilization-patterns">
         {shouldRenderSection('utilization-patterns') ? (
           <Suspense fallback={<SectionLoading />}>
-            <LazyUtilizationPatterns reportData={reportData} averageData={averageData} />
+            {sectionErrors['utilization-patterns'] ? (
+              <SectionError message={sectionErrors['utilization-patterns']} />
+            ) : (
+              <LazyUtilizationPatterns reportData={reportData} averageData={averageData} />
+            )}
           </Suspense>
         ) : <SectionLoading />}
       </Section>
@@ -125,7 +167,11 @@ const ReportBody: React.FC<ReportBodyProps> = ({
       <Section id="disease-management">
         {shouldRenderSection('disease-management') ? (
           <Suspense fallback={<SectionLoading />}>
-            <LazyDiseaseManagement reportData={reportData} averageData={averageData} />
+            {sectionErrors['disease-management'] ? (
+              <SectionError message={sectionErrors['disease-management']} />
+            ) : (
+              <LazyDiseaseManagement reportData={reportData} averageData={averageData} />
+            )}
           </Suspense>
         ) : <SectionLoading />}
       </Section>
@@ -133,7 +179,11 @@ const ReportBody: React.FC<ReportBodyProps> = ({
       <Section id="care-gaps">
         {shouldRenderSection('care-gaps') ? (
           <Suspense fallback={<SectionLoading />}>
-            <LazyCareGaps reportData={reportData} averageData={averageData} />
+            {sectionErrors['care-gaps'] ? (
+              <SectionError message={sectionErrors['care-gaps']} />
+            ) : (
+              <LazyCareGaps reportData={reportData} averageData={averageData} />
+            )}
           </Suspense>
         ) : <SectionLoading />}
       </Section>
@@ -141,7 +191,11 @@ const ReportBody: React.FC<ReportBodyProps> = ({
       <Section id="risk-factors">
         {shouldRenderSection('risk-factors') ? (
           <Suspense fallback={<SectionLoading />}>
-            <LazyRiskFactors reportData={reportData} averageData={averageData} />
+            {sectionErrors['risk-factors'] ? (
+              <SectionError message={sectionErrors['risk-factors']} />
+            ) : (
+              <LazyRiskFactors reportData={reportData} averageData={averageData} />
+            )}
           </Suspense>
         ) : <SectionLoading />}
       </Section>
@@ -149,7 +203,11 @@ const ReportBody: React.FC<ReportBodyProps> = ({
       <Section id="cost-analysis">
         {shouldRenderSection('cost-analysis') ? (
           <Suspense fallback={<SectionLoading />}>
-            <LazyCostAnalysis reportData={reportData} averageData={averageData} />
+            {sectionErrors['cost-analysis'] ? (
+              <SectionError message={sectionErrors['cost-analysis']} />
+            ) : (
+              <LazyCostAnalysis reportData={reportData} averageData={averageData} />
+            )}
           </Suspense>
         ) : <SectionLoading />}
       </Section>
@@ -157,7 +215,11 @@ const ReportBody: React.FC<ReportBodyProps> = ({
       <Section id="recommendations">
         {shouldRenderSection('recommendations') ? (
           <Suspense fallback={<SectionLoading />}>
-            <LazyStrategicRecommendationsSection reportData={reportData} averageData={averageData} />
+            {sectionErrors['recommendations'] ? (
+              <SectionError message={sectionErrors['recommendations']} />
+            ) : (
+              <LazyStrategicRecommendationsSection reportData={reportData} averageData={averageData} />
+            )}
           </Suspense>
         ) : <SectionLoading />}
       </Section>
@@ -165,7 +227,11 @@ const ReportBody: React.FC<ReportBodyProps> = ({
       <Section id="contact">
         {shouldRenderSection('contact') ? (
           <Suspense fallback={<SectionLoading />}>
-            <LazyContactSection userData={userData} />
+            {sectionErrors['contact'] ? (
+              <SectionError message={sectionErrors['contact']} />
+            ) : (
+              <LazyContactSection userData={userData} />
+            )}
           </Suspense>
         ) : <SectionLoading />}
       </Section>
