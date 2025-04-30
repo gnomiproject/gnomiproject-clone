@@ -1,3 +1,4 @@
+
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
@@ -13,9 +14,16 @@ setupConsoleFilter();
 // Add font loading performance monitoring
 document.fonts.ready.then(() => {
   console.log('Fonts have finished loading');
+  
+  // Attempt to force redraw after fonts are loaded
+  document.body.style.opacity = '0.99';
+  setTimeout(() => {
+    document.body.style.opacity = '1';
+  }, 0);
 }).catch(err => {
   console.warn('Font loading error:', err);
   // Continue with system fonts if custom fonts fail
+  document.documentElement.classList.add('fonts-failed');
 });
 
 // Add specific font loading error handling for Typekit

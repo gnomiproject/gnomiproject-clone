@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -12,17 +11,35 @@
     <link rel="preconnect" href="https://use.typekit.net" crossorigin />
     <link rel="preconnect" href="https://p.typekit.net" crossorigin />
     
-    <!-- Harmonia Sans Pro Font with fallback options and error handling -->
+    <!-- Harmonia Sans Pro Font with robust fallback options and enhanced error handling -->
     <link rel="stylesheet" href="https://use.typekit.net/nxl6mtp.css" 
-          onerror="document.documentElement.classList.add('fonts-failed');" />
+          onerror="document.documentElement.classList.add('fonts-failed'); console.warn('Typekit font CSS failed to load');" />
     
-    <!-- Add fallback font style in case the Typekit font fails to load -->
+    <!-- Add comprehensive fallback font style -->
     <style>
+      /* Define font loading states */
+      .fonts-loading .font-dependent {
+        opacity: 0.8;
+        transition: opacity 0.3s ease;
+      }
+      
+      .fonts-loaded .font-dependent {
+        opacity: 1;
+      }
+      
+      /* Define fallback fonts for when Typekit fails */
       .fonts-failed {
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       }
       
-      /* Add a font loading indicator that will be hidden once fonts load */
+      /* Add system font fallback explicitly */
+      @font-face {
+        font-family: 'harmonia-sans-fallback';
+        src: local('Arial');
+        font-display: swap;
+      }
+      
+      /* Font loading indicator */
       .font-loading-indicator {
         position: fixed;
         bottom: 10px;
@@ -52,14 +69,31 @@
       // Add class to track font loading state
       document.documentElement.classList.add('fonts-loading');
       
+      // Custom font loading with timeout
+      const fontLoadTimeout = setTimeout(function() {
+        console.warn('Font loading took too long, using fallbacks');
+        document.documentElement.classList.add('fonts-failed');
+        document.documentElement.classList.remove('fonts-loading');
+      }, 3000); // 3 second timeout
+      
       // Remove class when fonts are loaded
       document.fonts.ready.then(function() {
+        clearTimeout(fontLoadTimeout); // Clear the timeout
         document.documentElement.classList.remove('fonts-loading');
+        document.documentElement.classList.add('fonts-loaded');
         console.log('Fonts have loaded successfully');
       }).catch(function(err) {
         document.documentElement.classList.add('fonts-failed');
         console.warn('Font loading error:', err);
       });
+      
+      // Add specific error handler for the Typekit stylesheet
+      window.addEventListener('error', function(e) {
+        if (e.target && (e.target.href || '').includes('typekit')) {
+          document.documentElement.classList.add('fonts-failed');
+          console.warn('Typekit resource failed to load:', e.target.href);
+        }
+      }, true);
     </script>
     
     <!-- Open Graph / Facebook -->
