@@ -5,7 +5,6 @@ import ReportDebugTools from '../ReportDebugTools';
 
 // Lazy load all section components for better initial loading performance
 const LazyReportIntroduction = lazy(() => import('../sections/ReportIntroduction'));
-const LazyExecutiveSummary = lazy(() => import('../sections/ExecutiveSummary'));
 const LazyArchetypeProfile = lazy(() => import('../sections/ArchetypeProfile'));
 const LazySwotAnalysis = lazy(() => import('../sections/SwotAnalysis'));
 const LazyDemographicsSection = lazy(() => import('../sections/DemographicsSection'));
@@ -91,14 +90,6 @@ const ReportBody: React.FC<ReportBodyProps> = ({
         <Suspense fallback={<SectionLoading />}>
           <LazyReportIntroduction userData={userData} />
         </Suspense>
-      </Section>
-      
-      <Section id="executive-summary">
-        {shouldRenderSection('executive-summary') ? (
-          <Suspense fallback={<SectionLoading />}>
-            <LazyExecutiveSummary archetypeData={reportData} />
-          </Suspense>
-        ) : <SectionLoading />}
       </Section>
       
       <Section id="archetype-profile">

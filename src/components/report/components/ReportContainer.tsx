@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, Suspense, lazy, useCallback } from 'react';
 import LeftNavigation from '../navigation/LeftNavigation';
 import PrintButton from './PrintButton';
@@ -9,7 +8,6 @@ import { useRenderPerformance } from '@/components/shared/PerformanceMonitor';
 // Create sections array for LeftNavigation
 const REPORT_SECTIONS = [
   { id: 'introduction', name: 'Introduction' },
-  { id: 'executive-summary', name: 'Executive Summary' },
   { id: 'archetype-profile', name: 'Archetype Profile' },
   { id: 'swot-analysis', name: 'SWOT Analysis' },
   { id: 'demographics', name: 'Demographics' },
