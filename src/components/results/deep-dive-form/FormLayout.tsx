@@ -30,6 +30,8 @@ const FormLayout = ({
   onResetForm,
   onSubmit
 }: FormLayoutProps) => {
+  console.log("[FormLayout] Rendering with submitSuccessful:", submitSuccessful);
+  
   return (
     <div className="flex flex-col space-y-6">
       <Card className="w-full">

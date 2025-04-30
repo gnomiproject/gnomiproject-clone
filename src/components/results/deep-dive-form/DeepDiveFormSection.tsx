@@ -30,11 +30,14 @@ interface DeepDiveFormSectionProps {
 }
 
 const DeepDiveFormSection = ({ form, onSubmit, isSubmitting, className }: DeepDiveFormSectionProps) => {
-  const handleSubmit = form.handleSubmit(onSubmit);
+  const handleSubmit = (data: FormData) => {
+    console.log("[DeepDiveFormSection] Submitting form data:", data);
+    return onSubmit(data);
+  };
 
   return (
     <Form {...form}>
-      <form onSubmit={handleSubmit} className={`space-y-4 ${className}`}>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className={`space-y-4 ${className}`}>
         <FormField
           control={form.control}
           name="name"

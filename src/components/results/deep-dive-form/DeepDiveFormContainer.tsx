@@ -9,9 +9,6 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { ArchetypeId } from '@/types/archetype';
 import DeepDiveFormSection, { FormSchema, FormData } from './DeepDiveFormSection';
-import DeepDiveBenefits from './DeepDiveBenefits';
-import DeepDiveSuccessState from './DeepDiveSuccessState';
-import RetakeAssessmentLink from './RetakeAssessmentLink';
 import FormLayout from './FormLayout';
 
 // Add Google Analytics gtag to the Window interface
@@ -113,6 +110,7 @@ const DeepDiveFormContainer = ({
   };
 
   const handleSubmit = async (data: FormData) => {
+    console.log('[DeepDiveFormContainer] Form submitted with data:', data);
     setIsSubmitting(true);
     
     try {
@@ -237,7 +235,7 @@ const DeepDiveFormContainer = ({
       onRetakeAssessment={handleRetakeAssessment}
       onResetForm={resetFormSubmission}
       onSubmit={handleSubmit}
-      accessUrl={accessUrl} // Pass the accessUrl to the FormLayout
+      accessUrl={accessUrl}
     />
   );
 };
