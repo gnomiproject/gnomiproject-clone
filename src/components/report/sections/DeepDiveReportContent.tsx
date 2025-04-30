@@ -47,7 +47,7 @@ const DeepDiveReportContent = ({
         lastAccessed: userData.last_accessed
       } : 'No user data',
       fullArchetypeObject: archetype ? 'Present' : 'Missing',
-      archetypeRawData: JSON.stringify(archetype).substring(0, 200) + '...'
+      archetypeRawData: archetype ? JSON.stringify(archetype).substring(0, 200) + '...' : 'Missing'
     });
   }, [archetype, archetypeId, archetypeName, familyName, shortDescription, userData]);
 
@@ -69,6 +69,12 @@ const DeepDiveReportContent = ({
         <div className="bg-red-50 text-red-700 p-4 rounded-lg">
           <h2 className="text-xl font-bold">Report Data Missing</h2>
           <p>Unable to load report data. Please try refreshing the page.</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+          >
+            Retry Loading
+          </button>
         </div>
       </div>
     );

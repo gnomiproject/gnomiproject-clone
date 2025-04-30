@@ -36,6 +36,8 @@ const PageLoader = () => (
 );
 
 function App() {
+  console.log("App rendering: Route configuration loaded");
+  
   return (
     <BrowserRouter>
       <div className="app">

@@ -70,10 +70,13 @@ const ReportBody: React.FC<ReportBodyProps> = ({
   
   // Intersection Observer to detect when sections come into view
   useEffect(() => {
+    console.log("[ReportBody] Setting up intersection observer for sections");
+    
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach(entry => {
           if (entry.isIntersecting && entry.target.id) {
+            console.log(`Section entering viewport: ${entry.target.id}`);
             setViewedSections(prev => new Set([...prev, entry.target.id]));
           }
         });
@@ -84,6 +87,7 @@ const ReportBody: React.FC<ReportBodyProps> = ({
     // Track all section elements
     document.querySelectorAll('section[id]').forEach(section => {
       observer.observe(section);
+      console.log(`Observing section: ${section.id}`);
     });
     
     return () => observer.disconnect();
@@ -121,7 +125,7 @@ const ReportBody: React.FC<ReportBodyProps> = ({
 
   return (
     <div className="max-w-5xl mx-auto px-4 print:px-8">
-      {/* Sections in the specified order */}
+      {/* Sections in the new reordered sequence */}
       <Section id="introduction">
         <Suspense fallback={<SectionLoading />}>
           <LazyReportIntroduction userData={userData} />

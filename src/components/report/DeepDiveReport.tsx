@@ -38,7 +38,8 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
     hasUserData: !!userData,
     hasAverageData: !!averageData,
     isLoading,
-    hasError: !!error
+    hasError: !!error,
+    reportDataKeys: reportData ? Object.keys(reportData).slice(0, 5) : []
   });
   
   // Show loading state if data is still loading
@@ -86,6 +87,8 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
         // Set focus to the section for accessibility
         sectionElement.setAttribute('tabindex', '-1');
         sectionElement.focus({ preventScroll: true });
+      } else {
+        console.warn(`[DeepDiveReport] Could not find section with id: ${sectionId}`);
       }
       
       // Reset navigation state after animation completes
