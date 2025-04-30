@@ -1,15 +1,21 @@
 
 import React from 'react';
+import { ArchetypeId } from '@/types/archetype';
+import { getArchetypeColorHex } from '@/data/colors';
 
 interface ArchetypeOverviewCardProps {
   shortDescription: string;
   characteristics: string[];
+  archetypeId?: ArchetypeId;
 }
 
 const ArchetypeOverviewCard = ({ 
   shortDescription, 
-  characteristics 
+  characteristics,
+  archetypeId = 'a1' as ArchetypeId
 }: ArchetypeOverviewCardProps) => {
+  const archetypeColor = archetypeId ? getArchetypeColorHex(archetypeId) : '#00B0F0';
+  
   return (
     <div className="p-6 bg-slate-50 border border-slate-100 rounded-lg">
       <div className="flex flex-col md:flex-row gap-6">
@@ -25,8 +31,11 @@ const ArchetypeOverviewCard = ({
               <ul className="space-y-2">
                 {characteristics.map((characteristic, index) => (
                   <li key={index} className="flex items-start">
-                    <div className="flex-shrink-0 w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center mr-3 mt-0.5">
-                      <span className="text-blue-600 text-xs font-bold">{index + 1}</span>
+                    <div 
+                      className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center mr-3 mt-0.5"
+                      style={{ backgroundColor: `${archetypeColor}25`, color: archetypeColor }}
+                    >
+                      <span className="text-xs font-bold">{index + 1}</span>
                     </div>
                     <span>{characteristic}</span>
                   </li>

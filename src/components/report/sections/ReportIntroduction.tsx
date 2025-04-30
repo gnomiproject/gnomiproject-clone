@@ -1,16 +1,21 @@
 
 import React from 'react';
 import { format } from 'date-fns';
+import { ArchetypeId } from '@/types/archetype';
+import { getArchetypeColorHex } from '@/data/colors';
 
 interface ReportIntroductionProps {
   userData: any;
+  archetypeId?: ArchetypeId;
 }
 
 const ReportIntroduction = ({ 
-  userData
+  userData,
+  archetypeId = 'a1' as ArchetypeId
 }: ReportIntroductionProps) => {
   const reportDate = userData?.created_at ? format(new Date(userData.created_at), 'MMMM d, yyyy') : 'N/A';
   const employeeCount = userData?.exact_employee_count || userData?.assessment_result?.exactData?.employeeCount;
+  const archetypeColor = archetypeId ? getArchetypeColorHex(archetypeId) : '#00B0F0';
   
   return (
     <div className="mb-12 print:mb-8">
@@ -44,7 +49,10 @@ const ReportIntroduction = ({
           </div>
         </div>
         
-        <div className="h-1 w-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full mb-6"></div>
+        <div 
+          className="h-1 w-full rounded-full mb-6"
+          style={{ background: `linear-gradient(to right, ${archetypeColor}, ${archetypeColor}90, ${archetypeColor}70)` }}
+        ></div>
       </div>
       
       {/* For print version */}
@@ -81,14 +89,6 @@ const ReportIntroduction = ({
             <li>Use the SWOT Analysis to understand strengths and opportunities</li>
           </ul>
         </div>
-        
-        {employeeCount && (
-          <div className="mt-4 p-3 bg-blue-50 border border-blue-100 rounded-md">
-            <p className="text-blue-700 font-medium">
-              This report is personalized for an organization with approximately {employeeCount.toLocaleString()} employees.
-            </p>
-          </div>
-        )}
       </div>
     </div>
   );
