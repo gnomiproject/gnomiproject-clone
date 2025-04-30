@@ -51,7 +51,7 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
     rawFamilyName: archetypeData?.family_name,
     description: shortDescription.substring(0, 50) + '...',
     userData: userData ? `User data present for: ${userName}` : 'No user data',
-    archetypeObj: JSON.stringify(archetypeData).substring(0, 200) + '...',
+    archetypeObj: archetypeData ? JSON.stringify(archetypeData).substring(0, 200) + '...' : 'null',
     allProps: Object.keys(archetypeData || {}).join(', ')
   });
   

@@ -45,13 +45,13 @@ const DeepDiveReportContent = ({
         lastAccessed: userData.last_accessed
       } : 'No user data',
       fullArchetypeObject: archetype ? 'Present' : 'Missing',
-      archetypeRawData: JSON.stringify(archetype).substring(0, 200) + '...',
+      archetypeRawData: archetype ? JSON.stringify(archetype).substring(0, 200) + '...' : 'null',
       allProps: Object.keys(archetype || {}).join(', ')
     });
   }, [archetype, archetypeId, archetypeName, familyName, shortDescription, userData]);
 
   // Make a safe copy of the data to avoid mutation issues
-  const safeArchetype = {...archetype};
+  const safeArchetype = archetype ? {...archetype} : {};
   
   // Ensure the archetype data has all expected fields
   safeArchetype.id = archetypeId;
@@ -60,6 +60,20 @@ const DeepDiveReportContent = ({
   safeArchetype.archetype_name = archetypeName;
   safeArchetype.family_name = familyName;
   safeArchetype.short_description = shortDescription;
+  
+  // Guard against null archetype data
+  if (!archetype) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-6 text-center">
+          <h2 className="text-xl font-semibold text-amber-800">Report Data Not Available</h2>
+          <p className="mt-2 text-amber-700">
+            The report data could not be loaded. Please try again later.
+          </p>
+        </div>
+      </div>
+    );
+  }
   
   // Ensure we're passing the complete archetype data to all components
   return (
