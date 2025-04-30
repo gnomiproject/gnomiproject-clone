@@ -25,17 +25,17 @@ const DeepDiveReportContent = ({
   const archetypeId = archetype?.id || archetype?.archetype_id || '';
   
   // Debug logging
-  console.log('[DEBUG] DeepDiveReportContent received data:', {
+  console.log('[DEBUG] DeepDiveReportContent archetype data:', {
     id: archetypeId,
     name: archetypeName,
+    familyId: archetype?.family_id || archetype?.familyId,
+    familyName: archetype?.family_name,
     userData: userData ? {
       name: userData.name,
       organization: userData.organization,
       accessToken: userData.access_token ? `${userData.access_token.substring(0, 5)}...` : 'None',
       lastAccessed: userData.last_accessed
-    } : 'No user data',
-    hasStrategicRecommendations: !!archetype?.strategic_recommendations,
-    recommendationsType: typeof archetype?.strategic_recommendations
+    } : 'No user data'
   });
 
   // Make a safe copy of the data to avoid mutation issues
@@ -81,14 +81,15 @@ const DeepDiveReportContent = ({
             <div className="mt-2 font-mono text-xs space-y-1">
               <p>Archetype ID: {archetypeId}</p>
               <p>Archetype Name: {archetypeName}</p>
+              <p>Family ID: {archetype?.family_id || archetype?.familyId || 'Not available'}</p>
+              <p>Family Name: {archetype?.family_name || 'Not available'}</p>
               <p>User: {userData?.name || 'Not available'}</p>
               <p>Organization: {userData?.organization || 'Not available'}</p>
               <p>Access Token: {userData?.access_token ? `${userData.access_token.substring(0, 5)}...` : 'Not available'}</p>
               <p>Last Accessed: {userData?.last_accessed ? new Date(userData.last_accessed).toLocaleString() : 'Never'}</p>
               <p>Has User Data: {userData ? 'Yes' : 'No'}</p>
               <p>Has Strategic Recommendations: {archetype?.strategic_recommendations ? 'Yes' : 'No'}</p>
-              <p>Recommendations Type: {typeof archetype?.strategic_recommendations || 'Not available'}</p>
-              <p>Has SWOT Data: {archetype?.strengths ? 'Yes' : 'No'}</p>
+              <p>Has SWOT Data: {archetype?.strengths || archetype?.swot_analysis ? 'Yes' : 'No'}</p>
             </div>
             <div className="mt-4 flex justify-center">
               <GnomeImage type="presentation" showDebug={true} />

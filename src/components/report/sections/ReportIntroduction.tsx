@@ -3,6 +3,7 @@ import React from 'react';
 import { format } from 'date-fns';
 import { ArchetypeId } from '@/types/archetype';
 import { getArchetypeColorHex } from '@/data/colors';
+import { Badge } from '@/components/ui/badge';
 
 interface ReportIntroductionProps {
   userData: any;
@@ -13,13 +14,14 @@ const ReportIntroduction = ({
   userData,
   archetypeId = 'a1' as ArchetypeId
 }: ReportIntroductionProps) => {
+  // Get report date and basic user data
   const reportDate = userData?.created_at ? format(new Date(userData.created_at), 'MMMM d, yyyy') : 'N/A';
   const employeeCount = userData?.exact_employee_count || userData?.assessment_result?.exactData?.employeeCount;
   const archetypeColor = archetypeId ? getArchetypeColorHex(archetypeId) : '#00B0F0';
   
-  // Get dynamic archetype data from userData or defaults
-  const archetypeName = userData?.archetype_name || 'Unknown Archetype';
-  const familyName = userData?.family_name || 'Unknown Family';
+  // Get archetype data with better fallbacks
+  const archetypeName = userData?.archetype_name || userData?.assessment_result?.archetype?.name || 'Unknown Archetype';
+  const familyName = userData?.family_name || userData?.assessment_result?.family?.name || 'Unknown Family';
   const archetypeDescription = userData?.short_description || '';
   
   return (
@@ -75,32 +77,31 @@ const ReportIntroduction = ({
         <h2 className="text-xl font-semibold mb-4">About This Report</h2>
         
         <p className="text-gray-700 mb-3">
-          Based on your assessment results, your company most closely matches 
-          <span className="font-semibold"> "{archetypeName}" </span>
+          Based on your assessment results, your company most closely matches <span className="font-semibold">"{archetypeName}"</span>{' '}
           <span 
-            className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
+            className="inline-flex items-center px-2 py-1 rounded text-xs font-medium"
             style={{ backgroundColor: `${archetypeColor}20`, color: archetypeColor }}
           >
             [{archetypeId.toUpperCase()}]
           </span>, which is part of the "{familyName}" family.
         </p>
         
-        <p className="text-gray-700 mb-3">
+        <p className="text-gray-700 mb-4">
           {archetypeDescription}
         </p>
         
-        <p className="text-gray-700 mb-3">
+        <p className="text-gray-700 mb-4">
           This comprehensive deep dive report provides an in-depth analysis of your organization's healthcare archetype, 
           including detailed metrics, strategic recommendations, and actionable insights tailored specifically to {archetypeName}.
         </p>
         
-        <p className="text-gray-700">
+        <p className="text-gray-700 mb-4">
           The report examines key health factors across demographics, utilization patterns, risk factors, 
           cost analysis, care gaps, and disease management. Each section includes comparison data against 
           population averages to provide context for the findings, with special attention to the areas where {archetypeName} typically excel or face challenges.
         </p>
         
-        <div className="mt-4">
+        <div className="mt-5">
           <h3 className="text-lg font-semibold mb-2">How to Use This Report</h3>
           <ul className="list-disc list-inside space-y-1 text-gray-700">
             <li>Review each section for detailed analysis relevant to {archetypeName}</li>

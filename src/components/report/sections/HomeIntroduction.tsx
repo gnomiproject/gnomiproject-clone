@@ -15,7 +15,7 @@ interface HomeIntroductionProps {
 
 const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroductionProps) => {
   // Get key values once to avoid repetition
-  const archetypeId = archetypeData?.id || 'a1';
+  const archetypeId = archetypeData?.id || archetypeData?.archetype_id || 'a1';
   const archetypeName = archetypeData?.name || archetypeData?.archetype_name || 'Unknown Archetype';
   const matchPercentage = userData?.assessment_result?.percentageMatch || 85;
   const userName = userData?.name || 'Healthcare Leader';
@@ -47,6 +47,14 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
     family_name: familyName,
     short_description: shortDescription
   };
+
+  // Debug logging
+  console.log('[HomeIntroduction] Archetype data:', {
+    id: archetypeId,
+    name: archetypeName,
+    family: familyName,
+    description: shortDescription.substring(0, 50) + '...'
+  });
   
   return (
     <Section id="introduction" className="mt-2">
