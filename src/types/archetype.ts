@@ -38,6 +38,16 @@ export interface SwotAnalysis {
   threats: string[] | Json;
 }
 
+// Define a strongly-typed distinctive metric structure
+export interface DistinctiveMetric {
+  metric: string;
+  category: string;
+  archetype_value: number;
+  archetype_average: number;
+  difference: number;
+  significance?: string;
+}
+
 // Analysis table interfaces
 export interface ArchetypeDetailed extends Archetype {
   swot?: SwotAnalysis;
@@ -109,14 +119,7 @@ export interface ArchetypeDetailedData {
   opportunities?: string[] | Json;
   threats?: string[] | Json;
   
-  distinctive_metrics?: Array<{
-    metric: string;
-    category: string;
-    archetype_value: number;
-    archetype_average: number;
-    difference: number;
-    significance?: string;
-  }>;
+  distinctive_metrics?: Array<DistinctiveMetric>;
   strategic_recommendations?: Array<{
     recommendation_number: number;
     title: string;
@@ -130,9 +133,10 @@ export interface ArchetypeDetailedData {
   
   // Add properties for compatibility with level4_deepdive_report_data
   // These are the fields we need from the database tables
-  archetype_id?: string;  // Add this property to fix the type error
-  archetype_name?: string; // Add this property to fix the type error
-  archetype_overview?: string | Json; // Add this property to fix the current error
+  archetype_id?: string;
+  archetype_name?: string;
+  archetype_overview?: string | Json;
+  top_distinctive_metrics?: DistinctiveMetric[] | string;
   
   // New properties from level3_report_data with correct naming
   // Demographics metrics

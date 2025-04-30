@@ -1,6 +1,6 @@
 
 import React, { memo } from 'react';
-import { ArchetypeDetailedData } from '@/types/archetype';
+import { ArchetypeDetailedData, DistinctiveMetric } from '@/types/archetype';
 import SectionTitle from '@/components/shared/SectionTitle';
 import GnomePlaceholder from './introduction/GnomePlaceholder';
 import { Card } from '@/components/ui/card';
@@ -23,7 +23,7 @@ const ArchetypeProfileBase: React.FC<ArchetypeProfileProps> = ({ archetypeData, 
     name: data?.name || data?.archetype_name || 'Unknown',
     hasDescription: !!data?.long_description,
     hasCharacteristics: !!data?.key_characteristics,
-    hasOverview: !!data?.archetype_overview
+    hasTopMetrics: !!data?.top_distinctive_metrics
   });
 
   if (!data) {
@@ -44,13 +44,24 @@ const ArchetypeProfileBase: React.FC<ArchetypeProfileProps> = ({ archetypeData, 
   const archetypeId = data.id || data.archetype_id || '';
   const archetypeBadge = archetypeId.includes('_') ? archetypeId.split('_')[0] : archetypeId;
   
-  // Get the archetype overview if available
-  let archetypeOverview = null;
-  if (data.archetype_overview) {
-    archetypeOverview = typeof data.archetype_overview === 'string' 
-      ? data.archetype_overview 
-      : JSON.stringify(data.archetype_overview);
-  }
+  // Parse top distinctive metrics if available
+  const parseTopDistinctiveMetrics = (): DistinctiveMetric[] => {
+    if (!data.top_distinctive_metrics) return [];
+    
+    try {
+      if (typeof data.top_distinctive_metrics === 'string') {
+        return JSON.parse(data.top_distinctive_metrics);
+      } else {
+        return data.top_distinctive_metrics as DistinctiveMetric[];
+      }
+    } catch (error) {
+      console.error('Error parsing top_distinctive_metrics:', error);
+      return [];
+    }
+  };
+  
+  const topMetrics = parseTopDistinctiveMetrics();
+  console.log('[ArchetypeProfile] Parsed top metrics:', topMetrics);
   
   return (
     <div className="space-y-6">
@@ -93,11 +104,27 @@ const ArchetypeProfileBase: React.FC<ArchetypeProfileProps> = ({ archetypeData, 
               <p className="text-gray-600">{data.long_description || 'No detailed description available.'}</p>
             </div>
             
-            {/* Archetype Overview from level4 table */}
-            {archetypeOverview && (
+            {/* Top Distinctive Metrics - Replacing Archetype Overview */}
+            {topMetrics.length > 0 && (
               <div>
-                <h4 className="text-lg font-medium mb-2">Archetype Overview</h4>
-                <p className="text-gray-600 whitespace-pre-line">{archetypeOverview}</p>
+                <h4 className="text-lg font-medium mb-2">Key Distinctive Metrics</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {topMetrics.map((metric, index) => (
+                    <div key={index} className="border rounded-lg p-3">
+                      <div className="flex justify-between items-start mb-2">
+                        <h5 className="font-medium text-gray-900">{metric.metric}</h5>
+                        <span className="text-xs px-2 py-0.5 rounded bg-gray-100 text-gray-700">{metric.category}</span>
+                      </div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span className="text-gray-500">Value: {metric.archetype_value.toLocaleString()}</span>
+                        <span className="text-gray-500">Avg: {metric.archetype_average.toLocaleString()}</span>
+                      </div>
+                      <div className={`text-sm font-medium ${metric.difference > 0 ? 'text-blue-600' : 'text-amber-600'}`}>
+                        {metric.difference > 0 ? '+' : ''}{metric.difference.toFixed(1)}% {metric.significance && `(${metric.significance})`}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
             

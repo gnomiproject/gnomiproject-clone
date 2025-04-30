@@ -1,6 +1,6 @@
 
 import React, { memo } from 'react';
-import { ArchetypeDetailedData } from '@/types/archetype';
+import { ArchetypeDetailedData, DistinctiveMetric } from '@/types/archetype';
 import SectionTitle from '@/components/shared/SectionTitle';
 import { Section } from '@/components/shared/Section';
 import GnomePlaceholder from './introduction/GnomePlaceholder';
@@ -38,13 +38,24 @@ const ArchetypeProfileSectionBase: React.FC<ArchetypeProfileSectionProps> = ({ a
   const archetypeId = archetypeData.id || archetypeData.archetype_id || '';
   const archetypeBadge = archetypeId.includes('_') ? archetypeId.split('_')[0] : archetypeId;
   
-  // Get the archetype overview if available
-  let archetypeOverview = null;
-  if (archetypeData.archetype_overview) {
-    archetypeOverview = typeof archetypeData.archetype_overview === 'string' 
-      ? archetypeData.archetype_overview 
-      : JSON.stringify(archetypeData.archetype_overview);
-  }
+  // Parse top distinctive metrics if available
+  const parseTopDistinctiveMetrics = (): DistinctiveMetric[] => {
+    if (!archetypeData.top_distinctive_metrics) return [];
+    
+    try {
+      if (typeof archetypeData.top_distinctive_metrics === 'string') {
+        return JSON.parse(archetypeData.top_distinctive_metrics);
+      } else {
+        return archetypeData.top_distinctive_metrics as DistinctiveMetric[];
+      }
+    } catch (error) {
+      console.error('Error parsing top_distinctive_metrics:', error);
+      return [];
+    }
+  };
+  
+  const topMetrics = parseTopDistinctiveMetrics();
+  console.log('[ArchetypeProfileSection] Parsed top metrics:', topMetrics);
 
   return (
     <Section id="archetype-profile">
@@ -83,12 +94,39 @@ const ArchetypeProfileSectionBase: React.FC<ArchetypeProfileSectionProps> = ({ a
           archetypeBadge={archetypeBadge}
         />
         
-        {/* Archetype Overview */}
-        {archetypeOverview && (
+        {/* Top Distinctive Metrics - Replacing Archetype Overview */}
+        {topMetrics.length > 0 && (
           <Card className="p-6">
-            <h3 className="text-xl font-semibold mb-4">Archetype Overview</h3>
-            <div className="prose prose-gray max-w-none">
-              <p className="whitespace-pre-line">{archetypeOverview}</p>
+            <h3 className="text-xl font-semibold mb-4">Key Distinctive Metrics</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {topMetrics.map((metric, index) => (
+                <div key={index} className="border rounded-lg p-4">
+                  <div className="flex justify-between items-start mb-2">
+                    <h4 className="font-medium text-gray-900">{metric.metric}</h4>
+                    <span className="text-xs px-2 py-1 rounded bg-gray-100 text-gray-700">{metric.category}</span>
+                  </div>
+                  <div className="flex justify-between mb-1">
+                    <span className="text-sm text-gray-500">Archetype value</span>
+                    <span className="font-semibold">{metric.archetype_value.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between mb-2">
+                    <span className="text-sm text-gray-500">Average</span>
+                    <span>{metric.archetype_average.toLocaleString()}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div 
+                      className={`text-sm font-medium ${metric.difference > 0 ? 'text-blue-600' : 'text-amber-600'}`}
+                    >
+                      {metric.difference > 0 ? '+' : ''}{metric.difference.toFixed(1)}%
+                    </div>
+                    {metric.significance && (
+                      <span className="text-xs bg-gray-100 px-2 py-1 rounded text-gray-700">
+                        {metric.significance}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
           </Card>
         )}
