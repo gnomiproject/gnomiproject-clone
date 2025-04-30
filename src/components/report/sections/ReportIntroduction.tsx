@@ -17,6 +17,11 @@ const ReportIntroduction = ({
   const employeeCount = userData?.exact_employee_count || userData?.assessment_result?.exactData?.employeeCount;
   const archetypeColor = archetypeId ? getArchetypeColorHex(archetypeId) : '#00B0F0';
   
+  // Get dynamic archetype data from userData or defaults
+  const archetypeName = userData?.archetype_name || 'Unknown Archetype';
+  const familyName = userData?.family_name || 'Unknown Family';
+  const archetypeDescription = userData?.short_description || '';
+  
   return (
     <div className="mb-12 print:mb-8">
       <div className="print:hidden">
@@ -70,23 +75,38 @@ const ReportIntroduction = ({
         <h2 className="text-xl font-semibold mb-4">About This Report</h2>
         
         <p className="text-gray-700 mb-3">
+          Based on your assessment results, your company most closely matches 
+          <span className="font-semibold"> "{archetypeName}" </span>
+          <span 
+            className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
+            style={{ backgroundColor: `${archetypeColor}20`, color: archetypeColor }}
+          >
+            [{archetypeId.toUpperCase()}]
+          </span>, which is part of the "{familyName}" family.
+        </p>
+        
+        <p className="text-gray-700 mb-3">
+          {archetypeDescription}
+        </p>
+        
+        <p className="text-gray-700 mb-3">
           This comprehensive deep dive report provides an in-depth analysis of your organization's healthcare archetype, 
-          including detailed metrics, strategic recommendations, and actionable insights.
+          including detailed metrics, strategic recommendations, and actionable insights tailored specifically to {archetypeName}.
         </p>
         
         <p className="text-gray-700">
           The report examines key health factors across demographics, utilization patterns, risk factors, 
           cost analysis, care gaps, and disease management. Each section includes comparison data against 
-          population averages to provide context for the findings.
+          population averages to provide context for the findings, with special attention to the areas where {archetypeName} typically excel or face challenges.
         </p>
         
         <div className="mt-4">
           <h3 className="text-lg font-semibold mb-2">How to Use This Report</h3>
           <ul className="list-disc list-inside space-y-1 text-gray-700">
-            <li>Review each section for detailed analysis</li>
+            <li>Review each section for detailed analysis relevant to {archetypeName}</li>
             <li>Use the navigation sidebar to jump between sections</li>
-            <li>Focus on the Strategic Recommendations for actionable steps</li>
-            <li>Use the SWOT Analysis to understand strengths and opportunities</li>
+            <li>Focus on the Strategic Recommendations for actionable steps designed for your archetype</li>
+            <li>Use the SWOT Analysis to understand strengths and opportunities unique to your archetype classification</li>
           </ul>
         </div>
       </div>

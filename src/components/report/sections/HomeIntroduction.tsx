@@ -16,9 +16,10 @@ interface HomeIntroductionProps {
 const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroductionProps) => {
   // Get key values once to avoid repetition
   const archetypeId = archetypeData?.id || 'a1';
-  const archetypeName = archetypeData?.name || 'Unknown Archetype';
+  const archetypeName = archetypeData?.name || archetypeData?.archetype_name || 'Unknown Archetype';
   const matchPercentage = userData?.assessment_result?.percentageMatch || 85;
   const userName = userData?.name || 'Healthcare Leader';
+  const familyName = archetypeData?.family_name || archetypeData?.familyName || 'Unknown Family';
   
   // Get secondary archetype if available
   const secondaryArchetype = userData?.assessment_result?.secondaryArchetype?.name || 
@@ -39,6 +40,14 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
   // Normalize characteristics array
   const characteristics = normalizeSwotData(rawCharacteristics);
   
+  // Prepare enhanced userData for ReportIntroduction with archetype details
+  const enhancedUserData = {
+    ...userData,
+    archetype_name: archetypeName,
+    family_name: familyName,
+    short_description: shortDescription
+  };
+  
   return (
     <Section id="introduction" className="mt-2">
       <SectionTitle 
@@ -47,7 +56,10 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
       />
       
       {/* Main report introduction */}
-      <ReportIntroduction userData={userData} archetypeId={archetypeId} />
+      <ReportIntroduction 
+        userData={enhancedUserData} 
+        archetypeId={archetypeId} 
+      />
       
       {/* Welcome Card */}
       <div className="mt-8">
