@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { format } from 'date-fns';
 import { ArchetypeId } from '@/types/archetype';
@@ -41,6 +40,7 @@ const ReportIntroduction = ({
 
   return (
     <div className="mb-12 print:mb-8">
+      {/* Header section */}
       <div className="print:hidden">
         <div className="flex justify-between items-start mb-6">
           <div>
@@ -77,7 +77,7 @@ const ReportIntroduction = ({
         ></div>
       </div>
       
-      {/* For print version */}
+      {/* Print version header */}
       <div className="hidden print:block mb-4">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold">Deep Dive Report</h1>
@@ -88,6 +88,20 @@ const ReportIntroduction = ({
         <div className="h-0.5 w-full bg-gray-300 mt-2"></div>
       </div>
       
+      {/* Welcome section */}
+      <div className="bg-gradient-to-r from-blue-50 to-teal-50 border border-teal-100 rounded-lg p-6 mb-6">
+        <h2 className="text-xl font-semibold text-gray-800 mb-3">Welcome to Your Healthcare Journey</h2>
+        
+        <p className="text-gray-700 mb-3">
+          Thank you for completing the healthcare assessment and taking this important step toward optimizing your organization's healthcare strategy. Your commitment to better understanding your healthcare profile demonstrates forward-thinking leadership.
+        </p>
+        
+        <p className="text-gray-700">
+          We've created this personalized deep dive report specifically for you, using your assessment responses to provide targeted insights and recommendations. We're excited to partner with you on your journey toward more effective, efficient healthcare for your team members.
+        </p>
+      </div>
+      
+      {/* About This Report section */}
       <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
         <h2 className="text-xl font-semibold mb-4">About This Report</h2>
         
