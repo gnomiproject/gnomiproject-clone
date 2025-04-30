@@ -2,6 +2,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useCallback } from 'react';
+import { ArchetypeId } from '@/types/archetype';
 
 /**
  * Hook to fetch basic archetype data with efficient caching
@@ -96,12 +97,25 @@ export const useArchetypeBasics = () => {
     return families?.find((family) => family.id === id);
   }, [families]);
 
+  // Add the missing functions
+  const getArchetypeById = useCallback((id: ArchetypeId) => {
+    return archetypes?.find((archetype) => archetype.id === id);
+  }, [archetypes]);
+
+  const getArchetypesByFamily = useCallback((familyId: 'a' | 'b' | 'c') => {
+    return archetypes?.filter((archetype) => archetype.family_id === familyId) || [];
+  }, [archetypes]);
+
   return {
     archetypes,
     families,
     isLoading: isLoading || familiesLoading,
     error,
-    getFamilyById
+    getFamilyById,
+    // Add these properties to fix the TypeScript errors
+    getArchetypeById,
+    getArchetypesByFamily,
+    allArchetypes: archetypes || []
   };
 };
 
