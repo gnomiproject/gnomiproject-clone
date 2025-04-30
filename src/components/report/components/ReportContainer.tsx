@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, Suspense, lazy, useCallback, useEffect } from 'react';
 import LeftNavigation from '../navigation/LeftNavigation';
 import PrintButton from './PrintButton';
@@ -181,6 +182,7 @@ const ReportContainer: React.FC<ReportContainerProps> = ({
             setShowDebugData={setShowDebugData}
             setShowDiagnostics={setShowDiagnostics}
             handleRefreshData={handleRefreshData}
+            isDebugMode={isDebugMode}
           />
         </Suspense>
       </div>
