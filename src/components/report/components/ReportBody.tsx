@@ -1,4 +1,3 @@
-
 import React, { lazy, Suspense, useEffect, useState } from 'react';
 import { Section } from '@/components/shared/Section';
 import ReportDebugTools from '../ReportDebugTools';
@@ -12,6 +11,7 @@ const LazyDiseaseManagement = lazy(() => import('../sections/DiseaseManagement')
 const LazyCareGaps = lazy(() => import('../sections/CareGaps'));
 const LazyRiskFactors = lazy(() => import('../sections/RiskFactors'));
 const LazyCostAnalysis = lazy(() => import('../sections/CostAnalysis'));
+const LazySwotAnalysis = lazy(() => import('../sections/SwotAnalysis'));
 const LazyStrategicRecommendationsSection = lazy(() => import('../sections/strategic-recommendations/StrategicRecommendationsSection'));
 const LazyContactSection = lazy(() => import('../sections/ContactSection'));
 
@@ -125,7 +125,7 @@ const ReportBody: React.FC<ReportBodyProps> = ({
 
   return (
     <div className="max-w-5xl mx-auto px-4 print:px-8">
-      {/* Sections in the new reordered sequence */}
+      {/* Sections in the reordered sequence */}
       <Section id="introduction">
         <Suspense fallback={<SectionLoading />}>
           <LazyReportIntroduction userData={userData} />
@@ -211,6 +211,18 @@ const ReportBody: React.FC<ReportBodyProps> = ({
               <SectionError message={sectionErrors['cost-analysis']} />
             ) : (
               <LazyCostAnalysis reportData={reportData} averageData={averageData} />
+            )}
+          </Suspense>
+        ) : <SectionLoading />}
+      </Section>
+
+      <Section id="swot-analysis">
+        {shouldRenderSection('swot-analysis') ? (
+          <Suspense fallback={<SectionLoading />}>
+            {sectionErrors['swot-analysis'] ? (
+              <SectionError message={sectionErrors['swot-analysis']} />
+            ) : (
+              <LazySwotAnalysis reportData={reportData} archetypeData={reportData} />
             )}
           </Suspense>
         ) : <SectionLoading />}

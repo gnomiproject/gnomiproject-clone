@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, Suspense, lazy, useCallback, useEffect } from 'react';
 import LeftNavigation from '../navigation/LeftNavigation';
 import PrintButton from './PrintButton';
@@ -16,6 +15,7 @@ const REPORT_SECTIONS = [
   { id: 'care-gaps', name: 'Care Gaps' },
   { id: 'risk-factors', name: 'Risk Factors' },
   { id: 'cost-analysis', name: 'Cost Analysis' },
+  { id: 'swot-analysis', name: 'SWOT Analysis' },
   { id: 'recommendations', name: 'Recommendations' },
   { id: 'contact', name: 'Contact' },
 ];
@@ -174,14 +174,13 @@ const ReportContainer: React.FC<ReportContainerProps> = ({
             reportData={reportData}
             userData={userData}
             averageData={averageData}
-            isDebugMode={isDebugMode}
+            isAdminView={isAdminView}
+            debugInfo={debugInfo}
             showDebugData={showDebugData}
             showDiagnostics={showDiagnostics}
             setShowDebugData={setShowDebugData}
             setShowDiagnostics={setShowDiagnostics}
             handleRefreshData={handleRefreshData}
-            isAdminView={isAdminView}
-            debugInfo={debugInfo}
           />
         </Suspense>
       </div>

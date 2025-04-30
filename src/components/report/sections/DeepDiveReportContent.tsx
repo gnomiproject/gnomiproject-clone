@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import { Section } from '@/components/shared/Section';
@@ -12,6 +11,7 @@ import DiseaseManagement from './DiseaseManagement';
 import CareGaps from './CareGaps';
 import RiskFactors from './RiskFactors';
 import CostAnalysis from './CostAnalysis';
+import SwotAnalysis from './SwotAnalysis';
 import StrategicRecommendationsSection from './strategic-recommendations/StrategicRecommendationsSection';
 import ContactSection from './ContactSection';
 
@@ -143,6 +143,14 @@ const DeepDiveReportContent = ({
         <Section id="cost-analysis">
           <SectionTitle title="Cost Analysis" />
           <CostAnalysis reportData={safeArchetype} averageData={averageData} />
+        </Section>
+      </ErrorBoundary>
+      
+      {/* SWOT Analysis Section */}
+      <ErrorBoundary>
+        <Section id="swot-analysis">
+          <SectionTitle title="SWOT Analysis" />
+          <SwotAnalysis reportData={safeArchetype} />
         </Section>
       </ErrorBoundary>
       
