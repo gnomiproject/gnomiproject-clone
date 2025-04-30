@@ -1,4 +1,3 @@
-
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
@@ -6,6 +5,10 @@ import './index.css'
 import './styles/customColors.css'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from './lib/queryClient'
+import { setupConsoleFilter } from './utils/consoleFilter'
+
+// Set up console filter to suppress specific warnings
+setupConsoleFilter();
 
 // Add font loading performance monitoring
 document.fonts.ready.then(() => {
