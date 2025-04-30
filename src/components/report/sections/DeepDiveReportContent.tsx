@@ -39,7 +39,8 @@ const DeepDiveReportContent = ({
         organization: userData.organization,
         accessToken: userData.access_token ? `${userData.access_token.substring(0, 5)}...` : 'None',
         lastAccessed: userData.last_accessed
-      } : 'No user data'
+      } : 'No user data',
+      fullArchetypeObject: archetype ? 'Present' : 'Missing'
     });
   }, [archetype, archetypeId, archetypeName, familyName, shortDescription, userData]);
 
@@ -54,6 +55,7 @@ const DeepDiveReportContent = ({
   safeArchetype.family_name = familyName;
   safeArchetype.short_description = shortDescription;
   
+  // Ensure we're passing the complete archetype data to all components
   return (
     <div className="container mx-auto p-6">
       <ErrorBoundary>

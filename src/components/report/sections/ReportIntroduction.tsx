@@ -89,15 +89,18 @@ const ReportIntroduction = ({
       <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
         <h2 className="text-xl font-semibold mb-4">About This Report</h2>
         
-        <p className="text-gray-700 mb-3">
-          Based on your assessment results, your company most closely matches <span className="font-semibold">"{displayArchetypeName}"</span>{' '}
-          <span 
-            className="inline-flex items-center px-2 py-1 rounded text-xs font-medium"
-            style={{ backgroundColor: `${archetypeColor}20`, color: archetypeColor }}
-          >
-            [{archetypeId.toUpperCase()}]
-          </span>, which is part of the "{displayFamilyName}" family.
-        </p>
+        <div className="mb-4">
+          <p className="text-gray-700 mb-3">
+            Based on your assessment results, your company most closely matches{' '}
+            <span className="font-semibold">{displayArchetypeName}</span>{' '}
+            <span 
+              className="inline-flex items-center px-2 py-1 rounded text-xs font-medium"
+              style={{ backgroundColor: `${archetypeColor}20`, color: archetypeColor }}
+            >
+              [{archetypeId.toUpperCase()}]
+            </span>, which is part of the "{displayFamilyName}" family.
+          </p>
+        </div>
         
         {displayDescription && (
           <p className="text-gray-700 mb-4">
