@@ -7,6 +7,23 @@ import './styles/customColors.css'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from './lib/queryClient'
 
+// Add font loading performance monitoring
+document.fonts.ready.then(() => {
+  console.log('Fonts have finished loading');
+}).catch(err => {
+  console.warn('Font loading error:', err);
+  // Continue with system fonts if custom fonts fail
+});
+
+// Add specific font loading error handling for Typekit
+const typekitScript = document.querySelector('link[href*="typekit"]');
+if (typekitScript) {
+  typekitScript.addEventListener('error', () => {
+    console.warn('Typekit font CSS failed to load, falling back to system fonts');
+    document.documentElement.classList.add('fonts-failed');
+  });
+}
+
 // Add comprehensive logging to track application initialization in different environments
 console.log('Main.tsx: Application initializing', {
   environment: import.meta.env.MODE,
