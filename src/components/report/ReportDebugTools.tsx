@@ -23,7 +23,7 @@ const ReportDebugTools: React.FC<ReportDebugToolsProps> = ({
   debugInfo
 }) => {
   return (
-    <div className="fixed right-6 top-24 z-50 flex gap-2">
+    <div className="fixed right-6 top-24 z-50 flex gap-2 print:hidden">
       <Button 
         variant="outline"
         size="sm"

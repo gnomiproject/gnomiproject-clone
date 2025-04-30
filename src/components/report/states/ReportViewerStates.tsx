@@ -38,7 +38,7 @@ export const DiagnosticsStateHandler: React.FC<DiagnosticsStateProps> = ({
   if (showDiagnostics) {
     return (
       <>
-        <div className="fixed right-6 top-24 z-50 flex gap-2">
+        <div className="fixed right-6 top-24 z-50 flex gap-2 print:hidden">
           <button 
             className="bg-white shadow-md hover:bg-gray-100 px-4 py-2 rounded text-sm font-medium flex items-center"
             onClick={toggleDiagnostics}
@@ -149,7 +149,7 @@ export const DebugStateHandler: React.FC<DebugStateProps> = ({
   if (showDebugData && !isInsightsReport) {
     return (
       <>
-        <div className="fixed right-6 top-24 z-50 flex gap-2">
+        <div className="fixed right-6 top-24 z-50 flex gap-2 print:hidden">
           <button 
             className="bg-white shadow-md hover:bg-gray-100 px-4 py-2 rounded text-sm font-medium flex items-center"
             onClick={toggleDebugData}

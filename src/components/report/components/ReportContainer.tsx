@@ -187,8 +187,8 @@ const ReportContainer: React.FC<ReportContainerProps> = ({
         </Suspense>
       </div>
       
-      {/* Debug Element - always present but only visible in debug mode */}
-      <div className={`fixed bottom-4 right-4 z-50 ${isDebugMode ? 'block' : 'hidden'}`}>
+      {/* Debug Element - always present but only visible in debug mode and never in print */}
+      <div className={`fixed bottom-4 right-4 z-50 print:hidden ${isDebugMode ? 'block' : 'hidden'}`}>
         <button
           onClick={() => console.log("Debug Data:", { reportData, userData, averageData, activeSectionId })}
           className="bg-gray-800 text-white px-3 py-1 rounded text-xs shadow-lg"
