@@ -24,23 +24,16 @@ const ReportIntroduction = ({
   const employeeCount = userData?.exact_employee_count || userData?.assessment_result?.exactData?.employeeCount;
   const archetypeColor = archetypeId ? getArchetypeColorHex(archetypeId) : '#00B0F0';
   
-  // Get archetype data with better fallbacks
-  const displayArchetypeName = archetypeName || userData?.archetype_name || userData?.assessment_result?.archetype?.name || 'Unknown Archetype';
-  const displayFamilyName = familyName || userData?.family_name || userData?.assessment_result?.family?.name || 'Unknown Family';
-  const displayDescription = shortDescription || userData?.short_description || '';
-  
+  // Keep logger for debugging
   console.log('[ReportIntroduction] Rendering with:', {
     archetypeId,
-    archetypeName: displayArchetypeName,
-    familyName: displayFamilyName,
-    color: archetypeColor,
-    rawArchetypeName: archetypeName,
-    rawFamilyName: familyName
+    archetypeName,
+    familyName,
+    color: archetypeColor
   });
 
   return (
     <div className="mb-12 print:mb-8">
-      {/* Header section */}
       <div className="print:hidden">
         <div className="flex justify-between items-start mb-6">
           <div>
@@ -77,7 +70,7 @@ const ReportIntroduction = ({
         ></div>
       </div>
       
-      {/* Print version header */}
+      {/* For print version */}
       <div className="hidden print:block mb-4">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold">Deep Dive Report</h1>
@@ -88,55 +81,22 @@ const ReportIntroduction = ({
         <div className="h-0.5 w-full bg-gray-300 mt-2"></div>
       </div>
       
-      {/* Welcome section - NO DATA DEPENDENCIES */}
-      <div className="bg-gradient-to-r from-blue-50 to-teal-50 border border-teal-100 rounded-lg p-6 mb-6">
-        <h2 className="text-xl font-semibold text-gray-800 mb-3">Welcome to Your Healthcare Insights</h2>
-        
-        <p className="text-gray-700 mb-3">
-          Thank you for completing the healthcare assessment. Your commitment to understanding and optimizing your organization's healthcare strategy demonstrates forward-thinking leadership that can make a meaningful difference for your team members.
-        </p>
-        
-        <p className="text-gray-700 mb-3">
-          This personalized deep dive report has been specially created to provide you with valuable insights based on your assessment responses. We've analyzed key metrics and patterns to offer you a comprehensive view of your organization's healthcare profile.
-        </p>
-        
-        <p className="text-gray-700">
-          In the following pages, you'll discover targeted recommendations and actionable strategies designed to help you make informed decisions. We're excited to partner with you on your journey toward more effective, efficient healthcare solutions.
-        </p>
-      </div>
-      
-      {/* About This Report section */}
       <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
         <h2 className="text-xl font-semibold mb-4">About This Report</h2>
         
-        <div className="mb-4">
-          <p className="text-gray-700 mb-3">
-            Based on your assessment results, your company most closely matches{' '}
-            <span className="font-semibold">{displayArchetypeName}</span>{' '}
-            <span 
-              className="inline-flex items-center px-2 py-1 rounded text-xs font-medium"
-              style={{ backgroundColor: `${archetypeColor}20`, color: archetypeColor }}
-            >
-              [{archetypeId.toUpperCase()}]
-            </span>, which is part of the "{displayFamilyName}" family.
-          </p>
-        </div>
-        
-        {displayDescription && (
-          <p className="text-gray-700 mb-4">
-            {displayDescription}
-          </p>
-        )}
+        <p className="text-gray-700 mb-4">
+          Welcome! Thank you for completing the healthcare assessment. This personalized report has been created based on your responses to provide valuable insights that can help optimize your organization's healthcare strategy. We're excited to partner with you on your journey toward better healthcare outcomes for your entire team.
+        </p>
         
         <p className="text-gray-700 mb-4">
-          This comprehensive deep dive report provides an in-depth analysis of your organization's healthcare archetype, 
-          including detailed metrics, strategic recommendations, and actionable insights tailored specifically to your profile.
+          This comprehensive deep dive report provides an in-depth analysis of your organization's healthcare profile, 
+          including detailed metrics, strategic recommendations, and actionable insights tailored to your specific needs.
         </p>
         
         <p className="text-gray-700 mb-4">
           The report examines key health factors across demographics, utilization patterns, risk factors, 
           cost analysis, care gaps, and disease management. Each section includes comparison data against 
-          population averages to provide context for the findings, with special attention to the areas where your organization may excel or face challenges.
+          population averages to provide context for the findings, with special attention to areas where your organization may excel or face challenges.
         </p>
         
         <div className="mt-5">
