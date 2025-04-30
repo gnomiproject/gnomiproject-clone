@@ -2,6 +2,8 @@
 import React from 'react';
 import { UseFormReturn } from "react-hook-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { AlertCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import DeepDiveFormSection, { FormData } from './DeepDiveFormSection';
 import DeepDiveBenefits from './DeepDiveBenefits';
 import RetakeAssessmentLink from './RetakeAssessmentLink';
@@ -14,6 +16,7 @@ interface FormLayoutProps {
   submittedEmail: string;
   isSubmitting: boolean;
   accessUrl?: string;
+  formError?: string | null;
   onRetakeAssessment: () => void;
   onResetForm: () => void;
   onSubmit: (data: FormData) => Promise<void>;
@@ -26,6 +29,7 @@ const FormLayout = ({
   submittedEmail,
   isSubmitting,
   accessUrl = '',
+  formError,
   onRetakeAssessment,
   onResetForm,
   onSubmit
@@ -46,6 +50,13 @@ const FormLayout = ({
         </CardHeader>
         
         <CardContent>
+          {formError && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{formError}</AlertDescription>
+            </Alert>
+          )}
+          
           {submitSuccessful ? (
             <DeepDiveSuccessState 
               email={submittedEmail} 

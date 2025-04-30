@@ -1,109 +1,108 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Archetype, ArchetypeFamily, ArchetypeId, FamilyId } from '@/types/archetype';
+import { useCallback } from 'react';
 
+/**
+ * Hook to fetch basic archetype data with efficient caching
+ */
 export const useArchetypeBasics = () => {
-  // Always call the same hooks in the same order
-  const archetypesQuery = useQuery({
+  // Use a longer cache time to prevent unnecessary refetching
+  const { data: archetypes, isLoading, error } = useQuery({
     queryKey: ['archetype-basics'],
     queryFn: async () => {
       console.log('[RLS Test] Fetching archetype basics...');
       
-      const { data: archetypes, error } = await supabase
+      // First try to retrieve from local storage cache
+      const cachedData = sessionStorage.getItem('archetypes_cache');
+      if (cachedData) {
+        try {
+          const parsedData = JSON.parse(cachedData);
+          const cacheTimestamp = parsedData.timestamp;
+          
+          // Use cache if it's less than 1 hour old
+          if (Date.now() - cacheTimestamp < 3600000) {
+            console.log('[Performance] Using cached archetype data');
+            return parsedData.data;
+          }
+        } catch (e) {
+          console.warn('Cache parsing error:', e);
+        }
+      }
+      
+      // If no valid cache, fetch from Supabase
+      const { data, error } = await supabase
         .from('Core_Archetype_Overview')
         .select('*');
-
-      if (error) {
-        console.error('[RLS Test] Error fetching Core_Archetype_Overview:', error);
-        throw error;
+      
+      if (error) throw error;
+      
+      if (data) {
+        console.log('[RLS Test] Successfully fetched archetypes, count:', data.length);
+        
+        // Cache the fresh data
+        sessionStorage.setItem('archetypes_cache', JSON.stringify({
+          data,
+          timestamp: Date.now()
+        }));
       }
-
-      console.log('[RLS Test] Successfully fetched archetypes, count:', archetypes?.length || 0);
-
-      // Transform data to match our types
-      return archetypes.map((archetype): Archetype => ({
-        id: archetype.id as ArchetypeId,
-        name: archetype.name,
-        family_id: archetype.family_id as FamilyId,
-        short_description: archetype.short_description,
-        long_description: archetype.long_description,
-        hex_color: archetype.hex_color,
-        key_characteristics: archetype.key_characteristics ? 
-          (Array.isArray(archetype.key_characteristics) 
-            ? archetype.key_characteristics.map(item => String(item))
-            : typeof archetype.key_characteristics === 'string'
-              ? archetype.key_characteristics.split('\n')
-              : []) 
-          : [],
-        industries: archetype.industries
-      }));
-    }
+      
+      return data || [];
+    },
+    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
+    gcTime: 10 * 60 * 1000,   // Keep unused data for 10 minutes
   });
 
-  const familiesQuery = useQuery({
+  const { data: families, isLoading: familiesLoading } = useQuery({
     queryKey: ['family-basics'],
     queryFn: async () => {
       console.log('[RLS Test] Fetching family basics...');
       
-      const { data: families, error } = await supabase
+      // Try cache first
+      const cachedData = sessionStorage.getItem('families_cache');
+      if (cachedData) {
+        try {
+          const parsedData = JSON.parse(cachedData);
+          if (Date.now() - parsedData.timestamp < 3600000) {
+            console.log('[Performance] Using cached family data');
+            return parsedData.data;
+          }
+        } catch (e) {
+          console.warn('Cache parsing error:', e);
+        }
+      }
+      
+      const { data, error } = await supabase
         .from('Core_Archetype_Families')
         .select('*');
-
-      if (error) {
-        console.error('[RLS Test] Error fetching Core_Archetype_Families:', error);
-        throw error;
+      
+      if (error) throw error;
+      
+      if (data) {
+        console.log('[RLS Test] Successfully fetched families, count:', data.length);
+        sessionStorage.setItem('families_cache', JSON.stringify({
+          data,
+          timestamp: Date.now()
+        }));
       }
-
-      console.log('[RLS Test] Successfully fetched families, count:', families?.length || 0);
-
-      return families.map((family): ArchetypeFamily => ({
-        id: family.id as FamilyId,
-        name: family.name,
-        short_description: family.short_description || '',
-        hex_color: family.hex_color,
-        common_traits: Array.isArray(family.common_traits) 
-          ? family.common_traits.map(item => String(item))
-          : [],
-        industries: family.industries,
-        long_description: family.long_description,
-        // Add compatibility with component prop expectations
-        description: family.short_description || family.long_description || '',
-        commonTraits: Array.isArray(family.common_traits) 
-          ? family.common_traits.map(item => String(item))
-          : []
-      }));
-    }
+      
+      return data || [];
+    },
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 
-  const archetypeData = archetypesQuery.data || [];
-  const familyData = familiesQuery.data || [];
-  const error = archetypesQuery.error || familiesQuery.error;
-  const isLoading = archetypesQuery.isLoading || familiesQuery.isLoading;
-
-  // Helper function to get archetype by ID
-  const getArchetypeById = (id: ArchetypeId) => {
-    return archetypeData.find(archetype => archetype.id === id) || null;
-  };
-
-  // Helper function to get archetypes by family
-  const getArchetypesByFamily = (familyId: string) => {
-    return archetypeData.filter(archetype => archetype.family_id === familyId) || [];
-  };
-
-  // Helper function to get family by ID
-  const getFamilyById = (id: FamilyId) => {
-    return familyData.find(family => family.id === id) || null;
-  };
+  const getFamilyById = useCallback((id: 'a' | 'b' | 'c') => {
+    return families?.find((family) => family.id === id);
+  }, [families]);
 
   return {
-    archetypes: archetypeData,
-    families: familyData,
-    getArchetypeById,
-    getArchetypesByFamily,
-    getFamilyById,
-    isLoading,
+    archetypes,
+    families,
+    isLoading: isLoading || familiesLoading,
     error,
-    // Add for backward compatibility with useArchetypes hook
-    allArchetypes: archetypeData
+    getFamilyById
   };
 };
+
+export default useArchetypeBasics;

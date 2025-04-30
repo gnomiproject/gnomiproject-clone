@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { ArchetypeId } from '@/types/archetype';
-import DeepDiveFormSection, { FormSchema, FormData } from './DeepDiveFormSection';
+import { FormSchema, FormData } from './DeepDiveFormSection';
 import FormLayout from './FormLayout';
 
 // Add Google Analytics gtag to the Window interface
@@ -39,6 +39,7 @@ const DeepDiveFormContainer = ({
   const [submitSuccessful, setSubmitSuccessful] = useState(false);
   const [submittedEmail, setSubmittedEmail] = useState('');
   const [accessUrl, setAccessUrl] = useState('');
+  const [formError, setFormError] = useState<string | null>(null);
   const navigate = useNavigate();
   
   // Extended debug logging to trace the data flow
@@ -49,7 +50,6 @@ const DeepDiveFormContainer = ({
       assessmentResultKeys: assessmentResult ? Object.keys(assessmentResult) : null,
       hasExactData: assessmentResult?.exactData ? 'Yes' : 'No',
       exactEmployeeCount: assessmentResult?.exactData?.employeeCount,
-      fullAssessmentResult: assessmentResult ? JSON.stringify(assessmentResult) : null
     });
   }, [assessmentResult, archetypeId]);
   
@@ -96,6 +96,7 @@ const DeepDiveFormContainer = ({
     setSubmitSuccessful(false);
     setSubmittedEmail('');
     setAccessUrl('');
+    setFormError(null);
     
     // Reset form fields
     form.reset({
@@ -112,11 +113,9 @@ const DeepDiveFormContainer = ({
   const handleSubmit = async (data: FormData) => {
     console.log('[DeepDiveFormContainer] Form submitted with data:', data);
     setIsSubmitting(true);
+    setFormError(null);
     
     try {
-      console.log('[DeepDiveFormContainer] Submitting form with data:', data);
-      console.log('[DeepDiveFormContainer] Assessment result before submission:', assessmentResult);
-      
       // Generate a unique ID for the report request
       const reportId = uuidv4();
       
@@ -137,14 +136,10 @@ const DeepDiveFormContainer = ({
         }
       }
       
-      console.log('[DeepDiveFormContainer] Final exact employee count for submission:', exactEmployeeCount);
-      
       // Generate access token and construct URL
       const accessToken = uuidv4();
       const generatedUrl = `${window.location.origin}/report/${archetypeId}/${accessToken}`;
       setAccessUrl(generatedUrl); // Store URL for potential display
-      
-      console.log('[DeepDiveFormContainer] Generated access URL:', generatedUrl);
       
       // Ensure assessment result is properly formatted for database storage
       let formattedAssessmentResult = null;
@@ -162,8 +157,16 @@ const DeepDiveFormContainer = ({
         };
       }
       
-      console.log('[DeepDiveFormContainer] Formatted assessment result for DB:', formattedAssessmentResult);
-      console.log('[DeepDiveFormContainer] About to insert into Supabase with employee count:', exactEmployeeCount);
+      console.log('[DeepDiveFormContainer] About to insert into Supabase with data:', {
+        reportId,
+        archetypeId,
+        accessToken,
+        name: data.name,
+        email: data.email,
+        organization: data.organization || null,
+        employeeCount: exactEmployeeCount,
+        accessUrl: generatedUrl
+      });
       
       const { data: response, error } = await supabase
         .from('report_requests')
@@ -182,7 +185,7 @@ const DeepDiveFormContainer = ({
           assessment_result: formattedAssessmentResult,
           assessment_answers: assessmentAnswers || null,
           exact_employee_count: exactEmployeeCount,
-          access_url: generatedUrl // Make sure this is set
+          access_url: generatedUrl
         })
         .select('id, access_token, access_url');
 
@@ -194,7 +197,6 @@ const DeepDiveFormContainer = ({
       console.log('[DeepDiveFormContainer] Report request created successfully:', response);
       
       // Store submission record in session storage to prevent multiple submissions
-      // Also store the accessUrl
       sessionStorage.setItem(REPORT_SUBMITTED_KEY, JSON.stringify({
         archetypeId: archetypeId,
         email: data.email,
@@ -207,15 +209,18 @@ const DeepDiveFormContainer = ({
       setSubmittedEmail(data.email);
       
       // Track event
-      window.gtag?.('event', 'deep_dive_request', {
-        event_category: 'engagement',
-        event_label: archetypeId
-      });
+      if (window.gtag) {
+        window.gtag('event', 'deep_dive_request', {
+          event_category: 'engagement',
+          event_label: archetypeId
+        });
+      }
       
       toast.success(`Report request submitted successfully. We've sent a link to ${data.email}.`);
       
     } catch (error: any) {
       console.error('[DeepDiveFormContainer] Error submitting report request:', error);
+      setFormError(error.message || 'Failed to submit request. Please try again.');
       toast.error(`Error: ${error.message || 'Failed to submit request'}`);
     } finally {
       setIsSubmitting(false);
@@ -236,6 +241,7 @@ const DeepDiveFormContainer = ({
       onResetForm={resetFormSubmission}
       onSubmit={handleSubmit}
       accessUrl={accessUrl}
+      formError={formError}
     />
   );
 };

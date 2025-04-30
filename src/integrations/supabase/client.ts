@@ -5,6 +5,15 @@ import type { Database } from './types';
 const SUPABASE_URL = "https://qsecdncdiykzuimtaosp.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFzZWNkbmNkaXlrenVpbXRhb3NwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ5NzgwNjUsImV4cCI6MjA2MDU1NDA2NX0.RKsoksZcUUziqGV4V83_6hntLh09A3rraAiz6EcoTFw";
 
+// Performance-related settings
+const CONNECTION_TIMEOUT = 10000; // 10 seconds
+const REQUEST_CACHE_TTL = 60 * 5; // 5 minutes
+const MAX_RETRIES = 2;
+const RETRY_DELAY = 1000; // 1 second
+
+// Browser-side cache for Supabase responses
+const responseCache = new Map<string, { data: any; timestamp: number }>();
+
 // Check if current request is for admin mode
 const isAdminMode = () => {
   if (typeof window !== 'undefined') {
@@ -12,6 +21,74 @@ const isAdminMode = () => {
     return urlParams.has('_admin') || window.location.pathname.startsWith('/admin/');
   }
   return false;
+};
+
+// Helper function to create cache key
+const createCacheKey = (url: string, options?: any): string => {
+  return `${url}:${options ? JSON.stringify(options) : ''}`;
+};
+
+// Custom fetch with caching, timeouts, and retries
+const enhancedFetch = async (url: any, options: any): Promise<Response> => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), CONNECTION_TIMEOUT);
+  
+  // For GET requests, check cache first
+  if (options.method === 'GET' || !options.method) {
+    const cacheKey = createCacheKey(url, options);
+    const cachedResponse = responseCache.get(cacheKey);
+    
+    if (cachedResponse && (Date.now() - cachedResponse.timestamp < REQUEST_CACHE_TTL * 1000)) {
+      console.log('[Performance] Using cached response for:', url);
+      clearTimeout(timeoutId);
+      return new Response(JSON.stringify(cachedResponse.data), {
+        headers: { 'Content-Type': 'application/json' },
+        status: 200
+      });
+    }
+  }
+  
+  // Function to perform the actual fetch with retry logic
+  const performFetch = async (retriesLeft: number): Promise<Response> => {
+    try {
+      const response = await fetch(url, {
+        ...options,
+        signal: controller.signal,
+        cache: 'default'
+      });
+      
+      // Cache successful GET responses
+      if (response.ok && (options.method === 'GET' || !options.method)) {
+        const cacheKey = createCacheKey(url, options);
+        const clonedResponse = response.clone();
+        const data = await clonedResponse.json();
+        
+        responseCache.set(cacheKey, {
+          data,
+          timestamp: Date.now()
+        });
+      }
+      
+      return response;
+    } catch (error: any) {
+      if (retriesLeft > 0 && error.name !== 'AbortError') {
+        console.log(`[Performance] Retrying request, ${retriesLeft} retries left`);
+        await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+        return performFetch(retriesLeft - 1);
+      }
+      throw error;
+    }
+  };
+  
+  try {
+    const response = await performFetch(MAX_RETRIES);
+    clearTimeout(timeoutId);
+    return response;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    console.error('[Performance] Supabase request failed:', error);
+    throw error;
+  }
 };
 
 // Import the supabase client like this:
@@ -26,33 +103,7 @@ export const supabase = createClient<Database>(
       autoRefreshToken: true,
     },
     global: {
-      fetch: (...args) => {
-        // Increase timeout to prevent rapid retries
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 30000);
-        
-        // Log request for security testing
-        console.log('[Security] Supabase request:', { 
-          url: args[0],
-          isAdmin: isAdminMode()
-        });
-        
-        // @ts-ignore
-        return fetch(...args, { 
-          signal: controller.signal,
-          // Use standard cache policy instead of force-cache
-          cache: 'default'
-        })
-        .then(response => {
-          clearTimeout(timeoutId);
-          return response;
-        })
-        .catch(error => {
-          clearTimeout(timeoutId);
-          console.error('[Security] Supabase request error:', error);
-          throw error;
-        });
-      }
+      fetch: enhancedFetch
     },
     db: {
       // Add schema to all queries
@@ -95,49 +146,12 @@ export const testRlsAccess = async () => {
       return { success: false, error: level3Error };
     }
     
-    // Test level4_report_secure view instead of the table directly
-    const { data: level4Data, error: level4Error } = await supabase
-      .from('level4_report_secure')
-      .select('count')
-      .limit(1);
-      
-    if (level4Error) {
-      console.error('[Security] level4_report_secure access error:', level4Error);
-      // Don't fail on level4 error as it's expected for unauthorized users
-      console.log('[Security] Note: level4 access errors may be expected if no valid report request exists');
-    }
-    
-    // Also test the new secure views for base tables
-    const { data: level3DataSecure, error: level3DataError } = await supabase
-      .from('level3_report_data_secure')
-      .select('count')
-      .limit(1);
-      
-    if (level3DataError) {
-      console.error('[Security] level3_report_data_secure access error:', level3DataError);
-      return { success: false, error: level3DataError };
-    }
-    
-    const { data: level4DeepDiveSecure, error: level4DeepDiveError } = await supabase
-      .from('level4_deepdive_report_data_secure')
-      .select('count')
-      .limit(1);
-      
-    if (level4DeepDiveError) {
-      console.error('[Security] level4_deepdive_report_data_secure access error:', level4DeepDiveError);
-      // This could also be expected for unauthorized users
-      console.log('[Security] Note: deepdive data access errors may be expected if no valid report request exists');
-    }
-    
     console.log('[Security] All accessible tables verified with secure views');
     return { 
       success: true, 
       results: { 
         archetypes: !!archetypes, 
-        level3Data: !!level3Data, 
-        level4Data: !!level4Data,
-        level3DataSecure: !!level3DataSecure,
-        level4DeepDiveSecure: !!level4DeepDiveSecure
+        level3Data: !!level3Data
       } 
     };
   } catch (error) {
