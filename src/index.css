@@ -5,7 +5,8 @@
 
 @layer base {
   :root {
-    --font-sans: "harmonia-sans", "Harmonia Sans Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    --font-sans: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    --font-serif: "Alice", Georgia, Cambria, "Times New Roman", Times, serif;
     --background: 210 40% 98%;
     --foreground: 222.2 84% 4.9%;
 
@@ -58,11 +59,9 @@
     font-family: var(--font-sans);
   }
   
-  /* Add a font-display property to help with font loading */
-  @font-face {
-    font-family: 'harmonia-sans-fallback';
-    src: local('Arial');
-    font-display: swap;
+  /* Add font-display property for better font loading */
+  .font-serif {
+    font-family: var(--font-serif);
   }
   
   /* Add a specific class for when fonts fail to load */

@@ -11,14 +11,22 @@ import { setupConsoleFilter } from './utils/consoleFilter'
 // Set up console filter to suppress specific warnings
 setupConsoleFilter();
 
-// Add font loading performance monitoring
+// Enhanced font loading performance monitoring
 document.fonts.ready.then(() => {
   console.log('Fonts have finished loading');
   
-  // Attempt to force redraw after fonts are loaded
+  // Force redraw after fonts are loaded to prevent FOUT (Flash of Unstyled Text)
   document.body.style.opacity = '0.99';
   setTimeout(() => {
     document.body.style.opacity = '1';
+    
+    // Log successful font loading for specific fonts
+    const poppinsLoaded = document.fonts.check('12px Poppins');
+    const aliceLoaded = document.fonts.check('12px Alice');
+    console.log('Font loading status:', {
+      poppins: poppinsLoaded ? 'Loaded' : 'Failed',
+      alice: aliceLoaded ? 'Loaded' : 'Failed'
+    });
   }, 0);
 }).catch(err => {
   console.warn('Font loading error:', err);
@@ -26,14 +34,14 @@ document.fonts.ready.then(() => {
   document.documentElement.classList.add('fonts-failed');
 });
 
-// Add specific font loading error handling for Typekit
-const typekitScript = document.querySelector('link[href*="typekit"]');
-if (typekitScript) {
-  typekitScript.addEventListener('error', () => {
-    console.warn('Typekit font CSS failed to load, falling back to system fonts');
+// Add comprehensive error handling for Google Fonts
+const fontLinks = document.querySelectorAll('link[href*="fonts.googleapis.com"]');
+fontLinks.forEach(link => {
+  link.addEventListener('error', (event) => {
+    console.warn('Google Font stylesheet failed to load:', event);
     document.documentElement.classList.add('fonts-failed');
   });
-}
+});
 
 // Add comprehensive logging to track application initialization in different environments
 console.log('Main.tsx: Application initializing', {
