@@ -16,8 +16,7 @@ interface SwotTabProps {
 }
 
 const SwotTab = ({ archetypeData, swotData, hideRequestSection = false }: SwotTabProps) => {
-  // Get SWOT data with proper fallback strategy, using direct fields as primary source
-  // and using safe optional chaining to prevent TypeScript errors
+  // Get SWOT data with proper fallback strategy
   const strengths = normalizeSwotData(swotData?.strengths || archetypeData?.strengths);
   const weaknesses = normalizeSwotData(swotData?.weaknesses || archetypeData?.weaknesses);
   const opportunities = normalizeSwotData(swotData?.opportunities || archetypeData?.opportunities);

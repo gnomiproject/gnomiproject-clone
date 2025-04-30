@@ -11,11 +11,11 @@ interface InsightSwotSectionProps {
 }
 
 const InsightSwotSection = ({ archetype }: InsightSwotSectionProps) => {
-  // Extract SWOT data directly from the archetype object using normalizeSwotData to ensure consistent format
-  const strengths = normalizeSwotData(archetype?.strengths);
-  const weaknesses = normalizeSwotData(archetype?.weaknesses);
-  const opportunities = normalizeSwotData(archetype?.opportunities);
-  const threats = normalizeSwotData(archetype?.threats);
+  // Extract SWOT data directly from the archetype object using normalizeSwotData
+  const strengths = normalizeSwotData(archetype?.strengths || archetype?.swot_analysis?.strengths);
+  const weaknesses = normalizeSwotData(archetype?.weaknesses || archetype?.swot_analysis?.weaknesses);
+  const opportunities = normalizeSwotData(archetype?.opportunities || archetype?.swot_analysis?.opportunities);
+  const threats = normalizeSwotData(archetype?.threats || archetype?.swot_analysis?.threats);
 
   return (
     <Section id="swot-analysis">

@@ -20,10 +20,10 @@ const SwotAnalysis: React.FC<SwotAnalysisProps> = ({ reportData, archetypeData, 
   const data = reportData || archetypeData;
 
   // Get SWOT data safely using normalizeSwotData
-  const strengths = normalizeSwotData(propSwotData?.strengths || data?.strengths);
-  const weaknesses = normalizeSwotData(propSwotData?.weaknesses || data?.weaknesses);
-  const opportunities = normalizeSwotData(propSwotData?.opportunities || data?.opportunities);
-  const threats = normalizeSwotData(propSwotData?.threats || data?.threats);
+  const strengths = normalizeSwotData(propSwotData?.strengths || data?.strengths || data?.swot_analysis?.strengths);
+  const weaknesses = normalizeSwotData(propSwotData?.weaknesses || data?.weaknesses || data?.swot_analysis?.weaknesses);
+  const opportunities = normalizeSwotData(propSwotData?.opportunities || data?.opportunities || data?.swot_analysis?.opportunities);
+  const threats = normalizeSwotData(propSwotData?.threats || data?.threats || data?.swot_analysis?.threats);
 
   return (
     <div className="space-y-6">

@@ -8,10 +8,11 @@ interface SwotTabProps {
 
 export const SwotTab = ({ report }: SwotTabProps) => {
   // Get SWOT data directly from the report using normalizeSwotData
-  const strengths = normalizeSwotData(report?.strengths);
-  const weaknesses = normalizeSwotData(report?.weaknesses);
-  const opportunities = normalizeSwotData(report?.opportunities);
-  const threats = normalizeSwotData(report?.threats);
+  // The report may have direct SWOT fields or nested in swot_analysis
+  const strengths = normalizeSwotData(report?.strengths || report?.swot_analysis?.strengths);
+  const weaknesses = normalizeSwotData(report?.weaknesses || report?.swot_analysis?.weaknesses);
+  const opportunities = normalizeSwotData(report?.opportunities || report?.swot_analysis?.opportunities);
+  const threats = normalizeSwotData(report?.threats || report?.swot_analysis?.threats);
 
   if (!report) return <p>No SWOT analysis available</p>;
 
