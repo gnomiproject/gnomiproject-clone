@@ -84,6 +84,13 @@ const ReportBody: React.FC<ReportBodyProps> = ({
     return viewedSections.has(sectionId);
   };
 
+  // Add debugging to help identify issues
+  console.log('[ReportBody] Rendering with data:', {
+    hasReportData: !!reportData, 
+    hasUserData: !!userData,
+    viewedSections: Array.from(viewedSections)
+  });
+
   return (
     <div className="max-w-5xl mx-auto px-4 print:px-8">
       <Section id="introduction">

@@ -2,6 +2,8 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import ReportContainer from './components/ReportContainer';
 import { debounce } from '@/utils/debounce';
+import ReportLoadingState from './ReportLoadingState';
+import ReportError from './ReportError';
 
 interface DeepDiveReportProps {
   reportData: any;
@@ -9,6 +11,8 @@ interface DeepDiveReportProps {
   averageData?: any;
   isAdminView?: boolean;
   debugInfo?: any;
+  isLoading?: boolean;
+  error?: Error | null;
 }
 
 const DeepDiveReport: React.FC<DeepDiveReportProps> = ({ 
@@ -16,7 +20,9 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
   userData, 
   averageData, 
   isAdminView = false,
-  debugInfo
+  debugInfo,
+  isLoading = false,
+  error = null
 }) => {
   // Add a simple state to track if navigation is in process
   const [isNavigating, setIsNavigating] = useState(false);
@@ -25,6 +31,44 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
   const memoizedReportData = useMemo(() => reportData, [reportData]);
   const memoizedUserData = useMemo(() => userData, [userData]);
   const memoizedAverageData = useMemo(() => averageData, [averageData]);
+
+  // Add debug logging
+  console.log('[DeepDiveReport] Rendering with:', {
+    hasReportData: !!reportData,
+    hasUserData: !!userData,
+    hasAverageData: !!averageData,
+    isLoading,
+    hasError: !!error
+  });
+  
+  // Show loading state if data is still loading
+  if (isLoading) {
+    return <ReportLoadingState />;
+  }
+  
+  // Show error state if there's an error
+  if (error) {
+    return (
+      <ReportError 
+        title="Report Loading Error" 
+        message={error.message || "We're having trouble loading your report. Please try again."}
+        actionLabel="Retry Loading"
+        onAction={() => window.location.reload()}
+      />
+    );
+  }
+
+  // Show error if no report data is available
+  if (!reportData) {
+    return (
+      <ReportError
+        title="Report Data Unavailable"
+        message="We couldn't find the requested report data. Please check your access link or contact support."
+        actionLabel="Return Home"
+        onAction={() => window.location.href = '/'}
+      />
+    );
+  }
   
   // Optimized debounced navigation with useCallback to prevent recreation on each render
   const handleSafeNavigate = useCallback(
