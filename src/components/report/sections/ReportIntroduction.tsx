@@ -35,6 +35,8 @@ const ReportIntroduction = ({
     archetypeName: displayArchetypeName,
     familyName: displayFamilyName,
     color: archetypeColor,
+    rawArchetypeName: archetypeName,
+    rawFamilyName: familyName
   });
 
   return (

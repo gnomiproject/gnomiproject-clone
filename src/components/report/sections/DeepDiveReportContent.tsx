@@ -40,7 +40,8 @@ const DeepDiveReportContent = ({
         accessToken: userData.access_token ? `${userData.access_token.substring(0, 5)}...` : 'None',
         lastAccessed: userData.last_accessed
       } : 'No user data',
-      fullArchetypeObject: archetype ? 'Present' : 'Missing'
+      fullArchetypeObject: archetype ? 'Present' : 'Missing',
+      archetypeRawData: JSON.stringify(archetype).substring(0, 200) + '...'
     });
   }, [archetype, archetypeId, archetypeName, familyName, shortDescription, userData]);
 
@@ -105,6 +106,7 @@ const DeepDiveReportContent = ({
               <p>Has User Data: {userData ? 'Yes' : 'No'}</p>
               <p>Has Strategic Recommendations: {archetype?.strategic_recommendations ? 'Yes' : 'No'}</p>
               <p>Has SWOT Data: {archetype?.strengths || archetype?.swot_analysis ? 'Yes' : 'No'}</p>
+              <p>Raw Archetype Data Structure: {Object.keys(archetype || {}).join(', ')}</p>
             </div>
             <div className="mt-4 flex justify-center">
               <GnomeImage type="presentation" showDebug={true} />

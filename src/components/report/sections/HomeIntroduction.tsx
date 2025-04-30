@@ -46,7 +46,8 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
     name: archetypeName,
     family: familyName,
     description: shortDescription.substring(0, 50) + '...',
-    userData: userData ? `User data present for: ${userName}` : 'No user data'
+    userData: userData ? `User data present for: ${userName}` : 'No user data',
+    archetypeObj: JSON.stringify(archetypeData).substring(0, 100) + '...'
   });
   
   return (
