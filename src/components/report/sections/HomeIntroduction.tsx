@@ -40,14 +40,19 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
   // Normalize characteristics array
   const characteristics = normalizeSwotData(rawCharacteristics);
   
-  // Debug logging
-  console.log('[HomeIntroduction] Archetype data:', {
+  // Enhanced debug logging
+  console.log('[HomeIntroduction] Archetype data FULL:', archetypeData);
+  console.log('[HomeIntroduction] Archetype data DEBUG:', {
     id: archetypeId,
     name: archetypeName,
+    rawName: archetypeData?.name,
+    rawArchetypeName: archetypeData?.archetype_name,
     family: familyName,
+    rawFamilyName: archetypeData?.family_name,
     description: shortDescription.substring(0, 50) + '...',
     userData: userData ? `User data present for: ${userName}` : 'No user data',
-    archetypeObj: JSON.stringify(archetypeData).substring(0, 100) + '...'
+    archetypeObj: JSON.stringify(archetypeData).substring(0, 200) + '...',
+    allProps: Object.keys(archetypeData || {}).join(', ')
   });
   
   return (
