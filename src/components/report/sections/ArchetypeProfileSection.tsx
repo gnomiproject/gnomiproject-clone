@@ -20,8 +20,14 @@ export interface ArchetypeProfileSectionProps {
 // The main component logic
 const ArchetypeProfileSectionBase: React.FC<ArchetypeProfileSectionProps> = ({ archetypeData }) => {
   // Console log for debugging render cycles
-  console.log('[ArchetypeProfileSection] Rendering with data:', 
-    archetypeData?.name || archetypeData?.archetype_name || 'Unknown');
+  console.log('[ArchetypeProfileSection] Rendering with data:', {
+    name: archetypeData?.name || archetypeData?.archetype_name || 'Unknown',
+    hasTopMetrics: !!archetypeData?.top_distinctive_metrics,
+    topMetricsType: archetypeData?.top_distinctive_metrics ? typeof archetypeData.top_distinctive_metrics : 'undefined',
+    topMetricsPreview: archetypeData?.top_distinctive_metrics 
+      ? JSON.stringify(archetypeData.top_distinctive_metrics).substring(0, 100) + '...' 
+      : 'None'
+  });
   
   if (!archetypeData) {
     return (

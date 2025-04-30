@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useGetArchetype } from '@/hooks/useGetArchetype';
@@ -187,6 +186,38 @@ export const useReportAccess = ({ archetypeId: rawArchetypeId, token, isAdminVie
                 weaknesses: normalizeSwotData(swotData.weaknesses || []).length,
                 opportunities: normalizeSwotData(swotData.opportunities || []).length,
                 threats: normalizeSwotData(swotData.threats || []).length
+              }
+            }));
+          }
+        }
+
+        // Parse top distinctive metrics if available
+        if (!reportData || !reportData.top_distinctive_metrics) {
+          const { data: topMetricsData, error: topMetricsError } = await supabase
+            .from('Analysis_Archetype_Distinctive_Metrics')
+            .select('*')
+            .eq('archetype_id', archetypeId)
+            .limit(4)
+            .order('difference', { ascending: false });
+            
+          if (!topMetricsError && topMetricsData) {
+            console.log(`[useReportAccess] Got top distinctive metrics directly from the metrics table: ${topMetricsData.length} items`);
+            
+            // Update reportData with top metrics information
+            setReportData(prevData => {
+              return {
+                ...prevData,
+                top_distinctive_metrics: topMetricsData
+              };
+            });
+            
+            setDebugInfo(prev => ({
+              ...prev,
+              topMetricsQuery: {
+                success: true,
+                dataFound: true,
+                count: topMetricsData.length,
+                sample: topMetricsData.length > 0 ? topMetricsData[0].metric : 'None'
               }
             }));
           }

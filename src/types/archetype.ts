@@ -1,4 +1,3 @@
-
 export type ArchetypeId = 'a1' | 'a2' | 'a3' | 'b1' | 'b2' | 'b3' | 'c1' | 'c2' | 'c3';
 export type FamilyId = 'a' | 'b' | 'c';
 
@@ -56,14 +55,7 @@ export interface ArchetypeDetailed extends Archetype {
   weaknesses?: string[] | Json;
   opportunities?: string[] | Json;
   threats?: string[] | Json;
-  distinctive_metrics?: Array<{
-    metric: string;
-    category: string;
-    archetype_value: number;
-    archetype_average: number;
-    difference: number;
-    significance?: string;
-  }>;
+  distinctive_metrics?: Array<DistinctiveMetric>;
   strategic_recommendations?: Array<{
     recommendation_number: number;
     title: string;

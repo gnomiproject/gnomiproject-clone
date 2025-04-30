@@ -23,7 +23,9 @@ const ArchetypeProfileBase: React.FC<ArchetypeProfileProps> = ({ archetypeData, 
     name: data?.name || data?.archetype_name || 'Unknown',
     hasDescription: !!data?.long_description,
     hasCharacteristics: !!data?.key_characteristics,
-    hasTopMetrics: !!data?.top_distinctive_metrics
+    hasTopMetrics: !!data?.top_distinctive_metrics,
+    topMetricsType: data?.top_distinctive_metrics ? typeof data.top_distinctive_metrics : 'undefined',
+    topMetricsValue: data?.top_distinctive_metrics ? JSON.stringify(data.top_distinctive_metrics).substring(0, 100) + '...' : 'None'
   });
 
   if (!data) {
