@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import { Section } from '@/components/shared/Section';
@@ -57,6 +56,7 @@ const DeepDiveReportContent = ({
   safeArchetype.short_description = shortDescription;
   
   // Ensure we're passing the complete archetype data to all components
+  // Sections arranged in the new requested order
   return (
     <div className="container mx-auto p-6">
       <ErrorBoundary>

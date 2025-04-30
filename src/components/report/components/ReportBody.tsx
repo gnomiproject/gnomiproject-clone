@@ -1,4 +1,3 @@
-
 import React, { lazy, Suspense, useEffect, useState } from 'react';
 import { Section } from '@/components/shared/Section';
 import ReportDebugTools from '../ReportDebugTools';
@@ -6,13 +5,12 @@ import ReportDebugTools from '../ReportDebugTools';
 // Lazy load all section components for better initial loading performance
 const LazyReportIntroduction = lazy(() => import('../sections/ReportIntroduction'));
 const LazyArchetypeProfile = lazy(() => import('../sections/ArchetypeProfile'));
-const LazySwotAnalysis = lazy(() => import('../sections/SwotAnalysis'));
 const LazyDemographicsSection = lazy(() => import('../sections/DemographicsSection'));
-const LazyCostAnalysis = lazy(() => import('../sections/CostAnalysis'));
 const LazyUtilizationPatterns = lazy(() => import('../sections/UtilizationPatterns'));
 const LazyDiseaseManagement = lazy(() => import('../sections/DiseaseManagement'));
 const LazyCareGaps = lazy(() => import('../sections/CareGaps'));
 const LazyRiskFactors = lazy(() => import('../sections/RiskFactors'));
+const LazyCostAnalysis = lazy(() => import('../sections/CostAnalysis'));
 const LazyStrategicRecommendationsSection = lazy(() => import('../sections/strategic-recommendations/StrategicRecommendationsSection'));
 const LazyContactSection = lazy(() => import('../sections/ContactSection'));
 
@@ -84,7 +82,7 @@ const ReportBody: React.FC<ReportBodyProps> = ({
     return viewedSections.has(sectionId);
   };
 
-  // Add debugging to help identify issues
+  // Add debug logging
   console.log('[ReportBody] Rendering with data:', {
     hasReportData: !!reportData, 
     hasUserData: !!userData,
@@ -93,6 +91,7 @@ const ReportBody: React.FC<ReportBodyProps> = ({
 
   return (
     <div className="max-w-5xl mx-auto px-4 print:px-8">
+      {/* REORDERED SECTIONS according to requirements */}
       <Section id="introduction">
         <Suspense fallback={<SectionLoading />}>
           <LazyReportIntroduction userData={userData} />
@@ -107,26 +106,10 @@ const ReportBody: React.FC<ReportBodyProps> = ({
         ) : <SectionLoading />}
       </Section>
       
-      <Section id="swot-analysis">
-        {shouldRenderSection('swot-analysis') ? (
-          <Suspense fallback={<SectionLoading />}>
-            <LazySwotAnalysis reportData={reportData} />
-          </Suspense>
-        ) : <SectionLoading />}
-      </Section>
-      
       <Section id="demographics">
         {shouldRenderSection('demographics') ? (
           <Suspense fallback={<SectionLoading />}>
             <LazyDemographicsSection reportData={reportData} averageData={averageData} />
-          </Suspense>
-        ) : <SectionLoading />}
-      </Section>
-      
-      <Section id="cost-analysis">
-        {shouldRenderSection('cost-analysis') ? (
-          <Suspense fallback={<SectionLoading />}>
-            <LazyCostAnalysis reportData={reportData} averageData={averageData} />
           </Suspense>
         ) : <SectionLoading />}
       </Section>
@@ -159,6 +142,14 @@ const ReportBody: React.FC<ReportBodyProps> = ({
         {shouldRenderSection('risk-factors') ? (
           <Suspense fallback={<SectionLoading />}>
             <LazyRiskFactors reportData={reportData} averageData={averageData} />
+          </Suspense>
+        ) : <SectionLoading />}
+      </Section>
+      
+      <Section id="cost-analysis">
+        {shouldRenderSection('cost-analysis') ? (
+          <Suspense fallback={<SectionLoading />}>
+            <LazyCostAnalysis reportData={reportData} averageData={averageData} />
           </Suspense>
         ) : <SectionLoading />}
       </Section>

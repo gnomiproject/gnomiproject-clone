@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, Suspense, lazy, useCallback } from 'react';
 import LeftNavigation from '../navigation/LeftNavigation';
 import PrintButton from './PrintButton';
@@ -5,17 +6,16 @@ import { useReportNavigation } from '../hooks/useReportNavigation';
 import { debounce } from '@/utils/debounce';
 import { useRenderPerformance } from '@/components/shared/PerformanceMonitor';
 
-// Create sections array for LeftNavigation
+// Create sections array for LeftNavigation - REORDERED according to requirements
 const REPORT_SECTIONS = [
   { id: 'introduction', name: 'Introduction' },
   { id: 'archetype-profile', name: 'Archetype Profile' },
-  { id: 'swot-analysis', name: 'SWOT Analysis' },
   { id: 'demographics', name: 'Demographics' },
-  { id: 'cost-analysis', name: 'Cost Analysis' },
   { id: 'utilization-patterns', name: 'Utilization Patterns' },
   { id: 'disease-management', name: 'Disease Management' },
   { id: 'care-gaps', name: 'Care Gaps' },
   { id: 'risk-factors', name: 'Risk Factors' },
+  { id: 'cost-analysis', name: 'Cost Analysis' },
   { id: 'recommendations', name: 'Recommendations' },
   { id: 'contact', name: 'Contact' },
 ];
