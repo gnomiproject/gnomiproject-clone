@@ -8,11 +8,17 @@ import { Badge } from '@/components/ui/badge';
 interface ReportIntroductionProps {
   userData: any;
   archetypeId?: ArchetypeId;
+  archetypeName?: string;
+  familyName?: string;
+  shortDescription?: string;
 }
 
 const ReportIntroduction = ({ 
   userData,
-  archetypeId = 'a1' as ArchetypeId
+  archetypeId = 'a1' as ArchetypeId,
+  archetypeName,
+  familyName,
+  shortDescription
 }: ReportIntroductionProps) => {
   // Get report date and basic user data
   const reportDate = userData?.created_at ? format(new Date(userData.created_at), 'MMMM d, yyyy') : 'N/A';
@@ -20,10 +26,17 @@ const ReportIntroduction = ({
   const archetypeColor = archetypeId ? getArchetypeColorHex(archetypeId) : '#00B0F0';
   
   // Get archetype data with better fallbacks
-  const archetypeName = userData?.archetype_name || userData?.assessment_result?.archetype?.name || 'Unknown Archetype';
-  const familyName = userData?.family_name || userData?.assessment_result?.family?.name || 'Unknown Family';
-  const archetypeDescription = userData?.short_description || '';
+  const displayArchetypeName = archetypeName || userData?.archetype_name || userData?.assessment_result?.archetype?.name || 'Unknown Archetype';
+  const displayFamilyName = familyName || userData?.family_name || userData?.assessment_result?.family?.name || 'Unknown Family';
+  const displayDescription = shortDescription || userData?.short_description || '';
   
+  console.log('[ReportIntroduction] Rendering with:', {
+    archetypeId,
+    archetypeName: displayArchetypeName,
+    familyName: displayFamilyName,
+    color: archetypeColor,
+  });
+
   return (
     <div className="mb-12 print:mb-8">
       <div className="print:hidden">
@@ -77,34 +90,36 @@ const ReportIntroduction = ({
         <h2 className="text-xl font-semibold mb-4">About This Report</h2>
         
         <p className="text-gray-700 mb-3">
-          Based on your assessment results, your company most closely matches <span className="font-semibold">"{archetypeName}"</span>{' '}
+          Based on your assessment results, your company most closely matches <span className="font-semibold">"{displayArchetypeName}"</span>{' '}
           <span 
             className="inline-flex items-center px-2 py-1 rounded text-xs font-medium"
             style={{ backgroundColor: `${archetypeColor}20`, color: archetypeColor }}
           >
             [{archetypeId.toUpperCase()}]
-          </span>, which is part of the "{familyName}" family.
+          </span>, which is part of the "{displayFamilyName}" family.
         </p>
         
-        <p className="text-gray-700 mb-4">
-          {archetypeDescription}
-        </p>
+        {displayDescription && (
+          <p className="text-gray-700 mb-4">
+            {displayDescription}
+          </p>
+        )}
         
         <p className="text-gray-700 mb-4">
           This comprehensive deep dive report provides an in-depth analysis of your organization's healthcare archetype, 
-          including detailed metrics, strategic recommendations, and actionable insights tailored specifically to {archetypeName}.
+          including detailed metrics, strategic recommendations, and actionable insights tailored specifically to {displayArchetypeName}.
         </p>
         
         <p className="text-gray-700 mb-4">
           The report examines key health factors across demographics, utilization patterns, risk factors, 
           cost analysis, care gaps, and disease management. Each section includes comparison data against 
-          population averages to provide context for the findings, with special attention to the areas where {archetypeName} typically excel or face challenges.
+          population averages to provide context for the findings, with special attention to the areas where {displayArchetypeName} typically excel or face challenges.
         </p>
         
         <div className="mt-5">
           <h3 className="text-lg font-semibold mb-2">How to Use This Report</h3>
           <ul className="list-disc list-inside space-y-1 text-gray-700">
-            <li>Review each section for detailed analysis relevant to {archetypeName}</li>
+            <li>Review each section for detailed analysis relevant to {displayArchetypeName}</li>
             <li>Use the navigation sidebar to jump between sections</li>
             <li>Focus on the Strategic Recommendations for actionable steps designed for your archetype</li>
             <li>Use the SWOT Analysis to understand strengths and opportunities unique to your archetype classification</li>

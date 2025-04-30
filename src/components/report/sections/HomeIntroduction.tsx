@@ -40,14 +40,6 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
   // Normalize characteristics array
   const characteristics = normalizeSwotData(rawCharacteristics);
   
-  // Prepare enhanced userData for ReportIntroduction with archetype details
-  const enhancedUserData = {
-    ...userData,
-    archetype_name: archetypeName,
-    family_name: familyName,
-    short_description: shortDescription
-  };
-
   // Debug logging
   console.log('[HomeIntroduction] Archetype data:', {
     id: archetypeId,
@@ -65,8 +57,11 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
       
       {/* Main report introduction */}
       <ReportIntroduction 
-        userData={enhancedUserData} 
-        archetypeId={archetypeId} 
+        userData={userData} 
+        archetypeId={archetypeId}
+        archetypeName={archetypeName}
+        familyName={familyName}
+        shortDescription={shortDescription}
       />
       
       {/* Welcome Card */}

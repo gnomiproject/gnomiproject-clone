@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import { Section } from '@/components/shared/Section';
 import SectionTitle from '@/components/shared/SectionTitle';
@@ -23,23 +23,36 @@ const DeepDiveReportContent = ({
   // Store these values once to avoid unnecessary recalculations
   const archetypeName = archetype?.name || archetype?.archetype_name || 'Unknown';
   const archetypeId = archetype?.id || archetype?.archetype_id || '';
+  const familyName = archetype?.family_name || 'Unknown Family';
+  const shortDescription = archetype?.short_description || '';
   
   // Debug logging
-  console.log('[DEBUG] DeepDiveReportContent archetype data:', {
-    id: archetypeId,
-    name: archetypeName,
-    familyId: archetype?.family_id || archetype?.familyId,
-    familyName: archetype?.family_name,
-    userData: userData ? {
-      name: userData.name,
-      organization: userData.organization,
-      accessToken: userData.access_token ? `${userData.access_token.substring(0, 5)}...` : 'None',
-      lastAccessed: userData.last_accessed
-    } : 'No user data'
-  });
+  useEffect(() => {
+    console.log('[DeepDiveReportContent] Processing archetype data:', {
+      id: archetypeId,
+      name: archetypeName,
+      familyId: archetype?.family_id || archetype?.familyId,
+      familyName,
+      shortDescription: shortDescription ? shortDescription.substring(0, 50) + '...' : 'None',
+      userData: userData ? {
+        name: userData.name,
+        organization: userData.organization,
+        accessToken: userData.access_token ? `${userData.access_token.substring(0, 5)}...` : 'None',
+        lastAccessed: userData.last_accessed
+      } : 'No user data'
+    });
+  }, [archetype, archetypeId, archetypeName, familyName, shortDescription, userData]);
 
   // Make a safe copy of the data to avoid mutation issues
   const safeArchetype = {...archetype};
+  
+  // Ensure the archetype data has all expected fields
+  safeArchetype.id = archetypeId;
+  safeArchetype.name = archetypeName;
+  safeArchetype.archetype_id = archetypeId;
+  safeArchetype.archetype_name = archetypeName;
+  safeArchetype.family_name = familyName;
+  safeArchetype.short_description = shortDescription;
   
   return (
     <div className="container mx-auto p-6">
@@ -82,7 +95,7 @@ const DeepDiveReportContent = ({
               <p>Archetype ID: {archetypeId}</p>
               <p>Archetype Name: {archetypeName}</p>
               <p>Family ID: {archetype?.family_id || archetype?.familyId || 'Not available'}</p>
-              <p>Family Name: {archetype?.family_name || 'Not available'}</p>
+              <p>Family Name: {familyName}</p>
               <p>User: {userData?.name || 'Not available'}</p>
               <p>Organization: {userData?.organization || 'Not available'}</p>
               <p>Access Token: {userData?.access_token ? `${userData.access_token.substring(0, 5)}...` : 'Not available'}</p>
