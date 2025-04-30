@@ -1,3 +1,4 @@
+
 export type ArchetypeId = 'a1' | 'a2' | 'a3' | 'b1' | 'b2' | 'b3' | 'c1' | 'c2' | 'c3';
 export type FamilyId = 'a' | 'b' | 'c';
 
@@ -127,8 +128,7 @@ export interface ArchetypeDetailedData {
   // These are the fields we need from the database tables
   archetype_id?: string;
   archetype_name?: string;
-  archetype_overview?: string | Json;
-  top_distinctive_metrics?: DistinctiveMetric[] | string;
+  top_distinctive_metrics?: DistinctiveMetric[] | string | Json;
   
   // New properties from level3_report_data with correct naming
   // Demographics metrics
