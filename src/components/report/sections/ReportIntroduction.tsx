@@ -25,7 +25,7 @@ const ReportIntroduction = ({
   const employeeCount = userData?.exact_employee_count || userData?.assessment_result?.exactData?.employeeCount;
   const archetypeColor = archetypeId ? getArchetypeColorHex(archetypeId) : '#00B0F0';
   
-  // Get archetype data with better fallbacks - using directly passed props first
+  // Get archetype data with better fallbacks
   const displayArchetypeName = archetypeName || userData?.archetype_name || userData?.assessment_result?.archetype?.name || 'Unknown Archetype';
   const displayFamilyName = familyName || userData?.family_name || userData?.assessment_result?.family?.name || 'Unknown Family';
   const displayDescription = shortDescription || userData?.short_description || '';
@@ -33,12 +33,10 @@ const ReportIntroduction = ({
   console.log('[ReportIntroduction] Rendering with:', {
     archetypeId,
     archetypeName: displayArchetypeName,
-    passedArchetypeName: archetypeName,
     familyName: displayFamilyName,
-    passedFamilyName: familyName,
     color: archetypeColor,
-    userData: userData ? 'Present' : 'Not present',
-    shortDescription: displayDescription ? displayDescription.substring(0, 50) + '...' : 'None'
+    rawArchetypeName: archetypeName,
+    rawFamilyName: familyName
   });
 
   return (

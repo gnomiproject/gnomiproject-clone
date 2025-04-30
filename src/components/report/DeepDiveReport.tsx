@@ -2,8 +2,6 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import ReportContainer from './components/ReportContainer';
 import { debounce } from '@/utils/debounce';
-import ReportLoadingState from './ReportLoadingState';
-import ReportError from './ReportError';
 
 interface DeepDiveReportProps {
   reportData: any;
@@ -53,24 +51,6 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
     }, 300),
     [isNavigating]
   );
-
-  // Show loading state if reportData is undefined or null
-  if (!reportData) {
-    return <ReportLoadingState />;
-  }
-  
-  // Show error state if reportData is an empty object 
-  // (this could be a sign of failed data loading)
-  if (reportData && Object.keys(reportData).length === 0) {
-    return (
-      <ReportError 
-        title="Report Data Unavailable" 
-        message="We couldn't load the report data. Please try again later."
-        actionLabel="Retry Loading"
-        onAction={() => window.location.reload()}
-      />
-    );
-  }
 
   return (
     <ReportContainer

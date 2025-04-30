@@ -26,17 +26,13 @@ const DeepDiveReportContent = ({
   const familyName = archetype?.family_name || 'Unknown Family';
   const shortDescription = archetype?.short_description || '';
   
-  // Enhanced debug logging
+  // Debug logging
   useEffect(() => {
-    console.log('[DeepDiveReportContent] FULL archetype data:', archetype);
     console.log('[DeepDiveReportContent] Processing archetype data:', {
       id: archetypeId,
       name: archetypeName,
-      rawName: archetype?.name,
-      rawArchetypeName: archetype?.archetype_name,
       familyId: archetype?.family_id || archetype?.familyId,
       familyName,
-      rawFamilyName: archetype?.family_name,
       shortDescription: shortDescription ? shortDescription.substring(0, 50) + '...' : 'None',
       userData: userData ? {
         name: userData.name,
@@ -45,13 +41,12 @@ const DeepDiveReportContent = ({
         lastAccessed: userData.last_accessed
       } : 'No user data',
       fullArchetypeObject: archetype ? 'Present' : 'Missing',
-      archetypeRawData: archetype ? JSON.stringify(archetype).substring(0, 200) + '...' : 'null',
-      allProps: Object.keys(archetype || {}).join(', ')
+      archetypeRawData: JSON.stringify(archetype).substring(0, 200) + '...'
     });
   }, [archetype, archetypeId, archetypeName, familyName, shortDescription, userData]);
 
   // Make a safe copy of the data to avoid mutation issues
-  const safeArchetype = archetype ? {...archetype} : {};
+  const safeArchetype = {...archetype};
   
   // Ensure the archetype data has all expected fields
   safeArchetype.id = archetypeId;
@@ -60,20 +55,6 @@ const DeepDiveReportContent = ({
   safeArchetype.archetype_name = archetypeName;
   safeArchetype.family_name = familyName;
   safeArchetype.short_description = shortDescription;
-  
-  // Guard against null archetype data
-  if (!archetype) {
-    return (
-      <div className="container mx-auto p-6">
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-6 text-center">
-          <h2 className="text-xl font-semibold text-amber-800">Report Data Not Available</h2>
-          <p className="mt-2 text-amber-700">
-            The report data could not be loaded. Please try again later.
-          </p>
-        </div>
-      </div>
-    );
-  }
   
   // Ensure we're passing the complete archetype data to all components
   return (
@@ -116,8 +97,6 @@ const DeepDiveReportContent = ({
             <div className="mt-2 font-mono text-xs space-y-1">
               <p>Archetype ID: {archetypeId}</p>
               <p>Archetype Name: {archetypeName}</p>
-              <p>Raw Archetype Name: {archetype?.name || 'Not available'}</p>
-              <p>Raw Archetype ID: {archetype?.id || 'Not available'}</p>
               <p>Family ID: {archetype?.family_id || archetype?.familyId || 'Not available'}</p>
               <p>Family Name: {familyName}</p>
               <p>User: {userData?.name || 'Not available'}</p>
@@ -128,7 +107,6 @@ const DeepDiveReportContent = ({
               <p>Has Strategic Recommendations: {archetype?.strategic_recommendations ? 'Yes' : 'No'}</p>
               <p>Has SWOT Data: {archetype?.strengths || archetype?.swot_analysis ? 'Yes' : 'No'}</p>
               <p>Raw Archetype Data Structure: {Object.keys(archetype || {}).join(', ')}</p>
-              <p>Data Source: {archetype?.dataSource || 'Unknown'}</p>
             </div>
             <div className="mt-4 flex justify-center">
               <GnomeImage type="presentation" showDebug={true} />
