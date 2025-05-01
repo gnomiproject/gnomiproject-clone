@@ -65,11 +65,17 @@ const ArchetypeHeader = ({
                 alt={`${name} Guide`}
                 className="h-48 object-contain"
                 onError={(e) => {
+                  console.error('Error loading custom gnome image:', gnomeImage);
                   (e.target as HTMLImageElement).src = '/assets/gnomes/placeholder.svg';
                 }}
               />
             ) : (
-              <GnomeImage type="charts" className="h-48 object-contain" alt={`${name} Guide`} />
+              <GnomeImage 
+                type="charts" 
+                className="h-48 object-contain" 
+                alt={`${name} Guide`} 
+                showDebug={false}
+              />
             )}
           </div>
         </div>

@@ -44,6 +44,8 @@ export const fetchGnomeImages = async (): Promise<void> => {
   if (fetchedGnomeImages) return;
   
   try {
+    // Query the gnomi_images table directly
+    console.log('Fetching gnome images from gnomi_images table...');
     const { data, error } = await supabase
       .from('gnomi_images')
       .select('name, url');
@@ -54,38 +56,43 @@ export const fetchGnomeImages = async (): Promise<void> => {
     }
     
     if (data && data.length > 0) {
-      console.log('Fetched gnome images from database:', data.length);
+      console.log('Fetched gnome images from database:', data);
       
       // Update the gnome images map with the fetched URLs
       data.forEach(image => {
         // Map database names to our type names (e.g. gnome_chart -> charts)
-        if (image.name === 'gnome_chart') {
-          gnomeImages.charts = image.url;
-        }
-        if (image.name === 'gnome_report') {
-          gnomeImages.report = image.url;
-        }
-        if (image.name === 'gnome_presentation') {
-          gnomeImages.presentation = image.url;
-        }
-        if (image.name === 'gnome_profile') {
-          gnomeImages.profile = image.url;
-        }
-        if (image.name === 'gnome_welcome') {
-          gnomeImages.welcome = image.url;
-        }
-        if (image.name === 'gnome_clipboard') {
-          gnomeImages.clipboard = image.url;
-        }
-        if (image.name === 'gnome_analysis') {
-          gnomeImages.analysis = image.url;
-        }
-        if (image.name === 'gnome_magnifying') {
-          gnomeImages.magnifying = image.url;
+        switch (image.name) {
+          case 'gnome_chart':
+            gnomeImages.charts = image.url;
+            break;
+          case 'gnome_report':
+            gnomeImages.report = image.url;
+            break;
+          case 'gnome_presentation':
+            gnomeImages.presentation = image.url;
+            break;
+          case 'gnome_profile':
+            gnomeImages.profile = image.url;
+            break;
+          case 'gnome_welcome':
+            gnomeImages.welcome = image.url;
+            break;
+          case 'gnome_clipboard':
+            gnomeImages.clipboard = image.url;
+            break;
+          case 'gnome_analysis':
+            gnomeImages.analysis = image.url;
+            break;
+          case 'gnome_magnifying':
+            gnomeImages.magnifying = image.url;
+            break;
         }
       });
       
+      console.log('Updated gnome image URLs:', gnomeImages);
       fetchedGnomeImages = true;
+    } else {
+      console.warn('No gnome images found in database');
     }
   } catch (err) {
     console.error('Exception fetching gnome images:', err);

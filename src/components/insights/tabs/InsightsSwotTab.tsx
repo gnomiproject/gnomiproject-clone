@@ -29,21 +29,11 @@ const InsightsSwotTab = ({ archetypeData }: InsightsSwotTabProps) => {
         strengths: archetypeData.strengths,
         strengthsType: typeof archetypeData.strengths,
         isStrengthsArray: Array.isArray(archetypeData.strengths),
+        strengthsContent: JSON.stringify(archetypeData.strengths).slice(0, 100),
         weaknesses: archetypeData.weaknesses,
         opportunities: archetypeData.opportunities,
         threats: archetypeData.threats
       });
-      
-      // If strengths exist, log a sample
-      if (archetypeData.strengths) {
-        const sample = Array.isArray(archetypeData.strengths) 
-          ? archetypeData.strengths[0] 
-          : typeof archetypeData.strengths === 'object'
-            ? JSON.stringify(archetypeData.strengths).slice(0, 100)
-            : archetypeData.strengths;
-        
-        console.log("[InsightsSwotTab] Sample strength:", sample);
-      }
     }
   }, [archetypeData]);
 
@@ -71,7 +61,12 @@ const InsightsSwotTab = ({ archetypeData }: InsightsSwotTabProps) => {
         <div className="flex items-center justify-between">
           <CardTitle className="text-2xl">SWOT Analysis for {archetypeData.name || archetypeData.archetype_name || "This Archetype"}</CardTitle>
           <div className="hidden md:block">
-            <GnomeImage type="charts" className="h-24 object-contain" alt="SWOT Analysis Gnome" />
+            <GnomeImage 
+              type="charts" 
+              className="h-24 object-contain" 
+              alt="SWOT Analysis Gnome" 
+              showDebug={true}
+            />
           </div>
         </div>
       </CardHeader>

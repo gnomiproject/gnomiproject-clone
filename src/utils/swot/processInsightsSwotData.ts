@@ -1,108 +1,101 @@
+
+import { ArchetypeDetailedData } from "@/types/archetype";
+
 /**
- * Utility function for processing SWOT analysis data specifically for the Insights page
- * ONLY used with data from level3_report_secure table
+ * Processes SWOT data from the level3_report_secure table for the Insights page
+ * Handles multiple potential data formats:
+ * 1. Direct string arrays
+ * 2. JSON string representations of arrays
+ * 3. Array inside an object structure
+ * 4. Single string values (converts to array with one item)
+ * 
+ * @param archetypeData The archetype data from level3_report_secure
+ * @returns Processed SWOT data as string arrays
  */
-
-import { ensureArray } from '@/utils/array/ensureArray';
-
-export interface SwotData {
+export const processInsightsSwotData = (archetypeData: ArchetypeDetailedData): {
   strengths: string[];
   weaknesses: string[];
   opportunities: string[];
   threats: string[];
-}
-
-/**
- * Processes SWOT data from the level3_report_secure table for display in the Insights page
- * @param reportData Data from level3_report_secure table
- * @returns Structured SWOT data with arrays of strings for each category
- */
-export function processInsightsSwotData(reportData: any): SwotData {
-  // Initialize with empty arrays
-  const result: SwotData = {
-    strengths: [],
-    weaknesses: [],
-    opportunities: [],
-    threats: []
-  };
-  
-  if (!reportData) {
-    console.warn('[processInsightsSwotData] No report data provided');
-    return result;
-  }
-
-  // Log the data source to help with debugging
-  console.log('[processInsightsSwotData] Processing data from level3_report_secure:', {
-    hasStrengths: !!reportData.strengths,
-    hasWeaknesses: !!reportData.weaknesses,
-    hasOpportunities: !!reportData.opportunities,
-    hasThreats: !!reportData.threats,
-    strengthsType: reportData.strengths ? typeof reportData.strengths : 'undefined',
-    strengthsValue: reportData.strengths ? JSON.stringify(reportData.strengths).substring(0, 100) : 'undefined'
+} => {
+  // Log the input data types for debugging
+  console.log("[processInsightsSwotData] Processing data from level3_report_secure:", {
+    hasStrengths: !!archetypeData.strengths,
+    hasWeaknesses: !!archetypeData.weaknesses,
+    hasOpportunities: !!archetypeData.opportunities,
+    hasThreats: !!archetypeData.threats,
+    strengthsType: typeof archetypeData.strengths
   });
 
-  // Process each SWOT category
-  try {
-    // Helper function to process different data formats
-    const processField = (field: any): string[] => {
-      if (!field) {
-        return [];
+  // Helper function to parse different potential data formats
+  const parseSwotData = (data: any): string[] => {
+    try {
+      if (!data) {
+        return []; // No data available
       }
       
-      // If it's already an array of strings, use it directly
-      if (Array.isArray(field) && field.every(item => typeof item === 'string')) {
-        return field;
+      // If it's already an array, use it
+      if (Array.isArray(data)) {
+        return data.map(item => String(item));
       }
       
-      // If it's a string that looks like JSON array, parse it
-      if (typeof field === 'string' && field.startsWith('[')) {
+      // If it's a string, try to parse it as JSON
+      if (typeof data === 'string') {
         try {
-          const parsed = JSON.parse(field);
-          return Array.isArray(parsed) ? parsed.map(String) : [];
-        } catch (e) {
-          console.error('[processInsightsSwotData] Failed to parse JSON string', e);
-          return [field]; // Treat as a single string
+          const parsed = JSON.parse(data);
+          if (Array.isArray(parsed)) {
+            return parsed.map(item => String(item));
+          }
+          // If it's a JSON object but not an array, convert to string
+          return [data];
+        } catch {
+          // Not valid JSON, treat as a single string
+          return [data];
         }
       }
       
-      // If it's an object (likely from supabase jsonb), extract values
-      if (typeof field === 'object') {
-        // Convert keys like "0", "1", "2" to values
-        if (Object.keys(field).every(key => !isNaN(Number(key)))) {
-          return Object.values(field).map(String);
+      // If it's an object with potential nested data
+      if (typeof data === 'object') {
+        // Check for common patterns in how SWOT data might be structured
+        if (data.items && Array.isArray(data.items)) {
+          return data.items.map(item => String(item));
         }
-        
-        // Otherwise return object values
-        return Object.values(field).map(String);
+        if (data.points && Array.isArray(data.points)) {
+          return data.points.map(item => String(item));
+        }
+        if (data.data && Array.isArray(data.data)) {
+          return data.data.map(item => String(item));
+        }
+        // For other object structures, convert to string
+        return [JSON.stringify(data)];
       }
       
-      // Default: treat as a single string
-      return [String(field)];
-    };
-    
-    // Process each category
-    result.strengths = processField(reportData.strengths);
-    result.weaknesses = processField(reportData.weaknesses);
-    result.opportunities = processField(reportData.opportunities);
-    result.threats = processField(reportData.threats);
-    
-    // Add more detailed logging of what was actually processed
-    console.log('[processInsightsSwotData] Detailed SWOT data processed:', {
-      strengthsCount: result.strengths.length,
-      weaknessesCount: result.weaknesses.length,
-      opportunitiesCount: result.opportunities.length,
-      threatsCount: result.threats.length,
-      sampleStrength: result.strengths.length > 0 ? result.strengths[0] : 'none',
-      // Show the raw first entry of each category
-      rawStrengthSample: reportData.strengths ? 
-        (typeof reportData.strengths === 'object' ? 
-          JSON.stringify(reportData.strengths).substring(0, 100) : 
-          String(reportData.strengths).substring(0, 100)
-        ) : 'none'
-    });
-  } catch (error) {
-    console.error('[processInsightsSwotData] Error processing SWOT data:', error);
-  }
+      // Fallback: convert to string and return as single item
+      return [String(data)];
+    } catch (error) {
+      console.error("Error parsing SWOT data:", error);
+      return [];
+    }
+  };
 
-  return result;
-}
+  // Process each section
+  const strengths = parseSwotData(archetypeData.strengths);
+  const weaknesses = parseSwotData(archetypeData.weaknesses);
+  const opportunities = parseSwotData(archetypeData.opportunities);
+  const threats = parseSwotData(archetypeData.threats);
+
+  // Log the processed results
+  console.log("[processInsightsSwotData] Processed results:", {
+    strengthsCount: strengths.length,
+    weaknessesCount: weaknesses.length,
+    opportunitiesCount: opportunities.length,
+    threatsCount: threats.length
+  });
+
+  return {
+    strengths,
+    weaknesses,
+    opportunities,
+    threats
+  };
+};
