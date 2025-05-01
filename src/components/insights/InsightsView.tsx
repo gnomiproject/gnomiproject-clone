@@ -25,8 +25,9 @@ const InsightsView = ({
   assessmentAnswers,
   hideRequestSection = false
 }: ArchetypeReportProps) => {
+  // Always define hooks at the top level
   const [activeTab, setActiveTab] = React.useState('overview');
-  const familyColor = reportData.hexColor || reportData.color || '#4B5563';
+  const familyColor = reportData?.hexColor || reportData?.color || '#4B5563';
   
   // Enhanced logging for assessment data
   useEffect(() => {
@@ -59,11 +60,11 @@ const InsightsView = ({
     }
   }, [assessmentResult, archetypeId]);
 
-  // Ensure we have all the required properties
-  const name = reportData.name || reportData.archetype_name || 'Unknown Archetype';
-  const shortDescription = reportData.short_description || '';
-  const familyId = reportData.familyId || reportData.family_id;
-  const familyName = reportData.familyName || reportData.family_name || '';
+  // Ensure we have all the required properties for rendering
+  const name = reportData?.name || reportData?.archetype_name || 'Unknown Archetype';
+  const shortDescription = reportData?.short_description || '';
+  const familyId = reportData?.familyId || reportData?.family_id;
+  const familyName = reportData?.familyName || reportData?.family_name || '';
 
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">

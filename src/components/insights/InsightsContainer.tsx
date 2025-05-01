@@ -21,10 +21,12 @@ const InsightsContainer = ({
   assessmentResult,
   assessmentAnswers 
 }: InsightsContainerProps) => {
+  // Always define hooks first regardless of condition
   const { getArchetypeDetailedById } = useArchetypes();
   const renderCountRef = useRef(0);
   const processedRef = useRef(false);
   const mountedRef = useRef(true);
+  const [retrying, setRetrying] = React.useState(false);
   
   // Debug calls to identify load sequence
   console.log(`[InsightsContainer] Beginning data fetch for ${archetypeId}`);
@@ -37,8 +39,6 @@ const InsightsContainer = ({
     refetch,
     dataSource 
   } = useGetArchetype(archetypeId, false); 
-  
-  const [retrying, setRetrying] = React.useState(false);
   
   // Enhanced logging for assessment data tracing
   useEffect(() => {
