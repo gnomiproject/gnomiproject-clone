@@ -35,7 +35,7 @@ const ImageDatabaseTest: React.FC = () => {
           data, 
           error,
           count: data ? data.length : 0,
-          projectUrl: supabase.url.toString()
+          projectUrl: supabase.getUrl()
         });
         
         if (error) {
@@ -85,7 +85,7 @@ const ImageDatabaseTest: React.FC = () => {
       ) : (
         <div>
           <div className="bg-blue-50 p-2 rounded mb-2">
-            <p>Supabase Project: <code>{supabase.url.toString()}</code></p>
+            <p>Supabase Project: <code>{supabase.getUrl()}</code></p>
             <p>Table: <code>gnomi_images</code></p>
           </div>
           
