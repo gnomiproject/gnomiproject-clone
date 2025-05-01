@@ -23,13 +23,26 @@ const InsightsSwotTab = ({ archetypeData }: InsightsSwotTabProps) => {
 
     // Enhanced debugging for SWOT data structure
     if (archetypeData) {
+      // Log raw data for each SWOT section
       console.log("[InsightsSwotTab] Raw SWOT data structure:", {
         strengths: archetypeData.strengths,
         strengthsType: typeof archetypeData.strengths,
-        isArray: Array.isArray(archetypeData.strengths),
-        jsonStringified: archetypeData.strengths ? 
-          JSON.stringify(archetypeData.strengths).slice(0, 200) + '...' : 'undefined'
+        isStrengthsArray: Array.isArray(archetypeData.strengths),
+        weaknesses: archetypeData.weaknesses,
+        opportunities: archetypeData.opportunities,
+        threats: archetypeData.threats
       });
+      
+      // If strengths exist, log a sample
+      if (archetypeData.strengths) {
+        const sample = Array.isArray(archetypeData.strengths) 
+          ? archetypeData.strengths[0] 
+          : typeof archetypeData.strengths === 'object'
+            ? JSON.stringify(archetypeData.strengths).slice(0, 100)
+            : archetypeData.strengths;
+        
+        console.log("[InsightsSwotTab] Sample strength:", sample);
+      }
     }
   }, [archetypeData]);
 
