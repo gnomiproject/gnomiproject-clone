@@ -28,12 +28,12 @@ export const getImageByName = async (imageName: string): Promise<string | null> 
   
   // Check cache first
   if (imageCache.has(dbImageName)) {
-    console.log(`[ImageService] Using cached URL for ${dbImageName}`);
+    console.log(`🔴 [ImageService] Using cached URL for ${dbImageName} 🔴`);
     return imageCache.get(dbImageName) || null;
   }
   
   // Add more specific logging
-  console.log(`[ImageService] Fetching image: "${dbImageName}" (from input: "${imageName}")`);
+  console.log(`🔴 [ImageService] Fetching image: "${dbImageName}" (from input: "${imageName}") 🔴`);
   
   try {
     const { data, error } = await supabase
@@ -43,15 +43,15 @@ export const getImageByName = async (imageName: string): Promise<string | null> 
       .maybeSingle();
     
     // Log the full response for debugging
-    console.log(`[ImageService] Supabase response:`, { data, error });
+    console.log(`🔴 [ImageService] Supabase response: 🔴`, { data, error });
     
     if (error) {
-      console.error('[ImageService] Error fetching image:', error);
+      console.error('🔴 [ImageService] Error fetching image:', error, '🔴');
       return null;
     }
     
     if (!data) {
-      console.warn(`[ImageService] Image with name "${dbImageName}" not found`);
+      console.warn(`🔴 [ImageService] Image with name "${dbImageName}" not found 🔴`);
       return null;
     }
     
@@ -59,7 +59,7 @@ export const getImageByName = async (imageName: string): Promise<string | null> 
     imageCache.set(dbImageName, data.image_url);
     return data.image_url;
   } catch (error) {
-    console.error('[ImageService] Unexpected error:', error);
+    console.error('🔴 [ImageService] Unexpected error:', error, '🔴');
     return null;
   }
 };
@@ -81,12 +81,12 @@ export const prefetchImages = async (imageNames: string[]): Promise<void> => {
       .in('image_name', imagesToFetch);
     
     if (error) {
-      console.error('[ImageService] Error prefetching images:', error);
+      console.error('🔴 [ImageService] Error prefetching images:', error, '🔴');
       return;
     }
     
     if (!data || data.length === 0) {
-      console.warn('[ImageService] No images found during prefetch');
+      console.warn('🔴 [ImageService] No images found during prefetch 🔴');
       return;
     }
     
@@ -98,9 +98,9 @@ export const prefetchImages = async (imageNames: string[]): Promise<void> => {
     // Add placeholder to cache
     imageCache.set('placeholder', '/assets/gnomes/placeholder.svg');
     
-    console.log(`[ImageService] Prefetched and cached ${data.length} images`);
+    console.log(`🔴 [ImageService] Prefetched and cached ${data.length} images 🔴`);
   } catch (error) {
-    console.error('[ImageService] Error during prefetch:', error);
+    console.error('🔴 [ImageService] Error during prefetch:', error, '🔴');
   }
 };
 

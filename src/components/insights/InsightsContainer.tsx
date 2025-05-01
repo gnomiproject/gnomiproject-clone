@@ -27,7 +27,7 @@ const InsightsContainer = ({
   
   // Debug calls to identify load sequence - only log once
   useEffect(() => {
-    console.log(`[InsightsContainer] Beginning data fetch for ${archetypeId}`);
+    console.log(`🔴 [InsightsContainer] Beginning data fetch for ${archetypeId} 🔴`);
     
     return () => {
       mountedRef.current = false;
@@ -50,7 +50,7 @@ const InsightsContainer = ({
     
     // Only log on first render or when assessment data changes
     if (renderCountRef.current === 1 || renderCountRef.current % 5 === 0) {
-      console.log(`[InsightsContainer] Mount/Render #${renderCountRef.current} for ${archetypeId}`);
+      console.log(`🔴 [InsightsContainer] Mount/Render #${renderCountRef.current} for ${archetypeId} 🔴`);
     }
     
     // Ensure exactData exists in assessmentResult

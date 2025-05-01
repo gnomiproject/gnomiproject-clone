@@ -18,7 +18,7 @@ const ImageDatabaseTest: React.FC = () => {
         .from('gnomi_images')
         .select('*');
       
-      console.log('IMAGES DB TEST:', { data, error });
+      console.log('🔴 IMAGES DB TEST 🔴:', { data, error });
       
       if (data) {
         setImages(data);
