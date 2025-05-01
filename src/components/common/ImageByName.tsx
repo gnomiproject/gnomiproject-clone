@@ -8,13 +8,19 @@ interface ImageByNameProps {
   altText?: string;
   className?: string;
   fallbackSrc?: string;
+  width?: number;
+  height?: number;
+  onError?: () => void;
 }
 
 const ImageByName: React.FC<ImageByNameProps> = ({
   imageName,
   altText = 'Gnome Image',
   className = 'h-40 w-40 object-contain',
-  fallbackSrc = fallbackGnomeImage
+  fallbackSrc = fallbackGnomeImage,
+  width,
+  height,
+  onError
 }) => {
   const [src, setSrc] = useState<string | null>(null);
   const [error, setError] = useState<boolean>(false);
@@ -70,6 +76,11 @@ const ImageByName: React.FC<ImageByNameProps> = ({
     console.warn(`ImageByName: Error displaying image '${imageName}', falling back to placeholder`);
     setError(true);
     setSrc(fallbackSrc);
+    
+    // Call the onError callback if provided
+    if (onError) {
+      onError();
+    }
   };
   
   if (loading) {
@@ -85,6 +96,8 @@ const ImageByName: React.FC<ImageByNameProps> = ({
       src={src || fallbackSrc}
       alt={altText}
       className={className}
+      width={width}
+      height={height}
       onError={handleError}
     />
   );
