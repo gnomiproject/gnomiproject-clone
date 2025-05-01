@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -178,7 +177,7 @@ const InteractiveDNAExplorer = () => {
           <div className="flex-grow lg:w-2/3">
             <div
               ref={containerRef} 
-              className="relative h-[500px] w-[600px] mx-auto"
+              className="relative h-[500px] w-[400px] mx-auto"
             >
               <DNAHelix 
                 selectedArchetypeId={selectedArchetypeId}

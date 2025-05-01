@@ -96,8 +96,8 @@ const DNAHelix: React.FC<DNAHelixProps> = ({
       const container = canvas.parentElement;
       if (container) {
         // Set a fixed width to avoid stretching
-        canvas.width = 600; // Fixed width of 600px
-        canvas.height = 500; // Updated to 500px height
+        canvas.width = 400; // Updated from 600px to 400px width
+        canvas.height = 500; // Keep the 500px height
         
         // Force a redraw when the canvas size changes or selection changes
         const newStepPositions = drawDNAHelix(ctx, canvas.width, canvas.height, selectedArchetypeId, selectedFamilyId, hoveredStepIndex);
