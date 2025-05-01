@@ -1,10 +1,14 @@
 
+/**
+ * InsightsReportContent Component - Updated to use dedicated SWOT components
+ * This component is for the Insights Report and uses level3_report_secure data
+ */
 import React from 'react';
 import { Section } from '@/components/shared/Section';
 import SectionTitle from '@/components/shared/SectionTitle';
 import StrategicRecommendations from './StrategicRecommendations';
 import GnomeImage from '@/components/common/GnomeImage';
-import SwotAnalysis from './SwotAnalysis'; 
+import DeepDiveSwotAnalysis from './DeepDiveSwotAnalysis';
 
 interface InsightsReportContentProps {
   archetype: any;
@@ -19,7 +23,8 @@ const InsightsReportContent: React.FC<InsightsReportContentProps> = ({ archetype
     swotAnalysisType: typeof archetype?.swot_analysis,
     hasStrategicRecommendations: !!archetype?.strategic_recommendations,
     recommendationsType: typeof archetype?.strategic_recommendations,
-    recommendationsIsArray: Array.isArray(archetype?.strategic_recommendations)
+    recommendationsIsArray: Array.isArray(archetype?.strategic_recommendations),
+    dataSource: 'level4_report_secure'
   });
 
   // Safely extract name and ID from either format (admin or regular)
@@ -63,9 +68,9 @@ const InsightsReportContent: React.FC<InsightsReportContentProps> = ({ archetype
         </div>
       </Section>
       
-      {/* Using SwotAnalysis component consistently */}
+      {/* Using the dedicated DeepDiveSwotAnalysis component for level4_report_secure data */}
       <Section id="swot-analysis">
-        <SwotAnalysis reportData={archetype} />
+        <DeepDiveSwotAnalysis reportData={archetype} />
       </Section>
       
       <Section id="recommendations">
