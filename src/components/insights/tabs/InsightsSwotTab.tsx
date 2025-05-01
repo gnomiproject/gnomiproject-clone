@@ -20,6 +20,16 @@ const InsightsSwotTab = ({ archetypeData }: InsightsSwotTabProps) => {
       name: archetypeData?.name || archetypeData?.archetype_name,
       dataSource: 'level3_report_secure'
     });
+
+    // Enhanced debugging for SWOT data structure
+    if (archetypeData) {
+      console.log("[InsightsSwotTab] Raw SWOT data structure:", {
+        strengths: archetypeData.strengths,
+        strengthsType: typeof archetypeData.strengths,
+        isArray: Array.isArray(archetypeData.strengths),
+        jsonStringified: JSON.stringify(archetypeData.strengths).slice(0, 200) + '...'
+      });
+    }
   }, [archetypeData]);
 
   // Check if we have the necessary data
