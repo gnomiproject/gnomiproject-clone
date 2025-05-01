@@ -10,7 +10,6 @@ import WebsiteImage from '@/components/common/WebsiteImage';
 
 const InteractiveDNAExplorer = () => {
   const [renderCount, setRenderCount] = useState(0);
-  const [isExpanded, setIsExpanded] = useState(false);
   const [selectedArchetypeId, setSelectedArchetypeId] = useState<string | null>(null);
   const [selectedFamilyId, setSelectedFamilyId] = useState<'a' | 'b' | 'c' | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -79,11 +78,6 @@ const InteractiveDNAExplorer = () => {
     }
   };
 
-  // Toggle expanded view
-  const toggleExpanded = () => {
-    setIsExpanded(prev => !prev);
-  };
-
   // Safeguard to prevent rendering if data is not available
   if (!healthcareArchetypes || healthcareArchetypes.length === 0) {
     return <EmptyExplorerState />;
@@ -120,9 +114,7 @@ const InteractiveDNAExplorer = () => {
           <div className="flex-grow lg:w-2/3">
             <div
               ref={containerRef} 
-              className={`relative transition-all duration-500 ease-in-out overflow-hidden ${
-                isExpanded ? 'h-[600px]' : 'h-[350px]'
-              }`}
+              className="relative h-[600px] w-full max-w-[800px] mx-auto"
             >
               <DNAHelix 
                 selectedArchetypeId={selectedArchetypeId}
@@ -131,16 +123,6 @@ const InteractiveDNAExplorer = () => {
                 onFamilyClick={handleFamilyClick}
                 className="w-full h-full"
               />
-            </div>
-            
-            <div className="text-center mt-4">
-              <Button 
-                variant="ghost" 
-                onClick={toggleExpanded}
-                className="text-blue-600"
-              >
-                {isExpanded ? 'Show Less' : 'Expand View'}
-              </Button>
             </div>
           </div>
           
