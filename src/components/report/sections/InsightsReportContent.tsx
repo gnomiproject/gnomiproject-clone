@@ -15,8 +15,9 @@ const InsightsReportContent: React.FC<InsightsReportContentProps> = ({ archetype
   console.log('[DEBUG] InsightsReportContent data:', {
     id: archetype?.id || archetype?.archetype_id,
     name: archetype?.name || archetype?.archetype_name,
-    hasStrengths: !!archetype?.strengths,
-    hasRecommendations: !!archetype?.strategic_recommendations,
+    hasSwotAnalysis: !!archetype?.swot_analysis,
+    swotAnalysisType: typeof archetype?.swot_analysis,
+    hasStrategicRecommendations: !!archetype?.strategic_recommendations,
     recommendationsType: typeof archetype?.strategic_recommendations,
     recommendationsIsArray: Array.isArray(archetype?.strategic_recommendations)
   });
@@ -50,7 +51,7 @@ const InsightsReportContent: React.FC<InsightsReportContentProps> = ({ archetype
               <div className="mt-2 font-mono text-xs overflow-auto max-h-32">
                 <p>Archetype ID: {id}</p>
                 <p>Archetype Name: {name}</p>
-                <p>Has Strengths: {archetype?.strengths ? 'Yes' : 'No'}</p>
+                <p>Has SWOT Analysis: {archetype?.swot_analysis ? 'Yes' : 'No'}</p>
                 <p>Has Recommendations: {archetype?.strategic_recommendations ? 'Yes' : 'No'}</p>
                 <p>Recommendations Type: {typeof archetype?.strategic_recommendations}</p>
               </div>
@@ -64,7 +65,7 @@ const InsightsReportContent: React.FC<InsightsReportContentProps> = ({ archetype
       
       {/* Using SwotAnalysis component consistently */}
       <Section id="swot-analysis">
-        <SwotAnalysis archetypeData={archetype} />
+        <SwotAnalysis reportData={archetype} />
       </Section>
       
       <Section id="recommendations">

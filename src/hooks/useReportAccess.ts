@@ -96,19 +96,16 @@ export const useReportAccess = ({ archetypeId: rawArchetypeId, token, isAdminVie
         console.log(`[useReportAccess] Got level4 deep dive data for ${archetypeId}`);
         
         // Log the available fields related to SWOT
+        const swotAnalysisField = data.swot_analysis;
+        
         console.log("[useReportAccess] SWOT data check:", {
-          hasSwotAnalysisField: 'swot_analysis' in data,
-          hasStrengthsField: 'strengths' in data,
-          hasWeaknessesField: 'weaknesses' in data,
-          hasOpportunitiesField: 'opportunities' in data,
-          hasThreatsField: 'threats' in data,
-          swotAnalysisType: data.swot_analysis ? typeof data.swot_analysis : 'N/A',
-          strengthsType: data.strengths ? typeof data.strengths : 'N/A',
-          sampleData: data.strengths ? (
-            Array.isArray(data.strengths) ? 
-              `Array with ${data.strengths.length} items` : 
-              `Non-array: ${typeof data.strengths}`
-          ) : 'N/A'
+          hasSwotAnalysisField: !!swotAnalysisField,
+          swotAnalysisType: swotAnalysisField ? typeof swotAnalysisField : 'N/A',
+          swotSampleData: swotAnalysisField 
+            ? (typeof swotAnalysisField === 'object' 
+                ? `Object with keys: ${Object.keys(swotAnalysisField).join(', ')}` 
+                : typeof swotAnalysisField)
+            : 'N/A'
         });
         
         setReportData(data);
@@ -118,7 +115,7 @@ export const useReportAccess = ({ archetypeId: rawArchetypeId, token, isAdminVie
           level4Query: {
             success: true,
             dataFound: true,
-            swotDataAvailable: !!(data.swot_analysis || data.strengths)
+            swotDataAvailable: !!swotAnalysisField
           }
         }));
 

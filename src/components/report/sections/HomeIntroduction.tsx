@@ -5,7 +5,6 @@ import SectionTitle from '@/components/shared/SectionTitle';
 import ReportIntroduction from './ReportIntroduction';
 import WelcomeCard from './introduction/WelcomeCard';
 import ArchetypeOverviewCard from './introduction/ArchetypeOverviewCard';
-import { normalizeSwotData } from '@/utils/swot/normalizeSwotData';
 
 interface HomeIntroductionProps {
   userData: any;
@@ -37,8 +36,12 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
                             archetypeData?.traits || 
                             [];
   
-  // Normalize characteristics array
-  const characteristics = normalizeSwotData(rawCharacteristics);
+  // Simply convert any non-array characteristics to an array
+  const characteristics = Array.isArray(rawCharacteristics) 
+    ? rawCharacteristics 
+    : typeof rawCharacteristics === 'string' 
+      ? [rawCharacteristics] 
+      : [];
   
   // Debug logging
   console.log('[HomeIntroduction] Archetype data:', {

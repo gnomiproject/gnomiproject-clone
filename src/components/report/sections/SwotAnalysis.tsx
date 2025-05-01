@@ -22,7 +22,7 @@ const SwotAnalysis: React.FC<SwotAnalysisProps> = ({ reportData, archetypeData, 
   console.log("[SwotAnalysis] Data source check:", {
     hasReportData: !!reportData,
     reportDataSource: reportData ? "level4_report_secure" : "none",
-    swotDataAvailable: !!(reportData?.swot_analysis || reportData?.strengths),
+    swotDataAvailable: !!(reportData?.swot_analysis),
     swotAnalysisType: reportData?.swot_analysis ? typeof reportData.swot_analysis : "N/A"
   });
 
@@ -68,12 +68,8 @@ const SwotAnalysis: React.FC<SwotAnalysisProps> = ({ reportData, archetypeData, 
       [String(items)];
   };
 
-  // Get SWOT components directly from the data with priority order
-  // 1. Use props.swotData if provided (for testing/override)
-  // 2. Use swot_analysis object if available
-  // 3. Use direct fields if available
-  const swotAnalysis = data?.swot_analysis || {};
-  
+  // Get SWOT components from the data with appropriate type safety
+  // We need to handle the swot_analysis as a potential Record<string, any>
   let strengths: string[] = [];
   let weaknesses: string[] = [];
   let opportunities: string[] = [];
@@ -87,18 +83,12 @@ const SwotAnalysis: React.FC<SwotAnalysisProps> = ({ reportData, archetypeData, 
     threats = getSwotItems(propSwotData.threats);
   }
   // Handle data from swot_analysis object
-  else if (typeof swotAnalysis === 'object' && swotAnalysis !== null) {
-    strengths = getSwotItems(swotAnalysis.strengths);
-    weaknesses = getSwotItems(swotAnalysis.weaknesses);
-    opportunities = getSwotItems(swotAnalysis.opportunities);
-    threats = getSwotItems(swotAnalysis.threats);
-  }
-  // Handle data from direct fields
-  else {
-    strengths = getSwotItems(data?.strengths);
-    weaknesses = getSwotItems(data?.weaknesses);
-    opportunities = getSwotItems(data?.opportunities);
-    threats = getSwotItems(data?.threats);
+  else if (data?.swot_analysis && typeof data.swot_analysis === 'object') {
+    const swotObj = data.swot_analysis as Record<string, any>;
+    strengths = getSwotItems(swotObj.strengths);
+    weaknesses = getSwotItems(swotObj.weaknesses);
+    opportunities = getSwotItems(swotObj.opportunities);
+    threats = getSwotItems(swotObj.threats);
   }
 
   // If no data available, show no data message
