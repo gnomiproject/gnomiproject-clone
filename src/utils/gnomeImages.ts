@@ -1,3 +1,4 @@
+
 /**
  * Utility for centralized access to gnome images
  * These images should be used across the application for consistency
@@ -10,7 +11,7 @@ export const directImageMap: Record<string, string> = {
   'clipboard': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_clipboard.png',
   'reports': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_report.png',
   'welcome': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_welcome.png',
-  'magnifying': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_magnifying.png',
+  'magnifying_glass': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_magnifying.png',
   'analysis': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_analysis.png',
   'profile': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_profile.png',
   'report': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_report.png',
@@ -42,6 +43,7 @@ export const gnomeImages: Record<string, string> = {
   clipboard: 'reports',
   welcome: 'healthcare',
   magnifying: 'metrics',
+  magnifying_glass: 'metrics',
   profile: 'analysis',
   placeholder: 'placeholder'
 };

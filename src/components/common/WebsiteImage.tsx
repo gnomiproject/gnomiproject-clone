@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { getImageUrl, WebsiteImageType, FALLBACK_IMAGE } from '@/utils/imageService';
 
 interface WebsiteImageProps {
@@ -21,12 +21,20 @@ const WebsiteImage: React.FC<WebsiteImageProps> = ({
   onLoad,
   onError
 }) => {
+  const [hasError, setHasError] = useState(false);
+  const [loadedImage, setLoadedImage] = useState<string | null>(null);
+  
   // Get the image URL from Supabase storage
   const imageUrl = getImageUrl(type);
   
   // Handle image loading errors
   const handleError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    console.warn(`Failed to load image: ${type}`);
+    console.warn(`Failed to load image: ${type}`, {
+      attemptedUrl: e.currentTarget.src,
+      fallbackUrl: FALLBACK_IMAGE
+    });
+    
+    setHasError(true);
     
     // Set fallback image
     if (e.currentTarget.src !== FALLBACK_IMAGE) {
@@ -36,6 +44,11 @@ const WebsiteImage: React.FC<WebsiteImageProps> = ({
     if (onError) onError();
   };
   
+  const handleLoad = () => {
+    setLoadedImage(imageUrl);
+    if (onLoad) onLoad();
+  };
+  
   return (
     <img
       src={imageUrl}
@@ -43,7 +56,7 @@ const WebsiteImage: React.FC<WebsiteImageProps> = ({
       className={className}
       width={width}
       height={height}
-      onLoad={onLoad}
+      onLoad={handleLoad}
       onError={handleError}
     />
   );
