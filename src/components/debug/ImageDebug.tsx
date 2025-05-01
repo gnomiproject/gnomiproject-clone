@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, getSupabaseUrl } from '@/integrations/supabase/client';
 
 const ImageDebug = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -23,7 +23,7 @@ const ImageDebug = () => {
         console.log('🔎 [ImageDebug] Direct Supabase query result:', { 
           data, 
           error,
-          projectUrl: (supabase as any).getUrl(),
+          projectUrl: getSupabaseUrl(),
           recordCount: data?.length || 0
         });
         

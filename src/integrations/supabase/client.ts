@@ -90,6 +90,9 @@ export const supabase = createClient<Database>(
 // Helper for detecting admin mode throughout the app
 export const isAdmin = isAdminMode();
 
+// Add a function to get the Supabase URL
+export const getSupabaseUrl = () => SUPABASE_URL;
+
 // Add a dedicated test function for security
 export const testRlsAccess = async () => {
   try {

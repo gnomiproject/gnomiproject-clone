@@ -1,5 +1,5 @@
 
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, getSupabaseUrl } from '@/integrations/supabase/client';
 import { gnomeImages } from '@/utils/gnomeImages';
 
 // Type definitions for our image data
@@ -47,7 +47,7 @@ export const getImageByName = async (imageName: string): Promise<string | null> 
       .maybeSingle();
     
     // Get Supabase URL for debugging
-    const projectUrl = (supabase as any).getUrl();
+    const projectUrl = getSupabaseUrl();
     const projectRef = projectUrl.split('://')[1]?.split('.')[0] || 'unknown';
     
     // Log the full response for debugging
@@ -97,7 +97,7 @@ export const testDatabaseAccess = async (): Promise<GnomeImage[] | null> => {
       .select('*');
     
     // Get Supabase URL for debugging
-    const projectUrl = (supabase as any).getUrl();
+    const projectUrl = getSupabaseUrl();
     const projectRef = projectUrl.split('://')[1]?.split('.')[0] || 'unknown';
     
     console.log('🔴 [ImageService] All records test: 🔴', { 

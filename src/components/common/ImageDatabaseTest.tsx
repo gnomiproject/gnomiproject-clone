@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, getSupabaseUrl } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 
 interface ImageRecord {
@@ -35,7 +35,7 @@ const ImageDatabaseTest: React.FC = () => {
           data, 
           error,
           count: data ? data.length : 0,
-          projectUrl: (supabase as any).getUrl()
+          projectUrl: getSupabaseUrl()
         });
         
         if (error) {
