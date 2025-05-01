@@ -28,7 +28,6 @@ const InsightsView = ({
 }: ArchetypeReportProps) => {
   // Always define hooks at the top level
   const [activeTab, setActiveTab] = React.useState('overview');
-  const familyColor = reportData?.hexColor || reportData?.color || '#4B5563';
   
   // Enhanced logging for assessment data
   useEffect(() => {
@@ -77,11 +76,21 @@ const InsightsView = ({
     );
   }
 
+  // For debugging SWOT data issues
+  useEffect(() => {
+    console.log('[InsightsView] SWOT data availability check:', {
+      directStrengths: reportData.strengths ? 'Available' : 'Not available',
+      swotAnalysis: reportData.swot_analysis ? 'Available' : 'Not available',
+      enhancedSwot: reportData.enhanced?.swot ? 'Available' : 'Not available',
+    });
+  }, [reportData]);
+
   // Ensure we have all the required properties for rendering
   const name = reportData?.name || reportData?.archetype_name || 'Unknown Archetype';
   const shortDescription = reportData?.short_description || '';
   const familyId = reportData?.familyId || reportData?.family_id;
   const familyName = reportData?.familyName || reportData?.family_name || '';
+  const familyColor = reportData?.hexColor || reportData?.color || reportData?.hex_color || '#4B5563';
 
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">

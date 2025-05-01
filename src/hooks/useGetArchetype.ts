@@ -166,7 +166,7 @@ export const useGetArchetype = (archetypeId: ArchetypeId, skipCache: boolean = f
       
       // Only show this toast once
       if (fetchFailedRef.current && archetypeId) {
-        toast.info("Using offline data for " + archetypeId, {
+        toast.info(`Using offline data for ${archetypeId}`, {
           id: `offline-data-${archetypeId}`,
           duration: 3000
         });
@@ -178,9 +178,8 @@ export const useGetArchetype = (archetypeId: ArchetypeId, skipCache: boolean = f
 
   // Force refresh data with debounce to prevent rapid calls
   const refreshData = useCallback(async () => {
-    // Use standard toast method with title and description
-    toast({
-      title: "Refreshing Data",
+    // Use standard toast method that's compatible with sonner
+    toast.info("Refreshing Data", {
       description: "Fetching the latest archetype information..."
     });
     
@@ -198,15 +197,12 @@ export const useGetArchetype = (archetypeId: ArchetypeId, skipCache: boolean = f
     
     try {
       await refetch();
-      toast({
-        title: "Refresh Successful",
+      toast.success("Refresh Successful", {
         description: "Archetype data has been updated."
       });
     } catch (e) {
-      toast({
-        title: "Refresh Failed",
-        description: "Using offline data. Check your network connection.",
-        variant: "destructive" // Use destructive variant for error toasts
+      toast.error("Refresh Failed", {
+        description: "Using offline data. Check your network connection."
       });
       
       // Set fallback data when refresh fails

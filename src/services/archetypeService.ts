@@ -2,7 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { ArchetypeId } from '@/types/archetype';
 import { getCachedArchetype, cacheArchetype } from '@/utils/archetype/cacheUtils';
-import archetypesDetailedData from '@/data/archetypesDetailed';
+import * as archetypesDetailedData from '@/data/archetypesDetailed';
 
 /**
  * Fetch archetype data from Supabase with improved fallback handling
@@ -121,7 +121,9 @@ export const fetchArchetypeData = async (archetypeId: ArchetypeId, skipCache: bo
 const getStaticArchetypeData = (archetypeId: ArchetypeId) => {
   try {
     // Try to find matching archetype by ID in our static data
-    const archetypeData = archetypesDetailedData.find(
+    const archetypeData = archetypesDetailedData.default?.find?.(
+      archetype => archetype.id === archetypeId
+    ) || archetypesDetailedData.find?.(
       archetype => archetype.id === archetypeId
     );
     

@@ -23,8 +23,10 @@ export const normalizeSwotData = (data: any): string[] => {
   if (Array.isArray(data) && data.length > 0 && typeof data[0] === 'object') {
     return data.map(item => {
       if (!item) return '';
+      if (typeof item === 'string') return item;
       if (item.text) return item.text;
       if (item.description) return item.description;
+      if (typeof item === 'object' && Object.keys(item).length === 0) return '';
       return JSON.stringify(item);
     }).filter(Boolean);
   }
@@ -40,8 +42,11 @@ export const normalizeSwotData = (data: any): string[] => {
           return JSON.stringify(item);
         }).filter(Boolean);
       }
+      // If it's not an array after parsing, wrap it in an array
+      return [String(parsed)];
     } catch (e) {
       // If parsing fails, treat as a single string
+      console.log('Failed to parse JSON string in normalizeSwotData:', e);
       return [data];
     }
   }
@@ -66,5 +71,6 @@ export const normalizeSwotData = (data: any): string[] => {
   }
   
   // Fallback: convert whatever we have to string array
+  console.log('Using fallback conversion in normalizeSwotData for:', data);
   return Array.isArray(data) ? data.map(item => String(item || '')).filter(Boolean) : [String(data)];
 };
