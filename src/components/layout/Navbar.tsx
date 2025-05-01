@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { Menu } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { BetaBadge } from '@/components/shared/BetaBadge';
+import WebsiteImage from '@/components/common/WebsiteImage';
 import { testRlsAccess } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -40,9 +41,9 @@ const Navbar = () => {
   return (
     <nav className="w-full py-5 px-6 md:px-12 flex justify-between items-center relative">
       <Link to="/" className="flex items-center">
-        <img 
-          src="/lovable-uploads/c7752575-8c92-44b3-a9ae-8ee62f19c77a.png" 
-          alt="g nomi logo" 
+        <WebsiteImage 
+          type="logo" 
+          altText="g.nomi logo" 
           className="h-8"
         />
         <BetaBadge className="ml-2" />
