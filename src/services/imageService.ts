@@ -33,17 +33,24 @@ export const getImageByName = async (imageName: string): Promise<string | null> 
   }
   
   // Add more specific logging
-  console.log(`🔴 [ImageService] Fetching image: "${dbImageName}" (from input: "${imageName}") 🔴`);
+  console.log(`🔴 [ImageService] QUERY START: Looking for image_name = "${dbImageName}" (from input: "${imageName}") 🔴`);
   
   try {
     const { data, error } = await supabase
       .from('gnomi_images')
-      .select('image_url')
+      .select('*')  // Select all columns for debugging
       .eq('image_name', dbImageName)
       .maybeSingle();
     
     // Log the full response for debugging
-    console.log(`🔴 [ImageService] Supabase response: 🔴`, { data, error });
+    console.log(`🔴 [ImageService] QUERY RESULT: 🔴`, { 
+      data, 
+      error,
+      dataType: data ? typeof data : 'undefined',
+      isArray: Array.isArray(data),
+      requestedImage: dbImageName,
+      supabaseProjectRef: supabase.realtimeUrl.split('/')[2].split('.')[0]
+    });
     
     if (error) {
       console.error('🔴 [ImageService] Error fetching image:', error, '🔴');
@@ -60,6 +67,31 @@ export const getImageByName = async (imageName: string): Promise<string | null> 
     return data.image_url;
   } catch (error) {
     console.error('🔴 [ImageService] Unexpected error:', error, '🔴');
+    return null;
+  }
+};
+
+/**
+ * Tests database access by querying all records from the gnomi_images table
+ * @returns Array of image records or null if error
+ */
+export const testDatabaseAccess = async (): Promise<GnomeImage[] | null> => {
+  try {
+    console.log('🔴 [ImageService] Testing database access... 🔴');
+    const { data, error } = await supabase
+      .from('gnomi_images')
+      .select('*');
+    
+    console.log('🔴 [ImageService] All records test: 🔴', { 
+      data, 
+      error,
+      count: data ? data.length : 0,
+      supabaseProjectRef: supabase.realtimeUrl.split('/')[2].split('.')[0]
+    });
+    
+    return data;
+  } catch (e) {
+    console.error('🔴 [ImageService] Test query error:', e, '🔴');
     return null;
   }
 };
