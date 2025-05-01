@@ -1,4 +1,3 @@
-
 /**
  * Utility for centralized access to gnome images
  * These images should be used across the application for consistency
@@ -48,7 +47,7 @@ export const gnomeImages: Record<string, string> = {
 };
 
 // Direct path to the fallback image to use when dynamic loading fails
-export const fallbackGnomeImage = '/assets/gnomes/placeholder.svg';
+export const fallbackGnomeImage = 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_chart.png';
 
 /**
  * Get a gnome image by archetype ID

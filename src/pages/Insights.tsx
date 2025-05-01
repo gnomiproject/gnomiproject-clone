@@ -7,10 +7,7 @@ import NoAssessmentResults from '@/components/insights/NoAssessmentResults';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
 import InsightsContainer from '@/components/insights/InsightsContainer';
-// Debug components removed or hidden
-import TestImage from '@/components/common/TestImage';
-import ImageDatabaseTest from '@/components/common/ImageDatabaseTest';
-import ImageDebug from '@/components/debug/ImageDebug';
+// Debug components import removed
 
 // Storage keys
 const INSIGHTS_STORAGE_KEY = 'healthcareArchetypeInsights';
@@ -258,15 +255,7 @@ const Insights = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-6 md:px-12 pb-24 relative">
       <div className="max-w-5xl mx-auto">
-        {/* Add the new ImageDebug component at the very top */}
-        <ImageDebug />
-        
-        {/* Add Image Test Components at the top for debugging */}
-        <div className="mb-8 border-4 border-red-500 p-4 bg-red-50 rounded-lg">
-          <h2 className="text-xl font-bold text-red-800 mb-4">⚠️ Image Service Debug Panel ⚠️</h2>
-          <TestImage />
-          <ImageDatabaseTest />
-        </div>
+        {/* Debug components removed */}
 
         {/* Show assessment results if an archetype is selected */}
         {selectedArchetype ? (
