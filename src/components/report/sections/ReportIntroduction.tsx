@@ -89,7 +89,7 @@ const ReportIntroduction = ({
           <WebsiteImage 
             type="magnifying_glass" 
             altText="Gnome with magnifying glass"
-            className="h-20 w-20 object-contain flex-shrink-0"
+            className="h-40 w-40 object-contain flex-shrink-0"
           />
           <div>
             <h2 className="text-xl font-semibold text-gray-800 mb-3">Let's Dive Deep</h2>
