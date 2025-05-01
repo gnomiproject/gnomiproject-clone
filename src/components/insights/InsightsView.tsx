@@ -1,4 +1,3 @@
-
 import React, { useEffect, useMemo } from 'react';
 import { ArchetypeId, ArchetypeDetailedData } from '@/types/archetype';
 import ArchetypeNavTabs from './components/ArchetypeNavTabs';
@@ -8,7 +7,7 @@ import MetricsTab from './tabs/MetricsTab';
 import SwotTab from './tabs/SwotTab';
 import DiseaseAndCareTab from './tabs/DiseaseAndCareTab';
 import DeepDiveRequestForm from '@/components/results/DeepDiveRequestForm';
-import { getGnomeForArchetype } from '@/utils/gnomeImages';
+import { getImageForArchetype } from '@/utils/imageService';
 
 interface ArchetypeReportProps {
   archetypeId: ArchetypeId;
@@ -93,7 +92,7 @@ const InsightsView = ({
         familyName={familyName}
         familyColor={familyColor}
         archetypeHexColor={familyColor}
-        gnomeImage={getGnomeForArchetype(archetypeId)}
+        gnomeImage={getImageForArchetype(archetypeId)}
       />
       
       <ArchetypeNavTabs activeTab={activeTab} onTabChange={setActiveTab} />

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import GnomeImage from '@/components/common/GnomeImage';
+import WebsiteImage from '@/components/common/WebsiteImage';
 
 interface GnomePlaceholderProps {
   type?: string;
@@ -10,19 +10,23 @@ interface GnomePlaceholderProps {
 }
 
 const GnomePlaceholder = ({ 
-  type = 'welcome', 
+  type = 'chart', 
   className = 'h-full w-full object-contain p-4',
   altText,
   showDebug = false
 }: GnomePlaceholderProps) => {
   return (
     <div className="flex items-center justify-center bg-gray-100 rounded-lg w-full h-full">
-      <GnomeImage 
+      <WebsiteImage 
         type={type} 
         className={className} 
-        alt={altText || `Gnome ${type} illustration`} // Changed from altText to alt to match expected prop
-        showDebug={showDebug}
+        altText={altText || `Gnome ${type} illustration`}
       />
+      {showDebug && (
+        <div className="absolute top-0 left-0 bg-blue-500/80 text-white text-xs px-2 py-1 rounded-br">
+          {type}
+        </div>
+      )}
     </div>
   );
 };

@@ -1,7 +1,7 @@
 
 import React from 'react';
-import ImageByName from './ImageByName';
-import { fallbackGnomeImage } from '@/utils/gnomeImages';
+import WebsiteImage from './WebsiteImage';
+import { FALLBACK_IMAGE } from '@/utils/imageService';
 
 interface GnomeImageProps {
   type?: string;
@@ -21,13 +21,6 @@ const GnomeImage: React.FC<GnomeImageProps> = ({
   height
 }) => {
   const [hasError, setHasError] = React.useState(false);
-  const [imageName, setImageName] = React.useState(type);
-  
-  // Normalize image type
-  React.useEffect(() => {
-    // This ensures we're always using a valid image name
-    setImageName(type || 'placeholder');
-  }, [type]);
   
   const handleError = () => {
     console.error(`[GnomeImage] Failed to load gnome image: ${type}`);
@@ -36,13 +29,12 @@ const GnomeImage: React.FC<GnomeImageProps> = ({
 
   return (
     <div className="relative">
-      <ImageByName
-        imageName={imageName}
+      <WebsiteImage
+        type={type}
         altText={alt}
         className={className}
         width={width}
         height={height}
-        fallbackSrc={fallbackGnomeImage}
         onError={handleError}
       />
       

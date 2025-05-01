@@ -3,7 +3,7 @@ import React from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Info } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import ImageByName from '@/components/common/ImageByName';
+import WebsiteImage from '@/components/common/WebsiteImage';
 
 interface ArchetypeHeaderProps {
   name: string;
@@ -59,11 +59,10 @@ const ArchetypeHeader = ({
           </div>
           
           <div className="flex-shrink-0 hidden md:block">
-            <ImageByName 
-              imageName={gnomeImage || `gnome_${familyId?.toLowerCase()}`}
+            <WebsiteImage 
+              type={gnomeImage || `${familyId?.toLowerCase()}`}
               altText={`${name} Guide`}
               className="h-48 object-contain"
-              fallbackSrc="/assets/gnomes/placeholder.svg"
             />
           </div>
         </div>

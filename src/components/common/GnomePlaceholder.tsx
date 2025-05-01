@@ -1,7 +1,6 @@
 
 import React from 'react';
-import { fallbackGnomeImage } from '@/utils/gnomeImages';
-import GnomeImage from './GnomeImage';
+import WebsiteImage from './WebsiteImage';
 
 interface GnomePlaceholderProps {
   type?: string;
@@ -11,18 +10,17 @@ interface GnomePlaceholderProps {
 }
 
 const GnomePlaceholder: React.FC<GnomePlaceholderProps> = ({ 
-  type = 'charts', 
+  type = 'chart', 
   className = 'h-full w-full object-contain p-4',
   alt = 'Gnome illustration',
   showDebugInfo = false
 }) => {
   return (
     <div className="flex items-center justify-center bg-gray-100 rounded-lg w-full h-full relative">
-      <GnomeImage 
+      <WebsiteImage 
         type={type} 
-        alt={alt} // Fixed: was using altText which doesn't match the prop in GnomeImage
-        className={className} 
-        showDebug={showDebugInfo}
+        altText={alt}
+        className={className}
       />
       
       {showDebugInfo && (
