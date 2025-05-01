@@ -17,6 +17,11 @@ const imageCache = new Map<string, string>();
  * @returns The URL of the image or null if not found
  */
 export const getImageByName = async (imageName: string): Promise<string | null> => {
+  // Special case for placeholder - return the local path directly
+  if (imageName === 'placeholder') {
+    return '/assets/gnomes/placeholder.svg';
+  }
+  
   // Check if image URL is already in cache
   if (imageCache.has(imageName)) {
     console.log(`[ImageService] Using cached URL for ${imageName}`);
@@ -57,11 +62,16 @@ export const getImageByName = async (imageName: string): Promise<string | null> 
  * @param imageNames Array of image names to prefetch
  */
 export const prefetchImages = async (imageNames: string[]): Promise<void> => {
+  // Filter out placeholder as it doesn't need to be fetched from the database
+  const imagesToFetch = imageNames.filter(name => name !== 'placeholder');
+  
+  if (imagesToFetch.length === 0) return;
+  
   try {
     const { data, error } = await supabase
       .from('gnomi_images')
       .select('image_name, image_url')
-      .in('image_name', imageNames);
+      .in('image_name', imagesToFetch);
     
     if (error) {
       console.error('[ImageService] Error prefetching images:', error);
@@ -77,6 +87,9 @@ export const prefetchImages = async (imageNames: string[]): Promise<void> => {
     data.forEach((item: GnomeImage) => {
       imageCache.set(item.image_name, item.image_url);
     });
+    
+    // Add placeholder to cache
+    imageCache.set('placeholder', '/assets/gnomes/placeholder.svg');
     
     console.log(`[ImageService] Prefetched and cached ${data.length} images`);
   } catch (error) {
