@@ -9,14 +9,27 @@ const TestImage = () => {
   const [loading, setLoading] = useState(true);
   const [allImages, setAllImages] = useState<any[] | null>(null);
   const [isTestingDb, setIsTestingDb] = useState(false);
+  const [imageError, setImageError] = useState<string | null>(null);
   
   useEffect(() => {
     const testImages = async () => {
+      setLoading(true);
+      setImageError(null);
+      
       const testNames = ['gnome_chart', 'charts'];
       const results: Record<string, string | null> = {};
       
       for (const name of testNames) {
-        results[name] = await getImageByName(name);
+        try {
+          results[name] = await getImageByName(name);
+          if (!results[name]) {
+            setImageError(`Failed to load image "${name}"`);
+          }
+        } catch (error) {
+          console.error(`Error loading image "${name}":`, error);
+          setImageError(`Error loading "${name}": ${error instanceof Error ? error.message : String(error)}`);
+          results[name] = null;
+        }
       }
       
       setImageUrls(results);
@@ -31,6 +44,9 @@ const TestImage = () => {
     try {
       const results = await testDatabaseAccess();
       setAllImages(results);
+    } catch (error) {
+      console.error('Error testing database access:', error);
+      setImageError(`Database test error: ${error instanceof Error ? error.message : String(error)}`);
     } finally {
       setIsTestingDb(false);
     }
@@ -62,6 +78,14 @@ const TestImage = () => {
         )}
       </div>
       
+      {/* Display any errors */}
+      {imageError && (
+        <div className="p-2 bg-red-100 text-red-700 rounded mb-4">
+          <p className="font-bold">Error:</p>
+          <p>{imageError}</p>
+        </div>
+      )}
+      
       {/* Direct image test */}
       <div className="p-4 border border-red-500 bg-red-50 mb-4">
         <h3 className="text-md font-bold">Direct Image Test</h3>
@@ -74,6 +98,10 @@ const TestImage = () => {
               src={fallbackGnomeImage}
               alt="Fallback SVG" 
               className="h-32 border-2 border-blue-500" 
+              onError={(e) => {
+                console.error('Error loading fallback SVG:', e);
+                setImageError(`Failed to load fallback SVG: ${fallbackGnomeImage}`);
+              }}
             />
             <p className="text-xs mt-1">Source: {fallbackGnomeImage}</p>
           </div>
@@ -84,6 +112,10 @@ const TestImage = () => {
               src="https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_chart.png" 
               alt="Direct test" 
               className="h-32 border-2 border-green-500" 
+              onError={(e) => {
+                console.error('Error loading direct Supabase image:', e);
+                setImageError('Failed to load image directly from Supabase URL');
+              }}
             />
             <p className="text-xs mt-1">Source: supabase/gnome-images/gnome_chart.png</p>
           </div>
@@ -102,7 +134,15 @@ const TestImage = () => {
               <p className="text-sm text-gray-600 break-all">URL: {url || 'Not found'}</p>
               {url && 
                 <div className="mt-2 border p-2">
-                  <img src={url} alt={name} className="h-32 object-contain mx-auto" />
+                  <img 
+                    src={url} 
+                    alt={name} 
+                    className="h-32 object-contain mx-auto" 
+                    onError={(e) => {
+                      console.error(`Error loading image from URL: ${url}`, e);
+                      setImageError(`Failed to load image from URL: ${url}`);
+                    }}
+                  />
                 </div>
               }
             </div>

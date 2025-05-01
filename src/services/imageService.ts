@@ -35,6 +35,10 @@ export const getImageByName = async (imageName: string): Promise<string | null> 
   // Add more specific logging
   console.log(`🔴 [ImageService] QUERY START: Looking for image_name = "${dbImageName}" (from input: "${imageName}") 🔴`);
   
+  // Log the SQL query that would be executed for this request
+  const queryString = `SELECT * FROM public.gnomi_images WHERE image_name = '${dbImageName}'`;
+  console.log(`🔴 [ImageService] SQL query: 🔴`, queryString);
+  
   try {
     const { data, error } = await supabase
       .from('gnomi_images')
@@ -42,8 +46,9 @@ export const getImageByName = async (imageName: string): Promise<string | null> 
       .eq('image_name', dbImageName)
       .maybeSingle();
     
-    // Extract project ref from URL for debugging
-    const projectRef = new URL(supabase.getUrl()).hostname.split('.')[0];
+    // Get Supabase URL for debugging
+    const projectUrl = supabase.url.toString();
+    const projectRef = projectUrl.split('://')[1]?.split('.')[0] || 'unknown';
     
     // Log the full response for debugging
     console.log(`🔴 [ImageService] QUERY RESULT: 🔴`, { 
@@ -52,7 +57,8 @@ export const getImageByName = async (imageName: string): Promise<string | null> 
       dataType: data ? typeof data : 'undefined',
       isArray: Array.isArray(data),
       requestedImage: dbImageName,
-      supabaseProjectRef: projectRef
+      supabaseProjectRef: projectRef,
+      supabaseUrl: projectUrl
     });
     
     if (error) {
@@ -81,18 +87,25 @@ export const getImageByName = async (imageName: string): Promise<string | null> 
 export const testDatabaseAccess = async (): Promise<GnomeImage[] | null> => {
   try {
     console.log('🔴 [ImageService] Testing database access... 🔴');
+    
+    // Log the SQL query that would be executed
+    const queryString = `SELECT * FROM public.gnomi_images`;
+    console.log('🔴 [ImageService] SQL query: 🔴', queryString);
+    
     const { data, error } = await supabase
       .from('gnomi_images')
       .select('*');
     
-    // Extract project ref from URL for debugging
-    const projectRef = new URL(supabase.getUrl()).hostname.split('.')[0];
+    // Get Supabase URL for debugging
+    const projectUrl = supabase.url.toString();
+    const projectRef = projectUrl.split('://')[1]?.split('.')[0] || 'unknown';
     
     console.log('🔴 [ImageService] All records test: 🔴', { 
       data, 
       error,
       count: data ? data.length : 0,
-      supabaseProjectRef: projectRef
+      supabaseProjectRef: projectRef,
+      supabaseUrl: projectUrl
     });
     
     return data;

@@ -23,6 +23,10 @@ const ImageDatabaseTest: React.FC = () => {
       try {
         console.log('🔴 [ImageDatabaseTest] Fetching all images from gnomi_images table... 🔴');
         
+        // Log the raw query that would be executed
+        const queryString = `SELECT * FROM public.gnomi_images`;
+        console.log('🔴 [ImageDatabaseTest] SQL query: 🔴', queryString);
+        
         const { data, error } = await supabase
           .from('gnomi_images')
           .select('*');
@@ -31,7 +35,7 @@ const ImageDatabaseTest: React.FC = () => {
           data, 
           error,
           count: data ? data.length : 0,
-          projectUrl: supabase.getUrl()
+          projectUrl: supabase.url.toString()
         });
         
         if (error) {
@@ -81,7 +85,7 @@ const ImageDatabaseTest: React.FC = () => {
       ) : (
         <div>
           <div className="bg-blue-50 p-2 rounded mb-2">
-            <p>Supabase Project: <code>{supabase.getUrl()}</code></p>
+            <p>Supabase Project: <code>{supabase.url.toString()}</code></p>
             <p>Table: <code>gnomi_images</code></p>
           </div>
           
