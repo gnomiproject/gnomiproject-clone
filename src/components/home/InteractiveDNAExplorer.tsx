@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -173,8 +174,8 @@ const InteractiveDNAExplorer = () => {
         </div>
         
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Left side: DNA Visualization */}
-          <div className="flex-grow lg:w-2/3">
+          {/* Left side: DNA Visualization - reduced width proportion */}
+          <div className="flex-grow lg:w-1/2">
             <div
               ref={containerRef} 
               className="relative h-[500px] w-[400px] mx-auto"
@@ -189,8 +190,8 @@ const InteractiveDNAExplorer = () => {
             </div>
           </div>
           
-          {/* Right side: Details sidebar that changes based on selection */}
-          <div className="lg:w-1/3">
+          {/* Right side: Details sidebar that changes based on selection - increased width proportion */}
+          <div className="lg:w-1/2">
             {selectedArchetypeId ? (
               /* Show archetype details when an archetype is selected */
               <ArchetypeDetailView 
