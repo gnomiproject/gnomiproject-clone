@@ -7,6 +7,7 @@ import React, { useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArchetypeDetailedData } from '@/types/archetype';
 import { processInsightsSwotData } from '@/utils/swot/processInsightsSwotData';
+import GnomeImage from '@/components/common/GnomeImage';
 
 interface InsightsSwotTabProps {
   archetypeData: ArchetypeDetailedData;
@@ -67,7 +68,12 @@ const InsightsSwotTab = ({ archetypeData }: InsightsSwotTabProps) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-2xl">SWOT Analysis for {archetypeData.name || archetypeData.archetype_name || "This Archetype"}</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-2xl">SWOT Analysis for {archetypeData.name || archetypeData.archetype_name || "This Archetype"}</CardTitle>
+          <div className="hidden md:block">
+            <GnomeImage type="charts" className="h-24 object-contain" alt="SWOT Analysis Gnome" />
+          </div>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

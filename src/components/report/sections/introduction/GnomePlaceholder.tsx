@@ -1,5 +1,6 @@
 
 import React from 'react';
+import GnomeImage from '@/components/common/GnomeImage';
 
 interface GnomePlaceholderProps {
   type?: string;
@@ -7,10 +8,12 @@ interface GnomePlaceholderProps {
 
 const GnomePlaceholder = ({ type = 'welcome' }: GnomePlaceholderProps) => {
   return (
-    <div className="flex items-center justify-center bg-gray-100 rounded-lg w-full h-full">
-      <div className="text-center">
-        <div className="text-xs text-gray-500">Gnome Image ({type})</div>
-      </div>
+    <div className="flex items-center justify-center w-full h-full">
+      <GnomeImage 
+        type={type} 
+        className="w-full h-full object-contain" 
+        alt={`Healthcare Gnome (${type})`}
+      />
     </div>
   );
 };

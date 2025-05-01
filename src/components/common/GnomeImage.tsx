@@ -1,6 +1,6 @@
 
-import React from 'react';
-import { gnomeImages, fallbackGnomeImage } from '@/utils/gnomeImages';
+import React, { useEffect } from 'react';
+import { gnomeImages, fallbackGnomeImage, fetchGnomeImages } from '@/utils/gnomeImages';
 
 interface GnomeImageProps {
   type?: string;
@@ -15,6 +15,11 @@ const GnomeImage: React.FC<GnomeImageProps> = ({
   alt = 'Healthcare Gnome',
   showDebug = false
 }) => {
+  // Fetch gnome images when component mounts
+  useEffect(() => {
+    fetchGnomeImages();
+  }, []);
+  
   // Get image source with fallback
   const getImageSource = () => {
     if (type && gnomeImages[type as any]) {
@@ -26,6 +31,11 @@ const GnomeImage: React.FC<GnomeImageProps> = ({
   
   const [src, setSrc] = React.useState<string>(getImageSource());
   const [hasError, setHasError] = React.useState(false);
+  
+  // Update src if image mappings change
+  useEffect(() => {
+    setSrc(getImageSource());
+  }, [type, gnomeImages]);
   
   const handleError = () => {
     console.error(`Failed to load gnome image: ${src}`);

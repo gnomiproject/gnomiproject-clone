@@ -1,4 +1,3 @@
-
 /**
  * Utility function for processing SWOT analysis data specifically for the Insights page
  * ONLY used with data from level3_report_secure table
@@ -44,77 +43,63 @@ export function processInsightsSwotData(reportData: any): SwotData {
 
   // Process each SWOT category
   try {
-    // Direct array handling - if the field is already an array, it will be used directly
-    if (Array.isArray(reportData.strengths)) {
-      result.strengths = reportData.strengths.map(String);
-    } 
-    // JSON array handling - if the field is a stringified JSON array
-    else if (typeof reportData.strengths === 'string' && reportData.strengths.startsWith('[')) {
-      try {
-        result.strengths = JSON.parse(reportData.strengths);
-      } catch (e) {
-        result.strengths = [reportData.strengths];
+    // Helper function to process different data formats
+    const processField = (field: any): string[] => {
+      if (!field) {
+        return [];
       }
-    }
-    // Object handling - sometimes data comes as an object with values
-    else if (reportData.strengths && typeof reportData.strengths === 'object') {
-      result.strengths = Object.values(reportData.strengths).map(String);
-    }
-
-    // Process weaknesses
-    if (Array.isArray(reportData.weaknesses)) {
-      result.weaknesses = reportData.weaknesses.map(String);
-    } 
-    else if (typeof reportData.weaknesses === 'string' && reportData.weaknesses.startsWith('[')) {
-      try {
-        result.weaknesses = JSON.parse(reportData.weaknesses);
-      } catch (e) {
-        result.weaknesses = [reportData.weaknesses];
+      
+      // If it's already an array of strings, use it directly
+      if (Array.isArray(field) && field.every(item => typeof item === 'string')) {
+        return field;
       }
-    }
-    else if (reportData.weaknesses && typeof reportData.weaknesses === 'object') {
-      result.weaknesses = Object.values(reportData.weaknesses).map(String);
-    }
-
-    // Process opportunities
-    if (Array.isArray(reportData.opportunities)) {
-      result.opportunities = reportData.opportunities.map(String);
-    } 
-    else if (typeof reportData.opportunities === 'string' && reportData.opportunities.startsWith('[')) {
-      try {
-        result.opportunities = JSON.parse(reportData.opportunities);
-      } catch (e) {
-        result.opportunities = [reportData.opportunities];
+      
+      // If it's a string that looks like JSON array, parse it
+      if (typeof field === 'string' && field.startsWith('[')) {
+        try {
+          const parsed = JSON.parse(field);
+          return Array.isArray(parsed) ? parsed.map(String) : [];
+        } catch (e) {
+          console.error('[processInsightsSwotData] Failed to parse JSON string', e);
+          return [field]; // Treat as a single string
+        }
       }
-    }
-    else if (reportData.opportunities && typeof reportData.opportunities === 'object') {
-      result.opportunities = Object.values(reportData.opportunities).map(String);
-    }
-
-    // Process threats
-    if (Array.isArray(reportData.threats)) {
-      result.threats = reportData.threats.map(String);
-    } 
-    else if (typeof reportData.threats === 'string' && reportData.threats.startsWith('[')) {
-      try {
-        result.threats = JSON.parse(reportData.threats);
-      } catch (e) {
-        result.threats = [reportData.threats];
+      
+      // If it's an object (likely from supabase jsonb), extract values
+      if (typeof field === 'object') {
+        // Convert keys like "0", "1", "2" to values
+        if (Object.keys(field).every(key => !isNaN(Number(key)))) {
+          return Object.values(field).map(String);
+        }
+        
+        // Otherwise return object values
+        return Object.values(field).map(String);
       }
-    }
-    else if (reportData.threats && typeof reportData.threats === 'object') {
-      result.threats = Object.values(reportData.threats).map(String);
-    }
-
+      
+      // Default: treat as a single string
+      return [String(field)];
+    };
+    
+    // Process each category
+    result.strengths = processField(reportData.strengths);
+    result.weaknesses = processField(reportData.weaknesses);
+    result.opportunities = processField(reportData.opportunities);
+    result.threats = processField(reportData.threats);
+    
     // Add more detailed logging of what was actually processed
     console.log('[processInsightsSwotData] Detailed SWOT data processed:', {
       strengthsCount: result.strengths.length,
       weaknessesCount: result.weaknesses.length,
       opportunitiesCount: result.opportunities.length,
       threatsCount: result.threats.length,
-      sampleStrength: result.strengths.length > 0 ? result.strengths[0] : 'none'
+      sampleStrength: result.strengths.length > 0 ? result.strengths[0] : 'none',
+      // Show the raw first entry of each category
+      rawStrengthSample: reportData.strengths ? 
+        (typeof reportData.strengths === 'object' ? 
+          JSON.stringify(reportData.strengths).substring(0, 100) : 
+          String(reportData.strengths).substring(0, 100)
+        ) : 'none'
     });
-
   } catch (error) {
     console.error('[processInsightsSwotData] Error processing SWOT data:', error);
   }
