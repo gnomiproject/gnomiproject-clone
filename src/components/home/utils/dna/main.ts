@@ -12,7 +12,7 @@ export const drawDNAHelix = (
   ctx: CanvasRenderingContext2D,
   width: number,
   height: number,
-  selectedArchetypeId?: ArchetypeId | null,
+  selectedArchetypeId?: string | null,
   selectedFamilyId?: 'a' | 'b' | 'c' | null,
   hoveredStepIndex?: number | null
 ): StepPosition[] => {

@@ -1,3 +1,4 @@
+
 import { ArchetypeId } from '@/types/archetype';
 import { StepPosition } from '../../types/dnaHelix';
 import { getArchetypeColor } from './colors';
@@ -8,7 +9,7 @@ import { getArchetypeColor } from './colors';
 export const drawSteps = (
   ctx: CanvasRenderingContext2D,
   stepPositions: StepPosition[],
-  selectedArchetypeId: ArchetypeId | null | undefined,
+  selectedArchetypeId: string | null | undefined,
   selectedFamilyId: 'a' | 'b' | 'c' | null | undefined,
   hoveredStepIndex: number | null = null
 ) => {
@@ -22,7 +23,7 @@ export const drawSteps = (
     const isSelected = selectedArchetypeId && archetypeId === selectedArchetypeId;
     
     // Get the archetype color for this step
-    const stepColor = getArchetypeColor(archetypeId);
+    const stepColor = getArchetypeColor(archetypeId as ArchetypeId);
     
     // Create gradient for the step to fade on the left side
     const stepGradient = ctx.createLinearGradient(x1, y, x2, y);
@@ -106,7 +107,7 @@ export const drawLeaderLinesAndCircles = (
   ctx: CanvasRenderingContext2D,
   stepPositions: StepPosition[],
   width: number,
-  selectedArchetypeId: ArchetypeId | null | undefined,
+  selectedArchetypeId: string | null | undefined,
   selectedFamilyId: 'a' | 'b' | 'c' | null | undefined,
   hoveredStepIndex: number | null = null
 ) => {
@@ -124,7 +125,7 @@ export const drawLeaderLinesAndCircles = (
     const isSelected = selectedArchetypeId && archetypeId === selectedArchetypeId;
     
     // Get the archetype color for this leader line
-    const archetypeColor = getArchetypeColor(archetypeId);
+    const archetypeColor = getArchetypeColor(archetypeId as ArchetypeId);
     
     // Draw leader line with the archetype color
     ctx.beginPath();

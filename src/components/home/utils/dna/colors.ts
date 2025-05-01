@@ -1,4 +1,3 @@
-
 import { ArchetypeId } from '@/types/archetype';
 import { ARCHETYPE_COLORS } from '@/data/colors';
 
@@ -24,19 +23,19 @@ export const createDNAGradients = (ctx: CanvasRenderingContext2D, height: number
 /**
  * Returns the appropriate color for an archetype circle
  */
-export const getArchetypeColor = (archetypeId: ArchetypeId, hexColor?: string): string => {
+export const getArchetypeColor = (archetypeId: string | ArchetypeId, hexColor?: string): string => {
   // If a hex color is provided, use it directly
   if (hexColor) {
     return hexColor;
   }
   
   // Otherwise, get from our centralized colors
-  return ARCHETYPE_COLORS[archetypeId] || '#888888';
+  return ARCHETYPE_COLORS[archetypeId as ArchetypeId] || '#888888';
 };
 
 /**
  * Get the hex color for an archetype
  */
-export const getArchetypeHexColor = (archetypeId: ArchetypeId): string => {
-  return ARCHETYPE_COLORS[archetypeId] || '#888888';
+export const getArchetypeHexColor = (archetypeId: string | ArchetypeId): string => {
+  return ARCHETYPE_COLORS[archetypeId as ArchetypeId] || '#888888';
 };
