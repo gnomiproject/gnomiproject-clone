@@ -61,11 +61,13 @@ export const fetchArchetypeData = async (archetypeId: ArchetypeId, skipCache: bo
         threatsContent: data.threats
       });
       
-      // Check if SWOT might be in swot_analysis field instead
-      if (data.swot_analysis) {
+      // Check if there's a separate swot_analysis object in the data
+      // Use optional chaining and type checking to avoid TypeScript errors
+      const swotAnalysisField = (data as any).swot_analysis;
+      if (swotAnalysisField) {
         console.log("[archetypeService] Found swot_analysis field:", {
-          type: typeof data.swot_analysis,
-          content: data.swot_analysis
+          type: typeof swotAnalysisField,
+          content: swotAnalysisField
         });
       }
       
