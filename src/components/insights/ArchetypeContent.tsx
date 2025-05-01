@@ -37,8 +37,8 @@ const ArchetypeContent: React.FC<ArchetypeContentProps> = ({ archetype, archetyp
   const familyId = archetype?.family_id || 'unknown';
   const familyName = archetype?.familyName || archetype?.family_name || 'Unknown Family';
   
-  // Get color data
-  const archetypeHexColor = archetype?.hexColor || archetype?.hex_color || '#3b82f6'; // Default blue if not set
+  // Get color data - use only properties that exist on the type
+  const archetypeHexColor = archetype?.hexColor || '#3b82f6'; // Default blue if not set
   const familyColor = archetypeHexColor; // Use the same color for now
   
   return (
