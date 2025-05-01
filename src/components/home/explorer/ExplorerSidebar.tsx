@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import WebsiteImage from '@/components/common/WebsiteImage';
 import ArchetypeDetailView from '../ArchetypeDetailView';
 import FamilyDetailView from '../FamilyDetailView';
@@ -44,7 +43,7 @@ const ExplorerSidebar: React.FC<ExplorerSidebarProps> = ({
     );
   }
 
-  // Default state: Show gnome and CTA
+  // Default state: Show gnome and CTA with hyperlink instead of button
   return (
     <div className="bg-blue-50 p-6 rounded-lg border border-blue-100 flex flex-col items-center justify-center">
       <WebsiteImage 
@@ -55,12 +54,8 @@ const ExplorerSidebar: React.FC<ExplorerSidebarProps> = ({
       
       <h3 className="text-2xl font-bold text-blue-700 mb-2">Come Play with the DNA!</h3>
       <p className="text-gray-600 mb-6 text-center">
-        Click around the helix to explore what makes each archetype unique. Then take the assessment to discover which one matches your organization.
+        Click around the helix to explore what makes each archetype unique. Then <Link to="/assessment" className="text-blue-600 hover:text-blue-800 font-medium underline">take the assessment</Link> to discover which one matches your organization.
       </p>
-      
-      <Button asChild size="lg">
-        <Link to="/assessment">Take the Assessment</Link>
-      </Button>
     </div>
   );
 };
