@@ -90,7 +90,7 @@ const InteractiveDNAExplorer = () => {
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-4">
             <h2 className="text-xl font-bold">Healthcare Archetype Families</h2>
-            <p className="text-gray-600 mt-2 text-sm">
+            <p className="text-gray-350 mt-2 text-sm">
               View on desktop to explore the interactive DNA visualization.
             </p>
           </div>
