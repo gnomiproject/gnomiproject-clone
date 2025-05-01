@@ -7,7 +7,6 @@ import React, { useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArchetypeDetailedData } from '@/types/archetype';
 import { processInsightsSwotData } from '@/utils/swot/processInsightsSwotData';
-import GnomeImage from '@/components/common/GnomeImage';
 
 interface InsightsSwotTabProps {
   archetypeData: ArchetypeDetailedData;
@@ -29,11 +28,21 @@ const InsightsSwotTab = ({ archetypeData }: InsightsSwotTabProps) => {
         strengths: archetypeData.strengths,
         strengthsType: typeof archetypeData.strengths,
         isStrengthsArray: Array.isArray(archetypeData.strengths),
-        strengthsContent: JSON.stringify(archetypeData.strengths).slice(0, 100),
         weaknesses: archetypeData.weaknesses,
         opportunities: archetypeData.opportunities,
         threats: archetypeData.threats
       });
+      
+      // If strengths exist, log a sample
+      if (archetypeData.strengths) {
+        const sample = Array.isArray(archetypeData.strengths) 
+          ? archetypeData.strengths[0] 
+          : typeof archetypeData.strengths === 'object'
+            ? JSON.stringify(archetypeData.strengths).slice(0, 100)
+            : archetypeData.strengths;
+        
+        console.log("[InsightsSwotTab] Sample strength:", sample);
+      }
     }
   }, [archetypeData]);
 
@@ -58,17 +67,7 @@ const InsightsSwotTab = ({ archetypeData }: InsightsSwotTabProps) => {
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-2xl">SWOT Analysis for {archetypeData.name || archetypeData.archetype_name || "This Archetype"}</CardTitle>
-          <div className="hidden md:block">
-            <GnomeImage 
-              type="charts" 
-              className="h-24 object-contain" 
-              alt="SWOT Analysis Gnome" 
-              showDebug={true}
-            />
-          </div>
-        </div>
+        <CardTitle className="text-2xl">SWOT Analysis for {archetypeData.name || archetypeData.archetype_name || "This Archetype"}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

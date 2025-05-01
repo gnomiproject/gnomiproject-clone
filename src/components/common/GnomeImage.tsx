@@ -1,6 +1,6 @@
 
-import React, { useEffect, useState } from 'react';
-import { gnomeImages, fallbackGnomeImage, fetchGnomeImages } from '@/utils/gnomeImages';
+import React from 'react';
+import { gnomeImages, fallbackGnomeImage } from '@/utils/gnomeImages';
 
 interface GnomeImageProps {
   type?: string;
@@ -15,28 +15,6 @@ const GnomeImage: React.FC<GnomeImageProps> = ({
   alt = 'Healthcare Gnome',
   showDebug = false
 }) => {
-  const [src, setSrc] = useState<string>(fallbackGnomeImage);
-  const [hasError, setHasError] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  
-  // Fetch gnome images when component mounts
-  useEffect(() => {
-    const loadImages = async () => {
-      try {
-        await fetchGnomeImages();
-        const imageSrc = getImageSource();
-        console.log(`GnomeImage: Loading image for type "${type}" from source:`, imageSrc);
-        setSrc(imageSrc);
-      } catch (error) {
-        console.error('Error loading gnome images:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    loadImages();
-  }, [type]);
-  
   // Get image source with fallback
   const getImageSource = () => {
     if (type && gnomeImages[type as any]) {
@@ -45,6 +23,9 @@ const GnomeImage: React.FC<GnomeImageProps> = ({
     console.warn(`GnomeImage: Unknown type "${type}", using fallback`);
     return fallbackGnomeImage;
   };
+  
+  const [src, setSrc] = React.useState<string>(getImageSource());
+  const [hasError, setHasError] = React.useState(false);
   
   const handleError = () => {
     console.error(`Failed to load gnome image: ${src}`);
@@ -56,21 +37,15 @@ const GnomeImage: React.FC<GnomeImageProps> = ({
   
   return (
     <div className="relative">
-      {isLoading ? (
-        <div className={`${className} bg-gray-100 animate-pulse flex items-center justify-center`}>
-          <span className="text-gray-400">Loading...</span>
-        </div>
-      ) : (
-        <img
-          src={src}
-          alt={alt}
-          className={className}
-          onError={handleError}
-        />
-      )}
+      <img
+        src={src}
+        alt={alt}
+        className={className}
+        onError={handleError}
+      />
       {showDebug && (
         <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-1 text-xs">
-          {hasError ? 'Using fallback' : `Type: ${type}, URL: ${src}`}
+          {hasError ? 'Using fallback' : `Type: ${type}`}
         </div>
       )}
     </div>
