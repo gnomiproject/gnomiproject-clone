@@ -25,7 +25,6 @@ const ImageByName: React.FC<ImageByNameProps> = ({
   const [src, setSrc] = useState<string | null>(null);
   const [error, setError] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
-  const [loadAttempts, setLoadAttempts] = useState<number>(0);
   
   useEffect(() => {
     let isMounted = true;
@@ -42,11 +41,13 @@ const ImageByName: React.FC<ImageByNameProps> = ({
       try {
         setLoading(true);
         setError(false);
+        
+        // Use the simplified getImageByName function
         const imageUrl = await getImageByName(imageName);
         
         if (isMounted) {
           if (imageUrl) {
-            console.log(`[ImageByName] Successfully retrieved URL for '${imageName}': ${imageUrl}`);
+            console.log(`[ImageByName] Using URL for '${imageName}': ${imageUrl}`);
             setSrc(imageUrl);
             setError(false);
           } else {
@@ -74,19 +75,12 @@ const ImageByName: React.FC<ImageByNameProps> = ({
     return () => {
       isMounted = false;
     };
-  }, [imageName, fallbackSrc, loadAttempts]);
+  }, [imageName, fallbackSrc]);
   
   const handleError = () => {
     console.warn(`[ImageByName] Error displaying image '${imageName}', falling back to placeholder`);
     setError(true);
     setSrc(fallbackSrc);
-    
-    // Retry loading the image once if it fails, but with a short delay
-    if (loadAttempts < 1) {
-      setTimeout(() => {
-        setLoadAttempts(prev => prev + 1);
-      }, 1000);
-    }
     
     // Call the onError callback if provided
     if (onError) {

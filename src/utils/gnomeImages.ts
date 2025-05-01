@@ -4,6 +4,22 @@
  * These images should be used across the application for consistency
  */
 
+// Direct image mapping to URLs
+export const directImageMap: Record<string, string> = {
+  'gnome_chart': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_chart.png',
+  'charts': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_chart.png',
+  'clipboard': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_clipboard.png',
+  'reports': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_report.png',
+  'welcome': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_welcome.png',
+  'magnifying': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_magnifying.png',
+  'analysis': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_analysis.png',
+  'profile': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_profile.png',
+  'report': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_report.png',
+  'presentation': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_presentation.png',
+  'healthcare': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_healthcare.png',
+  'metrics': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_metrics.png',
+};
+
 // Gnome image types with descriptive names
 export type GnomeImageType = 
   | 'charts'       // Gnome with charts/analytics
@@ -14,7 +30,6 @@ export type GnomeImageType =
   | 'placeholder';  // Fallback image
 
 // Map of gnome image names to use with our ImageByName component
-// These should match the image_name values in the gnomi_images table
 export const gnomeImages: Record<string, string> = {
   // Direct mappings (same name in UI as in DB)
   charts: 'charts',
