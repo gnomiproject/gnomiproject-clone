@@ -7,8 +7,8 @@ import React from 'react';
 import { Section } from '@/components/shared/Section';
 import SectionTitle from '@/components/shared/SectionTitle';
 import StrategicRecommendations from './StrategicRecommendations';
-import GnomeImage from '@/components/common/GnomeImage';
 import DeepDiveSwotAnalysis from './DeepDiveSwotAnalysis';
+import { fallbackGnomeImage } from '@/utils/gnomeImages';
 
 interface InsightsReportContentProps {
   archetype: any;
@@ -62,8 +62,17 @@ const InsightsReportContent: React.FC<InsightsReportContentProps> = ({ archetype
               </div>
             </div>
             <div className="flex justify-center">
-              {/* Always use the charts gnome type here */}
-              <GnomeImage type="charts" showDebug={true} />
+              {/* Use a simple image tag to avoid component loading issues */}
+              <div className="relative">
+                <img
+                  src={fallbackGnomeImage}
+                  alt="Gnome Chart Illustration"
+                  className="h-48 object-contain"
+                />
+                <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-1 text-xs">
+                  Type: placeholder (fallback)
+                </div>
+              </div>
             </div>
           </div>
         </div>

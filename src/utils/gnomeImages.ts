@@ -30,7 +30,7 @@ export const gnomeImages: Record<string, string> = {
   placeholder: 'placeholder'
 };
 
-// Fallback URL to use when an image fails to load
+// Direct path to the fallback image to use when dynamic loading fails
 export const fallbackGnomeImage = '/assets/gnomes/placeholder.svg';
 
 /**
