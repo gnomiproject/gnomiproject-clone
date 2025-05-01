@@ -52,6 +52,7 @@ export const getGnomeForArchetype = (archetypeId: string): string => {
     'P1': 'presentation',
     'P2': 'welcome',
     'P3': 'report',
+    'B1': 'charts', // Adding B1 mapping to charts gnome
     'B2': 'charts' // Add B2 mapping to charts gnome
   };
   
