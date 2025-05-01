@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
+import WebsiteImage from '@/components/common/WebsiteImage';
 
 const EmptyExplorerState: React.FC = () => {
   return (
@@ -8,7 +9,7 @@ const EmptyExplorerState: React.FC = () => {
       {/* Left side: Gnome image */}
       <div className="shrink-0 mb-4 md:mb-0 md:mr-6">
         <img 
-          src="/lovable-uploads/81530cfd-8e54-4bfc-8fda-6658f15d9b8b.png" 
+          src="/lovable-uploads/9e5a2471-8a62-4a31-b47c-73c424acdb9f.png" 
           alt="Friendly gnome character" 
           className="h-32 md:h-40"
         />

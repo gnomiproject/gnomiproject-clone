@@ -1,6 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 import DNAHelix from './DNAHelix';
 import { healthcareArchetypes } from '@/data/healthcareArchetypes';
 import EmptyExplorerState from './EmptyExplorerState';
@@ -107,35 +108,58 @@ const InteractiveDNAExplorer = () => {
     <section id="dna-explorer" className="relative py-12 bg-gradient-to-b from-white to-gray-50">
       <div className="max-w-6xl mx-auto px-6 md:px-12">
         <div className="text-center mb-6">
-          <h2 className="text-2xl md:text-3xl font-bold">Explore Healthcare Archetype DNA</h2>
+          <h2 className="text-2xl md:text-3xl font-bold">Explore the DNA of Employer Healthcare</h2>
           <p className="text-gray-600 mt-2">
-            See how nine distinct healthcare profiles form three interconnected families.
+            We've identified 9 distinct employer archetypes, grouped into 3 families based on how organizations manage healthcare.
           </p>
         </div>
         
-        <div
-          ref={containerRef} 
-          className={`relative transition-all duration-500 ease-in-out overflow-hidden ${
-            isExpanded ? 'h-[600px]' : 'h-[350px]'
-          }`}
-        >
-          <DNAHelix 
-            selectedArchetypeId={selectedArchetypeId}
-            onStepClick={handleArchetypeClick}
-            selectedFamilyId={selectedFamilyId}
-            onFamilyClick={handleFamilyClick}
-            className="w-full h-full"
-          />
-        </div>
-        
-        <div className="text-center mt-4">
-          <Button 
-            variant="ghost" 
-            onClick={toggleExpanded}
-            className="text-blue-600"
-          >
-            {isExpanded ? 'Show Less' : 'Expand View'}
-          </Button>
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Left side: DNA Visualization */}
+          <div className="flex-grow lg:w-2/3">
+            <div
+              ref={containerRef} 
+              className={`relative transition-all duration-500 ease-in-out overflow-hidden ${
+                isExpanded ? 'h-[600px]' : 'h-[350px]'
+              }`}
+            >
+              <DNAHelix 
+                selectedArchetypeId={selectedArchetypeId}
+                onStepClick={handleArchetypeClick}
+                selectedFamilyId={selectedFamilyId}
+                onFamilyClick={handleFamilyClick}
+                className="w-full h-full"
+              />
+            </div>
+            
+            <div className="text-center mt-4">
+              <Button 
+                variant="ghost" 
+                onClick={toggleExpanded}
+                className="text-blue-600"
+              >
+                {isExpanded ? 'Show Less' : 'Expand View'}
+              </Button>
+            </div>
+          </div>
+          
+          {/* Right side: Gnome and CTA */}
+          <div className="lg:w-1/3 bg-blue-50 p-6 rounded-lg border border-blue-100 flex flex-col items-center justify-center">
+            <img 
+              src="/lovable-uploads/9e5a2471-8a62-4a31-b47c-73c424acdb9f.png" 
+              alt="Friendly gnome character" 
+              className="h-32 mb-4"
+            />
+            
+            <h3 className="text-2xl font-bold text-blue-700 mb-2">Come Play with the DNA!</h3>
+            <p className="text-gray-600 mb-6 text-center">
+              Click around the helix to explore what makes each archetype unique. Then take the assessment to discover which one matches your organization.
+            </p>
+            
+            <Button asChild size="lg">
+              <Link to="/assessment">Take the Assessment</Link>
+            </Button>
+          </div>
         </div>
       </div>
     </section>
