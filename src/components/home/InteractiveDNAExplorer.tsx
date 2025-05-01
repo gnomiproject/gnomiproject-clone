@@ -1,71 +1,25 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
-import DNAHelix from './DNAHelix';
+
+import React, { useState } from 'react';
 import { healthcareArchetypes } from '@/data/healthcareArchetypes';
-import EmptyExplorerState from './EmptyExplorerState';
 import { useIsMobile } from '@/hooks/use-mobile';
-import WebsiteImage from '@/components/common/WebsiteImage';
-import ArchetypeDetailView from './ArchetypeDetailView';
-import FamilyDetailView from './FamilyDetailView';
-import { useArchetypes } from '@/hooks/useArchetypes';
+import EmptyExplorerState from './EmptyExplorerState';
+import { useExplorerData } from './explorer/useExplorerData';
+import ExplorerHeader from './explorer/ExplorerHeader';
+import DNAVisualization from './explorer/DNAVisualization';
+import ExplorerSidebar from './explorer/ExplorerSidebar';
+import MobileExplorerFallback from './explorer/MobileExplorerFallback';
 
 const InteractiveDNAExplorer = () => {
-  const [renderCount, setRenderCount] = useState(0);
   const [selectedArchetypeId, setSelectedArchetypeId] = useState<string | null>(null);
   const [selectedFamilyId, setSelectedFamilyId] = useState<'a' | 'b' | 'c' | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const initialized = useRef(false);
   const isMobile = useIsMobile();
   
-  // Access archetype data
+  // Use the explorer data hook
   const { 
-    getAllArchetypeSummaries,
-    getArchetypeSummary,
-    getFamilyById
-  } = useArchetypes();
-
-  // Track mount/render count for debugging purposes
-  useEffect(() => {
-    const sequence = renderCount + 1;
-    setRenderCount(sequence);
-    console.info(`InteractiveDNAExplorer: Mount/Render #${sequence}`);
-    
-    return () => {
-      console.info("InteractiveDNAExplorer: Unmounting");
-    };
-  }, []);
-
-  // Format archetypes data for display
-  const formattedArchetypes = React.useMemo(() => {
-    console.info(`InteractiveDNAExplorer: Formatting archetype summaries (sequence #${renderCount})`);
-    try {
-      // Process archetypes for DNA helix visualization
-      return {
-        familyA: healthcareArchetypes.filter(a => a.familyId === 'A').map(a => ({
-          id: a.id,
-          name: a.name,
-          description: a.shortDescription || '',
-          color: a.hexColor
-        })),
-        familyB: healthcareArchetypes.filter(a => a.familyId === 'B').map(a => ({
-          id: a.id,
-          name: a.name,
-          description: a.shortDescription || '',
-          color: a.hexColor
-        })),
-        familyC: healthcareArchetypes.filter(a => a.familyId === 'C').map(a => ({
-          id: a.id,
-          name: a.name,
-          description: a.shortDescription || '',
-          color: a.hexColor
-        }))
-      };
-    } catch (error) {
-      console.error("Error formatting archetype data:", error);
-      return { familyA: [], familyB: [], familyC: [] };
-    }
-  }, [renderCount]);
+    formatArchetypeSummary,
+    getFamilyInfo,
+    getAllArchetypeSummaries
+  } = useExplorerData();
 
   // Handle archetype selection
   const handleArchetypeClick = (archetypeId: string) => {
@@ -95,133 +49,40 @@ const InteractiveDNAExplorer = () => {
     }
   };
 
-  // Get the selected archetype details for the sidebar
-  const selectedArchetype = selectedArchetypeId ? 
-    getArchetypeSummary(selectedArchetypeId as any) : null;
-
-  // Get the selected family details for the sidebar
-  const selectedFamily = selectedFamilyId ? 
-    getFamilyById(selectedFamilyId.toUpperCase() as any) : null;
-
-  // Create family info for display in the sidebar
-  const getFamilyInfo = (familyId: 'a' | 'b' | 'c') => {
-    const family = getFamilyById(familyId.toUpperCase() as any);
-    return {
-      id: familyId,
-      name: family?.name || `Family ${familyId.toUpperCase()}`,
-      description: family?.description || `Description for Family ${familyId.toUpperCase()}`,
-      commonTraits: family?.commonTraits || []
-    };
-  };
-
-  // Format the selected archetype summary for display
-  const formatArchetypeSummary = (archetypeId: string) => {
-    const archetype = getArchetypeSummary(archetypeId as any);
-    
-    if (!archetype) {
-      // Fallback to static data if dynamic data is not available
-      const staticArchetype = healthcareArchetypes.find(a => a.id === archetypeId);
-      return {
-        id: archetypeId,
-        familyId: staticArchetype?.familyId.toLowerCase() as 'a' | 'b' | 'c' || 'a',
-        name: staticArchetype?.name || `Archetype ${archetypeId}`,
-        familyName: `Family ${staticArchetype?.familyId || 'Unknown'}`,
-        description: staticArchetype?.shortDescription || 'No description available',
-        keyCharacteristics: ['No characteristics available']
-      };
-    }
-    
-    return {
-      id: archetype.id,
-      familyId: (archetype.familyId || '').toLowerCase() as 'a' | 'b' | 'c',
-      name: archetype.name,
-      familyName: archetype.familyName || 'Unknown Family',
-      description: archetype.description || 'No description available',
-      keyCharacteristics: archetype.keyCharacteristics || []
-    };
-  };
-
   // Safeguard to prevent rendering if data is not available
   if (!healthcareArchetypes || healthcareArchetypes.length === 0) {
     return <EmptyExplorerState />;
   }
 
-  // If on mobile, render a simplified version or nothing
+  // If on mobile, render a simplified version
   if (isMobile) {
-    return (
-      <section id="dna-explorer" className="relative py-6 bg-gradient-to-b from-white to-gray-50">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="text-center mb-4">
-            <h2 className="text-xl font-bold">Healthcare Archetype Families</h2>
-            <p className="text-gray-600 mt-2 text-sm">
-              View on desktop to explore the interactive DNA visualization.
-            </p>
-          </div>
-        </div>
-      </section>
-    );
+    return <MobileExplorerFallback />;
   }
 
   return (
     <section id="dna-explorer" className="relative py-12 bg-gradient-to-b from-white to-gray-50">
       <div className="max-w-6xl mx-auto px-6 md:px-12">
-        <div className="text-center mb-6">
-          <h2 className="text-2xl md:text-3xl font-bold">Explore the DNA of Employer Healthcare</h2>
-          <p className="text-gray-600 mt-2">
-            We've identified 9 distinct employer archetypes, grouped into 3 families based on how organizations manage healthcare.
-          </p>
-        </div>
+        <ExplorerHeader />
         
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Left side: DNA Visualization with fixed dimensions */}
-          <div className="flex-shrink-0">
-            <div
-              ref={containerRef} 
-              className="relative h-[490px] w-[400px] mx-auto"
-            >
-              <DNAHelix 
-                selectedArchetypeId={selectedArchetypeId}
-                onStepClick={handleArchetypeClick}
-                selectedFamilyId={selectedFamilyId}
-                onFamilyClick={handleFamilyClick}
-                className="w-full h-full"
-              />
-            </div>
-          </div>
+          {/* Left side: DNA Visualization */}
+          <DNAVisualization 
+            selectedArchetypeId={selectedArchetypeId}
+            onArchetypeClick={handleArchetypeClick}
+            selectedFamilyId={selectedFamilyId}
+            onFamilyClick={handleFamilyClick}
+          />
           
-          {/* Right side: Details sidebar with minimum width */}
+          {/* Right side: Details sidebar */}
           <div className="flex-grow min-w-[500px]">
-            {selectedArchetypeId ? (
-              /* Show archetype details when an archetype is selected */
-              <ArchetypeDetailView 
-                archetypeSummary={formatArchetypeSummary(selectedArchetypeId)}
-              />
-            ) : selectedFamilyId ? (
-              /* Show family details when a family is selected */
-              <FamilyDetailView
-                familyInfo={getFamilyInfo(selectedFamilyId)}
-                archetypes={getAllArchetypeSummaries()}
-                onSelectArchetype={handleArchetypeClick}
-              />
-            ) : (
-              /* Default state: Show gnome and CTA */
-              <div className="bg-blue-50 p-6 rounded-lg border border-blue-100 flex flex-col items-center justify-center">
-                <WebsiteImage 
-                  type="lefthand" 
-                  altText="Friendly gnome character"
-                  className="h-32 mb-4"
-                />
-                
-                <h3 className="text-2xl font-bold text-blue-700 mb-2">Come Play with the DNA!</h3>
-                <p className="text-gray-600 mb-6 text-center">
-                  Click around the helix to explore what makes each archetype unique. Then take the assessment to discover which one matches your organization.
-                </p>
-                
-                <Button asChild size="lg">
-                  <Link to="/assessment">Take the Assessment</Link>
-                </Button>
-              </div>
-            )}
+            <ExplorerSidebar
+              selectedArchetypeId={selectedArchetypeId}
+              selectedFamilyId={selectedFamilyId}
+              formatArchetypeSummary={formatArchetypeSummary}
+              getFamilyInfo={getFamilyInfo}
+              getAllArchetypeSummaries={getAllArchetypeSummaries}
+              handleArchetypeClick={handleArchetypeClick}
+            />
           </div>
         </div>
       </div>
