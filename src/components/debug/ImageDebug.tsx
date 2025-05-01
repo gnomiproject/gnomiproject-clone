@@ -3,9 +3,11 @@ import { useEffect, useState } from 'react';
 import { supabase, getSupabaseUrl } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { toast } from 'sonner';
 
 const ImageDebug = () => {
   const [isLoading, setIsLoading] = useState(true);
+  const [isAdding, setIsAdding] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [records, setRecords] = useState<any[]>([]);
   const [refreshTimestamp, setRefreshTimestamp] = useState(new Date());
@@ -52,28 +54,48 @@ const ImageDebug = () => {
   
   const handleManualInsert = async () => {
     try {
-      setIsLoading(true);
+      setIsAdding(true);
+      setError(null);
+      
+      // Sample test records
+      const testImages = [
+        { id: 1, image_name: 'gnome_chart', image_url: 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_chart.png' },
+        { id: 2, image_name: 'charts', image_url: 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_chart.png' },
+        { id: 3, image_name: 'reports', image_url: 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_report.png' },
+        { id: 4, image_name: 'healthcare', image_url: 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_healthcare.png' },
+        { id: 5, image_name: 'metrics', image_url: 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_metrics.png' }
+      ];
+      
+      console.log('🔎 [ImageDebug] Inserting test images:', testImages);
       
       // Insert sample records
       const { data, error } = await supabase
         .from('gnomi_images')
-        .upsert([
-          { id: 1, image_name: 'charts', image_url: 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_chart.png' },
-          { id: 2, image_name: 'reports', image_url: 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_report.png' },
-          { id: 3, image_name: 'healthcare', image_url: 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_healthcare.png' },
-          { id: 4, image_name: 'metrics', image_url: 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_metrics.png' },
-          { id: 5, image_name: 'analysis', image_url: 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_analysis.png' }
-        ], { onConflict: 'id' });
+        .upsert(testImages, { onConflict: 'id' });
       
       if (error) {
-        throw new Error(`Insert error: ${error.message}`);
+        throw new Error(`Failed to add test images: ${error.message}`);
       }
+      
+      // Show success message
+      toast.success('Test images added successfully!', {
+        description: `Added ${testImages.length} images to the database`,
+        duration: 5000
+      });
       
       // Refresh data by updating timestamp
       setRefreshTimestamp(new Date());
     } catch (err: any) {
       setError(err.message);
       console.error('🔎 [ImageDebug] Insert error:', err);
+      
+      // Show error message
+      toast.error('Failed to add test images', {
+        description: err.message,
+        duration: 5000
+      });
+    } finally {
+      setIsAdding(false);
     }
   };
   
@@ -94,9 +116,9 @@ const ImageDebug = () => {
             size="sm" 
             variant="destructive" 
             onClick={handleManualInsert}
-            disabled={isLoading}
+            disabled={isAdding || isLoading}
           >
-            Add Test Images
+            {isAdding ? 'Adding...' : 'Add Test Images'}
           </Button>
         </div>
       </div>
@@ -104,8 +126,8 @@ const ImageDebug = () => {
       <div className="bg-white p-2 rounded text-xs mb-3">
         <p>Connection: <code>{getSupabaseUrl() || 'Not connected'}</code></p>
         <p>Table: <code>gnomi_images</code></p>
-        <p>Status: <code className={isLoading ? "text-yellow-600" : "text-green-600"}>
-          {isLoading ? "Querying..." : "Ready"}
+        <p>Status: <code className={isLoading || isAdding ? "text-yellow-600" : "text-green-600"}>
+          {isLoading ? "Querying..." : isAdding ? "Adding images..." : "Ready"}
         </code></p>
       </div>
       
