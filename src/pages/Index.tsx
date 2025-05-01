@@ -7,10 +7,12 @@ import ArchetypesGridSection from '@/components/home/ArchetypesGridSection';
 import CallToActionSection from '@/components/home/CallToActionSection';
 import { migrateDataToSupabase, checkDataInSupabase } from '@/utils/migrationUtil';
 import { toast } from 'sonner';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Index = () => {
   const [isMigrating, setIsMigrating] = React.useState(false);
   const [dataExists, setDataExists] = React.useState<boolean | null>(null);
+  const isMobile = useIsMobile();
 
   // Check if data exists in Supabase
   React.useEffect(() => {
@@ -114,7 +116,7 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Interactive DNA Explorer */}
+      {/* Interactive DNA Explorer - only rendered on non-mobile devices within the component */}
       <InteractiveDNAExplorer />
 
       {/* Archetypes Grid */}
