@@ -114,7 +114,7 @@ const InteractiveDNAExplorer = () => {
           <div className="flex-grow lg:w-2/3">
             <div
               ref={containerRef} 
-              className="relative h-[600px] w-full max-w-[800px] mx-auto"
+              className="relative h-[400px] w-full max-w-[800px] mx-auto" // Changed height from 600px to 400px
             >
               <DNAHelix 
                 selectedArchetypeId={selectedArchetypeId}
