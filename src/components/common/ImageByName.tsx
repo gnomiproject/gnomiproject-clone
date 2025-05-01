@@ -47,9 +47,10 @@ const ImageByName: React.FC<ImageByNameProps> = ({
             setSrc(imageUrl);
             setError(false);
           } else {
+            // If no image URL is returned, use the direct fallback path
+            console.warn(`No image found for '${imageName}', using fallback`);
             setSrc(fallbackSrc);
             setError(true);
-            console.warn(`No image found for '${imageName}', using fallback`);
           }
         }
       } catch (err) {
