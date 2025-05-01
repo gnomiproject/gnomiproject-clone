@@ -23,10 +23,6 @@ const ImageDatabaseTest: React.FC = () => {
       try {
         console.log('🔴 [ImageDatabaseTest] Fetching all images from gnomi_images table... 🔴');
         
-        // Log the raw query that would be executed
-        const queryString = `SELECT * FROM public.gnomi_images`;
-        console.log('🔴 [ImageDatabaseTest] SQL query: 🔴', queryString);
-        
         const { data, error } = await supabase
           .from('gnomi_images')
           .select('*');
@@ -90,23 +86,32 @@ const ImageDatabaseTest: React.FC = () => {
           </div>
           
           <p>Found {images.length} image records:</p>
-          <pre className="mt-2 bg-gray-100 p-2 rounded text-xs overflow-auto max-h-40">
-            {JSON.stringify(images, null, 2)}
-          </pre>
           
           {images.length > 0 ? (
-            <div className="mt-4">
-              <h3 className="font-medium mb-2">Image List:</h3>
-              <ul className="list-disc pl-5">
-                {images.map(img => (
-                  <li key={img.id}>
-                    <strong>{img.image_name}:</strong> {img.image_url ? img.image_url.substring(0, 60) + '...' : 'No URL'}
-                  </li>
-                ))}
-              </ul>
+            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {images.map(img => (
+                <div key={img.id} className="border rounded p-2 bg-white">
+                  <p className="font-semibold">{img.image_name}</p>
+                  <p className="text-xs text-gray-500 truncate">{img.image_url}</p>
+                  <div className="mt-2 h-32 flex items-center justify-center border bg-gray-50">
+                    <img 
+                      src={img.image_url} 
+                      alt={img.image_name}
+                      className="max-h-28 max-w-full object-contain"
+                      onError={(e) => {
+                        const img = e.currentTarget;
+                        img.style.display = 'none';
+                        img.insertAdjacentHTML('afterend', 
+                          `<div class="text-red-500 text-xs p-2">Failed to load image</div>`
+                        );
+                      }}
+                    />
+                  </div>
+                </div>
+              ))}
             </div>
           ) : (
-            <p className="mt-2 text-orange-600">No image records found! Possible permission/access issue.</p>
+            <p className="mt-2 text-orange-600">No image records found! The records should have been inserted by the SQL migration.</p>
           )}
         </div>
       )}

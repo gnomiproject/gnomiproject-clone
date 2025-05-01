@@ -16,12 +16,16 @@ const TestImage = () => {
       setLoading(true);
       setImageError(null);
       
-      const testNames = ['gnome_chart', 'charts'];
+      // Test with both direct name and gnomeImages mapping
+      const testNames = ['charts', 'reports', 'analysis'];
       const results: Record<string, string | null> = {};
       
       for (const name of testNames) {
         try {
+          console.log(`Testing image "${name}"...`);
           results[name] = await getImageByName(name);
+          console.log(`Result for "${name}":`, results[name]);
+          
           if (!results[name]) {
             setImageError(`Failed to load image "${name}"`);
           }

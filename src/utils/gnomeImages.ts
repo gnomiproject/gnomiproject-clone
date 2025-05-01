@@ -6,27 +6,29 @@
 
 // Gnome image types with descriptive names
 export type GnomeImageType = 
-  | 'gnome_chart'       // Gnome with charts/analytics
-  | 'gnome_clipboard'   // Gnome with clipboard
-  | 'gnome_welcome'     // Gnome with open arms
-  | 'gnome_magnifying'  // Gnome with magnifying glass
-  | 'gnome_presentation' // Gnome with presentation
-  | 'gnome_profile'     // Gnome portrait style
-  | 'gnome_report'      // Gnome with report/document
-  | 'gnome_analysis'    // Gnome analyzing data
-  | 'placeholder';       // Fallback image
+  | 'charts'       // Gnome with charts/analytics
+  | 'reports'      // Gnome with report/document
+  | 'healthcare'   // Gnome healthcare related
+  | 'metrics'      // Gnome metrics related
+  | 'analysis'     // Gnome analyzing data
+  | 'placeholder';  // Fallback image
 
 // Map of gnome image names to use with our ImageByName component
 // These should match the image_name values in the gnomi_images table
 export const gnomeImages: Record<string, string> = {
-  presentation: 'gnome_presentation',
-  clipboard: 'gnome_clipboard',
-  welcome: 'gnome_welcome', 
-  magnifying: 'gnome_magnifying',
-  charts: 'gnome_chart', // This is the key used for charts gnome
-  profile: 'gnome_profile',
-  report: 'gnome_report',
-  analysis: 'gnome_analysis',
+  // Direct mappings (same name in UI as in DB)
+  charts: 'charts',
+  reports: 'reports',
+  healthcare: 'healthcare',
+  metrics: 'metrics', 
+  analysis: 'analysis',
+  
+  // Legacy aliases for backward compatibility
+  presentation: 'charts',
+  clipboard: 'reports',
+  welcome: 'healthcare',
+  magnifying: 'metrics',
+  profile: 'analysis',
   placeholder: 'placeholder'
 };
 
@@ -45,15 +47,15 @@ export const getGnomeForArchetype = (archetypeId: string): string => {
   const archetypeToGnomeMap: Record<string, string> = {
     // Example mappings
     'C1': 'charts',
-    'C2': 'clipboard',
+    'C2': 'reports',
     'C3': 'analysis',
-    'F1': 'magnifying',
-    'F2': 'profile',
-    'P1': 'presentation',
-    'P2': 'welcome',
-    'P3': 'report',
-    'B1': 'charts', // Adding B1 mapping to charts gnome
-    'B2': 'charts' // Add B2 mapping to charts gnome
+    'F1': 'metrics',
+    'F2': 'healthcare',
+    'P1': 'charts',
+    'P2': 'healthcare',
+    'P3': 'reports',
+    'B1': 'charts',
+    'B2': 'charts'
   };
   
   return archetypeToGnomeMap[archetypeId] || 'placeholder';
@@ -68,12 +70,12 @@ export const getGnomeForSection = (sectionType: string): string => {
   // Map section types to gnome types
   const sectionToGnomeMap: Record<string, string> = {
     'overview': 'charts',
-    'welcome': 'welcome',
-    'metrics': 'analysis',
-    'swot': 'clipboard',
-    'disease': 'magnifying',
-    'report': 'report',
-    'recommendations': 'presentation'
+    'welcome': 'healthcare',
+    'metrics': 'metrics',
+    'swot': 'reports',
+    'disease': 'metrics',
+    'report': 'reports',
+    'recommendations': 'charts'
   };
   
   return sectionToGnomeMap[sectionType] || 'placeholder';

@@ -35,10 +35,6 @@ export const getImageByName = async (imageName: string): Promise<string | null> 
   // Add more specific logging
   console.log(`🔴 [ImageService] QUERY START: Looking for image_name = "${dbImageName}" (from input: "${imageName}") 🔴`);
   
-  // Log the SQL query that would be executed for this request
-  const queryString = `SELECT * FROM public.gnomi_images WHERE image_name = '${dbImageName}'`;
-  console.log(`🔴 [ImageService] SQL query: 🔴`, queryString);
-  
   try {
     const { data, error } = await supabase
       .from('gnomi_images')
@@ -48,7 +44,6 @@ export const getImageByName = async (imageName: string): Promise<string | null> 
     
     // Get Supabase URL for debugging
     const projectUrl = getSupabaseUrl();
-    const projectRef = projectUrl.split('://')[1]?.split('.')[0] || 'unknown';
     
     // Log the full response for debugging
     console.log(`🔴 [ImageService] QUERY RESULT: 🔴`, { 
@@ -57,7 +52,6 @@ export const getImageByName = async (imageName: string): Promise<string | null> 
       dataType: data ? typeof data : 'undefined',
       isArray: Array.isArray(data),
       requestedImage: dbImageName,
-      supabaseProjectRef: projectRef,
       supabaseUrl: projectUrl
     });
     
@@ -88,23 +82,17 @@ export const testDatabaseAccess = async (): Promise<GnomeImage[] | null> => {
   try {
     console.log('🔴 [ImageService] Testing database access... 🔴');
     
-    // Log the SQL query that would be executed
-    const queryString = `SELECT * FROM public.gnomi_images`;
-    console.log('🔴 [ImageService] SQL query: 🔴', queryString);
-    
     const { data, error } = await supabase
       .from('gnomi_images')
       .select('*');
     
     // Get Supabase URL for debugging
     const projectUrl = getSupabaseUrl();
-    const projectRef = projectUrl.split('://')[1]?.split('.')[0] || 'unknown';
     
     console.log('🔴 [ImageService] All records test: 🔴', { 
       data, 
       error,
       count: data ? data.length : 0,
-      supabaseProjectRef: projectRef,
       supabaseUrl: projectUrl
     });
     
