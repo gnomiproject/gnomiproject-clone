@@ -2,6 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
+import WebsiteImage from '@/components/common/WebsiteImage';
 import InteractiveDNAExplorer from '@/components/home/InteractiveDNAExplorer';
 import ArchetypesGridSection from '@/components/home/ArchetypesGridSection';
 import CallToActionSection from '@/components/home/CallToActionSection';
@@ -60,9 +61,9 @@ const Index = () => {
           <div className="flex flex-col items-start">
             {/* Gnome character positioned to the left */}
             <div className="mb-2 self-center md:self-start">
-              <img 
-                src="/lovable-uploads/12da516f-6471-47a3-9861-9c4d50ab9415.png" 
-                alt="Healthcare Gnome" 
+              <WebsiteImage 
+                type="overlook" 
+                altText="Healthcare Gnome" 
                 className="h-20 md:h-28"
               />
             </div>
