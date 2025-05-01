@@ -90,7 +90,7 @@ const InteractiveDNAExplorer = () => {
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-4">
             <h2 className="text-xl font-bold">Healthcare Archetype Families</h2>
-            <p className="text-gray-400 mt-2 text-sm">
+            <p className="text-gray-600 mt-2 text-sm">
               View on desktop to explore the interactive DNA visualization.
             </p>
           </div>
@@ -104,7 +104,7 @@ const InteractiveDNAExplorer = () => {
       <div className="max-w-6xl mx-auto px-6 md:px-12">
         <div className="text-center mb-6">
           <h2 className="text-2xl md:text-3xl font-bold">Explore the DNA of Employer Healthcare</h2>
-          <p className="text-gray-400 mt-2">
+          <p className="text-gray-600 mt-2">
             We've identified 9 distinct employer archetypes, grouped into 3 families based on how organizations manage healthcare.
           </p>
         </div>
@@ -114,7 +114,7 @@ const InteractiveDNAExplorer = () => {
           <div className="flex-grow lg:w-2/3">
             <div
               ref={containerRef} 
-              className="relative h-[400px] w-full max-w-[800px] mx-auto"
+              className="relative h-[600px] w-full max-w-[800px] mx-auto"
             >
               <DNAHelix 
                 selectedArchetypeId={selectedArchetypeId}
