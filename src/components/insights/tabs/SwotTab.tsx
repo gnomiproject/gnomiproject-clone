@@ -12,11 +12,15 @@ const SwotTab = ({ archetypeData }: SwotTabProps) => {
   // Add logging to understand what data we're getting
   useEffect(() => {
     console.log("SwotTab received data:", {
-      archetypeId: archetypeData ? archetypeData.id || 'unknown' : null,
-      strengths: archetypeData?.strengths ? typeof archetypeData.strengths : 'undefined',
-      weaknesses: archetypeData?.weaknesses ? typeof archetypeData.weaknesses : 'undefined',
-      opportunities: archetypeData?.opportunities ? typeof archetypeData.opportunities : 'undefined',
-      threats: archetypeData?.threats ? typeof archetypeData.threats : 'undefined'
+      archetypeId: archetypeData ? archetypeData.id || archetypeData.archetype_id || 'unknown' : null,
+      hasStrengths: !!archetypeData?.strengths,
+      strengthsType: archetypeData?.strengths ? typeof archetypeData.strengths : 'undefined',
+      hasWeaknesses: !!archetypeData?.weaknesses,
+      weaknessesType: archetypeData?.weaknesses ? typeof archetypeData.weaknesses : 'undefined',
+      hasOpportunities: !!archetypeData?.opportunities,
+      opportunitiesType: archetypeData?.opportunities ? typeof archetypeData.opportunities : 'undefined',
+      hasThreats: !!archetypeData?.threats,
+      threatsType: archetypeData?.threats ? typeof archetypeData.threats : 'undefined'
     });
     
     // Log the actual data structures
@@ -28,9 +32,7 @@ const SwotTab = ({ archetypeData }: SwotTabProps) => {
     });
     
     if (archetypeData?.strengths) {
-      console.log("SwotTab strengths sample:", 
-        JSON.stringify(archetypeData.strengths).substring(0, 100) + '...'
-      );
+      console.log("SwotTab strengths data:", JSON.stringify(archetypeData.strengths));
     }
   }, [archetypeData]);
 

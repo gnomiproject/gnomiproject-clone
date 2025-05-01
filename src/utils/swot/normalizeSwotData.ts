@@ -67,6 +67,52 @@ export const normalizeSwotData = (data: any): string[] => {
     return data;
   }
   
+  // Check for specific object formats we might have in the DB
+  if (typeof data === 'object' && data !== null) {
+    console.log("[normalizeSwotData] Processing object data:", data);
+    
+    // If object has entries or items property that is an array
+    if (data.entries && Array.isArray(data.entries)) {
+      console.log("[normalizeSwotData] Found entries array in object");
+      return data.entries.map((entry: any) => {
+        if (typeof entry === 'string') return entry;
+        if (entry && typeof entry === 'object' && entry.text) return entry.text;
+        return String(entry);
+      }).filter(Boolean);
+    }
+    
+    if (data.items && Array.isArray(data.items)) {
+      console.log("[normalizeSwotData] Found items array in object");
+      return data.items.map((item: any) => {
+        if (typeof item === 'string') return item;
+        if (item && typeof item === 'object' && item.text) return item.text;
+        return String(item);
+      }).filter(Boolean);
+    }
+    
+    // If object has points property that is an array
+    if (data.points && Array.isArray(data.points)) {
+      console.log("[normalizeSwotData] Found points array in object");
+      return data.points.map((point: any) => {
+        if (typeof point === 'string') return point;
+        if (point && typeof point === 'object' && point.text) return point.text;
+        return String(point);
+      }).filter(Boolean);
+    }
+
+    // Try to extract any array-like property
+    for (const key in data) {
+      if (Array.isArray(data[key])) {
+        console.log(`[normalizeSwotData] Found array in property '${key}'`);
+        return data[key].map((item: any) => {
+          if (typeof item === 'string') return item;
+          if (item && typeof item === 'object' && item.text) return item.text;
+          return String(item);
+        }).filter(Boolean);
+      }
+    }
+  }
+  
   // Fallback: convert to string array
   console.log("[normalizeSwotData] Using fallback conversion to string array");
   const result = Array.isArray(data) ? 

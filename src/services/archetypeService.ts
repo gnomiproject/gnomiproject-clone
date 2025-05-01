@@ -43,17 +43,21 @@ export const fetchArchetypeData = async (archetypeId: ArchetypeId, skipCache: bo
         name: data.archetype_name,
         hasStrengths: !!data.strengths,
         strengthsType: data.strengths ? typeof data.strengths : 'undefined',
+        strengthsValue: data.strengths,
         hasWeaknesses: !!data.weaknesses,
+        weaknessesType: data.weaknesses ? typeof data.weaknesses : 'undefined',
         hasOpportunities: !!data.opportunities,
-        hasThreats: !!data.threats
+        opportunitiesType: data.opportunities ? typeof data.opportunities : 'undefined',
+        hasThreats: !!data.threats,
+        threatsType: data.threats ? typeof data.threats : 'undefined'
       });
       
       // Add detailed logging for SWOT data structure
-      console.log("[archetypeService] SWOT data structure:", {
-        strengths: data.strengths,
-        weaknesses: data.weaknesses,
-        opportunities: data.opportunities,
-        threats: data.threats
+      console.log("[archetypeService] SWOT data raw structure:", {
+        strengths: JSON.stringify(data.strengths),
+        weaknesses: JSON.stringify(data.weaknesses),
+        opportunities: JSON.stringify(data.opportunities),
+        threats: JSON.stringify(data.threats)
       });
       
       // Normalize data to ensure both snake_case and camelCase properties are available
