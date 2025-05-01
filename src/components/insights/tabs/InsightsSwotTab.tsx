@@ -27,7 +27,8 @@ const InsightsSwotTab = ({ archetypeData }: InsightsSwotTabProps) => {
         strengths: archetypeData.strengths,
         strengthsType: typeof archetypeData.strengths,
         isArray: Array.isArray(archetypeData.strengths),
-        jsonStringified: JSON.stringify(archetypeData.strengths).slice(0, 200) + '...'
+        jsonStringified: archetypeData.strengths ? 
+          JSON.stringify(archetypeData.strengths).slice(0, 200) + '...' : 'undefined'
       });
     }
   }, [archetypeData]);
@@ -46,7 +47,8 @@ const InsightsSwotTab = ({ archetypeData }: InsightsSwotTabProps) => {
     strengthsCount: strengths.length,
     weaknessesCount: weaknesses.length,
     opportunitiesCount: opportunities.length,
-    threatsCount: threats.length
+    threatsCount: threats.length,
+    firstStrength: strengths.length > 0 ? strengths[0] : 'none'
   });
 
   return (

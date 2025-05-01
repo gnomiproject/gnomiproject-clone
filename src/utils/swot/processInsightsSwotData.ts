@@ -38,90 +38,78 @@ export function processInsightsSwotData(reportData: any): SwotData {
     hasWeaknesses: !!reportData.weaknesses,
     hasOpportunities: !!reportData.opportunities,
     hasThreats: !!reportData.threats,
-    strengthsType: reportData.strengths ? typeof reportData.strengths : 'undefined'
+    strengthsType: reportData.strengths ? typeof reportData.strengths : 'undefined',
+    strengthsStructure: reportData.strengths ? JSON.stringify(reportData.strengths).substring(0, 100) + '...' : 'undefined'
   });
 
   // Enhanced processing of SWOT data to handle different formats
   try {
     // Process strengths
     if (reportData.strengths) {
-      if (typeof reportData.strengths === 'object' && !Array.isArray(reportData.strengths)) {
-        // If it's a JSON object, try to extract array data
-        if ('items' in reportData.strengths) {
-          result.strengths = ensureArray(reportData.strengths.items);
-        } else if ('points' in reportData.strengths) {
-          result.strengths = ensureArray(reportData.strengths.points);
-        } else if ('data' in reportData.strengths) {
-          result.strengths = ensureArray(reportData.strengths.data);
-        } else {
-          // Try to extract values from the object
-          const values = Object.values(reportData.strengths).filter(Boolean);
-          result.strengths = values.map(value => String(value));
+      if (typeof reportData.strengths === 'string') {
+        // Handle string format (possibly JSON)
+        try {
+          const parsed = JSON.parse(reportData.strengths);
+          result.strengths = processSwotItem(parsed);
+        } catch (e) {
+          // If not valid JSON, treat as plain text
+          result.strengths = [reportData.strengths];
         }
-      } else {
-        // Use the existing ensureArray utility for other formats
-        result.strengths = ensureArray(reportData.strengths);
+      } else if (typeof reportData.strengths === 'object') {
+        result.strengths = processSwotItem(reportData.strengths);
       }
     }
 
-    // Process weaknesses using the same pattern
+    // Process weaknesses
     if (reportData.weaknesses) {
-      if (typeof reportData.weaknesses === 'object' && !Array.isArray(reportData.weaknesses)) {
-        if ('items' in reportData.weaknesses) {
-          result.weaknesses = ensureArray(reportData.weaknesses.items);
-        } else if ('points' in reportData.weaknesses) {
-          result.weaknesses = ensureArray(reportData.weaknesses.points);
-        } else if ('data' in reportData.weaknesses) {
-          result.weaknesses = ensureArray(reportData.weaknesses.data);
-        } else {
-          const values = Object.values(reportData.weaknesses).filter(Boolean);
-          result.weaknesses = values.map(value => String(value));
+      if (typeof reportData.weaknesses === 'string') {
+        try {
+          const parsed = JSON.parse(reportData.weaknesses);
+          result.weaknesses = processSwotItem(parsed);
+        } catch (e) {
+          result.weaknesses = [reportData.weaknesses];
         }
-      } else {
-        result.weaknesses = ensureArray(reportData.weaknesses);
+      } else if (typeof reportData.weaknesses === 'object') {
+        result.weaknesses = processSwotItem(reportData.weaknesses);
       }
     }
 
-    // Process opportunities using the same pattern
+    // Process opportunities
     if (reportData.opportunities) {
-      if (typeof reportData.opportunities === 'object' && !Array.isArray(reportData.opportunities)) {
-        if ('items' in reportData.opportunities) {
-          result.opportunities = ensureArray(reportData.opportunities.items);
-        } else if ('points' in reportData.opportunities) {
-          result.opportunities = ensureArray(reportData.opportunities.points);
-        } else if ('data' in reportData.opportunities) {
-          result.opportunities = ensureArray(reportData.opportunities.data);
-        } else {
-          const values = Object.values(reportData.opportunities).filter(Boolean);
-          result.opportunities = values.map(value => String(value));
+      if (typeof reportData.opportunities === 'string') {
+        try {
+          const parsed = JSON.parse(reportData.opportunities);
+          result.opportunities = processSwotItem(parsed);
+        } catch (e) {
+          result.opportunities = [reportData.opportunities];
         }
-      } else {
-        result.opportunities = ensureArray(reportData.opportunities);
+      } else if (typeof reportData.opportunities === 'object') {
+        result.opportunities = processSwotItem(reportData.opportunities);
       }
     }
 
-    // Process threats using the same pattern
+    // Process threats
     if (reportData.threats) {
-      if (typeof reportData.threats === 'object' && !Array.isArray(reportData.threats)) {
-        if ('items' in reportData.threats) {
-          result.threats = ensureArray(reportData.threats.items);
-        } else if ('points' in reportData.threats) {
-          result.threats = ensureArray(reportData.threats.points);
-        } else if ('data' in reportData.threats) {
-          result.threats = ensureArray(reportData.threats.data);
-        } else {
-          const values = Object.values(reportData.threats).filter(Boolean);
-          result.threats = values.map(value => String(value));
+      if (typeof reportData.threats === 'string') {
+        try {
+          const parsed = JSON.parse(reportData.threats);
+          result.threats = processSwotItem(parsed);
+        } catch (e) {
+          result.threats = [reportData.threats];
         }
-      } else {
-        result.threats = ensureArray(reportData.threats);
+      } else if (typeof reportData.threats === 'object') {
+        result.threats = processSwotItem(reportData.threats);
       }
     }
 
     // Add more detailed logging for the processed result
     console.log('[processInsightsSwotData] Detailed SWOT data structure:', {
       strengths: result.strengths,
-      strengthsType: typeof result.strengths
+      strengthsCount: result.strengths.length,
+      weaknessesCount: result.weaknesses.length,
+      opportunitiesCount: result.opportunities.length,
+      threatsCount: result.threats.length,
+      sample: result.strengths.length > 0 ? result.strengths[0] : 'none'
     });
 
   } catch (error) {
@@ -129,4 +117,49 @@ export function processInsightsSwotData(reportData: any): SwotData {
   }
 
   return result;
+}
+
+/**
+ * Helper function to process a SWOT item into a string array
+ * Handles various data formats that might come from the database
+ */
+function processSwotItem(item: any): string[] {
+  // If it's already an array, ensure all items are strings
+  if (Array.isArray(item)) {
+    return item.map(i => typeof i === 'string' ? i : JSON.stringify(i));
+  }
+  
+  // If it's an object with specific known formats
+  if (typeof item === 'object' && item !== null) {
+    // Check for common patterns in the data structure
+    
+    // Pattern 1: Array in a property like 'items', 'data', 'points'
+    for (const key of ['items', 'data', 'points', 'list']) {
+      if (key in item && Array.isArray(item[key])) {
+        return item[key].map((i: any) => typeof i === 'string' ? i : String(i));
+      }
+    }
+    
+    // Pattern 2: Numbered keys like {"0": "point 1", "1": "point 2"}
+    const numericKeys = Object.keys(item).filter(k => !isNaN(Number(k)));
+    if (numericKeys.length > 0) {
+      return numericKeys.map(k => String(item[k]));
+    }
+    
+    // Pattern 3: Text content in properties like 'text', 'content', or 'description'
+    for (const key of ['text', 'content', 'description']) {
+      if (key in item && typeof item[key] === 'string') {
+        return [item[key]];
+      }
+    }
+    
+    // Last resort: extract all string values from object
+    const values = Object.values(item).filter(v => v !== null && v !== undefined);
+    if (values.length > 0) {
+      return values.map(v => typeof v === 'string' ? v : String(v));
+    }
+  }
+  
+  // Default case: convert to string and return as single-item array
+  return [String(item)];
 }
