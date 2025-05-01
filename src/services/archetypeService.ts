@@ -121,9 +121,7 @@ export const fetchArchetypeData = async (archetypeId: ArchetypeId, skipCache: bo
 const getStaticArchetypeData = (archetypeId: ArchetypeId) => {
   try {
     // Try to find matching archetype by ID in our static data
-    const archetypeData = archetypesDetailedData.default?.find?.(
-      archetype => archetype.id === archetypeId
-    ) || archetypesDetailedData.find?.(
+    const archetypeData = archetypesDetailedData.archetypesDetailed.find?.(
       archetype => archetype.id === archetypeId
     );
     
