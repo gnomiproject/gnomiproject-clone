@@ -2,7 +2,6 @@
 import React from 'react';
 import { ArchetypeDetailedData } from '@/types/archetype';
 import SectionTitle from '@/components/shared/SectionTitle';
-import { normalizeSwotData } from '@/utils/swot/normalizeSwotData';
 
 export interface SwotAnalysisProps {
   reportData?: ArchetypeDetailedData;
@@ -27,17 +26,80 @@ const SwotAnalysis: React.FC<SwotAnalysisProps> = ({ reportData, archetypeData, 
     swotAnalysisType: reportData?.swot_analysis ? typeof reportData.swot_analysis : "N/A"
   });
 
-  // Get SWOT data from the swot_analysis field if available, or from individual fields
+  // Extract SWOT data directly, with simple type handling
+  const getSwotItems = (items: any): string[] => {
+    if (!items) return [];
+    
+    // If it's already an array of strings
+    if (Array.isArray(items) && items.every(item => typeof item === 'string')) {
+      return items;
+    }
+    
+    // If it's an array of objects with text property
+    if (Array.isArray(items) && items.length > 0 && typeof items[0] === 'object' && items[0]?.text) {
+      return items.map(item => item?.text || '').filter(Boolean);
+    }
+    
+    // If it's a string that might be JSON
+    if (typeof items === 'string' && (items.startsWith('[') || items.startsWith('{'))) {
+      try {
+        const parsed = JSON.parse(items);
+        if (Array.isArray(parsed)) {
+          return parsed.map(item => {
+            if (typeof item === 'string') return item;
+            if (item && typeof item === 'object' && 'text' in item) return item.text;
+            return String(item);
+          }).filter(Boolean);
+        }
+        return [String(parsed)];
+      } catch (e) {
+        return [items];
+      }
+    }
+    
+    // If it's just a string
+    if (typeof items === 'string') {
+      return items.split('\n').filter(Boolean);
+    }
+    
+    // Fallback: just convert to string
+    return Array.isArray(items) ? 
+      items.map(item => String(item || '')).filter(Boolean) : 
+      [String(items)];
+  };
+
+  // Get SWOT components directly from the data with priority order
+  // 1. Use props.swotData if provided (for testing/override)
+  // 2. Use swot_analysis object if available
+  // 3. Use direct fields if available
   const swotAnalysis = data?.swot_analysis || {};
   
-  // Extract SWOT components from the data with priority order
-  // 1. Use props.swotData if provided (for testing/override)
-  // 2. Use data.swot_analysis.X if available
-  // 3. Use data.X direct fields if available
-  const strengths = normalizeSwotData(propSwotData?.strengths || swotAnalysis?.strengths || data?.strengths);
-  const weaknesses = normalizeSwotData(propSwotData?.weaknesses || swotAnalysis?.weaknesses || data?.weaknesses);
-  const opportunities = normalizeSwotData(propSwotData?.opportunities || swotAnalysis?.opportunities || data?.opportunities);
-  const threats = normalizeSwotData(propSwotData?.threats || swotAnalysis?.threats || data?.threats);
+  let strengths: string[] = [];
+  let weaknesses: string[] = [];
+  let opportunities: string[] = [];
+  let threats: string[] = [];
+  
+  // Handle data from props (for testing)
+  if (propSwotData) {
+    strengths = getSwotItems(propSwotData.strengths);
+    weaknesses = getSwotItems(propSwotData.weaknesses);
+    opportunities = getSwotItems(propSwotData.opportunities);
+    threats = getSwotItems(propSwotData.threats);
+  }
+  // Handle data from swot_analysis object
+  else if (typeof swotAnalysis === 'object' && swotAnalysis !== null) {
+    strengths = getSwotItems(swotAnalysis.strengths);
+    weaknesses = getSwotItems(swotAnalysis.weaknesses);
+    opportunities = getSwotItems(swotAnalysis.opportunities);
+    threats = getSwotItems(swotAnalysis.threats);
+  }
+  // Handle data from direct fields
+  else {
+    strengths = getSwotItems(data?.strengths);
+    weaknesses = getSwotItems(data?.weaknesses);
+    opportunities = getSwotItems(data?.opportunities);
+    threats = getSwotItems(data?.threats);
+  }
 
   // If no data available, show no data message
   if (!data) {

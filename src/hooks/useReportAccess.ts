@@ -4,7 +4,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useGetArchetype } from '@/hooks/useGetArchetype';
 import { ArchetypeId } from '@/types/archetype';
 import { normalizeArchetypeId } from '@/utils/archetypeValidation';
-import { normalizeSwotData } from '@/utils/swot/normalizeSwotData';
 
 interface UseReportAccessOptions {
   archetypeId: string;
@@ -103,7 +102,13 @@ export const useReportAccess = ({ archetypeId: rawArchetypeId, token, isAdminVie
           hasWeaknessesField: 'weaknesses' in data,
           hasOpportunitiesField: 'opportunities' in data,
           hasThreatsField: 'threats' in data,
-          swotAnalysisType: data.swot_analysis ? typeof data.swot_analysis : 'N/A'
+          swotAnalysisType: data.swot_analysis ? typeof data.swot_analysis : 'N/A',
+          strengthsType: data.strengths ? typeof data.strengths : 'N/A',
+          sampleData: data.strengths ? (
+            Array.isArray(data.strengths) ? 
+              `Array with ${data.strengths.length} items` : 
+              `Non-array: ${typeof data.strengths}`
+          ) : 'N/A'
         });
         
         setReportData(data);

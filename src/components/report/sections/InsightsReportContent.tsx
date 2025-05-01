@@ -4,7 +4,7 @@ import { Section } from '@/components/shared/Section';
 import SectionTitle from '@/components/shared/SectionTitle';
 import StrategicRecommendations from './StrategicRecommendations';
 import GnomeImage from '@/components/common/GnomeImage';
-import SwotAnalysis from './SwotAnalysis'; // Added import for SwotAnalysis instead
+import SwotAnalysis from './SwotAnalysis'; 
 
 interface InsightsReportContentProps {
   archetype: any;
@@ -62,7 +62,7 @@ const InsightsReportContent: React.FC<InsightsReportContentProps> = ({ archetype
         </div>
       </Section>
       
-      {/* Add SwotAnalysis section to replace InsightSwotSection */}
+      {/* Using SwotAnalysis component consistently */}
       <Section id="swot-analysis">
         <SwotAnalysis archetypeData={archetype} />
       </Section>
