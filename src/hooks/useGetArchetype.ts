@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { ArchetypeDetailedData, ArchetypeId, FamilyId } from '@/types/archetype';
 import { useArchetypes } from './useArchetypes';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { fetchArchetypeData } from '@/services/archetypeService';
 import { processArchetypeData, processFallbackData } from '@/utils/archetype/dataProcessing';
 import { clearArchetypeFromCache } from '@/utils/archetype/cacheUtils';
@@ -23,6 +23,7 @@ export const useGetArchetype = (archetypeId: ArchetypeId, skipCache: boolean = f
   const archetypeDataRef = useRef<ArchetypeDetailedData | null>(null);
   const familyDataRef = useRef<any | null>(null);
   const dataSourceRef = useRef<string>('');
+  const fetchFailedRef = useRef<boolean>(false);
   
   // Use state only for values that should trigger re-renders when changed
   const [archetypeData, setArchetypeData] = useState<ArchetypeDetailedData | null>(null);
@@ -59,6 +60,22 @@ export const useGetArchetype = (archetypeId: ArchetypeId, skipCache: boolean = f
     // Prevent excessive retries and backoff
     retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 10000),
   });
+  
+  // Immediately try to set fallback data if we don't have any data yet
+  useEffect(() => {
+    if (!archetypeData && archetypeId && getArchetypeEnhanced && getFamilyById) {
+      const fallbackData = getArchetypeEnhanced(archetypeId);
+      if (fallbackData) {
+        console.log('[useGetArchetype] Setting initial fallback data');
+        const { archetypeData: initialData, familyData: initialFamilyData, dataSource: initialSource } = 
+          processFallbackData(archetypeId, getArchetypeEnhanced, getFamilyById);
+        
+        setArchetypeData(initialData);
+        setFamilyData(initialFamilyData);
+        setDataSource(initialSource);
+      }
+    }
+  }, [archetypeId, archetypeData, getArchetypeEnhanced, getFamilyById]);
   
   // Process data on success - defined as a callback to avoid recreating on each render
   const processData = useCallback((data: any) => {
@@ -130,6 +147,7 @@ export const useGetArchetype = (archetypeId: ArchetypeId, skipCache: boolean = f
     // Prevent concurrent processing
     if (processingRef.current) return;
     processingRef.current = true;
+    fetchFailedRef.current = true;
     
     try {
       // Fallback to original archetype data structure on error
@@ -144,7 +162,15 @@ export const useGetArchetype = (archetypeId: ArchetypeId, skipCache: boolean = f
       // Then update state (triggers re-render)
       setArchetypeData(fallbackData);
       setFamilyData(fallbackFamilyData);
-      setDataSource(fallbackSource);
+      setDataSource('Offline Data (Fallback)');
+      
+      // Only show this toast once
+      if (fetchFailedRef.current && archetypeId) {
+        toast.info("Using offline data for " + archetypeId, {
+          id: `offline-data-${archetypeId}`,
+          duration: 3000
+        });
+      }
     } finally {
       processingRef.current = false;
     }
@@ -179,11 +205,14 @@ export const useGetArchetype = (archetypeId: ArchetypeId, skipCache: boolean = f
     } catch (e) {
       toast({
         title: "Refresh Failed",
-        description: "Unable to update archetype data. Please try again.",
+        description: "Using offline data. Check your network connection.",
         variant: "destructive" // Use destructive variant for error toasts
       });
+      
+      // Set fallback data when refresh fails
+      handleError(e as Error);
     }
-  }, [archetypeId, queryClient, queryKey, refetch]);
+  }, [archetypeId, queryClient, queryKey, refetch, handleError]);
 
   // Process data in useEffect, with improved dependency array and cleanup
   useEffect(() => {

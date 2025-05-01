@@ -2,9 +2,10 @@
 import { supabase } from '@/integrations/supabase/client';
 import { ArchetypeId } from '@/types/archetype';
 import { getCachedArchetype, cacheArchetype } from '@/utils/archetype/cacheUtils';
+import archetypesDetailedData from '@/data/archetypesDetailed';
 
 /**
- * Fetch archetype data from Supabase
+ * Fetch archetype data from Supabase with improved fallback handling
  */
 export const fetchArchetypeData = async (archetypeId: ArchetypeId, skipCache: boolean = false) => {
   // Verify a valid archetype ID was provided
@@ -50,6 +51,15 @@ export const fetchArchetypeData = async (archetypeId: ArchetypeId, skipCache: bo
           
         if (insensitiveError || !insensitiveData) {
           console.error("Error with case-insensitive archetype search:", insensitiveError);
+          
+          // Last resort - check our static data
+          const staticData = getStaticArchetypeData(archetypeId);
+          if (staticData) {
+            console.log(`Using static data for ${archetypeId}`);
+            cacheArchetype(archetypeId, staticData);
+            return staticData;
+          }
+          
           throw coreError;
         }
         
@@ -64,6 +74,14 @@ export const fetchArchetypeData = async (archetypeId: ArchetypeId, skipCache: bo
         return coreData;
       }
       
+      // If we still don't have data, try static data as last resort
+      const staticData = getStaticArchetypeData(archetypeId);
+      if (staticData) {
+        console.log(`Using static data for ${archetypeId}`);
+        cacheArchetype(archetypeId, staticData);
+        return staticData;
+      }
+      
       throw fetchError;
     }
     
@@ -72,11 +90,48 @@ export const fetchArchetypeData = async (archetypeId: ArchetypeId, skipCache: bo
       cacheArchetype(archetypeId, data);
     } else {
       console.log(`No data found in database for archetype ${archetypeId}`);
+      
+      // If no data returned, try static data
+      const staticData = getStaticArchetypeData(archetypeId);
+      if (staticData) {
+        console.log(`Using static data for ${archetypeId}`);
+        cacheArchetype(archetypeId, staticData);
+        return staticData;
+      }
     }
 
     return data;
   } catch (error) {
     console.error("Error in fetchArchetypeData:", error);
+    
+    // Final fallback to static data in case of complete failure
+    const staticData = getStaticArchetypeData(archetypeId);
+    if (staticData) {
+      console.log(`Using static data after error for ${archetypeId}`);
+      return staticData;
+    }
+    
     throw error;
+  }
+};
+
+/**
+ * Get static archetype data from local dataset
+ */
+const getStaticArchetypeData = (archetypeId: ArchetypeId) => {
+  try {
+    // Try to find matching archetype by ID in our static data
+    const archetypeData = archetypesDetailedData.find(
+      archetype => archetype.id === archetypeId
+    );
+    
+    if (archetypeData) {
+      return archetypeData;
+    }
+    
+    return null;
+  } catch (error) {
+    console.error("Error getting static archetype data:", error);
+    return null;
   }
 };

@@ -9,6 +9,7 @@ import SwotTab from './tabs/SwotTab';
 import DiseaseAndCareTab from './tabs/DiseaseAndCareTab';
 import DeepDiveRequestForm from '@/components/results/DeepDiveRequestForm';
 import { getGnomeForArchetype } from '@/utils/gnomeImages';
+import { toast } from 'sonner';
 
 interface ArchetypeReportProps {
   archetypeId: ArchetypeId;
@@ -59,6 +60,22 @@ const InsightsView = ({
       console.log('[InsightsView] No assessment result data');
     }
   }, [assessmentResult, archetypeId]);
+
+  // Error check - if reportData is null or undefined, show an error message
+  if (!reportData) {
+    // Return a minimal error state to avoid cascading failures
+    return (
+      <div className="bg-white rounded-lg shadow-sm p-6 text-center">
+        <h3 className="text-lg font-medium text-red-800 mb-2">Data Loading Issue</h3>
+        <p className="text-gray-600 mb-4">
+          We're having trouble loading archetype data for {archetypeId}.
+        </p>
+        <p className="text-sm text-gray-500">
+          This could be due to a network connection issue or temporary service disruption.
+        </p>
+      </div>
+    );
+  }
 
   // Ensure we have all the required properties for rendering
   const name = reportData?.name || reportData?.archetype_name || 'Unknown Archetype';

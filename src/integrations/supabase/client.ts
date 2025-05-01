@@ -1,9 +1,15 @@
 
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
+import { toast } from 'sonner';
 
 const SUPABASE_URL = "https://qsecdncdiykzuimtaosp.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFzZWNkbmNkaXlrenVpbXRhb3NwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ5NzgwNjUsImV4cCI6MjA2MDU1NDA2NX0.RKsoksZcUUziqGV4V83_6hntLh09A3rraAiz6EcoTFw";
+
+// Track connection status
+let hasShownConnectionError = false;
+let connectionAttempts = 0;
+const MAX_CONNECTION_ATTEMPTS = 3;
 
 // Check if current request is for admin mode
 const isAdminMode = () => {
@@ -45,11 +51,27 @@ export const supabase = createClient<Database>(
         })
         .then(response => {
           clearTimeout(timeoutId);
+          // Reset connection state on success
+          if (connectionAttempts > 0) {
+            connectionAttempts = 0;
+          }
           return response;
         })
         .catch(error => {
           clearTimeout(timeoutId);
+          connectionAttempts++;
+          
           console.error('[Security] Supabase request error:', error);
+          
+          // Only show connection error toast once to avoid spamming the user
+          if (!hasShownConnectionError && connectionAttempts >= MAX_CONNECTION_ATTEMPTS) {
+            hasShownConnectionError = true;
+            toast.error("Having trouble connecting to data service. Using fallback data.", {
+              id: "supabase-connection-error",
+              duration: 5000
+            });
+          }
+          
           throw error;
         });
       }

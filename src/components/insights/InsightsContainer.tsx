@@ -78,8 +78,11 @@ const InsightsContainer = ({
     setRetrying(true);
     try {
       await refetch();
+      toast.success("Reconnected successfully");
     } catch (error: any) {
-      toast.error(`Failed to refresh archetype data: ${error.message}`);
+      toast.error(`Could not refresh data: ${error.message}`, {
+        description: "Using offline data"
+      });
     } finally {
       setRetrying(false);
     }
@@ -118,11 +121,11 @@ const InsightsContainer = ({
     return <ArchetypeLoadingSkeleton />;
   }
   
-  // Show error state if there's an API error
-  if (error) {
+  // Show error state if there's an API error but not if we have fallback data
+  if (error && !archetypeData) {
     return (
       <ArchetypeError 
-        message="We couldn't connect to the database to load your archetype data."
+        message="We're having trouble connecting to our database. You can continue with offline data or retry the connection."
         onRetry={handleRetry}
         onRetakeAssessment={onRetakeAssessment}
         isRetrying={retrying}
@@ -130,7 +133,7 @@ const InsightsContainer = ({
     );
   }
   
-  // Show error state if no data is available
+  // Show error state if no data is available (after all fallbacks)
   if (!archetypeData) {
     return (
       <ArchetypeError 
@@ -156,6 +159,14 @@ const InsightsContainer = ({
     hasAssessmentAnswers: !!assessmentAnswers,
     exactEmployeeCount: assessmentResult?.exactData?.employeeCount
   });
+  
+  // If we're showing data from a fallback source, indicate this
+  if (error && archetypeData && dataSource !== 'API') {
+    toast.info(`Using offline data for ${archetypeId}`, { 
+      id: "offline-data-note",
+      duration: 3000
+    });
+  }
   
   return (
     <InsightsView 
