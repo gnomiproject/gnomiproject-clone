@@ -25,6 +25,7 @@ const ReportViewer = () => {
       rawArchetypeId,
       normalizedArchetypeId: archetypeId,
       token: token ? `${token.substring(0, 5)}...` : 'missing',
+      dataSource: 'level4_report_secure' // Explicitly log the data source
     });
   }, [archetypeId, rawArchetypeId, token]);
   
@@ -55,10 +56,10 @@ const ReportViewer = () => {
     debugInfo: userDataDebugInfo
   } = useReportUserData(token, archetypeId);
 
-  // Use report data hook for archetype data (minimal version)
+  // Use report data hook to fetch EXCLUSIVELY from level4_report_secure
   const {
     reportData, 
-    archetypeData,
+    archetypeData, // Kept for compatibility
     averageData,
     isLoading: reportLoading,
     error: reportError,
@@ -69,16 +70,33 @@ const ReportViewer = () => {
     isAdminView
   });
 
+  // Data source verification logging
+  useEffect(() => {
+    // Log details about the data source and SWOT data
+    console.log('[ReportViewer] Data source verification:', {
+      source: 'level4_report_secure',
+      hasReportData: !!reportData,
+      hasSwotAnalysis: !!reportData?.swot_analysis,
+      hasStrengths: !!reportData?.strengths,
+      hasWeaknesses: !!reportData?.weaknesses,
+      hasOpportunities: !!reportData?.opportunities,
+      hasThreats: !!reportData?.threats,
+      swotAnalysisType: reportData?.swot_analysis ? typeof reportData.swot_analysis : 'N/A'
+    });
+  }, [reportData]);
+
   // Combined debug info
   const combinedDebugInfo = {
     ...userDataDebugInfo,
     ...reportDebugInfo,
     reportViewerState: {
+      dataSource: 'level4_report_secure',
       userDataLoading,
       reportLoading,
       isValidAccess,
       hasUserData: !!userData,
-      hasReportData: !!reportData || !!archetypeData,
+      hasReportData: !!reportData,
+      hasSwotData: !!(reportData?.swot_analysis || reportData?.strengths),
       timestamp: new Date().toISOString()
     }
   };
@@ -105,7 +123,7 @@ const ReportViewer = () => {
     return (
       <ReportError
         title="Error Loading Report"
-        message={reportError.message}
+        message={`${reportError.message} (Data source: level4_report_secure)`}
         actionLabel="Retry"
         onAction={() => window.location.reload()}
         secondaryAction={() => navigate('/')}
@@ -115,28 +133,25 @@ const ReportViewer = () => {
   }
 
   // Show missing data error
-  if (!reportData && !archetypeData) {
+  if (!reportData) {
     return (
       <ReportError
         title="Report Not Found"
-        message={`Could not find report data for archetype: ${archetypeId} (original: ${rawArchetypeId})`}
+        message={`Could not find report data for archetype: ${archetypeId} in level4_report_secure table.`}
         actionLabel="Return Home"
         onAction={() => navigate('/')}
       />
     );
   }
 
-  // Use report data prioritizing more specific data sources
-  const finalReportData = reportData || archetypeData;
-
-  // Render the simplified report
+  // Render the report using only data from level4_report_secure
   return (
     <ErrorBoundary>
       <div className="min-h-screen bg-gray-50">
         {/* Debug toggle removed */}
         
         <DeepDiveReport
-          reportData={finalReportData}
+          reportData={reportData} // Using only the data from level4_report_secure
           userData={userData}
           averageData={averageData}
           isAdminView={isAdminView}

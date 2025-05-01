@@ -35,35 +35,27 @@ const DeepDiveReportContent = ({
   
   // Debug logging
   useEffect(() => {
-    console.log('[DeepDiveReportContent] Processing archetype data:', {
+    console.log('[DeepDiveReportContent] Processing archetype data from level4_report_secure:', {
       id: archetypeId,
       name: archetypeName,
       familyId: archetype?.family_id || archetype?.familyId,
       familyName,
       shortDescription: shortDescription ? shortDescription.substring(0, 50) + '...' : 'None',
-      hasOverview: !!archetype?.archetype_overview,
-      overviewType: archetype?.archetype_overview ? typeof archetype.archetype_overview : 'None',
+      hasSwotAnalysisField: !!archetype?.swot_analysis,
+      swotAnalysisType: archetype?.swot_analysis ? typeof archetype.swot_analysis : 'None',
+      hasStrengthsField: !!archetype?.strengths,
+      hasWeaknessesField: !!archetype?.weaknesses,
       userData: userData ? {
         name: userData.name,
         organization: userData.organization,
         accessToken: userData.access_token ? `${userData.access_token.substring(0, 5)}...` : 'None',
         lastAccessed: userData.last_accessed
-      } : 'No user data',
-      fullArchetypeObject: archetype ? 'Present' : 'Missing',
-      archetypeRawData: archetype ? JSON.stringify(archetype).substring(0, 200) + '...' : 'Missing'
+      } : 'No user data'
     });
   }, [archetype, archetypeId, archetypeName, familyName, shortDescription, userData]);
 
   // Make a safe copy of the data to avoid mutation issues
   const safeArchetype = {...archetype};
-  
-  // Ensure the archetype data has all expected fields
-  safeArchetype.id = archetypeId;
-  safeArchetype.name = archetypeName;
-  safeArchetype.archetype_id = archetypeId;
-  safeArchetype.archetype_name = archetypeName;
-  safeArchetype.family_name = familyName;
-  safeArchetype.short_description = shortDescription;
   
   // If no archetype data, show error
   if (!archetype) {
@@ -71,7 +63,7 @@ const DeepDiveReportContent = ({
       <div className="container mx-auto p-6">
         <div className="bg-red-50 text-red-700 p-4 rounded-lg">
           <h2 className="text-xl font-bold">Report Data Missing</h2>
-          <p>Unable to load report data. Please try refreshing the page.</p>
+          <p>Unable to load report data from level4_report_secure. Please try refreshing the page.</p>
           <button 
             onClick={() => window.location.reload()}
             className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
@@ -149,10 +141,9 @@ const DeepDiveReportContent = ({
         </Section>
       </ErrorBoundary>
       
-      {/* SWOT Analysis Section */}
+      {/* SWOT Analysis Section - Using data from level4_report_secure only */}
       <ErrorBoundary>
         <Section id="swot-analysis">
-          <SectionTitle title="SWOT Analysis" />
           <SwotAnalysis reportData={safeArchetype} />
         </Section>
       </ErrorBoundary>
@@ -176,19 +167,18 @@ const DeepDiveReportContent = ({
           <details className="mt-4 bg-gray-50 p-4 rounded-lg text-sm">
             <summary className="font-medium cursor-pointer">Debug Information</summary>
             <div className="mt-2 font-mono text-xs space-y-1">
+              <p>Data Source: level4_report_secure</p>
               <p>Archetype ID: {archetypeId}</p>
               <p>Archetype Name: {archetypeName}</p>
               <p>Family ID: {archetype?.family_id || archetype?.familyId || 'Not available'}</p>
               <p>Family Name: {familyName}</p>
+              <p>Has SWOT Analysis Field: {archetype?.swot_analysis ? 'Yes' : 'No'}</p>
+              <p>SWOT Analysis Type: {archetype?.swot_analysis ? typeof archetype.swot_analysis : 'None'}</p>
+              <p>Has Individual SWOT Fields: {(archetype?.strengths || archetype?.weaknesses) ? 'Yes' : 'No'}</p>
               <p>User: {userData?.name || 'Not available'}</p>
               <p>Organization: {userData?.organization || 'Not available'}</p>
               <p>Access Token: {userData?.access_token ? `${userData.access_token.substring(0, 5)}...` : 'Not available'}</p>
               <p>Last Accessed: {userData?.last_accessed ? new Date(userData.last_accessed).toLocaleString() : 'Never'}</p>
-              <p>Has User Data: {userData ? 'Yes' : 'No'}</p>
-              <p>Has Archetype Overview: {archetype?.archetype_overview ? 'Yes' : 'No'}</p>
-              <p>Has Strategic Recommendations: {archetype?.strategic_recommendations ? 'Yes' : 'No'}</p>
-              <p>Has SWOT Data: {archetype?.strengths || archetype?.swot_analysis ? 'Yes' : 'No'}</p>
-              <p>Raw Archetype Data Structure: {Object.keys(archetype || {}).join(', ')}</p>
             </div>
             <div className="mt-4 flex justify-center">
               <GnomeImage type="presentation" showDebug={true} />

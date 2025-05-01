@@ -6,7 +6,7 @@ import { normalizeSwotData } from '@/utils/swot/normalizeSwotData';
 
 export interface SwotAnalysisProps {
   reportData?: ArchetypeDetailedData;
-  archetypeData?: ArchetypeDetailedData;
+  archetypeData?: ArchetypeDetailedData; // Kept for backward compatibility
   swotData?: {
     strengths?: any[];
     weaknesses?: any[];
@@ -16,14 +16,40 @@ export interface SwotAnalysisProps {
 }
 
 const SwotAnalysis: React.FC<SwotAnalysisProps> = ({ reportData, archetypeData, swotData: propSwotData }) => {
-  // Use reportData as primary, fall back to archetypeData
-  const data = reportData || archetypeData;
+  // Use reportData from level4_report_secure as primary source
+  const data = reportData;
+  
+  // Log the data sources available
+  console.log("[SwotAnalysis] Data source check:", {
+    hasReportData: !!reportData,
+    reportDataSource: reportData ? "level4_report_secure" : "none",
+    swotDataAvailable: !!(reportData?.swot_analysis || reportData?.strengths),
+    swotAnalysisType: reportData?.swot_analysis ? typeof reportData.swot_analysis : "N/A"
+  });
 
-  // Get SWOT data safely using normalizeSwotData
-  const strengths = normalizeSwotData(propSwotData?.strengths || data?.strengths || data?.swot_analysis?.strengths);
-  const weaknesses = normalizeSwotData(propSwotData?.weaknesses || data?.weaknesses || data?.swot_analysis?.weaknesses);
-  const opportunities = normalizeSwotData(propSwotData?.opportunities || data?.opportunities || data?.swot_analysis?.opportunities);
-  const threats = normalizeSwotData(propSwotData?.threats || data?.threats || data?.swot_analysis?.threats);
+  // Get SWOT data from the swot_analysis field if available, or from individual fields
+  const swotAnalysis = data?.swot_analysis || {};
+  
+  // Extract SWOT components from the data with priority order
+  // 1. Use props.swotData if provided (for testing/override)
+  // 2. Use data.swot_analysis.X if available
+  // 3. Use data.X direct fields if available
+  const strengths = normalizeSwotData(propSwotData?.strengths || swotAnalysis?.strengths || data?.strengths);
+  const weaknesses = normalizeSwotData(propSwotData?.weaknesses || swotAnalysis?.weaknesses || data?.weaknesses);
+  const opportunities = normalizeSwotData(propSwotData?.opportunities || swotAnalysis?.opportunities || data?.opportunities);
+  const threats = normalizeSwotData(propSwotData?.threats || swotAnalysis?.threats || data?.threats);
+
+  // If no data available, show no data message
+  if (!data) {
+    return (
+      <div className="space-y-6">
+        <SectionTitle title="SWOT Analysis" />
+        <div className="bg-white rounded-lg p-6 shadow-sm">
+          <p className="text-gray-600">No SWOT analysis data available for this archetype.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

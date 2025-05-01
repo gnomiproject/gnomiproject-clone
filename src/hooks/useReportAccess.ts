@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useGetArchetype } from '@/hooks/useGetArchetype';
@@ -12,7 +13,7 @@ interface UseReportAccessOptions {
 }
 
 // Define valid table names to satisfy TypeScript
-type SecureTableName = 'level4_report_secure' | 'level4_deepdive_report_data_secure' | 'level3_report_secure' | 'level3_report_data_secure';
+type SecureTableName = 'level4_report_secure';
 
 export const useReportAccess = ({ archetypeId: rawArchetypeId, token, isAdminView = false }: UseReportAccessOptions) => {
   const [reportData, setReportData] = useState<any | null>(null);
@@ -24,7 +25,7 @@ export const useReportAccess = ({ archetypeId: rawArchetypeId, token, isAdminVie
   // Normalize the archetype ID to handle case sensitivity
   const archetypeId = normalizeArchetypeId(rawArchetypeId);
   
-  // Get archetypeData using the existing hook
+  // Get archetypeData using the existing hook (kept for compatibility)
   const {
     archetypeData,
     isLoading: archetypeLoading,
@@ -60,73 +61,28 @@ export const useReportAccess = ({ archetypeId: rawArchetypeId, token, isAdminVie
           console.log(`[useReportAccess] Validating token: ${token.substring(0, 5)}...`);
         }
 
-        // Try case-insensitive search for more robust data retrieval
-        const fetchWithCaseInsensitiveSearch = async (tableName: SecureTableName, archetypeIdParam: string) => {
-          // Try exact match first
-          const { data, error } = await supabase
-            .from(tableName)
-            .select('*')
-            .eq('archetype_id', archetypeIdParam)
-            .maybeSingle();
-            
-          if (!error && data) {
-            return { data, error };
-          }
-          
-          // If exact match fails, try case-insensitive search
-          console.log(`[useReportAccess] Trying case-insensitive search in ${tableName}`);
-          return await supabase
-            .from(tableName)
-            .select('*')
-            .ilike('archetype_id', archetypeIdParam)
-            .maybeSingle();
-        };
+        // SINGLE SOURCE OF TRUTH: Fetch data ONLY from level4_report_secure
+        const { data, error } = await supabase
+          .from('level4_report_secure')
+          .select('*')
+          .eq('archetype_id', archetypeId)
+          .maybeSingle();
 
-        // Fetch detailed report data from level4 secure view
-        const { data: deepDiveData, error: deepDiveError } = await fetchWithCaseInsensitiveSearch(
-          'level4_report_secure' as SecureTableName, 
-          archetypeId
-        );
-
-        if (deepDiveError) {
-          console.warn(`[useReportAccess] Could not fetch level4 data: ${deepDiveError.message}`);
+        if (error) {
+          console.error(`[useReportAccess] Database error fetching level4_report_secure:`, error);
+          setError(error);
           setDebugInfo(prev => ({
             ...prev,
             level4Query: {
               success: false,
-              error: deepDiveError.message
+              error: error.message
             }
           }));
-          
-          // Try the base level4 data with secure view if level4_report_secure fails
-          const { data: level4BaseData, error: level4BaseError } = await fetchWithCaseInsensitiveSearch(
-            'level4_deepdive_report_data_secure' as SecureTableName, 
-            archetypeId
-          );
-            
-          if (!level4BaseError && level4BaseData) {
-            console.log(`[useReportAccess] Got level4 data using base secure view for ${archetypeId}`);
-            setReportData(level4BaseData);
-            setDebugInfo(prev => ({
-              ...prev,
-              level4BaseQuery: {
-                success: true,
-                dataFound: true
-              }
-            }));
-          }
-        } else if (deepDiveData) {
-          console.log(`[useReportAccess] Got level4 deep dive data for ${archetypeId}`);
-          setReportData(deepDiveData);
-          setDebugInfo(prev => ({
-            ...prev,
-            level4Query: {
-              success: true,
-              dataFound: true
-            }
-          }));
-        } else {
-          console.log(`[useReportAccess] No level4 data found for ${archetypeId}, falling back`);
+          return;
+        }
+        
+        if (!data) {
+          console.log(`[useReportAccess] No data found in level4_report_secure for ${archetypeId}`);
           setDebugInfo(prev => ({
             ...prev,
             level4Query: {
@@ -134,98 +90,36 @@ export const useReportAccess = ({ archetypeId: rawArchetypeId, token, isAdminVie
               dataFound: false
             }
           }));
-          
-          // Try the level3 secure view as fallback
-          const { data: level3Data, error: level3Error } = await fetchWithCaseInsensitiveSearch(
-            'level3_report_secure' as SecureTableName, 
-            archetypeId
-          );
-            
-          if (!level3Error && level3Data) {
-            console.log(`[useReportAccess] Got level3 data using secure view for ${archetypeId}`);
-            setReportData(level3Data);
-            setDebugInfo(prev => ({
-              ...prev,
-              level3Query: {
-                success: true,
-                dataFound: true
-              }
-            }));
-          }
+          setError(new Error(`No data available for archetype ${archetypeId}`));
+          return;
         }
 
-        // If we still don't have SWOT data, try getting it directly from the Analysis_Archetype_SWOT table
-        if (!reportData) {
-          console.log(`[useReportAccess] Trying to fetch directly from SWOT table for ${archetypeId}`);
-          
-          const { data: swotData, error: swotError } = await supabase
-            .from('Analysis_Archetype_SWOT')
-            .select('strengths, weaknesses, opportunities, threats')
-            .eq('archetype_id', archetypeId)
-            .maybeSingle();
-            
-          if (!swotError && swotData && (swotData.strengths || swotData.weaknesses || swotData.opportunities || swotData.threats)) {
-            console.log(`[useReportAccess] Got SWOT data directly from SWOT table:`, swotData);
-            
-            // Update reportData with SWOT information
-            setReportData(prevData => {
-              const updatedData = {
-                ...prevData,
-                ...swotData
-              };
-              
-              return updatedData;
-            });
-            
-            setDebugInfo(prev => ({
-              ...prev,
-              swotQuery: {
-                success: true,
-                dataFound: true,
-                strengths: normalizeSwotData(swotData.strengths || []).length,
-                weaknesses: normalizeSwotData(swotData.weaknesses || []).length,
-                opportunities: normalizeSwotData(swotData.opportunities || []).length,
-                threats: normalizeSwotData(swotData.threats || []).length
-              }
-            }));
+        console.log(`[useReportAccess] Got level4 deep dive data for ${archetypeId}`);
+        
+        // Log the available fields related to SWOT
+        console.log("[useReportAccess] SWOT data check:", {
+          hasSwotAnalysisField: 'swot_analysis' in data,
+          hasStrengthsField: 'strengths' in data,
+          hasWeaknessesField: 'weaknesses' in data,
+          hasOpportunitiesField: 'opportunities' in data,
+          hasThreatsField: 'threats' in data,
+          swotAnalysisType: data.swot_analysis ? typeof data.swot_analysis : 'N/A'
+        });
+        
+        setReportData(data);
+        
+        setDebugInfo(prev => ({
+          ...prev,
+          level4Query: {
+            success: true,
+            dataFound: true,
+            swotDataAvailable: !!(data.swot_analysis || data.strengths)
           }
-        }
+        }));
 
-        // Parse top distinctive metrics if available
-        if (!reportData || !reportData.top_distinctive_metrics) {
-          const { data: topMetricsData, error: topMetricsError } = await supabase
-            .from('Analysis_Archetype_Distinctive_Metrics')
-            .select('*')
-            .eq('archetype_id', archetypeId)
-            .limit(4)
-            .order('difference', { ascending: false });
-            
-          if (!topMetricsError && topMetricsData) {
-            console.log(`[useReportAccess] Got top distinctive metrics directly from the metrics table: ${topMetricsData.length} items`);
-            
-            // Update reportData with top metrics information
-            setReportData(prevData => {
-              return {
-                ...prevData,
-                top_distinctive_metrics: topMetricsData
-              };
-            });
-            
-            setDebugInfo(prev => ({
-              ...prev,
-              topMetricsQuery: {
-                success: true,
-                dataFound: true,
-                count: topMetricsData.length,
-                sample: topMetricsData.length > 0 ? topMetricsData[0].metric : 'None'
-              }
-            }));
-          }
-        }
-
-        // Fetch average data for comparisons
+        // Fetch average data for comparisons (still from level4_report_secure)
         const { data: avgData, error: avgError } = await supabase
-          .from('level4_report_secure' as SecureTableName)
+          .from('level4_report_secure')
           .select('*')
           .eq('archetype_id', 'All_Average')
           .maybeSingle();
@@ -239,25 +133,6 @@ export const useReportAccess = ({ archetypeId: rawArchetypeId, token, isAdminVie
               error: avgError.message
             }
           }));
-          
-          // Try the base secure view for average data
-          const { data: avgBaseData, error: avgBaseError } = await supabase
-            .from('level4_deepdive_report_data_secure' as SecureTableName)
-            .select('*')
-            .eq('archetype_id', 'All_Average')
-            .maybeSingle();
-            
-          if (!avgBaseError && avgBaseData) {
-            console.log(`[useReportAccess] Got average data using base secure view`);
-            setAverageData(avgBaseData);
-            setDebugInfo(prev => ({
-              ...prev,
-              averageBaseQuery: {
-                success: true,
-                dataFound: true
-              }
-            }));
-          }
         } else if (avgData) {
           console.log(`[useReportAccess] Got average comparison data`);
           setAverageData(avgData);
@@ -287,7 +162,7 @@ export const useReportAccess = ({ archetypeId: rawArchetypeId, token, isAdminVie
 
   return {
     reportData,
-    archetypeData,
+    archetypeData, // Kept for backward compatibility
     averageData,
     isLoading: isLoading || archetypeLoading,
     error: error || archetypeError,

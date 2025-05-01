@@ -1,17 +1,17 @@
 
 /**
  * Normalizes SWOT data into a string array format
- * This simplifies the various formats that might exist in the database
+ * This simplifies the various formats that might exist in level4_report_secure
  */
 export const normalizeSwotData = (data: any): string[] => {
-  console.log("[normalizeSwotData] Input:", {
+  console.log("[normalizeSwotData] Input from level4_report_secure:", {
     dataType: typeof data,
     isNull: data === null,
     isUndefined: data === undefined,
     isArray: Array.isArray(data),
     isString: typeof data === 'string',
     value: data,
-    rawData: JSON.stringify(data) // Show the actual content
+    rawDataSample: data ? JSON.stringify(data).substring(0, 100) + (JSON.stringify(data).length > 100 ? '...' : '') : 'null' // Show sample of content
   });
   
   // Return empty array if data is null, undefined, or empty
@@ -26,7 +26,7 @@ export const normalizeSwotData = (data: any): string[] => {
     return data;
   }
   
-  // If it's an array of objects with text property (common format in our DB)
+  // If it's an array of objects with text property (common format in level4_report_secure)
   if (Array.isArray(data) && data.length > 0 && typeof data[0] === 'object' && data[0]?.text) {
     console.log("[normalizeSwotData] Array of objects with text property, extracting text");
     return data.map(item => item?.text || '').filter(Boolean);
@@ -67,9 +67,15 @@ export const normalizeSwotData = (data: any): string[] => {
     return data;
   }
   
-  // Check for specific object formats we might have in the DB
+  // Check for specific object formats we might have in level4_report_secure
   if (typeof data === 'object' && data !== null) {
-    console.log("[normalizeSwotData] Processing object data:", data);
+    // If the object itself contains the SWOT elements as properties
+    if ('strengths' in data || 'weaknesses' in data || 'opportunities' in data || 'threats' in data) {
+      console.log("[normalizeSwotData] Found SWOT structure in object itself - handling inner SWOT objects is handled at component level");
+      // This case is handled at the component level - we shouldn't end up here
+      // But if we do, return an empty array to avoid errors
+      return [];
+    }
     
     // If object has entries or items property that is an array
     if (data.entries && Array.isArray(data.entries)) {
@@ -98,18 +104,6 @@ export const normalizeSwotData = (data: any): string[] => {
         if (point && typeof point === 'object' && point.text) return point.text;
         return String(point);
       }).filter(Boolean);
-    }
-
-    // Try to extract any array-like property
-    for (const key in data) {
-      if (Array.isArray(data[key])) {
-        console.log(`[normalizeSwotData] Found array in property '${key}'`);
-        return data[key].map((item: any) => {
-          if (typeof item === 'string') return item;
-          if (item && typeof item === 'object' && item.text) return item.text;
-          return String(item);
-        }).filter(Boolean);
-      }
     }
   }
   
