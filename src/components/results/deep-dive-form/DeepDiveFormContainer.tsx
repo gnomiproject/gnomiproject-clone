@@ -35,12 +35,25 @@ const DeepDiveFormContainer = ({
   assessmentAnswers,
   archetypeData 
 }: DeepDiveFormContainerProps) => {
+  // Define all hooks at the top level - never conditionally
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccessful, setSubmitSuccessful] = useState(false);
   const [submittedEmail, setSubmittedEmail] = useState('');
   const [accessUrl, setAccessUrl] = useState('');
   const navigate = useNavigate();
   
+  // Form setup - must be called unconditionally
+  const form = useForm<FormData>({
+    resolver: zodResolver(FormSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      organization: "",
+      comments: "",
+      sessionId: localStorage.getItem('session_id') || ''
+    },
+  });
+
   // Extended debug logging to trace the data flow
   useEffect(() => {
     console.log('[DeepDiveFormContainer] Assessment data received', {
@@ -53,17 +66,6 @@ const DeepDiveFormContainer = ({
     });
   }, [assessmentResult, archetypeId]);
   
-  const form = useForm<FormData>({
-    resolver: zodResolver(FormSchema),
-    defaultValues: {
-      name: "",
-      email: "",
-      organization: "",
-      comments: "",
-      sessionId: localStorage.getItem('session_id') || ''
-    },
-  });
-
   // Check if user has already submitted a report in this session
   useEffect(() => {
     const hasSubmittedReport = sessionStorage.getItem(REPORT_SUBMITTED_KEY);

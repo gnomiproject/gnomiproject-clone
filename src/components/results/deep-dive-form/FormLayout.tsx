@@ -30,6 +30,7 @@ const FormLayout = ({
   onResetForm,
   onSubmit
 }: FormLayoutProps) => {
+  // Always log this, not conditionally
   console.log("[FormLayout] Rendering with submitSuccessful:", submitSuccessful);
   
   return (

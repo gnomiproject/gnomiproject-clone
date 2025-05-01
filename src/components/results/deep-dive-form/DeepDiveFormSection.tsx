@@ -29,7 +29,7 @@ interface DeepDiveFormSectionProps {
   className?: string;
 }
 
-const DeepDiveFormSection = ({ form, onSubmit, isSubmitting, className }: DeepDiveFormSectionProps) => {
+const DeepDiveFormSection = ({ form, onSubmit, isSubmitting, className = '' }: DeepDiveFormSectionProps) => {
   const handleSubmit = (data: FormData) => {
     console.log("[DeepDiveFormSection] Submitting form data:", data);
     return onSubmit(data);
