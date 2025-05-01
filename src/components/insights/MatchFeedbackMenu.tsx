@@ -35,18 +35,38 @@ const MatchFeedbackMenu = ({
     setIsSubmitting(true);
     
     try {
-      const { error } = await supabase
-        .from('insights_feedback')
-        .insert({
-          archetype_id: archetypeId,
-          session_id: sessionId || null,
-          feedback: selectedFeedback,
-          user_comments: userComments.trim() || null,
-          assessment_result: assessmentResult || null,
-          assessment_answers: assessmentAnswers || null
-        });
+      // Log what we're submitting to help with debugging
+      console.log('[MatchFeedbackMenu] Submitting feedback:', {
+        archetype_id: archetypeId,
+        session_id: sessionId,
+        feedback: selectedFeedback,
+        hasComments: !!userComments.trim(),
+        hasAssessmentResult: !!assessmentResult,
+        hasAssessmentAnswers: !!assessmentAnswers
+      });
+      
+      // Create the data object for insertion
+      const feedbackData = {
+        id: crypto.randomUUID(), // Generate UUID for the row ID
+        archetype_id: archetypeId,
+        session_id: sessionId || null,
+        feedback: selectedFeedback,
+        user_comments: userComments.trim() || null,
+        assessment_result: assessmentResult || null,
+        assessment_answers: assessmentAnswers || null,
+        created_at: new Date().toISOString()
+      };
 
-      if (error) throw error;
+      const { error, data } = await supabase
+        .from('insights_feedback')
+        .insert(feedbackData);
+
+      if (error) {
+        console.error('[MatchFeedbackMenu] Error in feedback submission:', error);
+        throw error;
+      }
+      
+      console.log('[MatchFeedbackMenu] Feedback submitted successfully:', data);
       
       toast({
         title: "Feedback Received",
@@ -56,7 +76,7 @@ const MatchFeedbackMenu = ({
       
       setSubmitted(true);
     } catch (err) {
-      console.error('Error in feedback submission:', err);
+      console.error('[MatchFeedbackMenu] Error in feedback submission:', err);
       toast({
         title: "Error Submitting Feedback",
         description: "There was a problem submitting your feedback. Please try again.",
@@ -74,7 +94,7 @@ const MatchFeedbackMenu = ({
     try {
       onClose();
     } catch (error) {
-      console.error('Error in handleClose:', error);
+      console.error('[MatchFeedbackMenu] Error in handleClose:', error);
     }
   };
 

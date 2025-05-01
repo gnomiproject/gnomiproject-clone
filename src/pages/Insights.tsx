@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ArchetypeId } from '@/types/archetype';
@@ -288,6 +287,7 @@ const Insights = () => {
             onClose={handleCloseFeedback}
             sessionId={sessionId}
             assessmentResult={sessionResults}
+            assessmentAnswers={sessionAnswers}
           />
         </div>
       )}
