@@ -1,7 +1,6 @@
 
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { ArchetypeDetailedData, ArchetypeId } from '@/types/archetype';
-import { useArchetypes } from './useArchetypes';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from "sonner";
 import { fetchArchetypeData } from '@/services/archetypeService';
@@ -23,14 +22,12 @@ export const useGetArchetype = (archetypeId: ArchetypeId, skipCache: boolean = f
   const archetypeDataRef = useRef<ArchetypeDetailedData | null>(null);
   const familyDataRef = useRef<any | null>(null);
   const dataSourceRef = useRef<string>('');
-  const fetchFailedRef = useRef<boolean>(false);
   
   // Use state only for values that should trigger re-renders when changed
   const [archetypeData, setArchetypeData] = useState<ArchetypeDetailedData | null>(null);
   const [familyData, setFamilyData] = useState<any | null>(null);
   const [dataSource, setDataSource] = useState<string>('');
   
-  const { getFamilyById } = useArchetypes();
   const queryClient = useQueryClient();
   
   // Add processing guard to prevent redundant processing
@@ -61,8 +58,6 @@ export const useGetArchetype = (archetypeId: ArchetypeId, skipCache: boolean = f
     retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 10000),
   });
   
-  // Remove fallback initialization - we only want data from the primary source
-  
   // Process data on success - defined as a callback to avoid recreating on each render
   const processData = useCallback((data: any) => {
     // Skip processing if no data or if processing is in progress
@@ -88,19 +83,26 @@ export const useGetArchetype = (archetypeId: ArchetypeId, skipCache: boolean = f
     
     try {
       if (data) {
-        // Process database data
-        const { archetypeData: formattedData, familyData: processedFamilyData, dataSource: source } = 
-          processArchetypeData(data, getFamilyById);
+        // Extract family data from the level3_report_secure response
+        const extractedFamilyData = {
+          id: data.family_id,
+          name: data.family_name,
+          shortDescription: data.family_short_description,
+          longDescription: data.family_long_description,
+          industries: data.family_industries,
+          hexColor: data.hex_color,
+          commonTraits: data.common_traits
+        };
         
         // Update refs first
-        archetypeDataRef.current = formattedData;
-        familyDataRef.current = processedFamilyData;
-        dataSourceRef.current = source;
+        archetypeDataRef.current = data;
+        familyDataRef.current = extractedFamilyData;
+        dataSourceRef.current = 'level3_report_secure';
         
         // Then update state (triggers re-render)
-        setArchetypeData(formattedData);
-        setFamilyData(processedFamilyData);
-        setDataSource(source);
+        setArchetypeData(data);
+        setFamilyData(extractedFamilyData);
+        setDataSource('level3_report_secure');
       } else {
         // No data, just set everything to null
         archetypeDataRef.current = null;
@@ -119,7 +121,7 @@ export const useGetArchetype = (archetypeId: ArchetypeId, skipCache: boolean = f
       // Always reset the processing flag even if there's an error
       processingRef.current = false;
     }
-  }, [getFamilyById]);
+  }, []);
 
   // Handle errors - defined as a callback to avoid recreating on each render
   const handleError = useCallback((error: Error) => {
@@ -128,7 +130,6 @@ export const useGetArchetype = (archetypeId: ArchetypeId, skipCache: boolean = f
     // Prevent concurrent processing
     if (processingRef.current) return;
     processingRef.current = true;
-    fetchFailedRef.current = true;
     
     try {
       // On error, set everything to null - no fallback data

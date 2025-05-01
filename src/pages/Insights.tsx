@@ -1,13 +1,12 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useArchetypes } from '@/hooks/useArchetypes';
 import { ArchetypeId } from '@/types/archetype';
 import { AssessmentResult } from '@/types/assessment';
 import MatchFeedbackMenu from '@/components/insights/MatchFeedbackMenu';
 import NoAssessmentResults from '@/components/insights/NoAssessmentResults';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
-import { useGetArchetype } from '@/hooks/useGetArchetype';
 import InsightsContainer from '@/components/insights/InsightsContainer';
 
 // Storage keys
@@ -28,14 +27,6 @@ const Insights = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  
-  // Use consistent hook calls - important for React's hook rules
-  const { getArchetypeDetailedById, getFamilyById } = useArchetypes();
-
-  // Check if the user is interacting with a form
-  const handleFormVisibilityChange = (isVisible: boolean) => {
-    setIsFormVisible(isVisible);
-  };
   
   // Added effect to detect when user is focusing on form inputs
   useEffect(() => {
@@ -220,7 +211,7 @@ const Insights = () => {
         staleTime: 5 * 60 * 1000 // 5 minutes
       });
     }
-  }, [location, queryClient]); 
+  }, [location, queryClient, sessionResults]); 
 
   // Add scroll event listener to show feedback menu when scrolling
   // with throttling to avoid too many events
@@ -267,17 +258,6 @@ const Insights = () => {
     }
   };
 
-  // Use useGetArchetype hook to fetch the latest archetype data from the DB
-  const { archetypeData: fetchedArchetypeData, isLoading: isLoadingArchetype } = 
-    useGetArchetype(selectedArchetype as ArchetypeId);
-
-  // Get the archetype data from local cache if DB fetch is still loading
-  const localArchetypeData = selectedArchetype ? getArchetypeDetailedById(selectedArchetype) : null;
-  
-  // Use fetched data if available, otherwise fall back to local data
-  const archetypeData = fetchedArchetypeData || localArchetypeData;
-  const familyData = archetypeData?.familyId ? getFamilyById(archetypeData.familyId) : null;
-
   // Debug
   console.log("[Insights] Selected archetype:", selectedArchetype);
   console.log("[Insights] Session results full data:", sessionResults);
@@ -288,7 +268,7 @@ const Insights = () => {
     <div className="min-h-screen bg-gray-50 py-12 px-6 md:px-12 pb-24 relative">
       <div className="max-w-5xl mx-auto">
         {/* Show assessment results if an archetype is selected */}
-        {selectedArchetype && archetypeData ? (
+        {selectedArchetype ? (
           <InsightsContainer
             archetypeId={selectedArchetype}
             onRetakeAssessment={handleRetakeAssessment}
@@ -301,7 +281,7 @@ const Insights = () => {
       </div>
 
       {/* Feedback menu in bottom right corner - only show if archetype is selected and user has scrolled */}
-      {selectedArchetype && archetypeData && showFeedback && !isFormVisible && (
+      {selectedArchetype && showFeedback && !isFormVisible && (
         <div className="fixed bottom-6 right-6 z-10 animate-slide-in-from-bottom">
           <MatchFeedbackMenu 
             archetypeId={selectedArchetype} 

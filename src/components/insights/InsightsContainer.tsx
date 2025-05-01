@@ -1,7 +1,6 @@
 
 import React, { useMemo, useRef, useEffect } from 'react';
 import { ArchetypeId } from '@/types/archetype';
-import { useArchetypes } from '@/hooks/useArchetypes';
 import { useGetArchetype } from '@/hooks/useGetArchetype';
 import InsightsView from './InsightsView';
 import ArchetypeLoadingSkeleton from './ArchetypeLoadingSkeleton';
@@ -22,9 +21,7 @@ const InsightsContainer = ({
   assessmentAnswers 
 }: InsightsContainerProps) => {
   // Always define hooks first regardless of condition
-  const { getArchetypeDetailedById } = useArchetypes();
   const renderCountRef = useRef(0);
-  const processedRef = useRef(false);
   const mountedRef = useRef(true);
   const [retrying, setRetrying] = React.useState(false);
   
@@ -33,7 +30,7 @@ const InsightsContainer = ({
   
   // Skip cache here to ensure we get fresh data
   const { 
-    archetypeData: dbArchetypeData, 
+    archetypeData, 
     isLoading, 
     error, 
     refetch,
@@ -62,11 +59,6 @@ const InsightsContainer = ({
       console.log('[InsightsContainer] Updated assessment result:', assessmentResult);
     }
     
-    // Reset flags when archetypeId changes
-    if (archetypeId) {
-      processedRef.current = false;
-    }
-    
     return () => {
       mountedRef.current = false;
       console.log(`[InsightsContainer] Unmounting for ${archetypeId}`);
@@ -81,63 +73,23 @@ const InsightsContainer = ({
       toast.success("Reconnected successfully");
     } catch (error: any) {
       toast.error(`Could not refresh data: ${error.message}`, {
-        description: "Using offline data"
+        description: "No data available"
       });
     } finally {
       setRetrying(false);
     }
   };
   
-  // Use memoization with strict dependency tracking to prevent redundant calculations
-  const archetypeData = useMemo(() => {
-    // Skip processing if already done or component unmounted
-    if (processedRef.current || !mountedRef.current) {
-      console.log(`[InsightsContainer] Skipping redundant processing for ${archetypeId}`);
-      return dbArchetypeData || getArchetypeDetailedById(archetypeId);
-    }
-    
-    // Set processing flag immediately before any operations
-    processedRef.current = true;
-    console.log(`[InsightsContainer] Processing data for ${archetypeId} (sequence #${renderCountRef.current})`);
-    
-    // Get data from API or fallback to local data
-    const data = dbArchetypeData || getArchetypeDetailedById(archetypeId);
-    
-    if (data) {
-      console.log(`[InsightsContainer] Data found:`, { 
-        name: data.name || data.archetype_name,
-        id: data.id || data.archetype_id,
-        familyId: data.familyId || data.family_id
-      });
-    } else {
-      console.warn(`[InsightsContainer] No data found for archetype ${archetypeId}`);
-    }
-    
-    return data;
-  }, [dbArchetypeData, getArchetypeDetailedById, archetypeId]);
-  
   // Show loading state
   if (isLoading) {
     return <ArchetypeLoadingSkeleton />;
   }
   
-  // Show error state if there's an API error but not if we have fallback data
-  if (error && !archetypeData) {
+  // Show error state if there's an API error
+  if (error || !archetypeData) {
     return (
       <ArchetypeError 
-        message="We're having trouble connecting to our database. You can continue with offline data or retry the connection."
-        onRetry={handleRetry}
-        onRetakeAssessment={onRetakeAssessment}
-        isRetrying={retrying}
-      />
-    );
-  }
-  
-  // Show error state if no data is available (after all fallbacks)
-  if (!archetypeData) {
-    return (
-      <ArchetypeError 
-        message="No data available for this archetype. Please try retaking the assessment."
+        message="We're having trouble retrieving archetype data. Please try again later or retake the assessment."
         onRetry={handleRetry}
         onRetakeAssessment={onRetakeAssessment}
         isRetrying={retrying}
@@ -159,14 +111,6 @@ const InsightsContainer = ({
     hasAssessmentAnswers: !!assessmentAnswers,
     exactEmployeeCount: assessmentResult?.exactData?.employeeCount
   });
-  
-  // If we're showing data from a fallback source, indicate this
-  if (error && archetypeData && dataSource !== 'API') {
-    toast.info(`Using offline data for ${archetypeId}`, { 
-      id: "offline-data-note",
-      duration: 3000
-    });
-  }
   
   return (
     <InsightsView 

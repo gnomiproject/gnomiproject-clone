@@ -31,7 +31,10 @@ export const fetchReportData = async (
   archetypeId: string,
   reportType: ReportType
 ): Promise<ArchetypeDetailedData | null> => {
-  const dataSourceTable = getDataSource(reportType);
+  // For insights reports, always use level3_report_secure
+  const dataSourceTable = reportType === 'insight' ? 'level3_report_secure' : getDataSource(reportType);
+  
+  console.log(`[fetchReportData] Querying ${dataSourceTable} for archetypeId ${archetypeId}`);
   
   const { data, error } = await supabase
     .from(dataSourceTable as any)
@@ -39,7 +42,15 @@ export const fetchReportData = async (
     .eq('archetype_id', archetypeId)
     .maybeSingle();
 
-  if (error) throw error;
+  if (error) {
+    console.error(`[fetchReportData] Error querying ${dataSourceTable}:`, error);
+    throw error;
+  }
+  
+  if (!data) {
+    console.log(`[fetchReportData] No data found in ${dataSourceTable} for archetype ${archetypeId}`);
+    return null;
+  }
   
   return data ? mapToArchetypeDetailedData(data) : null;
 };
@@ -47,6 +58,8 @@ export const fetchReportData = async (
 // Function to map raw database fields to our application model
 const mapToArchetypeDetailedData = (data: any): ArchetypeDetailedData | null => {
   if (!data) return null;
+  
+  console.log('[mapToArchetypeDetailedData] Processing data for:', data.archetype_id);
   
   return {
     id: data.archetype_id,
@@ -64,15 +77,13 @@ const mapToArchetypeDetailedData = (data: any): ArchetypeDetailedData | null => 
     family_id: data.family_id,
     
     // Map SWOT analysis fields
-    strengths: Array.isArray(data.strengths) ? data.strengths : [],
-    weaknesses: Array.isArray(data.weaknesses) ? data.weaknesses : [],
-    opportunities: Array.isArray(data.opportunities) ? data.opportunities : [],
-    threats: Array.isArray(data.threats) ? data.threats : [],
+    strengths: data.strengths || [],
+    weaknesses: data.weaknesses || [],
+    opportunities: data.opportunities || [],
+    threats: data.threats || [],
     
     // Map strategic recommendations
-    strategic_recommendations: Array.isArray(data.strategic_recommendations) 
-      ? data.strategic_recommendations
-      : [],
+    strategic_recommendations: data.strategic_recommendations || [],
       
     // Map metrics with their original names
     "Demo_Average Family Size": data["Demo_Average Family Size"] || 0,
@@ -117,12 +128,12 @@ const mapToArchetypeDetailedData = (data: any): ArchetypeDetailedData | null => 
     },
     enhanced: {
       swot: {
-        strengths: Array.isArray(data.strengths) ? data.strengths : [],
-        weaknesses: Array.isArray(data.weaknesses) ? data.weaknesses : [],
-        opportunities: Array.isArray(data.opportunities) ? data.opportunities : [],
-        threats: Array.isArray(data.threats) ? data.threats : [],
+        strengths: data.strengths || [],
+        weaknesses: data.weaknesses || [],
+        opportunities: data.opportunities || [],
+        threats: data.threats || [],
       },
-      strategicPriorities: Array.isArray(data.strategic_recommendations) ? data.strategic_recommendations : [],
+      strategicPriorities: data.strategic_recommendations || [],
       costSavings: [],
       riskProfile: data["Risk_Average Risk Score"] ? {
         score: String(data["Risk_Average Risk Score"]).substring(0, 4),
