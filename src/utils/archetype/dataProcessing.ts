@@ -1,26 +1,13 @@
-
 import { ArchetypeDetailedData, ArchetypeId, FamilyId } from '@/types/archetype';
+import { mapDatabaseResponseToInterface } from '@/utils/dataTransforms/namingConventions';
 
 // Helper function to normalize property names across different data sources
 export const normalizePropertyNames = (data: any): any => {
   if (!data) return null;
   
-  const normalized = { ...data };
+  // Use the generic mapper function for consistent property normalization
+  const normalized = mapDatabaseResponseToInterface(data);
   
-  // Handle hex color variations (snake_case to camelCase)
-  if (normalized.hex_color && !normalized.hexColor) {
-    normalized.hexColor = normalized.hex_color;
-  }
-  
-  // Handle family ID/name variations
-  if (normalized.family_id && !normalized.familyId) {
-    normalized.familyId = normalized.family_id;
-  }
-  
-  if (normalized.family_name && !normalized.familyName) {
-    normalized.familyName = normalized.family_name;
-  }
-
   // Handle key_characteristics to ensure it's usable as an array
   if (normalized.key_characteristics) {
     // If it's a string, split it by newlines
@@ -33,6 +20,11 @@ export const normalizePropertyNames = (data: any): any => {
     else if (!Array.isArray(normalized.key_characteristics)) {
       normalized.key_characteristics = [];
     }
+  }
+  
+  // Also ensure keyCharacteristics is set if key_characteristics exists
+  if (normalized.key_characteristics && !normalized.keyCharacteristics) {
+    normalized.keyCharacteristics = normalized.key_characteristics;
   }
   
   return normalized;

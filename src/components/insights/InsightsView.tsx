@@ -90,7 +90,8 @@ const InsightsView = ({
   const shortDescription = reportData?.short_description || '';
   const familyId = reportData?.familyId || reportData?.family_id;
   const familyName = reportData?.familyName || reportData?.family_name || '';
-  const familyColor = reportData?.hexColor || reportData?.color || reportData?.hex_color || '#4B5563';
+  // Fix: Use hexColor first, then fall back to hex_color for compatibility with database sources
+  const familyColor = reportData?.hexColor || reportData?.color || (reportData as any)?.hex_color || '#4B5563';
 
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">
