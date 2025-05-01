@@ -60,6 +60,19 @@ const InsightsView = ({
     }
   }, [assessmentResult, archetypeId]);
 
+  // Add debugging for SWOT data
+  useEffect(() => {
+    console.log('[InsightsView] Report data received:', {
+      archetypeId: reportData?.id || reportData?.archetype_id || 'unknown',
+      hasReportData: !!reportData,
+      hasStrengths: !!reportData?.strengths,
+      strengthsType: reportData?.strengths ? typeof reportData.strengths : 'undefined',
+      hasWeaknesses: !!reportData?.weaknesses,
+      hasOpportunities: !!reportData?.opportunities,
+      hasThreats: !!reportData?.threats
+    });
+  }, [reportData]);
+
   // Error check - if reportData is null or undefined, show an error message
   if (!reportData) {
     // Return a minimal error state to avoid cascading failures

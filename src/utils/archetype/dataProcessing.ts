@@ -41,7 +41,7 @@ export const processArchetypeData = (
 ) => {
   // Early return for no data
   if (!data) {
-    console.warn("No data provided to processArchetypeData");
+    console.warn("[dataProcessing] No data provided to processArchetypeData");
     return { 
       archetypeData: null,
       familyData: null,
@@ -52,7 +52,15 @@ export const processArchetypeData = (
   const archetypeId = data.archetype_id || data.id;
   
   // Process data from level3_report_secure
-  console.log(`Processing database data for archetype ${archetypeId}`);
+  console.log(`[dataProcessing] Processing database data for archetype ${archetypeId}`);
+  console.log("[dataProcessing] SWOT data in processArchetypeData:", {
+    hasStrengths: !!data.strengths,
+    strengthsType: data.strengths ? typeof data.strengths : 'undefined',
+    strengthsValue: data.strengths,
+    hasWeaknesses: !!data.weaknesses,
+    hasOpportunities: !!data.opportunities,
+    hasThreats: !!data.threats
+  });
   
   // Extract family information
   const familyId = (data.family_id || 'unknown') as FamilyId;
@@ -61,7 +69,7 @@ export const processArchetypeData = (
   // Normalize the property names to ensure both snake_case and camelCase are available
   const normalizedData = normalizePropertyNames(data);
   
-  return {
+  const result = {
     archetypeData: {
       ...normalizedData,
       id: archetypeId,
@@ -73,4 +81,15 @@ export const processArchetypeData = (
     familyData: family,
     dataSource: 'Database'
   };
+
+  console.log("[dataProcessing] Processed SWOT data:", {
+    archetypeId,
+    hasProcessedStrengths: !!result.archetypeData.strengths,
+    processedStrengthsType: result.archetypeData.strengths ? typeof result.archetypeData.strengths : 'undefined',
+    hasProcessedWeaknesses: !!result.archetypeData.weaknesses,
+    hasProcessedOpportunities: !!result.archetypeData.opportunities,
+    hasProcessedThreats: !!result.archetypeData.threats
+  });
+  
+  return result;
 };

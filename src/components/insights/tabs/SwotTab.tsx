@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArchetypeDetailedData } from '@/types/archetype';
 import { normalizeSwotData } from '@/utils/swot/normalizeSwotData';
@@ -9,6 +9,23 @@ interface SwotTabProps {
 }
 
 const SwotTab = ({ archetypeData }: SwotTabProps) => {
+  // Add logging to understand what data we're getting
+  useEffect(() => {
+    console.log("SwotTab received data:", {
+      archetypeData: archetypeData ? archetypeData.id || 'unknown' : null,
+      strengths: archetypeData?.strengths ? typeof archetypeData.strengths : 0,
+      weaknesses: archetypeData?.weaknesses ? typeof archetypeData.weaknesses : 0,
+      opportunities: archetypeData?.opportunities ? typeof archetypeData.opportunities : 0,
+      threats: archetypeData?.threats ? typeof archetypeData.threats : 0
+    });
+    
+    if (archetypeData?.strengths) {
+      console.log("SwotTab strengths sample:", 
+        JSON.stringify(archetypeData.strengths).substring(0, 100) + '...'
+      );
+    }
+  }, [archetypeData]);
+
   // Check if we have the necessary data
   if (!archetypeData) {
     return <div className="p-4">Unable to load SWOT analysis data</div>;
@@ -20,6 +37,16 @@ const SwotTab = ({ archetypeData }: SwotTabProps) => {
   const weaknesses = normalizeSwotData(archetypeData.weaknesses);
   const opportunities = normalizeSwotData(archetypeData.opportunities);
   const threats = normalizeSwotData(archetypeData.threats);
+  
+  // Log what we got after normalization
+  console.log("SwotTab normalized data:", {
+    strengthsLength: strengths.length,
+    weaknessesLength: weaknesses.length,
+    opportunitiesLength: opportunities.length,
+    threatsLength: threats.length,
+    strengthsSample: strengths.length > 0 ? strengths[0] : 'none',
+    weaknessesSample: weaknesses.length > 0 ? weaknesses[0] : 'none',
+  });
 
   return (
     <Card>
