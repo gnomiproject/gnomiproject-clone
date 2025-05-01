@@ -2,12 +2,11 @@
 import { supabase } from '@/integrations/supabase/client';
 import { ArchetypeId } from '@/types/archetype';
 import { getCachedArchetype, cacheArchetype } from '@/utils/archetype/cacheUtils';
-import * as archetypesDetailedData from '@/data/archetypesDetailed';
 import { mapDatabaseResponseToInterface } from '@/utils/dataTransforms/namingConventions';
 
 /**
  * Fetch archetype data from Supabase with simplified approach
- * Primary focus on level3_report_secure table
+ * Primary focus on level3_report_secure table only
  */
 export const fetchArchetypeData = async (archetypeId: ArchetypeId, skipCache: boolean = false) => {
   // Verify a valid archetype ID was provided
@@ -24,7 +23,7 @@ export const fetchArchetypeData = async (archetypeId: ArchetypeId, skipCache: bo
   }
   
   try {
-    // Use the secure view as our primary and only data source
+    // Only use the secure view as our data source - no fallbacks
     const { data, error } = await supabase
       .from('level3_report_secure')
       .select('*')
@@ -45,34 +44,11 @@ export const fetchArchetypeData = async (archetypeId: ArchetypeId, skipCache: bo
       return normalizedData;
     } else {
       console.log(`No data found in database for archetype ${archetypeId}`);
-      
       // If no data found, return null - we'll handle this at the UI level
       return null;
     }
   } catch (error) {
     console.error("Error in fetchArchetypeData:", error);
     throw error;
-  }
-};
-
-/**
- * Get static archetype data from local dataset (for development only)
- * In production, we only use the Supabase database
- */
-const getStaticArchetypeData = (archetypeId: ArchetypeId) => {
-  try {
-    // Find matching archetype by ID in our static data
-    const archetypeData = archetypesDetailedData.archetypesDetailed.find?.(
-      archetype => archetype.id === archetypeId
-    );
-    
-    if (archetypeData) {
-      return archetypeData;
-    }
-    
-    return null;
-  } catch (error) {
-    console.error("Error getting static archetype data:", error);
-    return null;
   }
 };

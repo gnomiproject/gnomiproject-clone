@@ -1,11 +1,11 @@
 
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { ArchetypeDetailedData, ArchetypeId, FamilyId } from '@/types/archetype';
+import { ArchetypeDetailedData, ArchetypeId } from '@/types/archetype';
 import { useArchetypes } from './useArchetypes';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from "sonner";
 import { fetchArchetypeData } from '@/services/archetypeService';
-import { processArchetypeData, processFallbackData } from '@/utils/archetype/dataProcessing';
+import { processArchetypeData } from '@/utils/archetype/dataProcessing';
 import { clearArchetypeFromCache } from '@/utils/archetype/cacheUtils';
 
 interface UseGetArchetype {
@@ -30,7 +30,7 @@ export const useGetArchetype = (archetypeId: ArchetypeId, skipCache: boolean = f
   const [familyData, setFamilyData] = useState<any | null>(null);
   const [dataSource, setDataSource] = useState<string>('');
   
-  const { getArchetypeEnhanced, getFamilyById } = useArchetypes();
+  const { getFamilyById } = useArchetypes();
   const queryClient = useQueryClient();
   
   // Add processing guard to prevent redundant processing
@@ -61,26 +61,12 @@ export const useGetArchetype = (archetypeId: ArchetypeId, skipCache: boolean = f
     retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 10000),
   });
   
-  // Immediately try to set fallback data if we don't have any data yet
-  useEffect(() => {
-    if (!archetypeData && archetypeId && getArchetypeEnhanced && getFamilyById) {
-      const fallbackData = getArchetypeEnhanced(archetypeId);
-      if (fallbackData) {
-        console.log('[useGetArchetype] Setting initial fallback data');
-        const { archetypeData: initialData, familyData: initialFamilyData, dataSource: initialSource } = 
-          processFallbackData(archetypeId, getArchetypeEnhanced, getFamilyById);
-        
-        setArchetypeData(initialData);
-        setFamilyData(initialFamilyData);
-        setDataSource(initialSource);
-      }
-    }
-  }, [archetypeId, archetypeData, getArchetypeEnhanced, getFamilyById]);
+  // Remove fallback initialization - we only want data from the primary source
   
   // Process data on success - defined as a callback to avoid recreating on each render
   const processData = useCallback((data: any) => {
     // Skip processing if no data or if processing is in progress
-    if (!data || processingRef.current) {
+    if (processingRef.current) {
       return;
     }
     
@@ -104,7 +90,7 @@ export const useGetArchetype = (archetypeId: ArchetypeId, skipCache: boolean = f
       if (data) {
         // Process database data
         const { archetypeData: formattedData, familyData: processedFamilyData, dataSource: source } = 
-          processArchetypeData(data, getFamilyById, getArchetypeEnhanced);
+          processArchetypeData(data, getFamilyById);
         
         // Update refs first
         archetypeDataRef.current = formattedData;
@@ -116,19 +102,14 @@ export const useGetArchetype = (archetypeId: ArchetypeId, skipCache: boolean = f
         setFamilyData(processedFamilyData);
         setDataSource(source);
       } else {
-        // Fallback to original archetype data structure
-        const { archetypeData: fallbackData, familyData: fallbackFamilyData, dataSource: fallbackSource } = 
-          processFallbackData(archetypeId, getArchetypeEnhanced, getFamilyById);
+        // No data, just set everything to null
+        archetypeDataRef.current = null;
+        familyDataRef.current = null;
+        dataSourceRef.current = 'No Data Available';
         
-        // Update refs first
-        archetypeDataRef.current = fallbackData;
-        familyDataRef.current = fallbackFamilyData;
-        dataSourceRef.current = fallbackSource;
-        
-        // Then update state (triggers re-render)
-        setArchetypeData(fallbackData);
-        setFamilyData(fallbackFamilyData);
-        setDataSource(fallbackSource);
+        setArchetypeData(null);
+        setFamilyData(null);
+        setDataSource('No Data Available');
       }
       
       // Update processing status
@@ -138,7 +119,7 @@ export const useGetArchetype = (archetypeId: ArchetypeId, skipCache: boolean = f
       // Always reset the processing flag even if there's an error
       processingRef.current = false;
     }
-  }, [getFamilyById, getArchetypeEnhanced, archetypeId]);
+  }, [getFamilyById]);
 
   // Handle errors - defined as a callback to avoid recreating on each render
   const handleError = useCallback((error: Error) => {
@@ -150,31 +131,25 @@ export const useGetArchetype = (archetypeId: ArchetypeId, skipCache: boolean = f
     fetchFailedRef.current = true;
     
     try {
-      // Fallback to original archetype data structure on error
-      const { archetypeData: fallbackData, familyData: fallbackFamilyData, dataSource: fallbackSource } = 
-        processFallbackData(archetypeId, getArchetypeEnhanced, getFamilyById);
+      // On error, set everything to null - no fallback data
+      archetypeDataRef.current = null;
+      familyDataRef.current = null;
+      dataSourceRef.current = 'Error - Data Unavailable';
       
-      // Update refs first
-      archetypeDataRef.current = fallbackData;
-      familyDataRef.current = fallbackFamilyData;
-      dataSourceRef.current = fallbackSource;
+      setArchetypeData(null);
+      setFamilyData(null);
+      setDataSource('Error - Data Unavailable');
       
-      // Then update state (triggers re-render)
-      setArchetypeData(fallbackData);
-      setFamilyData(fallbackFamilyData);
-      setDataSource('Offline Data (Fallback)');
-      
-      // Only show this toast once
-      if (fetchFailedRef.current && archetypeId) {
-        toast.info(`Using offline data for ${archetypeId}`, {
-          id: `offline-data-${archetypeId}`,
-          duration: 3000
-        });
-      }
+      // Show error toast
+      toast.error(`Couldn't load data for ${archetypeId}`, {
+        id: `error-data-${archetypeId}`,
+        description: "The requested data could not be loaded",
+        duration: 3000
+      });
     } finally {
       processingRef.current = false;
     }
-  }, [getFamilyById, getArchetypeEnhanced, archetypeId]);
+  }, [archetypeId]);
 
   // Force refresh data with debounce to prevent rapid calls
   const refreshData = useCallback(async () => {
@@ -202,10 +177,10 @@ export const useGetArchetype = (archetypeId: ArchetypeId, skipCache: boolean = f
       });
     } catch (e) {
       toast.error("Refresh Failed", {
-        description: "Using offline data. Check your network connection."
+        description: "Unable to load data. Please try again later."
       });
       
-      // Set fallback data when refresh fails
+      // Handle error with null data
       handleError(e as Error);
     }
   }, [archetypeId, queryClient, queryKey, refetch, handleError]);
