@@ -810,18 +810,18 @@ export type Database = {
       gnomi_images: {
         Row: {
           id: number
-          name: string
-          url: string | null
+          image_name: string
+          image_url: string | null
         }
         Insert: {
           id?: number
-          name: string
-          url?: string | null
+          image_name: string
+          image_url?: string | null
         }
         Update: {
           id?: number
-          name?: string
-          url?: string | null
+          image_name?: string
+          image_url?: string | null
         }
         Relationships: []
       }
