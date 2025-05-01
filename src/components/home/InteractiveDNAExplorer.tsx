@@ -7,6 +7,9 @@ import { healthcareArchetypes } from '@/data/healthcareArchetypes';
 import EmptyExplorerState from './EmptyExplorerState';
 import { useIsMobile } from '@/hooks/use-mobile';
 import WebsiteImage from '@/components/common/WebsiteImage';
+import ArchetypeDetailView from './ArchetypeDetailView';
+import FamilyDetailView from './FamilyDetailView';
+import { useArchetypes } from '@/hooks/useArchetypes';
 
 const InteractiveDNAExplorer = () => {
   const [renderCount, setRenderCount] = useState(0);
@@ -16,6 +19,13 @@ const InteractiveDNAExplorer = () => {
   const initialized = useRef(false);
   const isMobile = useIsMobile();
   
+  // Access archetype data
+  const { 
+    getAllArchetypeSummaries,
+    getArchetypeSummary,
+    getFamilyById
+  } = useArchetypes();
+
   // Track mount/render count for debugging purposes
   useEffect(() => {
     const sequence = renderCount + 1;
@@ -61,7 +71,11 @@ const InteractiveDNAExplorer = () => {
   // Handle archetype selection
   const handleArchetypeClick = (archetypeId: string) => {
     try {
-      setSelectedArchetypeId(archetypeId);
+      setSelectedArchetypeId(prev => prev === archetypeId ? null : archetypeId);
+      // Clear family selection when an archetype is selected
+      if (selectedFamilyId) {
+        setSelectedFamilyId(null);
+      }
       console.log(`Selected archetype ${archetypeId}`);
     } catch (error) {
       console.error("Error handling archetype click:", error);
@@ -72,10 +86,60 @@ const InteractiveDNAExplorer = () => {
   const handleFamilyClick = (familyId: 'a' | 'b' | 'c') => {
     try {
       setSelectedFamilyId(prev => prev === familyId ? null : familyId);
+      // Clear archetype selection when a family is selected
+      if (selectedArchetypeId) {
+        setSelectedArchetypeId(null);
+      }
       console.log(`Selected family ${familyId}`);
     } catch (error) {
       console.error("Error handling family click:", error);
     }
+  };
+
+  // Get the selected archetype details for the sidebar
+  const selectedArchetype = selectedArchetypeId ? 
+    getArchetypeSummary(selectedArchetypeId as any) : null;
+
+  // Get the selected family details for the sidebar
+  const selectedFamily = selectedFamilyId ? 
+    getFamilyById(selectedFamilyId.toUpperCase() as any) : null;
+
+  // Create family info for display in the sidebar
+  const getFamilyInfo = (familyId: 'a' | 'b' | 'c') => {
+    const family = getFamilyById(familyId.toUpperCase() as any);
+    return {
+      id: familyId,
+      name: family?.name || `Family ${familyId.toUpperCase()}`,
+      description: family?.description || `Description for Family ${familyId.toUpperCase()}`,
+      commonTraits: family?.commonTraits || []
+    };
+  };
+
+  // Format the selected archetype summary for display
+  const formatArchetypeSummary = (archetypeId: string) => {
+    const archetype = getArchetypeSummary(archetypeId as any);
+    
+    if (!archetype) {
+      // Fallback to static data if dynamic data is not available
+      const staticArchetype = healthcareArchetypes.find(a => a.id === archetypeId);
+      return {
+        id: archetypeId,
+        familyId: staticArchetype?.familyId.toLowerCase() as 'a' | 'b' | 'c' || 'a',
+        name: staticArchetype?.name || `Archetype ${archetypeId}`,
+        familyName: `Family ${staticArchetype?.familyId || 'Unknown'}`,
+        description: staticArchetype?.shortDescription || 'No description available',
+        keyCharacteristics: ['No characteristics available']
+      };
+    }
+    
+    return {
+      id: archetype.id,
+      familyId: (archetype.familyId || '').toLowerCase() as 'a' | 'b' | 'c',
+      name: archetype.name,
+      familyName: archetype.familyName || 'Unknown Family',
+      description: archetype.description || 'No description available',
+      keyCharacteristics: archetype.keyCharacteristics || []
+    };
   };
 
   // Safeguard to prevent rendering if data is not available
@@ -114,7 +178,7 @@ const InteractiveDNAExplorer = () => {
           <div className="flex-grow lg:w-2/3">
             <div
               ref={containerRef} 
-              className="relative h-[500px] w-[600px] mx-auto" // Updated to fixed 600px width and 500px height
+              className="relative h-[500px] w-[600px] mx-auto"
             >
               <DNAHelix 
                 selectedArchetypeId={selectedArchetypeId}
@@ -126,22 +190,39 @@ const InteractiveDNAExplorer = () => {
             </div>
           </div>
           
-          {/* Right side: Gnome and CTA */}
-          <div className="lg:w-1/3 bg-blue-50 p-6 rounded-lg border border-blue-100 flex flex-col items-center justify-center">
-            <WebsiteImage 
-              type="lefthand" 
-              altText="Friendly gnome character"
-              className="h-32 mb-4"
-            />
-            
-            <h3 className="text-2xl font-bold text-blue-700 mb-2">Come Play with the DNA!</h3>
-            <p className="text-gray-600 mb-6 text-center">
-              Click around the helix to explore what makes each archetype unique. Then take the assessment to discover which one matches your organization.
-            </p>
-            
-            <Button asChild size="lg">
-              <Link to="/assessment">Take the Assessment</Link>
-            </Button>
+          {/* Right side: Details sidebar that changes based on selection */}
+          <div className="lg:w-1/3">
+            {selectedArchetypeId ? (
+              /* Show archetype details when an archetype is selected */
+              <ArchetypeDetailView 
+                archetypeSummary={formatArchetypeSummary(selectedArchetypeId)}
+              />
+            ) : selectedFamilyId ? (
+              /* Show family details when a family is selected */
+              <FamilyDetailView
+                familyInfo={getFamilyInfo(selectedFamilyId)}
+                archetypes={getAllArchetypeSummaries()}
+                onSelectArchetype={handleArchetypeClick}
+              />
+            ) : (
+              /* Default state: Show gnome and CTA */
+              <div className="bg-blue-50 p-6 rounded-lg border border-blue-100 flex flex-col items-center justify-center">
+                <WebsiteImage 
+                  type="lefthand" 
+                  altText="Friendly gnome character"
+                  className="h-32 mb-4"
+                />
+                
+                <h3 className="text-2xl font-bold text-blue-700 mb-2">Come Play with the DNA!</h3>
+                <p className="text-gray-600 mb-6 text-center">
+                  Click around the helix to explore what makes each archetype unique. Then take the assessment to discover which one matches your organization.
+                </p>
+                
+                <Button asChild size="lg">
+                  <Link to="/assessment">Take the Assessment</Link>
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </div>
