@@ -23,7 +23,7 @@ export const gnomeImages: Record<string, string> = {
   clipboard: 'gnome_clipboard',
   welcome: 'gnome_welcome', 
   magnifying: 'gnome_magnifying',
-  charts: 'gnome_chart',
+  charts: 'gnome_chart', // This is the key used for charts gnome
   profile: 'gnome_profile',
   report: 'gnome_report',
   analysis: 'gnome_analysis',

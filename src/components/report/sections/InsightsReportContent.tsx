@@ -62,7 +62,7 @@ const InsightsReportContent: React.FC<InsightsReportContentProps> = ({ archetype
               </div>
             </div>
             <div className="flex justify-center">
-              <GnomeImage type="profile" showDebug={true} />
+              <GnomeImage type="charts" showDebug={true} />
             </div>
           </div>
         </div>
