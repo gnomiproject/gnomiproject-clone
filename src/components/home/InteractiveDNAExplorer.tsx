@@ -6,6 +6,7 @@ import DNAHelix from './DNAHelix';
 import { healthcareArchetypes } from '@/data/healthcareArchetypes';
 import EmptyExplorerState from './EmptyExplorerState';
 import { useIsMobile } from '@/hooks/use-mobile';
+import WebsiteImage from '@/components/common/WebsiteImage';
 
 const InteractiveDNAExplorer = () => {
   const [renderCount, setRenderCount] = useState(0);
@@ -145,9 +146,9 @@ const InteractiveDNAExplorer = () => {
           
           {/* Right side: Gnome and CTA */}
           <div className="lg:w-1/3 bg-blue-50 p-6 rounded-lg border border-blue-100 flex flex-col items-center justify-center">
-            <img 
-              src="/lovable-uploads/9e5a2471-8a62-4a31-b47c-73c424acdb9f.png" 
-              alt="Friendly gnome character" 
+            <WebsiteImage 
+              type="lefthand" 
+              altText="Friendly gnome character"
               className="h-32 mb-4"
             />
             
