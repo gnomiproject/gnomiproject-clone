@@ -10,7 +10,8 @@ export const normalizeSwotData = (data: any): string[] => {
     isUndefined: data === undefined,
     isArray: Array.isArray(data),
     isString: typeof data === 'string',
-    value: data
+    value: data,
+    rawData: JSON.stringify(data) // Show the actual content
   });
   
   // Return empty array if data is null, undefined, or empty
@@ -58,6 +59,12 @@ export const normalizeSwotData = (data: any): string[] => {
   if (typeof data === 'string') {
     console.log("[normalizeSwotData] Plain string, splitting by newlines");
     return data.split('\n').filter(Boolean);
+  }
+  
+  // Empty array handling - if data is an empty array
+  if (Array.isArray(data) && data.length === 0) {
+    console.log("[normalizeSwotData] Empty array received, returning as is");
+    return data;
   }
   
   // Fallback: convert to string array

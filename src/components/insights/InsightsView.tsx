@@ -71,6 +71,11 @@ const InsightsView = ({
       hasOpportunities: !!reportData?.opportunities,
       hasThreats: !!reportData?.threats
     });
+    
+    // Log complete SWOT data structure
+    if (reportData?.strengths) {
+      console.log('[InsightsView] Full strengths data:', reportData.strengths);
+    }
   }, [reportData]);
 
   // Error check - if reportData is null or undefined, show an error message

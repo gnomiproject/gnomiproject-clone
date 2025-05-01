@@ -25,6 +25,7 @@ export const fetchArchetypeData = async (archetypeId: ArchetypeId, skipCache: bo
   
   try {
     // Only use the secure view as our data source - no fallbacks
+    console.log("[archetypeService] Querying level3_report_secure for archetypeId:", archetypeId);
     const { data, error } = await supabase
       .from('level3_report_secure')
       .select('*')
@@ -44,13 +45,15 @@ export const fetchArchetypeData = async (archetypeId: ArchetypeId, skipCache: bo
         strengthsType: data.strengths ? typeof data.strengths : 'undefined',
         hasWeaknesses: !!data.weaknesses,
         hasOpportunities: !!data.opportunities,
-        hasThreats: !!data.threats,
-        swotDataSample: {
-          strengths: data.strengths ? JSON.stringify(data.strengths).substring(0, 100) + '...' : 'null',
-          weaknesses: data.weaknesses ? JSON.stringify(data.weaknesses).substring(0, 100) + '...' : 'null',
-          opportunities: data.opportunities ? JSON.stringify(data.opportunities).substring(0, 100) + '...' : 'null',
-          threats: data.threats ? JSON.stringify(data.threats).substring(0, 100) + '...' : 'null',
-        }
+        hasThreats: !!data.threats
+      });
+      
+      // Add detailed logging for SWOT data structure
+      console.log("[archetypeService] SWOT data structure:", {
+        strengths: data.strengths,
+        weaknesses: data.weaknesses,
+        opportunities: data.opportunities,
+        threats: data.threats
       });
       
       // Normalize data to ensure both snake_case and camelCase properties are available
