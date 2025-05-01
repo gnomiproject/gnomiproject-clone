@@ -1,24 +1,11 @@
+
 import React, { useEffect } from 'react';
 import { ArchetypeId, ArchetypeDetailedData } from '@/types/archetype';
 import ArchetypeHeader from './components/ArchetypeHeader';
 import ArchetypeFooter from './components/ArchetypeFooter';
 import MetricCard from './metrics/MetricCard';
 import MetricBar from './metrics/MetricBar';
-
-// Simple array conversion helper function
-const ensureArray = (data: any): any[] => {
-  if (!data) return [];
-  if (Array.isArray(data)) return data;
-  if (typeof data === 'string') {
-    try {
-      const parsed = JSON.parse(data);
-      return Array.isArray(parsed) ? parsed : [data];
-    } catch (e) {
-      return [data];
-    }
-  }
-  return [data];
-};
+import { ensureArray } from '@/utils/array/ensureArray';
 
 interface ArchetypeContentProps {
   archetype: ArchetypeDetailedData;
@@ -45,14 +32,24 @@ const ArchetypeContent: React.FC<ArchetypeContentProps> = ({ archetype, archetyp
 
   // Set fallbacks for empty data
   const description = archetype?.short_description || 'No description available for this archetype.';
-  const metrics = archetype?.metrics || {};
+  
+  // Get family data
+  const familyId = archetype?.family_id || 'unknown';
+  const familyName = archetype?.familyName || archetype?.family_name || 'Unknown Family';
+  
+  // Get color data
+  const archetypeHexColor = archetype?.hexColor || archetype?.hex_color || '#3b82f6'; // Default blue if not set
+  const familyColor = archetypeHexColor; // Use the same color for now
   
   return (
     <div className="space-y-8">
       <ArchetypeHeader 
         name={name} 
         description={description} 
-        archetypeId={archetypeId} 
+        familyId={familyId} 
+        familyName={familyName}
+        familyColor={familyColor}
+        archetypeHexColor={archetypeHexColor}
       />
       
       {/* Key Characteristics */}
@@ -77,7 +74,7 @@ const ArchetypeContent: React.FC<ArchetypeContentProps> = ({ archetype, archetyp
       
       {/* Add metrics cards or other content as needed */}
       
-      <ArchetypeFooter archetypeId={archetypeId} />
+      <ArchetypeFooter archetypeHexColor={archetypeHexColor} />
     </div>
   );
 };
