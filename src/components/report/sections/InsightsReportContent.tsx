@@ -8,7 +8,9 @@ import { Section } from '@/components/shared/Section';
 import SectionTitle from '@/components/shared/SectionTitle';
 import StrategicRecommendations from './StrategicRecommendations';
 import DeepDiveSwotAnalysis from './DeepDiveSwotAnalysis';
+import TestImage from '@/components/common/TestImage';
 import { fallbackGnomeImage } from '@/utils/gnomeImages';
+import ImageByName from '@/components/common/ImageByName';
 
 interface InsightsReportContentProps {
   archetype: any;
@@ -47,6 +49,13 @@ const InsightsReportContent: React.FC<InsightsReportContentProps> = ({ archetype
         </div>
       </div>
 
+      <Section id="image-test">
+        <SectionTitle title="Image Service Test" />
+        <div className="bg-white rounded-lg p-6 shadow-sm">
+          <TestImage />
+        </div>
+      </Section>
+
       <Section id="debug-info">
         <SectionTitle title="Debug Information" />
         <div className="bg-white rounded-lg p-6 shadow-sm">
@@ -62,15 +71,26 @@ const InsightsReportContent: React.FC<InsightsReportContentProps> = ({ archetype
               </div>
             </div>
             <div className="flex justify-center">
-              {/* Use a simple image tag to avoid component loading issues */}
-              <div className="relative">
-                <img
-                  src={fallbackGnomeImage}
-                  alt="Gnome Chart Illustration"
-                  className="h-48 object-contain"
-                />
-                <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-1 text-xs">
-                  Type: placeholder (fallback)
+              {/* Try both approaches for comparison */}
+              <div className="grid grid-cols-2 gap-4 w-full">
+                <div className="relative">
+                  <h4 className="text-sm font-medium mb-2">Direct Image:</h4>
+                  <img
+                    src={fallbackGnomeImage}
+                    alt="Gnome Chart Illustration"
+                    className="h-48 object-contain"
+                  />
+                  <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-1 text-xs">
+                    Type: placeholder (fallback)
+                  </div>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium mb-2">ImageByName Component:</h4>
+                  <ImageByName 
+                    imageName="charts" 
+                    altText="Gnome Charts Illustration" 
+                    className="h-48 object-contain"
+                  />
                 </div>
               </div>
             </div>

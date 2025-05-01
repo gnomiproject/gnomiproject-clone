@@ -1,5 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { gnomeImages } from '@/utils/gnomeImages';
 
 // Type definitions for our image data
 export interface GnomeImage {
@@ -17,25 +18,32 @@ const imageCache = new Map<string, string>();
  * @returns The URL of the image or null if not found
  */
 export const getImageByName = async (imageName: string): Promise<string | null> => {
+  // Check if we need to translate from short name to db name
+  const dbImageName = gnomeImages[imageName] || imageName;
+  
   // Special case for placeholder - return the local path directly
-  if (imageName === 'placeholder') {
+  if (dbImageName === 'placeholder') {
     return '/assets/gnomes/placeholder.svg';
   }
   
-  // Check if image URL is already in cache
-  if (imageCache.has(imageName)) {
-    console.log(`[ImageService] Using cached URL for ${imageName}`);
-    return imageCache.get(imageName) || null;
+  // Check cache first
+  if (imageCache.has(dbImageName)) {
+    console.log(`[ImageService] Using cached URL for ${dbImageName}`);
+    return imageCache.get(dbImageName) || null;
   }
   
+  // Add more specific logging
+  console.log(`[ImageService] Fetching image: "${dbImageName}" (from input: "${imageName}")`);
+  
   try {
-    console.log(`[ImageService] Fetching image URL for "${imageName}"`);
-    
     const { data, error } = await supabase
       .from('gnomi_images')
       .select('image_url')
-      .eq('image_name', imageName)
+      .eq('image_name', dbImageName)
       .maybeSingle();
+    
+    // Log the full response for debugging
+    console.log(`[ImageService] Supabase response:`, { data, error });
     
     if (error) {
       console.error('[ImageService] Error fetching image:', error);
@@ -43,13 +51,12 @@ export const getImageByName = async (imageName: string): Promise<string | null> 
     }
     
     if (!data) {
-      console.warn(`[ImageService] Image with name "${imageName}" not found`);
+      console.warn(`[ImageService] Image with name "${dbImageName}" not found`);
       return null;
     }
     
-    // Store in cache for future requests
-    imageCache.set(imageName, data.image_url);
-    
+    // Cache and return
+    imageCache.set(dbImageName, data.image_url);
     return data.image_url;
   } catch (error) {
     console.error('[ImageService] Unexpected error:', error);
