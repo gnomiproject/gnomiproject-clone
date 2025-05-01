@@ -7,6 +7,7 @@ import NoAssessmentResults from '@/components/insights/NoAssessmentResults';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
 import InsightsContainer from '@/components/insights/InsightsContainer';
+// Debug components removed or hidden
 import TestImage from '@/components/common/TestImage';
 import ImageDatabaseTest from '@/components/common/ImageDatabaseTest';
 import ImageDebug from '@/components/debug/ImageDebug';

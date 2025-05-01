@@ -86,3 +86,13 @@ export const prefetchImages = async (imageNames: string[]): Promise<void> => {
 export const clearImageCache = (): void => {
   imageCache.clear();
 };
+
+/**
+ * Test Database Access - Simplified stub that returns empty array 
+ * This is added to satisfy the import in TestImage.tsx without actually
+ * accessing the database
+ */
+export const testDatabaseAccess = async (): Promise<any[]> => {
+  console.log('[ImageService] testDatabaseAccess called - database access is now bypassed');
+  return [];
+};
