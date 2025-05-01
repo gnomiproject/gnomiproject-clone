@@ -24,7 +24,7 @@ export const fetchArchetypeData = async (archetypeId: ArchetypeId, skipCache: bo
   }
   
   try {
-    // Only use the secure view as our data source - no fallbacks
+    // Query only from level3_report_secure table
     console.log("[archetypeService] Querying level3_report_secure for archetypeId:", archetypeId);
     const { data, error } = await supabase
       .from('level3_report_secure')
@@ -38,12 +38,14 @@ export const fetchArchetypeData = async (archetypeId: ArchetypeId, skipCache: bo
     }
     
     if (data) {
+      // Enhanced logging for SWOT data availability and format
       console.log("[archetypeService] Raw data from level3_report_secure:", {
         archetypeId: data.archetype_id,
         name: data.archetype_name,
         hasStrengths: !!data.strengths,
         strengthsType: data.strengths ? typeof data.strengths : 'undefined',
-        strengthsValue: data.strengths,
+        strengthsIsArray: Array.isArray(data.strengths),
+        strengthsIsEmpty: Array.isArray(data.strengths) ? data.strengths.length === 0 : false,
         hasWeaknesses: !!data.weaknesses,
         weaknessesType: data.weaknesses ? typeof data.weaknesses : 'undefined',
         hasOpportunities: !!data.opportunities,
@@ -52,12 +54,12 @@ export const fetchArchetypeData = async (archetypeId: ArchetypeId, skipCache: bo
         threatsType: data.threats ? typeof data.threats : 'undefined'
       });
       
-      // Add detailed logging for SWOT data structure
-      console.log("[archetypeService] SWOT data raw structure:", {
-        strengths: JSON.stringify(data.strengths),
-        weaknesses: JSON.stringify(data.weaknesses),
-        opportunities: JSON.stringify(data.opportunities),
-        threats: JSON.stringify(data.threats)
+      // Detailed logging for SWOT data structure
+      console.log("[archetypeService] SWOT data raw content:", {
+        strengths: data.strengths,
+        weaknesses: data.weaknesses,
+        opportunities: data.opportunities,
+        threats: data.threats
       });
       
       // Normalize data to ensure both snake_case and camelCase properties are available

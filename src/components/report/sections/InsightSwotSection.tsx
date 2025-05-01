@@ -4,18 +4,66 @@ import { Card } from '@/components/ui/card';
 import { Section } from '@/components/shared/Section';
 import SectionTitle from '@/components/shared/SectionTitle';
 import { insightReportSchema } from '@/schemas/insightReportSchema';
-import { normalizeSwotData } from '@/utils/swot/normalizeSwotData';
 
 interface InsightSwotSectionProps {
   archetype: any;
 }
 
 const InsightSwotSection = ({ archetype }: InsightSwotSectionProps) => {
-  // Extract SWOT data directly from the archetype object using normalizeSwotData
-  const strengths = normalizeSwotData(archetype?.strengths || archetype?.swot_analysis?.strengths);
-  const weaknesses = normalizeSwotData(archetype?.weaknesses || archetype?.swot_analysis?.weaknesses);
-  const opportunities = normalizeSwotData(archetype?.opportunities || archetype?.swot_analysis?.opportunities);
-  const threats = normalizeSwotData(archetype?.threats || archetype?.swot_analysis?.threats);
+  // Helper function to safely process SWOT data with minimal transformation
+  const processSwotData = (data: any): string[] => {
+    if (!data) return [];
+    
+    // If it's already an array, use it directly
+    if (Array.isArray(data)) {
+      // Map to ensure all items are strings
+      return data.map(item => {
+        if (typeof item === 'string') return item;
+        // Handle case where items might be objects with text property
+        if (item && typeof item === 'object' && 'text' in item) return item.text;
+        return String(item);
+      }).filter(Boolean);
+    }
+    
+    // If it's a string that looks like JSON, try to parse it
+    if (typeof data === 'string' && (data.startsWith('[') || data.startsWith('{'))) {
+      try {
+        const parsed = JSON.parse(data);
+        if (Array.isArray(parsed)) {
+          return parsed.map(item => {
+            if (typeof item === 'string') return item;
+            if (item && typeof item === 'object' && 'text' in item) return item.text;
+            return String(item);
+          }).filter(Boolean);
+        }
+      } catch (e) {
+        console.error("JSON parsing failed:", e);
+      }
+    }
+    
+    // If it's an object with a specific property that contains the array
+    if (data && typeof data === 'object') {
+      // Check for common patterns in our data
+      for (const key of ['entries', 'items', 'points']) {
+        if (Array.isArray(data[key])) {
+          return data[key].map((item: any) => {
+            if (typeof item === 'string') return item;
+            if (item && typeof item === 'object' && 'text' in item) return item.text;
+            return String(item);
+          }).filter(Boolean);
+        }
+      }
+    }
+    
+    // Fallback: if it's a plain string or other format
+    return typeof data === 'string' ? [data] : [String(data)];
+  };
+
+  // Extract SWOT data directly from the archetype object
+  const strengths = processSwotData(archetype?.strengths || archetype?.swot_analysis?.strengths);
+  const weaknesses = processSwotData(archetype?.weaknesses || archetype?.swot_analysis?.weaknesses);
+  const opportunities = processSwotData(archetype?.opportunities || archetype?.swot_analysis?.opportunities);
+  const threats = processSwotData(archetype?.threats || archetype?.swot_analysis?.threats);
 
   return (
     <Section id="swot-analysis">

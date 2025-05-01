@@ -2,7 +2,6 @@
 import React, { useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArchetypeDetailedData } from '@/types/archetype';
-import { normalizeSwotData } from '@/utils/swot/normalizeSwotData';
 
 interface SwotTabProps {
   archetypeData: ArchetypeDetailedData;
@@ -11,56 +10,93 @@ interface SwotTabProps {
 const SwotTab = ({ archetypeData }: SwotTabProps) => {
   // Add logging to understand what data we're getting
   useEffect(() => {
-    console.log("SwotTab received data:", {
-      archetypeId: archetypeData ? archetypeData.id || archetypeData.archetype_id || 'unknown' : null,
-      hasStrengths: !!archetypeData?.strengths,
-      strengthsType: archetypeData?.strengths ? typeof archetypeData.strengths : 'undefined',
-      hasWeaknesses: !!archetypeData?.weaknesses,
-      weaknessesType: archetypeData?.weaknesses ? typeof archetypeData.weaknesses : 'undefined',
-      hasOpportunities: !!archetypeData?.opportunities,
-      opportunitiesType: archetypeData?.opportunities ? typeof archetypeData.opportunities : 'undefined',
-      hasThreats: !!archetypeData?.threats,
-      threatsType: archetypeData?.threats ? typeof archetypeData.threats : 'undefined'
-    });
-    
-    // Log the actual data structures
-    console.log("SwotTab raw data:", {
+    console.log("[SwotTab] Raw archetype data:", archetypeData);
+    console.log("[SwotTab] Raw SWOT data:", {
       strengths: archetypeData?.strengths,
       weaknesses: archetypeData?.weaknesses,
       opportunities: archetypeData?.opportunities,
       threats: archetypeData?.threats
     });
-    
-    if (archetypeData?.strengths) {
-      console.log("SwotTab strengths data:", JSON.stringify(archetypeData.strengths));
-    }
   }, [archetypeData]);
 
   // Check if we have the necessary data
   if (!archetypeData) {
-    console.log("SwotTab: No archetype data available");
+    console.log("[SwotTab] No archetype data available");
     return <div className="p-4">Unable to load SWOT analysis data</div>;
   }
   
-  // Get SWOT data directly from the level3 table data
-  console.log("SwotTab: About to normalize data");
+  // Helper function to safely process SWOT data with minimal transformation
+  const processSwotData = (data: any): string[] => {
+    console.log("[SwotTab] Processing SWOT data:", {
+      dataType: typeof data,
+      isNull: data === null,
+      isUndefined: data === undefined,
+      isArray: Array.isArray(data),
+      rawData: data
+    });
+    
+    if (!data) return [];
+    
+    // If it's already an array, use it directly
+    if (Array.isArray(data)) {
+      console.log("[SwotTab] Using array directly:", data);
+      // Map to ensure all items are strings
+      return data.map(item => {
+        if (typeof item === 'string') return item;
+        // Handle case where items might be objects with text property
+        if (item && typeof item === 'object' && 'text' in item) return item.text;
+        return String(item);
+      }).filter(Boolean);
+    }
+    
+    // If it's a string that looks like JSON, try to parse it
+    if (typeof data === 'string' && (data.startsWith('[') || data.startsWith('{'))) {
+      try {
+        console.log("[SwotTab] Attempting to parse JSON string");
+        const parsed = JSON.parse(data);
+        if (Array.isArray(parsed)) {
+          return parsed.map(item => {
+            if (typeof item === 'string') return item;
+            if (item && typeof item === 'object' && 'text' in item) return item.text;
+            return String(item);
+          }).filter(Boolean);
+        }
+      } catch (e) {
+        console.error("[SwotTab] JSON parsing failed:", e);
+      }
+    }
+    
+    // If it's an object with a specific property that contains the array
+    if (data && typeof data === 'object') {
+      // Check for common patterns in our data
+      for (const key of ['entries', 'items', 'points']) {
+        if (Array.isArray(data[key])) {
+          console.log(`[SwotTab] Found array in '${key}' property:`, data[key]);
+          return data[key].map((item: any) => {
+            if (typeof item === 'string') return item;
+            if (item && typeof item === 'object' && 'text' in item) return item.text;
+            return String(item);
+          }).filter(Boolean);
+        }
+      }
+    }
+    
+    // Fallback: if it's a plain string or other format
+    return typeof data === 'string' ? [data] : [String(data)];
+  };
+
+  // Process SWOT data directly, with minimal transformation
+  const strengths = processSwotData(archetypeData.strengths);
+  const weaknesses = processSwotData(archetypeData.weaknesses);
+  const opportunities = processSwotData(archetypeData.opportunities);
+  const threats = processSwotData(archetypeData.threats);
   
-  // We only look for direct properties on the archetypeData object
-  const strengths = normalizeSwotData(archetypeData.strengths);
-  const weaknesses = normalizeSwotData(archetypeData.weaknesses);
-  const opportunities = normalizeSwotData(archetypeData.opportunities);
-  const threats = normalizeSwotData(archetypeData.threats);
-  
-  // Log what we got after normalization
-  console.log("SwotTab normalized data:", {
-    strengthsLength: strengths.length,
-    weaknessesLength: weaknesses.length,
-    opportunitiesLength: opportunities.length,
-    threatsLength: threats.length,
-    strengthsSample: strengths.length > 0 ? strengths[0] : 'none',
-    weaknessesSample: weaknesses.length > 0 ? weaknesses[0] : 'none',
-    strengthsIsArray: Array.isArray(strengths),
-    fullStrengths: strengths
+  // Log processed data
+  console.log("[SwotTab] Processed SWOT data:", {
+    strengths,
+    weaknesses,
+    opportunities,
+    threats
   });
 
   return (
@@ -74,15 +110,12 @@ const SwotTab = ({ archetypeData }: SwotTabProps) => {
             <h4 className="text-lg font-bold text-green-700 mb-4">Strengths</h4>
             <ul className="space-y-2">
               {strengths && strengths.length > 0 ? (
-                strengths.map((strength: string, index: number) => {
-                  console.log(`Rendering strength #${index}:`, strength);
-                  return (
-                    <li key={`strength-${index}`} className="flex items-center gap-2">
-                      <div className="h-2 w-2 rounded-full bg-green-500"></div>
-                      <span>{strength}</span>
-                    </li>
-                  );
-                })
+                strengths.map((strength: string, index: number) => (
+                  <li key={`strength-${index}`} className="flex items-center gap-2">
+                    <div className="h-2 w-2 rounded-full bg-green-500"></div>
+                    <span>{strength}</span>
+                  </li>
+                ))
               ) : (
                 <li className="text-gray-500 italic">No strengths data available</li>
               )}
