@@ -9,6 +9,7 @@ import SectionTitle from '@/components/shared/SectionTitle';
 import StrategicRecommendations from './StrategicRecommendations';
 import DeepDiveSwotAnalysis from './DeepDiveSwotAnalysis';
 import TestImage from '@/components/common/TestImage';
+import ImageDatabaseTest from '@/components/common/ImageDatabaseTest';
 import { fallbackGnomeImage } from '@/utils/gnomeImages';
 import ImageByName from '@/components/common/ImageByName';
 
@@ -48,6 +49,13 @@ const InsightsReportContent: React.FC<InsightsReportContentProps> = ({ archetype
           </p>
         </div>
       </div>
+
+      <Section id="image-database-test">
+        <SectionTitle title="Image Database Records" />
+        <div className="bg-white rounded-lg p-6 shadow-sm">
+          <ImageDatabaseTest />
+        </div>
+      </Section>
 
       <Section id="image-test">
         <SectionTitle title="Image Service Test" />
