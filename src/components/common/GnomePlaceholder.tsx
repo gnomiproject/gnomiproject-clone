@@ -20,7 +20,7 @@ const GnomePlaceholder: React.FC<GnomePlaceholderProps> = ({
     <div className="flex items-center justify-center bg-gray-100 rounded-lg w-full h-full relative">
       <GnomeImage 
         type={type} 
-        altText={alt} 
+        alt={alt} // Fixed: was using altText which doesn't match the prop in GnomeImage
         className={className} 
         showDebug={showDebugInfo}
       />

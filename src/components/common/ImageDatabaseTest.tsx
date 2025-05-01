@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase, getSupabaseUrl } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { ReloadIcon } from '@radix-ui/react-icons';
+import { RefreshCw } from 'lucide-react';  // Replace ReloadIcon with RefreshCw from lucide-react
 
 interface ImageRecord {
   id: number;
@@ -80,7 +80,7 @@ const ImageDatabaseTest: React.FC = () => {
         >
           {loading ? (
             <>
-              <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+              <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
               Loading...
             </>
           ) : (

@@ -20,7 +20,7 @@ const GnomePlaceholder = ({
       <GnomeImage 
         type={type} 
         className={className} 
-        alt={altText || `Gnome ${type} illustration`}
+        alt={altText || `Gnome ${type} illustration`} // Changed from altText to alt to match expected prop
         showDebug={showDebug}
       />
     </div>
