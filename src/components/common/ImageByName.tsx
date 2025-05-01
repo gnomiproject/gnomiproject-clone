@@ -49,12 +49,12 @@ const ImageByName: React.FC<ImageByNameProps> = ({
           } else {
             setSrc(fallbackSrc);
             setError(true);
-            console.warn(`ImageByName: No image found for '${imageName}', using fallback`);
+            console.warn(`No image found for '${imageName}', using fallback`);
           }
         }
       } catch (err) {
         if (isMounted) {
-          console.error(`ImageByName: Error loading '${imageName}':`, err);
+          console.error(`Error loading '${imageName}':`, err);
           setSrc(fallbackSrc);
           setError(true);
         }
@@ -73,7 +73,7 @@ const ImageByName: React.FC<ImageByNameProps> = ({
   }, [imageName, fallbackSrc]);
   
   const handleError = () => {
-    console.warn(`ImageByName: Error displaying image '${imageName}', falling back to placeholder`);
+    console.warn(`Error displaying image '${imageName}', falling back to placeholder`);
     setError(true);
     setSrc(fallbackSrc);
     

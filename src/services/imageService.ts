@@ -28,40 +28,38 @@ export const getImageByName = async (imageName: string): Promise<string | null> 
   
   // Check cache first
   if (imageCache.has(dbImageName)) {
-    console.log(`🔴 [ImageService] Using cached URL for ${dbImageName} 🔴`);
+    console.log(`[ImageService] Using cached URL for ${dbImageName}`);
     return imageCache.get(dbImageName) || null;
   }
   
-  // Add more specific logging
-  console.log(`🔴 [ImageService] QUERY START: Looking for image_name = "${dbImageName}" (from input: "${imageName}") 🔴`);
-  
   try {
+    // Add more specific logging
+    console.log(`[ImageService] Looking for image_name = "${dbImageName}" (from input: "${imageName}")`);
+    
     const { data, error } = await supabase
       .from('gnomi_images')
-      .select('*')  // Select all columns for debugging
+      .select('image_url')  // Only select the URL for better performance
       .eq('image_name', dbImageName)
       .maybeSingle();
     
     // Get Supabase URL for debugging
     const projectUrl = getSupabaseUrl();
     
-    // Log the full response for debugging
-    console.log(`🔴 [ImageService] QUERY RESULT: 🔴`, { 
+    // Log the query result for debugging
+    console.log(`[ImageService] Query result:`, { 
       data, 
       error,
-      dataType: data ? typeof data : 'undefined',
-      isArray: Array.isArray(data),
       requestedImage: dbImageName,
       supabaseUrl: projectUrl
     });
     
     if (error) {
-      console.error('🔴 [ImageService] Error fetching image:', error, '🔴');
+      console.error('Error fetching image:', error);
       return null;
     }
     
     if (!data) {
-      console.warn(`🔴 [ImageService] Image with name "${dbImageName}" not found 🔴`);
+      console.warn(`Image with name "${dbImageName}" not found`);
       return null;
     }
     
@@ -69,7 +67,7 @@ export const getImageByName = async (imageName: string): Promise<string | null> 
     imageCache.set(dbImageName, data.image_url);
     return data.image_url;
   } catch (error) {
-    console.error('🔴 [ImageService] Unexpected error:', error, '🔴');
+    console.error('Unexpected error:', error);
     return null;
   }
 };
@@ -80,8 +78,6 @@ export const getImageByName = async (imageName: string): Promise<string | null> 
  */
 export const testDatabaseAccess = async (): Promise<GnomeImage[] | null> => {
   try {
-    console.log('🔴 [ImageService] Testing database access... 🔴');
-    
     const { data, error } = await supabase
       .from('gnomi_images')
       .select('*');
@@ -89,7 +85,7 @@ export const testDatabaseAccess = async (): Promise<GnomeImage[] | null> => {
     // Get Supabase URL for debugging
     const projectUrl = getSupabaseUrl();
     
-    console.log('🔴 [ImageService] All records test: 🔴', { 
+    console.log('All records test:', { 
       data, 
       error,
       count: data ? data.length : 0,
@@ -98,7 +94,7 @@ export const testDatabaseAccess = async (): Promise<GnomeImage[] | null> => {
     
     return data;
   } catch (e) {
-    console.error('🔴 [ImageService] Test query error:', e, '🔴');
+    console.error('Test query error:', e);
     return null;
   }
 };
@@ -120,12 +116,12 @@ export const prefetchImages = async (imageNames: string[]): Promise<void> => {
       .in('image_name', imagesToFetch);
     
     if (error) {
-      console.error('🔴 [ImageService] Error prefetching images:', error, '🔴');
+      console.error('Error prefetching images:', error);
       return;
     }
     
     if (!data || data.length === 0) {
-      console.warn('🔴 [ImageService] No images found during prefetch 🔴');
+      console.warn('No images found during prefetch');
       return;
     }
     
@@ -137,9 +133,9 @@ export const prefetchImages = async (imageNames: string[]): Promise<void> => {
     // Add placeholder to cache
     imageCache.set('placeholder', '/assets/gnomes/placeholder.svg');
     
-    console.log(`🔴 [ImageService] Prefetched and cached ${data.length} images 🔴`);
+    console.log(`Prefetched and cached ${data.length} images`);
   } catch (error) {
-    console.error('🔴 [ImageService] Error during prefetch:', error, '🔴');
+    console.error('Error during prefetch:', error);
   }
 };
 

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -14,8 +15,12 @@ const Index = () => {
   // Check if data exists in Supabase
   React.useEffect(() => {
     const checkDatabase = async () => {
-      const result = await checkDataInSupabase();
-      setDataExists(result.exists);
+      try {
+        const result = await checkDataInSupabase();
+        setDataExists(result.exists);
+      } catch (error) {
+        console.error("Error checking database:", error);
+      }
     };
     
     checkDatabase();
