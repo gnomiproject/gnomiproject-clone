@@ -62,6 +62,7 @@ const InsightsReportContent: React.FC<InsightsReportContentProps> = ({ archetype
               </div>
             </div>
             <div className="flex justify-center">
+              {/* Always use the charts gnome type here */}
               <GnomeImage type="charts" showDebug={true} />
             </div>
           </div>
