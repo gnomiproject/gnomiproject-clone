@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { ArchetypeId, ArchetypeDetailedData } from '@/types/archetype';
 import ArchetypeNavTabs from './components/ArchetypeNavTabs';
 import ArchetypeHeader from './components/ArchetypeHeader';
@@ -9,7 +9,6 @@ import SwotTab from './tabs/SwotTab';
 import DiseaseAndCareTab from './tabs/DiseaseAndCareTab';
 import DeepDiveRequestForm from '@/components/results/DeepDiveRequestForm';
 import { getGnomeForArchetype } from '@/utils/gnomeImages';
-import { toast } from 'sonner';
 
 interface ArchetypeReportProps {
   archetypeId: ArchetypeId;
@@ -29,52 +28,35 @@ const InsightsView = ({
   // Always define hooks at the top level
   const [activeTab, setActiveTab] = React.useState('overview');
   
-  // Enhanced logging for assessment data
-  useEffect(() => {
-    if (assessmentResult) {
-      console.log('[InsightsView] Using assessment result data', {
-        hasAssessmentResult: true,
-        archetypeId,
-        primaryArchetype: assessmentResult.primaryArchetype,
-        hasExactData: !!assessmentResult.exactData,
-        exactEmployeeCount: assessmentResult?.exactData?.employeeCount
-      });
-      
-      // Ensure exactData exists in the assessment result
-      if (!assessmentResult.exactData) {
-        const storedEmployeeCount = sessionStorage.getItem('healthcareArchetypeExactEmployeeCount');
-        if (storedEmployeeCount) {
-          console.log('[InsightsView] Adding exactData from session storage:', storedEmployeeCount);
-          assessmentResult.exactData = {
-            employeeCount: Number(storedEmployeeCount)
-          };
-        } else {
-          console.log('[InsightsView] No employee count found in session storage, adding empty exactData');
-          assessmentResult.exactData = {
-            employeeCount: null
-          };
-        }
-      }
-    } else {
-      console.log('[InsightsView] No assessment result data');
-    }
-  }, [assessmentResult, archetypeId]);
-
-  // Add debugging for SWOT data
-  useEffect(() => {
-    console.log('[InsightsView] Report data received:', {
-      archetypeId: reportData?.id || reportData?.archetype_id || 'unknown',
-      hasReportData: !!reportData,
-      hasStrengths: !!reportData?.strengths,
-      strengthsType: reportData?.strengths ? typeof reportData.strengths : 'undefined',
-      hasWeaknesses: !!reportData?.weaknesses,
-      hasOpportunities: !!reportData?.opportunities,
-      hasThreats: !!reportData?.threats
+  // Process assessment data once with useMemo to prevent redundant processing
+  const processedAssessmentResult = useMemo(() => {
+    // Only log once when the component mounts or when assessment data changes
+    console.log('[InsightsView] Using assessment result data', {
+      hasAssessmentResult: !!assessmentResult,
+      archetypeId,
+      exactEmployeeCount: assessmentResult?.exactData?.employeeCount
     });
     
-    // Log complete SWOT data structure
+    // If assessment data exists but exactData doesn't, add it
+    if (assessmentResult && !assessmentResult.exactData) {
+      const storedEmployeeCount = sessionStorage.getItem('healthcareArchetypeExactEmployeeCount');
+      const result = {...assessmentResult};
+      result.exactData = {
+        employeeCount: storedEmployeeCount ? Number(storedEmployeeCount) : null
+      };
+      return result;
+    }
+    return assessmentResult;
+  }, [assessmentResult, archetypeId]);
+
+  // Log SWOT data only once on mount or if reportData changes
+  useEffect(() => {
     if (reportData?.strengths) {
-      console.log('[InsightsView] Full strengths data:', reportData.strengths);
+      console.log('[InsightsView] SWOT data available:', {
+        directStrengths: !!reportData.strengths,
+        swotAnalysis: !!reportData.swot_analysis,
+        enhancedSwot: !!reportData.enhanced?.swot
+      });
     }
   }, [reportData]);
 
@@ -93,15 +75,6 @@ const InsightsView = ({
       </div>
     );
   }
-
-  // For debugging SWOT data issues
-  useEffect(() => {
-    console.log('[InsightsView] SWOT data availability check:', {
-      directStrengths: reportData.strengths ? 'Available' : 'Not available',
-      swotAnalysis: reportData.swot_analysis ? 'Available' : 'Not available',
-      enhancedSwot: reportData.enhanced?.swot ? 'Available' : 'Not available',
-    });
-  }, [reportData]);
 
   // Ensure we have all the required properties for rendering
   const name = reportData?.name || reportData?.archetype_name || 'Unknown Archetype';
@@ -141,7 +114,7 @@ const InsightsView = ({
         <div className="border-t border-gray-100 mt-6">
           <DeepDiveRequestForm
             archetypeId={archetypeId}
-            assessmentResult={assessmentResult}
+            assessmentResult={processedAssessmentResult}
             assessmentAnswers={assessmentAnswers}
             archetypeData={reportData}
           />
@@ -151,4 +124,5 @@ const InsightsView = ({
   );
 };
 
-export default InsightsView;
+// Use React.memo to prevent unnecessary re-renders
+export default React.memo(InsightsView);

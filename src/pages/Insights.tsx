@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ArchetypeId } from '@/types/archetype';
 import { AssessmentResult } from '@/types/assessment';
@@ -26,6 +27,8 @@ const Insights = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const scrollTimeout = useRef<number | null>(null);
+  const hasScrolledRef = useRef(false);
   
   // Added effect to detect when user is focusing on form inputs
   useEffect(() => {
@@ -58,7 +61,7 @@ const Insights = () => {
     };
   }, []);
   
-  // Load session ID and answers
+  // Load session ID and answers once
   useEffect(() => {
     const storedSessionId = sessionStorage.getItem(SESSION_ID_KEY);
     if (storedSessionId) {
@@ -92,7 +95,6 @@ const Insights = () => {
     
     if (location.state?.selectedArchetype) {
       console.log("[Insights] Setting archetype from location state:", location.state.selectedArchetype);
-      console.log("[Insights] Location state exact employee count:", location.state.exactEmployeeCount);
       // Source 1: Direct navigation from Results
       newArchetype = location.state.selectedArchetype;
       
@@ -132,7 +134,7 @@ const Insights = () => {
           }
         };
         
-        console.log("[Insights] Created temporary result from location state:", tempResult);
+        console.log("[Insights] Created temporary result from location state");
         sessionStorage.setItem(SESSION_RESULTS_KEY, JSON.stringify(tempResult));
         setSessionResults(tempResult);
       }
@@ -155,13 +157,6 @@ const Insights = () => {
             };
           }
           
-          console.log("[Insights] Parsed assessment results:", {
-            primaryArchetype: assessmentResults.primaryArchetype,
-            resultTier: assessmentResults.resultTier,
-            hasExactData: !!assessmentResults.exactData,
-            exactEmployeeCount: assessmentResults.exactData?.employeeCount,
-            fullData: JSON.stringify(assessmentResults)
-          });
           setSessionResults(assessmentResults);
           newArchetype = assessmentResults.primaryArchetype;
           console.log("[Insights] Using archetype from session storage:", newArchetype);
@@ -190,7 +185,7 @@ const Insights = () => {
                 employeeCount: Number(storedEmployeeCount)
               }
             };
-            console.log("[Insights] Created assessment results from stored employee count:", assessmentResults);
+            console.log("[Insights] Created assessment results from stored employee count");
             setSessionResults(assessmentResults);
             sessionStorage.setItem(SESSION_RESULTS_KEY, JSON.stringify(assessmentResults));
           }
@@ -210,34 +205,34 @@ const Insights = () => {
         staleTime: 5 * 60 * 1000 // 5 minutes
       });
     }
-  }, [location, queryClient, sessionResults]); 
+  }, [location, queryClient]); 
+
+  // Optimized scroll event handler with useCallback to prevent recreation on each render
+  const handleScroll = useCallback(() => {
+    if (scrollTimeout.current !== null) {
+      return;
+    }
+    
+    scrollTimeout.current = window.setTimeout(() => {
+      if (!hasFeedbackBeenClosed && window.scrollY > 100 && !isFormVisible && !hasScrolledRef.current) {
+        setShowFeedback(true);
+        hasScrolledRef.current = true; // Mark that we've shown feedback after scroll
+      }
+      scrollTimeout.current = null;
+    }, 300); // Increased debounce time for better performance
+  }, [hasFeedbackBeenClosed, isFormVisible]);
 
   // Add scroll event listener to show feedback menu when scrolling
-  // with throttling to avoid too many events
   useEffect(() => {
-    let scrollTimeout: number | null = null;
+    window.addEventListener('scroll', handleScroll, { passive: true });
     
-    const handleScroll = () => {
-      if (scrollTimeout !== null) {
-        return;
-      }
-      
-      scrollTimeout = window.setTimeout(() => {
-        if (!hasFeedbackBeenClosed && window.scrollY > 100 && !isFormVisible) {
-          setShowFeedback(true);
-        }
-        scrollTimeout = null;
-      }, 100);
-    };
-
-    window.addEventListener('scroll', handleScroll);
     return () => {
       window.removeEventListener('scroll', handleScroll);
-      if (scrollTimeout !== null) {
-        window.clearTimeout(scrollTimeout);
+      if (scrollTimeout.current !== null) {
+        window.clearTimeout(scrollTimeout.current);
       }
     };
-  }, [hasFeedbackBeenClosed, isFormVisible]);
+  }, [handleScroll]);
 
   // Handle retaking the assessment
   const handleRetakeAssessment = () => {
@@ -256,12 +251,6 @@ const Insights = () => {
       toast.error('There was an issue closing the feedback menu');
     }
   };
-
-  // Debug
-  console.log("[Insights] Selected archetype:", selectedArchetype);
-  console.log("[Insights] Session results full data:", sessionResults);
-  console.log("[Insights] Session answers:", sessionAnswers);
-  console.log("[Insights] Exact employee count:", sessionResults?.exactData?.employeeCount);
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-6 md:px-12 pb-24 relative">

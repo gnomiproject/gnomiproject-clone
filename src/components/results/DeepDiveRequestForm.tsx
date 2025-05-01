@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useMemo } from 'react';
 import { ArchetypeId } from '@/types/archetype';
 import DeepDiveFormContainer from './deep-dive-form/DeepDiveFormContainer';
 
@@ -16,43 +16,36 @@ const DeepDiveRequestForm = ({
   assessmentAnswers,
   archetypeData 
 }: DeepDiveRequestFormProps) => {
-  // Add debugging to trace the exact employee count data
-  useEffect(() => {
-    if (assessmentResult) {
-      console.log('[DeepDiveRequestForm] Assessment data check', {
-        hasAssessmentResult: true,
-        archetypeId,
-        primaryArchetype: assessmentResult.primaryArchetype,
-        resultTier: assessmentResult.resultTier,
-        hasExactData: !!assessmentResult?.exactData,
-        exactEmployeeCount: assessmentResult?.exactData?.employeeCount,
-        fullAssessmentResult: JSON.stringify(assessmentResult)
-      });
-      
-      // Check if we need to ensure exactData exists
-      if (!assessmentResult.exactData) {
-        console.warn('[DeepDiveRequestForm] exactData property missing from assessmentResult');
-        const storedEmployeeCount = sessionStorage.getItem('healthcareArchetypeExactEmployeeCount');
-        if (storedEmployeeCount) {
-          console.log('[DeepDiveRequestForm] Found employee count in session storage:', storedEmployeeCount);
-          assessmentResult.exactData = {
-            employeeCount: Number(storedEmployeeCount)
-          };
-        }
-      }
-    } else {
-      console.log('[DeepDiveRequestForm] No assessment result data available');
+  // Use useMemo to process assessment result only once
+  const processedAssessmentResult = useMemo(() => {
+    // Only log once
+    console.log('[DeepDiveRequestForm] Assessment data check', {
+      hasAssessmentResult: !!assessmentResult,
+      archetypeId,
+      hasExactData: !!assessmentResult?.exactData
+    });
+    
+    // Clone and modify the assessment result if needed
+    if (assessmentResult && !assessmentResult.exactData) {
+      const storedEmployeeCount = sessionStorage.getItem('healthcareArchetypeExactEmployeeCount');
+      const result = {...assessmentResult};
+      result.exactData = {
+        employeeCount: storedEmployeeCount ? Number(storedEmployeeCount) : null
+      };
+      return result;
     }
+    return assessmentResult;
   }, [assessmentResult, archetypeId]);
 
   return (
     <DeepDiveFormContainer
       archetypeId={archetypeId}
-      assessmentResult={assessmentResult}
+      assessmentResult={processedAssessmentResult}
       assessmentAnswers={assessmentAnswers}
       archetypeData={archetypeData}
     />
   );
 };
 
-export default DeepDiveRequestForm;
+// Use React.memo to prevent unnecessary re-renders
+export default React.memo(DeepDiveRequestForm);

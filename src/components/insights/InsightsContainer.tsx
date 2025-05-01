@@ -25,8 +25,15 @@ const InsightsContainer = ({
   const mountedRef = useRef(true);
   const [retrying, setRetrying] = React.useState(false);
   
-  // Debug calls to identify load sequence
-  console.log(`[InsightsContainer] Beginning data fetch for ${archetypeId}`);
+  // Debug calls to identify load sequence - only log once
+  useEffect(() => {
+    console.log(`[InsightsContainer] Beginning data fetch for ${archetypeId}`);
+    
+    return () => {
+      mountedRef.current = false;
+      console.log(`[InsightsContainer] Unmounting for ${archetypeId}`);
+    };
+  }, [archetypeId]); // Only run on mount and archetypeId change
   
   // Skip cache here to ensure we get fresh data
   const { 
@@ -37,33 +44,26 @@ const InsightsContainer = ({
     dataSource 
   } = useGetArchetype(archetypeId, false); 
   
-  // Enhanced logging for assessment data tracing
-  useEffect(() => {
+  // Enhanced logging for assessment data tracing - using useMemo to prevent redundant processing
+  const processedAssessmentResult = useMemo(() => {
     renderCountRef.current += 1;
-    console.log(`[InsightsContainer] Mount/Render #${renderCountRef.current} for ${archetypeId}`);
-    console.log('[InsightsContainer] Assessment data check:', { 
-      hasAssessmentResult: !!assessmentResult,
-      assessmentResultKeys: assessmentResult ? Object.keys(assessmentResult) : null,
-      hasExactData: assessmentResult?.exactData ? 'Yes' : 'No',
-      exactEmployeeCount: assessmentResult?.exactData?.employeeCount,
-      dataSource: dataSource
-    });
+    
+    // Only log on first render or when assessment data changes
+    if (renderCountRef.current === 1 || renderCountRef.current % 5 === 0) {
+      console.log(`[InsightsContainer] Mount/Render #${renderCountRef.current} for ${archetypeId}`);
+    }
     
     // Ensure exactData exists in assessmentResult
     if (assessmentResult && !assessmentResult.exactData) {
-      console.log('[InsightsContainer] Adding exactData to assessment result');
       const storedEmployeeCount = sessionStorage.getItem('healthcareArchetypeExactEmployeeCount');
-      assessmentResult.exactData = {
+      const result = {...assessmentResult};
+      result.exactData = {
         employeeCount: storedEmployeeCount ? Number(storedEmployeeCount) : null
       };
-      console.log('[InsightsContainer] Updated assessment result:', assessmentResult);
+      return result;
     }
-    
-    return () => {
-      mountedRef.current = false;
-      console.log(`[InsightsContainer] Unmounting for ${archetypeId}`);
-    };
-  }, [archetypeId, assessmentResult, dataSource]);
+    return assessmentResult;
+  }, [assessmentResult, archetypeId]);
   
   // Handle retry logic
   const handleRetry = async () => {
@@ -106,21 +106,16 @@ const InsightsContainer = ({
     familyName: archetypeData.familyName || archetypeData.family_name || 'Healthcare Archetype'
   };
   
-  console.log('[InsightsContainer] Rendering with assessment data:', {
-    hasAssessmentResult: !!assessmentResult,
-    hasAssessmentAnswers: !!assessmentAnswers,
-    exactEmployeeCount: assessmentResult?.exactData?.employeeCount
-  });
-  
   return (
     <InsightsView 
       archetypeId={archetypeId}
       reportData={safeArchetypeData}
-      assessmentResult={assessmentResult}
+      assessmentResult={processedAssessmentResult}
       assessmentAnswers={assessmentAnswers}
       hideRequestSection={false}
     />
   );
 };
 
-export default InsightsContainer;
+// Use React.memo to prevent unnecessary re-renders
+export default React.memo(InsightsContainer);
