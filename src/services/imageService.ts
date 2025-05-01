@@ -42,6 +42,9 @@ export const getImageByName = async (imageName: string): Promise<string | null> 
       .eq('image_name', dbImageName)
       .maybeSingle();
     
+    // Extract project ref from URL for debugging
+    const projectRef = new URL(supabase.getUrl()).hostname.split('.')[0];
+    
     // Log the full response for debugging
     console.log(`🔴 [ImageService] QUERY RESULT: 🔴`, { 
       data, 
@@ -49,7 +52,7 @@ export const getImageByName = async (imageName: string): Promise<string | null> 
       dataType: data ? typeof data : 'undefined',
       isArray: Array.isArray(data),
       requestedImage: dbImageName,
-      supabaseProjectRef: supabase.realtimeUrl.split('/')[2].split('.')[0]
+      supabaseProjectRef: projectRef
     });
     
     if (error) {
@@ -82,11 +85,14 @@ export const testDatabaseAccess = async (): Promise<GnomeImage[] | null> => {
       .from('gnomi_images')
       .select('*');
     
+    // Extract project ref from URL for debugging
+    const projectRef = new URL(supabase.getUrl()).hostname.split('.')[0];
+    
     console.log('🔴 [ImageService] All records test: 🔴', { 
       data, 
       error,
       count: data ? data.length : 0,
-      supabaseProjectRef: supabase.realtimeUrl.split('/')[2].split('.')[0]
+      supabaseProjectRef: projectRef
     });
     
     return data;
