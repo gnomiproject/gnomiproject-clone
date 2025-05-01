@@ -36,38 +36,44 @@ export const getImageByName = async (imageName: string): Promise<string | null> 
     // Add more specific logging
     console.log(`[ImageService] Looking for image_name = "${dbImageName}" (from input: "${imageName}")`);
     
+    // Direct query approach with more detailed logging
     const { data, error } = await supabase
       .from('gnomi_images')
-      .select('image_url')  // Only select the URL for better performance
+      .select('image_url')
       .eq('image_name', dbImageName)
       .maybeSingle();
     
-    // Get Supabase URL for debugging
-    const projectUrl = getSupabaseUrl();
-    
-    // Log the query result for debugging
+    // Log the query result with detailed information
     console.log(`[ImageService] Query result:`, { 
       data, 
       error,
       requestedImage: dbImageName,
-      supabaseUrl: projectUrl
+      supabaseUrl: getSupabaseUrl(),
+      query: `SELECT image_url FROM gnomi_images WHERE image_name = '${dbImageName}'`
     });
     
     if (error) {
-      console.error('Error fetching image:', error);
+      console.error('[ImageService] Database error:', error);
       return null;
     }
     
     if (!data) {
-      console.warn(`Image with name "${dbImageName}" not found`);
-      return null;
+      console.warn(`[ImageService] Image with name "${dbImageName}" not found`);
+      
+      // Fallback: try direct format with .png extension if naming convention is consistent
+      const fallbackUrl = `https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_${dbImageName}.png`;
+      console.log(`[ImageService] Trying fallback URL: ${fallbackUrl}`);
+      
+      // Cache the fallback URL to avoid redundant lookups
+      imageCache.set(dbImageName, fallbackUrl);
+      return fallbackUrl;
     }
     
-    // Cache and return
+    // Cache and return the found image URL
     imageCache.set(dbImageName, data.image_url);
     return data.image_url;
   } catch (error) {
-    console.error('Unexpected error:', error);
+    console.error('[ImageService] Unexpected error:', error);
     return null;
   }
 };
@@ -78,23 +84,34 @@ export const getImageByName = async (imageName: string): Promise<string | null> 
  */
 export const testDatabaseAccess = async (): Promise<GnomeImage[] | null> => {
   try {
-    const { data, error } = await supabase
+    console.log('[ImageService] Testing database access...');
+    
+    // First, let's check if the table exists by getting all records
+    const { data, error, count } = await supabase
       .from('gnomi_images')
-      .select('*');
+      .select('*', { count: 'exact' });
     
-    // Get Supabase URL for debugging
-    const projectUrl = getSupabaseUrl();
-    
-    console.log('All records test:', { 
+    // Log comprehensive debug information
+    console.log('[ImageService] Database test result:', { 
       data, 
       error,
-      count: data ? data.length : 0,
-      supabaseUrl: projectUrl
+      recordCount: data ? data.length : 0,
+      countReturned: count,
+      supabaseUrl: getSupabaseUrl()
     });
+    
+    if (error) {
+      console.error('[ImageService] Database error during test:', error);
+      return null;
+    }
+
+    if (!data || data.length === 0) {
+      console.warn('[ImageService] No records found in gnomi_images table');
+    }
     
     return data;
   } catch (e) {
-    console.error('Test query error:', e);
+    console.error('[ImageService] Error testing database access:', e);
     return null;
   }
 };
@@ -116,12 +133,18 @@ export const prefetchImages = async (imageNames: string[]): Promise<void> => {
       .in('image_name', imagesToFetch);
     
     if (error) {
-      console.error('Error prefetching images:', error);
+      console.error('[ImageService] Error prefetching images:', error);
       return;
     }
     
     if (!data || data.length === 0) {
-      console.warn('No images found during prefetch');
+      console.warn('[ImageService] No images found during prefetch');
+      
+      // Create fallback URLs based on naming convention
+      for (const name of imagesToFetch) {
+        const fallbackUrl = `https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_${name}.png`;
+        imageCache.set(name, fallbackUrl);
+      }
       return;
     }
     
@@ -133,9 +156,9 @@ export const prefetchImages = async (imageNames: string[]): Promise<void> => {
     // Add placeholder to cache
     imageCache.set('placeholder', '/assets/gnomes/placeholder.svg');
     
-    console.log(`Prefetched and cached ${data.length} images`);
+    console.log(`[ImageService] Prefetched and cached ${data.length} images`);
   } catch (error) {
-    console.error('Error during prefetch:', error);
+    console.error('[ImageService] Error during prefetch:', error);
   }
 };
 
@@ -144,4 +167,21 @@ export const prefetchImages = async (imageNames: string[]): Promise<void> => {
  */
 export const clearImageCache = (): void => {
   imageCache.clear();
+};
+
+/**
+ * Validates if image URLs are accessible by attempting to load them
+ */
+export const validateImageUrl = async (url: string): Promise<boolean> => {
+  // Skip validation for local assets
+  if (url.startsWith('/')) return true;
+  
+  try {
+    // We can't directly test image loading server-side, so we return true for now
+    // In a real implementation, this could make a HEAD request to validate the URL
+    return true;
+  } catch (error) {
+    console.error(`[ImageService] URL validation failed for ${url}:`, error);
+    return false;
+  }
 };

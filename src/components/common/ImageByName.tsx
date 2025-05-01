@@ -25,6 +25,7 @@ const ImageByName: React.FC<ImageByNameProps> = ({
   const [src, setSrc] = useState<string | null>(null);
   const [error, setError] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
+  const [loadAttempts, setLoadAttempts] = useState<number>(0);
   
   useEffect(() => {
     let isMounted = true;
@@ -40,22 +41,24 @@ const ImageByName: React.FC<ImageByNameProps> = ({
       
       try {
         setLoading(true);
+        setError(false);
         const imageUrl = await getImageByName(imageName);
         
         if (isMounted) {
           if (imageUrl) {
+            console.log(`[ImageByName] Successfully retrieved URL for '${imageName}': ${imageUrl}`);
             setSrc(imageUrl);
             setError(false);
           } else {
             // If no image URL is returned, use the direct fallback path
-            console.warn(`No image found for '${imageName}', using fallback`);
+            console.warn(`[ImageByName] No image found for '${imageName}', using fallback`);
             setSrc(fallbackSrc);
             setError(true);
           }
         }
       } catch (err) {
         if (isMounted) {
-          console.error(`Error loading '${imageName}':`, err);
+          console.error(`[ImageByName] Error loading '${imageName}':`, err);
           setSrc(fallbackSrc);
           setError(true);
         }
@@ -71,12 +74,19 @@ const ImageByName: React.FC<ImageByNameProps> = ({
     return () => {
       isMounted = false;
     };
-  }, [imageName, fallbackSrc]);
+  }, [imageName, fallbackSrc, loadAttempts]);
   
   const handleError = () => {
-    console.warn(`Error displaying image '${imageName}', falling back to placeholder`);
+    console.warn(`[ImageByName] Error displaying image '${imageName}', falling back to placeholder`);
     setError(true);
     setSrc(fallbackSrc);
+    
+    // Retry loading the image once if it fails, but with a short delay
+    if (loadAttempts < 1) {
+      setTimeout(() => {
+        setLoadAttempts(prev => prev + 1);
+      }, 1000);
+    }
     
     // Call the onError callback if provided
     if (onError) {
@@ -86,8 +96,8 @@ const ImageByName: React.FC<ImageByNameProps> = ({
   
   if (loading) {
     return (
-      <div className={`${className} flex items-center justify-center bg-gray-100`}>
-        <div className="animate-pulse bg-gray-200 rounded-lg w-3/4 h-3/4"></div>
+      <div className={`${className} flex items-center justify-center bg-gray-50 animate-pulse`}>
+        <div className="animate-pulse rounded-lg w-3/4 h-3/4 bg-gray-200"></div>
       </div>
     );
   }
@@ -96,7 +106,7 @@ const ImageByName: React.FC<ImageByNameProps> = ({
     <img 
       src={src || fallbackSrc}
       alt={altText}
-      className={className}
+      className={`${className} ${error ? 'opacity-80' : ''}`}
       width={width}
       height={height}
       onError={handleError}

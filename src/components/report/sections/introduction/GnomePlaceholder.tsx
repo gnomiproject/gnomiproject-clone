@@ -1,19 +1,27 @@
 
 import React from 'react';
-import ImageByName from '@/components/common/ImageByName';
+import GnomeImage from '@/components/common/GnomeImage';
 
 interface GnomePlaceholderProps {
   type?: string;
+  className?: string;
+  altText?: string;
+  showDebug?: boolean;
 }
 
-const GnomePlaceholder = ({ type = 'welcome' }: GnomePlaceholderProps) => {
+const GnomePlaceholder = ({ 
+  type = 'welcome', 
+  className = 'h-full w-full object-contain p-4',
+  altText,
+  showDebug = false
+}: GnomePlaceholderProps) => {
   return (
     <div className="flex items-center justify-center bg-gray-100 rounded-lg w-full h-full">
-      <ImageByName 
-        imageName={type} 
-        altText={`Gnome ${type} illustration`} 
-        className="h-full w-full object-contain p-4" 
-        fallbackSrc="/assets/gnomes/placeholder.svg"
+      <GnomeImage 
+        type={type} 
+        className={className} 
+        alt={altText || `Gnome ${type} illustration`}
+        showDebug={showDebug}
       />
     </div>
   );

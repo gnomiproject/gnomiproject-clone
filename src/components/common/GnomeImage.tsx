@@ -21,16 +21,23 @@ const GnomeImage: React.FC<GnomeImageProps> = ({
   height
 }) => {
   const [hasError, setHasError] = React.useState(false);
+  const [imageName, setImageName] = React.useState(type);
+  
+  // Normalize image type
+  React.useEffect(() => {
+    // This ensures we're always using a valid image name
+    setImageName(type || 'placeholder');
+  }, [type]);
   
   const handleError = () => {
-    console.error(`Failed to load gnome image: ${type}`);
+    console.error(`[GnomeImage] Failed to load gnome image: ${type}`);
     setHasError(true);
   };
-  
+
   return (
     <div className="relative">
       <ImageByName
-        imageName={type}
+        imageName={imageName}
         altText={alt}
         className={className}
         width={width}
@@ -39,9 +46,9 @@ const GnomeImage: React.FC<GnomeImageProps> = ({
         onError={handleError}
       />
       
-      {showDebug && (
-        <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-1 text-xs">
-          {hasError ? 'Using fallback' : `Type: ${type}`}
+      {(showDebug || hasError) && (
+        <div className={`absolute bottom-0 left-0 right-0 ${hasError ? 'bg-red-800/70' : 'bg-black/70'} text-white p-1 text-xs`}>
+          {hasError ? `Failed: ${type} (using fallback)` : `Type: ${type}`}
         </div>
       )}
     </div>
