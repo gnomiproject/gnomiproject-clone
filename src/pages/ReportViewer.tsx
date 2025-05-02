@@ -15,6 +15,8 @@ import ReportError from '@/components/report/ReportError';
 const ReportViewer = () => {
   const { archetypeId: rawArchetypeId, token } = useParams();
   const [debugMode, setDebugMode] = useState(false); // Changed to false to hide debug by default
+  // State to track when to refresh data
+  const [refreshCounter, setRefreshCounter] = useState(0);
   
   // Normalize the archetype ID to handle case sensitivity
   const archetypeId = rawArchetypeId ? normalizeArchetypeId(rawArchetypeId) : undefined;
@@ -63,12 +65,22 @@ const ReportViewer = () => {
     averageData,
     isLoading: reportLoading,
     error: reportError,
-    debugInfo: reportDebugInfo
+    debugInfo: reportDebugInfo,
+    refreshData // This is now properly defined in useReportAccess
   } = useReportAccess({
     archetypeId, 
     token: token || '',
-    isAdminView
+    isAdminView,
+    skipCache: refreshCounter > 0 // Skip cache if we're refreshing
   });
+
+  // Handle manual refresh
+  const handleRefresh = () => {
+    if (refreshData) {
+      refreshData();
+    }
+    setRefreshCounter(prev => prev + 1);
+  };
 
   // Data source verification logging
   useEffect(() => {

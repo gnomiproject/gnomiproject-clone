@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from 'react';
 import { ReportType } from '@/types/reports';
 import { getDataSource } from '@/utils/reports/schemaMapping';
@@ -83,6 +84,14 @@ export const useReportData = ({
         if (!accessData) {
           setIsValidAccess(false);
           setError(new Error('Invalid or expired access token'));
+          setIsLoading(false);
+          return;
+        }
+        
+        // Check if token has expired - access data now includes expires_at from our updated fetchTokenAccess
+        if (accessData.expires_at && new Date(accessData.expires_at) < new Date()) {
+          setIsValidAccess(false);
+          setError(new Error('Your access token has expired'));
           setIsLoading(false);
           return;
         }

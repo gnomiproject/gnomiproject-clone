@@ -1,26 +1,32 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { ReportType } from '@/types/reports';
 import type { ReportDataSource } from '@/utils/reports/dataSourceUtils';
 import { ArchetypeDetailedData } from '@/types/archetype';
 import { getDataSource } from '@/utils/reports/schemaMapping';
 
+interface TokenAccessData {
+  id: string;
+  archetype_id: string;
+  name: string;
+  organization: string;
+  email: string;
+  created_at: string;
+  expires_at?: string; // Added the expires_at property as optional
+  status?: string;
+  access_count?: number;
+  assessment_result?: any;
+  exact_employee_count?: number;
+}
+
 interface TokenAccessResponse {
-  data: {
-    id: string;
-    archetype_id: string;
-    name: string;
-    organization: string;
-    email: string;
-    created_at: string;
-  } | null;
+  data: TokenAccessData | null;
   error: any;
 }
 
 export const fetchTokenAccess = async (archetypeId: string, token: string): Promise<TokenAccessResponse> => {
   return await supabase
     .from('report_requests')
-    .select('id, archetype_id, name, organization, email, created_at')
+    .select('id, archetype_id, name, organization, email, created_at, expires_at, status, access_count, assessment_result, exact_employee_count')
     .eq('archetype_id', archetypeId)
     .eq('access_token', token)
     .gt('expires_at', new Date().toISOString())
