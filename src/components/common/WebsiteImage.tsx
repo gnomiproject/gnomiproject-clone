@@ -24,14 +24,18 @@ const WebsiteImage: React.FC<WebsiteImageProps> = ({
   const [hasError, setHasError] = useState(false);
   const [loadedImage, setLoadedImage] = useState<string | null>(null);
   
+  // Normalize image type to handle aliases like "magnifying" -> "magnifying_glass"
+  const normalizedType = type === 'magnifying' ? 'magnifying_glass' : type;
+  
   // Get the image URL from Supabase storage
-  const imageUrl = getImageUrl(type);
+  const imageUrl = getImageUrl(normalizedType);
   
   // Handle image loading errors
   const handleError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     console.warn(`Failed to load image: ${type}`, {
       attemptedUrl: e.currentTarget.src,
-      fallbackUrl: FALLBACK_IMAGE
+      fallbackUrl: FALLBACK_IMAGE,
+      normalizedType
     });
     
     setHasError(true);

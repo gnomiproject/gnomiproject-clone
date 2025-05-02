@@ -7,6 +7,7 @@ export type WebsiteImageType =
   | 'clipboard'
   | 'lefthand'
   | 'magnifying_glass'
+  | 'magnifying'  // Add alias for backward compatibility
   | 'overlook'
   | 'favicon'
   | 'logo';
@@ -28,7 +29,7 @@ export const getImageUrl = (imageName: string): string => {
       fileName = 'gnomi_favicon.png';
     } else if (imageName === 'logo') {
       fileName = 'g.nomi_logo.png';
-    } else if (imageName === 'magnifying_glass') {
+    } else if (imageName === 'magnifying_glass' || imageName === 'magnifying') {
       // Ensure we use the correct file name for magnifying glass
       fileName = 'gnome_magnifying_glass.png';
     } else {
