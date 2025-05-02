@@ -28,6 +28,9 @@ export const getImageUrl = (imageName: string): string => {
       fileName = 'gnomi_favicon.png';
     } else if (imageName === 'logo') {
       fileName = 'g.nomi_logo.png';
+    } else if (imageName === 'magnifying_glass') {
+      // Ensure we use the correct file name for magnifying glass
+      fileName = 'gnome_magnifying_glass.png';
     } else {
       // Handle gnome images - add prefix if needed
       fileName = imageName.startsWith('gnome_') 
