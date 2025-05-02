@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { ReportType } from '@/types/reports';
 import { getDataSource } from '@/utils/reports/schemaMapping';
@@ -14,7 +13,6 @@ interface UseReportDataOptions {
   token?: string;
   isInsightsReport: boolean;
   skipCache?: boolean;
-  refreshTrigger?: number;
 }
 
 interface UseReportDataResult {
@@ -33,8 +31,7 @@ export const useReportData = ({
   archetypeId = '', 
   token = '', 
   isInsightsReport, 
-  skipCache = false,
-  refreshTrigger = 0
+  skipCache = false 
 }: UseReportDataOptions): UseReportDataResult => {
   const [reportData, setReportData] = useState<ArchetypeDetailedData | null>(null);
   const [userData, setUserData] = useState<any>(null);
@@ -56,7 +53,7 @@ export const useReportData = ({
       setIsLoading(true);
       setError(null);
 
-      const cacheKey = `report-${archetypeId}-${token}-${refreshTrigger}`;
+      const cacheKey = `report-${archetypeId}-${token}`;
       
       // Check cache first if not skipping
       if (!skipCache) {
@@ -90,14 +87,6 @@ export const useReportData = ({
           return;
         }
         
-        // Log token validation success with timestamp
-        console.log('[useReportData] Token validation successful:', {
-          archetypeId,
-          tokenPreview: token.substring(0, 5) + '...',
-          timestamp: new Date().toISOString(),
-          expires_at: accessData.expires_at
-        });
-        
         setIsValidAccess(true);
         setUserData(accessData);
       } else {
@@ -113,13 +102,6 @@ export const useReportData = ({
         setAverageData(processedData.averageData);
         setDataSource(getDataSource(reportType));
 
-        // Log successful data fetch with timestamp
-        console.log('[useReportData] Data fetched successfully:', {
-          archetypeId,
-          dataSource: getDataSource(reportType),
-          timestamp: new Date().toISOString()
-        });
-
         // Cache successful results
         setInCache(cacheKey, {
           reportData: processedData.reportData,
@@ -134,7 +116,7 @@ export const useReportData = ({
     } finally {
       setIsLoading(false);
     }
-  }, [archetypeId, token, isInsightsReport, skipCache, refreshTrigger]);
+  }, [archetypeId, token, isInsightsReport, skipCache]);
 
   // Load data on mount and when dependencies change
   useEffect(() => {
@@ -144,9 +126,9 @@ export const useReportData = ({
   const retry = useCallback(() => {
     setIsLoading(true);
     setError(null);
-    const cacheKey = `report-${archetypeId}-${token}-${refreshTrigger}`;
+    const cacheKey = `report-${archetypeId}-${token}`;
     clearFromCache(cacheKey);
-  }, [archetypeId, token, refreshTrigger]);
+  }, [archetypeId, token]);
 
   const refreshData = useCallback(async () => {
     toast({
@@ -154,7 +136,7 @@ export const useReportData = ({
       description: "Fetching the latest information..."
     });
     
-    const cacheKey = `report-${archetypeId}-${token}-${refreshTrigger}`;
+    const cacheKey = `report-${archetypeId}-${token}`;
     clearFromCache(cacheKey);
     
     try {
@@ -170,7 +152,7 @@ export const useReportData = ({
         variant: "destructive"
       });
     }
-  }, [archetypeId, token, loadReportData, refreshTrigger]);
+  }, [archetypeId, token, loadReportData]);
 
   return {
     reportData,

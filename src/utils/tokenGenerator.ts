@@ -62,8 +62,7 @@ export const validateReportToken = (archetypeId: string, token: string): boolean
     console.log(`Validating token for ${archetypeId}:`, { 
       provided: token, 
       stored: storedToken,
-      match: storedToken === token,
-      timestamp: new Date().toISOString()
+      match: storedToken === token
     });
     
     return storedToken === token;
@@ -104,4 +103,3 @@ export const clearAllReportTokens = (): void => {
 export const hasReportToken = (archetypeId: string): boolean => {
   return !!getReportToken(archetypeId);
 };
-

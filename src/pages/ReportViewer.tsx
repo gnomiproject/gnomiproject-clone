@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { isValidArchetypeId, normalizeArchetypeId } from '@/utils/archetypeValidation';
@@ -14,7 +15,6 @@ import ReportError from '@/components/report/ReportError';
 const ReportViewer = () => {
   const { archetypeId: rawArchetypeId, token } = useParams();
   const [debugMode, setDebugMode] = useState(false); // Changed to false to hide debug by default
-  const [refreshTrigger, setRefreshTrigger] = useState(0); // Added to trigger data refresh
   
   // Normalize the archetype ID to handle case sensitivity
   const archetypeId = rawArchetypeId ? normalizeArchetypeId(rawArchetypeId) : undefined;
@@ -25,25 +25,13 @@ const ReportViewer = () => {
       rawArchetypeId,
       normalizedArchetypeId: archetypeId,
       token: token ? `${token.substring(0, 5)}...` : 'missing',
-      dataSource: 'level4_report_secure', // Explicitly log the data source
-      refreshTrigger
+      dataSource: 'level4_report_secure' // Explicitly log the data source
     });
-  }, [archetypeId, rawArchetypeId, token, refreshTrigger]);
+  }, [archetypeId, rawArchetypeId, token]);
   
   // Simple helper for valid access
   const isAdminView = token === 'admin-view';
   const navigate = useNavigate();
-  
-  // Set up periodic refresh to keep session alive
-  useEffect(() => {
-    // Set up a refresh timer to keep tokens valid (every 5 minutes)
-    const refreshTimer = setInterval(() => {
-      console.log('[ReportViewer] Refreshing report data to maintain session');
-      setRefreshTrigger(prev => prev + 1); // This will trigger a re-fetch
-    }, 5 * 60 * 1000); // 5 minutes
-    
-    return () => clearInterval(refreshTimer);
-  }, []);
   
   // Validate archetypeId
   if (!archetypeId || !isValidArchetypeId(archetypeId)) {
@@ -65,9 +53,8 @@ const ReportViewer = () => {
     isLoading: userDataLoading,
     isValid: isValidAccess,
     error: userDataError,
-    debugInfo: userDataDebugInfo,
-    refreshData: refreshUserData
-  } = useReportUserData(token, archetypeId, refreshTrigger);
+    debugInfo: userDataDebugInfo
+  } = useReportUserData(token, archetypeId);
 
   // Use report data hook to fetch EXCLUSIVELY from level4_report_secure
   const {
@@ -76,22 +63,12 @@ const ReportViewer = () => {
     averageData,
     isLoading: reportLoading,
     error: reportError,
-    debugInfo: reportDebugInfo,
-    refreshData: refreshReportData
+    debugInfo: reportDebugInfo
   } = useReportAccess({
     archetypeId, 
     token: token || '',
-    isAdminView,
-    refreshTrigger
+    isAdminView
   });
-
-  // Handle manual refresh
-  const handleRefresh = () => {
-    console.log('[ReportViewer] Manual refresh triggered');
-    refreshUserData();
-    refreshReportData();
-    toast.info("Refreshing report data...");
-  };
 
   // Data source verification logging
   useEffect(() => {
@@ -104,11 +81,9 @@ const ReportViewer = () => {
       hasWeaknesses: !!reportData?.weaknesses,
       hasOpportunities: !!reportData?.opportunities,
       hasThreats: !!reportData?.threats,
-      swotAnalysisType: reportData?.swot_analysis ? typeof reportData.swot_analysis : 'N/A',
-      timestampRefresh: new Date().toISOString(),
-      isValidAccess
+      swotAnalysisType: reportData?.swot_analysis ? typeof reportData.swot_analysis : 'N/A'
     });
-  }, [reportData, isValidAccess, refreshTrigger]);
+  }, [reportData]);
 
   // Combined debug info
   const combinedDebugInfo = {
@@ -122,8 +97,7 @@ const ReportViewer = () => {
       hasUserData: !!userData,
       hasReportData: !!reportData,
       hasSwotData: !!(reportData?.swot_analysis || reportData?.strengths),
-      timestamp: new Date().toISOString(),
-      refreshTrigger
+      timestamp: new Date().toISOString()
     }
   };
 
@@ -151,7 +125,7 @@ const ReportViewer = () => {
         title="Error Loading Report"
         message={`${reportError.message} (Data source: level4_report_secure)`}
         actionLabel="Retry"
-        onAction={() => handleRefresh()}
+        onAction={() => window.location.reload()}
         secondaryAction={() => navigate('/')}
         secondaryActionLabel="Return Home"
       />
@@ -174,18 +148,7 @@ const ReportViewer = () => {
   return (
     <ErrorBoundary>
       <div className="min-h-screen bg-gray-50">
-        {/* Add a refresh button that's visible but not intrusive */}
-        <div className="fixed bottom-4 left-4 z-50 print:hidden">
-          <button 
-            onClick={handleRefresh}
-            className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-full shadow-lg flex items-center justify-center"
-            title="Refresh report data"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-          </button>
-        </div>
+        {/* Debug toggle removed */}
         
         <DeepDiveReport
           reportData={reportData} // Using only the data from level4_report_secure

@@ -47,9 +47,9 @@ export const useReportGeneration = () => {
       // Generate a unique access token
       const accessToken = uuidv4();
 
-      // Calculate expiration date (90 days from now instead of 30)
+      // Calculate expiration date (30 days from now)
       const expiryDate = new Date();
-      expiryDate.setDate(expiryDate.getDate() + 90);
+      expiryDate.setDate(expiryDate.getDate() + 30);
       
       // Create a report request entry
       const { data: reportData, error: reportError } = await supabase
@@ -77,14 +77,6 @@ export const useReportGeneration = () => {
       
       // Set the last generated URL for display
       setLastGeneratedUrl(reportUrl);
-      
-      // Log token information for debugging
-      console.log('[Report Generation] Report successfully generated:', {
-        archetypeId,
-        accessToken,
-        expiryDate: expiryDate.toISOString(),
-        url: reportUrl
-      });
       
       toast.success("Report Generated", {
         description: `Successfully generated report for ${archetypeId.toLowerCase()} ${archetypeData?.archetype_name || ''}`,
