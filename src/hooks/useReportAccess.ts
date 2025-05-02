@@ -170,18 +170,15 @@ export const useReportAccess = ({
   // Add refreshData function that can be called by components
   const refreshData = useCallback(async () => {
     try {
-      toast({
-        title: "Refreshing Data",
+      toast("Refreshing Data", {
         description: "Loading the latest report information..."
       });
       await fetchReportData();
-      toast({
-        title: "Data Refreshed",
+      toast("Data Refreshed", {
         description: "Successfully updated report data"
       });
     } catch (err) {
-      toast({
-        title: "Refresh Failed",
+      toast("Refresh Failed", {
         description: "Could not update report data",
         variant: "destructive"
       });
