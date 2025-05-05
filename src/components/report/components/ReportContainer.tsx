@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, Suspense, lazy, useCallback, useEffect } from 'react';
 import LeftNavigation from '../navigation/LeftNavigation';
 import PrintButton from './PrintButton';
@@ -53,6 +52,7 @@ interface ReportContainerProps {
   isAdminView?: boolean;
   debugInfo?: any;
   onNavigate?: (sectionId: string) => void;
+  children?: React.ReactNode; // Added children prop to the interface
 }
 
 const ReportContainer: React.FC<ReportContainerProps> = ({ 
@@ -61,8 +61,10 @@ const ReportContainer: React.FC<ReportContainerProps> = ({
   averageData, 
   isAdminView = false,
   debugInfo,
-  onNavigate
+  onNavigate,
+  children // Added children to the component props
 }) => {
+  
   // Track performance
   useRenderPerformance('ReportContainer');
   
@@ -170,21 +172,25 @@ const ReportContainer: React.FC<ReportContainerProps> = ({
         className="lg:pl-64 py-6 print:py-0 print:pl-0"
         ref={reportRef}
       >
-        <Suspense fallback={<LoadingFallback />}>
-          <LazyReportBody
-            reportData={reportData}
-            userData={userData}
-            averageData={averageData}
-            isAdminView={isAdminView}
-            debugInfo={debugInfo}
-            showDebugData={showDebugData}
-            showDiagnostics={showDiagnostics}
-            setShowDebugData={setShowDebugData}
-            setShowDiagnostics={setShowDiagnostics}
-            handleRefreshData={handleRefreshData}
-            isDebugMode={isDebugMode}
-          />
-        </Suspense>
+        {children ? (
+          children
+        ) : (
+          <Suspense fallback={<LoadingFallback />}>
+            <LazyReportBody
+              reportData={reportData}
+              userData={userData}
+              averageData={averageData}
+              isAdminView={isAdminView}
+              debugInfo={debugInfo}
+              showDebugData={showDebugData}
+              showDiagnostics={showDiagnostics}
+              setShowDebugData={setShowDebugData}
+              setShowDiagnostics={setShowDiagnostics}
+              handleRefreshData={handleRefreshData}
+              isDebugMode={isDebugMode}
+            />
+          </Suspense>
+        )}
       </div>
       
       {/* Debug Element - always present but only visible in debug mode and never in print */}
