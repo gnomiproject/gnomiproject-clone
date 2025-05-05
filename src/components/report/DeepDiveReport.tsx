@@ -13,7 +13,6 @@ export interface DeepDiveReportProps {
   debugInfo?: any;
   isLoading?: boolean;
   error?: Error | null;
-  // The onRefresh prop was missing in the component definition
   onRefresh?: () => void;
 }
 
@@ -36,7 +35,14 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
   }
 
   return (
-    <ReportContainer>
+    <ReportContainer 
+      reportData={reportData}
+      userData={userData}
+      averageData={averageData}
+      isAdminView={isAdminView}
+      debugInfo={debugInfo}
+      onNavigate={undefined}
+    >
       <DeepDiveReportContent 
         archetype={reportData} 
         userData={userData} 
