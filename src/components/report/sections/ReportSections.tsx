@@ -1,4 +1,3 @@
-
 import React from 'react';
 import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import { Section } from '@/components/shared/Section';
@@ -53,6 +52,7 @@ const ReportSections: React.FC<ReportSectionsProps> = ({
       {/* Utilization Patterns Section */}
       <ErrorBoundary>
         <Section id="utilization-patterns">
+          <SectionTitle title="Utilization Patterns" />
           <UtilizationPatterns reportData={reportData} averageData={averageData} />
         </Section>
       </ErrorBoundary>

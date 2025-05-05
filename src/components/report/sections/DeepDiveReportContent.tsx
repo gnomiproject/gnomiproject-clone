@@ -14,6 +14,8 @@ import CostAnalysis from '@/components/report/sections/CostAnalysis';
 import SwotAnalysis from '@/components/report/sections/SwotAnalysis';
 import StrategicRecommendationsSection from '@/components/report/sections/strategic-recommendations/StrategicRecommendationsSection';
 import ContactSection from '@/components/report/sections/ContactSection';
+import ReportErrorHandler from './components/ReportErrorHandler';
+import ReportDebugInfo from './components/ReportDebugInfo';
 
 interface DeepDiveReportContentProps {
   archetype: any;
@@ -58,20 +60,10 @@ const DeepDiveReportContent = ({
   
   // If no archetype data, show error
   if (!archetype) {
-    return (
-      <div className="container mx-auto p-6">
-        <div className="bg-red-50 text-red-700 p-4 rounded-lg">
-          <h2 className="text-xl font-bold">Report Data Missing</h2>
-          <p>Unable to load report data from level4_report_secure. Please try refreshing the page.</p>
-          <button 
-            onClick={() => window.location.reload()}
-            className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-          >
-            Retry Loading
-          </button>
-        </div>
-      </div>
-    );
+    return <ReportErrorHandler 
+      archetypeName={archetypeName} 
+      onRetry={() => window.location.reload()} 
+    />;
   }
   
   // Log key findings for Archetype Insights
@@ -172,28 +164,16 @@ const DeepDiveReportContent = ({
       
       {/* Debug information - shown in a less prominent way */}
       <ErrorBoundary>
-        <Section id="debug-info" className="print:hidden">
-          <details className="mt-4 bg-gray-50 p-4 rounded-lg text-sm">
-            <summary className="font-medium cursor-pointer">Debug Information</summary>
-            <div className="mt-2 font-mono text-xs space-y-1">
-              <p>Data Source: level4_report_secure</p>
-              <p>Archetype ID: {archetypeId}</p>
-              <p>Archetype Name: {archetypeName}</p>
-              <p>Family ID: {archetype?.family_id || archetype?.familyId || 'Not available'}</p>
-              <p>Family Name: {familyName}</p>
-              <p>Has SWOT Analysis Field: {archetype?.swot_analysis ? 'Yes' : 'No'}</p>
-              <p>SWOT Analysis Type: {archetype?.swot_analysis ? typeof archetype.swot_analysis : 'None'}</p>
-              <p>Has Individual SWOT Fields: {(archetype?.strengths || archetype?.weaknesses) ? 'Yes' : 'No'}</p>
-              <p>User: {userData?.name || 'Not available'}</p>
-              <p>Organization: {userData?.organization || 'Not available'}</p>
-              <p>Access Token: {userData?.access_token ? `${userData.access_token.substring(0, 5)}...` : 'Not available'}</p>
-              <p>Last Accessed: {userData?.last_accessed ? new Date(userData.last_accessed).toLocaleString() : 'Never'}</p>
-            </div>
-            <div className="mt-4 flex justify-center">
-              <GnomeImage type="clipboard" showDebug={true} />
-            </div>
-          </details>
-        </Section>
+        <ReportDebugInfo 
+          archetypeId={archetypeId}
+          archetypeName={archetypeName}
+          familyName={familyName}
+          familyId={archetype?.family_id || archetype?.familyId}
+          swotAnalysis={archetype?.swot_analysis}
+          strengths={archetype?.strengths}
+          weaknesses={archetype?.weaknesses}
+          userData={userData}
+        />
       </ErrorBoundary>
     </div>
   );
