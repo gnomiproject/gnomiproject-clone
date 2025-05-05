@@ -17,11 +17,49 @@ const DemographicInsights: React.FC<DemographicInsightsProps> = ({ insights }) =
       return insights;
     }
     
-    // If it's a string, split by paragraphs or bullet points
-    return insights
-      .split(/\n|•/)
-      .map(item => item.trim())
-      .filter(item => item.length > 0);
+    try {
+      // Check if insights is a JSON string
+      if (typeof insights === 'string' && (insights.startsWith('{') || insights.startsWith('['))) {
+        const parsedJson = JSON.parse(insights);
+        
+        // Handle different JSON structures
+        if (parsedJson.overview) {
+          const insightsArray = [];
+          
+          if (parsedJson.overview) {
+            insightsArray.push(parsedJson.overview);
+          }
+          
+          if (Array.isArray(parsedJson.findings)) {
+            insightsArray.push(...parsedJson.findings);
+          }
+          
+          return insightsArray.length > 0 ? insightsArray : ["No demographic insights available."];
+        }
+        
+        // If it's a simple array, return it
+        if (Array.isArray(parsedJson)) {
+          return parsedJson;
+        }
+        
+        // If it's an object with no recognized structure, return as string
+        return [JSON.stringify(parsedJson)];
+      }
+      
+      // If it's a regular string, split by paragraphs or bullet points
+      return insights
+        .split(/\n|•/)
+        .map(item => item.trim())
+        .filter(item => item.length > 0);
+    } catch (e) {
+      console.error("Error parsing demographic insights:", e);
+      
+      // If parsing fails, treat as regular text
+      return insights
+        .split(/\n|•/)
+        .map(item => item.trim())
+        .filter(item => item.length > 0);
+    }
   }, [insights]);
 
   return (
