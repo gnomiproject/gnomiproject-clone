@@ -6,6 +6,7 @@ import { ArchetypeDetailedData, ArchetypeId, FamilyId } from '@/types/archetype'
 import { getFromCache, setInCache, clearFromCache } from '@/utils/reports/reportCache';
 import { processReportData } from '@/utils/reports/reportDataTransforms';
 import { validateReportToken } from '@/utils/reports/accessTracking';
+import { ensureArray } from '@/utils/array/ensureArray';
 
 // Local storage key for fallback report data
 const FALLBACK_REPORT_KEY = 'report_data_fallback';
@@ -29,28 +30,9 @@ interface UseReportAccessResult {
 }
 
 // Helper function to ensure key_characteristics is always a string array
-const ensureStringArray = (value: any): string[] => {
-  if (!value) {
-    return [];
-  }
-  
-  if (Array.isArray(value)) {
-    // If it's already an array, make sure all items are strings
-    return value.map(item => String(item));
-  }
-  
-  if (typeof value === 'string') {
-    // Handle empty string case
-    if (!value.trim()) return [];
-    // Split by comma or newline, depending on the format
-    const separator = value.includes(',') ? ',' : '\n';
-    return value.split(separator)
-      .filter(item => item.trim().length > 0)
-      .map(item => item.trim());
-  }
-  
-  // If it's not an array or string, return an empty array
-  return [];
+const ensureKeyCharacteristics = (value: any): string[] => {
+  // Use the global ensureArray utility function and force string type
+  return ensureArray(value).map(item => String(item));
 };
 
 export const useReportAccess = ({
@@ -110,8 +92,8 @@ export const useReportAccess = ({
         id: data.archetype_id as ArchetypeId,
         name: data.archetype_name,
         familyId: data.family_id as FamilyId || 'unknown' as FamilyId,
-        // Use ensureStringArray helper to fix the type error
-        key_characteristics: ensureStringArray(data.key_characteristics),
+        // Use our helper to ensure key_characteristics is ALWAYS a string array
+        key_characteristics: ensureKeyCharacteristics(data.key_characteristics),
         // Include all other properties from data
         ...data
       };
