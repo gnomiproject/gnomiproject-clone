@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import { Section } from '@/components/shared/Section';
@@ -14,8 +15,8 @@ import CostAnalysis from '@/components/report/sections/CostAnalysis';
 import SwotAnalysis from '@/components/report/sections/SwotAnalysis';
 import StrategicRecommendationsSection from '@/components/report/sections/strategic-recommendations/StrategicRecommendationsSection';
 import ContactSection from '@/components/report/sections/ContactSection';
-import ReportErrorHandler from './components/ReportErrorHandler';
-import ReportDebugInfo from './components/ReportDebugInfo';
+import ReportErrorHandler from '@/components/report/components/ReportErrorHandler';
+import ReportDebugInfo from '@/components/report/components/ReportDebugInfo';
 
 interface DeepDiveReportContentProps {
   archetype: any;
