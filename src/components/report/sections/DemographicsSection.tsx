@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Users, User, Building2, MapPin, Users2, CalendarClock, DollarSign } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -76,6 +77,9 @@ const DemographicsSection: React.FC<DemographicsSectionProps> = ({
           />
         </div>
       </div>
+      
+      {/* Demographic Insights - Moved to the top */}
+      <DemographicInsights insights={insights} />
       
       {/* Workforce Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -183,9 +187,6 @@ const DemographicsSection: React.FC<DemographicsSectionProps> = ({
           )}
         </CardContent>
       </Card>
-      
-      {/* Demographic Insights */}
-      <DemographicInsights insights={insights} />
     </div>
   );
 };

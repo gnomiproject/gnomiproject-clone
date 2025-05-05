@@ -63,7 +63,7 @@ const DemographicInsights: React.FC<DemographicInsightsProps> = ({ insights }) =
   }, [insights]);
 
   return (
-    <Card className="mt-8">
+    <Card>
       <CardHeader>
         <CardTitle className="flex items-center text-lg">
           <Building className="mr-2 h-5 w-5 text-blue-600" />
@@ -76,13 +76,16 @@ const DemographicInsights: React.FC<DemographicInsightsProps> = ({ insights }) =
             {processedInsights.length === 1 && !processedInsights[0].includes("•") ? (
               <p>{processedInsights[0]}</p>
             ) : (
-              <ul className="space-y-2">
-                {processedInsights.map((insight, index) => (
-                  <li key={index} className="text-gray-700">
-                    {insight.startsWith('•') ? insight.substring(1).trim() : insight}
-                  </li>
-                ))}
-              </ul>
+              <>
+                <p className="mb-3">The demographics of this archetype show several key characteristics:</p>
+                <ul className="space-y-2">
+                  {processedInsights.slice(0, 3).map((insight, index) => (
+                    <li key={index} className="text-gray-700">
+                      {insight.startsWith('•') ? insight.substring(1).trim() : insight}
+                    </li>
+                  ))}
+                </ul>
+              </>
             )}
           </div>
         ) : (
