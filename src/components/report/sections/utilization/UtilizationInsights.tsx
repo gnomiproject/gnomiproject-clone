@@ -69,16 +69,20 @@ const UtilizationInsights = ({
             )}
             
             {/* Findings section as bullet points */}
-            {parsedInsights.findings && parsedInsights.findings.length > 0 && (
+            {parsedInsights.findings && Object.keys(parsedInsights.findings).length > 0 && (
               <div className="mt-4">
                 <h3 className="text-md font-medium mb-2">Key Findings:</h3>
                 <ul className="list-disc pl-5 space-y-2">
-                  {Object.entries(parsedInsights.findings).map(([key, value]: [string, any], index) => (
-                    <li key={index} className="text-gray-700">
-                      <span className="font-medium">{key.replace(/([A-Z])/g, ' $1').trim()}: </span>
-                      {value}
-                    </li>
-                  ))}
+                  {Object.entries(parsedInsights.findings).map(([key, value]: [string, any], index) => {
+                    // Clean up the key - remove numbers at the beginning if present
+                    const cleanKey = key.replace(/^\d+\s*/, '').replace(/([A-Z])/g, ' $1').trim();
+                    return (
+                      <li key={index} className="text-gray-700">
+                        <span className="font-medium">{cleanKey}: </span>
+                        {value}
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
             )}
@@ -88,12 +92,19 @@ const UtilizationInsights = ({
               <div className="mt-4">
                 <h3 className="text-md font-medium mb-2">Key Metrics:</h3>
                 <ul className="list-disc pl-5 space-y-2">
-                  {parsedInsights.metrics.map((metric: any, index: number) => (
-                    <li key={index} className="text-gray-700">
-                      <span className="font-medium">{metric.name}: </span>
-                      {metric.value} <span className="text-gray-500">({metric.context})</span>
-                    </li>
-                  ))}
+                  {parsedInsights.metrics.map((metric: any, index: number) => {
+                    // Format consistently with metrics in parentheses
+                    const metricText = metric.context ? 
+                      `${metric.value} (${metric.context})` : 
+                      metric.value;
+                      
+                    return (
+                      <li key={index} className="text-gray-700">
+                        <span className="font-medium">{metric.name}: </span>
+                        {metricText}
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
             )}
