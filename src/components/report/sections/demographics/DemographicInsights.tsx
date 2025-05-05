@@ -73,20 +73,14 @@ const DemographicInsights: React.FC<DemographicInsightsProps> = ({ insights }) =
       <CardContent>
         {processedInsights.length > 0 ? (
           <div className="prose max-w-none">
-            {processedInsights.length === 1 && !processedInsights[0].includes("•") ? (
-              <p>{processedInsights[0]}</p>
-            ) : (
-              <>
-                <p className="mb-3">The demographics of this archetype show several key characteristics:</p>
-                <ul className="space-y-2">
-                  {processedInsights.slice(0, 3).map((insight, index) => (
-                    <li key={index} className="text-gray-700">
-                      {insight.startsWith('•') ? insight.substring(1).trim() : insight}
-                    </li>
-                  ))}
-                </ul>
-              </>
-            )}
+            <p className="mb-3">The demographics of this archetype show several key characteristics:</p>
+            <ul className="list-disc pl-5 space-y-2">
+              {processedInsights.slice(0, 3).map((insight, index) => (
+                <li key={index} className="text-gray-700">
+                  {insight.startsWith('•') ? insight.substring(1).trim() : insight}
+                </li>
+              ))}
+            </ul>
           </div>
         ) : (
           <p className="text-gray-500 italic">No demographic insights available.</p>
