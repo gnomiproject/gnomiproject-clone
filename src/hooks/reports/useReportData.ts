@@ -1,10 +1,9 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { ReportType } from '@/types/reports';
 import { getDataSource } from '@/utils/reports/schemaMapping';
 import { supabase } from '@/integrations/supabase/client';
 import { getFromCache, setInCache, clearFromCache } from '@/utils/reports/reportCache';
-import { processReportData, AverageData } from '@/utils/reports/reportDataTransforms';
+import { processReportData, AverageData, createDefaultAverageData } from '@/utils/reports/reportDataTransforms';
 import { toast } from "@/hooks/use-toast";
 import { ArchetypeDetailedData } from '@/types/archetype';
 import { fetchTokenAccess, fetchReportData } from './useFetchReportData';
@@ -41,7 +40,8 @@ export const useReportData = ({
   skipCache = false 
 }: UseReportDataOptions): UseReportDataResult => {
   const [userData, setUserData] = useState<any>(null);
-  const [averageData, setAverageData] = useState<AverageData>(processReportData(null).then(result => result.averageData));
+  // Start with default average data
+  const [averageData, setAverageData] = useState<AverageData>(createDefaultAverageData());
   const [isValidAccess, setIsValidAccess] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
   const [dataSource, setDataSource] = useState<string>('');
@@ -51,7 +51,7 @@ export const useReportData = ({
   const reportType: ReportType = isInsightsReport ? 'insight' : 'deepDive';
   const queryKey = ['report', archetypeId, token, reportType];
   
-  // Initialize averageData with default values
+  // Initialize averageData with values from database when component mounts
   useEffect(() => {
     const initializeAverageData = async () => {
       try {
@@ -59,6 +59,7 @@ export const useReportData = ({
         setAverageData(defaultProcessed.averageData);
       } catch (err) {
         console.error("Error initializing average data:", err);
+        // We already have default values from createDefaultAverageData()
       }
     };
     
