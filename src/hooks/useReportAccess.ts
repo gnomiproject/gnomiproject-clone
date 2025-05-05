@@ -103,7 +103,7 @@ export const useReportAccess = ({
         id: data.archetype_id as ArchetypeId,
         name: data.archetype_name,
         familyId: data.family_id as FamilyId || 'unknown' as FamilyId,
-        // Handle key_characteristics using our helper function
+        // Use ensureStringArray helper to fix the type error
         key_characteristics: ensureStringArray(data.key_characteristics),
         // Include all other properties from data
         ...data
