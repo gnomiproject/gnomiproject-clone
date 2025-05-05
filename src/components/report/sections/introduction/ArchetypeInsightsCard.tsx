@@ -30,6 +30,13 @@ const ArchetypeInsightsCard: React.FC<ArchetypeInsightsCardProps> = ({
   keyFindings = [],
   topPriority
 }) => {
+  console.log("ArchetypeInsightsCard rendering with:", {
+    archetypeName,
+    familyLength: familyName?.length || 0,
+    findingsCount: keyFindings?.length || 0,
+    hasPriority: !!topPriority
+  });
+  
   // Map findings to icons based on their content
   const findingsWithIcons: KeyFinding[] = keyFindings.map(finding => {
     let icon;
@@ -56,7 +63,7 @@ const ArchetypeInsightsCard: React.FC<ArchetypeInsightsCardProps> = ({
   });
 
   return (
-    <Card className="overflow-hidden bg-white shadow-md border-t-4 border-t-teal-500 mb-8">
+    <Card className="overflow-hidden bg-white shadow-md border-t-4 border-t-teal-500 mb-8 relative z-10">
       <CardContent className="p-6">
         <div className="space-y-6">
           {/* Header Section */}

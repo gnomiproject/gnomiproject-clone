@@ -98,8 +98,8 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
         />
       </div>
       
-      {/* Archetype Insights Card - Now with added visibility styling */}
-      <div className="mt-6 mb-6">
+      {/* Archetype Insights Card - This is now prominently displayed */}
+      <div className="mt-8 mb-8 relative z-0">
         <ArchetypeInsightsCard
           archetypeName={archetypeName}
           familyName={familyName}
@@ -110,7 +110,7 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
       </div>
       
       {/* Archetype Overview Card */}
-      <div className="mt-6">
+      <div className="mt-8">
         <ArchetypeOverviewCard 
           shortDescription={shortDescription}
           characteristics={characteristics}
