@@ -74,11 +74,6 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
   
   return (
     <Section id="introduction" className="mt-2">
-      <SectionTitle 
-        title="Introduction" 
-        subtitle={`Welcome to your ${archetypeName} Deep Dive Report`} 
-      />
-      
       {/* Main report introduction */}
       <ReportIntroduction 
         userData={userData} 
@@ -89,8 +84,15 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
         shortDescription={shortDescription}
       />
       
-      {/* Welcome Card */}
-      <div className="mt-8">
+      {/* Introduction title - Moved below the report introduction */}
+      <SectionTitle 
+        title="Introduction" 
+        subtitle={`Welcome to your ${archetypeName} Deep Dive Report`} 
+        className="mt-8"
+      />
+      
+      {/* Welcome Card - Now placed under the introduction title */}
+      <div className="mt-6">
         <WelcomeCard 
           userName={userName}
           archetypeName={archetypeName}
@@ -100,7 +102,7 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
         />
       </div>
       
-      {/* Insights Card - This replaces both previous cards to avoid redundancy */}
+      {/* Insights Card */}
       <div className="mt-8 mb-8">
         <ArchetypeInsightsCard
           archetypeName={archetypeName}
