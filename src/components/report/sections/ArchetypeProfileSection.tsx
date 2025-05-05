@@ -126,8 +126,8 @@ const ArchetypeProfileSectionBase: React.FC<ArchetypeProfileSectionProps> = ({ a
         {/* Industry Composition */}
         <IndustryComposition industries={archetypeData.industries || ''} />
         
-        {/* Navigation */}
-        <ProfileNavigation onNavigate={id => console.log(`Navigation to ${id} will be handled by parent`)} />
+        {/* Navigation - no longer passing props since component now returns null */}
+        <ProfileNavigation />
       </div>
     </Section>
   );
