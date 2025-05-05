@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import { Section } from '@/components/shared/Section';
@@ -110,7 +111,6 @@ const DeepDiveReportContent = ({
       {/* Utilization Patterns Section */}
       <ErrorBoundary>
         <Section id="utilization-patterns">
-          <SectionTitle title="Utilization Patterns" />
           <UtilizationPatterns reportData={safeArchetype} averageData={averageData} />
         </Section>
       </ErrorBoundary>
