@@ -1,9 +1,8 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
-import { ArchetypeDetailedData } from '@/types/archetype';
+import { ArchetypeDetailedData, ArchetypeId, FamilyId } from '@/types/archetype';
 import { getFromCache, setInCache, clearFromCache } from '@/utils/reports/reportCache';
 import { processReportData } from '@/utils/reports/reportDataTransforms';
 import { validateReportToken } from '@/utils/reports/accessTracking';
@@ -81,11 +80,12 @@ export const useReportAccess = ({
         throw new Error(`No report data found for ${archetypeId}`);
       }
       
-      // Map the data to the expected structure
+      // Map the data to the expected structure with proper type casting
       const mappedData: ArchetypeDetailedData = {
-        id: data.archetype_id,
+        id: data.archetype_id as ArchetypeId,
         name: data.archetype_name,
-        familyId: data.family_id || 'unknown',
+        familyId: data.family_id as FamilyId || 'unknown' as FamilyId,
+        // Include all other properties from data
         ...data
       };
       
@@ -151,6 +151,7 @@ export const useReportAccess = ({
     retry: 1,
     retryDelay: 5000,
     meta: {
+      // Use meta property instead of onError
       onError: (error: Error) => {
         console.error('Error fetching report data:', error);
         setError(error);

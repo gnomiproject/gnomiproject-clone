@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { fetchTokenAccess } from './reports/useFetchReportData';
@@ -12,6 +11,12 @@ export interface ReportUserData {
   assessment_result?: any;
   exact_employee_count?: number;
   status?: 'active' | 'inactive' | 'expiring-soon' | 'grace-period';
+  // Add missing properties referenced in components
+  access_count?: number;
+  last_accessed?: string;
+  expires_at?: string;
+  archetype_id?: string;
+  access_url?: string;
 }
 
 interface UseReportUserDataResult {
@@ -38,7 +43,8 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
         name: 'Admin View',
         organization: 'Admin Console',
         email: 'admin@example.com',
-        status: 'active'
+        status: 'active',
+        archetype_id: archetypeId // Add archetype_id to admin view data
       });
       setIsValid(true);
       setIsLoading(false);
@@ -76,7 +82,24 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
           });
           console.warn(`[useReportUserData] Token validation failed in ${validationTime}ms:`, error);
         } else if (data) {
-          setUserData(data);
+          // Make sure data is properly converted to ReportUserData type
+          const reportUserData: ReportUserData = {
+            id: data.id,
+            name: data.name,
+            organization: data.organization,
+            email: data.email,
+            created_at: data.created_at,
+            assessment_result: data.assessment_result,
+            exact_employee_count: data.exact_employee_count,
+            status: data.status as 'active' | 'inactive' | 'expiring-soon' | 'grace-period',
+            access_count: data.access_count,
+            last_accessed: data.last_accessed,
+            expires_at: data.expires_at,
+            archetype_id: data.archetype_id,
+            access_url: data.access_url
+          };
+          
+          setUserData(reportUserData);
           setIsValid(true);
           setError(null);
           setDebugInfo({

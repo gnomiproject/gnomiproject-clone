@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useReportUserData } from '@/hooks/useReportUserData';
 import { useParams } from 'react-router-dom';
@@ -176,7 +175,7 @@ const ReportUserDataTest = () => {
                     size="sm" 
                     asChild
                   >
-                    <a href={userData.access_url as string} target="_blank" rel="noopener noreferrer">
+                    <a href={userData.access_url} target="_blank" rel="noopener noreferrer">
                       <ExternalLink className="h-4 w-4" />
                     </a>
                   </Button>
