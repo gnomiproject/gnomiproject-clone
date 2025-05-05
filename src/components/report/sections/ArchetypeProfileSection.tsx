@@ -7,7 +7,6 @@ import GnomePlaceholder from './introduction/GnomePlaceholder';
 import ArchetypeIdentityCard from './archetype-profile/ArchetypeIdentityCard';
 import KeyCharacteristicsList from './archetype-profile/KeyCharacteristicsList';
 import IndustryComposition from './archetype-profile/IndustryComposition';
-import DistinctiveMetrics from './archetype-profile/DistinctiveMetrics';
 import ProfileNavigation from './archetype-profile/ProfileNavigation';
 import { Card } from '@/components/ui/card';
 
@@ -84,7 +83,15 @@ const ArchetypeProfileSectionBase: React.FC<ArchetypeProfileSectionProps> = ({ a
           archetypeBadge={archetypeBadge}
         />
         
-        {/* Top Distinctive Metrics - Replacing Archetype Overview */}
+        {/* Key Characteristics - Moved above Key Distinctive Metrics */}
+        {archetypeData.key_characteristics && (
+          <KeyCharacteristicsList 
+            characteristics={archetypeData.key_characteristics} 
+            archetypeColor={archetypeData.hexColor || '#6E59A5'}
+          />
+        )}
+        
+        {/* Top Distinctive Metrics */}
         {topMetrics.length > 0 && (
           <Card className="p-6">
             <h3 className="text-xl font-semibold mb-4">Key Distinctive Metrics</h3>
@@ -121,22 +128,8 @@ const ArchetypeProfileSectionBase: React.FC<ArchetypeProfileSectionProps> = ({ a
           </Card>
         )}
         
-        {/* Key Characteristics */}
-        {archetypeData.key_characteristics && (
-          <KeyCharacteristicsList 
-            characteristics={archetypeData.key_characteristics} 
-            archetypeColor={archetypeData.hexColor || '#6E59A5'}
-          />
-        )}
-        
         {/* Industry Composition */}
         <IndustryComposition industries={archetypeData.industries || ''} />
-        
-        {/* Distinctive Metrics */}
-        <DistinctiveMetrics 
-          metrics={archetypeData.distinctive_metrics || []} 
-          archetypeId={archetypeData.id || archetypeData.archetype_id || ''}
-        />
         
         {/* Navigation */}
         <ProfileNavigation onNavigate={id => console.log(`Navigation to ${id} will be handled by parent`)} />
