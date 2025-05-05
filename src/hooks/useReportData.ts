@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+
+import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
@@ -158,8 +159,10 @@ export const useReportData = ({ archetypeId, token, isInsightsReport = false, sk
     gcTime: 1000 * 60 * 60, // 60 minutes
     refetchOnWindowFocus: false, // Prevents refetches when window regains focus
     refetchOnReconnect: false, // Prevents refetches on network reconnection
-    onError: (error) => {
-      console.error('[useReportData] Query error:', error);
+    meta: {
+      onError: (error: Error) => {
+        console.error('[useReportData] Query error:', error);
+      }
     }
   });
   
@@ -238,11 +241,18 @@ export const useReportData = ({ archetypeId, token, isInsightsReport = false, sk
         
         if (detailedData) {
           console.log('[useReportData] Got detailed report data from level4');
-          setReportData(detailedData);
+          // Map the data to match ArchetypeDetailedData
+          const mappedData = {
+            ...detailedData,
+            id: detailedData.archetype_id,
+            name: detailedData.archetype_name,
+            familyId: detailedData.family_id || 'unknown'
+          };
+          setReportData(mappedData);
           
           // Cache the data
           setInCache(cacheKey, {
-            reportData: detailedData,
+            reportData: mappedData,
             userData,
             averageData
           });
@@ -263,11 +273,18 @@ export const useReportData = ({ archetypeId, token, isInsightsReport = false, sk
         
         if (level3Data) {
           console.log('[useReportData] Got report data from level3');
-          setReportData(level3Data);
+          // Map the data to match ArchetypeDetailedData
+          const mappedLevel3Data = {
+            ...level3Data,
+            id: level3Data.archetype_id,
+            name: level3Data.archetype_name,
+            familyId: level3Data.family_id || 'unknown'
+          };
+          setReportData(mappedLevel3Data);
           
           // Cache level3 data too
           setInCache(cacheKey, {
-            reportData: level3Data,
+            reportData: mappedLevel3Data,
             userData,
             averageData
           });
@@ -311,6 +328,9 @@ export const useReportData = ({ archetypeId, token, isInsightsReport = false, sk
           // Construct a full report data object
           const combinedData = {
             ...coreData,
+            id: coreData.id,
+            name: coreData.name,
+            familyId: coreData.family_id || 'unknown',
             archetype_id: coreData.id,
             archetype_name: coreData.name,
             strengths: swotData?.strengths || [],

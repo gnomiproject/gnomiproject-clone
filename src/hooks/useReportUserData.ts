@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -16,7 +17,7 @@ export interface ReportUserData {
   exact_employee_count: number | null;
   access_count: number;
   last_accessed: string | null;
-  expires_at: string | null;
+  expires_at: string | null; // Added to match the token_expiry
   access_url?: string;
   access_token?: string;
 }

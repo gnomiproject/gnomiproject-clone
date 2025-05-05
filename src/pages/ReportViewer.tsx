@@ -137,8 +137,8 @@ const ReportViewer = () => {
         return;
       }
       
-      if (userData?.token_expiry) {
-        const expiryDate = new Date(userData.token_expiry);
+      if (userData?.expires_at) {
+        const expiryDate = new Date(userData.expires_at);
         const now = new Date();
         const daysRemaining = (expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
         
@@ -342,7 +342,6 @@ const ReportViewer = () => {
           debugInfo={combinedDebugInfo}
           isLoading={userDataLoading || reportLoading}
           error={reportError || userDataError}
-          onRefresh={handleRefresh} // Pass refresh handler to report
         />
       </div>
       
