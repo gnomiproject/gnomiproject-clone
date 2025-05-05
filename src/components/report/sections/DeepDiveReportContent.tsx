@@ -3,17 +3,17 @@ import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import { Section } from '@/components/shared/Section';
 import SectionTitle from '@/components/shared/SectionTitle';
 import GnomeImage from '@/components/common/GnomeImage';
-import HomeIntroduction from './HomeIntroduction';
-import ArchetypeProfileSection from './ArchetypeProfileSection';
-import DemographicsSection from './DemographicsSection';
-import UtilizationPatterns from './UtilizationPatterns';
-import DiseaseManagement from './DiseaseManagement';
-import CareGaps from './CareGaps';
-import RiskFactors from './RiskFactors';
-import CostAnalysis from './CostAnalysis';
-import SwotAnalysis from './SwotAnalysis';
-import StrategicRecommendationsSection from './strategic-recommendations/StrategicRecommendationsSection';
-import ContactSection from './ContactSection';
+import HomeIntroduction from '@/components/report/sections/HomeIntroduction';
+import ArchetypeProfileSection from '@/components/report/sections/ArchetypeProfileSection';
+import DemographicsSection from '@/components/report/sections/DemographicsSection';
+import UtilizationPatterns from '@/components/report/sections/UtilizationPatterns';
+import DiseaseManagement from '@/components/report/sections/DiseaseManagement';
+import CareGaps from '@/components/report/sections/CareGaps';
+import RiskFactors from '@/components/report/sections/RiskFactors';
+import CostAnalysis from '@/components/report/sections/CostAnalysis';
+import SwotAnalysis from '@/components/report/sections/SwotAnalysis';
+import StrategicRecommendationsSection from '@/components/report/sections/strategic-recommendations/StrategicRecommendationsSection';
+import ContactSection from '@/components/report/sections/ContactSection';
 
 interface DeepDiveReportContentProps {
   archetype: any;

@@ -2,7 +2,7 @@
 import React from 'react';
 import { ArchetypeDetailedData } from '@/types/archetype';
 import ReportContainer from './components/ReportContainer';
-import DeepDiveReportContent from './sections/DeepDiveReportContent';
+import DeepDiveReportContent from '@/components/report/sections/DeepDiveReportContent';
 import { ReportUserData } from '@/hooks/useReportUserData';
 
 export interface DeepDiveReportProps {

@@ -3,7 +3,7 @@ import React from 'react';
 import { BarChart2 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { formatNumber } from '@/utils/formatters';
-import { calculatePercentageDifference, getMetricComparisonText } from '@/utils/reports/metricUtils';
+import { calculatePercentageDifference, isLowerBetter } from '@/utils/reports/metricUtils';
 
 interface OverallSDOHProps {
   reportData: any;
@@ -18,7 +18,12 @@ const OverallSDOH: React.FC<OverallSDOHProps> = ({ reportData, averageData }) =>
                        averageData?.SDOH_Average_SDOH || 0;
   
   // Calculate comparison metrics
-  const { text, color } = getMetricComparisonText(sdohScore, avgSdohScore, 'SDOH');
+  const percentDiff = calculatePercentageDifference(sdohScore, avgSdohScore);
+  const lowerIsBetter = isLowerBetter('SDOH');
+  const isPositive = (percentDiff > 0 && !lowerIsBetter) || (percentDiff < 0 && lowerIsBetter);
+  const comparisonWord = percentDiff > 0 ? "higher than" : "lower than";
+  const text = `${Math.abs(percentDiff).toFixed(1)}% ${comparisonWord} average`;
+  const color = isPositive ? "text-green-600" : "text-amber-600";
   
   // Determine SDOH level category
   let sdohLevel = 'Average Social Determinants';

@@ -79,3 +79,66 @@ export const formatMetricValue = (value: number, options: {
   
   return formatted;
 };
+
+/**
+ * Format a percentage difference for display
+ * 
+ * @param percentDiff The percentage difference to format
+ * @returns Formatted string with sign
+ */
+export const formatPercentageDifference = (percentDiff: number): string => {
+  const sign = percentDiff > 0 ? '+' : '';
+  return `${sign}${percentDiff.toFixed(1)}%`;
+};
+
+/**
+ * Get comparison text and color for a metric
+ * 
+ * @param value The value to compare
+ * @param average The average to compare against
+ * @param metricName The name of the metric
+ * @returns Object with text and color properties
+ */
+export const getMetricComparisonText = (value: number, average: number, metricName: string): { text: string; color: string } => {
+  if (!value || !average) {
+    return { text: 'No comparison data', color: 'text-gray-500' };
+  }
+  
+  // Calculate the percentage difference
+  const percentDiff = calculatePercentageDifference(value, average);
+  
+  // Determine if lower is better for this metric
+  const lowerIsBetter = isLowerBetter(metricName);
+  
+  // Determine if this is positive or negative
+  const isPositive = (percentDiff > 0 && !lowerIsBetter) || (percentDiff < 0 && lowerIsBetter);
+  
+  // Determine display text
+  const comparisonWord = percentDiff > 0 ? "higher than" : "lower than";
+  const text = `${Math.abs(percentDiff).toFixed(1)}% ${comparisonWord} average`;
+  
+  // Determine color for the comparison text
+  const color = isPositive ? "text-green-600" : percentDiff === 0 ? "text-gray-600" : "text-amber-600";
+  
+  return { text, color };
+};
+
+/**
+ * Organize metrics by category
+ * 
+ * @param metrics Array of metrics
+ * @returns Object with metrics organized by category
+ */
+export const organizeMetricsByCategory = (metrics: any[]): Record<string, any[]> => {
+  const categories: Record<string, any[]> = {};
+  
+  metrics.forEach(metric => {
+    const category = metric.category || 'Uncategorized';
+    if (!categories[category]) {
+      categories[category] = [];
+    }
+    categories[category].push(metric);
+  });
+  
+  return categories;
+};

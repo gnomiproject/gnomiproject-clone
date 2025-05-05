@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import { ChartBar, TrendingUp, TrendingDown } from 'lucide-react';
 import { useDistinctiveMetrics } from '@/hooks/archetype/useDistinctiveMetrics';
 import { formatFieldValue } from '@/utils/reports/fieldFormatters';
-import { getMetricComparisonText } from '@/utils/reports/metricUtils';
+import { calculatePercentageDifference, isLowerBetter } from '@/utils/reports/metricUtils';
 import { ArchetypeId } from '@/types/archetype';
 
 interface DistinctiveMetricsProps {
@@ -64,8 +64,21 @@ const DistinctiveMetrics: React.FC<DistinctiveMetricsProps> = ({ metrics, archet
           // Determine if the difference is positive for this metric
           const isPositiveDifference = difference > 0;
           
-          // Get comparison text and color
-          const comparison = getMetricComparisonText(metricValue, averageValue, metricName);
+          // Determine if lower is better for this metric
+          const lowerIsBetter = isLowerBetter(metricName);
+          
+          // Calculate percentage difference
+          const percentDiff = calculatePercentageDifference(metricValue, averageValue);
+          
+          // Determine if this is positive or negative
+          const isPositive = (percentDiff > 0 && !lowerIsBetter) || (percentDiff < 0 && lowerIsBetter);
+          
+          // Determine display text
+          const comparisonWord = percentDiff > 0 ? "higher than" : "lower than";
+          const comparisonText = `${Math.abs(percentDiff).toFixed(1)}% ${comparisonWord} average`;
+          
+          // Determine color for the comparison text
+          const textColor = isPositive ? "text-green-600" : "text-amber-600";
 
           // Format values based on metric type
           const formattedValue = formatFieldValue(metricName, metricValue);
@@ -92,11 +105,11 @@ const DistinctiveMetrics: React.FC<DistinctiveMetricsProps> = ({ metrics, archet
                 
                 <div className="flex items-center gap-2 mt-2">
                   {isPositiveDifference ? (
-                    <TrendingUp className={comparison.color.replace('text-', '')} size={18} />
+                    <TrendingUp className={textColor} size={18} />
                   ) : (
-                    <TrendingDown className={comparison.color.replace('text-', '')} size={18} />
+                    <TrendingDown className={textColor} size={18} />
                   )}
-                  <span className={`text-sm ${comparison.color}`}>{comparison.text}</span>
+                  <span className={`text-sm ${textColor}`}>{comparisonText}</span>
                 </div>
                 
                 {significance && (

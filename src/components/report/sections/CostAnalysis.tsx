@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { DollarSign, TrendingDown, AlertTriangle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatNumber } from '@/utils/formatters';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { calculatePercentageDifference, formatPercentageDifference } from '@/utils/reports/metricUtils';
+import { calculatePercentageDifference, getMetricComparisonText } from '@/utils/reports/metricUtils';
 
 interface CostAnalysisProps {
   reportData: any;

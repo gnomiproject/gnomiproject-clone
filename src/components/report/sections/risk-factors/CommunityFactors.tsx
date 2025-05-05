@@ -3,7 +3,7 @@ import React from 'react';
 import { Smartphone, Home, GraduationCap, Heart, Baby, Store } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { formatNumber } from '@/utils/formatters';
-import { getMetricComparisonText } from '@/utils/reports/metricUtils';
+import { calculatePercentageDifference, isLowerBetter } from '@/utils/reports/metricUtils';
 
 interface CommunityFactorsProps {
   reportData: any;
@@ -65,8 +65,13 @@ const CommunityFactors: React.FC<CommunityFactorsProps> = ({ reportData, average
           const avgValue = averageData?.[factor.fieldName] || 
                           averageData?.[factor.fieldName.replace(/ /g, '_')] || 0;
           
-          // Get comparison text and color
-          const { text, color } = getMetricComparisonText(value, avgValue, factor.fieldName);
+          // Calculate comparison data
+          const percentDiff = calculatePercentageDifference(value, avgValue);
+          const lowerIsBetter = isLowerBetter(factor.fieldName);
+          const isPositive = (percentDiff > 0 && !lowerIsBetter) || (percentDiff < 0 && lowerIsBetter);
+          const comparisonWord = percentDiff > 0 ? "higher than" : "lower than";
+          const text = `${Math.abs(percentDiff).toFixed(1)}% ${comparisonWord} average`;
+          const color = isPositive ? "text-green-600" : "text-amber-600";
 
           return (
             <div key={index} className="bg-gray-50 rounded-lg p-4 border border-gray-100">

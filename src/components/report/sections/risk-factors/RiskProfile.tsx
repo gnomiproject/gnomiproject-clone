@@ -3,7 +3,7 @@ import React from 'react';
 import { Activity } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { formatNumber } from '@/utils/formatters';
-import { calculatePercentageDifference, getMetricComparisonText } from '@/utils/reports/metricUtils';
+import { calculatePercentageDifference, isLowerBetter } from '@/utils/reports/metricUtils';
 
 interface RiskProfileProps {
   reportData: any;
@@ -19,7 +19,11 @@ const RiskProfile: React.FC<RiskProfileProps> = ({ reportData, averageData }) =>
   
   // Calculate comparison metrics
   const percentDiff = calculatePercentageDifference(riskScore, avgRiskScore);
-  const { text, color } = getMetricComparisonText(riskScore, avgRiskScore, 'risk');
+  const lowerIsBetter = isLowerBetter('risk');
+  const isPositive = (percentDiff > 0 && !lowerIsBetter) || (percentDiff < 0 && lowerIsBetter);
+  const comparisonWord = percentDiff > 0 ? "higher than" : "lower than";
+  const text = `${Math.abs(percentDiff).toFixed(1)}% ${comparisonWord} average`;
+  const color = isPositive ? "text-green-600" : "text-amber-600";
   
   // Determine risk level category
   let riskLevel = 'Moderate';
