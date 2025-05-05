@@ -86,10 +86,12 @@ export const useReportAccess = ({
         id: data.archetype_id as ArchetypeId,
         name: data.archetype_name,
         familyId: data.family_id as FamilyId || 'unknown' as FamilyId,
-        // Convert key_characteristics to string[] if it's a string
-        key_characteristics: typeof data.key_characteristics === 'string' 
-          ? data.key_characteristics.split(',').map(item => item.trim())
-          : data.key_characteristics,
+        // Handle key_characteristics properly, ensuring it's a string array
+        key_characteristics: Array.isArray(data.key_characteristics) 
+          ? data.key_characteristics 
+          : typeof data.key_characteristics === 'string'
+            ? data.key_characteristics.split(',').map(item => item.trim())
+            : [],
         // Include all other properties from data
         ...data
       };

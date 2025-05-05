@@ -17,6 +17,8 @@ interface TokenAccessData {
   access_count?: number;
   assessment_result?: any;
   exact_employee_count?: number;
+  last_accessed?: string;
+  access_url?: string;
 }
 
 interface TokenAccessResponse {
