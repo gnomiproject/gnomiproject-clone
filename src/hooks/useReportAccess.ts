@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -7,6 +8,7 @@ import { getFromCache, setInCache, clearFromCache } from '@/utils/reports/report
 import { processReportData } from '@/utils/reports/reportDataTransforms';
 import { validateReportToken } from '@/utils/reports/accessTracking';
 import { ensureArray } from '@/utils/array/ensureArray';
+import { ensureStringArray } from '@/utils/array/ensureStringArray';
 
 // Local storage key for fallback report data
 const FALLBACK_REPORT_KEY = 'report_data_fallback';
@@ -28,12 +30,6 @@ interface UseReportAccessResult {
   refreshData: () => Promise<void>;
   isUsingFallbackData?: boolean;
 }
-
-// Helper function to ensure key_characteristics is always a string array
-const ensureKeyCharacteristics = (value: any): string[] => {
-  // Use the global ensureArray utility function and force string type
-  return ensureArray(value).map(item => String(item));
-};
 
 export const useReportAccess = ({
   archetypeId,
@@ -66,8 +62,12 @@ export const useReportAccess = ({
         console.log(`[useReportAccess] Using cached data for ${archetypeId}`);
         
         // Ensure key_characteristics is properly formatted in cached data
-        if (cachedData.data?.reportData?.key_characteristics) {
-          cachedData.data.reportData.key_characteristics = ensureKeyCharacteristics(cachedData.data.reportData.key_characteristics);
+        if (cachedData.data?.reportData) {
+          // Create a new object with properly typed key_characteristics first
+          cachedData.data.reportData = {
+            key_characteristics: ensureStringArray(cachedData.data.reportData?.key_characteristics),
+            ...cachedData.data.reportData
+          };
         }
         
         return cachedData.data;
@@ -94,13 +94,12 @@ export const useReportAccess = ({
       }
       
       // Map the data to the expected structure with proper type casting
+      // Important: Place key_characteristics BEFORE spreading data to ensure correct typing
       const mappedData: ArchetypeDetailedData = {
         id: data.archetype_id as ArchetypeId,
         name: data.archetype_name,
         familyId: data.family_id as FamilyId || 'unknown' as FamilyId,
-        // Use our helper to ensure key_characteristics is ALWAYS a string array
-        key_characteristics: ensureKeyCharacteristics(data.key_characteristics),
-        // Include all other properties from data
+        key_characteristics: ensureStringArray(data.key_characteristics),
         ...data
       };
       
@@ -142,8 +141,12 @@ export const useReportAccess = ({
         console.log(`[useReportAccess] Using fallback data for ${archetypeId} from ${parsed.timestamp}`);
         
         // Ensure key_characteristics is properly formatted in fallback data
-        if (parsed.reportData?.key_characteristics) {
-          parsed.reportData.key_characteristics = ensureKeyCharacteristics(parsed.reportData.key_characteristics);
+        if (parsed.reportData) {
+          // Create a new object with properly typed key_characteristics first
+          parsed.reportData = {
+            key_characteristics: ensureStringArray(parsed.reportData?.key_characteristics),
+            ...parsed.reportData
+          };
         }
         
         setIsUsingFallbackData(true);
