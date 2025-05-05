@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -28,6 +27,23 @@ interface UseReportAccessResult {
   refreshData: () => Promise<void>;
   isUsingFallbackData?: boolean;
 }
+
+// Helper function to ensure key_characteristics is always a string array
+const ensureStringArray = (value: any): string[] => {
+  if (Array.isArray(value)) {
+    return value.map(item => String(item));
+  }
+  if (typeof value === 'string') {
+    // Handle empty string case
+    if (!value.trim()) return [];
+    // Split by comma or newline, depending on the format
+    const separator = value.includes(',') ? ',' : '\n';
+    return value.split(separator)
+      .filter(item => item.trim().length > 0)
+      .map(item => item.trim());
+  }
+  return [];
+};
 
 export const useReportAccess = ({
   archetypeId,
@@ -86,12 +102,8 @@ export const useReportAccess = ({
         id: data.archetype_id as ArchetypeId,
         name: data.archetype_name,
         familyId: data.family_id as FamilyId || 'unknown' as FamilyId,
-        // Handle key_characteristics properly, ensuring it's a string array
-        key_characteristics: Array.isArray(data.key_characteristics) 
-          ? data.key_characteristics 
-          : typeof data.key_characteristics === 'string'
-            ? data.key_characteristics.split(',').filter(item => item.trim().length > 0).map(item => item.trim())
-            : [],
+        // Handle key_characteristics using our helper function
+        key_characteristics: ensureStringArray(data.key_characteristics),
         // Include all other properties from data
         ...data
       };
