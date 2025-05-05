@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -64,6 +65,12 @@ export const useReportAccess = ({
       const cachedData = getFromCache(cacheKey);
       if (cachedData) {
         console.log(`[useReportAccess] Using cached data for ${archetypeId}`);
+        
+        // Ensure key_characteristics is properly formatted in cached data
+        if (cachedData.data && cachedData.data.key_characteristics) {
+          cachedData.data.key_characteristics = ensureKeyCharacteristics(cachedData.data.key_characteristics);
+        }
+        
         return cachedData.data;
       }
     }
@@ -134,6 +141,12 @@ export const useReportAccess = ({
       if (fallbackData) {
         const parsed = JSON.parse(fallbackData);
         console.log(`[useReportAccess] Using fallback data for ${archetypeId} from ${parsed.timestamp}`);
+        
+        // Ensure key_characteristics is properly formatted in fallback data
+        if (parsed.reportData && parsed.reportData.key_characteristics) {
+          parsed.reportData.key_characteristics = ensureKeyCharacteristics(parsed.reportData.key_characteristics);
+        }
+        
         setIsUsingFallbackData(true);
         return parsed;
       }
