@@ -4,6 +4,7 @@ import { Section } from '@/components/shared/Section';
 import SectionTitle from '@/components/shared/SectionTitle';
 import ReportIntroduction from './ReportIntroduction';
 import WelcomeCard from './introduction/WelcomeCard';
+import ArchetypeInsightsCard from './introduction/ArchetypeInsightsCard';
 
 interface HomeIntroductionProps {
   userData: any;
@@ -98,6 +99,17 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
           archetypeId={archetypeId}
           matchPercentage={matchPercentage}
           secondaryArchetype={secondaryArchetype}
+        />
+      </div>
+      
+      {/* Insights Card */}
+      <div className="mt-8 mb-8">
+        <ArchetypeInsightsCard
+          archetypeName={archetypeName}
+          familyName={familyName}
+          shortDescription={shortDescription}
+          keyFindings={keyFindings}
+          archetypeId={archetypeId}
         />
       </div>
     </Section>
