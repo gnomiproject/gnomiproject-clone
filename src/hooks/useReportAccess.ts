@@ -90,7 +90,7 @@ export const useReportAccess = ({
         key_characteristics: Array.isArray(data.key_characteristics) 
           ? data.key_characteristics 
           : typeof data.key_characteristics === 'string'
-            ? data.key_characteristics.split(',').map(item => item.trim())
+            ? data.key_characteristics.split(',').filter(item => item.trim().length > 0).map(item => item.trim())
             : [],
         // Include all other properties from data
         ...data
