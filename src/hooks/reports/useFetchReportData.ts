@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { ReportType } from '@/types/reports';
 import type { ReportDataSource } from '@/utils/reports/dataSourceUtils';
@@ -153,7 +154,6 @@ export const fetchTokenAccess = async (archetypeId: string, token: string): Prom
   }
 };
 
-// Keep the fetchReportData function the same
 export const fetchReportData = async (
   archetypeId: string,
   reportType: ReportType
@@ -182,11 +182,8 @@ export const fetchReportData = async (
   return data ? mapToArchetypeDetailedData(data) : null;
 };
 
-// Keep the mapToArchetypeDetailedData function the same
 const mapToArchetypeDetailedData = (data: any): ArchetypeDetailedData | null => {
   if (!data) return null;
-  
-  console.log('[mapToArchetypeDetailedData] Processing data for:', data.archetype_id);
   
   return {
     id: data.archetype_id,
@@ -242,43 +239,5 @@ const mapToArchetypeDetailedData = (data: any): ArchetypeDetailedData | null => 
     "Gaps_Behavioral Health FU ED Visit Mental Illness": data["Gaps_Behavioral Health FU ED Visit Mental Illness"] || 0,
     "Gaps_Cancer Screening Breast": data["Gaps_Cancer Screening Breast"] || 0,
     "Gaps_Wellness Visit Adults": data["Gaps_Wellness Visit Adults"] || 0,
-    
-    // Add standard structure for backward compatibility
-    standard: {
-      fullDescription: data.long_description || '',
-      keyCharacteristics: typeof data.key_characteristics === 'string'
-        ? data.key_characteristics.split('\n').filter(Boolean)
-        : [],
-      overview: data.short_description || '',
-      keyStatistics: {},
-      keyInsights: []
-    },
-    enhanced: {
-      swot: {
-        strengths: data.strengths || [],
-        weaknesses: data.weaknesses || [],
-        opportunities: data.opportunities || [],
-        threats: data.threats || [],
-      },
-      strategicPriorities: data.strategic_recommendations || [],
-      costSavings: [],
-      riskProfile: data["Risk_Average Risk Score"] ? {
-        score: String(data["Risk_Average Risk Score"]).substring(0, 4),
-        comparison: 'Based on clinical and utilization patterns',
-        conditions: [
-          { 
-            name: 'Risk Score', 
-            value: String(data["Risk_Average Risk Score"]).substring(0, 4), 
-            barWidth: `${Math.min(data["Risk_Average Risk Score"] * 10, 100)}%` 
-          }
-        ]
-      } : undefined
-    },
-    summary: {
-      description: data.short_description || '',
-      keyCharacteristics: typeof data.key_characteristics === 'string'
-        ? data.key_characteristics.split('\n').filter(Boolean)
-        : []
-    }
   };
 };
