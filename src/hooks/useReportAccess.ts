@@ -67,8 +67,8 @@ export const useReportAccess = ({
         console.log(`[useReportAccess] Using cached data for ${archetypeId}`);
         
         // Ensure key_characteristics is properly formatted in cached data
-        if (cachedData.data && cachedData.data.key_characteristics) {
-          cachedData.data.key_characteristics = ensureKeyCharacteristics(cachedData.data.key_characteristics);
+        if (cachedData.data?.reportData?.key_characteristics) {
+          cachedData.data.reportData.key_characteristics = ensureKeyCharacteristics(cachedData.data.reportData.key_characteristics);
         }
         
         return cachedData.data;
@@ -85,7 +85,7 @@ export const useReportAccess = ({
         .maybeSingle();
         
       if (error) {
-        console.error(`[useReportAccess] Database error:`, error);
+        console.error("[useReportAccess] Database error:", error);
         throw new Error(`Error fetching report: ${error.message}`);
       }
       
@@ -143,7 +143,7 @@ export const useReportAccess = ({
         console.log(`[useReportAccess] Using fallback data for ${archetypeId} from ${parsed.timestamp}`);
         
         // Ensure key_characteristics is properly formatted in fallback data
-        if (parsed.reportData && parsed.reportData.key_characteristics) {
+        if (parsed.reportData?.key_characteristics) {
           parsed.reportData.key_characteristics = ensureKeyCharacteristics(parsed.reportData.key_characteristics);
         }
         
