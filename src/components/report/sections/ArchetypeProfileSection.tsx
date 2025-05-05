@@ -104,19 +104,18 @@ const ArchetypeProfileSectionBase: React.FC<ArchetypeProfileSectionProps> = ({ a
                   </div>
                   <div className="flex justify-between mb-1">
                     <span className="text-sm text-gray-500">Archetype value</span>
-                    <span className="font-semibold">{metric.archetype_value.toLocaleString()}</span>
+                    <span className="font-semibold text-right">{metric.archetype_value.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between mb-2">
                     <span className="text-sm text-gray-500">Average</span>
-                    <span>{metric.archetype_average.toLocaleString()}</span>
+                    <span className="text-right">{metric.archetype_average.toLocaleString()}</span>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex justify-end">
                     <div 
                       className={`text-sm font-medium ${metric.difference > 0 ? 'text-blue-600' : 'text-amber-600'}`}
                     >
                       {metric.difference > 0 ? '+' : ''}{metric.difference.toFixed(1)}%
                     </div>
-                    {/* Removed the significance badge here */}
                   </div>
                 </div>
               ))}
