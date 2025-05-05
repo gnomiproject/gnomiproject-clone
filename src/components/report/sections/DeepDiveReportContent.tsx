@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import { Section } from '@/components/shared/Section';
@@ -191,7 +190,7 @@ const DeepDiveReportContent = ({
               <p>Last Accessed: {userData?.last_accessed ? new Date(userData.last_accessed).toLocaleString() : 'Never'}</p>
             </div>
             <div className="mt-4 flex justify-center">
-              <GnomeImage type="presentation" showDebug={true} />
+              <GnomeImage type="clipboard" showDebug={true} />
             </div>
           </details>
         </Section>
