@@ -35,20 +35,22 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
   }
 
   return (
-    <ReportContainer 
-      reportData={reportData}
-      userData={userData}
-      averageData={averageData}
-      isAdminView={isAdminView}
-      debugInfo={debugInfo}
-      onNavigate={undefined}
-    >
-      <DeepDiveReportContent 
-        archetype={reportData} 
-        userData={userData} 
+    <div className="min-h-screen bg-gray-50">
+      <ReportContainer 
+        reportData={reportData}
+        userData={userData}
         averageData={averageData}
-      />
-    </ReportContainer>
+        isAdminView={isAdminView}
+        debugInfo={debugInfo}
+        onNavigate={undefined}
+      >
+        <DeepDiveReportContent 
+          archetype={reportData} 
+          userData={userData} 
+          averageData={averageData}
+        />
+      </ReportContainer>
+    </div>
   );
 };
 
