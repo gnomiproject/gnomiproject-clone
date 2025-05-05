@@ -130,7 +130,7 @@ export const useReportData = ({
       throw new Error(`No report data found for ${archetypeId}`);
     }
     
-    // Process the data asynchronously
+    // Process the data asynchronously and await the result
     const processedData = await processReportData(reportData);
     
     // Save to cache

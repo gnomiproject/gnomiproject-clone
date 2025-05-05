@@ -69,11 +69,13 @@ export const processReportData = async (data: ArchetypeDetailedData | null): Pro
     } else {
       console.log('[processReportData] Using database All_Average data');
       
-      // Transform the data into our AverageData structure
+      // Transform the data into our AverageData structure by creating a complete object first
+      // Start with our default data structure to ensure all fields are present
       averageData = {
+        ...createDefaultAverageData(), // Create a base with all required fields
         archetype_id: avgData.archetype_id as string,
         archetype_name: avgData.archetype_name as string || 'Population Average',
-        // Map all numeric fields from avgData to the AverageData format
+        // Then override with actual values from the database
         ...Object.fromEntries(
           Object.entries(avgData)
             .filter(([key, value]) => 

@@ -3,17 +3,17 @@ import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import { Section } from '@/components/shared/Section';
 import SectionTitle from '@/components/shared/SectionTitle';
 import GnomeImage from '@/components/common/GnomeImage';
-import HomeIntroduction from './HomeIntroduction';
-import ArchetypeProfileSection from './ArchetypeProfileSection';
-import DemographicsSection from './DemographicsSection';
-import UtilizationPatterns from './UtilizationPatterns';
-import DiseaseManagement from './DiseaseManagement';
-import CareGaps from './CareGaps';
-import RiskFactors from './RiskFactors';
-import CostAnalysis from './CostAnalysis';
-import SwotAnalysis from './SwotAnalysis';
-import StrategicRecommendationsSection from './strategic-recommendations/StrategicRecommendationsSection';
-import ContactSection from './ContactSection';
+import HomeIntroduction from '@/components/report/sections/HomeIntroduction';
+import ArchetypeProfileSection from '@/components/report/sections/ArchetypeProfileSection';
+import DemographicsSection from '@/components/report/sections/DemographicsSection';
+import UtilizationPatterns from '@/components/report/sections/UtilizationPatterns';
+import DiseaseManagement from '@/components/report/sections/DiseaseManagement';
+import CareGaps from '@/components/report/sections/CareGaps';
+import RiskFactors from '@/components/report/sections/RiskFactors';
+import CostAnalysis from '@/components/report/sections/CostAnalysis';
+import SwotAnalysis from '@/components/report/sections/SwotAnalysis';
+import StrategicRecommendationsSection from '@/components/report/sections/strategic-recommendations/StrategicRecommendationsSection';
+import ContactSection from '@/components/report/sections/ContactSection';
 
 interface DeepDiveReportContentProps {
   archetype: any;
@@ -55,30 +55,6 @@ const DeepDiveReportContent = ({
 
   // Make a safe copy of the data to avoid mutation issues
   const safeArchetype = {...archetype};
-  
-  // Debug logging for demographics data
-  useEffect(() => {
-    if (safeArchetype && averageData) {
-      console.log('[DeepDiveReportContent] Demographics data comparison:', {
-        archetype: {
-          employees: safeArchetype["Demo_Average Employees"],
-          members: safeArchetype["Demo_Average Members"],
-          familySize: safeArchetype["Demo_Average Family Size"],
-          age: safeArchetype["Demo_Average Age"],
-          states: safeArchetype["Demo_Average States"],
-          salary: safeArchetype["Demo_Average Salary"]
-        },
-        average: {
-          employees: averageData["Demo_Average Employees"],
-          members: averageData["Demo_Average Members"],
-          familySize: averageData["Demo_Average Family Size"],
-          age: averageData["Demo_Average Age"],
-          states: averageData["Demo_Average States"],
-          salary: averageData["Demo_Average Salary"]
-        }
-      });
-    }
-  }, [safeArchetype, averageData]);
   
   // If no archetype data, show error
   if (!archetype) {

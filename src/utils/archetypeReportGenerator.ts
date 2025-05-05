@@ -1,4 +1,8 @@
 
-import generateArchetypeReports from './reports/archetypeReportGenerator';
+import { generateArchetypeReport } from './reports/archetypeReportGenerator';
 
-export default generateArchetypeReports;
+// Export the named function directly
+export { generateArchetypeReport };
+
+// Also provide a default export for backward compatibility
+export default generateArchetypeReport;
