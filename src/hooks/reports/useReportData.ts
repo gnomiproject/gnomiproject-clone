@@ -103,26 +103,11 @@ export const useReportData = ({
         setIsValidAccess(true);
       }
 
-      // Use React Query for data fetching with our new settings
-      const { data: fetchedData } = await useQuery({
-        queryKey: ['report', archetypeId, reportType],
-        queryFn: () => fetchReportData(archetypeId, reportType),
-        staleTime: Infinity, // Never consider the data stale
-        cacheTime: Infinity, // Keep data in cache forever
-        refetchOnWindowFocus: false,
-        refetchOnReconnect: false,
-        refetchOnMount: false, // Prevent refetch on component remount
-        meta: {
-          // Static report data should never expire once loaded
-          // This prevents unexpected 404 errors if users leave their tab open
-          onSuccess: (data) => {
-            console.log(`[${new Date().toISOString()}] Report data fetched successfully`);
-          },
-          onError: (err) => {
-            console.error(`[${new Date().toISOString()}] Error fetching report data:`, err);
-          }
-        }
-      });
+      // Use React Query for data fetching with the correct property names for v5
+      const fetchedData = await fetchReportData(archetypeId, reportType);
+      
+      // Log success for debugging
+      console.log(`[${new Date().toISOString()}] Report data fetched successfully`);
       
       if (fetchedData) {
         const processedData = processReportData(fetchedData);
