@@ -1,128 +1,49 @@
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React from 'react';
+import { ArchetypeDetailedData } from '@/types/archetype';
 import ReportContainer from './components/ReportContainer';
-import { debounce } from '@/utils/debounce';
-import ReportLoadingState from './ReportLoadingState';
-import ReportError from './ReportError';
-import BetaBadge from '@/components/shared/BetaBadge';
+import DeepDiveReportContent from './sections/DeepDiveReportContent';
+import { ReportUserData } from '@/hooks/useReportUserData';
 
-interface DeepDiveReportProps {
-  reportData: any;
-  userData?: any;
+export interface DeepDiveReportProps {
+  reportData: ArchetypeDetailedData;
+  userData: ReportUserData | null;
   averageData?: any;
   isAdminView?: boolean;
   debugInfo?: any;
   isLoading?: boolean;
   error?: Error | null;
+  // The onRefresh prop was missing in the component definition
+  onRefresh?: () => void;
 }
 
-const DeepDiveReport: React.FC<DeepDiveReportProps> = ({ 
-  reportData, 
-  userData, 
-  averageData, 
+const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
+  reportData,
+  userData,
+  averageData,
   isAdminView = false,
   debugInfo,
   isLoading = false,
-  error = null
+  error = null,
+  onRefresh
 }) => {
-  // Add a simple state to track if navigation is in process
-  const [isNavigating, setIsNavigating] = useState(false);
-  
-  // Use memoized values to prevent unnecessary re-renders
-  const memoizedReportData = useMemo(() => reportData, [reportData]);
-  const memoizedUserData = useMemo(() => userData, [userData]);
-  const memoizedAverageData = useMemo(() => averageData, [averageData]);
-
-  // Add debug logging
-  console.log('[DeepDiveReport] Rendering with:', {
-    hasReportData: !!reportData,
-    hasUserData: !!userData,
-    hasAverageData: !!averageData,
-    isLoading,
-    hasError: !!error,
-    reportDataKeys: reportData ? Object.keys(reportData).slice(0, 5) : []
-  });
-  
-  // Show loading state if data is still loading
-  if (isLoading) {
-    return <ReportLoadingState />;
-  }
-  
-  // Show error state if there's an error
-  if (error) {
-    return (
-      <ReportError 
-        title="Report Loading Error" 
-        message={error.message || "We're having trouble loading your report. Please try again."}
-        actionLabel="Retry Loading"
-        onAction={() => window.location.reload()}
-      />
-    );
-  }
-
-  // Show error if no report data is available
   if (!reportData) {
     return (
-      <ReportError
-        title="Report Data Unavailable"
-        message="We couldn't find the requested report data. Please check your access link or contact support."
-        actionLabel="Return Home"
-        onAction={() => window.location.href = '/'}
-      />
-    );
-  }
-  
-  // Optimized debounced navigation with useCallback to prevent recreation on each render
-  const handleSafeNavigate = useCallback(
-    debounce((sectionId: string) => {
-      if (isNavigating) return; // Prevent rapid navigation
-      
-      setIsNavigating(true);
-      
-      // Find the section element
-      const sectionElement = document.getElementById(sectionId);
-      if (sectionElement) {
-        // Scroll to the section
-        sectionElement.scrollIntoView({ behavior: 'smooth' });
-        
-        // Set focus to the section for accessibility
-        sectionElement.setAttribute('tabindex', '-1');
-        sectionElement.focus({ preventScroll: true });
-      } else {
-        console.warn(`[DeepDiveReport] Could not find section with id: ${sectionId}`);
-      }
-      
-      // Reset navigation state after animation completes
-      setTimeout(() => {
-        setIsNavigating(false);
-      }, 800);
-    }, 300),
-    [isNavigating]
-  );
-
-  // Add beta badge instead of debug toggle
-  const renderBetaBadge = () => {
-    return (
-      <div className="fixed bottom-4 right-4 z-50 print:hidden">
-        <BetaBadge className="shadow-lg" />
+      <div className="p-4">
+        <h2>No report data available</h2>
       </div>
     );
-  };
+  }
 
   return (
-    <>
-      {renderBetaBadge()}
-      <ReportContainer
-        reportData={memoizedReportData}
-        userData={memoizedUserData}
-        averageData={memoizedAverageData}
-        isAdminView={isAdminView}
-        debugInfo={debugInfo}
-        onNavigate={handleSafeNavigate}
+    <ReportContainer>
+      <DeepDiveReportContent 
+        archetype={reportData} 
+        userData={userData} 
+        averageData={averageData}
       />
-    </>
+    </ReportContainer>
   );
 };
 
-// Use React.memo to prevent unnecessary re-renders
-export default React.memo(DeepDiveReport);
+export default DeepDiveReport;

@@ -1,153 +1,97 @@
-import { toast } from 'sonner';
-
-// Maximum allowed attempts before warning
-const MAX_TOKEN_FAILURES = 3;
-
-interface TokenState {
-  archetypeId: string;
-  tokenPreview: string;
-  lastChecked: number;
-  checkCount: number;
-  failureCount: number;
-  lastStatus: 'valid' | 'error' | 'warning' | 'unknown';
-  expiresAt?: string;
-}
-
-// Keep track of token states
-const tokenStates = new Map<string, TokenState>();
 
 /**
- * Record a token check and its result
+ * Token monitoring utilities to track access and validation over time
+ */
+
+interface TokenCheckRecord {
+  timestamp: number;
+  archetype: string;
+  token: string;
+  success: boolean;
+  expiresAt?: string | null;
+  error?: string;
+}
+
+// In-memory store of recent token checks
+const tokenChecks: TokenCheckRecord[] = [];
+
+// Maximum number of checks to store in memory
+const MAX_TOKEN_CHECKS = 100;
+
+/**
+ * Records a token check event
  */
 export const recordTokenCheck = (
   archetypeId: string,
   token: string,
-  isValid: boolean,
-  expiresAt?: string,
+  success: boolean,
+  expiresAt?: string | null,
   error?: string
 ): void => {
-  const key = `${archetypeId}-${token}`;
-  const tokenPreview = token.substring(0, 5) + '...';
-  const now = Date.now();
-  
-  // Get existing state or create new one
-  const existingState = tokenStates.get(key) || {
-    archetypeId,
-    tokenPreview,
-    lastChecked: now,
-    checkCount: 0,
-    failureCount: 0,
-    lastStatus: 'unknown'
-  };
-  
-  // Update state
-  const newState: TokenState = {
-    ...existingState,
-    lastChecked: now,
-    checkCount: existingState.checkCount + 1,
-    failureCount: isValid ? existingState.failureCount : existingState.failureCount + 1,
-    lastStatus: isValid ? 'valid' : 'error',
-    expiresAt: expiresAt || existingState.expiresAt
-  };
-  
-  // Store updated state
-  tokenStates.set(key, newState);
-  
-  // Log status
-  console.log(`[TokenMonitor] Token check for ${archetypeId}: ${isValid ? 'Valid' : 'Invalid'} (Failures: ${newState.failureCount}/${MAX_TOKEN_FAILURES})`);
-  
-  // Check for too many failures
-  if (newState.failureCount >= MAX_TOKEN_FAILURES && newState.lastStatus === 'error') {
-    console.error(`[TokenMonitor] Multiple token validation failures for ${archetypeId} (${newState.failureCount})`);
-    
-    // Show warning toast only once when threshold is reached
-    if (newState.failureCount === MAX_TOKEN_FAILURES) {
-      toast.error('Token validation issues', { 
-        description: error || 'Your access to this report may be interrupted soon'
-      });
-    }
-  }
-  
-  // Check for expiration if valid
-  if (isValid && expiresAt) {
-    const expiryDate = new Date(expiresAt);
-    const now = new Date();
-    const daysRemaining = (expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
-    
-    if (daysRemaining < 3) {
-      newState.lastStatus = 'warning';
-      
-      // Show expiration warning only once per day
-      const lastWarningKey = `${key}-expiry-warning`;
-      const lastWarning = localStorage.getItem(lastWarningKey);
-      const today = new Date().toDateString();
-      
-      if (lastWarning !== today) {
-        toast.warning('Report access expiring soon', {
-          description: `This report access will expire in ${Math.ceil(daysRemaining)} days`,
-        });
-        localStorage.setItem(lastWarningKey, today);
-      }
-    }
-  }
-};
-
-/**
- * Get the current state of all monitored tokens
- */
-export const getTokenMonitorStats = (): {
-  totalTokens: number;
-  validTokens: number;
-  warningTokens: number;
-  errorTokens: number;
-  tokensWithMultipleFailures: number;
-} => {
-  let validTokens = 0;
-  let warningTokens = 0;
-  let errorTokens = 0;
-  let tokensWithMultipleFailures = 0;
-  
-  tokenStates.forEach(state => {
-    if (state.lastStatus === 'valid') validTokens++;
-    if (state.lastStatus === 'warning') warningTokens++;
-    if (state.lastStatus === 'error') errorTokens++;
-    if (state.failureCount > 1) tokensWithMultipleFailures++;
+  // Add new check at the beginning
+  tokenChecks.unshift({
+    timestamp: Date.now(),
+    archetype: archetypeId,
+    token: token.substring(0, 5) + '...',
+    success,
+    expiresAt,
+    error
   });
   
+  // Trim if exceeding max size
+  if (tokenChecks.length > MAX_TOKEN_CHECKS) {
+    tokenChecks.length = MAX_TOKEN_CHECKS;
+  }
+  
+  // Log the check for debugging
+  console.log(`[TokenMonitor] Token check recorded: ${success ? 'SUCCESS' : 'FAILURE'} for ${archetypeId}`);
+  if (error) {
+    console.warn(`[TokenMonitor] Token check error: ${error}`);
+  }
+};
+
+/**
+ * Get token check history
+ */
+export const getTokenChecks = (limit = 20): TokenCheckRecord[] => {
+  return tokenChecks.slice(0, limit);
+};
+
+/**
+ * Check if a token has recently failed validation
+ */
+export const hasRecentFailure = (
+  archetypeId: string,
+  token: string,
+  timeWindowMs = 60000 // 1 minute
+): boolean => {
+  const now = Date.now();
+  const recentChecks = tokenChecks.filter(check => 
+    check.archetype === archetypeId && 
+    check.token.startsWith(token.substring(0, 5)) &&
+    now - check.timestamp < timeWindowMs
+  );
+  
+  return recentChecks.some(check => !check.success);
+};
+
+/**
+ * Returns a summary of token check statistics
+ */
+export const getTokenCheckStats = () => {
+  if (tokenChecks.length === 0) {
+    return { total: 0, success: 0, failure: 0, failureRate: 0 };
+  }
+  
+  const total = tokenChecks.length;
+  const success = tokenChecks.filter(check => check.success).length;
+  const failure = total - success;
+  const failureRate = (failure / total) * 100;
+  
   return {
-    totalTokens: tokenStates.size,
-    validTokens,
-    warningTokens,
-    errorTokens,
-    tokensWithMultipleFailures
+    total,
+    success,
+    failure,
+    failureRate: Math.round(failureRate * 10) / 10
   };
-};
-
-/**
- * Clear all token monitoring data
- */
-export const clearTokenMonitorData = (): void => {
-  tokenStates.clear();
-  console.log('[TokenMonitor] All monitoring data cleared');
-};
-
-/**
- * Get detailed debugging data for a specific token
- */
-export const getTokenDebugInfo = (archetypeId: string, token: string): TokenState | null => {
-  const key = `${archetypeId}-${token}`;
-  return tokenStates.get(key) || null;
-};
-
-/**
- * Check if a token is approaching expiration
- */
-export const isTokenNearExpiration = (expiresAt?: string, warningDays = 3): boolean => {
-  if (!expiresAt) return false;
-  
-  const expiryDate = new Date(expiresAt);
-  const now = new Date();
-  const daysRemaining = (expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
-  
-  return daysRemaining < warningDays;
 };

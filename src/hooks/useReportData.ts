@@ -1,14 +1,13 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
-import { ArchetypeId } from '@/types/archetype';
+import { ArchetypeDetailedData, ArchetypeId } from '@/types/archetype';
 import { trackReportAccess } from '@/utils/reports/accessTracking';
 import { getFromCache, setInCache, clearFromCache } from '@/utils/reports/reportCache';
 
 interface UseReportDataProps {
-  archetypeId: ArchetypeId;
+  archetypeId: string; // Accept string initially, we'll validate if it's a valid ArchetypeId
   token: string;
   isInsightsReport?: boolean;
   skipCache?: boolean;
@@ -42,6 +41,33 @@ export const useReportData = ({ archetypeId, token, isInsightsReport = false, sk
       console.error(`[useReportData] Validation error: ${error}`);
     }
   }, []);
+
+  // Helper function to convert string to ArchetypeId
+  const asArchetypeId = (id: string): ArchetypeId => {
+    // Verify the id is a valid ArchetypeId format
+    if (/^[abc][1-3]$/.test(id)) {
+      return id as ArchetypeId;
+    }
+    // For special cases like 'All_Average'
+    return 'a1'; // Default to a1 as fallback
+  };
+
+  // Map database data to ArchetypeDetailedData format
+  const mapToArchetypeDetailedData = (data: any): ArchetypeDetailedData => {
+    if (!data) return null;
+    
+    return {
+      id: asArchetypeId(data.archetype_id || data.id || archetypeId),
+      name: data.archetype_name || data.name || '',
+      familyId: (data.family_id || 'a') as 'a' | 'b' | 'c',
+      // Copy all existing properties
+      ...data,
+      // Ensure these required properties exist
+      key_characteristics: data.key_characteristics || [],
+      short_description: data.short_description || '',
+      family_id: data.family_id || 'a',
+    };
+  };
 
   const fetchReportData = async () => {
     // For insights report type, we don't need token validation
@@ -192,8 +218,9 @@ export const useReportData = ({ archetypeId, token, isInsightsReport = false, sk
         }
         
         if (avgData) {
-          setAverageData(avgData);
-          setInCache(cacheKey, { reportData: avgData, userData: null, averageData: null });
+          const mappedAvgData = mapToArchetypeDetailedData(avgData);
+          setAverageData(mappedAvgData);
+          setInCache(cacheKey, { reportData: mappedAvgData, userData: null, averageData: null });
           console.log('[useReportData] Average comparison data loaded and cached');
         }
       } catch (err) {
@@ -242,12 +269,7 @@ export const useReportData = ({ archetypeId, token, isInsightsReport = false, sk
         if (detailedData) {
           console.log('[useReportData] Got detailed report data from level4');
           // Map the data to match ArchetypeDetailedData
-          const mappedData = {
-            ...detailedData,
-            id: detailedData.archetype_id,
-            name: detailedData.archetype_name,
-            familyId: detailedData.family_id || 'unknown'
-          };
+          const mappedData = mapToArchetypeDetailedData(detailedData);
           setReportData(mappedData);
           
           // Cache the data
@@ -274,12 +296,7 @@ export const useReportData = ({ archetypeId, token, isInsightsReport = false, sk
         if (level3Data) {
           console.log('[useReportData] Got report data from level3');
           // Map the data to match ArchetypeDetailedData
-          const mappedLevel3Data = {
-            ...level3Data,
-            id: level3Data.archetype_id,
-            name: level3Data.archetype_name,
-            familyId: level3Data.family_id || 'unknown'
-          };
+          const mappedLevel3Data = mapToArchetypeDetailedData(level3Data);
           setReportData(mappedLevel3Data);
           
           // Cache level3 data too
@@ -328,9 +345,6 @@ export const useReportData = ({ archetypeId, token, isInsightsReport = false, sk
           // Construct a full report data object
           const combinedData = {
             ...coreData,
-            id: coreData.id,
-            name: coreData.name,
-            familyId: coreData.family_id || 'unknown',
             archetype_id: coreData.id,
             archetype_name: coreData.name,
             strengths: swotData?.strengths || [],
@@ -340,8 +354,16 @@ export const useReportData = ({ archetypeId, token, isInsightsReport = false, sk
             strategic_recommendations: recData || []
           };
           
+          const mappedCombinedData = mapToArchetypeDetailedData(combinedData);
           console.log('Constructed report data from multiple sources');
-          setReportData(combinedData);
+          setReportData(mappedCombinedData);
+          
+          // Cache combined data
+          setInCache(cacheKey, {
+            reportData: mappedCombinedData,
+            userData,
+            averageData
+          });
         }
       } catch (err) {
         console.error('[useReportData] Error loading report data:', err);
