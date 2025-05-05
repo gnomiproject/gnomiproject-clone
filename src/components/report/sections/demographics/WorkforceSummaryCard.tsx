@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { calculatePercentageDifference } from '@/utils/reports/metricUtils';
 
@@ -28,6 +28,16 @@ const WorkforceSummaryCard: React.FC<WorkforceSummaryCardProps> = ({
   
   // Calculate the percentage difference
   const percentDiff = calculatePercentageDifference(value, average);
+  
+  // Debug log to see what's happening with the calculations
+  useEffect(() => {
+    console.log(`[WorkforceSummaryCard] ${title} calculation:`, {
+      value,
+      average,
+      percentDiff,
+      calculation: `(${value} - ${average}) / ${average} * 100 = ${percentDiff.toFixed(1)}%`
+    });
+  }, [value, average, title, percentDiff]);
   
   // Determine if higher or lower is better based on the metric name
   const lowerIsBetter = title.toLowerCase().includes('cost') || title.toLowerCase().includes('risk');

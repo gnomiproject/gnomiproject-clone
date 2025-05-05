@@ -7,7 +7,6 @@ import WorkforceCompositionChart from './demographics/WorkforceCompositionChart'
 import GeographicPresence from './demographics/GeographicPresence';
 import DemographicInsights from './demographics/DemographicInsights';
 import { formatNumber } from '@/utils/formatters';
-import NavigationButtons from './demographics/NavigationButtons';
 import { calculateCostPerMember } from '@/utils/reports/costUtils';
 
 interface DemographicsSectionProps {
@@ -22,12 +21,7 @@ interface DemographicsSectionProps {
 
 const DemographicsSection: React.FC<DemographicsSectionProps> = ({ 
   reportData, 
-  averageData,
-  previousSection,
-  nextSection,
-  previousSectionName,
-  nextSectionName,
-  onNavigate
+  averageData
 }) => {
   // Extract demographic data
   const employees = reportData?.["Demo_Average Employees"] || 0;
@@ -46,6 +40,16 @@ const DemographicsSection: React.FC<DemographicsSectionProps> = ({
   const avgPercentFemale = averageData?.["Demo_Average Percent Female"] || 0;
   const avgAge = averageData?.["Demo_Average Age"] || 0;
   const avgSalary = averageData?.["Demo_Average Salary"] || 0;
+  
+  // Log comparison data for debugging
+  console.log('[DemographicsSection] Comparison Data:', {
+    employees, avgEmployees,
+    members, avgMembers,
+    familySize, avgFamilySize,
+    states, avgStates,
+    age, avgAge,
+    salary, avgSalary
+  });
   
   // Demographic insights
   const insights = reportData?.demographic_insights || '';
@@ -184,17 +188,6 @@ const DemographicsSection: React.FC<DemographicsSectionProps> = ({
       
       {/* Demographic Insights */}
       <DemographicInsights insights={insights} />
-      
-      {/* Navigation Buttons */}
-      {previousSection && nextSection && previousSectionName && nextSectionName && (
-        <NavigationButtons
-          previousSection={previousSection}
-          nextSection={nextSection}
-          previousSectionName={previousSectionName}
-          nextSectionName={nextSectionName}
-          onNavigate={onNavigate}
-        />
-      )}
     </div>
   );
 };
