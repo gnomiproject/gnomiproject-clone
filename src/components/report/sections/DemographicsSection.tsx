@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Users, User, Building2, MapPin, Users2, CalendarClock, DollarSign } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -131,7 +130,6 @@ const DemographicsSection: React.FC<DemographicsSectionProps> = ({
         <WorkforceCompositionChart 
           percentFemale={percentFemale * 100} 
           averagePercentFemale={avgPercentFemale * 100}
-          averageAge={age}
           archetype={reportData?.archetype_name || reportData?.name || 'Archetype'}
         />
         

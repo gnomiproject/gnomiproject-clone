@@ -5,14 +5,12 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recha
 interface WorkforceCompositionChartProps {
   percentFemale: number;
   averagePercentFemale: number;
-  averageAge: number;
   archetype: string;
 }
 
 const WorkforceCompositionChart: React.FC<WorkforceCompositionChartProps> = ({
   percentFemale,
   averagePercentFemale,
-  averageAge,
   archetype
 }) => {
   // Format gender data for the chart
@@ -76,10 +74,6 @@ const WorkforceCompositionChart: React.FC<WorkforceCompositionChartProps> = ({
           <h4 className="text-sm font-medium mb-2">Demographic Summary</h4>
           <ul className="space-y-2 text-sm">
             <li className="flex justify-between">
-              <span>Average Age:</span>
-              <span className="font-semibold">{averageAge ? averageAge.toFixed(1) : 'N/A'} years</span>
-            </li>
-            <li className="flex justify-between">
               <span>Female Employees:</span>
               <span className="font-semibold">{percentFemale ? percentFemale.toFixed(1) : 'N/A'}%</span>
             </li>
@@ -89,9 +83,10 @@ const WorkforceCompositionChart: React.FC<WorkforceCompositionChartProps> = ({
             </li>
             <li className="flex justify-between">
               <span>Difference:</span>
-              <span className={`font-semibold ${percentFemale > averagePercentFemale ? 'text-green-600' : 'text-amber-600'}`}>
+              <span className="font-semibold text-gray-600">
                 {percentFemale && averagePercentFemale
-                  ? (percentFemale - averagePercentFemale).toFixed(1) + '%'
+                  ? (percentFemale > averagePercentFemale ? '+' : '') + 
+                    (percentFemale - averagePercentFemale).toFixed(1) + '%'
                   : 'N/A'}
               </span>
             </li>
