@@ -29,13 +29,14 @@ const WorkforceSummaryCard: React.FC<WorkforceSummaryCardProps> = ({
   // Calculate the percentage difference
   const percentDiff = calculatePercentageDifference(value, average);
   
-  // Debug log to see what's happening with the calculations
+  // Enhanced debug log to see what's happening with the calculations
   useEffect(() => {
-    console.log(`[WorkforceSummaryCard] ${title} calculation:`, {
+    console.log(`[WorkforceSummaryCard] ${title} comparison:`, {
       value,
       average,
       percentDiff,
-      calculation: `(${value} - ${average}) / ${average} * 100 = ${percentDiff.toFixed(1)}%`
+      calculation: `(${value} - ${average}) / ${average} * 100 = ${percentDiff.toFixed(1)}%`,
+      source: 'Using All_Average from database'
     });
   }, [value, average, title, percentDiff]);
   
@@ -47,10 +48,12 @@ const WorkforceSummaryCard: React.FC<WorkforceSummaryCardProps> = ({
   
   // Determine display text
   const comparisonWord = percentDiff > 0 ? "higher than" : "lower than";
-  const comparisonText = `${Math.abs(percentDiff).toFixed(1)}% ${comparisonWord} average`;
+  const comparisonText = Math.abs(percentDiff) < 0.1 ? 
+    "same as average" : 
+    `${Math.abs(percentDiff).toFixed(1)}% ${comparisonWord} average`;
   
   // Determine color for the comparison text
-  const textColor = isPositive ? "text-green-600" : "text-amber-600";
+  const textColor = isPositive ? "text-green-600" : Math.abs(percentDiff) < 0.1 ? "text-gray-600" : "text-amber-600";
   
   return (
     <Card className="overflow-hidden">

@@ -1,6 +1,6 @@
+
 import { formatNumber } from '@/utils/formatters';
-import { calculatePercentageDifference } from './metricUtils';
-import { organizeMetricsByCategory } from './metricUtils';
+import { calculatePercentageDifference, organizeMetricsByCategory } from './metricUtils';
 
 /**
  * Generates a report for a given archetype.

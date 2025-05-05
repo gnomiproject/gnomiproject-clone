@@ -113,6 +113,11 @@ export const getMetricComparisonText = (value: number, average: number, metricNa
   // Determine if this is positive or negative
   const isPositive = (percentDiff > 0 && !lowerIsBetter) || (percentDiff < 0 && lowerIsBetter);
   
+  // Handle values that are virtually the same
+  if (Math.abs(percentDiff) < 0.1) {
+    return { text: 'Same as average', color: 'text-gray-600' };
+  }
+  
   // Determine display text
   const comparisonWord = percentDiff > 0 ? "higher than" : "lower than";
   const text = `${Math.abs(percentDiff).toFixed(1)}% ${comparisonWord} average`;
@@ -130,6 +135,10 @@ export const getMetricComparisonText = (value: number, average: number, metricNa
  * @returns Object with metrics organized by category
  */
 export const organizeMetricsByCategory = (metrics: any[]): Record<string, any[]> => {
+  if (!metrics || !Array.isArray(metrics)) {
+    return {};
+  }
+  
   const categories: Record<string, any[]> = {};
   
   metrics.forEach(metric => {

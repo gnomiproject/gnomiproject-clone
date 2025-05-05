@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -114,8 +113,8 @@ export const useReportAccess = ({
         )
       };
       
-      // Process the data
-      const processedData = processReportData(mappedData);
+      // Process the data with async now
+      const processedData = await processReportData(mappedData);
       
       // Save to cache - include empty userData to match expected cache structure
       setInCache(cacheKey, {

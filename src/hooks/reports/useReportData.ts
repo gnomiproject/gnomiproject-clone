@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { ReportType } from '@/types/reports';
 import { getDataSource } from '@/utils/reports/schemaMapping';
@@ -131,8 +130,8 @@ export const useReportData = ({
       throw new Error(`No report data found for ${archetypeId}`);
     }
     
-    // Process the data
-    const processedData = processReportData(reportData);
+    // Process the data asynchronously
+    const processedData = await processReportData(reportData);
     
     // Save to cache
     setInCache(cacheKey, {
