@@ -10,8 +10,6 @@ import IndustryComposition from './archetype-profile/IndustryComposition';
 import DistinctiveMetrics from './archetype-profile/DistinctiveMetrics';
 import ProfileNavigation from './archetype-profile/ProfileNavigation';
 import { Card } from '@/components/ui/card';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
-import { Home } from 'lucide-react';
 
 export interface ArchetypeProfileSectionProps {
   archetypeData: ArchetypeDetailedData;
@@ -65,20 +63,6 @@ const ArchetypeProfileSectionBase: React.FC<ArchetypeProfileSectionProps> = ({ a
 
   return (
     <Section id="archetype-profile">
-      {/* Breadcrumb Navigation */}
-      <Breadcrumb className="mb-6">
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <a href="#home" className="flex items-center gap-2 text-gray-500 hover:text-primary">
-              <Home className="h-4 w-4" />
-              <span>Home</span>
-            </a>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbPage>Archetype Profile</BreadcrumbPage>
-        </BreadcrumbList>
-      </Breadcrumb>
-
       <div className="flex flex-col md:flex-row gap-6 items-start mb-8">
         <div className="w-full md:w-2/3">
           <SectionTitle 
@@ -87,7 +71,7 @@ const ArchetypeProfileSectionBase: React.FC<ArchetypeProfileSectionProps> = ({ a
           />
         </div>
         <div className="w-full md:w-1/3 flex justify-center">
-          <div className="h-48 w-48">
+          <div className="h-24 w-24">
             <GnomePlaceholder type="magnifying" />
           </div>
         </div>
