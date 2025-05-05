@@ -12,6 +12,15 @@ interface HomeIntroductionProps {
   averageData?: any;
 }
 
+/**
+ * HomeIntroduction - The first section of the report
+ * 
+ * This component presents a welcome message and overview of the archetype
+ * with key findings and characteristics. It shows:
+ * 1. A section title
+ * 2. A personalized welcome message
+ * 3. Key insights about the archetype
+ */
 const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroductionProps) => {
   // Get key values once to avoid repetition
   const archetypeId = archetypeData?.id || archetypeData?.archetype_id || 'a1';
@@ -91,7 +100,7 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
         />
       </div>
       
-      {/* Archetype Insights Card - This is now the only card showing archetype information */}
+      {/* Insights Card - This replaces both previous cards to avoid redundancy */}
       <div className="mt-8 mb-8">
         <ArchetypeInsightsCard
           archetypeName={archetypeName}

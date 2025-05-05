@@ -28,13 +28,22 @@ interface UseReportUserDataResult {
   debugInfo: any;
 }
 
-// Hook to check the validity of a report access token and fetch associated user data
+/**
+ * Hook to check the validity of a report access token and fetch associated user data
+ * 
+ * This hook implements a progressive validation approach:
+ * 1. For admin-view tokens, always provide admin user data
+ * 2. For regular tokens, validate against the database
+ * 3. Track validation attempts and results
+ * 4. Provide detailed debug information
+ */
 export const useReportUserData = (token: string | undefined, archetypeId: string): UseReportUserDataResult => {
   const [userData, setUserData] = useState<ReportUserData | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isValid, setIsValid] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
   const [debugInfo, setDebugInfo] = useState<any>({});
+  const [validationHistory, setValidationHistory] = useState<any[]>([]);
   
   // For admin-view special token, provide default user data
   useEffect(() => {
@@ -69,8 +78,20 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
         
         const validationStartTime = Date.now();
         console.log(`[useReportUserData] Validating token for ${archetypeId}...`);
+        
         const { data, error, debugInfo } = await fetchTokenAccess(archetypeId, token);
+        
         const validationTime = Date.now() - validationStartTime;
+        const validationResult = {
+          timestamp: new Date().toISOString(),
+          validationTimeMs: validationTime,
+          success: !error,
+          errorMessage: error?.message || null,
+          tokenStatus: data?.status || null
+        };
+        
+        // Add to validation history
+        setValidationHistory(prev => [validationResult, ...prev.slice(0, 9)]); // Keep last 10 validation attempts
         
         if (error) {
           setError(new Error(error.message || 'Invalid token'));
@@ -79,7 +100,8 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
           setDebugInfo({
             ...debugInfo,
             validationTime,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
+            validationHistory: [validationResult, ...validationHistory.slice(0, 9)]
           });
           console.warn(`[useReportUserData] Token validation failed in ${validationTime}ms:`, error);
         } else if (data) {
@@ -108,7 +130,8 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
             ...debugInfo,
             validationTime,
             tokenStatus: data.status,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
+            validationHistory: [validationResult, ...validationHistory.slice(0, 9)]
           });
           console.log(`[useReportUserData] Token validated successfully in ${validationTime}ms`);
         } else {
@@ -118,7 +141,8 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
           setDebugInfo({
             ...debugInfo,
             validationTime,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
+            validationHistory: [validationResult, ...validationHistory.slice(0, 9)]
           });
           console.warn(`[useReportUserData] No data returned from token validation in ${validationTime}ms`);
         }
@@ -138,9 +162,18 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
     };
     
     validateToken();
-  }, [token, archetypeId]);
+  }, [token, archetypeId, validationHistory]);
   
-  return { userData, isLoading, isValid, error, debugInfo };
+  return { 
+    userData, 
+    isLoading, 
+    isValid, 
+    error, 
+    debugInfo: {
+      ...debugInfo,
+      validationHistory
+    } 
+  };
 };
 
 export default useReportUserData;

@@ -12,7 +12,20 @@ import ReportError from '@/components/report/ReportError';
 import { checkCacheHealth, getCacheStats } from '@/utils/reports/reportCache';
 import FallbackBanner from '@/components/report/FallbackBanner';
 
-// This is a simplified version of ReportViewer focused on token-based access
+/**
+ * ReportViewer - A simplified token-based report viewer
+ * 
+ * This component handles:
+ * 1. Token-based authentication for report access
+ * 2. Loading report data from level4_report_secure
+ * 3. Fallback to cached data when network issues occur
+ * 4. Error and expiration handling with graceful degradation
+ * 
+ * The component implements progressive enhancement:
+ * - Report data persists in cache even if token validation fails
+ * - Expired tokens in grace period still show reports with warning
+ * - Reports continue to be viewable even after page refresh if cache exists
+ */
 const ReportViewer = () => {
   const { archetypeId: rawArchetypeId, token } = useParams();
   const [debugMode, setDebugMode] = useState(false); // Changed to false to hide debug by default
@@ -112,7 +125,15 @@ const ReportViewer = () => {
     setIsUsingFallbackData(isFallbackData || false);
   }, [isFallbackData]);
   
-  // Check token status every 5 minutes (was 30 seconds)
+  /**
+   * Check token status - improved version
+   * 
+   * This check is designed to be less aggressive and more forgiving:
+   * 1. For admin views, always valid
+   * 2. For cached reports with existing session data, use progressive validation
+   * 3. Report continues to be visible even if token validation fails after session start
+   * 4. Only show clear errors for completely invalid tokens, not just expired ones
+   */
   const checkTokenStatus = useCallback(() => {
     if (token && !isAdminView) {
       // Set status to checking
@@ -122,8 +143,12 @@ const ReportViewer = () => {
       const sessionDuration = (Date.now() - sessionStartTime) / 1000; // in seconds
       console.log(`[ReportViewer] Checking token status at ${sessionDuration.toFixed(1)}s into session`);
       
+      // Special case: If we have reportData and the token was previously valid,
+      // but now fails validation, we still allow viewing with a warning
+      const hasLoadedReportData = !!reportData;
+      
       if (userDataError) {
-        console.warn('[ReportViewer] Token validation failed:', userDataError.message);
+        console.warn('[ReportViewer] Token validation issue:', userDataError.message);
         
         // Check for grace period
         if (userData?.status === 'grace-period') {
@@ -132,6 +157,14 @@ const ReportViewer = () => {
           return;
         }
         
+        // If we already loaded the report data, show warning but don't block access
+        if (hasLoadedReportData) {
+          console.log('[ReportViewer] Using progressive validation - showing report despite token issues');
+          setTokenStatus('warning');
+          return;
+        }
+        
+        // Otherwise, show error
         setTokenStatus('error');
         setErrorDetails({
           type: 'token',
@@ -143,6 +176,14 @@ const ReportViewer = () => {
       
       if (!isValidAccess) {
         console.warn('[ReportViewer] Token is not valid');
+        
+        // If we already loaded the report, still show it with a warning
+        if (hasLoadedReportData) {
+          console.log('[ReportViewer] Using progressive validation - showing report despite invalid token');
+          setTokenStatus('warning');
+          return;
+        }
+        
         setTokenStatus('error');
         setErrorDetails({
           type: 'access',
@@ -167,9 +208,9 @@ const ReportViewer = () => {
       setTokenStatus('valid');
       setErrorDetails(null);
     }
-  }, [token, isAdminView, isValidAccess, userDataError, userData, sessionStartTime]);
+  }, [token, isAdminView, isValidAccess, userDataError, userData, sessionStartTime, reportData]);
   
-  // Set up periodic token checks - now every 5 minutes instead of 30 seconds
+  // Set up REDUCED periodic token checks - now every 5 minutes instead of 30 seconds
   useEffect(() => {
     if (!token || isAdminView) return;
     
@@ -184,7 +225,7 @@ const ReportViewer = () => {
       if (pageActive.current) {
         checkTokenStatus();
       }
-    }, 5 * 60 * 1000); // Every 5 minutes
+    }, 5 * 60 * 1000); // Every 5 minutes instead of 30 seconds
     
     return () => {
       clearInterval(timer);
@@ -250,7 +291,8 @@ const ReportViewer = () => {
       sessionDuration: ((Date.now() - sessionStartTime) / 1000).toFixed(1) + 's',
       cacheHealth: checkCacheHealth(),
       cacheStats: getCacheStats(),
-      isUsingFallbackData
+      isUsingFallbackData,
+      validationFrequency: '5 minutes' // Document new validation frequency
     }
   };
 

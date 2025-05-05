@@ -27,11 +27,32 @@ interface TokenAccessResponse {
   debugInfo?: any;
 }
 
-// Add buffer period (in hours) before expiration to warn about soon-to-expire tokens
+/**
+ * Constants for token expiration handling
+ * 
+ * TOKEN_EXPIRATION_BUFFER_HOURS: Time window (in hours) before actual expiration to start showing warnings
+ * TOKEN_EXPIRATION_GRACE_HOURS: Time window (in hours) after expiration to still allow access with warning
+ * TOKEN_VALIDATION_INTERVAL_MINS: How often to check token status during active sessions (in minutes)
+ */
 const TOKEN_EXPIRATION_BUFFER_HOURS = 24;
-// Add grace period (in hours) after expiration to still show data with warning
 const TOKEN_EXPIRATION_GRACE_HOURS = 1;
+const TOKEN_VALIDATION_INTERVAL_MINS = 5;  // Increased from 30 sec to 5 minutes
 
+/**
+ * Validates a token's access for a specific archetype report
+ * 
+ * Validation approach:
+ * 1. Query the database for the token without expiration check
+ * 2. If token exists, perform JavaScript-based validation with grace period:
+ *    - Check if token is marked as inactive in the database
+ *    - Check if token is expired (current time > expires_at)
+ *    - Apply grace period if token is recently expired
+ *    - Apply warning if token is close to expiration
+ * 3. Return validation result with detailed debug info
+ * 
+ * This approach allows for flexible handling of token expiration with 
+ * customizable buffer and grace periods without requiring database changes.
+ */
 export const fetchTokenAccess = async (archetypeId: string, token: string): Promise<TokenAccessResponse> => {
   console.log(`[fetchTokenAccess] Validating token for ${archetypeId} (Token: ${token.substring(0, 5)}...)`);
   
@@ -95,18 +116,29 @@ export const fetchTokenAccess = async (archetypeId: string, token: string): Prom
     const isInactive = tokenData.status !== 'active';
     let isExpired = false;
     let isWithinGracePeriod = false;
+    let expirationMsg = "No expiration set";
     
     if (tokenData.expires_at) {
       const expirationDate = new Date(tokenData.expires_at);
       isExpired = expirationDate <= now;
       isWithinGracePeriod = isExpired && expirationDate >= gracePeriodThreshold;
       
+      // Detailed logging for expiration
+      const expirationDiffMs = expirationDate.getTime() - now.getTime();
+      const expirationDiffHours = Math.round(expirationDiffMs / (1000 * 60 * 60));
+      expirationMsg = isExpired 
+        ? `Expired ${Math.abs(expirationDiffHours)}h ago`
+        : `Expires in ${expirationDiffHours}h`;
+      
       console.log(`[fetchTokenAccess] Token expiration details:`, {
         expirationDate: expirationDate.toISOString(),
+        expirationMessage: expirationMsg,
         isExpired,
         isWithinGracePeriod,
         gracePeriodThreshold: gracePeriodThreshold.toISOString()
       });
+    } else {
+      console.log(`[fetchTokenAccess] Token has no expiration date set`);
     }
     
     // Return invalid for inactive tokens
@@ -131,7 +163,7 @@ export const fetchTokenAccess = async (archetypeId: string, token: string): Prom
     
     // Handle expired tokens outside grace period
     if (isExpired && !isWithinGracePeriod) {
-      console.warn(`[fetchTokenAccess] Token expired for ${archetypeId} (outside grace period)`);
+      console.warn(`[fetchTokenAccess] Token expired for ${archetypeId} (outside grace period): ${expirationMsg}`);
       return { 
         data: null, 
         error: { 
@@ -144,6 +176,7 @@ export const fetchTokenAccess = async (archetypeId: string, token: string): Prom
           tokenPreview: token.substring(0, 5) + '...',
           found: true,
           isExpired,
+          expirationMsg,
           expiresAt: tokenData.expires_at
         }
       };
@@ -151,7 +184,7 @@ export const fetchTokenAccess = async (archetypeId: string, token: string): Prom
     
     // For expired tokens within grace period, add a warning flag
     if (isExpired && isWithinGracePeriod) {
-      console.warn(`[fetchTokenAccess] Token expired but within grace period for ${archetypeId}`);
+      console.warn(`[fetchTokenAccess] Token expired but within grace period for ${archetypeId}: ${expirationMsg}`);
       // Add a warning flag to the data
       tokenData.status = 'grace-period';
     }
@@ -179,6 +212,7 @@ export const fetchTokenAccess = async (archetypeId: string, token: string): Prom
         archetypeId,
         tokenPreview: token.substring(0, 5) + '...',
         validUntil: tokenData.expires_at,
+        expirationMsg: tokenData.expires_at ? expirationMsg : "No expiration",
         status: tokenData.status
       }
     };
