@@ -1,0 +1,118 @@
+
+import React from 'react';
+import ErrorBoundary from '@/components/shared/ErrorBoundary';
+import { Section } from '@/components/shared/Section';
+import SectionTitle from '@/components/shared/SectionTitle';
+import HomeIntroduction from '@/components/report/sections/HomeIntroduction';
+import ArchetypeProfileSection from '@/components/report/sections/ArchetypeProfileSection';
+import DemographicsSection from '@/components/report/sections/DemographicsSection';
+import UtilizationPatterns from '@/components/report/sections/UtilizationPatterns';
+import DiseaseManagement from '@/components/report/sections/DiseaseManagement';
+import CareGaps from '@/components/report/sections/CareGaps';
+import RiskFactors from '@/components/report/sections/RiskFactors';
+import CostAnalysis from '@/components/report/sections/CostAnalysis';
+import SwotAnalysis from '@/components/report/sections/SwotAnalysis';
+import StrategicRecommendationsSection from '@/components/report/sections/strategic-recommendations/StrategicRecommendationsSection';
+import ContactSection from '@/components/report/sections/ContactSection';
+
+interface ReportSectionsProps {
+  reportData: any;
+  userData?: any;
+  averageData?: any;
+}
+
+const ReportSections: React.FC<ReportSectionsProps> = ({
+  reportData,
+  userData,
+  averageData
+}) => {
+  return (
+    <>
+      {/* Introduction Section */}
+      <ErrorBoundary>
+        <HomeIntroduction 
+          userData={userData}
+          archetypeData={reportData}
+          averageData={averageData}
+        />
+      </ErrorBoundary>
+      
+      {/* Archetype Profile Section */}
+      <ErrorBoundary>
+        <ArchetypeProfileSection archetypeData={reportData} />
+      </ErrorBoundary>
+      
+      {/* Demographics Section */}
+      <ErrorBoundary>
+        <DemographicsSection 
+          reportData={reportData} 
+          averageData={averageData} 
+        />
+      </ErrorBoundary>
+      
+      {/* Utilization Patterns Section */}
+      <ErrorBoundary>
+        <Section id="utilization-patterns">
+          <UtilizationPatterns reportData={reportData} averageData={averageData} />
+        </Section>
+      </ErrorBoundary>
+      
+      {/* Disease Management Section */}
+      <ErrorBoundary>
+        <Section id="disease-management">
+          <SectionTitle title="Disease Management" />
+          <DiseaseManagement reportData={reportData} averageData={averageData} />
+        </Section>
+      </ErrorBoundary>
+      
+      {/* Care Gaps Section */}
+      <ErrorBoundary>
+        <Section id="care-gaps">
+          <SectionTitle title="Care Gaps" />
+          <CareGaps reportData={reportData} averageData={averageData} />
+        </Section>
+      </ErrorBoundary>
+      
+      {/* Risk Factors Section */}
+      <ErrorBoundary>
+        <Section id="risk-factors">
+          <SectionTitle title="Risk Factors" />
+          <RiskFactors reportData={reportData} averageData={averageData} />
+        </Section>
+      </ErrorBoundary>
+      
+      {/* Cost Analysis Section */}
+      <ErrorBoundary>
+        <Section id="cost-analysis">
+          <SectionTitle title="Cost Analysis" />
+          <CostAnalysis reportData={reportData} averageData={averageData} />
+        </Section>
+      </ErrorBoundary>
+      
+      {/* SWOT Analysis Section - Using data from level4_report_secure only */}
+      <ErrorBoundary>
+        <Section id="swot-analysis">
+          <SwotAnalysis reportData={reportData} />
+        </Section>
+      </ErrorBoundary>
+      
+      {/* Strategic Recommendations Section */}
+      <ErrorBoundary>
+        <StrategicRecommendationsSection
+          reportData={reportData}
+          averageData={averageData}
+        />
+      </ErrorBoundary>
+      
+      {/* About This Report Section (renamed from Contact Section) */}
+      <ErrorBoundary>
+        <Section id="about-report">
+          <SectionTitle title="About This Report" />
+          <ContactSection userData={userData} />
+        </Section>
+      </ErrorBoundary>
+    </>
+  );
+};
+
+export default ReportSections;
