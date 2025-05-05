@@ -4,7 +4,6 @@ import { Section } from '@/components/shared/Section';
 import SectionTitle from '@/components/shared/SectionTitle';
 import ReportIntroduction from './ReportIntroduction';
 import WelcomeCard from './introduction/WelcomeCard';
-import ArchetypeOverviewCard from './introduction/ArchetypeOverviewCard';
 import ArchetypeInsightsCard from './introduction/ArchetypeInsightsCard';
 
 interface HomeIntroductionProps {
@@ -92,22 +91,13 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
         />
       </div>
       
-      {/* Archetype Insights Card - This is now prominently displayed */}
-      <div className="mt-8 mb-8 relative z-0">
+      {/* Archetype Insights Card - This is now the only card showing archetype information */}
+      <div className="mt-8 mb-8">
         <ArchetypeInsightsCard
           archetypeName={archetypeName}
           familyName={familyName}
           shortDescription={shortDescription}
           keyFindings={keyFindings}
-          archetypeId={archetypeId}
-        />
-      </div>
-      
-      {/* Archetype Overview Card */}
-      <div className="mt-8">
-        <ArchetypeOverviewCard 
-          shortDescription={shortDescription}
-          characteristics={characteristics}
           archetypeId={archetypeId}
         />
       </div>

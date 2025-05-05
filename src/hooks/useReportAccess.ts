@@ -64,8 +64,9 @@ export const useReportAccess = ({
         // Ensure key_characteristics is properly formatted in cached data
         if (cachedData.data?.reportData) {
           // Create a new object with properly typed key_characteristics first
+          const keyCharacteristicsArray = ensureStringArray(cachedData.data.reportData?.key_characteristics) as string[];
           cachedData.data.reportData = {
-            key_characteristics: ensureStringArray(cachedData.data.reportData?.key_characteristics) as string[],
+            key_characteristics: keyCharacteristicsArray,
             ...cachedData.data.reportData
           };
         }
@@ -93,7 +94,7 @@ export const useReportAccess = ({
         throw new Error(`No report data found for ${archetypeId}`);
       }
       
-      // First, get the string array for key_characteristics
+      // Convert key_characteristics to string[] before creating mappedData
       const keyCharacteristicsArray = ensureStringArray(data.key_characteristics) as string[];
       
       // Then create the mappedData object with explicit typing
@@ -144,7 +145,7 @@ export const useReportAccess = ({
         
         // Ensure key_characteristics is properly formatted in fallback data
         if (parsed.reportData) {
-          // Create a new object with properly typed key_characteristics first
+          // Create a new object with properly typed key_characteristics
           const keyCharacteristicsArray = ensureStringArray(parsed.reportData?.key_characteristics) as string[];
           parsed.reportData = {
             key_characteristics: keyCharacteristicsArray,
