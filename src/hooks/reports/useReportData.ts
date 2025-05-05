@@ -188,26 +188,28 @@ export const useReportData = ({
     queryFn: fetchReport,
     ...reportDataQueryOptions,
     enabled: isValidAccess && !!archetypeId,
-    onError: (error: Error) => {
-      console.error('Error fetching report data:', error);
-      setError(error);
-      
-      // Try to use fallback data when an error occurs
-      const fallbackData = getFallbackData();
-      if (fallbackData) {
-        // Set the result data directly
-        setAverageData(fallbackData.averageData);
-        toast({
-          title: "Using cached report data",
-          description: "The latest data couldn't be retrieved. Showing previously loaded data.",
-          variant: "warning"
-        });
-      } else {
-        toast({
-          title: "Error Loading Report",
-          description: error.message,
-          variant: "destructive"
-        });
+    meta: {
+      onError: (error: Error) => {
+        console.error('Error fetching report data:', error);
+        setError(error);
+        
+        // Try to use fallback data when an error occurs
+        const fallbackData = getFallbackData();
+        if (fallbackData) {
+          // Set the result data directly
+          setAverageData(fallbackData.averageData);
+          toast({
+            title: "Using cached report data",
+            description: "The latest data couldn't be retrieved. Showing previously loaded data.",
+            variant: "default"
+          });
+        } else {
+          toast({
+            title: "Error Loading Report",
+            description: error.message,
+            variant: "destructive"
+          });
+        }
       }
     }
   });

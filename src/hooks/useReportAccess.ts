@@ -1,10 +1,14 @@
-
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useGetArchetype } from '@/hooks/useGetArchetype';
-import { ArchetypeId } from '@/types/archetype';
-import { normalizeArchetypeId } from '@/utils/archetypeValidation';
 import { toast } from 'sonner';
+import { useQuery } from '@tanstack/react-query';
+import { ArchetypeDetailedData } from '@/types/archetype';
+import { getFromCache, setInCache, clearFromCache } from '@/utils/reports/reportCache';
+import { processReportData } from '@/utils/reports/reportDataTransforms';
+import { validateReportToken } from '@/utils/reports/accessTracking';
+
+// Local storage key for fallback report data
+const FALLBACK_REPORT_KEY = 'report_data_fallback';
 
 interface UseReportAccessOptions {
   archetypeId: string;
@@ -13,184 +17,185 @@ interface UseReportAccessOptions {
   skipCache?: boolean;
 }
 
-export const useReportAccess = ({ 
-  archetypeId: rawArchetypeId, 
-  token, 
+interface UseReportAccessResult {
+  reportData: any;
+  archetypeData: ArchetypeDetailedData;
+  averageData: any;
+  isLoading: boolean;
+  error: Error;
+  debugInfo: any;
+  refreshData: () => Promise<void>;
+  isUsingFallbackData?: boolean;
+}
+
+export const useReportAccess = ({
+  archetypeId,
+  token,
   isAdminView = false,
   skipCache = false
 }: UseReportAccessOptions) => {
-  const [reportData, setReportData] = useState<any | null>(null);
-  const [averageData, setAverageData] = useState<any | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
   const [debugInfo, setDebugInfo] = useState<any>({});
-
-  // Normalize the archetype ID to handle case sensitivity
-  const archetypeId = normalizeArchetypeId(rawArchetypeId);
+  const [isUsingFallbackData, setIsUsingFallbackData] = useState<boolean>(false);
   
-  // Get archetypeData using the existing hook (kept for compatibility)
-  const {
-    archetypeData,
-    isLoading: archetypeLoading,
-    error: archetypeError,
-  } = useGetArchetype(archetypeId as ArchetypeId);
-
-  // Function to fetch report data
+  // Query key for this report
+  const queryKey = ['report-access', archetypeId, token];
+  
+  // Function to fetch report data from level4_report_secure
   const fetchReportData = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      console.log(`[useReportAccess] Fetching report data for ${rawArchetypeId} (normalized: ${archetypeId}) with token ${token.substring(0, 5)}...`);
-      setDebugInfo(prev => ({
-        ...prev,
-        fetchStarted: true,
-        originalArchetypeId: rawArchetypeId,
-        normalizedArchetypeId: archetypeId,
-        tokenPreview: token.substring(0, 5) + '...',
-        isAdminView
-      }));
-
-      // Skip token validation for admin view
-      if (isAdminView) {
-        console.log(`[useReportAccess] Admin view detected, skipping token validation`);
-        setDebugInfo(prev => ({
-          ...prev,
-          adminViewDetected: true
-        }));
-      } else {
-        // For normal users, verify the token is valid first
-        console.log(`[useReportAccess] Validating token: ${token.substring(0, 5)}...`);
+    console.log(`[useReportAccess] Fetching report data for ${archetypeId}`);
+    
+    if (!archetypeId) {
+      throw new Error('Missing archetype ID');
+    }
+    
+    // Cache key for the report data
+    const cacheKey = `report-access-${archetypeId}-${token}`;
+    
+    // Check cache first if not skipping
+    if (!skipCache) {
+      const cachedData = getFromCache(cacheKey);
+      if (cachedData) {
+        console.log(`[useReportAccess] Using cached data for ${archetypeId}`);
+        return cachedData.data;
       }
-
-      // SINGLE SOURCE OF TRUTH: Fetch data ONLY from level4_report_secure
+    }
+    
+    // For admin view or valid token, fetch the data
+    try {
+      // Fetch from level4_report_secure table
       const { data, error } = await supabase
         .from('level4_report_secure')
         .select('*')
         .eq('archetype_id', archetypeId)
         .maybeSingle();
-
+        
       if (error) {
-        console.error(`[useReportAccess] Database error fetching level4_report_secure:`, error);
-        setError(error);
-        setDebugInfo(prev => ({
-          ...prev,
-          level4Query: {
-            success: false,
-            error: error.message
-          }
-        }));
-        return;
+        console.error(`[useReportAccess] Database error:`, error);
+        throw new Error(`Error fetching report: ${error.message}`);
       }
       
       if (!data) {
-        console.log(`[useReportAccess] No data found in level4_report_secure for ${archetypeId}`);
-        setDebugInfo(prev => ({
-          ...prev,
-          level4Query: {
-            success: true,
-            dataFound: false
-          }
-        }));
-        setError(new Error(`No data available for archetype ${archetypeId}`));
-        return;
+        console.warn(`[useReportAccess] No data found for ${archetypeId}`);
+        throw new Error(`No report data found for ${archetypeId}`);
       }
-
-      console.log(`[useReportAccess] Got level4 deep dive data for ${archetypeId}`);
       
-      // Log the available fields related to SWOT
-      const swotAnalysisField = data.swot_analysis;
+      // Process the data
+      const processedData = processReportData(data);
       
-      console.log("[useReportAccess] SWOT data check:", {
-        hasSwotAnalysisField: !!swotAnalysisField,
-        swotAnalysisType: swotAnalysisField ? typeof swotAnalysisField : 'N/A',
-        swotSampleData: swotAnalysisField 
-          ? (typeof swotAnalysisField === 'object' 
-              ? `Object with keys: ${Object.keys(swotAnalysisField).join(', ')}` 
-              : typeof swotAnalysisField)
-          : 'N/A'
-      });
+      // Save to cache
+      setInCache(cacheKey, processedData);
       
-      setReportData(data);
-      
-      setDebugInfo(prev => ({
-        ...prev,
-        level4Query: {
-          success: true,
-          dataFound: true,
-          swotDataAvailable: !!swotAnalysisField
-        }
-      }));
-
-      // Fetch average data for comparisons (still from level4_report_secure)
-      const { data: avgData, error: avgError } = await supabase
-        .from('level4_report_secure')
-        .select('*')
-        .eq('archetype_id', 'All_Average')
-        .maybeSingle();
-
-      if (avgError) {
-        console.warn(`[useReportAccess] Could not fetch average data: ${avgError.message}`);
-        setDebugInfo(prev => ({
-          ...prev,
-          averageQuery: {
-            success: false,
-            error: avgError.message
-          }
-        }));
-      } else if (avgData) {
-        console.log(`[useReportAccess] Got average comparison data`);
-        setAverageData(avgData);
-        setDebugInfo(prev => ({
-          ...prev,
-          averageQuery: {
-            success: true,
-            dataFound: true
-          }
-        }));
+      // Store as fallback data in localStorage
+      try {
+        localStorage.setItem(
+          `${FALLBACK_REPORT_KEY}-${archetypeId}`, 
+          JSON.stringify({
+            ...processedData,
+            timestamp: new Date().toISOString()
+          })
+        );
+      } catch (e) {
+        console.warn('Could not save fallback data to localStorage:', e);
       }
-
+      
+      return processedData;
     } catch (err) {
-      console.error(`[useReportAccess] Error loading report data:`, err);
-      setError(err instanceof Error ? err : new Error('Unknown error loading report data'));
-      setDebugInfo(prev => ({
-        ...prev,
-        error: err instanceof Error ? err.message : 'Unknown error'
-      }));
-    } finally {
-      setIsLoading(false);
+      console.error(`[useReportAccess] Error fetching data:`, err);
+      throw err;
     }
-  }, [rawArchetypeId, archetypeId, token, isAdminView]);
-
-  // Load data on mount and when dependencies change
-  useEffect(() => {
-    fetchReportData();
-  }, [fetchReportData]);
-
-  // Add refreshData function that can be called by components
-  const refreshData = useCallback(async () => {
+  }, [archetypeId, token, skipCache]);
+  
+  // Function to get fallback data from localStorage
+  const getFallbackData = useCallback(() => {
     try {
-      toast("Refreshing Data", {
-        description: "Loading the latest report information..."
-      });
-      await fetchReportData();
-      toast("Data Refreshed", {
-        description: "Successfully updated report data"
-      });
-    } catch (err) {
-      toast("Refresh Failed", {
-        description: "Could not update report data"
-      });
+      const fallbackData = localStorage.getItem(`${FALLBACK_REPORT_KEY}-${archetypeId}`);
+      if (fallbackData) {
+        const parsed = JSON.parse(fallbackData);
+        console.log(`[useReportAccess] Using fallback data for ${archetypeId} from ${parsed.timestamp}`);
+        setIsUsingFallbackData(true);
+        return parsed;
+      }
+    } catch (e) {
+      console.error('Error loading fallback data:', e);
     }
-  }, [fetchReportData]);
-
+    return null;
+  }, [archetypeId]);
+  
+  // Use React Query for data fetching
+  const { 
+    data: reportData, 
+    isLoading, 
+    error: queryError,
+    refetch 
+  } = useQuery({
+    queryKey,
+    queryFn: fetchReportData,
+    enabled: !!archetypeId && (isAdminView || !!token),
+    staleTime: Infinity,
+    gcTime: Infinity,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
+    retry: 1,
+    retryDelay: 5000,
+    onError: (error: Error) => {
+      console.error('Error fetching report data:', error);
+      setError(error);
+      
+      // Try to use fallback data when an error occurs
+      const fallbackData = getFallbackData();
+      if (fallbackData) {
+        toast.warning("Using cached report data", {
+          description: "The latest data couldn't be retrieved. Showing previously loaded data."
+        });
+      } else {
+        toast.error("Error Loading Report", {
+          description: error.message
+        });
+      }
+    }
+  });
+  
+  // Refresh data function
+  const refreshData = useCallback(async () => {
+    toast.info("Refreshing Report Data", {
+      description: "Fetching the latest information..."
+    });
+    
+    const cacheKey = `report-access-${archetypeId}-${token}`;
+    clearFromCache(cacheKey);
+    
+    try {
+      await refetch();
+      setIsUsingFallbackData(false);
+      toast.success("Refresh Successful", {
+        description: "Report data has been updated."
+      });
+    } catch (e) {
+      toast.error("Refresh Failed", {
+        description: "Unable to update report data. Please try again."
+      });
+      
+      // Try to use fallback data
+      getFallbackData();
+    }
+  }, [archetypeId, token, refetch, getFallbackData]);
+  
+  // Return the data and functions
   return {
-    reportData,
-    archetypeData, // Kept for backward compatibility
-    averageData,
-    isLoading: isLoading || archetypeLoading,
-    error: error || archetypeError,
-    debugInfo,
-    refreshData // Added the missing refreshData function
+    reportData: reportData?.reportData || (isUsingFallbackData ? getFallbackData()?.reportData : null),
+    archetypeData: reportData?.reportData || (isUsingFallbackData ? getFallbackData()?.reportData : null),
+    averageData: reportData?.averageData || (isUsingFallbackData ? getFallbackData()?.averageData : null),
+    isLoading,
+    error: error || (queryError as Error) || null,
+    debugInfo: {
+      ...debugInfo,
+      isUsingFallbackData,
+      queryKey,
+      hasError: !!error || !!queryError
+    },
+    refreshData,
+    isUsingFallbackData
   };
 };

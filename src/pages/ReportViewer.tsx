@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { isValidArchetypeId, normalizeArchetypeId } from '@/utils/archetypeValidation';
@@ -99,8 +98,8 @@ const ReportViewer = () => {
     isLoading: reportLoading,
     error: reportError,
     debugInfo: reportDebugInfo,
-    refreshData, // This is now properly defined in useReportAccess
-    isUsingFallbackData: isFallbackData
+    refreshData,
+    isUsingFallbackData: isFallbackData = false // Add default value
   } = useReportAccess({
     archetypeId, 
     token: token || '',
@@ -153,7 +152,7 @@ const ReportViewer = () => {
         return;
       }
       
-      // Check if token is about to expire
+      // Check if token is about to expire - adding null check and default value
       if (userData?.status === 'expiring-soon') {
         console.warn('[ReportViewer] Token will expire soon');
         setTokenStatus('warning');
