@@ -9,6 +9,10 @@ import { toast } from "@/hooks/use-toast";
 import { ArchetypeDetailedData } from '@/types/archetype';
 import { fetchTokenAccess, fetchReportData } from './useFetchReportData';
 import { useQuery } from '@tanstack/react-query';
+import { staticDataQueryOptions, reportDataQueryOptions } from '@/utils/query/queryConfig';
+
+// Local storage key for fallback report data
+const FALLBACK_REPORT_KEY = 'report_data_fallback';
 
 interface UseReportDataOptions {
   archetypeId?: string;
@@ -27,6 +31,7 @@ interface UseReportDataResult {
   dataSource: string;
   retry: () => void;
   refreshData: () => Promise<void>;
+  isUsingFallbackData?: boolean;
 }
 
 export const useReportData = ({ 
@@ -35,114 +40,196 @@ export const useReportData = ({
   isInsightsReport, 
   skipCache = false 
 }: UseReportDataOptions): UseReportDataResult => {
-  const [reportData, setReportData] = useState<ArchetypeDetailedData | null>(null);
   const [userData, setUserData] = useState<any>(null);
   const [averageData, setAverageData] = useState<AverageData>(processReportData(null).averageData);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isValidAccess, setIsValidAccess] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
   const [dataSource, setDataSource] = useState<string>('');
+  const [isUsingFallbackData, setIsUsingFallbackData] = useState<boolean>(false);
 
-  const loadReportData = useCallback(async () => {
+  // Initialize report type and queryKey
+  const reportType: ReportType = isInsightsReport ? 'insight' : 'deepDive';
+  const queryKey = ['report', archetypeId, token, reportType];
+  
+  // Function to validate token access
+  const validateTokenAccess = useCallback(async () => {
     if (!archetypeId) {
       setError(new Error('Missing archetype ID'));
-      setIsLoading(false);
       setIsValidAccess(false);
-      return;
+      return false;
     }
 
-    try {
-      setIsLoading(true);
-      setError(null);
+    // If no token provided, consider it valid access for insights reports
+    if (!token && isInsightsReport) {
+      setIsValidAccess(true);
+      return true;
+    }
 
-      const cacheKey = `report-${archetypeId}-${token}`;
-      
-      // Check cache first if not skipping
-      if (!skipCache) {
-        const cachedData = getFromCache(cacheKey);
-        if (cachedData) {
-          setReportData(cachedData.data.reportData);
-          setUserData(cachedData.data.userData);
-          setAverageData(cachedData.data.averageData);
-          setIsValidAccess(true);
-          setDataSource('cache');
-          setIsLoading(false);
-          return;
-        }
-      }
-
-      // Determine report type and data source
-      const reportType: ReportType = isInsightsReport ? 'insight' : 'deepDive';
-      
-      // Validate token access if provided
-      if (token) {
+    // Validate token access if provided
+    if (token) {
+      try {
         const { data: accessData, error: accessError } = await fetchTokenAccess(archetypeId, token);
         
         if (accessError) {
           console.error('Token validation error:', accessError);
+          setError(new Error(accessError.message || 'Invalid or expired access token'));
+          setIsValidAccess(false);
+          return false;
         }
         
         if (!accessData) {
           setIsValidAccess(false);
-          setError(new Error('Invalid or expired access token'));
-          setIsLoading(false);
-          return;
+          return false;
         }
         
-        // Check if token has expired - access data now includes expires_at from our updated fetchTokenAccess
-        if (accessData.expires_at && new Date(accessData.expires_at) < new Date()) {
-          setIsValidAccess(false);
-          setError(new Error('Your access token has expired'));
-          setIsLoading(false);
-          return;
-        }
-        
-        setIsValidAccess(true);
         setUserData(accessData);
-      } else {
         setIsValidAccess(true);
+        return true;
+      } catch (err) {
+        console.error('Error validating token:', err);
+        setError(err instanceof Error ? err : new Error('Unknown error validating token'));
+        setIsValidAccess(false);
+        return false;
       }
+    }
 
-      // Use React Query for data fetching with the correct property names for v5
-      const fetchedData = await fetchReportData(archetypeId, reportType);
-      
-      // Log success for debugging
-      console.log(`[${new Date().toISOString()}] Report data fetched successfully`);
-      
-      if (fetchedData) {
-        const processedData = processReportData(fetchedData);
-        setReportData(processedData.reportData);
-        setAverageData(processedData.averageData);
-        setDataSource(getDataSource(reportType));
+    // No token and not insights report - not valid
+    setIsValidAccess(false);
+    return false;
+  }, [archetypeId, token, isInsightsReport]);
 
-        // Cache successful results
-        setInCache(cacheKey, {
+  // Effect to validate token on mount or when dependencies change
+  useEffect(() => {
+    validateTokenAccess();
+  }, [validateTokenAccess]);
+
+  // Function to fetch report data
+  const fetchReport = useCallback(async () => {
+    if (!archetypeId) {
+      throw new Error('Missing archetype ID');
+    }
+
+    // Cache key for the report data
+    const cacheKey = `report-${archetypeId}-${token}`;
+    
+    // Check cache first if not skipping
+    if (!skipCache) {
+      const cachedData = getFromCache(cacheKey);
+      if (cachedData) {
+        console.log(`[useReportData] Using cached data for ${archetypeId}`);
+        return {
+          reportData: cachedData.data.reportData,
+          averageData: cachedData.data.averageData
+        };
+      }
+    }
+
+    // Fetch the report data
+    const reportData = await fetchReportData(archetypeId, reportType);
+    
+    if (!reportData) {
+      throw new Error(`No report data found for ${archetypeId}`);
+    }
+    
+    // Process the data
+    const processedData = processReportData(reportData);
+    
+    // Save to cache
+    setInCache(cacheKey, {
+      reportData: processedData.reportData,
+      userData,
+      averageData: processedData.averageData
+    });
+    
+    // Store as fallback data in localStorage
+    try {
+      localStorage.setItem(
+        `${FALLBACK_REPORT_KEY}-${archetypeId}`, 
+        JSON.stringify({
           reportData: processedData.reportData,
-          userData,
-          averageData: processedData.averageData
+          averageData: processedData.averageData,
+          timestamp: new Date().toISOString()
+        })
+      );
+    } catch (e) {
+      console.warn('Could not save fallback data to localStorage:', e);
+    }
+    
+    return processedData;
+  }, [archetypeId, token, userData, reportType, skipCache]);
+
+  // Function to get fallback data from localStorage
+  const getFallbackData = useCallback(() => {
+    try {
+      const fallbackData = localStorage.getItem(`${FALLBACK_REPORT_KEY}-${archetypeId}`);
+      if (fallbackData) {
+        const parsed = JSON.parse(fallbackData);
+        console.log(`[useReportData] Using fallback data for ${archetypeId} from ${parsed.timestamp}`);
+        setIsUsingFallbackData(true);
+        return {
+          reportData: parsed.reportData,
+          averageData: parsed.averageData
+        };
+      }
+    } catch (e) {
+      console.error('Error loading fallback data:', e);
+    }
+    return null;
+  }, [archetypeId]);
+
+  // Use React Query for data fetching with the correct property names for v5
+  const { 
+    data: reportDataResult, 
+    isLoading, 
+    error: queryError,
+    refetch 
+  } = useQuery({
+    queryKey,
+    queryFn: fetchReport,
+    ...reportDataQueryOptions,
+    enabled: isValidAccess && !!archetypeId,
+    onError: (error: Error) => {
+      console.error('Error fetching report data:', error);
+      setError(error);
+      
+      // Try to use fallback data when an error occurs
+      const fallbackData = getFallbackData();
+      if (fallbackData) {
+        // Set the result data directly
+        setAverageData(fallbackData.averageData);
+        toast({
+          title: "Using cached report data",
+          description: "The latest data couldn't be retrieved. Showing previously loaded data.",
+          variant: "warning"
+        });
+      } else {
+        toast({
+          title: "Error Loading Report",
+          description: error.message,
+          variant: "destructive"
         });
       }
-
-    } catch (err) {
-      console.error('Error loading report data:', err);
-      setError(err instanceof Error ? err : new Error('Unknown error loading report'));
-    } finally {
-      setIsLoading(false);
     }
-  }, [archetypeId, token, isInsightsReport, skipCache]);
+  });
 
-  // Load data on mount and when dependencies change
+  // Update average data when report data changes
   useEffect(() => {
-    loadReportData();
-  }, [loadReportData]);
+    if (reportDataResult) {
+      setAverageData(reportDataResult.averageData);
+      setDataSource(getDataSource(reportType));
+      setIsUsingFallbackData(false);
+    }
+  }, [reportDataResult, reportType]);
 
+  // Retry function
   const retry = useCallback(() => {
-    setIsLoading(true);
     setError(null);
     const cacheKey = `report-${archetypeId}-${token}`;
     clearFromCache(cacheKey);
-  }, [archetypeId, token]);
+    refetch();
+  }, [archetypeId, token, refetch]);
 
+  // Refresh data function
   const refreshData = useCallback(async () => {
     toast({
       title: "Refreshing Report Data",
@@ -153,7 +240,7 @@ export const useReportData = ({
     clearFromCache(cacheKey);
     
     try {
-      await loadReportData();
+      await refetch();
       toast({
         title: "Refresh Successful",
         description: "Report data has been updated."
@@ -165,17 +252,18 @@ export const useReportData = ({
         variant: "destructive"
       });
     }
-  }, [archetypeId, token, loadReportData]);
+  }, [archetypeId, token, refetch]);
 
   return {
-    reportData,
+    reportData: reportDataResult?.reportData || null,
     userData,
     averageData,
     isLoading,
     isValidAccess,
-    error,
+    error: error || (queryError as Error) || null,
     dataSource,
     retry,
-    refreshData
+    refreshData,
+    isUsingFallbackData
   };
 };

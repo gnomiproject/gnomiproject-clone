@@ -11,6 +11,7 @@ import { Card } from '@/components/ui/card';
 import ReportLoadingState from '@/components/report/ReportLoadingState';
 import ReportError from '@/components/report/ReportError';
 import { checkCacheHealth, getCacheStats } from '@/utils/reports/reportCache';
+import FallbackBanner from '@/components/report/FallbackBanner';
 
 // This is a simplified version of ReportViewer focused on token-based access
 const ReportViewer = () => {
@@ -18,11 +19,12 @@ const ReportViewer = () => {
   const [debugMode, setDebugMode] = useState(false); // Changed to false to hide debug by default
   // State to track when to refresh data
   const [refreshCounter, setRefreshCounter] = useState(0);
-  // New state for token monitoring
-  const [tokenStatus, setTokenStatus] = useState<'valid' | 'checking' | 'warning' | 'error'>('checking');
+  // State for token monitoring
+  const [tokenStatus, setTokenStatus] = useState<'valid' | 'checking' | 'warning' | 'error' | 'grace-period'>('checking');
   const [lastStatusCheck, setLastStatusCheck] = useState<number>(Date.now());
   const [sessionStartTime] = useState<number>(Date.now());
   const [errorDetails, setErrorDetails] = useState<any>(null);
+  const [isUsingFallbackData, setIsUsingFallbackData] = useState<boolean>(false);
   const pageActive = useRef<boolean>(true);
   
   // Normalize the archetype ID to handle case sensitivity
@@ -97,7 +99,8 @@ const ReportViewer = () => {
     isLoading: reportLoading,
     error: reportError,
     debugInfo: reportDebugInfo,
-    refreshData // This is now properly defined in useReportAccess
+    refreshData, // This is now properly defined in useReportAccess
+    isUsingFallbackData: isFallbackData
   } = useReportAccess({
     archetypeId, 
     token: token || '',
@@ -105,7 +108,12 @@ const ReportViewer = () => {
     skipCache: refreshCounter > 0 // Skip cache if we're refreshing
   });
   
-  // Check token status every 30 seconds
+  // Update fallback data state
+  useEffect(() => {
+    setIsUsingFallbackData(isFallbackData || false);
+  }, [isFallbackData]);
+  
+  // Check token status every 5 minutes (was 30 seconds)
   const checkTokenStatus = useCallback(() => {
     if (token && !isAdminView) {
       // Set status to checking
@@ -117,6 +125,14 @@ const ReportViewer = () => {
       
       if (userDataError) {
         console.warn('[ReportViewer] Token validation failed:', userDataError.message);
+        
+        // Check for grace period
+        if (userData?.status === 'grace-period') {
+          console.log('[ReportViewer] Token is in grace period, still showing data with warning');
+          setTokenStatus('grace-period');
+          return;
+        }
+        
         setTokenStatus('error');
         setErrorDetails({
           type: 'token',
@@ -137,30 +153,15 @@ const ReportViewer = () => {
         return;
       }
       
-      if (userData?.expires_at) {
-        const expiryDate = new Date(userData.expires_at);
-        const now = new Date();
-        const daysRemaining = (expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
-        
-        if (daysRemaining <= 0) {
-          console.error('[ReportViewer] Token has expired');
-          setTokenStatus('error');
-          setErrorDetails({
-            type: 'expiration',
-            message: `Token expired on ${expiryDate.toLocaleString()}`,
-            timestamp: Date.now()
-          });
-          return;
-        }
-        
-        if (daysRemaining < 3) {
-          console.warn('[ReportViewer] Token will expire soon:', {
-            expiry: expiryDate.toLocaleString(),
-            daysRemaining: daysRemaining.toFixed(1)
-          });
-          setTokenStatus('warning');
-          return;
-        }
+      // Check if token is about to expire
+      if (userData?.status === 'expiring-soon') {
+        console.warn('[ReportViewer] Token will expire soon');
+        setTokenStatus('warning');
+        return;
+      } else if (userData?.status === 'grace-period') {
+        console.warn('[ReportViewer] Token is in grace period');
+        setTokenStatus('grace-period');
+        return;
       }
       
       // All checks passed
@@ -169,7 +170,7 @@ const ReportViewer = () => {
     }
   }, [token, isAdminView, isValidAccess, userDataError, userData, sessionStartTime]);
   
-  // Set up periodic token checks
+  // Set up periodic token checks - now every 5 minutes instead of 30 seconds
   useEffect(() => {
     if (!token || isAdminView) return;
     
@@ -178,13 +179,13 @@ const ReportViewer = () => {
       checkTokenStatus();
     }
     
-    // Set up timer for periodic checks
+    // Set up timer for periodic checks - increased to 5 minutes
     const timer = setInterval(() => {
       // Only run check if page is active
       if (pageActive.current) {
         checkTokenStatus();
       }
-    }, 30 * 1000); // Every 30 seconds
+    }, 5 * 60 * 1000); // Every 5 minutes
     
     return () => {
       clearInterval(timer);
@@ -224,6 +225,14 @@ const ReportViewer = () => {
     }
   }, [reportData, reportLoading, tokenStatus]);
 
+  // Handler for requesting new access token
+  const handleRequestNewToken = () => {
+    // Redirect to a form or API to request a new token
+    const emailSubject = `Token renewal request for ${archetypeId}`;
+    const emailBody = `Hi, my token for archetype ${archetypeId} has expired. Please provide a new access token.`;
+    window.open(`mailto:support@example.com?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`);
+  };
+
   // Combined debug info
   const combinedDebugInfo = {
     ...userDataDebugInfo,
@@ -241,7 +250,8 @@ const ReportViewer = () => {
       lastStatusCheck: new Date(lastStatusCheck).toISOString(),
       sessionDuration: ((Date.now() - sessionStartTime) / 1000).toFixed(1) + 's',
       cacheHealth: checkCacheHealth(),
-      cacheStats: getCacheStats()
+      cacheStats: getCacheStats(),
+      isUsingFallbackData
     }
   };
 
@@ -269,8 +279,42 @@ const ReportViewer = () => {
     return <ReportLoadingState />;
   }
 
+  // Handle various error and fallback scenarios
+
+  // If we have a token error but fallback data is available, show the report with a warning
+  if (tokenStatus === 'error' && isUsingFallbackData && reportData) {
+    return (
+      <ErrorBoundary onError={handleError} name="Report Viewer">
+        <div className="min-h-screen bg-gray-50">
+          {/* Error banner for expired token but showing fallback data */}
+          <div className="bg-red-50 border-b border-red-200 p-4 text-center">
+            <p className="text-base text-red-700">
+              <span className="font-semibold">Access Token Expired:</span> You're viewing a cached copy of this report.
+            </p>
+            <button
+              onClick={handleRequestNewToken}
+              className="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+            >
+              Request New Access Token
+            </button>
+          </div>
+          
+          <DeepDiveReport
+            reportData={reportData}
+            userData={userData}
+            averageData={averageData}
+            isAdminView={false}
+            debugInfo={combinedDebugInfo}
+            isLoading={false}
+            error={null} // Suppress error since we're showing fallback
+          />
+        </div>
+      </ErrorBoundary>
+    );
+  }
+
   // Show access error with enhanced debug info
-  if (!isAdminView && token && !isValidAccess) {
+  if (!isAdminView && token && !isValidAccess && !isUsingFallbackData) {
     console.error('[ReportViewer] Access error:', {
       token: token ? `${token.substring(0, 5)}...` : 'missing',
       error: userDataError?.message || 'Unknown validation error',
@@ -283,12 +327,14 @@ const ReportViewer = () => {
         message={userDataError?.message || 'Invalid or expired access token.'}
         actionLabel="Return Home"
         onAction={() => navigate('/')}
+        secondaryAction={handleRequestNewToken}
+        secondaryActionLabel="Request New Access Token"
       />
     );
   }
 
   // Show data fetch error with more helpful details
-  if (reportError) {
+  if (reportError && !isUsingFallbackData) {
     console.error('[ReportViewer] Data error:', reportError);
     
     return (
@@ -307,7 +353,7 @@ const ReportViewer = () => {
   }
 
   // Show missing data error with archetype details
-  if (!reportData) {
+  if (!reportData && !isUsingFallbackData) {
     console.error('[ReportViewer] No report data found for:', archetypeId);
     
     return (
@@ -334,6 +380,27 @@ const ReportViewer = () => {
           </div>
         )}
         
+        {/* Grace period banner */}
+        {tokenStatus === 'grace-period' && !isAdminView && (
+          <div className="bg-orange-50 border-b border-orange-200 p-3 text-center">
+            <p className="text-sm text-orange-700">
+              <span className="font-semibold">Access Token Expired:</span> This report is viewable in grace period mode.
+            </p>
+            <button
+              onClick={handleRequestNewToken}
+              className="mt-2 px-3 py-1 bg-orange-600 text-white text-sm rounded hover:bg-orange-700"
+            >
+              Request New Access Token
+            </button>
+          </div>
+        )}
+        
+        {/* Fallback data banner */}
+        <FallbackBanner 
+          show={isUsingFallbackData} 
+          message="This report is showing previously cached data because the latest data could not be retrieved."
+        />
+        
         <DeepDiveReport
           reportData={reportData} // Using only the data from level4_report_secure
           userData={userData}
@@ -354,6 +421,7 @@ const ReportViewer = () => {
               console.log('Session Duration:', ((Date.now() - sessionStartTime) / 1000).toFixed(1) + 's');
               console.log('Token Status:', { status: tokenStatus, lastCheck: new Date(lastStatusCheck).toLocaleString() });
               console.log('User Data:', userData);
+              console.log('Using Fallback Data:', isUsingFallbackData);
               console.log('Report Data Sample:', reportData ? {
                 id: reportData.id || reportData.archetype_id,
                 name: reportData.name || reportData.archetype_name

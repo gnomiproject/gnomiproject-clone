@@ -27,6 +27,8 @@ interface TokenAccessResponse {
 
 // Add buffer period (in hours) before expiration to warn about soon-to-expire tokens
 const TOKEN_EXPIRATION_BUFFER_HOURS = 24;
+// Add grace period (in hours) after expiration to still show data with warning
+const TOKEN_EXPIRATION_GRACE_HOURS = 1;
 
 export const fetchTokenAccess = async (archetypeId: string, token: string): Promise<TokenAccessResponse> => {
   console.log(`[fetchTokenAccess] Validating token for ${archetypeId} (Token: ${token.substring(0, 5)}...)`);
@@ -39,16 +41,21 @@ export const fetchTokenAccess = async (archetypeId: string, token: string): Prom
     const bufferThreshold = new Date();
     bufferThreshold.setHours(now.getHours() + TOKEN_EXPIRATION_BUFFER_HOURS);
     
+    // Calculate grace period (current time - grace period)
+    const gracePeriodThreshold = new Date();
+    gracePeriodThreshold.setHours(now.getHours() - TOKEN_EXPIRATION_GRACE_HOURS);
+    
     console.log(`[fetchTokenAccess] Current time: ${now.toISOString()}`);
     console.log(`[fetchTokenAccess] Buffer threshold: ${bufferThreshold.toISOString()}`);
+    console.log(`[fetchTokenAccess] Grace period threshold: ${gracePeriodThreshold.toISOString()}`);
     
-    // Query the database for the token
+    // Query the database for the token - WITHOUT expiration check
+    // We will check expiration in JavaScript with grace period
     const result = await supabase
       .from('report_requests')
       .select('id, archetype_id, name, organization, email, created_at, expires_at, status, access_count, assessment_result, exact_employee_count')
       .eq('archetype_id', archetypeId)
       .eq('access_token', token)
-      .gt('expires_at', now.toISOString()) // Token must not be expired
       .maybeSingle();
     
     // Log validation attempt results  
@@ -67,41 +74,7 @@ export const fetchTokenAccess = async (archetypeId: string, token: string): Prom
     }
     
     if (!result.data) {
-      console.warn(`[fetchTokenAccess] No valid token found for ${archetypeId}`);
-      
-      // Do a second query without the expiration check to see if the token exists but is expired
-      const expiredCheck = await supabase
-        .from('report_requests')
-        .select('id, expires_at, status')
-        .eq('archetype_id', archetypeId)
-        .eq('access_token', token)
-        .maybeSingle();
-        
-      if (expiredCheck.data) {
-        const isExpired = new Date(expiredCheck.data.expires_at) <= now;
-        const isInactive = expiredCheck.data.status !== 'active';
-        
-        console.warn(`[fetchTokenAccess] Token found but invalid. Expired: ${isExpired}, Inactive: ${isInactive}`);
-        
-        return { 
-          data: null, 
-          error: { 
-            message: isExpired 
-              ? `Token expired on ${new Date(expiredCheck.data.expires_at).toLocaleString()}` 
-              : 'Token is no longer active'
-          },
-          debugInfo: {
-            timestamp: now.toISOString(),
-            archetypeId,
-            tokenPreview: token.substring(0, 5) + '...',
-            found: true,
-            isExpired,
-            isInactive,
-            expiresAt: expiredCheck.data.expires_at,
-            status: expiredCheck.data.status
-          }
-        };
-      }
+      console.warn(`[fetchTokenAccess] No token found for ${archetypeId}`);
       
       return { 
         data: null, 
@@ -115,28 +88,96 @@ export const fetchTokenAccess = async (archetypeId: string, token: string): Prom
       };
     }
     
-    // Check if token is close to expiration (within buffer period)
-    const expirationDate = new Date(result.data.expires_at || '');
-    const isNearExpiration = expirationDate <= bufferThreshold;
+    // Validate token status and expiration with grace period
+    const tokenData = result.data;
+    const isInactive = tokenData.status !== 'active';
+    let isExpired = false;
+    let isWithinGracePeriod = false;
     
-    if (isNearExpiration) {
-      const hoursRemaining = Math.round((expirationDate.getTime() - now.getTime()) / (1000 * 60 * 60));
-      console.warn(`[fetchTokenAccess] Token will expire soon: ${hoursRemaining} hours remaining`);
+    if (tokenData.expires_at) {
+      const expirationDate = new Date(tokenData.expires_at);
+      isExpired = expirationDate <= now;
+      isWithinGracePeriod = isExpired && expirationDate >= gracePeriodThreshold;
+      
+      console.log(`[fetchTokenAccess] Token expiration details:`, {
+        expirationDate: expirationDate.toISOString(),
+        isExpired,
+        isWithinGracePeriod,
+        gracePeriodThreshold: gracePeriodThreshold.toISOString()
+      });
+    }
+    
+    // Return invalid for inactive tokens
+    if (isInactive) {
+      console.warn(`[fetchTokenAccess] Token found but inactive for ${archetypeId}`);
+      return { 
+        data: null, 
+        error: { 
+          message: 'Token is no longer active',
+          code: 'INACTIVE_TOKEN'
+        },
+        debugInfo: {
+          timestamp: now.toISOString(),
+          archetypeId,
+          tokenPreview: token.substring(0, 5) + '...',
+          found: true,
+          isInactive,
+          status: tokenData.status
+        }
+      };
+    }
+    
+    // Handle expired tokens outside grace period
+    if (isExpired && !isWithinGracePeriod) {
+      console.warn(`[fetchTokenAccess] Token expired for ${archetypeId} (outside grace period)`);
+      return { 
+        data: null, 
+        error: { 
+          message: `Token expired on ${new Date(tokenData.expires_at || '').toLocaleString()}`,
+          code: 'EXPIRED_TOKEN'
+        },
+        debugInfo: {
+          timestamp: now.toISOString(),
+          archetypeId,
+          tokenPreview: token.substring(0, 5) + '...',
+          found: true,
+          isExpired,
+          expiresAt: tokenData.expires_at
+        }
+      };
+    }
+    
+    // For expired tokens within grace period, add a warning flag
+    if (isExpired && isWithinGracePeriod) {
+      console.warn(`[fetchTokenAccess] Token expired but within grace period for ${archetypeId}`);
+      // Add a warning flag to the data
+      tokenData.status = 'grace-period';
+    }
+    
+    // Check if token is close to expiration (within buffer period)
+    if (tokenData.expires_at) {
+      const expirationDate = new Date(tokenData.expires_at || '');
+      const isNearExpiration = expirationDate <= bufferThreshold && !isExpired;
+      
+      if (isNearExpiration) {
+        const hoursRemaining = Math.round((expirationDate.getTime() - now.getTime()) / (1000 * 60 * 60));
+        console.warn(`[fetchTokenAccess] Token will expire soon: ${hoursRemaining} hours remaining`);
+        // Add expiration warning
+        tokenData.status = 'expiring-soon';
+      }
     }
     
     console.log(`[fetchTokenAccess] Token validated successfully for ${archetypeId}`);
     
     return { 
-      data: result.data,
+      data: tokenData,
       error: null,
       debugInfo: {
         timestamp: now.toISOString(),
         archetypeId,
         tokenPreview: token.substring(0, 5) + '...',
-        validUntil: result.data.expires_at,
-        isNearExpiration,
-        hoursRemaining: isNearExpiration ? 
-          Math.round((expirationDate.getTime() - now.getTime()) / (1000 * 60 * 60)) : null
+        validUntil: tokenData.expires_at,
+        status: tokenData.status
       }
     };
   } catch (error) {

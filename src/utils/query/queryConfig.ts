@@ -21,3 +21,11 @@ export const staticDataQueryOptions = {
   refetchOnReconnect: false,
   refetchOnMount: false,
 };
+
+// Config specifically for report data that includes fallback and error handling
+export const reportDataQueryOptions = {
+  ...staticDataQueryOptions,
+  retry: 1,               // Limit retries
+  retryDelay: 5000,       // Longer delay between retries
+  // Add specialized error handlers in the components using this config
+};
