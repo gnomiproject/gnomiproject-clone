@@ -74,11 +74,13 @@ const UtilizationInsights = ({
                 <h3 className="text-md font-medium mb-2">Key Findings:</h3>
                 <ul className="list-disc pl-5 space-y-2">
                   {Object.entries(parsedInsights.findings).map(([key, value]: [string, any], index) => {
-                    // Clean up the key - remove numbers and colons at the beginning
+                    // Clean up the key - remove numbers, colons and any whitespace at the beginning
+                    // Then add spaces before capital letters for better readability
                     const cleanKey = key
-                      .replace(/^\d+\s*/, '')  // Remove leading numbers
-                      .replace(/^:\s*/, '')    // Remove leading colons
-                      .replace(/([A-Z])/g, ' $1').trim(); // Add spaces before capital letters
+                      .replace(/^\d+[\s:]*/, '')    // Remove leading numbers with any spaces or colons that follow
+                      .replace(/^[:\s]+/, '')       // Remove any remaining leading colons or spaces
+                      .replace(/([A-Z])/g, ' $1')   // Add spaces before capital letters
+                      .trim();                      // Remove any extra whitespace
                       
                     return (
                       <li key={index} className="text-gray-700">
