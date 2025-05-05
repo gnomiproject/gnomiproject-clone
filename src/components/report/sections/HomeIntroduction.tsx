@@ -81,6 +81,7 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
       {/* Main report introduction */}
       <ReportIntroduction 
         userData={userData} 
+        reportData={archetypeData}
         archetypeId={archetypeId}
         archetypeName={archetypeName}
         familyName={familyName}
@@ -106,6 +107,7 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
           shortDescription={shortDescription}
           keyFindings={keyFindings}
           topPriority={typeof topPriority === 'string' ? topPriority : topPriority?.title || topPriority?.description}
+          archetypeId={archetypeId}
         />
       </div>
       

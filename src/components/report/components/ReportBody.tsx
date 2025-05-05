@@ -1,3 +1,4 @@
+
 import React, { lazy, Suspense, useEffect, useState } from 'react';
 import { Section } from '@/components/shared/Section';
 import ReportDebugTools from '../ReportDebugTools';
@@ -106,6 +107,7 @@ const ReportBody: React.FC<ReportBodyProps> = ({
     reportDataSample: reportData ? {
       id: reportData.id || reportData.archetype_id,
       name: reportData.name || reportData.archetype_name,
+      hasKeyFindings: !!reportData.key_findings
     } : 'No data'
   });
 
@@ -128,7 +130,14 @@ const ReportBody: React.FC<ReportBodyProps> = ({
       {/* Sections in the reordered sequence */}
       <Section id="introduction">
         <Suspense fallback={<SectionLoading />}>
-          <LazyReportIntroduction userData={userData} />
+          <LazyReportIntroduction 
+            userData={userData} 
+            reportData={reportData}
+            archetypeId={reportData?.archetype_id || reportData?.id}
+            archetypeName={reportData?.name || reportData?.archetype_name}
+            familyName={reportData?.family_name}
+            shortDescription={reportData?.short_description}
+          />
         </Suspense>
       </Section>
       

@@ -4,9 +4,11 @@ import { ArchetypeId } from '@/types/archetype';
 import { getArchetypeColorHex } from '@/data/colors';
 import { Badge } from '@/components/ui/badge';
 import WebsiteImage from '@/components/common/WebsiteImage';
+import ArchetypeInsightsCard from './introduction/ArchetypeInsightsCard';
 
 interface ReportIntroductionProps {
   userData: any;
+  reportData?: any;
   archetypeId?: ArchetypeId;
   archetypeName?: string;
   familyName?: string;
@@ -15,6 +17,7 @@ interface ReportIntroductionProps {
 
 const ReportIntroduction = ({ 
   userData,
+  reportData,
   archetypeId = 'a1' as ArchetypeId,
   archetypeName,
   familyName,
@@ -25,12 +28,31 @@ const ReportIntroduction = ({
   const employeeCount = userData?.exact_employee_count || userData?.assessment_result?.exactData?.employeeCount;
   const archetypeColor = archetypeId ? getArchetypeColorHex(archetypeId) : '#00B0F0';
   
+  // Log for debugging
+  console.log("ReportIntroduction - reportData:", reportData ? {
+    id: reportData.id || reportData.archetype_id,
+    name: reportData.name || reportData.archetype_name,
+    hasKeyFindings: !!reportData.key_findings
+  } : 'No reportData');
+  console.log("ReportIntroduction - key_findings:", reportData?.key_findings || 'No key findings');
+  
+  // Extract key findings from reportData
+  const keyFindings = reportData?.key_findings || [];
+  
+  // Extract top priority from strategic_recommendations if available
+  const topPriority = Array.isArray(reportData?.strategic_recommendations) && 
+                     reportData.strategic_recommendations.length > 0
+                     ? reportData.strategic_recommendations[0].description || reportData.strategic_recommendations[0].title
+                     : undefined;
+
   // Keep logger for debugging
   console.log('[ReportIntroduction] Rendering with:', {
     archetypeId,
     archetypeName,
     familyName,
-    color: archetypeColor
+    color: archetypeColor,
+    keyFindingsCount: keyFindings?.length || 0,
+    hasTopPriority: !!topPriority
   });
 
   return (
@@ -107,6 +129,20 @@ const ReportIntroduction = ({
           </div>
         </div>
       </div>
+
+      {/* Archetype Insights Card - Add it here */}
+      {reportData && (
+        <div className="mt-8 mb-8 relative z-0">
+          <ArchetypeInsightsCard
+            archetypeName={archetypeName || reportData.name || reportData.archetype_name || 'Unknown Archetype'}
+            familyName={familyName || reportData.family_name || 'Unknown Family'}
+            shortDescription={shortDescription || reportData.short_description || ''}
+            keyFindings={keyFindings}
+            topPriority={topPriority}
+            archetypeId={archetypeId || reportData.archetype_id || reportData.id}
+          />
+        </div>
+      )}
     </div>
   );
 };
