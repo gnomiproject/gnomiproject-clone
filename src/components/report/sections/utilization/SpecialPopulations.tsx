@@ -128,19 +128,6 @@ const SpecialPopulations = ({
             </div>
           </div>
         </div>
-
-        <div className="mt-6 bg-yellow-50 p-4 rounded-lg text-sm border border-yellow-100">
-          <h4 className="font-medium mb-2 text-yellow-800">Opportunity Analysis</h4>
-          <p className="text-yellow-700 mb-2">
-            The concentration of healthcare costs in a small percentage of members presents both challenges and opportunities for care management:
-          </p>
-          <ul className="list-disc pl-5 space-y-1 text-yellow-700">
-            <li>Consider targeted case management programs for high-cost members</li>
-            <li>Analyze characteristics of non-utilizers to identify potential care barriers</li>
-            <li>Implement preventive care outreach to convert non-utilizers to appropriate care users</li>
-            <li>Examine high-cost conditions to identify potential early intervention opportunities</li>
-          </ul>
-        </div>
       </CardContent>
     </Card>
   );
