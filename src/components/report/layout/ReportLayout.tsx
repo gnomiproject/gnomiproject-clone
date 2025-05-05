@@ -28,7 +28,7 @@ const ReportLayout: React.FC<ReportLayoutProps> = ({
     { id: 'care-gaps', name: 'Care Gaps' },
     { id: 'risk-factors', name: 'Risk Factors' },
     { id: 'recommendations', name: 'Recommendations' },
-    { id: 'contact', name: 'Contact' },
+    { id: 'about-report', name: 'About This Report' }, // Changed 'contact' to 'about-report'
   ];
 
   return (

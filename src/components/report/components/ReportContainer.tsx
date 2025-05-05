@@ -18,7 +18,7 @@ const REPORT_SECTIONS = [
   { id: 'cost-analysis', name: 'Cost Analysis' },
   { id: 'swot-analysis', name: 'SWOT Analysis' },
   { id: 'recommendations', name: 'Recommendations' },
-  { id: 'contact', name: 'Contact' },
+  { id: 'about-report', name: 'About This Report' }, // Changed 'contact' to 'about-report'
 ];
 
 // Lazy load ReportBody to improve initial load time
