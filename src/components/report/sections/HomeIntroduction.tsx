@@ -5,6 +5,7 @@ import SectionTitle from '@/components/shared/SectionTitle';
 import ReportIntroduction from './ReportIntroduction';
 import WelcomeCard from './introduction/WelcomeCard';
 import ArchetypeInsightsCard from './introduction/ArchetypeInsightsCard';
+import WebsiteImage from '@/components/common/WebsiteImage';
 
 interface HomeIntroductionProps {
   userData: any;
@@ -111,6 +112,32 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
           keyFindings={keyFindings}
           archetypeId={archetypeId}
         />
+      </div>
+      
+      {/* Welcome section with gnome - Moved to the bottom of the introduction section */}
+      <div className="bg-blue-50 border border-blue-100 rounded-lg p-6 mb-6 mt-8">
+        <div className="flex items-start gap-4">
+          <WebsiteImage 
+            type="magnifying_glass" 
+            altText="Gnome with magnifying glass"
+            className="h-40 w-40 object-contain flex-shrink-0"
+          />
+          <div>
+            <h2 className="text-xl font-semibold text-gray-800 mb-3">Let's Dive Deep</h2>
+            
+            <p className="text-gray-700 mb-3">
+              Thanks for requesting a closer look at your healthcare archetype. This report unpacks the patterns your organization shares with others like it—based on data from hundreds of employers and millions of covered lives.
+            </p>
+            
+            <p className="text-gray-700 mb-3">
+              Inside, you'll find insights to help you understand your workforce's healthcare behaviors, compare yourself to similar companies, and explore ideas for smarter benefits decisions.
+            </p>
+            
+            <p className="text-gray-700">
+              We're excited to help you turn these insights into action. Let's get started.
+            </p>
+          </div>
+        </div>
       </div>
     </Section>
   );
