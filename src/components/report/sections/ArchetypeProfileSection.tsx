@@ -116,11 +116,7 @@ const ArchetypeProfileSectionBase: React.FC<ArchetypeProfileSectionProps> = ({ a
                     >
                       {metric.difference > 0 ? '+' : ''}{metric.difference.toFixed(1)}%
                     </div>
-                    {metric.significance && (
-                      <span className="text-xs bg-gray-100 px-2 py-1 rounded text-gray-700">
-                        {metric.significance}
-                      </span>
-                    )}
+                    {/* Removed the significance badge here */}
                   </div>
                 </div>
               ))}
