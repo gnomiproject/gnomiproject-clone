@@ -19,6 +19,9 @@ const UtilizationPatterns = ({ reportData, averageData }: UtilizationPatternsPro
         Understanding how members access healthcare services provides crucial insights into population health management and cost-saving opportunities.
       </p>
 
+      {/* Utilization Insights - Moved to top */}
+      <UtilizationInsights reportData={reportData} />
+
       {/* Care Pathway Utilization */}
       <CarePathwayUtilization reportData={reportData} averageData={averageData} />
 
@@ -30,9 +33,6 @@ const UtilizationPatterns = ({ reportData, averageData }: UtilizationPatternsPro
 
       {/* Special Populations */}
       <SpecialPopulations reportData={reportData} averageData={averageData} />
-
-      {/* Utilization Insights */}
-      <UtilizationInsights reportData={reportData} />
     </div>
   );
 };

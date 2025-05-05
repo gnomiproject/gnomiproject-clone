@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartPie } from 'lucide-react';
@@ -9,10 +10,33 @@ interface UtilizationInsightsProps {
 const UtilizationInsights = ({
   reportData
 }: UtilizationInsightsProps) => {
+  // Try to parse JSON data if it exists
+  const parseInsights = () => {
+    try {
+      if (typeof reportData.utilization_patterns === 'string' && reportData.utilization_patterns.trim().startsWith('{')) {
+        const parsedData = JSON.parse(reportData.utilization_patterns);
+        
+        if (parsedData?.overview) {
+          return {
+            overview: parsedData.overview,
+            findings: parsedData.findings || [],
+            metrics: parsedData.key_metrics || []
+          };
+        }
+      }
+      return null;
+    } catch (error) {
+      console.error('Error parsing utilization insights:', error);
+      return null;
+    }
+  };
+
+  const parsedInsights = parseInsights();
+  
   // Handle case where there are no insights
   if (!reportData.utilization_patterns) {
     return (
-      <Card className="mt-6">
+      <Card className="mt-4 mb-8">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center text-lg">
             <ChartPie className="mr-2 h-5 w-5 text-yellow-600" />
@@ -26,13 +50,8 @@ const UtilizationInsights = ({
     );
   }
 
-  // Format insights into paragraphs
-  const insights = typeof reportData.utilization_patterns === 'string' 
-    ? reportData.utilization_patterns.split('\n').filter((line: string) => line.trim() !== '')
-    : [];
-
   return (
-    <Card className="mt-6">
+    <Card className="mt-4 mb-8">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center text-lg">
           <ChartPie className="mr-2 h-5 w-5 text-yellow-600" />
@@ -40,24 +59,66 @@ const UtilizationInsights = ({
         </CardTitle>
       </CardHeader>
       <CardContent className="p-6">
-        {insights.length > 0 ? (
+        {parsedInsights ? (
           <div className="space-y-4">
-            {insights.map((insight: string, index: number) => (
-              <div key={index} className="bg-blue-50 p-4 rounded-lg">
-                <p className="text-blue-800">{insight}</p>
+            {/* Overview section */}
+            {parsedInsights.overview && (
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <p className="text-blue-800">{parsedInsights.overview}</p>
               </div>
-            ))}
+            )}
+            
+            {/* Findings section as bullet points */}
+            {parsedInsights.findings && parsedInsights.findings.length > 0 && (
+              <div className="mt-4">
+                <h3 className="text-md font-medium mb-2">Key Findings:</h3>
+                <ul className="list-disc pl-5 space-y-2">
+                  {Object.entries(parsedInsights.findings).map(([key, value]: [string, any], index) => (
+                    <li key={index} className="text-gray-700">
+                      <span className="font-medium">{key.replace(/([A-Z])/g, ' $1').trim()}: </span>
+                      {value}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            
+            {/* Key metrics */}
+            {parsedInsights.metrics && parsedInsights.metrics.length > 0 && (
+              <div className="mt-4">
+                <h3 className="text-md font-medium mb-2">Key Metrics:</h3>
+                <ul className="list-disc pl-5 space-y-2">
+                  {parsedInsights.metrics.map((metric: any, index: number) => (
+                    <li key={index} className="text-gray-700">
+                      <span className="font-medium">{metric.name}: </span>
+                      {metric.value} <span className="text-gray-500">({metric.context})</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         ) : (
-          <div className="bg-yellow-50 p-4 rounded-lg">
-            <h3 className="text-lg font-medium text-yellow-800 mb-2">General Utilization Considerations</h3>
-            <ul className="list-disc pl-5 space-y-2 text-yellow-700">
-              <li>Monitor emergency department utilization to identify opportunities for redirecting care to more appropriate settings</li>
-              <li>Examine telehealth adoption rates to assess remote care engagement and digital access barriers</li>
-              <li>Review specialist to PCP visit ratios to ensure effective care coordination and appropriate referral patterns</li>
-              <li>Analyze high-cost claimant characteristics to develop targeted care management strategies</li>
-              <li>Consider plan design adjustments to encourage appropriate utilization of preventive and primary care services</li>
-            </ul>
+          // Fallback to raw string parsing and general information
+          <div>
+            {typeof reportData.utilization_patterns === 'string' && (
+              <div className="bg-blue-50 p-4 rounded-lg mb-4">
+                {reportData.utilization_patterns.split('\n').map((line: string, index: number) => (
+                  <p key={index} className="text-blue-800 mb-2">{line}</p>
+                ))}
+              </div>
+            )}
+            
+            <div className="bg-yellow-50 p-4 rounded-lg">
+              <h3 className="text-lg font-medium text-yellow-800 mb-2">General Utilization Considerations</h3>
+              <ul className="list-disc pl-5 space-y-2 text-yellow-700">
+                <li>Monitor emergency department utilization to identify opportunities for redirecting care to more appropriate settings</li>
+                <li>Examine telehealth adoption rates to assess remote care engagement and digital access barriers</li>
+                <li>Review specialist to PCP visit ratios to ensure effective care coordination and appropriate referral patterns</li>
+                <li>Analyze high-cost claimant characteristics to develop targeted care management strategies</li>
+                <li>Consider plan design adjustments to encourage appropriate utilization of preventive and primary care services</li>
+              </ul>
+            </div>
           </div>
         )}
       </CardContent>
