@@ -102,8 +102,16 @@ export const useReportAccess = ({
         id: data.archetype_id as ArchetypeId,
         name: data.archetype_name,
         familyId: data.family_id as FamilyId || 'unknown' as FamilyId,
-        key_characteristics: keyCharacteristicsArray,
-        ...data
+        key_characteristics: keyCharacteristicsArray, // Explicitly use the string array we prepared
+        short_description: data.short_description,
+        long_description: data.long_description,
+        hexColor: data.hex_color,
+        industries: data.industries,
+        // Include any additional properties from the original data
+        // but use the stringified array for key_characteristics
+        ...Object.fromEntries(
+          Object.entries(data).filter(([key]) => key !== 'key_characteristics')
+        )
       };
       
       // Process the data
