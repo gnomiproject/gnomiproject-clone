@@ -83,7 +83,7 @@ const ArchetypeInsightsCard: React.FC<ArchetypeInsightsCardProps> = ({
               {archetypeName} Insights
             </h3>
             <p className="text-sm text-gray-500">
-              <span className="font-semibold">{familyName} Family</span> • Healthcare Archetype Profile
+              Healthcare Archetype Profile
             </p>
             <p className="text-gray-600 mt-2 text-sm">
               {shortDescription}
