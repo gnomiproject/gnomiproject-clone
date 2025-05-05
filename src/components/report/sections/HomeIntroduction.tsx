@@ -5,6 +5,7 @@ import SectionTitle from '@/components/shared/SectionTitle';
 import ReportIntroduction from './ReportIntroduction';
 import WelcomeCard from './introduction/WelcomeCard';
 import ArchetypeOverviewCard from './introduction/ArchetypeOverviewCard';
+import ArchetypeInsightsCard from './introduction/ArchetypeInsightsCard';
 
 interface HomeIntroductionProps {
   userData: any;
@@ -42,6 +43,21 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
     : typeof rawCharacteristics === 'string' 
       ? [rawCharacteristics] 
       : [];
+      
+  // Get key findings for the insights card
+  const keyFindings = archetypeData?.key_findings || [
+    "High overall healthcare costs, especially in pharmacy spend",
+    "Above average prevalence of mental health disorders and chronic conditions",
+    "High utilization of specialist and emergency services",
+    "Significant gaps in preventive care and medication adherence",
+    "Moderate social determinants of health challenges"
+  ];
+  
+  // Get top strategic priority if available
+  const topPriority = Array.isArray(archetypeData?.strategic_recommendations) && 
+                     archetypeData.strategic_recommendations.length > 0
+                     ? archetypeData.strategic_recommendations[0]
+                     : "Implement integrated behavioral health programs to address mental health needs";
   
   // Debug logging
   console.log('[HomeIntroduction] Archetype data:', {
@@ -50,7 +66,8 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
     family: familyName,
     description: shortDescription.substring(0, 50) + '...',
     userData: userData ? `User data present for: ${userName}` : 'No user data',
-    archetypeObj: JSON.stringify(archetypeData).substring(0, 100) + '...'
+    archetypeObj: JSON.stringify(archetypeData).substring(0, 100) + '...',
+    keyFindings: keyFindings ? `${keyFindings.length} findings found` : 'No key findings'
   });
   
   return (
@@ -77,6 +94,17 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
           archetypeId={archetypeId}
           matchPercentage={matchPercentage}
           secondaryArchetype={secondaryArchetype}
+        />
+      </div>
+      
+      {/* Archetype Insights Card - New Component */}
+      <div className="mt-6">
+        <ArchetypeInsightsCard
+          archetypeName={archetypeName}
+          familyName={familyName}
+          shortDescription={shortDescription}
+          keyFindings={keyFindings}
+          topPriority={typeof topPriority === 'string' ? topPriority : topPriority?.title || topPriority?.description}
         />
       </div>
       
