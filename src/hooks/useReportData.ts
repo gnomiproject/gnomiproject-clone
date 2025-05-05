@@ -188,17 +188,12 @@ export const useReportData = ({ archetypeId, token, isInsightsReport = false, sk
     meta: {
       onError: (error: Error) => {
         console.error(`[useReportData] [${new Date().toISOString()}] Query error:`, error);
+      },
+      onSuccess: (data: any) => {
+        console.log(`[useReportData] [${new Date().toISOString()}] Report data fetched successfully`);
       }
-    },
-    onSuccess: (data) => {
-      console.log(`[useReportData] [${new Date().toISOString()}] Report data fetched successfully`);
-    },
-    onError: (error) => {
-      console.error(`[useReportData] [${new Date().toISOString()}] Error fetching report data:`, error);
     }
   });
-  
-  
   
   // Fetch average data for comparisons
   useEffect(() => {
