@@ -21,14 +21,7 @@ const UtilizationPatterns = ({ reportData, averageData }: UtilizationPatternsPro
       <div className="flex flex-col md:flex-row gap-8">
         <div className="md:w-2/3">
           <h1 className="text-3xl font-bold mb-6">Utilization Patterns</h1>
-          <p className="text-lg mb-2">
-            Understanding how members access healthcare services provides crucial insights into population health management
-            and cost-saving opportunities.
-          </p>
-          <p className="text-gray-600">
-            This section analyzes care pathways, hospital utilization, diagnostic services, and special populations
-            to identify patterns and opportunities for improvement.
-          </p>
+          {/* Removed the introductory paragraph text as requested */}
         </div>
         <div className="md:w-1/3 flex justify-center">
           <img
