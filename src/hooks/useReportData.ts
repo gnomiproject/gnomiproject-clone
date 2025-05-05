@@ -82,7 +82,7 @@ export const useReportData = ({ archetypeId, token, isInsightsReport = false, sk
       return null;
     }
     
-    console.log(`[useReportData] Fetching report data for archetype ${archetypeId} with token ${token.substring(0, 5)}...`);
+    console.log(`[useReportData] [${new Date().toISOString()}] Fetching report data for archetype ${archetypeId} with token ${token.substring(0, 5)}...`);
     
     try {
       // First validate the token
@@ -181,16 +181,24 @@ export const useReportData = ({ archetypeId, token, isInsightsReport = false, sk
     enabled: !!archetypeId && !!token && !isInsightsReport,
     retry: 2,
     retryDelay: (attempt) => Math.min(attempt * 1000, 3000), // Exponential backoff with max 3 second delay
-    staleTime: skipCache ? 0 : 1000 * 60 * 30, // 30 minutes (up from 5 minutes)
+    staleTime: 1000 * 60 * 120, // 2 hours (up from 5 minutes)
     gcTime: 1000 * 60 * 60, // 60 minutes
     refetchOnWindowFocus: false, // Prevents refetches when window regains focus
     refetchOnReconnect: false, // Prevents refetches on network reconnection
     meta: {
       onError: (error: Error) => {
-        console.error('[useReportData] Query error:', error);
+        console.error(`[useReportData] [${new Date().toISOString()}] Query error:`, error);
       }
+    },
+    onSuccess: (data) => {
+      console.log(`[useReportData] [${new Date().toISOString()}] Report data fetched successfully`);
+    },
+    onError: (error) => {
+      console.error(`[useReportData] [${new Date().toISOString()}] Error fetching report data:`, error);
     }
   });
+  
+  
   
   // Fetch average data for comparisons
   useEffect(() => {
@@ -253,7 +261,7 @@ export const useReportData = ({ archetypeId, token, isInsightsReport = false, sk
           }
         }
         
-        console.log(`[useReportData] Fetching detailed data for archetype ${archetypeId}`);
+        console.log(`[useReportData] [${new Date().toISOString()}] Fetching detailed data for archetype ${archetypeId}`);
         
         // Fetch from level4 secure view first (most detailed)
         const { data: detailedData, error: detailedError } = await supabase
@@ -267,7 +275,7 @@ export const useReportData = ({ archetypeId, token, isInsightsReport = false, sk
         }
         
         if (detailedData) {
-          console.log('[useReportData] Got detailed report data from level4');
+          console.log(`[useReportData] [${new Date().toISOString()}] Got detailed report data from level4`);
           // Map the data to match ArchetypeDetailedData
           const mappedData = mapToArchetypeDetailedData(detailedData);
           setReportData(mappedData);
@@ -294,7 +302,7 @@ export const useReportData = ({ archetypeId, token, isInsightsReport = false, sk
         }
         
         if (level3Data) {
-          console.log('[useReportData] Got report data from level3');
+          console.log(`[useReportData] [${new Date().toISOString()}] Got report data from level3`);
           // Map the data to match ArchetypeDetailedData
           const mappedLevel3Data = mapToArchetypeDetailedData(level3Data);
           setReportData(mappedLevel3Data);
@@ -355,7 +363,7 @@ export const useReportData = ({ archetypeId, token, isInsightsReport = false, sk
           };
           
           const mappedCombinedData = mapToArchetypeDetailedData(combinedData);
-          console.log('Constructed report data from multiple sources');
+          console.log(`[useReportData] [${new Date().toISOString()}] Constructed report data from multiple sources`);
           setReportData(mappedCombinedData);
           
           // Cache combined data
@@ -366,7 +374,7 @@ export const useReportData = ({ archetypeId, token, isInsightsReport = false, sk
           });
         }
       } catch (err) {
-        console.error('[useReportData] Error loading report data:', err);
+        console.error(`[useReportData] [${new Date().toISOString()}] Error loading report data:`, err);
       }
     };
     
@@ -393,11 +401,11 @@ export const useReportData = ({ archetypeId, token, isInsightsReport = false, sk
     const interval = setInterval(() => {
       // Only run validation check if we previously had valid access
       if (isValidAccess) {
-        console.log('[useReportData] Running periodic token validation check');
+        console.log(`[useReportData] [${new Date().toISOString()}] Running periodic token validation check`);
         
         // Use the existing retryValidation function from React Query
         retryValidation().catch(err => {
-          console.error('[useReportData] Periodic validation failed:', err);
+          console.error(`[useReportData] [${new Date().toISOString()}] Periodic validation failed:`, err);
           // Don't invalidate UI right away, just log the error
         });
       }
@@ -409,7 +417,7 @@ export const useReportData = ({ archetypeId, token, isInsightsReport = false, sk
   }, [isValidAccess, isInsightsReport, token, retryValidation]);
   
   const refreshData = () => {
-    console.log('[useReportData] Manually refreshing data');
+    console.log(`[useReportData] [${new Date().toISOString()}] Manually refreshing data`);
     setReportData(null);
     setUserData(null);
     clearFromCache(cacheKey);
