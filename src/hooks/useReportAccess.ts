@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -85,6 +86,10 @@ export const useReportAccess = ({
         id: data.archetype_id as ArchetypeId,
         name: data.archetype_name,
         familyId: data.family_id as FamilyId || 'unknown' as FamilyId,
+        // Convert key_characteristics to string[] if it's a string
+        key_characteristics: typeof data.key_characteristics === 'string' 
+          ? data.key_characteristics.split(',').map(item => item.trim())
+          : data.key_characteristics,
         // Include all other properties from data
         ...data
       };

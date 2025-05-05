@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { fetchTokenAccess } from './reports/useFetchReportData';
@@ -92,11 +93,12 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
             assessment_result: data.assessment_result,
             exact_employee_count: data.exact_employee_count,
             status: data.status as 'active' | 'inactive' | 'expiring-soon' | 'grace-period',
+            // Check if properties exist before assigning them
             access_count: data.access_count,
-            last_accessed: data.last_accessed,
-            expires_at: data.expires_at,
-            archetype_id: data.archetype_id,
-            access_url: data.access_url
+            last_accessed: data.last_accessed || undefined,
+            expires_at: data.expires_at || undefined,
+            archetype_id: data.archetype_id || archetypeId,
+            access_url: data.access_url || undefined
           };
           
           setUserData(reportUserData);
