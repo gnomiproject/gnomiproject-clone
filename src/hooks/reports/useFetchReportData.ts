@@ -11,7 +11,7 @@ interface TokenAccessData {
   organization: string;
   email: string;
   created_at: string;
-  expires_at?: string; // Added the expires_at property as optional
+  expires_at?: string;
   status?: string;
   access_count?: number;
   assessment_result?: any;
@@ -21,18 +21,139 @@ interface TokenAccessData {
 interface TokenAccessResponse {
   data: TokenAccessData | null;
   error: any;
+  debugInfo?: any;
 }
 
+// Add buffer period (in hours) before expiration to warn about soon-to-expire tokens
+const TOKEN_EXPIRATION_BUFFER_HOURS = 24;
+
 export const fetchTokenAccess = async (archetypeId: string, token: string): Promise<TokenAccessResponse> => {
-  return await supabase
-    .from('report_requests')
-    .select('id, archetype_id, name, organization, email, created_at, expires_at, status, access_count, assessment_result, exact_employee_count')
-    .eq('archetype_id', archetypeId)
-    .eq('access_token', token)
-    .gt('expires_at', new Date().toISOString())
-    .maybeSingle();
+  console.log(`[fetchTokenAccess] Validating token for ${archetypeId} (Token: ${token.substring(0, 5)}...)`);
+  
+  try {
+    // Get current time for validation
+    const now = new Date();
+    
+    // Calculate buffer time threshold (current time + buffer period)
+    const bufferThreshold = new Date();
+    bufferThreshold.setHours(now.getHours() + TOKEN_EXPIRATION_BUFFER_HOURS);
+    
+    console.log(`[fetchTokenAccess] Current time: ${now.toISOString()}`);
+    console.log(`[fetchTokenAccess] Buffer threshold: ${bufferThreshold.toISOString()}`);
+    
+    // Query the database for the token
+    const result = await supabase
+      .from('report_requests')
+      .select('id, archetype_id, name, organization, email, created_at, expires_at, status, access_count, assessment_result, exact_employee_count')
+      .eq('archetype_id', archetypeId)
+      .eq('access_token', token)
+      .gt('expires_at', now.toISOString()) // Token must not be expired
+      .maybeSingle();
+    
+    // Log validation attempt results  
+    if (result.error) {
+      console.error(`[fetchTokenAccess] Database error:`, result.error);
+      return { 
+        data: null, 
+        error: result.error,
+        debugInfo: {
+          timestamp: now.toISOString(),
+          archetypeId,
+          tokenPreview: token.substring(0, 5) + '...',
+          errorMessage: result.error.message
+        }
+      };
+    }
+    
+    if (!result.data) {
+      console.warn(`[fetchTokenAccess] No valid token found for ${archetypeId}`);
+      
+      // Do a second query without the expiration check to see if the token exists but is expired
+      const expiredCheck = await supabase
+        .from('report_requests')
+        .select('id, expires_at, status')
+        .eq('archetype_id', archetypeId)
+        .eq('access_token', token)
+        .maybeSingle();
+        
+      if (expiredCheck.data) {
+        const isExpired = new Date(expiredCheck.data.expires_at) <= now;
+        const isInactive = expiredCheck.data.status !== 'active';
+        
+        console.warn(`[fetchTokenAccess] Token found but invalid. Expired: ${isExpired}, Inactive: ${isInactive}`);
+        
+        return { 
+          data: null, 
+          error: { 
+            message: isExpired 
+              ? `Token expired on ${new Date(expiredCheck.data.expires_at).toLocaleString()}` 
+              : 'Token is no longer active'
+          },
+          debugInfo: {
+            timestamp: now.toISOString(),
+            archetypeId,
+            tokenPreview: token.substring(0, 5) + '...',
+            found: true,
+            isExpired,
+            isInactive,
+            expiresAt: expiredCheck.data.expires_at,
+            status: expiredCheck.data.status
+          }
+        };
+      }
+      
+      return { 
+        data: null, 
+        error: { message: 'Invalid access token' },
+        debugInfo: {
+          timestamp: now.toISOString(),
+          archetypeId,
+          tokenPreview: token.substring(0, 5) + '...',
+          found: false
+        }
+      };
+    }
+    
+    // Check if token is close to expiration (within buffer period)
+    const expirationDate = new Date(result.data.expires_at || '');
+    const isNearExpiration = expirationDate <= bufferThreshold;
+    
+    if (isNearExpiration) {
+      const hoursRemaining = Math.round((expirationDate.getTime() - now.getTime()) / (1000 * 60 * 60));
+      console.warn(`[fetchTokenAccess] Token will expire soon: ${hoursRemaining} hours remaining`);
+    }
+    
+    console.log(`[fetchTokenAccess] Token validated successfully for ${archetypeId}`);
+    
+    return { 
+      data: result.data,
+      error: null,
+      debugInfo: {
+        timestamp: now.toISOString(),
+        archetypeId,
+        tokenPreview: token.substring(0, 5) + '...',
+        validUntil: result.data.expires_at,
+        isNearExpiration,
+        hoursRemaining: isNearExpiration ? 
+          Math.round((expirationDate.getTime() - now.getTime()) / (1000 * 60 * 60)) : null
+      }
+    };
+  } catch (error) {
+    console.error(`[fetchTokenAccess] Unexpected error:`, error);
+    return { 
+      data: null, 
+      error, 
+      debugInfo: {
+        timestamp: new Date().toISOString(),
+        archetypeId,
+        tokenPreview: token.substring(0, 5) + '...',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      }
+    };
+  }
 };
 
+// Keep the fetchReportData function the same
 export const fetchReportData = async (
   archetypeId: string,
   reportType: ReportType
@@ -61,7 +182,7 @@ export const fetchReportData = async (
   return data ? mapToArchetypeDetailedData(data) : null;
 };
 
-// Function to map raw database fields to our application model
+// Keep the mapToArchetypeDetailedData function the same
 const mapToArchetypeDetailedData = (data: any): ArchetypeDetailedData | null => {
   if (!data) return null;
   

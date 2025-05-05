@@ -1,9 +1,9 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { AssessmentResult } from '@/types/assessment';
 import { normalizeArchetypeId } from '@/utils/archetypeValidation';
+import { recordTokenCheck } from '@/utils/reports/tokenMonitor';
 
 export interface ReportUserData {
   id: string;
@@ -18,7 +18,7 @@ export interface ReportUserData {
   last_accessed: string | null;
   expires_at: string | null;
   access_url?: string;
-  access_token?: string; // Add access token for debugging
+  access_token?: string;
 }
 
 export const useReportUserData = (token: string | undefined, archetypeId: string | undefined) => {
@@ -27,10 +27,26 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
   const [isValid, setIsValid] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
   const [debugInfo, setDebugInfo] = useState<any>(null);
+  const [validationHistory, setValidationHistory] = useState<{success: boolean, time: number, error?: string}[]>([]);
 
   useEffect(() => {
     const fetchUserData = async () => {
       console.log(`[useReportUserData] Starting fetch with token: ${token?.substring(0, 5)}... and archetype: ${archetypeId}`);
+      
+      // Track validation history
+      const recordValidationResult = (success: boolean, errorMessage?: string) => {
+        const now = Date.now();
+        setValidationHistory(prev => {
+          const newHistory = [...prev, { success, time: now, error: errorMessage }];
+          // Keep only the last 10 entries to avoid memory issues
+          return newHistory.slice(-10);
+        });
+        
+        // If token and archetypeId exist, record the check in token monitor
+        if (token && archetypeId) {
+          recordTokenCheck(archetypeId, token, success, userData?.expires_at, errorMessage);
+        }
+      };
       
       if (!token || !archetypeId) {
         console.log('[useReportUserData] Missing token or archetypeId, aborting fetch');
@@ -39,8 +55,10 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
         setDebugInfo({
           reason: 'Missing token or archetypeId',
           token: token ? `${token.substring(0, 5)}...` : null,
-          archetypeId
+          archetypeId,
+          validationTime: new Date().toISOString()
         });
+        recordValidationResult(false, 'Missing token or archetypeId');
         return;
       }
       
@@ -56,7 +74,8 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
           stage: 'initial',
           originalArchetypeId: archetypeId,
           normalizedArchetypeId,
-          tokenPreview: token.substring(0, 5) + '...'
+          tokenPreview: token.substring(0, 5) + '...',
+          validationTime: new Date().toISOString()
         });
         
         // First, check if the report request exists and is valid
@@ -76,8 +95,11 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
             query: {
               token: token.substring(0, 5) + '...',
               archetypeId: normalizedArchetypeId
-            }
+            },
+            validationTime: new Date().toISOString()
           });
+          setError(new Error(`Error fetching report user data: ${fetchError.message}`));
+          recordValidationResult(false, `Database error: ${fetchError.message}`);
           throw new Error(`Error fetching report user data: ${fetchError.message}`);
         }
         
@@ -97,6 +119,7 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
             
           if (insensitiveError) {
             console.error('[useReportUserData] Error with case-insensitive search:', insensitiveError);
+            recordValidationResult(false, `Case-insensitive search error: ${insensitiveError.message}`);
           } else if (insensitiveData) {
             console.log('[useReportUserData] Found data using case-insensitive search:', insensitiveData.archetype_id);
             // Use this data instead
@@ -117,7 +140,10 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
                 expires_at: insensitiveData.expires_at,
                 current_time: new Date().toISOString()
               }));
-              throw new Error('This report link has expired');
+              const expiredMsg = `This report link has expired on ${new Date(insensitiveData.expires_at).toLocaleString()}`;
+              setError(new Error(expiredMsg));
+              recordValidationResult(false, expiredMsg);
+              throw new Error(expiredMsg);
             }
             
             // Update access count for the matched data
@@ -125,13 +151,20 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
             const newAccessCount = currentAccessCount + 1;
             const currentTime = new Date().toISOString();
             
-            await supabase
-              .from('report_requests')
-              .update({
-                access_count: newAccessCount,
-                last_accessed: currentTime
-              })
-              .eq('id', insensitiveData.id);
+            try {
+              await supabase
+                .from('report_requests')
+                .update({
+                  access_count: newAccessCount,
+                  last_accessed: currentTime
+                })
+                .eq('id', insensitiveData.id);
+                
+              console.log('[useReportUserData] Access count updated to:', newAccessCount);
+            } catch (updateError) {
+              console.warn('[useReportUserData] Could not update access count:', updateError);
+              // This is non-blocking, don't throw
+            }
               
             const typedUserData: ReportUserData = {
               id: insensitiveData.id,
@@ -152,6 +185,7 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
             setUserData(typedUserData);
             setIsValid(true);
             setIsLoading(false);
+            recordValidationResult(true);
             return;
           }
         }
@@ -165,9 +199,13 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
             query: {
               token: token.substring(0, 5) + '...',
               archetypeId: normalizedArchetypeId
-            }
+            },
+            validationTime: new Date().toISOString()
           });
-          throw new Error('Invalid or expired access token');
+          const errorMsg = 'Invalid or expired access token';
+          setError(new Error(errorMsg));
+          recordValidationResult(false, errorMsg);
+          throw new Error(errorMsg);
         }
         
         // Check if the token has expired
@@ -180,7 +218,10 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
             expires_at: data.expires_at,
             current_time: new Date().toISOString()
           });
-          throw new Error('This report link has expired');
+          const expiredMsg = `This report link has expired on ${new Date(data.expires_at).toLocaleString()}`;
+          setError(new Error(expiredMsg));
+          recordValidationResult(false, expiredMsg);
+          throw new Error(expiredMsg);
         }
         
         // If we get here, the token is valid, so now update the access count
@@ -189,33 +230,38 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
         const currentTime = new Date().toISOString();
         
         // Track this access with a direct update
-        const { error: accessUpdateError } = await supabase
-          .from('report_requests')
-          .update({
-            access_count: newAccessCount,
-            last_accessed: currentTime
-          })
-          .eq('access_token', token)
-          .eq('archetype_id', normalizedArchetypeId);
-        
-        if (accessUpdateError) {
-          console.warn('[useReportUserData] Could not update access count:', accessUpdateError);
-          setDebugInfo(prev => ({
-            ...prev,
-            access_count_update: {
-              success: false,
-              error: accessUpdateError
-            }
-          }));
-        } else {
-          console.log('[useReportUserData] Access count updated to:', newAccessCount);
-          setDebugInfo(prev => ({
-            ...prev,
-            access_count_update: {
-              success: true,
-              new_count: newAccessCount
-            }
-          }));
+        try {
+          const { error: accessUpdateError } = await supabase
+            .from('report_requests')
+            .update({
+              access_count: newAccessCount,
+              last_accessed: currentTime
+            })
+            .eq('access_token', token)
+            .eq('archetype_id', normalizedArchetypeId);
+          
+          if (accessUpdateError) {
+            console.warn('[useReportUserData] Could not update access count:', accessUpdateError);
+            setDebugInfo(prev => ({
+              ...prev,
+              access_count_update: {
+                success: false,
+                error: accessUpdateError
+              }
+            }));
+          } else {
+            console.log('[useReportUserData] Access count updated to:', newAccessCount);
+            setDebugInfo(prev => ({
+              ...prev,
+              access_count_update: {
+                success: true,
+                new_count: newAccessCount
+              }
+            }));
+          }
+        } catch (updateError) {
+          console.warn('[useReportUserData] Error updating access count:', updateError);
+          // This is non-blocking, don't throw
         }
         
         console.log('[useReportUserData] Found valid report user data');
@@ -243,7 +289,8 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
           organization: typedUserData.organization,
           archetypeId: typedUserData.archetype_id,
           hasAssessmentData: !!typedUserData.assessment_result,
-          token_preview: token.substring(0, 5) + '...'
+          token_preview: token.substring(0, 5) + '...',
+          validationTime: new Date().toISOString()
         });
         
         setUserData(typedUserData);
@@ -257,6 +304,7 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
             organization: typedUserData.organization
           }
         }));
+        recordValidationResult(true);
       } catch (err) {
         console.error('[useReportUserData] Error:', err);
         setError(err instanceof Error ? err : new Error('Unknown error fetching user data'));
@@ -267,6 +315,7 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
           final_result: 'error',
           error: err instanceof Error ? err.message : 'Unknown error'
         }));
+        recordValidationResult(false, err instanceof Error ? err.message : 'Unknown error');
       } finally {
         setIsLoading(false);
         console.log('[useReportUserData] Fetch completed, isValid:', isValid);
@@ -274,13 +323,14 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
     };
     
     fetchUserData();
-  }, [token, archetypeId]);
+  }, [token, archetypeId, userData?.expires_at]);
   
   return {
     userData,
     isLoading,
     isValid,
     error,
-    debugInfo
+    debugInfo,
+    validationHistory
   };
 };
