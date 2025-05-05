@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -31,9 +30,15 @@ interface UseReportAccessResult {
 
 // Helper function to ensure key_characteristics is always a string array
 const ensureStringArray = (value: any): string[] => {
+  if (!value) {
+    return [];
+  }
+  
   if (Array.isArray(value)) {
+    // If it's already an array, make sure all items are strings
     return value.map(item => String(item));
   }
+  
   if (typeof value === 'string') {
     // Handle empty string case
     if (!value.trim()) return [];
@@ -43,6 +48,8 @@ const ensureStringArray = (value: any): string[] => {
       .filter(item => item.trim().length > 0)
       .map(item => item.trim());
   }
+  
+  // If it's not an array or string, return an empty array
   return [];
 };
 

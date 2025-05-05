@@ -25,7 +25,15 @@ export const ensureArray = (data: any): any[] => {
       }
     }
     // Handle newline-separated strings
-    return data.split('\n').filter(Boolean);
+    if (data.includes('\n')) {
+      return data.split('\n').filter(Boolean);
+    }
+    // Handle comma-separated strings
+    if (data.includes(',')) {
+      return data.split(',').map(s => s.trim()).filter(Boolean);
+    }
+    // Single value string
+    return [data];
   }
   
   if (typeof data === 'object' && data !== null) {
