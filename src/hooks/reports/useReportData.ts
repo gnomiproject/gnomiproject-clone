@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from 'react';
 import { ReportType } from '@/types/reports';
 import { getDataSource } from '@/utils/reports/schemaMapping';
@@ -40,7 +41,7 @@ export const useReportData = ({
   skipCache = false 
 }: UseReportDataOptions): UseReportDataResult => {
   const [userData, setUserData] = useState<any>(null);
-  const [averageData, setAverageData] = useState<AverageData>(processReportData(null).averageData);
+  const [averageData, setAverageData] = useState<AverageData>(processReportData(null).then(result => result.averageData));
   const [isValidAccess, setIsValidAccess] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
   const [dataSource, setDataSource] = useState<string>('');
@@ -49,6 +50,20 @@ export const useReportData = ({
   // Initialize report type and queryKey
   const reportType: ReportType = isInsightsReport ? 'insight' : 'deepDive';
   const queryKey = ['report', archetypeId, token, reportType];
+  
+  // Initialize averageData with default values
+  useEffect(() => {
+    const initializeAverageData = async () => {
+      try {
+        const defaultProcessed = await processReportData(null);
+        setAverageData(defaultProcessed.averageData);
+      } catch (err) {
+        console.error("Error initializing average data:", err);
+      }
+    };
+    
+    initializeAverageData();
+  }, []);
   
   // Function to validate token access
   const validateTokenAccess = useCallback(async () => {
