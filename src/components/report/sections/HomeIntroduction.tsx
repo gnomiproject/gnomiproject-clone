@@ -53,12 +53,6 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
     "Moderate social determinants of health challenges"
   ];
   
-  // Get top strategic priority if available
-  const topPriority = Array.isArray(archetypeData?.strategic_recommendations) && 
-                     archetypeData.strategic_recommendations.length > 0
-                     ? archetypeData.strategic_recommendations[0]
-                     : "Implement integrated behavioral health programs to address mental health needs";
-  
   // Debug logging
   console.log('[HomeIntroduction] Archetype data:', {
     id: archetypeId,
@@ -67,8 +61,7 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
     description: shortDescription.substring(0, 50) + '...',
     userData: userData ? `User data present for: ${userName}` : 'No user data',
     archetypeObj: JSON.stringify(archetypeData).substring(0, 100) + '...',
-    keyFindings: keyFindings ? `${keyFindings.length} findings found` : 'No key findings',
-    topPriority: topPriority ? (typeof topPriority === 'string' ? topPriority.substring(0, 30) + '...' : 'Object') : 'No priority'
+    keyFindings: keyFindings ? `${keyFindings.length} findings found` : 'No key findings'
   });
   
   return (
@@ -106,7 +99,6 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
           familyName={familyName}
           shortDescription={shortDescription}
           keyFindings={keyFindings}
-          topPriority={typeof topPriority === 'string' ? topPriority : topPriority?.title || topPriority?.description}
           archetypeId={archetypeId}
         />
       </div>

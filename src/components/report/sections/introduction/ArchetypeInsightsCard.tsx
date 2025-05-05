@@ -22,7 +22,6 @@ interface ArchetypeInsightsCardProps {
   familyName: string;
   shortDescription: string;
   keyFindings: string[];
-  topPriority?: string;
   archetypeId?: ArchetypeId;
 }
 
@@ -31,14 +30,12 @@ const ArchetypeInsightsCard: React.FC<ArchetypeInsightsCardProps> = ({
   familyName,
   shortDescription,
   keyFindings = [],
-  topPriority,
   archetypeId = 'a1' as ArchetypeId // Default to a1 if not provided
 }) => {
   console.log("ArchetypeInsightsCard rendering with:", {
     archetypeName,
     familyLength: familyName?.length || 0,
     findingsCount: keyFindings?.length || 0,
-    hasPriority: !!topPriority,
     archetypeId
   });
   
@@ -79,8 +76,11 @@ const ArchetypeInsightsCard: React.FC<ArchetypeInsightsCardProps> = ({
         <div className="space-y-6">
           {/* Header Section */}
           <div className="space-y-2">
-            <h3 className="text-2xl font-semibold text-gray-800 tracking-tight">
+            <h3 className="text-2xl font-semibold text-gray-800 tracking-tight flex items-center gap-2">
               {archetypeName} Insights
+              <span className="text-sm font-medium px-2 py-0.5 rounded bg-gray-100 text-gray-600">
+                {archetypeId}
+              </span>
             </h3>
             <p className="text-sm text-gray-500">
               Healthcare Archetype Profile
@@ -107,16 +107,6 @@ const ArchetypeInsightsCard: React.FC<ArchetypeInsightsCardProps> = ({
               ))}
             </div>
           </div>
-
-          {/* Top Priority Section */}
-          {topPriority && (
-            <div className="mt-4 pt-4 border-t border-gray-200">
-              <h4 className="text-lg font-medium text-gray-700 mb-2">Top Strategic Priority</h4>
-              <p className="text-gray-600 p-3 rounded-md" style={{ backgroundColor: `${archetypeColor}10` }}>
-                {topPriority}
-              </p>
-            </div>
-          )}
         </div>
       </CardContent>
     </Card>

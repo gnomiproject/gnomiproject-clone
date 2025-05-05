@@ -38,12 +38,6 @@ const ReportIntroduction = ({
   
   // Extract key findings from reportData
   const keyFindings = reportData?.key_findings || [];
-  
-  // Extract top priority from strategic_recommendations if available
-  const topPriority = Array.isArray(reportData?.strategic_recommendations) && 
-                     reportData.strategic_recommendations.length > 0
-                     ? reportData.strategic_recommendations[0].description || reportData.strategic_recommendations[0].title
-                     : undefined;
 
   // Keep logger for debugging
   console.log('[ReportIntroduction] Rendering with:', {
@@ -51,8 +45,7 @@ const ReportIntroduction = ({
     archetypeName,
     familyName,
     color: archetypeColor,
-    keyFindingsCount: keyFindings?.length || 0,
-    hasTopPriority: !!topPriority
+    keyFindingsCount: keyFindings?.length || 0
   });
 
   return (
@@ -138,7 +131,6 @@ const ReportIntroduction = ({
             familyName={familyName || reportData.family_name || 'Unknown Family'}
             shortDescription={shortDescription || reportData.short_description || ''}
             keyFindings={keyFindings}
-            topPriority={topPriority}
             archetypeId={archetypeId || reportData.archetype_id || reportData.id}
           />
         </div>
