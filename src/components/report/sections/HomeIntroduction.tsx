@@ -67,7 +67,8 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
     description: shortDescription.substring(0, 50) + '...',
     userData: userData ? `User data present for: ${userName}` : 'No user data',
     archetypeObj: JSON.stringify(archetypeData).substring(0, 100) + '...',
-    keyFindings: keyFindings ? `${keyFindings.length} findings found` : 'No key findings'
+    keyFindings: keyFindings ? `${keyFindings.length} findings found` : 'No key findings',
+    topPriority: topPriority ? (typeof topPriority === 'string' ? topPriority.substring(0, 30) + '...' : 'Object') : 'No priority'
   });
   
   return (
@@ -97,8 +98,8 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
         />
       </div>
       
-      {/* Archetype Insights Card - New Component */}
-      <div className="mt-6">
+      {/* Archetype Insights Card - Now with added visibility styling */}
+      <div className="mt-6 mb-6">
         <ArchetypeInsightsCard
           archetypeName={archetypeName}
           familyName={familyName}

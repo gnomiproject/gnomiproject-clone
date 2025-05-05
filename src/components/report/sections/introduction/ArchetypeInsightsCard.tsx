@@ -4,9 +4,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import { 
   DollarSign, 
   Brain, 
-  Ambulance,
+  Hospital,
   CalendarCheck, 
-  Home 
+  Home,
+  Users
 } from 'lucide-react';
 
 interface KeyFinding {
@@ -33,19 +34,19 @@ const ArchetypeInsightsCard: React.FC<ArchetypeInsightsCardProps> = ({
   const findingsWithIcons: KeyFinding[] = keyFindings.map(finding => {
     let icon;
     
-    if (finding.toLowerCase().includes('cost') || finding.toLowerCase().includes('spend')) {
+    if (finding.toLowerCase().includes('cost') || finding.toLowerCase().includes('spend') || finding.toLowerCase().includes('financ')) {
       icon = <DollarSign className="h-5 w-5 text-teal-600 flex-shrink-0" />;
-    } else if (finding.toLowerCase().includes('mental health') || finding.toLowerCase().includes('condition')) {
+    } else if (finding.toLowerCase().includes('mental health') || finding.toLowerCase().includes('condition') || finding.toLowerCase().includes('disorder')) {
       icon = <Brain className="h-5 w-5 text-teal-600 flex-shrink-0" />;
-    } else if (finding.toLowerCase().includes('emergency') || finding.toLowerCase().includes('specialist')) {
-      icon = <Ambulance className="h-5 w-5 text-teal-600 flex-shrink-0" />;
-    } else if (finding.toLowerCase().includes('care') || finding.toLowerCase().includes('preventive')) {
+    } else if (finding.toLowerCase().includes('emergency') || finding.toLowerCase().includes('specialist') || finding.toLowerCase().includes('hospital')) {
+      icon = <Hospital className="h-5 w-5 text-teal-600 flex-shrink-0" />;
+    } else if (finding.toLowerCase().includes('care') || finding.toLowerCase().includes('preventive') || finding.toLowerCase().includes('adherence')) {
       icon = <CalendarCheck className="h-5 w-5 text-teal-600 flex-shrink-0" />;
-    } else if (finding.toLowerCase().includes('social') || finding.toLowerCase().includes('determinants')) {
+    } else if (finding.toLowerCase().includes('social') || finding.toLowerCase().includes('determinants') || finding.toLowerCase().includes('community')) {
       icon = <Home className="h-5 w-5 text-teal-600 flex-shrink-0" />;
     } else {
       // Default icon
-      icon = <CalendarCheck className="h-5 w-5 text-teal-600 flex-shrink-0" />;
+      icon = <Users className="h-5 w-5 text-teal-600 flex-shrink-0" />;
     }
     
     return {
@@ -55,7 +56,7 @@ const ArchetypeInsightsCard: React.FC<ArchetypeInsightsCardProps> = ({
   });
 
   return (
-    <Card className="overflow-hidden bg-white shadow-md border-t-4 border-t-teal-500">
+    <Card className="overflow-hidden bg-white shadow-md border-t-4 border-t-teal-500 mb-8">
       <CardContent className="p-6">
         <div className="space-y-6">
           {/* Header Section */}
