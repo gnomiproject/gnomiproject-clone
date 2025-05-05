@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { ChartBar } from 'lucide-react';
 import CarePathwayUtilization from './utilization/CarePathwayUtilization';
 import HospitalServices from './utilization/HospitalServices';
 import DiagnosticServices from './utilization/DiagnosticServices';
@@ -13,11 +12,13 @@ interface UtilizationPatternsProps {
 }
 
 const UtilizationPatterns = ({ reportData, averageData }: UtilizationPatternsProps) => {
-  // Gnome image
-  const gnomeImage = '/assets/gnomes/gnome_clipboard.png';
-
   return (
     <div className="space-y-4">
+      {/* Introductory text */}
+      <p className="text-gray-700 mb-6">
+        Understanding how members access healthcare services provides crucial insights into population health management and cost-saving opportunities.
+      </p>
+
       {/* Care Pathway Utilization */}
       <CarePathwayUtilization reportData={reportData} averageData={averageData} />
 
