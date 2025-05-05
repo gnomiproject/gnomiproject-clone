@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { format } from 'date-fns';
 import { ArchetypeId } from '@/types/archetype';
@@ -97,8 +98,8 @@ const ReportIntroduction = ({
         <div className="h-0.5 w-full bg-gray-300 mt-2"></div>
       </div>
       
-      {/* Welcome section */}
-      <div className="bg-blue-50 border border-blue-100 rounded-lg p-6 mb-6">
+      {/* Welcome section - Moved to the bottom of the introduction section */}
+      <div className="bg-blue-50 border border-blue-100 rounded-lg p-6 mb-6 mt-8">
         <div className="flex items-start gap-4">
           <WebsiteImage 
             type="magnifying_glass" 
