@@ -156,9 +156,12 @@ const DeepDiveReportContent = ({
         />
       </ErrorBoundary>
       
-      {/* Contact Section */}
+      {/* About This Report Section (renamed from Contact Section) */}
       <ErrorBoundary>
-        <ContactSection userData={userData} />
+        <Section id="about-report">
+          <SectionTitle title="About This Report" />
+          <ContactSection userData={userData} />
+        </Section>
       </ErrorBoundary>
       
       {/* Debug information - shown in a less prominent way */}

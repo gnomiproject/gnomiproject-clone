@@ -240,11 +240,11 @@ const ReportBody: React.FC<ReportBodyProps> = ({
         ) : <SectionLoading />}
       </Section>
       
-      <Section id="contact">
-        {shouldRenderSection('contact') ? (
+      <Section id="about-report">
+        {shouldRenderSection('about-report') ? (
           <Suspense fallback={<SectionLoading />}>
-            {sectionErrors['contact'] ? (
-              <SectionError message={sectionErrors['contact']} />
+            {sectionErrors['about-report'] ? (
+              <SectionError message={sectionErrors['about-report']} />
             ) : (
               <LazyContactSection userData={userData} />
             )}
