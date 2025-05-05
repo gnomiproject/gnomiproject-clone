@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { format } from 'date-fns';
 import { ArchetypeId } from '@/types/archetype';
@@ -97,6 +98,19 @@ const ReportIntroduction = ({
         <div className="h-0.5 w-full bg-gray-300 mt-2"></div>
       </div>
       
+      {/* Archetype Insights Card - Moved above the welcome section */}
+      {reportData && (
+        <div className="mb-6 relative z-0">
+          <ArchetypeInsightsCard
+            archetypeName={archetypeName || reportData.name || reportData.archetype_name || 'Unknown Archetype'}
+            familyName={familyName || reportData.family_name || 'Unknown Family'}
+            shortDescription={shortDescription || reportData.short_description || ''}
+            keyFindings={keyFindings}
+            archetypeId={archetypeId || reportData.archetype_id || reportData.id}
+          />
+        </div>
+      )}
+      
       {/* Welcome section */}
       <div className="bg-blue-50 border border-blue-100 rounded-lg p-6 mb-6">
         <div className="flex items-start gap-4">
@@ -122,19 +136,6 @@ const ReportIntroduction = ({
           </div>
         </div>
       </div>
-
-      {/* Archetype Insights Card - Add it here */}
-      {reportData && (
-        <div className="mt-8 mb-8 relative z-0">
-          <ArchetypeInsightsCard
-            archetypeName={archetypeName || reportData.name || reportData.archetype_name || 'Unknown Archetype'}
-            familyName={familyName || reportData.family_name || 'Unknown Family'}
-            shortDescription={shortDescription || reportData.short_description || ''}
-            keyFindings={keyFindings}
-            archetypeId={archetypeId || reportData.archetype_id || reportData.id}
-          />
-        </div>
-      )}
     </div>
   );
 };

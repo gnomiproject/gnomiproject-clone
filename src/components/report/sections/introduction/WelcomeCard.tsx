@@ -1,8 +1,6 @@
 
 import React from 'react';
 import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { ArrowRight } from 'lucide-react';
 import { getArchetypeColorHex } from '@/data/colors';
 import { ArchetypeId } from '@/types/archetype';
 
@@ -55,16 +53,6 @@ const WelcomeCard = ({
               </span>
             )}
           </div>
-        </div>
-        
-        <div className="w-full md:w-auto mt-4 md:mt-0">
-          <Button 
-            onClick={() => document.getElementById('metrics-overview')?.scrollIntoView({ behavior: 'smooth' })}
-            className="w-full md:w-auto"
-            style={{ backgroundColor: archetypeColor }}
-          >
-            Explore Full Report <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
         </div>
       </div>
     </Card>
