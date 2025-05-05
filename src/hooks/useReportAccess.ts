@@ -179,8 +179,7 @@ export const useReportAccess = ({
       });
     } catch (err) {
       toast("Refresh Failed", {
-        description: "Could not update report data",
-        variant: "destructive"
+        description: "Could not update report data"
       });
     }
   }, [fetchReportData]);
