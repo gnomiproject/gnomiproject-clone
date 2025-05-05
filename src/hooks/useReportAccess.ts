@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -22,7 +23,7 @@ interface UseReportAccessResult {
   archetypeData: ArchetypeDetailedData;
   averageData: any;
   isLoading: boolean;
-  error: Error;
+  error: Error | null;
   debugInfo: any;
   refreshData: () => Promise<void>;
   isUsingFallbackData?: boolean;
@@ -33,7 +34,7 @@ export const useReportAccess = ({
   token,
   isAdminView = false,
   skipCache = false
-}: UseReportAccessOptions) => {
+}: UseReportAccessOptions): UseReportAccessResult => {
   const [error, setError] = useState<Error | null>(null);
   const [debugInfo, setDebugInfo] = useState<any>({});
   const [isUsingFallbackData, setIsUsingFallbackData] = useState<boolean>(false);
@@ -80,11 +81,22 @@ export const useReportAccess = ({
         throw new Error(`No report data found for ${archetypeId}`);
       }
       
-      // Process the data
-      const processedData = processReportData(data);
+      // Map the data to the expected structure
+      const mappedData: ArchetypeDetailedData = {
+        id: data.archetype_id,
+        name: data.archetype_name,
+        familyId: data.family_id || 'unknown',
+        ...data
+      };
       
-      // Save to cache
-      setInCache(cacheKey, processedData);
+      // Process the data
+      const processedData = processReportData(mappedData);
+      
+      // Save to cache - include empty userData to match expected cache structure
+      setInCache(cacheKey, {
+        ...processedData,
+        userData: {}
+      });
       
       // Store as fallback data in localStorage
       try {
@@ -122,7 +134,7 @@ export const useReportAccess = ({
     return null;
   }, [archetypeId]);
   
-  // Use React Query for data fetching
+  // Use React Query for data fetching - using the meta property for error handling in v5
   const { 
     data: reportData, 
     isLoading, 
@@ -131,7 +143,6 @@ export const useReportAccess = ({
   } = useQuery({
     queryKey,
     queryFn: fetchReportData,
-    enabled: !!archetypeId && (isAdminView || !!token),
     staleTime: Infinity,
     gcTime: Infinity,
     refetchOnWindowFocus: false,
@@ -139,20 +150,22 @@ export const useReportAccess = ({
     refetchOnMount: false,
     retry: 1,
     retryDelay: 5000,
-    onError: (error: Error) => {
-      console.error('Error fetching report data:', error);
-      setError(error);
-      
-      // Try to use fallback data when an error occurs
-      const fallbackData = getFallbackData();
-      if (fallbackData) {
-        toast.warning("Using cached report data", {
-          description: "The latest data couldn't be retrieved. Showing previously loaded data."
-        });
-      } else {
-        toast.error("Error Loading Report", {
-          description: error.message
-        });
+    meta: {
+      onError: (error: Error) => {
+        console.error('Error fetching report data:', error);
+        setError(error);
+        
+        // Try to use fallback data when an error occurs
+        const fallbackData = getFallbackData();
+        if (fallbackData) {
+          toast.warning("Using cached report data", {
+            description: "The latest data couldn't be retrieved. Showing previously loaded data."
+          });
+        } else {
+          toast.error("Error Loading Report", {
+            description: error.message
+          });
+        }
       }
     }
   });
