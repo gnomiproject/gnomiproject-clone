@@ -18,8 +18,12 @@ const DemographicInsights: React.FC<DemographicInsightsProps> = ({ insights }) =
     // Check if insights is already a parsed object with the right structure
     if (typeof insights === 'object' && !Array.isArray(insights)) {
       if (insights.findings) {
+        // Clean up the overview - remove "Overview of demographic_insights for archetype X"
+        let cleanedOverview = insights.overview || "";
+        cleanedOverview = cleanedOverview.replace(/overview of demographic_insights for archetype \w+/i, '').trim();
+        
         return {
-          overview: insights.overview || "",
+          overview: cleanedOverview,
           findings: Array.isArray(insights.findings) ? insights.findings : []
         };
       }
@@ -40,9 +44,36 @@ const DemographicInsights: React.FC<DemographicInsightsProps> = ({ insights }) =
         
         // Handle structured JSON format with overview and findings
         if (parsedJson.overview || parsedJson.findings) {
+          // Clean up the overview
+          let cleanedOverview = parsedJson.overview || "";
+          cleanedOverview = cleanedOverview.replace(/overview of demographic_insights for archetype \w+/i, '').trim();
+          
+          // If we have key_metrics, merge them with findings if they're not already there
+          let allFindings = Array.isArray(parsedJson.findings) ? [...parsedJson.findings] : [];
+          
+          // Add key_metrics to findings if they exist and contain additional information
+          if (parsedJson.key_metrics && Array.isArray(parsedJson.key_metrics)) {
+            // Format each metric as a finding
+            const metricFindings = parsedJson.key_metrics.map((metric: any) => {
+              return `${metric.name}: ${metric.value}${metric.context ? ` (${metric.context})` : ''}`;
+            });
+            
+            // Only add metrics that aren't already covered in findings
+            for (const metricFinding of metricFindings) {
+              // Skip if a similar finding already exists
+              const isDuplicate = allFindings.some((finding: string) => {
+                return metricFinding.includes(finding) || finding.includes(metricFinding);
+              });
+              
+              if (!isDuplicate) {
+                allFindings.push(metricFinding);
+              }
+            }
+          }
+          
           return {
-            overview: parsedJson.overview || "",
-            findings: Array.isArray(parsedJson.findings) ? parsedJson.findings : []
+            overview: cleanedOverview,
+            findings: allFindings
           };
         }
         
@@ -60,8 +91,12 @@ const DemographicInsights: React.FC<DemographicInsightsProps> = ({ insights }) =
             return `${metric.name}: ${metric.value}${metric.context ? ` (${metric.context})` : ''}`;
           });
           
+          // Clean up the overview
+          let cleanedOverview = parsedJson.overview || "";
+          cleanedOverview = cleanedOverview.replace(/overview of demographic_insights for archetype \w+/i, '').trim();
+          
           return {
-            overview: parsedJson.overview || "",
+            overview: cleanedOverview,
             findings: [
               ...(Array.isArray(parsedJson.findings) ? parsedJson.findings : []),
               ...metricFindings
@@ -78,6 +113,7 @@ const DemographicInsights: React.FC<DemographicInsightsProps> = ({ insights }) =
       // If it's a regular string, split by paragraphs or bullet points
       const textItems = typeof insights === 'string' ? 
         insights
+          .replace(/overview of demographic_insights for archetype \w+/i, '')
           .split(/\n|•/)
           .map(item => item.trim())
           .filter(item => item.length > 0) : 
@@ -93,6 +129,7 @@ const DemographicInsights: React.FC<DemographicInsightsProps> = ({ insights }) =
       // If parsing fails, treat as regular text
       const textItems = typeof insights === 'string' ? 
         insights
+          .replace(/overview of demographic_insights for archetype \w+/i, '')
           .split(/\n|•/)
           .map(item => item.trim())
           .filter(item => item.length > 0) : 

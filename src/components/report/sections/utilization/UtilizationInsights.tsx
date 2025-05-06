@@ -23,9 +23,16 @@ const UtilizationInsights = ({
           reportData.utilization_patterns.trim().startsWith('{')) {
         const parsed = JSON.parse(reportData.utilization_patterns);
         
+        // Clean up the overview text to remove field names
         if (parsed?.overview) {
+          // Remove "Overview of utilization_patterns for archetype X"
+          const cleanedOverview = parsed.overview
+            .replace(/overview of utilization_patterns for archetype \w+/i, '')
+            .replace(/^[:\s\.]+/, '') // Remove leading colons or spaces
+            .trim();
+            
           return {
-            overview: parsed.overview,
+            overview: cleanedOverview || "Key utilization patterns for this archetype:",
             findings: parsed.findings || {},
             metrics: parsed.key_metrics || []
           };
@@ -66,7 +73,7 @@ const UtilizationInsights = ({
       <CardContent className="p-6">
         {parsedInsights ? (
           <div className="space-y-4">
-            {/* Overview section */}
+            {/* Overview section - cleaned up */}
             {parsedInsights.overview && (
               <div className="bg-blue-50 p-4 rounded-lg">
                 <p className="text-blue-800">{parsedInsights.overview}</p>
@@ -85,16 +92,10 @@ const UtilizationInsights = ({
                       .replace(/^[:\s\.]+/, '')
                       .trim();
                     
-                    const formattedKey = cleanKey.charAt(0).toUpperCase() + cleanKey.slice(1);
-                    
-                    // Format the value as a string
-                    const formattedValue = String(value);
-                    
+                    // Don't include the key name in the display to avoid repetition
                     return (
                       <li key={index} className="text-gray-700">
-                        {formattedKey ? 
-                          <span><span className="font-medium">{formattedKey}</span> {formattedValue}</span> : 
-                          <span>{formattedValue}</span>}
+                        {String(value)}
                       </li>
                     );
                   })}
@@ -109,9 +110,12 @@ const UtilizationInsights = ({
           <div>
             {typeof reportData.utilization_patterns === 'string' && (
               <div className="bg-blue-50 p-4 rounded-lg mb-4">
-                {reportData.utilization_patterns.split('\n').map((line: string, index: number) => (
-                  <p key={index} className="text-blue-800 mb-2">{line}</p>
-                ))}
+                {reportData.utilization_patterns
+                  .replace(/overview of utilization_patterns for archetype \w+/i, '')
+                  .split('\n')
+                  .map((line: string, index: number) => (
+                    line.trim() && <p key={index} className="text-blue-800 mb-2">{line.trim()}</p>
+                  ))}
               </div>
             )}
             
