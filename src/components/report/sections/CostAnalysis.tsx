@@ -28,11 +28,9 @@ const CostAnalysis = ({
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row gap-8">
         <div className="md:w-2/3">
-          <h1 className="text-3xl font-bold mb-6">Cost Analysis</h1>
-          
           <p className="text-lg mb-6">
-            Understanding your healthcare spending patterns is crucial for effective benefits management. 
-            This section breaks down your organization's healthcare costs and compares them to the 
+            Understanding healthcare spending patterns is crucial for effective benefits management. 
+            This section breaks down your archetype's healthcare costs and compares them to the 
             {reportData.archetype_name} archetype average.
           </p>
         </div>
@@ -137,7 +135,7 @@ const CostAnalysis = ({
                   <BarChart
                     data={[{
                       name: 'Specialty Rx',
-                      'Your Cost': reportData["Cost_Specialty RX Allowed Amount PMPM"] || 0,
+                      'Specialty Rx Cost': reportData["Cost_Specialty RX Allowed Amount PMPM"] || 0,
                       'Archetype Average': averageData["Cost_Specialty RX Allowed Amount PMPM"] || 0
                     }]}
                     margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
