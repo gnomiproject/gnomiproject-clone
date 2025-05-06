@@ -13,9 +13,13 @@ interface BetaBadgeProps {
 }
 
 export const BetaBadge: React.FC<BetaBadgeProps> = ({ className, sticky = false }) => {
+  // Enhanced styles for better visibility
   const baseClasses = "inline-block bg-teal-500 text-white px-2 py-0.5 text-xs font-bold rounded cursor-help print:hidden";
-  const stickyClasses = sticky ? "fixed bottom-6 right-6 z-50 shadow-lg px-3 py-1 text-sm animate-pulse" : "ml-2 align-super";
+  const stickyClasses = sticky ? "px-3 py-1 text-sm animate-pulse shadow-lg" : "ml-2 align-super";
 
+  // Debug logging to verify rendering
+  console.log('[BetaBadge] Rendering with sticky:', sticky);
+  
   return (
     <TooltipProvider>
       <Tooltip>

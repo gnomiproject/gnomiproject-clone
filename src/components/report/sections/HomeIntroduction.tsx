@@ -62,19 +62,30 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
     "Moderate social determinants of health challenges"
   ];
   
-  // Debug logging
-  console.log('[HomeIntroduction] Archetype data:', {
+  // Enhanced debug logging
+  console.log('[HomeIntroduction] Rendering with data:', {
     id: archetypeId,
     name: archetypeName,
     family: familyName,
-    description: shortDescription.substring(0, 50) + '...',
+    description: shortDescription ? (shortDescription.substring(0, 50) + '...') : 'No description',
     userData: userData ? `User data present for: ${userName}` : 'No user data',
-    archetypeObj: JSON.stringify(archetypeData).substring(0, 100) + '...',
+    archetypeObj: archetypeData ? 'Archetype data present' : 'No archetype data',
     keyFindings: keyFindings ? `${keyFindings.length} findings found` : 'No key findings'
   });
   
   return (
-    <Section id="introduction" className="mt-2">
+    <div className="mt-2">
+      {/* Welcome Card - Explicitly placed at the very top */}
+      <div className="mb-6">
+        <WelcomeCard 
+          userName={userName}
+          archetypeName={archetypeName}
+          archetypeId={archetypeId}
+          matchPercentage={matchPercentage}
+          secondaryArchetype={secondaryArchetype}
+        />
+      </div>
+
       {/* Main report introduction */}
       <ReportIntroduction 
         userData={userData} 
@@ -84,19 +95,8 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
         familyName={familyName}
         shortDescription={shortDescription}
       />
-
-      {/* Welcome Card - Now placed at the top of the introduction */}
-      <div className="mt-6">
-        <WelcomeCard 
-          userName={userName}
-          archetypeName={archetypeName}
-          archetypeId={archetypeId}
-          matchPercentage={matchPercentage}
-          secondaryArchetype={secondaryArchetype}
-        />
-      </div>
       
-      {/* Introduction title - Moved below the welcome card */}
+      {/* Introduction title - Positioned after the welcome card and intro */}
       <SectionTitle 
         title="Introduction" 
         subtitle={`Welcome to your ${archetypeName} Deep Dive Report`} 
@@ -139,7 +139,7 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
           </div>
         </div>
       </div>
-    </Section>
+    </div>
   );
 };
 

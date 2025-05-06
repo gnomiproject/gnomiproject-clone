@@ -1,4 +1,10 @@
 
+import React, { useEffect } from 'react';
+import ErrorBoundary from '@/components/shared/ErrorBoundary';
+import ReportSections from './ReportSections';
+import ReportErrorHandler from '../components/ReportErrorHandler';
+import ReportDebugInfo from '../components/ReportDebugInfo';
+
 import React from 'react';
 import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import { Section } from '@/components/shared/Section';
@@ -26,22 +32,31 @@ const ReportSections: React.FC<ReportSectionsProps> = ({
   userData,
   averageData
 }) => {
-  // Debug log to check if ReportSections is being rendered with correct data
+  // Enhanced debug logging to track rendering and data flow
   console.log('[ReportSections] Rendering with data:', { 
     hasUserData: !!userData,
     hasReportData: !!reportData,
-    reportDataName: reportData?.name || reportData?.archetype_name
+    reportDataName: reportData?.name || reportData?.archetype_name,
+    reportDataId: reportData?.id || reportData?.archetype_id,
+    familyName: reportData?.family_name
   });
+
+  // Force this component to re-render after mount to ensure children render correctly
+  useEffect(() => {
+    console.log('[ReportSections] Component mounted');
+  }, []);
 
   return (
     <>
-      {/* Introduction Section - Making sure it appears first */}
+      {/* Introduction Section - Making sure it appears first and with explicit section class */}
       <ErrorBoundary>
-        <HomeIntroduction 
-          userData={userData}
-          archetypeData={reportData}
-          averageData={averageData}
-        />
+        <Section id="introduction" className="mb-10">
+          <HomeIntroduction 
+            userData={userData}
+            archetypeData={reportData}
+            averageData={averageData}
+          />
+        </Section>
       </ErrorBoundary>
       
       {/* Archetype Profile Section */}

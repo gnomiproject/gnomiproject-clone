@@ -27,6 +27,14 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
   error = null,
   onRefresh
 }) => {
+  // Debug logging to track component rendering and data
+  console.log('[DeepDiveReport] Rendering with data:', { 
+    hasReportData: !!reportData, 
+    hasUserData: !!userData,
+    isAdminView,
+    reportName: reportData?.name || reportData?.archetype_name
+  });
+
   if (!reportData) {
     return (
       <div className="p-4">
@@ -37,8 +45,8 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
 
   return (
     <div className="min-h-screen bg-gray-50 relative">
-      {/* Add sticky beta badge at the root level with high z-index */}
-      <div className="fixed bottom-6 right-6 z-50">
+      {/* Beta badge with improved visibility - absolute positioning with high z-index */}
+      <div className="fixed bottom-6 right-6 z-[9999] shadow-lg">
         <BetaBadge sticky={true} />
       </div>
       
@@ -49,6 +57,7 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
         isAdminView={isAdminView}
         debugInfo={debugInfo}
         onNavigate={undefined}
+        hideNavbar={false}
       >
         <DeepDiveReportContent 
           archetype={reportData} 

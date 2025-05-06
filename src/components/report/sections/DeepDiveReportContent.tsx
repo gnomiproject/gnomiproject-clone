@@ -22,9 +22,9 @@ const DeepDiveReportContent = ({
   const familyName = archetype?.family_name || 'Unknown Family';
   const shortDescription = archetype?.short_description || '';
   
-  // Debug logging
+  // Enhanced debug logging
   useEffect(() => {
-    console.log('[DeepDiveReportContent] Processing archetype data from level4_report_secure:', {
+    console.log('[DeepDiveReportContent] Processing archetype data:', {
       id: archetypeId,
       name: archetypeName,
       familyId: archetype?.family_id || archetype?.familyId,

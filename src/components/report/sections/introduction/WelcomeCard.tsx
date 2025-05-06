@@ -21,8 +21,11 @@ const WelcomeCard = ({
 }: WelcomeCardProps) => {
   const archetypeColor = getArchetypeColorHex(archetypeId);
   
+  // Debug logging to verify rendering
+  console.log('[WelcomeCard] Rendering for:', { userName, archetypeName, archetypeId });
+  
   return (
-    <Card className="p-6 border border-gray-200 bg-gradient-to-br from-white to-slate-50">
+    <Card className="p-6 border border-gray-200 bg-gradient-to-br from-white to-slate-50 shadow-md">
       <div className="flex flex-col md:flex-row items-start justify-between gap-4">
         <div>
           <div className="mb-2">

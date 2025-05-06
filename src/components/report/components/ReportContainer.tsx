@@ -45,7 +45,7 @@ interface ReportContainerProps {
   debugInfo?: any;
   onNavigate?: (sectionId: string) => void;
   children?: React.ReactNode;
-  hideNavbar?: boolean; // Add this prop
+  hideNavbar?: boolean;
 }
 
 const ReportContainer: React.FC<ReportContainerProps> = ({ 
@@ -56,11 +56,19 @@ const ReportContainer: React.FC<ReportContainerProps> = ({
   debugInfo,
   onNavigate,
   children,
-  hideNavbar = false // Default to false for backward compatibility
+  hideNavbar = false
 }) => {
+  // Enhanced debug logging
+  console.log('[ReportContainer] Rendering with:', { 
+    hasReportData: !!reportData, 
+    hasUserData: !!userData,
+    hasChildren: !!children,
+    reportName: reportData?.name || reportData?.archetype_name
+  });
+  
   // Use React.memo to prevent unnecessary re-renders
   const MemoizedReportContainer = React.memo(() => {
-    // Track performance without affecting component behavior - FIX: Remove the second argument
+    // Track performance without affecting component behavior
     useRenderPerformance('ReportContainer');
     
     const reportRef = useRef<HTMLDivElement>(null);
