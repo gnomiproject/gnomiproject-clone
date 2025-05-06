@@ -310,12 +310,14 @@ export const fetchReportData = async (
       return null;
     }
     
+    // Use proper type checking before logging
     console.log(`[fetchReportData] Successfully retrieved data for ${archetypeId}:`, {
       hasStrategicRecommendations: !!data.strategic_recommendations,
       recommendationsCount: data.strategic_recommendations ? 
         (Array.isArray(data.strategic_recommendations) ? 
           data.strategic_recommendations.length : 
-          'object with keys: ' + Object.keys(data.strategic_recommendations).join(', ')) : 
+          (typeof data.strategic_recommendations === 'object' ? 
+            Object.keys(data.strategic_recommendations).length : 0)) : 
         0
     });
     
