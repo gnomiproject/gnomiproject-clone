@@ -2,9 +2,17 @@
 import React, { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 
-const ReportLoadingState = () => {
+interface ReportLoadingStateProps {
+  message?: string;
+  archetypeName?: string;
+}
+
+const ReportLoadingState = ({ 
+  message = 'Loading your report', 
+  archetypeName 
+}: ReportLoadingStateProps) => {
   const [loadingProgress, setLoadingProgress] = useState(30);
-  const [loadingMessage, setLoadingMessage] = useState('Loading local data...');
+  const [loadingMessage, setLoadingMessage] = useState('Preparing report data...');
   
   // Simulate progress for visual feedback
   useEffect(() => {
@@ -17,9 +25,9 @@ const ReportLoadingState = () => {
       });
       
       // Change the message based on progress
-      if (loadingProgress > 60 && loadingMessage === 'Loading local data...') {
-        setLoadingMessage('Preparing report content...');
-      } else if (loadingProgress > 80 && loadingMessage === 'Preparing report content...') {
+      if (loadingProgress > 60 && loadingMessage === 'Preparing report data...') {
+        setLoadingMessage('Formatting report content...');
+      } else if (loadingProgress > 80 && loadingMessage === 'Formatting report content...') {
         setLoadingMessage('Almost ready...');
       }
     }, 800);
@@ -28,16 +36,19 @@ const ReportLoadingState = () => {
   }, [loadingProgress, loadingMessage]);
 
   return (
-    <div className="min-h-[70vh] bg-gray-50 flex flex-col items-center justify-center p-4">
+    <div className="min-h-[70vh] bg-gray-50 flex flex-col items-center justify-center p-6">
       <Loader2 className="h-16 w-16 text-blue-500 animate-spin mb-6" />
-      <h2 className="text-2xl font-semibold mb-3">Loading Your Report</h2>
+      <h2 className="text-2xl font-semibold mb-3">
+        {message}
+        {archetypeName && <span className="text-blue-600"> {archetypeName}</span>}
+      </h2>
       <p className="text-gray-600 max-w-md text-center">
-        Please wait while we prepare your report. This may take a few moments...
+        Please wait while we prepare your report. This should take just a moment...
       </p>
       <div className="mt-8 max-w-md w-full">
-        <div className="h-2 bg-blue-100 rounded overflow-hidden">
+        <div className="h-2 bg-blue-100 rounded-full overflow-hidden">
           <div 
-            className="h-full bg-blue-500 animate-pulse transition-all duration-500 ease-in-out" 
+            className="h-full bg-blue-500 transition-all duration-500 ease-in-out" 
             style={{ width: `${loadingProgress}%` }}
           ></div>
         </div>
@@ -49,4 +60,4 @@ const ReportLoadingState = () => {
   );
 };
 
-export default ReportLoadingState;
+export default React.memo(ReportLoadingState);

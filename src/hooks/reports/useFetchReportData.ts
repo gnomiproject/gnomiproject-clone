@@ -310,15 +310,23 @@ export const fetchReportData = async (
       return null;
     }
     
-    // Use proper type checking before logging
+    // Fix: Add proper type checking to prevent TypeScript errors
+    // and handle different data types safely
+    const hasStrategicRecommendations = data && 'strategic_recommendations' in data && !!data.strategic_recommendations;
+    let recommendationsCount = 0;
+    
+    if (hasStrategicRecommendations) {
+      const recommendations = data.strategic_recommendations;
+      if (Array.isArray(recommendations)) {
+        recommendationsCount = recommendations.length;
+      } else if (recommendations && typeof recommendations === 'object') {
+        recommendationsCount = Object.keys(recommendations).length;
+      }
+    }
+    
     console.log(`[fetchReportData] Successfully retrieved data for ${archetypeId}:`, {
-      hasStrategicRecommendations: !!data.strategic_recommendations,
-      recommendationsCount: data.strategic_recommendations ? 
-        (Array.isArray(data.strategic_recommendations) ? 
-          data.strategic_recommendations.length : 
-          (typeof data.strategic_recommendations === 'object' ? 
-            Object.keys(data.strategic_recommendations).length : 0)) : 
-        0
+      hasStrategicRecommendations,
+      recommendationsCount
     });
     
     return data ? mapToArchetypeDetailedData(data) : null;

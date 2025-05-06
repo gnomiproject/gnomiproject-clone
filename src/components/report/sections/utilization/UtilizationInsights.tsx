@@ -1,7 +1,8 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartPie } from 'lucide-react';
+import { normalizeArray } from '@/utils/array/arrayUtils';
 
 interface UtilizationInsightsProps {
   reportData: any;
@@ -10,17 +11,23 @@ interface UtilizationInsightsProps {
 const UtilizationInsights = ({
   reportData
 }: UtilizationInsightsProps) => {
-  // Try to parse JSON data if it exists
-  const parseInsights = () => {
+  // Try to parse JSON data if it exists - memoized for better performance
+  const parsedInsights = useMemo(() => {
     try {
-      if (typeof reportData.utilization_patterns === 'string' && reportData.utilization_patterns.trim().startsWith('{')) {
-        const parsedData = JSON.parse(reportData.utilization_patterns);
+      if (!reportData || !reportData.utilization_patterns) {
+        return null;
+      }
+
+      // Handle JSON string format
+      if (typeof reportData.utilization_patterns === 'string' && 
+          reportData.utilization_patterns.trim().startsWith('{')) {
+        const parsed = JSON.parse(reportData.utilization_patterns);
         
-        if (parsedData?.overview) {
+        if (parsed?.overview) {
           return {
-            overview: parsedData.overview,
-            findings: parsedData.findings || [],
-            metrics: parsedData.key_metrics || []
+            overview: parsed.overview,
+            findings: parsed.findings || {},
+            metrics: parsed.key_metrics || []
           };
         }
       }
@@ -29,12 +36,10 @@ const UtilizationInsights = ({
       console.error('Error parsing utilization insights:', error);
       return null;
     }
-  };
+  }, [reportData?.utilization_patterns]);
 
-  const parsedInsights = parseInsights();
-  
   // Handle case where there are no insights
-  if (!reportData.utilization_patterns) {
+  if (!reportData?.utilization_patterns) {
     return (
       <Card className="mt-4 mb-8">
         <CardHeader className="pb-3">
@@ -74,18 +79,23 @@ const UtilizationInsights = ({
                 <h3 className="text-md font-medium mb-2">Key Findings:</h3>
                 <ul className="list-disc pl-5 space-y-2">
                   {Object.entries(parsedInsights.findings).map(([key, value]: [string, any], index) => {
-                    // Clean up the key - remove numbers, colons and any whitespace at the beginning
-                    // Then add spaces before capital letters for better readability
+                    // Format the key for display by:
+                    // 1. Remove leading numbers and any following characters like colons or periods
+                    // 2. Remove any remaining leading special characters
+                    // 3. Capitalize the first letter
                     const cleanKey = key
-                      .replace(/^\d+[\s:]*/, '')    // Remove leading numbers with any spaces or colons that follow
-                      .replace(/^[:\s]+/, '')       // Remove any remaining leading colons or spaces
-                      .replace(/([A-Z])/g, ' $1')   // Add spaces before capital letters
-                      .trim();                      // Remove any extra whitespace
-                      
+                      .replace(/^\d+[\s:\.]*/, '')    // Remove leading numbers with colons/periods
+                      .replace(/^[:\s\.]+/, '')       // Remove remaining leading special chars
+                      .trim();                        // Remove whitespace
+                    
+                    const formattedKey = cleanKey.charAt(0).toUpperCase() + cleanKey.slice(1);
+                    
+                    // Format the value as a string
+                    const formattedValue = String(value);
+                    
                     return (
                       <li key={index} className="text-gray-700">
-                        <span className="font-medium">{cleanKey}: </span>
-                        {value}
+                        <span className="font-medium">{formattedKey}:</span> {formattedValue}
                       </li>
                     );
                   })}
@@ -100,14 +110,16 @@ const UtilizationInsights = ({
                 <ul className="list-disc pl-5 space-y-2">
                   {parsedInsights.metrics.map((metric: any, index: number) => {
                     // Format consistently with metrics in parentheses
-                    const metricText = metric.context ? 
-                      `${metric.value} (${metric.context})` : 
-                      metric.value;
+                    // Only add context in parentheses if it exists
+                    const metricValue = metric.value || 'N/A';
+                    const metricContext = metric.context;
+                    const metricText = metricContext ? 
+                      `${metricValue} (${metricContext})` : 
+                      metricValue;
                       
                     return (
                       <li key={index} className="text-gray-700">
-                        <span className="font-medium">{metric.name}: </span>
-                        {metricText}
+                        <span className="font-medium">{metric.name || `Metric ${index + 1}`}:</span> {metricText}
                       </li>
                     );
                   })}
@@ -143,4 +155,4 @@ const UtilizationInsights = ({
   );
 };
 
-export default UtilizationInsights;
+export default React.memo(UtilizationInsights);
