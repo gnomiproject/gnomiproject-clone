@@ -1,10 +1,4 @@
 
-import React, { useEffect } from 'react';
-import ErrorBoundary from '@/components/shared/ErrorBoundary';
-import ReportSections from './ReportSections';
-import ReportErrorHandler from '../components/ReportErrorHandler';
-import ReportDebugInfo from '../components/ReportDebugInfo';
-
 import React from 'react';
 import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import { Section } from '@/components/shared/Section';
@@ -42,7 +36,7 @@ const ReportSections: React.FC<ReportSectionsProps> = ({
   });
 
   // Force this component to re-render after mount to ensure children render correctly
-  useEffect(() => {
+  React.useEffect(() => {
     console.log('[ReportSections] Component mounted');
   }, []);
 
