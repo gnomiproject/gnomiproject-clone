@@ -258,6 +258,45 @@ export type Database = {
           },
         ]
       }
+      Claude_Test_Logs: {
+        Row: {
+          archetype_id: string
+          current_db_recommendations: Json | null
+          focused_claude_response: Json | null
+          focused_error: string | null
+          focused_recommendations: Json | null
+          id: number
+          standard_claude_response: Json | null
+          standard_error: string | null
+          standard_recommendations: Json | null
+          timestamp: string
+        }
+        Insert: {
+          archetype_id: string
+          current_db_recommendations?: Json | null
+          focused_claude_response?: Json | null
+          focused_error?: string | null
+          focused_recommendations?: Json | null
+          id?: number
+          standard_claude_response?: Json | null
+          standard_error?: string | null
+          standard_recommendations?: Json | null
+          timestamp: string
+        }
+        Update: {
+          archetype_id?: string
+          current_db_recommendations?: Json | null
+          focused_claude_response?: Json | null
+          focused_error?: string | null
+          focused_recommendations?: Json | null
+          id?: number
+          standard_claude_response?: Json | null
+          standard_error?: string | null
+          standard_recommendations?: Json | null
+          timestamp?: string
+        }
+        Relationships: []
+      }
       Core_Archetype_Families: {
         Row: {
           common_traits: Json | null

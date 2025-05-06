@@ -23,7 +23,8 @@ export const RecommendationsTab = ({ report }: RecommendationsTabProps) => {
   console.log('[RecommendationsTab] Recommendations data:', {
     rawData: report.strategic_recommendations,
     processedCount: recommendationsArray.length,
-    isArray: Array.isArray(report.strategic_recommendations)
+    isArray: Array.isArray(report.strategic_recommendations),
+    firstItem: recommendationsArray[0]
   });
 
   return (

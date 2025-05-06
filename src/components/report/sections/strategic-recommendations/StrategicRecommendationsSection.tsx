@@ -22,15 +22,17 @@ const StrategicRecommendationsSection: React.FC<StrategicRecommendationsSectionP
   
   // Memoize recommendations processing to avoid expensive operations on re-renders
   const recommendations = useMemo(() => {
+    // Log what we're working with
+    console.log('[StrategicRecommendationsSection] Processing strategic_recommendations:', reportData?.strategic_recommendations);
+    
     // Extract strategic recommendations using the memoized function for better performance
     const recs = reportData?.strategic_recommendations 
       ? memoizedEnsureArray(reportData.strategic_recommendations, 'strategic_recommendations') 
       : [];
     
     // Add debug logging to see what's being processed
-    console.log('[StrategicRecommendationsSection] Processing recommendations:', {
-      rawRecommendations: reportData?.strategic_recommendations,
-      processedCount: recs.length,
+    console.log('[StrategicRecommendationsSection] Processed recommendations:', {
+      count: recs.length,
       processedData: recs
     });
     

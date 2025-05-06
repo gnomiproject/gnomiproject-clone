@@ -1,21 +1,20 @@
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import ReportError from '@/components/report/ReportError';
 
 interface ErrorHandlerProps {
-  archetypeId: string | undefined;
-  rawArchetypeId: string | undefined;
-  isValidArchetype: boolean;
-  isValidAccess: boolean;
-  isAdminView: boolean;
-  token: string | undefined;
-  userDataError: Error | null;
-  reportError: Error | null;
-  reportData: any;
-  isUsingFallbackData: boolean;
-  onRetry: () => void;
-  onRequestNewToken: () => void;
+  archetypeId?: string;
+  rawArchetypeId?: string;
+  isValidArchetype?: boolean;
+  isValidAccess?: boolean;
+  isAdminView?: boolean;
+  token?: string;
+  userDataError?: Error | null;
+  reportError?: Error | null;
+  reportData?: any;
+  isUsingFallbackData?: boolean;
+  onRetry?: () => void;
+  onRequestNewToken?: () => void;
 }
 
 const ErrorHandler: React.FC<ErrorHandlerProps> = ({
@@ -32,73 +31,57 @@ const ErrorHandler: React.FC<ErrorHandlerProps> = ({
   onRetry,
   onRequestNewToken
 }) => {
-  const navigate = useNavigate();
-
-  // Invalid archetype ID error
+  // Case 1: Invalid archetype ID
   if (!isValidArchetype) {
     return (
       <ReportError
-        title="Invalid Archetype ID"
-        message={`The requested archetype report (${rawArchetypeId}) could not be found.`}
-        actionLabel="Return Home"
-        onAction={() => navigate('/')}
-        secondaryAction={() => window.location.reload()}
-        secondaryActionLabel="Retry"
+        title="Invalid Archetype"
+        message={`"${rawArchetypeId}" is not a valid archetype identifier. Please check the URL and try again.`}
+        actionLabel="Go to Home"
+        onAction={() => window.location.href = '/'}
       />
     );
   }
 
-  // Access error - but only if we're not using fallback data
-  if (!isAdminView && token && !isValidAccess && !isUsingFallbackData) {
-    console.error('[ReportViewer] Access error:', {
-      token: token ? `${token.substring(0, 5)}...` : 'missing',
-      error: userDataError?.message || 'Unknown validation error'
-    });
-    
+  // Case 2: Invalid access token (not admin and token validation failed)
+  if (!isAdminView && !isValidAccess && reportError?.message?.includes('token')) {
     return (
       <ReportError
-        title="Access Error"
-        message={userDataError?.message || 'Invalid or expired access token.'}
-        actionLabel="Return Home"
-        onAction={() => navigate('/')}
-        secondaryAction={onRequestNewToken}
-        secondaryActionLabel="Request New Access Token"
-      />
-    );
-  }
-
-  // Data fetch error
-  if (reportError && !isUsingFallbackData) {
-    console.error('[ReportViewer] Data error:', reportError);
-    
-    return (
-      <ReportError
-        title="Error Loading Report"
-        message={`${reportError.message} (Data source: level4_report_secure)`}
-        actionLabel="Retry"
-        onAction={onRetry}
-        secondaryAction={() => navigate('/')}
+        title="Invalid Access Token"
+        message={`Your access token for "${archetypeId}" appears to be invalid or expired. Please request a new access token to view this report.`}
+        actionLabel="Request New Token"
+        onAction={onRequestNewToken || (() => window.location.href = '/')}
+        secondaryAction={() => window.location.href = '/'}
         secondaryActionLabel="Return Home"
       />
     );
   }
 
-  // Missing data error
-  if (!reportData && !isUsingFallbackData) {
-    console.error('[ReportViewer] No report data found for:', archetypeId);
-    
+  // Case 3: No report data found
+  if (!reportData && reportError && !isUsingFallbackData) {
     return (
       <ReportError
         title="Report Not Found"
-        message={`Could not find report data for archetype: ${archetypeId} in level4_report_secure table.`}
-        actionLabel="Return Home"
-        onAction={() => navigate('/')}
+        message={`We couldn't find a report for "${archetypeId}". The report may not exist or there might be an issue accessing it.`}
+        actionLabel="Try Again"
+        onAction={onRetry || (() => window.location.reload())}
+        secondaryAction={() => window.location.href = '/'}
+        secondaryActionLabel="Return Home"
       />
     );
   }
 
-  // No errors to handle
-  return null;
+  // Case 4: General error
+  return (
+    <ReportError
+      title="Error Loading Report"
+      message={reportError?.message || userDataError?.message || "An unexpected error occurred while loading the report."}
+      actionLabel="Try Again"
+      onAction={onRetry || (() => window.location.reload())}
+      secondaryAction={() => window.location.href = '/'}
+      secondaryActionLabel="Return Home"
+    />
+  );
 };
 
 export default ErrorHandler;

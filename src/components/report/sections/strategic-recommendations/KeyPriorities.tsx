@@ -11,11 +11,12 @@ interface KeyPrioritiesProps {
 // Base component implementation
 const KeyPrioritiesBase: React.FC<KeyPrioritiesProps> = ({ recommendations }) => {
   // Use memoizedEnsureArray to safely handle recommendations data
-  const safeRecommendations = useMemo(() => 
-    memoizedEnsureArray<any>(recommendations, 'recommendations'),
-  [recommendations]);
+  const safeRecommendations = useMemo(() => {
+    console.log('[KeyPriorities] Processing recommendations:', recommendations);
+    return memoizedEnsureArray<any>(recommendations, 'recommendations');
+  }, [recommendations]);
   
-  // Show all recommendations instead of limiting to top 3
+  // Use all recommendations
   const allRecommendations = safeRecommendations;
 
   // Early return for empty data case

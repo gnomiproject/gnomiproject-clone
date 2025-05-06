@@ -310,13 +310,20 @@ export const fetchReportData = async (
       return null;
     }
     
-    console.log(`[fetchReportData] Successfully retrieved data for ${archetypeId}`);
+    console.log(`[fetchReportData] Successfully retrieved data for ${archetypeId}:`, {
+      hasStrategicRecommendations: !!data.strategic_recommendations,
+      recommendationsCount: data.strategic_recommendations ? 
+        (Array.isArray(data.strategic_recommendations) ? 
+          data.strategic_recommendations.length : 
+          'object with keys: ' + Object.keys(data.strategic_recommendations).join(', ')) : 
+        0
+    });
+    
     return data ? mapToArchetypeDetailedData(data) : null;
   } catch (error) {
     console.error(`[fetchReportData] Error fetching report data:`, error);
     
     // Try fallback source for deep dive reports
-    // Fix: Use strict string comparison instead of type comparison
     if (reportType === 'deepDive' && dataSourceTable === 'level4_report_secure') {
       console.log(`[fetchReportData] Attempting fallback to level4_deepdive_report_data_secure`);
       try {
@@ -365,6 +372,24 @@ const mapToArchetypeDetailedData = (data: any): ArchetypeDetailedData | null => 
         .filter(Boolean)
         .map((item: any) => String(item).trim());
     }
+
+    // Process strategic recommendations if available
+    let strategicRecommendations = data.strategic_recommendations;
+    if (strategicRecommendations) {
+      // If it's not an array, convert to array for consistent handling
+      if (!Array.isArray(strategicRecommendations)) {
+        // It might be an object with numeric keys, convert to array
+        strategicRecommendations = Object.values(strategicRecommendations);
+      }
+      
+      // Log what we found
+      console.log(`[mapToArchetypeDetailedData] Processed strategic recommendations:`, {
+        originalType: typeof data.strategic_recommendations,
+        isArray: Array.isArray(data.strategic_recommendations),
+        processedCount: strategicRecommendations.length,
+        sample: strategicRecommendations.slice(0, 2)
+      });
+    }
     
     return {
       id: data.archetype_id,
@@ -378,62 +403,18 @@ const mapToArchetypeDetailedData = (data: any): ArchetypeDetailedData | null => 
       key_characteristics: keyCharacteristics,
       industries: data.industries,
       family_id: data.family_id,
+      strategic_recommendations: strategicRecommendations,
       
-      // Map SWOT analysis fields
-      strengths: ensureArray(data.strengths || []),
-      weaknesses: ensureArray(data.weaknesses || []),
-      opportunities: ensureArray(data.opportunities || []),
-      threats: ensureArray(data.threats || []),
-      
-      // Map strategic recommendations
-      strategic_recommendations: ensureArray(data.strategic_recommendations || []),
-        
-      // Map metrics with their original names
-      "Demo_Average Family Size": data["Demo_Average Family Size"] || 0,
-      "Demo_Average Age": data["Demo_Average Age"] || 0,
-      "Demo_Average Employees": data["Demo_Average Employees"] || 0,
-      "Demo_Average States": data["Demo_Average States"] || 0,
-      "Demo_Average Percent Female": data["Demo_Average Percent Female"] || 0,
-      
-      "Util_Emergency Visits per 1k Members": data["Util_Emergency Visits per 1k Members"] || 0,
-      "Util_Specialist Visits per 1k Members": data["Util_Specialist Visits per 1k Members"] || 0,
-      "Util_Inpatient Admits per 1k Members": data["Util_Inpatient Admits per 1k Members"] || 0,
-      "Util_Percent of Members who are Non-Utilizers": data["Util_Percent of Members who are Non-Utilizers"] || 0,
-      
-      "Risk_Average Risk Score": data["Risk_Average Risk Score"] || 0,
-      "SDOH_Average SDOH": data["SDOH_Average SDOH"] || 0,
-      
-      "Cost_Medical & RX Paid Amount PEPY": data["Cost_Medical & RX Paid Amount PEPY"] || 0,
-      "Cost_Medical & RX Paid Amount PMPY": data["Cost_Medical & RX Paid Amount PMPY"] || 0,
-      "Cost_Avoidable ER Potential Savings PMPY": data["Cost_Avoidable ER Potential Savings PMPY"] || 0,
-      "Cost_Medical Paid Amount PEPY": data["Cost_Medical Paid Amount PEPY"] || 0,
-      "Cost_RX Paid Amount PEPY": data["Cost_RX Paid Amount PEPY"] || 0,
-      
-      "Dise_Heart Disease Prevalence": data["Dise_Heart Disease Prevalence"] || 0,
-      "Dise_Type 2 Diabetes Prevalence": data["Dise_Type 2 Diabetes Prevalence"] || 0, 
-      "Dise_Mental Health Disorder Prevalence": data["Dise_Mental Health Disorder Prevalence"] || 0,
-      "Dise_Substance Use Disorder Prevalence": data["Dise_Substance Use Disorder Prevalence"] || 0,
-      
-      "Gaps_Diabetes RX Adherence": data["Gaps_Diabetes RX Adherence"] || 0,
-      "Gaps_Behavioral Health FU ED Visit Mental Illness": data["Gaps_Behavioral Health FU ED Visit Mental Illness"] || 0,
-      "Gaps_Cancer Screening Breast": data["Gaps_Cancer Screening Breast"] || 0,
-      "Gaps_Wellness Visit Adults": data["Gaps_Wellness Visit Adults"] || 0,
-      
-      // Also include any additional properties
-      ...Object.fromEntries(
-        Object.entries(data).filter(([key]) => 
-          !key.includes('key_characteristics') &&
-          !key.includes('strengths') &&
-          !key.includes('weaknesses') &&
-          !key.includes('opportunities') &&
-          !key.includes('threats') &&
-          !key.includes('strategic_recommendations')
-        )
-      )
+      // Copy all other properties
+      ...Object.entries(data)
+        .filter(([key]) => !['id', 'name', 'family_id', 'family_name', 
+                           'hex_color', 'short_description', 'long_description',
+                           'key_characteristics', 'industries', 
+                           'strategic_recommendations'].includes(key))
+        .reduce((obj, [key, value]) => ({ ...obj, [key]: value }), {})
     };
   } catch (error) {
     console.error('[mapToArchetypeDetailedData] Error mapping data:', error);
-    console.error('Original data:', data);
-    throw new Error(`Failed to map report data: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    return null;
   }
 };
