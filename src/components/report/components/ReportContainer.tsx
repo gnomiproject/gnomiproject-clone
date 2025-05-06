@@ -1,12 +1,14 @@
-import React, { useState, useRef, Suspense, lazy, useCallback, useEffect } from 'react';
+
+import React, { useState, useRef, useCallback } from 'react';
 import LeftNavigation from '../navigation/LeftNavigation';
 import PrintButton from './PrintButton';
 import { useReportNavigation } from '../hooks/useReportNavigation';
 import { debounce } from '@/utils/debounce';
 import { useRenderPerformance } from '@/components/shared/PerformanceMonitor';
 import Navbar from '@/components/layout/Navbar';
+import ReportBodyContent from './ReportBodyContent';
 
-// Create sections array for LeftNavigation - sections have been reordered as requested
+// Create sections array for LeftNavigation
 const REPORT_SECTIONS = [
   { id: 'introduction', name: 'Introduction' },
   { id: 'archetype-profile', name: 'Archetype Profile' },
@@ -18,19 +20,8 @@ const REPORT_SECTIONS = [
   { id: 'cost-analysis', name: 'Cost Analysis' },
   { id: 'swot-analysis', name: 'SWOT Analysis' },
   { id: 'recommendations', name: 'Recommendations' },
-  { id: 'about-report', name: 'About This Report' }, // Changed 'contact' to 'about-report'
+  { id: 'about-report', name: 'About This Report' },
 ];
-
-// Lazy load ReportBody to improve initial load time
-const LazyReportBody = lazy(() => import('./ReportBody'));
-
-// Loading placeholder
-const LoadingFallback = () => (
-  <div className="p-12 flex flex-col items-center justify-center space-y-4">
-    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-    <p className="text-gray-600">Loading report content...</p>
-  </div>
-);
 
 // Error fallback component
 const ErrorFallback = ({ error }: { error: Error }) => (
@@ -53,7 +44,7 @@ interface ReportContainerProps {
   isAdminView?: boolean;
   debugInfo?: any;
   onNavigate?: (sectionId: string) => void;
-  children?: React.ReactNode; // Added children prop to the interface
+  children?: React.ReactNode;
 }
 
 const ReportContainer: React.FC<ReportContainerProps> = ({ 
@@ -63,9 +54,8 @@ const ReportContainer: React.FC<ReportContainerProps> = ({
   isAdminView = false,
   debugInfo,
   onNavigate,
-  children // Added children to the component props
+  children
 }) => {
-  
   // Track performance
   useRenderPerformance('ReportContainer');
   
@@ -74,31 +64,13 @@ const ReportContainer: React.FC<ReportContainerProps> = ({
   // Use the passed onNavigate function if provided, otherwise use the hook
   const { activeSectionId, handleNavigate, isNavigating } = useReportNavigation();
   
-  // Track whether report body has mounted
-  const [isReportBodyMounted, setIsReportBodyMounted] = useState(false);
-  
-  // Effect to log sections and verify they exist in DOM
-  useEffect(() => {
-    // Log section verification on mount
-    console.log("[ReportContainer] Verifying section IDs match DOM elements");
-    
-    // Short delay to ensure DOM is ready
-    const timer = setTimeout(() => {
-      REPORT_SECTIONS.forEach(section => {
-        const element = document.getElementById(section.id);
-        console.log(`Section ${section.id}: ${element ? "Found in DOM" : "NOT FOUND IN DOM"}`);
-      });
-      
-      setIsReportBodyMounted(true);
-    }, 1000);
-    
-    return () => clearTimeout(timer);
-  }, []);
+  // State for debug tools
+  const [showDebugData, setShowDebugData] = useState(false);
+  const [showDiagnostics, setShowDiagnostics] = useState(false);
   
   // Debounce navigation to prevent rapid successive clicks
   const debouncedNavigate = useCallback(
     debounce((sectionId: string) => {
-      // Use the provided onNavigate function if it exists, otherwise use the hook function
       if (onNavigate) {
         console.log(`[ReportContainer] Using provided onNavigate for section: ${sectionId}`);
         onNavigate(sectionId);
@@ -113,27 +85,11 @@ const ReportContainer: React.FC<ReportContainerProps> = ({
   // Debug info
   const isDebugMode = isAdminView || window.location.search.includes('debug=true');
   
-  // Setup report debug tools props
-  const [showDebugData, setShowDebugData] = useState(false);
-  const [showDiagnostics, setShowDiagnostics] = useState(false);
-  
   const handleRefreshData = useCallback(() => {
     // Refresh data logic would go here
     console.log("Refreshing report data");
     window.location.reload();
   }, []);
-
-  // Store the theme color from report data
-  const themeColor = reportData?.hexColor || reportData?.hex_color || "#4B5563";
-
-  // Add debug logging to help troubleshoot loading issues
-  console.log("[ReportContainer] Rendering with:", {
-    hasReportData: !!reportData, 
-    reportDataType: reportData ? typeof reportData : 'none',
-    reportDataKeys: reportData ? Object.keys(reportData).slice(0, 10) : [],
-    activeSectionId,
-    reportSections: REPORT_SECTIONS.map(s => s.id)
-  });
 
   if (!reportData) {
     console.error("[ReportContainer] No report data available");
@@ -171,7 +127,7 @@ const ReportContainer: React.FC<ReportContainerProps> = ({
         documentTitle={`Healthcare Archetype Report - ${reportData?.archetype_name || reportData?.name || 'Unknown'}`} 
       />
 
-      {/* Main report content with improved error handling and lazy loading */}
+      {/* Main report content */}
       <div 
         className="lg:pl-64 py-6 print:py-0 print:pl-0 pt-16" // Added pt-16 to account for navbar
         ref={reportRef}
@@ -179,21 +135,19 @@ const ReportContainer: React.FC<ReportContainerProps> = ({
         {children ? (
           children
         ) : (
-          <Suspense fallback={<LoadingFallback />}>
-            <LazyReportBody
-              reportData={reportData}
-              userData={userData}
-              averageData={averageData}
-              isAdminView={isAdminView}
-              debugInfo={debugInfo}
-              showDebugData={showDebugData}
-              showDiagnostics={showDiagnostics}
-              setShowDebugData={setShowDebugData}
-              setShowDiagnostics={setShowDiagnostics}
-              handleRefreshData={handleRefreshData}
-              isDebugMode={isDebugMode}
-            />
-          </Suspense>
+          <ReportBodyContent
+            reportData={reportData}
+            userData={userData}
+            averageData={averageData}
+            isAdminView={isAdminView}
+            debugInfo={debugInfo}
+            showDebugData={showDebugData}
+            showDiagnostics={showDiagnostics}
+            setShowDebugData={setShowDebugData}
+            setShowDiagnostics={setShowDiagnostics}
+            handleRefreshData={handleRefreshData}
+            isDebugMode={isDebugMode}
+          />
         )}
       </div>
       
