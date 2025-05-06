@@ -1,5 +1,5 @@
 
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useState, useEffect } from 'react';
 
 // Lazy load ReportBody to improve initial load time
 const LazyReportBody = lazy(() => import('./ReportBody'));
@@ -39,6 +39,24 @@ const ReportBodyContent: React.FC<ReportBodyContentProps> = ({
   handleRefreshData,
   isDebugMode
 }) => {
+  // Add state to track if report has been attempted to load
+  const [hasAttemptedLoad, setHasAttemptedLoad] = useState<boolean>(false);
+
+  // Flag when the component has mounted to prevent unnecessary token validations
+  useEffect(() => {
+    setHasAttemptedLoad(true);
+    
+    // Log debug information once when component mounts
+    if (isDebugMode) {
+      console.log('[ReportBodyContent] Rendering with data:', {
+        hasReportData: !!reportData,
+        hasUserData: !!userData,
+        hasAverageData: !!averageData,
+        isAdminView
+      });
+    }
+  }, [reportData, userData, averageData, isAdminView, isDebugMode]);
+
   return (
     <Suspense fallback={<LoadingFallback />}>
       <LazyReportBody
