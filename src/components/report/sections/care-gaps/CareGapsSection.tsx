@@ -33,7 +33,6 @@ const CareGapsSection: React.FC<CareGapsSectionProps> = ({ reportData, averageDa
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row gap-8">
         <div className="md:w-2/3">
-          <h1 className="text-3xl font-bold mb-6">Care Gaps</h1>
           <p className="text-lg">
             Care gaps identify missed opportunities for preventive care, chronic condition management, 
             and follow-up services. Addressing these gaps can improve health outcomes and reduce 
