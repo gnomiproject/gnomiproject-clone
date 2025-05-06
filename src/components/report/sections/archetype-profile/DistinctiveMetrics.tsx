@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card } from '@/components/ui/card';
-import { ArrowUp, ArrowDown, TrendingUp, TrendingDown, Info } from 'lucide-react';
+import { ArrowUp, ArrowDown } from 'lucide-react';
 import { useDistinctiveMetrics } from '@/hooks/archetype/useDistinctiveMetrics';
 import { formatFieldValue } from '@/utils/reports/fieldFormatters';
 import { calculatePercentageDifference, isLowerBetter } from '@/utils/reports/metricUtils';
@@ -30,9 +30,9 @@ const DistinctiveMetrics: React.FC<DistinctiveMetricsProps> = ({ metrics, archet
 
   if (isLoading) {
     return (
-      <Card className="p-6">
+      <Card className="p-4">
         <h4 className="text-lg font-medium mb-2">Distinctive Metrics</h4>
-        <div className="py-3">
+        <div className="py-2">
           <p className="text-gray-600">Loading metrics...</p>
         </div>
       </Card>
@@ -41,7 +41,7 @@ const DistinctiveMetrics: React.FC<DistinctiveMetricsProps> = ({ metrics, archet
 
   if (!topMetrics || topMetrics.length === 0) {
     return (
-      <Card className="p-6">
+      <Card className="p-4">
         <h4 className="text-lg font-medium mb-2">Distinctive Metrics</h4>
         <p className="text-gray-600">No distinctive metrics available.</p>
       </Card>
@@ -107,10 +107,10 @@ const DistinctiveMetrics: React.FC<DistinctiveMetricsProps> = ({ metrics, archet
   };
 
   return (
-    <Card className="p-6">
-      <h4 className="text-xl font-semibold mb-4">Key Distinctive Metrics</h4>
+    <Card className="p-4">
+      <h4 className="text-xl font-semibold mb-3">Key Distinctive Metrics</h4>
       
-      <div className="grid grid-cols-1 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
         {topMetrics.map((metric, index) => {
           // Extract values, with fallbacks for different property naming conventions
           const metricName = metric.Metric || metric.metric || '';
@@ -118,7 +118,6 @@ const DistinctiveMetrics: React.FC<DistinctiveMetricsProps> = ({ metrics, archet
           const averageValue = metric["Archetype Average"] || metric.archetype_average || 0;
           const difference = metric.Difference || metric.difference || 0;
           const category = metric.Category || metric.category || '';
-          const significance = metric.Significance || metric.significance || '';
           
           // Determine if lower is better for this metric
           const lowerIsBetter = isLowerBetter(metricName);
@@ -134,49 +133,42 @@ const DistinctiveMetrics: React.FC<DistinctiveMetricsProps> = ({ metrics, archet
 
           return (
             <div key={index} className="bg-white rounded-lg border shadow-sm overflow-hidden transition-all hover:shadow-md">
-              <div className="p-4 border-b">
+              <div className="p-3 border-b">
                 <div className="flex justify-between items-start">
-                  <h5 className="font-semibold text-gray-900">{metricName}</h5>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor(category)}`}>
+                  <h5 className="font-semibold text-gray-900 text-sm">{metricName}</h5>
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getCategoryColor(category)}`}>
                     {category}
                   </span>
                 </div>
               </div>
               
-              <div className="p-4 bg-gray-50">
-                <div className="grid grid-cols-2 gap-8">
+              <div className="p-3 bg-gray-50">
+                <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm text-gray-500 mb-1">Your Value</p>
-                    <p className="text-2xl font-bold">{formatMetricValue(metricName, metricValue)}</p>
+                    <p className="text-xs text-gray-500 mb-1">Your Value</p>
+                    <p className="text-lg font-bold">{formatMetricValue(metricName, metricValue)}</p>
                   </div>
                   
                   <div>
-                    <p className="text-sm text-gray-500 mb-1">Average</p>
-                    <p className="text-xl">{formatMetricValue(metricName, averageValue)}</p>
+                    <p className="text-xs text-gray-500 mb-1">Average</p>
+                    <p className="text-lg">{formatMetricValue(metricName, averageValue)}</p>
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-2 mt-4">
+                <div className="flex items-center gap-1.5 mt-2">
                   {isPositive ? (
-                    <div className="p-1.5 rounded-full bg-green-100">
-                      <ArrowUp className="text-green-600" size={16} />
+                    <div className="p-1 rounded-full bg-green-100">
+                      <ArrowUp className="text-green-600" size={14} />
                     </div>
                   ) : (
-                    <div className="p-1.5 rounded-full bg-amber-100">
-                      <ArrowDown className="text-amber-600" size={16} />
+                    <div className="p-1 rounded-full bg-amber-100">
+                      <ArrowDown className="text-amber-600" size={14} />
                     </div>
                   )}
-                  <span className={`text-sm font-medium ${differenceColor}`}>
+                  <span className={`text-xs font-medium ${differenceColor}`}>
                     {formattedDifference} difference from average
                   </span>
                 </div>
-                
-                {significance && (
-                  <div className="mt-3 flex items-start gap-2 text-gray-600 bg-blue-50 p-2 rounded">
-                    <Info size={16} className="text-blue-600 mt-0.5 flex-shrink-0" />
-                    <p className="text-sm">{significance}</p>
-                  </div>
-                )}
               </div>
             </div>
           );
