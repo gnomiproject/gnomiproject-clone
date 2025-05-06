@@ -6,6 +6,7 @@
 import React from 'react';
 import { ArchetypeDetailedData } from '@/types/archetype';
 import DeepDiveSwotAnalysis from './DeepDiveSwotAnalysis';
+import SectionTitle from '@/components/shared/SectionTitle';
 
 export interface SwotAnalysisProps {
   reportData?: ArchetypeDetailedData;
@@ -20,13 +21,14 @@ export interface SwotAnalysisProps {
 
 const SwotAnalysis: React.FC<SwotAnalysisProps> = ({ reportData, archetypeData, swotData: propSwotData }) => {
   // Use reportData from level4_report_secure as primary source
-  const data = reportData;
+  const data = reportData || archetypeData;
   
-  // Log the transition for debugging
-  console.log("[SwotAnalysis] Transitioning to dedicated DeepDiveSwotAnalysis component");
-  
-  // Simply pass through to the dedicated DeepDiveSwotAnalysis component
-  return <DeepDiveSwotAnalysis reportData={data} />;
+  return (
+    <>
+      <SectionTitle title="SWOT Analysis" />
+      <DeepDiveSwotAnalysis reportData={data} />
+    </>
+  );
 };
 
 export default SwotAnalysis;

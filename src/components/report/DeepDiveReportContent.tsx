@@ -54,13 +54,6 @@ const DeepDiveReportContent = ({
     />;
   }
   
-  // Log key findings for Archetype Insights
-  console.log('[DeepDiveReportContent] Key Findings for Insights Card:', {
-    keyFindings: archetype?.key_findings || 'None found',
-    keyFindingsCount: archetype?.key_findings?.length || 0,
-    recommendations: archetype?.strategic_recommendations?.length || 0
-  });
-  
   // Ensure we're passing the complete archetype data to all components
   return (
     <div className="container mx-auto p-6">

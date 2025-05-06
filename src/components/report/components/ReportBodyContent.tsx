@@ -1,16 +1,6 @@
 
-import React, { Suspense, lazy, useState, useEffect } from 'react';
-
-// Lazy load ReportBody to improve initial load time
-const LazyReportBody = lazy(() => import('./ReportBody'));
-
-// Loading placeholder
-const LoadingFallback = () => (
-  <div className="p-12 flex flex-col items-center justify-center space-y-4">
-    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-    <p className="text-gray-600">Loading report content...</p>
-  </div>
-);
+import React, { useState, useEffect } from 'react';
+import ReportBody from './ReportBody';
 
 interface ReportBodyContentProps {
   reportData: any;
@@ -58,21 +48,19 @@ const ReportBodyContent: React.FC<ReportBodyContentProps> = ({
   }, [reportData, userData, averageData, isAdminView, isDebugMode]);
 
   return (
-    <Suspense fallback={<LoadingFallback />}>
-      <LazyReportBody
-        reportData={reportData}
-        userData={userData}
-        averageData={averageData}
-        isAdminView={isAdminView}
-        debugInfo={debugInfo}
-        showDebugData={showDebugData}
-        showDiagnostics={showDiagnostics}
-        setShowDebugData={setShowDebugData}
-        setShowDiagnostics={setShowDiagnostics}
-        handleRefreshData={handleRefreshData}
-        isDebugMode={isDebugMode}
-      />
-    </Suspense>
+    <ReportBody
+      reportData={reportData}
+      userData={userData}
+      averageData={averageData}
+      isAdminView={isAdminView}
+      debugInfo={debugInfo}
+      showDebugData={showDebugData}
+      showDiagnostics={showDiagnostics}
+      setShowDebugData={setShowDebugData}
+      setShowDiagnostics={setShowDiagnostics}
+      handleRefreshData={handleRefreshData}
+      isDebugMode={isDebugMode}
+    />
   );
 };
 
