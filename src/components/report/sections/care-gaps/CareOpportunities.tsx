@@ -150,20 +150,6 @@ const CareOpportunities: React.FC<CareOpportunitiesProps> = ({
             </div>
           </div>
         </div>
-        
-        <div className="mt-6 p-4 border border-blue-100 bg-blue-50 rounded-lg">
-          <div className="flex items-start gap-3">
-            <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
-            <div>
-              <h3 className="font-medium text-blue-900 mb-1">Best Practice</h3>
-              <p className="text-sm text-blue-800">
-                Consider using targeted outreach programs to close these care gaps. 
-                Coordinated reminders, transportation assistance, and incentives can 
-                significantly improve compliance with recommended care.
-              </p>
-            </div>
-          </div>
-        </div>
       </CardContent>
     </Card>
   );
