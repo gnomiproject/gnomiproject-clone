@@ -19,13 +19,6 @@ const BehavioralHealthConditions = ({ reportData, averageData }: BehavioralHealt
     { id: 'Dise_Substance Use Disorder Prevalence', label: 'Substance Use Disorders' },
   ];
 
-  // Determine if this archetype has higher than average behavioral health prevalence
-  const hasHigherThanAverage = conditions.some(condition => {
-    const value = reportData[condition.id] || 0;
-    const avgValue = averageData && averageData[condition.id] ? averageData[condition.id] : 0;
-    return value > avgValue * 1.1; // 10% higher considered significant
-  });
-
   return (
     <Card>
       <CardHeader className="border-b border-gray-100">
@@ -40,14 +33,6 @@ const BehavioralHealthConditions = ({ reportData, averageData }: BehavioralHealt
             Behavioral health conditions frequently co-occur with physical health conditions and can significantly
             impact healthcare costs and outcomes if not properly addressed.
           </p>
-          {hasHigherThanAverage && (
-            <div className="mt-2 p-3 bg-purple-50 border border-purple-100 rounded-md">
-              <p className="text-sm text-purple-700">
-                <strong>Note:</strong> This population has higher than average prevalence of behavioral health conditions,
-                suggesting a need for increased mental health support and services.
-              </p>
-            </div>
-          )}
         </div>
         
         <div className="mt-6">

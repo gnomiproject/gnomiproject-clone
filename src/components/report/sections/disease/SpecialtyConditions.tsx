@@ -54,7 +54,6 @@ const SpecialtyConditions = ({ reportData, averageData }: SpecialtyConditionsPro
 
   // Determine if this archetype has significantly different prevalence
   const diffPercentage = calculatePercentageDifference(totalBurden, avgTotalBurden);
-  const hasSignificantDifference = Math.abs(diffPercentage) > 15;
 
   return (
     <Card>
@@ -70,16 +69,6 @@ const SpecialtyConditions = ({ reportData, averageData }: SpecialtyConditionsPro
             Specialty conditions often require specialized care and can represent significant cost drivers.
             Understanding prevalence helps in benefit design and care management programs.
           </p>
-          
-          {hasSignificantDifference && (
-            <div className="mt-2 p-3 bg-blue-50 border border-blue-100 rounded-md">
-              <p className="text-sm text-blue-700">
-                <strong>Note:</strong> This population has {diffPercentage > 0 ? 'higher' : 'lower'} than average 
-                prevalence of specialty conditions ({Math.abs(Math.round(diffPercentage))}% {diffPercentage > 0 ? 'above' : 'below'} benchmark), 
-                suggesting a need for {diffPercentage > 0 ? 'enhanced' : 'standard'} specialty care networks.
-              </p>
-            </div>
-          )}
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
