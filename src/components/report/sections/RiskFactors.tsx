@@ -83,6 +83,9 @@ const RiskFactors = ({ reportData, averageData }: RiskFactorsProps) => {
           />
         </div>
       </div>
+      
+      {/* Risk-SDOH Relationship - Moved to top */}
+      <RiskSDOHInsights reportData={reportData} averageData={averageData} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Risk Profile Component */}
@@ -97,9 +100,6 @@ const RiskFactors = ({ reportData, averageData }: RiskFactorsProps) => {
 
       {/* Digital & Community Factors */}
       <CommunityFactors reportData={reportData} averageData={averageData} />
-      
-      {/* Risk-SDOH Relationship */}
-      <RiskSDOHInsights reportData={reportData} averageData={averageData} />
     </div>
   );
 };

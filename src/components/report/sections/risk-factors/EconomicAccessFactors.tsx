@@ -41,7 +41,7 @@ const EconomicAccessFactors: React.FC<EconomicAccessFactorsProps> = ({ reportDat
 
   return (
     <Card className="p-6 shadow-sm">
-      <h3 className="text-xl font-semibold mb-4">Economic & Access Factors</h3>
+      <h3 className="text-xl font-semibold mb-4">Economic & Access Factors (SDOH)</h3>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {factors.map((factor, index) => {
