@@ -14,15 +14,41 @@ export interface CachedReport {
   expiresAt: number;
 }
 
-// Configuration for cache
+// Enhanced configuration for cache
 const CACHE_CONFIG = {
-  DEFAULT_TTL_MS: 60 * 60 * 1000, // 60 minutes in milliseconds
-  WARNING_THRESHOLD_MS: 50 * 60 * 1000, // 50 minutes in milliseconds
-  MINIMUM_VALID_TTL_MS: 5 * 60 * 1000 // 5 minutes in milliseconds
+  DEFAULT_TTL_MS: 24 * 60 * 60 * 1000, // 24 hours (increased from 60 minutes)
+  WARNING_THRESHOLD_MS: 4 * 60 * 60 * 1000, // 4 hours before expiration to show warning
+  MINIMUM_VALID_TTL_MS: 30 * 60 * 1000, // 30 minutes minimum validity (increased from 5 min)
+  SESSION_STORAGE_KEY: 'report-cache-manifest'
 };
 
 // Simple in-memory cache for report data
 const reportCache = new Map<string, CachedReport>();
+
+// Initialize cache from sessionStorage if available
+try {
+  const savedCache = sessionStorage.getItem(CACHE_CONFIG.SESSION_STORAGE_KEY);
+  if (savedCache) {
+    const parsedCache = JSON.parse(savedCache);
+    console.log(`[reportCache] Restoring ${Object.keys(parsedCache).length} cache items from session storage`);
+    
+    Object.entries(parsedCache).forEach(([key, value]) => {
+      reportCache.set(key, value as CachedReport);
+    });
+  }
+} catch (e) {
+  console.warn('[reportCache] Failed to restore cache from session storage:', e);
+}
+
+// Helper function to persist cache to sessionStorage
+const persistCache = () => {
+  try {
+    const cacheObject = Object.fromEntries(reportCache.entries());
+    sessionStorage.setItem(CACHE_CONFIG.SESSION_STORAGE_KEY, JSON.stringify(cacheObject));
+  } catch (e) {
+    console.warn('[reportCache] Failed to persist cache to session storage:', e);
+  }
+};
 
 // Check if cached data is still valid
 const isCacheValid = (cachedReport: CachedReport | null): boolean => {
@@ -34,7 +60,7 @@ const isCacheValid = (cachedReport: CachedReport | null): boolean => {
   
   // If cache is nearing expiration, log a warning
   if (isValid && timeRemaining < CACHE_CONFIG.WARNING_THRESHOLD_MS) {
-    console.warn(`[reportCache] Cache for report will expire soon. ${Math.round(timeRemaining / 60000)} minutes remaining`);
+    console.warn(`[reportCache] Cache will expire soon. ${Math.round(timeRemaining / 60000)} minutes remaining`);
     
     // If less than minimum TTL remaining, invalidate cache
     if (timeRemaining < CACHE_CONFIG.MINIMUM_VALID_TTL_MS) {
@@ -61,6 +87,7 @@ export const getFromCache = (cacheKey: string): CachedReport | null => {
   if (!isCacheValid(cachedReport)) {
     console.log(`[reportCache] Cache expired for key: ${cacheKey.substring(0, 15)}...`);
     reportCache.delete(cacheKey);
+    persistCache();
     return null;
   }
   
@@ -75,11 +102,14 @@ export const setInCache = (cacheKey: string, data: CachedReport['data']): void =
   const now = Date.now();
   const expiresAt = now + CACHE_CONFIG.DEFAULT_TTL_MS;
   
-  reportCache.set(cacheKey, {
+  const entry = {
     data,
     timestamp: now,
     expiresAt
-  });
+  };
+  
+  reportCache.set(cacheKey, entry);
+  persistCache();
   
   console.log(`[reportCache] Data cached with key: ${cacheKey.substring(0, 15)}... (expires in ${CACHE_CONFIG.DEFAULT_TTL_MS / 60000} minutes)`);
 };
@@ -88,6 +118,7 @@ export const clearFromCache = (cacheKey: string): void => {
   if (reportCache.has(cacheKey)) {
     console.log(`[reportCache] Clearing cache for key: ${cacheKey.substring(0, 15)}...`);
     reportCache.delete(cacheKey);
+    persistCache();
   } else {
     console.log(`[reportCache] No cache found for key: ${cacheKey.substring(0, 15)}...`);
   }
@@ -97,6 +128,7 @@ export const clearFromCache = (cacheKey: string): void => {
 export const clearAllCache = (): void => {
   const itemCount = reportCache.size;
   reportCache.clear();
+  sessionStorage.removeItem(CACHE_CONFIG.SESSION_STORAGE_KEY);
   console.log(`[reportCache] Cleared all cached data (${itemCount} items)`);
   toast.info(`Cache cleared (${itemCount} reports)`, {
     description: "All report data will be re-fetched from the server"
@@ -109,28 +141,44 @@ export const getCacheStats = (): {
   keys: string[];
   oldestTimestamp: number | null;
   newestTimestamp: number | null;
+  oldestKey: string | null;
+  newestKey: string | null;
+  averageTtlMinutes: number;
 } => {
   let oldestTimestamp = null;
   let newestTimestamp = null;
+  let oldestKey = null;
+  let newestKey = null;
+  let totalTtl = 0;
   const keys: string[] = [];
+  const now = Date.now();
   
   reportCache.forEach((value, key) => {
     keys.push(key);
     
     if (oldestTimestamp === null || value.timestamp < oldestTimestamp) {
       oldestTimestamp = value.timestamp;
+      oldestKey = key;
     }
     
     if (newestTimestamp === null || value.timestamp > newestTimestamp) {
       newestTimestamp = value.timestamp;
+      newestKey = key;
     }
+    
+    totalTtl += value.expiresAt - now;
   });
+  
+  const averageTtlMinutes = reportCache.size > 0 ? Math.round((totalTtl / reportCache.size) / 60000) : 0;
   
   return {
     size: reportCache.size,
     keys,
     oldestTimestamp,
-    newestTimestamp
+    newestTimestamp,
+    oldestKey,
+    newestKey,
+    averageTtlMinutes
   };
 };
 

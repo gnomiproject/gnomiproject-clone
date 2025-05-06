@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { isValidArchetypeId, normalizeArchetypeId } from '@/utils/archetypeValidation';
@@ -7,65 +6,96 @@ import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import { useReportUserData } from '@/hooks/useReportUserData';
 import { useReportAccess } from '@/hooks/useReportAccess';
 import ReportLoadingState from '@/components/report/ReportLoadingState';
-import { checkCacheHealth, getCacheStats } from '@/utils/reports/reportCache';
+import { checkCacheHealth, getCacheStats, clearAllCache } from '@/utils/reports/reportCache';
 import { useTokenStatus } from '@/hooks/useTokenStatus';
 import ReportViewerContent from '@/components/report/viewer/ReportViewerContent';
 import ErrorHandler from '@/components/report/viewer/ErrorHandler';
 
 /**
- * ReportViewer - A simplified token-based report viewer
+ * Enhanced ReportViewer with improved error handling and fallback strategies
  * 
- * This component handles:
- * 1. Token-based authentication for report access
- * 2. Loading report data from level4_report_secure
- * 3. Fallback to cached data when network issues occur
- * 4. Error and expiration handling with graceful degradation
+ * Key improvements:
+ * 1. Persistent token state tracking
+ * 2. Fallback to cached data on token errors
+ * 3. Graceful degradation UI instead of 404 redirects
+ * 4. Progressive validation approach
+ * 5. Improved logging and debugging for token states
  */
 const ReportViewer = () => {
   const { archetypeId: rawArchetypeId, token } = useParams();
-  // State to track when to refresh data
   const [refreshCounter, setRefreshCounter] = useState(0);
   const [errorDetails, setErrorDetails] = useState<any>(null);
   const [isUsingFallbackData, setIsUsingFallbackData] = useState<boolean>(false);
   const [sessionStartTime] = useState<number>(Date.now());
   const pageActive = useRef<boolean>(true);
-  const tokenCheckInitialized = useRef<boolean>(false);
   const hasValidatedRef = useRef<boolean>(false);
-  
-  // Normalize the archetype ID to handle case sensitivity
-  const archetypeId = rawArchetypeId ? normalizeArchetypeId(rawArchetypeId) : undefined;
-  const isValidArchetype = !!archetypeId && isValidArchetypeId(archetypeId);
-  
-  // Simple helper for valid access
-  const isAdminView = token === 'admin-view';
   const navigate = useNavigate();
   
-  // Debug logging for URL parameters
+  // Track page visibility for performance optimization
   useEffect(() => {
-    console.log('[ReportViewer] Session started:', new Date(sessionStartTime).toISOString());
-    console.log('[ReportViewer] URL parameters:', {
-      rawArchetypeId,
-      normalizedArchetypeId: archetypeId,
-      token: token ? `${token.substring(0, 5)}...` : 'missing',
-      dataSource: 'level4_report_secure'
-    });
-    
-    // Log cache health at start
-    const cacheHealth = checkCacheHealth();
-    console.log('[ReportViewer] Initial cache health:', cacheHealth);
-    
-    // Track page visibility
     const handleVisibilityChange = () => {
       pageActive.current = document.visibilityState === 'visible';
       console.log(`[ReportViewer] Page visibility changed: ${pageActive.current ? 'active' : 'background'}`);
     };
     
     document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, []);
+  
+  // Normalize the archetype ID to handle case sensitivity
+  const archetypeId = rawArchetypeId ? normalizeArchetypeId(rawArchetypeId) : undefined;
+  const isValidArchetype = !!archetypeId && isValidArchetypeId(archetypeId);
+  const isAdminView = token === 'admin-view';
+  
+  // Track token state in localStorage for debugging
+  const logTokenState = useCallback((action: string, state: any) => {
+    try {
+      const timestamp = new Date().toISOString();
+      const entry = { 
+        timestamp, 
+        action,
+        archetypeId,
+        tokenPreview: token ? `${token.substring(0, 5)}...` : 'none',
+        state 
+      };
+      
+      // Get existing log
+      const existingLog = JSON.parse(localStorage.getItem('tokenDebugLog') || '[]');
+      
+      // Add new entry
+      existingLog.push(entry);
+      
+      // Keep only last 100 entries
+      const trimmedLog = existingLog.slice(-100);
+      
+      // Save back to localStorage
+      localStorage.setItem('tokenDebugLog', JSON.stringify(trimmedLog));
+    } catch (e) {
+      console.error('Error logging token state:', e);
+    }
+  }, [archetypeId, token]);
+  
+  // Log component rendering
+  useEffect(() => {
+    console.log('[ReportViewer] Session started:', new Date(sessionStartTime).toISOString());
+    console.log('[ReportViewer] URL parameters:', {
+      rawArchetypeId,
+      normalizedArchetypeId: archetypeId,
+      token: token ? `${token.substring(0, 5)}...` : 'missing',
+      isAdminView
+    });
+    
+    // Log cache health at start
+    const cacheHealth = checkCacheHealth();
+    console.log('[ReportViewer] Initial cache health:', cacheHealth);
+    
+    // Log token state
+    logTokenState('component_mount', { isValidArchetype, isAdminView });
     
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      logTokenState('component_unmount', {});
     };
-  }, [sessionStartTime, rawArchetypeId, archetypeId, token]);
+  }, [sessionStartTime, rawArchetypeId, archetypeId, token, isAdminView, isValidArchetype, logTokenState]);
 
   // Use the simplified user data hook for token validation
   const {
@@ -76,10 +106,21 @@ const ReportViewer = () => {
     debugInfo: userDataDebugInfo
   } = useReportUserData(token, archetypeId || '');
 
-  // Use report data hook to fetch EXCLUSIVELY from level4_report_secure
+  // Log user data result
+  useEffect(() => {
+    if (!userDataLoading) {
+      logTokenState('user_data_loaded', {
+        isValid: isValidAccess,
+        hasError: !!userDataError,
+        hasUserData: !!userData
+      });
+    }
+  }, [userDataLoading, isValidAccess, userDataError, userData, logTokenState]);
+
+  // Use report data hook to fetch report data
   const {
     reportData, 
-    archetypeData, // Kept for compatibility
+    archetypeData,
     averageData,
     isLoading: reportLoading,
     error: reportError,
@@ -92,6 +133,17 @@ const ReportViewer = () => {
     isAdminView,
     skipCache: refreshCounter > 0
   });
+  
+  // Log report data result
+  useEffect(() => {
+    if (!reportLoading) {
+      logTokenState('report_data_loaded', {
+        hasReportData: !!reportData,
+        hasError: !!reportError,
+        isFallbackData
+      });
+    }
+  }, [reportLoading, reportData, reportError, isFallbackData, logTokenState]);
   
   // Update fallback data state
   useEffect(() => {
@@ -114,29 +166,15 @@ const ReportViewer = () => {
     reportData
   });
   
-  // Set up a single periodic token check after everything is loaded
+  // Log token status changes
   useEffect(() => {
-    if (!token || isAdminView || tokenCheckInitialized.current) return;
-    
-    // Only set up the periodic check once
-    if (!userDataLoading && !reportLoading) {
-      tokenCheckInitialized.current = true;
-      console.log('[ReportViewer] Setting up token check interval');
-      
-      // Set up timer for periodic checks - 5 minutes
-      const timer = setInterval(() => {
-        // Only run check if page is active
-        if (pageActive.current) {
-          checkTokenStatus();
-        }
-      }, 5 * 60 * 1000); // Every 5 minutes
-      
-      return () => {
-        clearInterval(timer);
-      };
-    }
-  }, [token, isAdminView, checkTokenStatus, userDataLoading, reportLoading]);
-
+    logTokenState('token_status_updated', {
+      tokenStatus,
+      lastCheck: new Date(lastStatusCheck).toISOString(),
+      errorDetails: tokenErrorDetails
+    });
+  }, [tokenStatus, lastStatusCheck, tokenErrorDetails, logTokenState]);
+  
   // Handle manual refresh
   const handleRefresh = useCallback(() => {
     console.log('[ReportViewer] Manual refresh requested');
@@ -148,7 +186,11 @@ const ReportViewer = () => {
     toast('Refreshing report data...', {
       description: 'Getting the latest information from the server'
     });
-  }, [refreshData, checkTokenStatus]);
+    
+    logTokenState('manual_refresh', {
+      counter: refreshCounter + 1
+    });
+  }, [refreshData, checkTokenStatus, refreshCounter, logTokenState]);
 
   // Handler for requesting new access token
   const handleRequestNewToken = useCallback(() => {
@@ -156,14 +198,16 @@ const ReportViewer = () => {
     const emailSubject = `Token renewal request for ${archetypeId}`;
     const emailBody = `Hi, my token for archetype ${archetypeId} has expired. Please provide a new access token.`;
     window.open(`mailto:support@example.com?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`);
-  }, [archetypeId]);
+    
+    logTokenState('request_new_token', { archetypeId });
+  }, [archetypeId, logTokenState]);
 
   // Combined debug info
   const combinedDebugInfo = {
     ...userDataDebugInfo,
     ...reportDebugInfo,
     reportViewerState: {
-      dataSource: 'level4_report_secure',
+      dataSource: isAdminView ? 'level4_report_secure (admin)' : 'level4_report_secure',
       userDataLoading,
       reportLoading,
       isValidAccess,
@@ -191,6 +235,10 @@ const ReportViewer = () => {
       timestamp: Date.now()
     });
     
+    logTokenState('error_boundary', {
+      errorMessage: error.message
+    });
+    
     // Try to recover by refreshing the data
     setTimeout(() => {
       if (refreshData) {
@@ -198,14 +246,24 @@ const ReportViewer = () => {
         refreshData();
       }
     }, 2000);
-  }, [refreshData]);
+  }, [refreshData, logTokenState]);
+  
+  // Function to clear debug logs
+  const clearDebugLogs = useCallback(() => {
+    try {
+      localStorage.removeItem('tokenDebugLog');
+      toast.success('Debug logs cleared');
+    } catch (e) {
+      console.error('Error clearing debug logs:', e);
+    }
+  }, []);
 
   // Show loading state
   if (userDataLoading || reportLoading) {
     return <ReportLoadingState />;
   }
 
-  // Handle error cases with our error handler component
+  // Create the error handler element for conditional rendering
   const errorElement = (
     <ErrorHandler
       archetypeId={archetypeId}
@@ -223,8 +281,16 @@ const ReportViewer = () => {
     />
   );
   
-  // Only return the error element if there's an actual error
-  if (!isValidArchetype || (!isAdminView && !isValidAccess && !reportData) || (!reportData && reportError)) {
+  // Show errors only in specific conditions:
+  // 1. Invalid archetype ID
+  // 2. No admin view AND no valid access AND no report data AND not using fallback data
+  // 3. No report data AND report error AND not using fallback data
+  const shouldShowError = 
+    !isValidArchetype || 
+    (!isAdminView && !isValidAccess && !reportData && !isUsingFallbackData) || 
+    (!reportData && reportError && !isUsingFallbackData);
+  
+  if (shouldShowError) {
     return errorElement;
   }
 
@@ -290,6 +356,36 @@ const ReportViewer = () => {
         onRequestNewToken={handleRequestNewToken}
         hideNavbar={true}
       />
+      
+      {/* Debug toolbar - only visible in development */}
+      {import.meta.env.DEV && (
+        <div className="fixed bottom-0 left-0 right-0 bg-gray-900 text-white p-2 flex items-center justify-between text-xs z-50">
+          <div>Token: {tokenStatus} | Cache: {isUsingFallbackData ? 'Using Fallback' : 'Fresh'}</div>
+          <div className="space-x-2">
+            <button
+              onClick={handleRefresh}
+              className="px-2 py-1 bg-blue-700 rounded hover:bg-blue-800"
+            >
+              Refresh Data
+            </button>
+            <button
+              onClick={() => {
+                clearAllCache();
+                handleRefresh();
+              }}
+              className="px-2 py-1 bg-red-700 rounded hover:bg-red-800"
+            >
+              Clear Cache
+            </button>
+            <button
+              onClick={clearDebugLogs}
+              className="px-2 py-1 bg-gray-700 rounded hover:bg-gray-800"
+            >
+              Clear Debug Logs
+            </button>
+          </div>
+        </div>
+      )}
     </ErrorBoundary>
   );
 };
