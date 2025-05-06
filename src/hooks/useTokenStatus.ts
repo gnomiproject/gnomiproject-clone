@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect, useRef } from 'react';
 
 interface UseTokenStatusProps {
@@ -66,22 +65,72 @@ export const useTokenStatus = ({
     console.log(`[ReportViewer] Checking token status at ${sessionDuration.toFixed(1)}s into session`);
     
     // Special case: If we have reportData and the token was previously valid,
-    // but now fails validation, we still allow viewing with a warning
+    // we will allow viewing with just client-side validation
     const hasLoadedReportData = !!reportData;
     
-    if (userDataError) {
-      console.warn('[ReportViewer] Token validation issue:', userDataError.message);
+    // Client-side token expiration check - no network requests
+    if (userData?.expires_at) {
+      const expirationDate = new Date(userData.expires_at);
+      const now = new Date();
       
-      // Check for grace period
-      if (userData?.status === 'grace-period') {
-        console.log('[ReportViewer] Token is in grace period, still showing data with warning');
-        setTokenStatus('grace-period');
+      // Calculate hours until expiration (negative if expired)
+      const hoursUntilExpiration = (expirationDate.getTime() - now.getTime()) / (1000 * 60 * 60);
+      
+      console.log(`[useTokenStatus] Client-side expiration check: ${hoursUntilExpiration.toFixed(2)} hours until expiration`);
+      
+      // If token is expired
+      if (hoursUntilExpiration <= 0) {
+        // Check for grace period (within 24 hours of expiration)
+        if (hoursUntilExpiration > -24) {
+          console.log('[useTokenStatus] Token expired but within grace period');
+          setTokenStatus('grace-period');
+          return;
+        } else {
+          // If we already loaded data, still show it
+          if (hasLoadedReportData) {
+            console.log('[useTokenStatus] Using offline-friendly validation - showing report despite expired token');
+            setTokenStatus('grace-period');
+            return;
+          }
+          
+          // Otherwise show error
+          console.warn('[useTokenStatus] Token expired beyond grace period');
+          setTokenStatus('error');
+          setErrorDetails({
+            type: 'expiration',
+            message: `Token expired on ${expirationDate.toLocaleString()}`,
+            timestamp: Date.now()
+          });
+          return;
+        }
+      }
+      
+      // If token will expire soon (within 24 hours)
+      if (hoursUntilExpiration <= 24) {
+        console.warn(`[useTokenStatus] Token will expire soon: ${hoursUntilExpiration.toFixed(2)} hours remaining`);
+        setTokenStatus('warning');
         return;
       }
+    }
+    
+    // Check server-provided status if available
+    if (userData?.status === 'grace-period') {
+      console.warn('[useTokenStatus] Token is in grace period according to server');
+      setTokenStatus('grace-period');
+      return;
+    } else if (userData?.status === 'expiring-soon') {
+      console.warn('[useTokenStatus] Token will expire soon according to server');
+      setTokenStatus('warning');
+      return;
+    }
+    
+    // Handle server validation errors
+    if (userDataError) {
+      console.warn('[useTokenStatus] Token validation issue:', userDataError.message);
       
       // If we already loaded the report data, show warning but don't block access
       if (hasLoadedReportData) {
-        console.log('[ReportViewer] Using progressive validation - showing report despite token issues');
+        console.log('[useTokenStatus] Using offline-friendly validation - showing report despite token issues');
         setTokenStatus('warning');
         return;
       }
@@ -97,11 +146,11 @@ export const useTokenStatus = ({
     }
     
     if (!isValidAccess) {
-      console.warn('[ReportViewer] Token is not valid');
+      console.warn('[useTokenStatus] Token is not valid');
       
       // If we already loaded the report, still show it with a warning
       if (hasLoadedReportData) {
-        console.log('[ReportViewer] Using progressive validation - showing report despite invalid token');
+        console.log('[useTokenStatus] Using offline-friendly validation - showing report despite invalid token');
         setTokenStatus('warning');
         return;
       }
@@ -112,17 +161,6 @@ export const useTokenStatus = ({
         message: 'Access validation failed',
         timestamp: Date.now()
       });
-      return;
-    }
-    
-    // Check if token is about to expire
-    if (userData?.status === 'expiring-soon') {
-      console.warn('[ReportViewer] Token will expire soon');
-      setTokenStatus('warning');
-      return;
-    } else if (userData?.status === 'grace-period') {
-      console.warn('[ReportViewer] Token is in grace period');
-      setTokenStatus('grace-period');
       return;
     }
     
@@ -189,22 +227,7 @@ export const useTokenStatus = ({
     }
   }, [token, isValidAccess, userDataError, reportData, shouldRevalidate, checkTokenStatus]);
 
-  // Set up periodic token checks - once every 30 minutes instead of 5 minutes
-  useEffect(() => {
-    if (!token || isAdminView) return;
-    
-    console.log('[useTokenStatus] Setting up periodic token validation (every 30 minutes)');
-    
-    const timer = setInterval(() => {
-      if (!isUnmountedRef.current) {
-        checkTokenStatus();
-      }
-    }, 30 * 60 * 1000); // Every 30 minutes
-    
-    return () => {
-      clearInterval(timer);
-    };
-  }, [token, isAdminView, checkTokenStatus]);
+  // REMOVED: Periodic token checks - we're now using client-side validation only
 
   return {
     tokenStatus,

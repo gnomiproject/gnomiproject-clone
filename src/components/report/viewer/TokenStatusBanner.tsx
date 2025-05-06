@@ -29,12 +29,13 @@ const TokenStatusBanner: React.FC<TokenStatusBannerProps> = ({
     );
   }
 
-  // Grace period banner
+  // Grace period banner - more informative and less alarming
   if (tokenStatus === 'grace-period') {
     return (
       <div className="bg-orange-50 border-b border-orange-200 p-3 text-center">
         <p className="text-sm text-orange-700">
           <span className="font-semibold">Access Token Expired:</span> This report is viewable in grace period mode.
+          {isUsingFallbackData && " You're viewing a cached copy of this report."}
         </p>
         <button
           onClick={onRequestNewToken}
