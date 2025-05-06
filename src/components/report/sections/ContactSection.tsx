@@ -10,7 +10,6 @@ interface ContactSectionProps {
 const ContactSection: React.FC<ContactSectionProps> = ({ userData }) => {
   return (
     <div className="space-y-6">
-      <SectionTitle title="About This Report" />
       
       {/* About This Report Section */}
       <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-6">
