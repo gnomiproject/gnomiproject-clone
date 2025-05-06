@@ -45,21 +45,22 @@ const WorkforceCompositionChart: React.FC<WorkforceCompositionChartProps> = ({
                   outerRadius={70}
                   fill="#8884d8"
                   dataKey="value"
-                  label={({ name, percent }) => {
-                    // Fix: Add type guard before calling toFixed
-                    const formattedPercent = typeof percent === 'number' 
-                      ? `${(percent * 100).toFixed(0)}%` 
-                      : `${percent}%`;
-                    return `${name}: ${formattedPercent}`;
+                  label={(entry) => {
+                    // Fixed label rendering to prevent overlap
+                    // Only show percent in the chart for cleaner look
+                    return `${Math.round(entry.percent * 100)}%`;
                   }}
                 >
                   {genderData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
+                <Legend 
+                  formatter={(value) => `${value}`}
+                  verticalAlign="bottom"
+                />
                 <Tooltip 
                   formatter={(value) => {
-                    // Fix: Add type guard before calling toFixed
                     return typeof value === 'number' 
                       ? `${value.toFixed(1)}%` 
                       : `${value}%`;
@@ -83,7 +84,7 @@ const WorkforceCompositionChart: React.FC<WorkforceCompositionChartProps> = ({
             </li>
             <li className="flex justify-between">
               <span>Difference:</span>
-              <span className="font-semibold text-gray-600">
+              <span className={`font-semibold ${(percentFemale < averagePercentFemale) ? 'text-amber-600' : 'text-green-600'}`}>
                 {percentFemale && averagePercentFemale
                   ? (percentFemale > averagePercentFemale ? '+' : '') + 
                     (percentFemale - averagePercentFemale).toFixed(1) + '%'

@@ -23,9 +23,9 @@ const UtilizationInsights = ({
           reportData.utilization_patterns.trim().startsWith('{')) {
         const parsed = JSON.parse(reportData.utilization_patterns);
         
-        // Clean up the overview text to remove field names
+        // Clean up the overview text to completely remove field names
         if (parsed?.overview) {
-          // Remove "Overview of utilization_patterns for archetype X"
+          // Remove "Overview of utilization_patterns for archetype X" completely
           const cleanedOverview = parsed.overview
             .replace(/overview of utilization_patterns for archetype \w+/i, '')
             .replace(/^[:\s\.]+/, '') // Remove leading colons or spaces
@@ -33,8 +33,8 @@ const UtilizationInsights = ({
             
           return {
             overview: cleanedOverview || "Key utilization patterns for this archetype:",
-            findings: parsed.findings || {},
-            metrics: parsed.key_metrics || []
+            findings: parsed.findings || {}
+            // We'll intentionally exclude key_metrics as they repeat information
           };
         }
       }
@@ -103,7 +103,7 @@ const UtilizationInsights = ({
               </div>
             )}
             
-            {/* Remove Key metrics section as it duplicates information */}
+            {/* Removed Key metrics section as it duplicates information */}
           </div>
         ) : (
           // Fallback to raw string parsing and general information

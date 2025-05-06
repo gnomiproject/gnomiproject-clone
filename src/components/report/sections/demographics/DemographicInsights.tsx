@@ -18,22 +18,50 @@ const DemographicInsights: React.FC<DemographicInsightsProps> = ({ insights }) =
     // Check if insights is already a parsed object with the right structure
     if (typeof insights === 'object' && !Array.isArray(insights)) {
       if (insights.findings) {
-        // Clean up the overview - remove "Overview of demographic_insights for archetype X"
+        // Clean up the overview - completely remove "Overview of demographic_insights for archetype X"
         let cleanedOverview = insights.overview || "";
-        cleanedOverview = cleanedOverview.replace(/overview of demographic_insights for archetype \w+/i, '').trim();
+        cleanedOverview = cleanedOverview
+          .replace(/overview of demographic_insights for archetype \w+/i, '')
+          .replace(/^[:\s\.]+/, '') // Remove leading colons or spaces
+          .trim();
+        
+        // Remove duplicate findings by creating a unique set of their core content
+        let uniqueFindings = new Set();
+        const deduplicatedFindings = Array.isArray(insights.findings) 
+          ? insights.findings.filter(finding => {
+              // Normalize finding by lowercasing and removing some formatting
+              const normalizedFinding = String(finding).toLowerCase().trim();
+              if (uniqueFindings.has(normalizedFinding)) {
+                return false;
+              }
+              uniqueFindings.add(normalizedFinding);
+              return true;
+            })
+          : [];
         
         return {
           overview: cleanedOverview,
-          findings: Array.isArray(insights.findings) ? insights.findings : []
+          findings: deduplicatedFindings
         };
       }
     }
     
     // Check if insights is already an array
     if (Array.isArray(insights)) {
+      // Deduplicate array items
+      let uniqueFindings = new Set();
+      const deduplicatedFindings = insights.filter(finding => {
+        const normalizedFinding = String(finding).toLowerCase().trim();
+        if (uniqueFindings.has(normalizedFinding)) {
+          return false;
+        }
+        uniqueFindings.add(normalizedFinding);
+        return true;
+      });
+      
       return {
         overview: "",
-        findings: insights
+        findings: deduplicatedFindings
       };
     }
     
@@ -44,36 +72,36 @@ const DemographicInsights: React.FC<DemographicInsightsProps> = ({ insights }) =
         
         // Handle structured JSON format with overview and findings
         if (parsedJson.overview || parsedJson.findings) {
-          // Clean up the overview
+          // Clean up the overview - completely remove "Overview of demographic_insights for archetype X"
           let cleanedOverview = parsedJson.overview || "";
-          cleanedOverview = cleanedOverview.replace(/overview of demographic_insights for archetype \w+/i, '').trim();
+          cleanedOverview = cleanedOverview
+            .replace(/overview of demographic_insights for archetype \w+/i, '')
+            .replace(/^[:\s\.]+/, '') // Remove leading colons or spaces
+            .trim();
           
-          // If we have key_metrics, merge them with findings if they're not already there
-          let allFindings = Array.isArray(parsedJson.findings) ? [...parsedJson.findings] : [];
+          // Process findings
+          let findings = Array.isArray(parsedJson.findings) ? [...parsedJson.findings] : [];
           
-          // Add key_metrics to findings if they exist and contain additional information
+          // Use key_metrics to supplement findings if they're not redundant
           if (parsedJson.key_metrics && Array.isArray(parsedJson.key_metrics)) {
-            // Format each metric as a finding
-            const metricFindings = parsedJson.key_metrics.map((metric: any) => {
-              return `${metric.name}: ${metric.value}${metric.context ? ` (${metric.context})` : ''}`;
-            });
-            
-            // Only add metrics that aren't already covered in findings
-            for (const metricFinding of metricFindings) {
-              // Skip if a similar finding already exists
-              const isDuplicate = allFindings.some((finding: string) => {
-                return metricFinding.includes(finding) || finding.includes(metricFinding);
-              });
-              
-              if (!isDuplicate) {
-                allFindings.push(metricFinding);
-              }
-            }
+            // We'll skip key_metrics since they tend to be redundant with the findings
+            // The findings often already contain the formatted versions of these metrics
           }
+          
+          // Remove duplicate findings by normalizing and comparing
+          let uniqueFindings = new Set();
+          findings = findings.filter(finding => {
+            const normalizedFinding = String(finding).toLowerCase().trim();
+            if (uniqueFindings.has(normalizedFinding)) {
+              return false;
+            }
+            uniqueFindings.add(normalizedFinding);
+            return true;
+          });
           
           return {
             overview: cleanedOverview,
-            findings: allFindings
+            findings
           };
         }
         
@@ -84,30 +112,6 @@ const DemographicInsights: React.FC<DemographicInsightsProps> = ({ insights }) =
             findings: parsedJson
           };
         }
-        
-        // If it's an object with no recognized structure, extract key metrics
-        if (parsedJson.key_metrics && Array.isArray(parsedJson.key_metrics)) {
-          const metricFindings = parsedJson.key_metrics.map((metric: any) => {
-            return `${metric.name}: ${metric.value}${metric.context ? ` (${metric.context})` : ''}`;
-          });
-          
-          // Clean up the overview
-          let cleanedOverview = parsedJson.overview || "";
-          cleanedOverview = cleanedOverview.replace(/overview of demographic_insights for archetype \w+/i, '').trim();
-          
-          return {
-            overview: cleanedOverview,
-            findings: [
-              ...(Array.isArray(parsedJson.findings) ? parsedJson.findings : []),
-              ...metricFindings
-            ]
-          };
-        }
-        
-        return {
-          overview: "",
-          findings: ["Data format not recognized."]
-        };
       }
       
       // If it's a regular string, split by paragraphs or bullet points

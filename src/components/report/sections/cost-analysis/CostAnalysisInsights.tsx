@@ -18,9 +18,38 @@ const CostAnalysisInsights = ({ costAnalysis }: CostAnalysisInsightsProps) => {
         
         // Process the parsed data to create a readable format
         if (parsedData.overview) {
-          const overview = parsedData.overview;
+          // Remove any "Overview of cost_analysis for archetype X" text
+          let overview = parsedData.overview
+            .replace(/overview of cost_analysis for archetype \w+/i, '')
+            .replace(/^[:\s\.]+/, '') // Remove leading colons or spaces
+            .trim();
+
           const findings = parsedData.findings || [];
+          
+          // We'll use key_metrics only if they provide additional information beyond what's in findings
           const keyMetrics = parsedData.key_metrics || [];
+          
+          // Create a set of normalized finding texts to check for duplicates
+          const normalizedFindings = new Set(findings.map((f: string) => 
+            f.toLowerCase().replace(/[^\w\s]/g, '').trim()
+          ));
+          
+          // Filter out key_metrics that duplicate information in findings
+          const uniqueKeyMetrics = keyMetrics.filter((metric: any) => {
+            // Create a normalized string representation of the metric
+            const metricText = `${metric.name} ${metric.value} ${metric.context || ''}`.toLowerCase()
+              .replace(/[^\w\s]/g, '').trim();
+            
+            // Check if this metric information is already covered in findings
+            const isDuplicate = [...normalizedFindings].some(finding => {
+              return finding.includes(metricText) || 
+                     metricText.includes(finding) ||
+                     // Check specifically for the metric name in findings
+                     finding.includes(metric.name.toLowerCase());
+            });
+            
+            return !isDuplicate;
+          });
           
           return (
             <div className="space-y-4">
@@ -37,11 +66,11 @@ const CostAnalysisInsights = ({ costAnalysis }: CostAnalysisInsightsProps) => {
                 </div>
               )}
               
-              {keyMetrics.length > 0 && (
+              {uniqueKeyMetrics.length > 0 && (
                 <div>
-                  <h4 className="font-medium my-2">Key Cost Metrics:</h4>
+                  <h4 className="font-medium my-2">Additional Cost Metrics:</h4>
                   <ul className="list-disc pl-5 space-y-1">
-                    {keyMetrics.map((metric: any, index: number) => (
+                    {uniqueKeyMetrics.map((metric: any, index: number) => (
                       <li key={index}>
                         <strong>{metric.name}:</strong> {formatNumber(metric.value, 'currency')} 
                         {metric.context && <span className="text-gray-600"> ({metric.context})</span>}
