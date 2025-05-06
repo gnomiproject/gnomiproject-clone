@@ -3,7 +3,6 @@ import React from 'react';
 import TopConditions from './disease/TopConditions';
 import BehavioralHealthConditions from './disease/BehavioralHealthConditions';
 import SpecialtyConditions from './disease/SpecialtyConditions';
-import MskConditions from './disease/MskConditions';
 
 interface DiseaseManagementProps {
   reportData: any;
@@ -48,9 +47,6 @@ const DiseaseManagement = ({ reportData, averageData }: DiseaseManagementProps) 
 
       {/* Specialty Conditions */}
       <SpecialtyConditions reportData={reportData} averageData={averageData} />
-
-      {/* MSK & Pain Conditions */}
-      <MskConditions reportData={reportData} averageData={averageData} />
     </div>
   );
 };
