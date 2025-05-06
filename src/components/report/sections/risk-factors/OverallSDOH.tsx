@@ -19,22 +19,28 @@ const OverallSDOH: React.FC<OverallSDOHProps> = ({ reportData, averageData }) =>
   
   // Calculate comparison metrics
   const percentDiff = calculatePercentageDifference(sdohScore, avgSdohScore);
-  const lowerIsBetter = isLowerBetter('SDOH');
-  const isPositive = (percentDiff > 0 && !lowerIsBetter) || (percentDiff < 0 && lowerIsBetter);
+  
+  // For SDOH, lower values indicate fewer social determinant risks
+  // Note: This is different from isLowerBetter() - we're not saying lower is "better"
+  // but rather that lower values represent fewer social risk factors
+  const fewerRisks = percentDiff < 0;
+  
   const comparisonWord = percentDiff > 0 ? "higher than" : "lower than";
   const text = `${Math.abs(percentDiff).toFixed(1)}% ${comparisonWord} average`;
-  const color = isPositive ? "text-green-600" : "text-amber-600";
+  
+  // Color based on risk assessment, not "better/worse" judgment
+  const color = fewerRisks ? "text-green-600" : "text-amber-600";
   
   // Determine SDOH level category
-  let sdohLevel = 'Average Social Determinants';
+  let sdohLevel = 'Moderate Social Risk Factors';
   let sdohColor = 'text-yellow-500';
   
   if (sdohScore > avgSdohScore * 1.05) {
-    sdohLevel = 'Better Social Determinants';
-    sdohColor = 'text-green-500';
-  } else if (sdohScore < avgSdohScore * 0.95) {
-    sdohLevel = 'Challenged Social Determinants';
+    sdohLevel = 'Higher Social Risk Factors';
     sdohColor = 'text-red-500';
+  } else if (sdohScore < avgSdohScore * 0.95) {
+    sdohLevel = 'Fewer Social Risk Factors';
+    sdohColor = 'text-green-500';
   }
 
   return (
@@ -46,7 +52,7 @@ const OverallSDOH: React.FC<OverallSDOHProps> = ({ reportData, averageData }) =>
       
       <div className="mt-4">
         <div className="text-3xl font-bold">{formatNumber(sdohScore, 'number', 1)}</div>
-        <div className="text-sm text-gray-500">SDOH Composite Score (Higher is Better)</div>
+        <div className="text-sm text-gray-500">SDOH Composite Score (Higher indicates greater health risks)</div>
         
         <div className="mt-3">
           <span className={`text-sm font-medium ${color}`}>{text}</span>
@@ -58,7 +64,8 @@ const OverallSDOH: React.FC<OverallSDOHProps> = ({ reportData, averageData }) =>
           
           <p className="mt-2 text-sm text-gray-600">
             This composite score measures the overall social and environmental factors 
-            affecting this population. It indicates the collective impact of economic stability, 
+            affecting this population. A higher score indicates greater social determinant risks,
+            which may negatively impact health outcomes. The score reflects economic stability, 
             education, social context, healthcare access, and neighborhood factors.
           </p>
         </div>

@@ -66,7 +66,8 @@ const RiskFactors = ({ reportData, averageData }: RiskFactorsProps) => {
           <h1 className="text-3xl font-bold mb-6">Risk & SDOH Factors</h1>
           <p className="text-lg">
             Social Determinants of Health (SDOH) are the conditions in which people are born, grow, live, 
-            work, and age that impact their health outcomes. Understanding these factors helps identify 
+            work, and age that impact their health outcomes. Higher SDOH scores indicate greater social risk factors,
+            which may negatively impact health. Understanding these factors helps identify 
             barriers to healthcare access and opportunities for targeted interventions.
           </p>
         </div>
