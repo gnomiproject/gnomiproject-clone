@@ -27,20 +27,10 @@ const ReportViewer = () => {
   const [errorDetails, setErrorDetails] = useState<any>(null);
   const [isUsingFallbackData, setIsUsingFallbackData] = useState<boolean>(false);
   const [sessionStartTime] = useState<number>(Date.now());
-  const pageActive = useRef<boolean>(true);
   const hasValidatedRef = useRef<boolean>(false);
   const navigate = useNavigate();
   
-  // Track page visibility for performance optimization
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      pageActive.current = document.visibilityState === 'visible';
-      console.log(`[ReportViewer] Page visibility changed: ${pageActive.current ? 'active' : 'background'}`);
-    };
-    
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, []);
+  // Removing page visibility tracking to prevent unnecessary operations
   
   // Normalize the archetype ID to handle case sensitivity
   const archetypeId = rawArchetypeId ? normalizeArchetypeId(rawArchetypeId) : undefined;
@@ -221,7 +211,7 @@ const ReportViewer = () => {
       cacheHealth: checkCacheHealth(),
       cacheStats: getCacheStats(),
       isUsingFallbackData,
-      validationFrequency: '5 minutes'
+      validationFrequency: '30 minutes' // Updated to 30 minutes
     }
   };
 
