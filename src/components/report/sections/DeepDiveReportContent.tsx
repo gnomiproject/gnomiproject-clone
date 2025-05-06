@@ -2,8 +2,8 @@
 import React, { useEffect } from 'react';
 import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import ReportSections from './ReportSections';
-import ReportErrorHandler from './components/ReportErrorHandler';
-import ReportDebugInfo from './components/ReportDebugInfo';
+import ReportErrorHandler from '../components/ReportErrorHandler';
+import ReportDebugInfo from '../components/ReportDebugInfo';
 
 interface DeepDiveReportContentProps {
   archetype: any;
