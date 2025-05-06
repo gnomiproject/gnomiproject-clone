@@ -54,6 +54,11 @@ const DeepDiveReportContent = ({
     />;
   }
   
+  console.log('[DeepDiveReportContent] Rendering with safeArchetype:', { 
+    name: safeArchetype?.name || safeArchetype?.archetype_name,
+    hasUserData: !!userData 
+  });
+  
   // Ensure we're passing the complete archetype data to all components
   return (
     <div className="container mx-auto p-6">
