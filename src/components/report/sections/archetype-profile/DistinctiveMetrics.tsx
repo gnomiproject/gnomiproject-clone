@@ -1,9 +1,10 @@
 
 import React from 'react';
 import { Card } from '@/components/ui/card';
-import { ArrowUp, ArrowDown } from 'lucide-react';
+import { ArrowUp, ArrowDown, BadgeDollarSign, BadgePercent } from 'lucide-react';
 import { useDistinctiveMetrics } from '@/hooks/archetype/useDistinctiveMetrics';
 import { formatFieldValue } from '@/utils/reports/fieldFormatters';
+import { formatNumber } from '@/utils/formatters';
 import { calculatePercentageDifference, isLowerBetter } from '@/utils/reports/metricUtils';
 import { ArchetypeId } from '@/types/archetype';
 
@@ -48,51 +49,25 @@ const DistinctiveMetrics: React.FC<DistinctiveMetricsProps> = ({ metrics, archet
     );
   }
 
-  // Helper to format currency values
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', { 
-      style: 'currency', 
-      currency: 'USD',
-      maximumFractionDigits: 0 
-    }).format(value);
-  };
-
-  // Helper to format percentage values
-  const formatPercent = (value: number) => {
-    return new Intl.NumberFormat('en-US', { 
-      style: 'percent',
-      minimumFractionDigits: 1,
-      maximumFractionDigits: 1
-    }).format(value);
-  };
-
   // Helper to determine if a metric should be displayed as a percentage
   const isPercentMetric = (metricName: string) => {
-    return metricName.toLowerCase().includes('percent') || 
-           metricName.toLowerCase().includes('prevalence') || 
-           metricName.toLowerCase().includes('rate');
+    const name = metricName.toLowerCase();
+    return name.includes('percent') || 
+           name.includes('prevalence') || 
+           name.includes('rate') ||
+           name.includes('access') ||
+           name.includes('sdoh');
   };
 
   // Helper to determine if a metric should be displayed as currency
   const isCurrencyMetric = (metricName: string) => {
-    return metricName.toLowerCase().includes('cost') || 
-           metricName.toLowerCase().includes('amount') || 
-           metricName.toLowerCase().includes('salary') || 
-           metricName.toLowerCase().includes('spend');
-  };
-
-  // Helper to format the metric value based on its type
-  const formatMetricValue = (metricName: string, value: number) => {
-    if (isCurrencyMetric(metricName)) {
-      return formatCurrency(value);
-    } else if (isPercentMetric(metricName)) {
-      return formatPercent(value);
-    } else {
-      return value.toLocaleString(undefined, {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      });
-    }
+    const name = metricName.toLowerCase();
+    return name.includes('cost') || 
+           name.includes('amount') || 
+           name.includes('salary') || 
+           name.includes('spend') ||
+           name.includes('paid') ||
+           name.includes('savings');
   };
 
   // Helper to get category badge color
@@ -103,14 +78,15 @@ const DistinctiveMetrics: React.FC<DistinctiveMetricsProps> = ({ metrics, archet
     if (categoryLower.includes('cost')) return 'bg-green-100 text-green-800';
     if (categoryLower.includes('benefit')) return 'bg-purple-100 text-purple-800';
     if (categoryLower.includes('utilization')) return 'bg-indigo-100 text-indigo-800';
+    if (categoryLower.includes('sdoh')) return 'bg-teal-100 text-teal-800';
     return 'bg-gray-100 text-gray-800';
   };
 
   return (
-    <Card className="p-4">
-      <h4 className="text-xl font-semibold mb-3">Key Distinctive Metrics</h4>
+    <Card className="p-6">
+      <h4 className="text-xl font-semibold mb-4">Key Distinctive Metrics</h4>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {topMetrics.map((metric, index) => {
           // Extract values, with fallbacks for different property naming conventions
           const metricName = metric.Metric || metric.metric || '';
@@ -125,48 +101,58 @@ const DistinctiveMetrics: React.FC<DistinctiveMetricsProps> = ({ metrics, archet
           // Determine if this is positive or negative
           const isPositive = (difference > 0 && !lowerIsBetter) || (difference < 0 && lowerIsBetter);
           
+          // Format values based on their type
+          const formattedValue = isCurrencyMetric(metricName) 
+            ? formatNumber(metricValue, 'currency') 
+            : isPercentMetric(metricName) 
+              ? formatNumber(metricValue, 'number', 2)
+              : formatNumber(metricValue, 'number', 1);
+          
+          const formattedAverage = isCurrencyMetric(metricName) 
+            ? formatNumber(averageValue, 'currency') 
+            : isPercentMetric(metricName) 
+              ? formatNumber(averageValue, 'number', 2)
+              : formatNumber(averageValue, 'number', 1);
+
           // Format the difference as a percentage with sign
           const formattedDifference = `${difference > 0 ? '+' : ''}${Math.abs(difference).toFixed(1)}%`;
           
-          // Determine color for the comparison text
-          const differenceColor = isPositive ? "text-green-600" : "text-amber-600";
-
           return (
-            <div key={index} className="bg-white rounded-lg border shadow-sm overflow-hidden transition-all hover:shadow-md">
-              <div className="p-3 border-b">
-                <div className="flex justify-between items-start">
-                  <h5 className="font-semibold text-gray-900 text-sm">{metricName}</h5>
-                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getCategoryColor(category)}`}>
-                    {category}
-                  </span>
-                </div>
+            <div key={index} className="bg-white rounded-lg border shadow-sm overflow-hidden hover:shadow transition-shadow duration-200">
+              <div className="p-4 border-b flex justify-between items-center">
+                <h5 className="font-semibold text-gray-900 text-sm line-clamp-2">{metricName}</h5>
+                <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getCategoryColor(category)}`}>
+                  {category}
+                </span>
               </div>
               
-              <div className="p-3 bg-gray-50">
-                <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 bg-gray-50">
+                <div className="flex justify-between items-baseline mb-3">
                   <div>
                     <p className="text-xs text-gray-500 mb-1">Your Value</p>
-                    <p className="text-lg font-bold">{formatMetricValue(metricName, metricValue)}</p>
+                    <p className="text-xl font-bold flex items-center">
+                      {isCurrencyMetric(metricName) && <BadgeDollarSign className="h-4 w-4 mr-1 opacity-70" />}
+                      {isPercentMetric(metricName) && <BadgePercent className="h-4 w-4 mr-1 opacity-70" />}
+                      {formattedValue}
+                    </p>
                   </div>
                   
-                  <div>
+                  <div className="text-right">
                     <p className="text-xs text-gray-500 mb-1">Average</p>
-                    <p className="text-lg">{formatMetricValue(metricName, averageValue)}</p>
+                    <p className="text-lg text-gray-700">{formattedAverage}</p>
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-1.5 mt-2">
+                <div className={`flex items-center justify-center gap-1 py-1.5 px-3 rounded-full ${
+                  isPositive ? 'bg-green-50 text-green-600' : 'bg-amber-50 text-amber-600'
+                }`}>
                   {isPositive ? (
-                    <div className="p-1 rounded-full bg-green-100">
-                      <ArrowUp className="text-green-600" size={14} />
-                    </div>
+                    <ArrowUp className="h-3.5 w-3.5" />
                   ) : (
-                    <div className="p-1 rounded-full bg-amber-100">
-                      <ArrowDown className="text-amber-600" size={14} />
-                    </div>
+                    <ArrowDown className="h-3.5 w-3.5" />
                   )}
-                  <span className={`text-xs font-medium ${differenceColor}`}>
-                    {formattedDifference} difference from average
+                  <span className="text-xs font-medium">
+                    {formattedDifference} from average
                   </span>
                 </div>
               </div>
