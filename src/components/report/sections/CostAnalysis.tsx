@@ -15,12 +15,68 @@ const CostAnalysis = ({
   reportData, 
   averageData 
 }: CostAnalysisProps) => {
-  // Format cost data for charts
-  const costComparisonData = generateCostComparisonData(reportData, averageData);
-  
   // Get cost analysis insights
   const costAnalysis = reportData.cost_analysis || 
     "No specific cost analysis insights available for this archetype.";
+  
+  // Parse and format the cost analysis insights if it's in JSON format
+  const formattedCostAnalysis = React.useMemo(() => {
+    try {
+      // Check if the text appears to be a JSON string
+      if (costAnalysis && (costAnalysis.startsWith('{') || costAnalysis.startsWith('['))) {
+        const parsedData = JSON.parse(costAnalysis);
+        
+        // Process the parsed data to create a readable format
+        if (parsedData.overview) {
+          const overview = parsedData.overview;
+          const findings = parsedData.findings || [];
+          const keyMetrics = parsedData.key_metrics || [];
+          
+          return (
+            <div className="space-y-4">
+              <p>{overview}</p>
+              
+              {findings.length > 0 && (
+                <div>
+                  <h4 className="font-medium my-2">Key Findings:</h4>
+                  <ul className="list-disc pl-5 space-y-1">
+                    {findings.map((finding: string, index: number) => (
+                      <li key={index}>{finding}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              
+              {keyMetrics.length > 0 && (
+                <div>
+                  <h4 className="font-medium my-2">Key Cost Metrics:</h4>
+                  <ul className="list-disc pl-5 space-y-1">
+                    {keyMetrics.map((metric: any, index: number) => (
+                      <li key={index}>
+                        <strong>{metric.name}:</strong> {formatNumber(metric.value, 'currency')} 
+                        {metric.context && <span className="text-gray-600"> ({metric.context})</span>}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          );
+        }
+      }
+    } catch (e) {
+      console.error("Error parsing cost analysis data:", e);
+    }
+    
+    // If not JSON or parsing fails, just return the text as is, splitting by periods and newlines for better formatting
+    return (
+      <div className="space-y-2">
+        {costAnalysis.split(/\.\s+|[\n\r]+/).filter(Boolean).map((paragraph: string, index: number) => (
+          <p key={index}>{paragraph.trim()}{!paragraph.trim().endsWith('.') ? '.' : ''}</p>
+        ))}
+      </div>
+    );
+  }, [costAnalysis]);
   
   // Gnome image
   const gnomeImage = '/assets/gnomes/gnome_charts.png';
@@ -46,6 +102,21 @@ const CostAnalysis = ({
           />
         </div>
       </div>
+
+      {/* Cost Analysis Insights - Moved to the top */}
+      <Card className="mt-2">
+        <CardHeader>
+          <CardTitle className="flex items-center text-lg">
+            <DollarSign className="mr-2 h-5 w-5 text-blue-600" />
+            Cost Analysis Insights
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="prose max-w-none">
+            {formattedCostAnalysis}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Cost Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -180,50 +251,6 @@ const CostAnalysis = ({
           </div>
         </CardContent>
       </Card>
-
-      {/* Cost Comparison Chart */}
-      <Card className="mt-6">
-        <CardHeader>
-          <CardTitle className="flex items-center text-lg">
-            <TrendingDown className="mr-2 h-5 w-5 text-blue-600" />
-            Cost Comparison: Archetype vs Population Average
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={costComparisonData}
-                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                layout="vertical"
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis type="number" tickFormatter={(value) => formatNumber(value, 'currency', 0)} />
-                <YAxis type="category" dataKey="name" width={150} />
-                <Tooltip formatter={(value) => formatNumber(value as number, 'currency', 2)} />
-                <Legend />
-                <Bar dataKey="Archetype Cost" fill="#3b82f6" />
-                <Bar dataKey="Population Average" fill="#94a3b8" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Cost Insights */}
-      <Card className="mt-6">
-        <CardHeader>
-          <CardTitle className="flex items-center text-lg">
-            <DollarSign className="mr-2 h-5 w-5 text-blue-600" />
-            Cost Analysis Insights
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="prose max-w-none">
-            <p>{costAnalysis}</p>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 };
@@ -307,37 +334,6 @@ const formatPercentOfTotal = (part: number, total: number, formatted: boolean = 
   if (!part || !total) return formatted ? '0%' : 0;
   const percentage = (part / total) * 100;
   return formatted ? `${percentage.toFixed(1)}%` : percentage;
-};
-
-// Generate data for cost comparison charts
-const generateCostComparisonData = (reportData: any, averageData: any) => {
-  return [
-    {
-      name: 'Total Cost (PEPY)',
-      'Archetype Cost': reportData["Cost_Medical & RX Paid Amount PEPY"] || 0,
-      'Population Average': averageData["Cost_Medical & RX Paid Amount PEPY"] || 0
-    },
-    {
-      name: 'Medical Cost (PEPY)',
-      'Archetype Cost': reportData["Cost_Medical Paid Amount PEPY"] || 0,
-      'Population Average': averageData["Cost_Medical Paid Amount PEPY"] || 0
-    },
-    {
-      name: 'Rx Cost (PEPY)',
-      'Archetype Cost': reportData["Cost_RX Paid Amount PEPY"] || 0,
-      'Population Average': averageData["Cost_RX Paid Amount PEPY"] || 0
-    },
-    {
-      name: 'Total Cost (PMPY)',
-      'Archetype Cost': reportData["Cost_Medical & RX Paid Amount PMPY"] || 0,
-      'Population Average': averageData["Cost_Medical & RX Paid Amount PMPY"] || 0
-    },
-    {
-      name: 'Avoidable ER Savings (PMPY)',
-      'Archetype Cost': reportData["Cost_Avoidable ER Potential Savings PMPY"] || 0,
-      'Population Average': averageData["Cost_Avoidable ER Potential Savings PMPY"] || 0
-    }
-  ];
 };
 
 export default CostAnalysis;
