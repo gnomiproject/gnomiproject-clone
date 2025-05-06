@@ -52,22 +52,26 @@ const CareGapsSection: React.FC<CareGapsSectionProps> = ({ reportData, averageDa
       </div>
 
       {hasMetrics ? (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <PreventiveCareGaps reportData={reportData} averageData={averageData} />
-          <PediatricCareGaps reportData={reportData} averageData={averageData} />
-          <ImmunizationGaps reportData={reportData} averageData={averageData} />
-          <ChronicConditionGaps reportData={reportData} averageData={averageData} />
-          <BehavioralHealthGaps 
-            reportData={reportData} 
-            averageData={averageData}
-            className="lg:col-span-2" 
-          />
+        <div className="space-y-6">
+          {/* Care Opportunities moved to the top */}
           <CareOpportunities 
             reportData={reportData}
             averageData={averageData}
             careGapsContent={careGapsContent}
-            className="lg:col-span-2" 
+            className="mb-6" 
           />
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <PreventiveCareGaps reportData={reportData} averageData={averageData} />
+            <PediatricCareGaps reportData={reportData} averageData={averageData} />
+            <ImmunizationGaps reportData={reportData} averageData={averageData} />
+            <ChronicConditionGaps reportData={reportData} averageData={averageData} />
+            <BehavioralHealthGaps 
+              reportData={reportData} 
+              averageData={averageData}
+              className="lg:col-span-2" 
+            />
+          </div>
         </div>
       ) : (
         <Card className="bg-blue-50 p-8 rounded-lg text-center">

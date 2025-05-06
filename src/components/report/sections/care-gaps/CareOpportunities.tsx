@@ -54,6 +54,65 @@ const CareOpportunities: React.FC<CareOpportunitiesProps> = ({
       .replace('ED', 'Emergency Department');
   };
   
+  // Parse and format the care gaps content if it's in JSON format
+  const formatCareGapsContent = (content: string) => {
+    if (!content) return "No care gaps analysis available.";
+    
+    try {
+      // Check if the content is in JSON format
+      if (content.trim().startsWith('{')) {
+        const gapData = JSON.parse(content);
+        
+        // Format the structured data into readable text
+        return (
+          <div className="space-y-4">
+            {gapData.overview && (
+              <div>
+                <h4 className="font-medium mb-2">Overview</h4>
+                <p>{gapData.overview}</p>
+              </div>
+            )}
+            
+            {gapData.findings && gapData.findings.length > 0 && (
+              <div>
+                <h4 className="font-medium mb-2">Key Findings</h4>
+                <ul className="list-disc pl-5 space-y-1">
+                  {gapData.findings.map((finding: string, index: number) => (
+                    <li key={index}>{finding}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            
+            {gapData.key_metrics && gapData.key_metrics.length > 0 && (
+              <div>
+                <h4 className="font-medium mb-2">Key Metrics</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {gapData.key_metrics.map((metric: any, index: number) => (
+                    <div key={index} className="bg-gray-50 p-3 rounded-md">
+                      <div className="font-medium">{metric.name}</div>
+                      <div className="flex justify-between text-sm mt-1">
+                        <span>Value: {(metric.value * 100).toFixed(1)}%</span>
+                        <span className="text-gray-600">{metric.context}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      }
+      
+      // If not JSON, return as plain text
+      return content;
+    } catch (e) {
+      // If parsing fails, return the original content
+      console.error("Error parsing care gaps content:", e);
+      return content;
+    }
+  };
+  
   const opportunities = findOpportunities();
   
   return (
@@ -101,8 +160,8 @@ const CareOpportunities: React.FC<CareOpportunitiesProps> = ({
             <span>Care Gaps Analysis</span>
           </h3>
           <div className="border border-gray-200 rounded-lg p-4 bg-white">
-            <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-line">
-              {careGapsContent}
+            <div className="prose prose-sm max-w-none text-gray-700">
+              {formatCareGapsContent(careGapsContent)}
             </div>
           </div>
         </div>
