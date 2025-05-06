@@ -38,7 +38,7 @@ const ReportLoadingState = ({
   return (
     <div className="min-h-[70vh] bg-gray-50 flex flex-col items-center justify-center p-6">
       <Loader2 className="h-16 w-16 text-blue-500 animate-spin mb-6" />
-      <h2 className="text-2xl font-semibold mb-3">
+      <h2 className="text-2xl font-semibold mb-3 text-center">
         {message}
         {archetypeName && <span className="text-blue-600"> {archetypeName}</span>}
       </h2>

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import { Section } from '@/components/shared/Section';
@@ -52,7 +53,6 @@ const ReportSections: React.FC<ReportSectionsProps> = ({
       {/* Utilization Patterns Section */}
       <ErrorBoundary>
         <Section id="utilization-patterns">
-          <SectionTitle title="Utilization Patterns" />
           <UtilizationPatterns reportData={reportData} averageData={averageData} />
         </Section>
       </ErrorBoundary>
@@ -60,7 +60,6 @@ const ReportSections: React.FC<ReportSectionsProps> = ({
       {/* Disease Management Section */}
       <ErrorBoundary>
         <Section id="disease-management">
-          <SectionTitle title="Disease Management" />
           <DiseaseManagement reportData={reportData} averageData={averageData} />
         </Section>
       </ErrorBoundary>
@@ -68,7 +67,6 @@ const ReportSections: React.FC<ReportSectionsProps> = ({
       {/* Care Gaps Section */}
       <ErrorBoundary>
         <Section id="care-gaps">
-          <SectionTitle title="Care Gaps" />
           <CareGaps reportData={reportData} averageData={averageData} />
         </Section>
       </ErrorBoundary>
@@ -84,12 +82,11 @@ const ReportSections: React.FC<ReportSectionsProps> = ({
       {/* Cost Analysis Section */}
       <ErrorBoundary>
         <Section id="cost-analysis">
-          <SectionTitle title="Cost Analysis" />
           <CostAnalysis reportData={reportData} averageData={averageData} />
         </Section>
       </ErrorBoundary>
       
-      {/* SWOT Analysis Section - Using data from level4_report_secure only */}
+      {/* SWOT Analysis Section */}
       <ErrorBoundary>
         <Section id="swot-analysis">
           <SwotAnalysis reportData={reportData} />
@@ -104,7 +101,7 @@ const ReportSections: React.FC<ReportSectionsProps> = ({
         />
       </ErrorBoundary>
       
-      {/* About This Report Section (renamed from Contact Section) */}
+      {/* About This Report Section */}
       <ErrorBoundary>
         <Section id="about-report">
           <SectionTitle title="About This Report" />

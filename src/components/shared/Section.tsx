@@ -18,7 +18,9 @@ export const Section = ({
       id={id}
       className={cn('py-12', className)}
     >
-      {children}
+      <div className="container mx-auto">
+        {children}
+      </div>
     </section>
   );
 };

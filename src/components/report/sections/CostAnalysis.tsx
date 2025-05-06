@@ -22,12 +22,14 @@ const CostAnalysis = ({
 
   return (
     <div className="space-y-8">
+      <h1 className="text-3xl font-bold mb-6">Cost Analysis</h1>
+      
       <div className="flex flex-col md:flex-row gap-8">
         <div className="md:w-2/3">
           <p className="text-lg mb-6">
             Understanding healthcare spending patterns is crucial for effective benefits management. 
             This section breaks down this archetype's healthcare costs and compares them to the 
-            {reportData.archetype_name} archetype average.
+            average.
           </p>
         </div>
         <div className="md:w-1/3 flex justify-center">

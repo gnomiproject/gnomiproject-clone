@@ -79,14 +79,11 @@ const UtilizationInsights = ({
                 <h3 className="text-md font-medium mb-2">Key Findings:</h3>
                 <ul className="list-disc pl-5 space-y-2">
                   {Object.entries(parsedInsights.findings).map(([key, value]: [string, any], index) => {
-                    // Format the key for display by:
-                    // 1. Remove leading numbers and any following characters like colons or periods
-                    // 2. Remove any remaining leading special characters
-                    // 3. Capitalize the first letter
+                    // Format the key for display by removing numbers and special characters
                     const cleanKey = key
-                      .replace(/^\d+[\s:\.]*/, '')    // Remove leading numbers with colons/periods
-                      .replace(/^[:\s\.]+/, '')       // Remove remaining leading special chars
-                      .trim();                        // Remove whitespace
+                      .replace(/^\d+[\s:\.]*/, '')
+                      .replace(/^[:\s\.]+/, '')
+                      .trim();
                     
                     const formattedKey = cleanKey.charAt(0).toUpperCase() + cleanKey.slice(1);
                     
@@ -95,7 +92,9 @@ const UtilizationInsights = ({
                     
                     return (
                       <li key={index} className="text-gray-700">
-                        <span className="font-medium">{formattedKey}:</span> {formattedValue}
+                        {formattedKey ? 
+                          <span><span className="font-medium">{formattedKey}</span> {formattedValue}</span> : 
+                          <span>{formattedValue}</span>}
                       </li>
                     );
                   })}
@@ -103,29 +102,7 @@ const UtilizationInsights = ({
               </div>
             )}
             
-            {/* Key metrics */}
-            {parsedInsights.metrics && parsedInsights.metrics.length > 0 && (
-              <div className="mt-4">
-                <h3 className="text-md font-medium mb-2">Key Metrics:</h3>
-                <ul className="list-disc pl-5 space-y-2">
-                  {parsedInsights.metrics.map((metric: any, index: number) => {
-                    // Format consistently with metrics in parentheses
-                    // Only add context in parentheses if it exists
-                    const metricValue = metric.value || 'N/A';
-                    const metricContext = metric.context;
-                    const metricText = metricContext ? 
-                      `${metricValue} (${metricContext})` : 
-                      metricValue;
-                      
-                    return (
-                      <li key={index} className="text-gray-700">
-                        <span className="font-medium">{metric.name || `Metric ${index + 1}`}:</span> {metricText}
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-            )}
+            {/* Remove Key metrics section as it duplicates information */}
           </div>
         ) : (
           // Fallback to raw string parsing and general information

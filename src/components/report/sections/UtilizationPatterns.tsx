@@ -14,6 +14,9 @@ interface UtilizationPatternsProps {
 const UtilizationPatterns = ({ reportData, averageData }: UtilizationPatternsProps) => {
   return (
     <div className="space-y-4">
+      {/* Add section title */}
+      <h1 className="text-3xl font-bold mb-6">Utilization Patterns</h1>
+      
       {/* Introductory text */}
       <p className="text-gray-700 mb-6">
         Understanding how members access healthcare services provides crucial insights into population health management and cost-saving opportunities.
