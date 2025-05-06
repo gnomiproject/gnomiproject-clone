@@ -3,7 +3,6 @@ import React, { useMemo } from 'react';
 import { Section } from '@/components/shared/Section';
 import SectionTitle from '@/components/shared/SectionTitle';
 import KeyPriorities from './KeyPriorities';
-import ExpectedImpact from './ExpectedImpact';
 import SuccessMetrics from './SuccessMetrics';
 import GnomeImage from '@/components/common/GnomeImage';
 import { memoizedEnsureArray } from '@/utils/ensureArray';
@@ -53,9 +52,6 @@ const StrategicRecommendationsSection: React.FC<StrategicRecommendationsSectionP
 
         {/* Key Priorities Section */}
         <KeyPriorities recommendations={recommendations} />
-        
-        {/* Expected Impact */}
-        <ExpectedImpact reportData={reportData} />
         
         {/* Success Metrics */}
         <SuccessMetrics reportData={reportData} />
