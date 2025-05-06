@@ -2,6 +2,7 @@
 import React from 'react';
 import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import ReportContainer from '@/components/report/components/ReportContainer';
+import DeepDiveReport from '@/components/report/DeepDiveReport';
 
 interface ReportViewerContentProps {
   tokenStatus: 'valid' | 'checking' | 'warning' | 'error' | 'grace-period';
@@ -19,7 +20,7 @@ interface ReportViewerContentProps {
   lastStatusCheck: number;
   onError: (error: Error, errorInfo: React.ErrorInfo) => void;
   onRequestNewToken: () => void;
-  hideNavbar?: boolean; // Add this prop
+  hideNavbar?: boolean;
 }
 
 const ReportViewerContent: React.FC<ReportViewerContentProps> = ({
@@ -40,15 +41,22 @@ const ReportViewerContent: React.FC<ReportViewerContentProps> = ({
   onRequestNewToken,
   hideNavbar = false // Default to false for backward compatibility
 }) => {
+  // Add debug logging to track what's being rendered
+  console.log('[ReportViewerContent] Rendering with:', {
+    hasReportData: !!reportData,
+    hasUserData: !!userData,
+    hideNavbar,
+    tokenStatus
+  });
+  
   return (
     <ErrorBoundary onError={onError} name="Report Viewer Content">
-      <ReportContainer
+      <DeepDiveReport
         reportData={reportData}
         userData={userData}
         averageData={averageData}
         isAdminView={isAdminView}
         debugInfo={combinedDebugInfo}
-        hideNavbar={hideNavbar} // Pass the hideNavbar prop to ReportContainer
       />
     </ErrorBoundary>
   );

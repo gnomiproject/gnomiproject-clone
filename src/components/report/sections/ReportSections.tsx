@@ -37,7 +37,7 @@ const ReportSections: React.FC<ReportSectionsProps> = ({
     familyName: reportData?.family_name
   });
 
-  // Force this component to re-render after mount to ensure children render correctly
+  // Check if HomeIntroduction exists and is properly imported
   useEffect(() => {
     console.log('[ReportSections] Component mounted');
     
@@ -52,19 +52,16 @@ const ReportSections: React.FC<ReportSectionsProps> = ({
       const introSection = document.getElementById('introduction');
       console.log('[ReportSections] Checking if intro section exists:', !!introSection);
       setIntroRendered(!!introSection);
+      
+      // Check if the introduction content is actually visible
+      if (introSection) {
+        const welcomeCard = introSection.querySelector('[data-section="welcome-card"]');
+        console.log('[ReportSections] Welcome card exists in intro section:', !!welcomeCard);
+      }
     }, 500);
     
     return () => clearTimeout(timer);
   }, []);
-  
-  // Delayed check for intro section
-  useEffect(() => {
-    if (introRendered) {
-      console.log('[ReportSections] Introduction section has rendered');
-    } else {
-      console.log('[ReportSections] Introduction section has not rendered yet');
-    }
-  }, [introRendered]);
 
   return (
     <>
@@ -86,7 +83,6 @@ const ReportSections: React.FC<ReportSectionsProps> = ({
       </ErrorBoundary>
       
       {/* Rest of the sections */}
-      {/* Demographics Section */}
       <ErrorBoundary>
         <DemographicsSection 
           reportData={reportData} 

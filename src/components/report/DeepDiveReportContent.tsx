@@ -22,7 +22,7 @@ const DeepDiveReportContent = ({
   const familyName = archetype?.family_name || 'Unknown Family';
   const shortDescription = archetype?.short_description || '';
   
-  // Debug logging
+  // Enhanced debug logging
   useEffect(() => {
     console.log('[DeepDiveReportContent] Component mounted with archetype data:', {
       id: archetypeId,
@@ -33,15 +33,19 @@ const DeepDiveReportContent = ({
       hasSwotAnalysisField: !!archetype?.swot_analysis,
       swotAnalysisType: archetype?.swot_analysis ? typeof archetype.swot_analysis : 'None',
       hasStrengthsField: !!archetype?.strengths,
-      hasWeaknessesField: !!archetype?.weaknesses,
-      userData: userData ? {
-        name: userData.name,
-        organization: userData.organization,
-        accessToken: userData.access_token ? `${userData.access_token.substring(0, 5)}...` : 'None',
-        lastAccessed: userData.last_accessed
-      } : 'No user data'
+      hasWeaknessesField: !!archetype?.weaknesses
     });
-  }, [archetype, archetypeId, archetypeName, familyName, shortDescription, userData]);
+    
+    // Check if HomeIntroduction rendered
+    setTimeout(() => {
+      const introSection = document.getElementById('introduction');
+      console.log('[DeepDiveReportContent] Introduction section in DOM:', !!introSection);
+      
+      if (introSection) {
+        console.log('[DeepDiveReportContent] Introduction section children:', introSection.children.length);
+      }
+    }, 500);
+  }, [archetype, archetypeId, archetypeName, familyName, shortDescription]);
 
   // Make a safe copy of the data to avoid mutation issues
   const safeArchetype = {...archetype};

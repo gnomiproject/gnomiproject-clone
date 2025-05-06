@@ -62,8 +62,8 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
 
   return (
     <div className="min-h-screen bg-gray-50 relative">
-      {/* Beta badge with improved visibility - absolute positioning with high z-index */}
-      <div className="fixed bottom-6 right-6 z-[9999] shadow-lg">
+      {/* Beta badge with improved visibility - fixed position with high z-index */}
+      <div className="fixed bottom-6 right-6 z-[9999] shadow-lg print:hidden">
         <BetaBadge sticky={true} />
       </div>
       
