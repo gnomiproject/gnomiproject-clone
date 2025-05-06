@@ -1,9 +1,8 @@
 
 import React from 'react';
 import { Card } from '@/components/ui/card';
-import { ArrowUp, ArrowDown, BadgeDollarSign, BadgePercent } from 'lucide-react';
+import { ArrowUp, ArrowDown } from 'lucide-react';
 import { useDistinctiveMetrics } from '@/hooks/archetype/useDistinctiveMetrics';
-import { formatFieldValue } from '@/utils/reports/fieldFormatters';
 import { formatNumber } from '@/utils/formatters';
 import { calculatePercentageDifference, isLowerBetter } from '@/utils/reports/metricUtils';
 import { ArchetypeId } from '@/types/archetype';
@@ -70,18 +69,6 @@ const DistinctiveMetrics: React.FC<DistinctiveMetricsProps> = ({ metrics, archet
            name.includes('savings');
   };
 
-  // Helper to get category badge color
-  const getCategoryColor = (category: string) => {
-    const categoryLower = category.toLowerCase();
-    if (categoryLower.includes('demographic')) return 'bg-blue-100 text-blue-800';
-    if (categoryLower.includes('disease') || categoryLower.includes('prevalence')) return 'bg-amber-100 text-amber-800';
-    if (categoryLower.includes('cost')) return 'bg-green-100 text-green-800';
-    if (categoryLower.includes('benefit')) return 'bg-purple-100 text-purple-800';
-    if (categoryLower.includes('utilization')) return 'bg-indigo-100 text-indigo-800';
-    if (categoryLower.includes('sdoh')) return 'bg-teal-100 text-teal-800';
-    return 'bg-gray-100 text-gray-800';
-  };
-
   return (
     <Card className="p-6">
       <h4 className="text-xl font-semibold mb-4">Key Distinctive Metrics</h4>
@@ -93,7 +80,6 @@ const DistinctiveMetrics: React.FC<DistinctiveMetricsProps> = ({ metrics, archet
           const metricValue = metric["Archetype Value"] || metric.archetype_value || 0;
           const averageValue = metric["Archetype Average"] || metric.archetype_average || 0;
           const difference = metric.Difference || metric.difference || 0;
-          const category = metric.Category || metric.category || '';
           
           // Determine if lower is better for this metric
           const lowerIsBetter = isLowerBetter(metricName);
@@ -119,20 +105,19 @@ const DistinctiveMetrics: React.FC<DistinctiveMetricsProps> = ({ metrics, archet
           
           return (
             <div key={index} className="bg-white rounded-lg border shadow-sm overflow-hidden hover:shadow transition-shadow duration-200">
-              <div className="p-4 border-b flex justify-between items-center">
-                <h5 className="font-semibold text-gray-900 text-sm line-clamp-2">{metricName}</h5>
-                <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getCategoryColor(category)}`}>
-                  {category}
-                </span>
+              <div className="p-4 border-b">
+                {/* Fixed height title container to ensure consistent card heights */}
+                <h5 className="font-semibold text-gray-900 text-sm h-10 flex items-center">
+                  {metricName}
+                </h5>
               </div>
               
               <div className="p-4 bg-gray-50">
-                <div className="flex justify-between items-baseline mb-3">
+                {/* Fixed layout grid for metric values */}
+                <div className="grid grid-cols-2 gap-2 mb-3">
                   <div>
                     <p className="text-xs text-gray-500 mb-1">Your Value</p>
                     <p className="text-xl font-bold flex items-center">
-                      {isCurrencyMetric(metricName) && <BadgeDollarSign className="h-4 w-4 mr-1 opacity-70" />}
-                      {isPercentMetric(metricName) && <BadgePercent className="h-4 w-4 mr-1 opacity-70" />}
                       {formattedValue}
                     </p>
                   </div>
