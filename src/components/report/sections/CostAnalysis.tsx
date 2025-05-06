@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { DollarSign, TrendingDown, AlertTriangle } from 'lucide-react';
+import { DollarSign, TrendingDown, AlertTriangle, PieChart } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatNumber } from '@/utils/formatters';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
@@ -30,7 +31,7 @@ const CostAnalysis = ({
         <div className="md:w-2/3">
           <p className="text-lg mb-6">
             Understanding healthcare spending patterns is crucial for effective benefits management. 
-            This section breaks down your archetype's healthcare costs and compares them to the 
+            This section breaks down this archetype's healthcare costs and compares them to the 
             {reportData.archetype_name} archetype average.
           </p>
         </div>
@@ -97,7 +98,7 @@ const CostAnalysis = ({
         />
       </div>
 
-      {/* Avoidable ER Costs */}
+      {/* Avoidable ER Costs - Now in a separate card */}
       <Card className="mt-6 border-orange-200">
         <CardHeader className="bg-orange-50 pb-3">
           <CardTitle className="flex items-center text-lg">
@@ -107,7 +108,7 @@ const CostAnalysis = ({
         </CardHeader>
         <CardContent className="p-6">
           <div className="flex flex-col md:flex-row items-start gap-6">
-            <div className="md:w-1/3">
+            <div className="md:w-1/2">
               <div className="bg-orange-100 p-6 rounded-lg text-center">
                 <h3 className="text-orange-800 font-medium mb-1">Potential Annual Savings</h3>
                 <div className="text-3xl font-bold text-orange-700">
@@ -128,15 +129,15 @@ const CostAnalysis = ({
                 )}
               </div>
             </div>
-            <div className="md:w-2/3">
-              <h3 className="text-lg font-medium mb-4">Specialty Rx Cost Impact</h3>
+            <div className="md:w-1/2">
+              <h3 className="text-lg font-medium mb-4">Avoidable ER Comparison</h3>
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
                     data={[{
-                      name: 'Specialty Rx',
-                      'Your Cost': reportData["Cost_Specialty RX Allowed Amount PMPM"] || 0,
-                      'Archetype Average': averageData["Cost_Specialty RX Allowed Amount PMPM"] || 0
+                      name: 'Avoidable ER Costs',
+                      'Archetype Cost': reportData["Cost_Avoidable ER Potential Savings PMPY"] || 0,
+                      'Population Average': averageData["Cost_Avoidable ER Potential Savings PMPY"] || 0
                     }]}
                     margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                   >
@@ -145,20 +146,85 @@ const CostAnalysis = ({
                     <YAxis tickFormatter={(value) => formatNumber(value, 'currency', 0)} />
                     <Tooltip formatter={(value) => formatNumber(value as number, 'currency', 2)} />
                     <Legend />
-                    <Bar dataKey="Your Cost" fill="#f97316" />
-                    <Bar dataKey="Archetype Average" fill="#fdba74" />
+                    <Bar dataKey="Archetype Cost" fill="#f97316" />
+                    <Bar dataKey="Population Average" fill="#fdba74" />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
-              <p className="text-sm text-gray-600 mt-4">
-                Specialty medications represent {formatPercentOfTotal(
-                  reportData["Cost_Specialty RX Allowed Amount PMPM"] * 12, 
-                  reportData["Cost_RX Paid Amount PMPY"]
-                )} of your total pharmacy spend, compared to the archetype average of {formatPercentOfTotal(
-                  averageData["Cost_Specialty RX Allowed Amount PMPM"] * 12, 
-                  averageData["Cost_RX Paid Amount PMPY"]
-                )}.
-              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Specialty Rx Cost Impact - Now in its own separate card */}
+      <Card className="mt-6 border-blue-200">
+        <CardHeader className="bg-blue-50 pb-3">
+          <CardTitle className="flex items-center text-lg">
+            <PieChart className="mr-2 h-5 w-5 text-blue-600" />
+            Specialty Rx Cost Impact
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="flex flex-col md:flex-row items-start gap-6">
+            <div className="md:w-1/2">
+              <h3 className="text-lg font-medium mb-4">Specialty Rx Cost Comparison</h3>
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={[{
+                      name: 'Specialty Rx',
+                      'Archetype Cost': reportData["Cost_Specialty RX Allowed Amount PMPM"] || 0,
+                      'Population Average': averageData["Cost_Specialty RX Allowed Amount PMPM"] || 0
+                    }]}
+                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis tickFormatter={(value) => formatNumber(value, 'currency', 0)} />
+                    <Tooltip formatter={(value) => formatNumber(value as number, 'currency', 2)} />
+                    <Legend />
+                    <Bar dataKey="Archetype Cost" fill="#3b82f6" />
+                    <Bar dataKey="Population Average" fill="#93c5fd" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+            <div className="md:w-1/2">
+              <div className="bg-blue-100 p-6 rounded-lg">
+                <h3 className="text-blue-800 font-medium mb-3">Specialty Rx Impact Analysis</h3>
+                <p className="text-sm text-gray-700">
+                  Specialty medications represent {formatPercentOfTotal(
+                    reportData["Cost_Specialty RX Allowed Amount PMPM"] * 12, 
+                    reportData["Cost_RX Paid Amount PMPY"]
+                  )} of this archetype's total pharmacy spend, compared to the population average of {formatPercentOfTotal(
+                    averageData["Cost_Specialty RX Allowed Amount PMPM"] * 12, 
+                    averageData["Cost_RX Paid Amount PMPY"]
+                  )}.
+                </p>
+                <div className="mt-4">
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-sm font-medium">Specialty as % of Total Rx</span>
+                    <span className="text-sm font-medium">
+                      {formatPercentOfTotal(
+                        reportData["Cost_Specialty RX Allowed Amount PMPM"] * 12, 
+                        reportData["Cost_RX Paid Amount PMPY"]
+                      )}
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2.5">
+                    <div 
+                      className="bg-blue-600 h-2.5 rounded-full" 
+                      style={{ 
+                        width: formatPercentOfTotal(
+                          reportData["Cost_Specialty RX Allowed Amount PMPM"] * 12, 
+                          reportData["Cost_RX Paid Amount PMPY"],
+                          false
+                        ) 
+                      }}
+                    ></div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </CardContent>
@@ -169,7 +235,7 @@ const CostAnalysis = ({
         <CardHeader>
           <CardTitle className="flex items-center text-lg">
             <TrendingDown className="mr-2 h-5 w-5 text-blue-600" />
-            Cost Comparison: Your Organization vs Archetype Average
+            Cost Comparison: Archetype vs Population Average
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -185,8 +251,8 @@ const CostAnalysis = ({
                 <YAxis type="category" dataKey="name" width={150} />
                 <Tooltip formatter={(value) => formatNumber(value as number, 'currency', 2)} />
                 <Legend />
-                <Bar dataKey="Your Cost" fill="#3b82f6" />
-                <Bar dataKey="Archetype Average" fill="#94a3b8" />
+                <Bar dataKey="Archetype Cost" fill="#3b82f6" />
+                <Bar dataKey="Population Average" fill="#94a3b8" />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -264,7 +330,7 @@ const formatComparison = (value: number, benchmark: number, betterDirection: 'hi
   const percentDiff = (diff / benchmark) * 100;
   
   if (Math.abs(percentDiff) < 1) {
-    return { text: 'On par with archetype average', type: 'neutral' };
+    return { text: 'On par with population average', type: 'neutral' };
   }
   
   const direction = diff > 0 ? 'higher' : 'lower';
@@ -286,9 +352,10 @@ const formatComparison = (value: number, benchmark: number, betterDirection: 'hi
 };
 
 // Format a percentage of total
-const formatPercentOfTotal = (part: number, total: number): string => {
-  if (!part || !total) return '0%';
-  return ((part / total) * 100).toFixed(1) + '%';
+const formatPercentOfTotal = (part: number, total: number, formatted: boolean = true): string | number => {
+  if (!part || !total) return formatted ? '0%' : 0;
+  const percentage = (part / total) * 100;
+  return formatted ? `${percentage.toFixed(1)}%` : percentage;
 };
 
 // Generate data for cost comparison charts
@@ -296,28 +363,28 @@ const generateCostComparisonData = (reportData: any, averageData: any) => {
   return [
     {
       name: 'Total Cost (PEPY)',
-      'Your Cost': reportData["Cost_Medical & RX Paid Amount PEPY"] || 0,
-      'Archetype Average': averageData["Cost_Medical & RX Paid Amount PEPY"] || 0
+      'Archetype Cost': reportData["Cost_Medical & RX Paid Amount PEPY"] || 0,
+      'Population Average': averageData["Cost_Medical & RX Paid Amount PEPY"] || 0
     },
     {
       name: 'Medical Cost (PEPY)',
-      'Your Cost': reportData["Cost_Medical Paid Amount PEPY"] || 0,
-      'Archetype Average': averageData["Cost_Medical Paid Amount PEPY"] || 0
+      'Archetype Cost': reportData["Cost_Medical Paid Amount PEPY"] || 0,
+      'Population Average': averageData["Cost_Medical Paid Amount PEPY"] || 0
     },
     {
       name: 'Rx Cost (PEPY)',
-      'Your Cost': reportData["Cost_RX Paid Amount PEPY"] || 0,
-      'Archetype Average': averageData["Cost_RX Paid Amount PEPY"] || 0
+      'Archetype Cost': reportData["Cost_RX Paid Amount PEPY"] || 0,
+      'Population Average': averageData["Cost_RX Paid Amount PEPY"] || 0
     },
     {
       name: 'Total Cost (PMPY)',
-      'Your Cost': reportData["Cost_Medical & RX Paid Amount PMPY"] || 0,
-      'Archetype Average': averageData["Cost_Medical & RX Paid Amount PMPY"] || 0
+      'Archetype Cost': reportData["Cost_Medical & RX Paid Amount PMPY"] || 0,
+      'Population Average': averageData["Cost_Medical & RX Paid Amount PMPY"] || 0
     },
     {
       name: 'Avoidable ER Savings (PMPY)',
-      'Your Cost': reportData["Cost_Avoidable ER Potential Savings PMPY"] || 0,
-      'Archetype Average': averageData["Cost_Avoidable ER Potential Savings PMPY"] || 0
+      'Archetype Cost': reportData["Cost_Avoidable ER Potential Savings PMPY"] || 0,
+      'Population Average': averageData["Cost_Avoidable ER Potential Savings PMPY"] || 0
     }
   ];
 };
