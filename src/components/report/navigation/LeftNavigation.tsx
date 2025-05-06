@@ -54,7 +54,7 @@ const LeftNavigationBase: React.FC<LeftNavigationProps> = ({
   }, [sections, activeSectionId, throttledNavigate]);
   
   return (
-    <div className="w-64 shrink-0 border-r border-gray-200 h-full bg-gray-50 print:hidden overflow-auto">
+    <div className="w-64 shrink-0 border-r border-gray-200 h-full bg-gray-50 print:hidden overflow-auto pt-16">
       <div className="p-4 border-b border-gray-200">
         <h3 className="font-semibold text-gray-800">Report Sections</h3>
       </div>
