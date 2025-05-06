@@ -26,29 +26,14 @@ const CareGapsSection: React.FC<CareGapsSectionProps> = ({ reportData, averageDa
   const hasMetrics = reportData["Gaps_Wellness Visit Adults"] !== undefined || 
                      reportData["Gaps_Cancer Screening Breast"] !== undefined;
 
-  // Gnome image path
-  const gnomeImage = '/assets/gnomes/gnome_clipboard.png';
-
   return (
     <div className="space-y-8">
-      <div className="flex flex-col md:flex-row gap-8">
-        <div className="md:w-2/3">
-          <p className="text-lg">
-            Care gaps identify missed opportunities for preventive care, chronic condition management, 
-            and follow-up services. Addressing these gaps can improve health outcomes and reduce 
-            long-term costs.
-          </p>
-        </div>
-        <div className="md:w-1/3 flex justify-center">
-          <img
-            src={gnomeImage}
-            alt="Care Gaps Analysis"
-            className="max-h-64 object-contain"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = '/assets/gnomes/placeholder.svg';
-            }}
-          />
-        </div>
+      <div className="mb-6">
+        <p className="text-lg">
+          Care gaps identify missed opportunities for preventive care, chronic condition management, 
+          and follow-up services. Addressing these gaps can improve health outcomes and reduce 
+          long-term costs.
+        </p>
       </div>
 
       {hasMetrics ? (

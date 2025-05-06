@@ -6,7 +6,6 @@ import OverallSDOH from './risk-factors/OverallSDOH';
 import EconomicAccessFactors from './risk-factors/EconomicAccessFactors';
 import CommunityFactors from './risk-factors/CommunityFactors';
 import RiskSDOHInsights from './risk-factors/RiskSDOHInsights';
-import { formatNumber } from '@/utils/formatters';
 import { Card } from '@/components/ui/card';
 
 interface RiskFactorsProps {
@@ -15,9 +14,6 @@ interface RiskFactorsProps {
 }
 
 const RiskFactors = ({ reportData, averageData }: RiskFactorsProps) => {
-  // Gnome image
-  const gnomeImage = '/assets/gnomes/gnome_magnifying.png';
-  
   // Check if we have risk and SDOH data
   const hasRiskData = typeof reportData?.Risk_Average_Risk_Score !== 'undefined' || 
                       typeof reportData?.['Risk_Average Risk Score'] !== 'undefined';
@@ -29,24 +25,12 @@ const RiskFactors = ({ reportData, averageData }: RiskFactorsProps) => {
   if (!hasRiskData && !hasSDOHData) {
     return (
       <div className="space-y-8">
-        <div className="flex flex-col md:flex-row gap-8">
-          <div className="md:w-2/3">
-            <h1 className="text-3xl font-bold mb-6">Clinical Risk & SDOH Factors</h1>
-            <p className="text-lg">
-              This section analyzes clinical risk scores and social determinants of health.
-              We'll expand this section in the next update.
-            </p>
-          </div>
-          <div className="md:w-1/3 flex justify-center">
-            <img
-              src={gnomeImage}
-              alt="Risk Factors Gnome"
-              className="max-h-64 object-contain"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = '/assets/gnomes/placeholder.svg';
-              }}
-            />
-          </div>
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold mb-6">Clinical Risk & SDOH Factors</h1>
+          <p className="text-lg">
+            This section analyzes clinical risk scores and social determinants of health.
+            We'll expand this section in the next update.
+          </p>
         </div>
 
         <div className="bg-blue-50 p-8 rounded-lg text-center">
@@ -61,27 +45,15 @@ const RiskFactors = ({ reportData, averageData }: RiskFactorsProps) => {
   return (
     <div className="space-y-8">
       {/* Section Header */}
-      <div className="flex flex-col md:flex-row gap-8">
-        <div className="md:w-2/3">
-          <h1 className="text-3xl font-bold mb-6">Clinical Risk & SDOH Factors</h1>
-          <p className="text-lg">
-            Social Determinants of Health (SDOH) are the conditions in which people are born, grow, live, 
-            work, and age that impact their health outcomes. Higher SDOH scores indicate greater social risk factors,
-            which may negatively impact health. Clinical Risk scores are based on the population's claims and demographic history.
-            Understanding both clinical and social risk factors helps identify 
-            barriers to healthcare access and opportunities for targeted interventions.
-          </p>
-        </div>
-        <div className="md:w-1/3 flex justify-center">
-          <img
-            src={gnomeImage}
-            alt="Risk Factors Gnome"
-            className="max-h-64 object-contain"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = '/assets/gnomes/placeholder.svg';
-            }}
-          />
-        </div>
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold mb-6">Clinical Risk & SDOH Factors</h1>
+        <p className="text-lg">
+          Social Determinants of Health (SDOH) are the conditions in which people are born, grow, live, 
+          work, and age that impact their health outcomes. Higher SDOH scores indicate greater social risk factors,
+          which may negatively impact health. Clinical Risk scores are based on the population's claims and demographic history.
+          Understanding both clinical and social risk factors helps identify 
+          barriers to healthcare access and opportunities for targeted interventions.
+        </p>
       </div>
       
       {/* Risk-SDOH Relationship - Moved to top */}

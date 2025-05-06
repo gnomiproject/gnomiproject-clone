@@ -16,32 +16,17 @@ const CostAnalysis = ({
   // Get cost analysis insights
   const costAnalysis = reportData.cost_analysis || 
     "No specific cost analysis insights available for this archetype.";
-  
-  // Gnome image
-  const gnomeImage = '/assets/gnomes/gnome_charts.png';
 
   return (
     <div className="space-y-8">
       <h1 className="text-3xl font-bold mb-6">Cost Analysis</h1>
       
-      <div className="flex flex-col md:flex-row gap-8">
-        <div className="md:w-2/3">
-          <p className="text-lg mb-6">
-            Understanding healthcare spending patterns is crucial for effective benefits management. 
-            This section breaks down this archetype's healthcare costs and compares them to the 
-            average.
-          </p>
-        </div>
-        <div className="md:w-1/3 flex justify-center">
-          <img
-            src={gnomeImage}
-            alt="Cost Analysis Gnome"
-            className="max-h-64 object-contain"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = '/assets/gnomes/placeholder.svg';
-            }}
-          />
-        </div>
+      <div className="mb-6">
+        <p className="text-lg">
+          Understanding healthcare spending patterns is crucial for effective benefits management. 
+          This section breaks down this archetype's healthcare costs and compares them to the 
+          average.
+        </p>
       </div>
 
       {/* Cost Analysis Insights */}
