@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Section } from '@/components/shared/Section';
-import GnomeImage from '@/components/common/GnomeImage';
+import WebsiteImage from '@/components/common/WebsiteImage';
 
 interface ReportDebugInfoProps {
   archetypeId: string;
@@ -43,7 +43,7 @@ const ReportDebugInfo: React.FC<ReportDebugInfoProps> = ({
           <p>Last Accessed: {userData?.last_accessed ? new Date(userData.last_accessed).toLocaleString() : 'Never'}</p>
         </div>
         <div className="mt-4 flex justify-center">
-          <GnomeImage type="clipboard" showDebug={true} />
+          <WebsiteImage type="clipboard" altText="Debug information gnome" className="h-24 w-24" />
         </div>
       </details>
     </Section>

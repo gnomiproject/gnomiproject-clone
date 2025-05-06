@@ -22,7 +22,7 @@ const WebsiteImage: React.FC<WebsiteImageProps> = ({
   onError
 }) => {
   const [hasError, setHasError] = useState(false);
-  const [loadedImage, setLoadedImage] = useState<string | null>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
   
   // Normalize image type to handle aliases like "magnifying" -> "magnifying_glass"
   const normalizedType = type === 'magnifying' ? 'magnifying_glass' : type;
@@ -32,10 +32,11 @@ const WebsiteImage: React.FC<WebsiteImageProps> = ({
   
   // Handle image loading errors
   const handleError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    console.warn(`Failed to load image: ${type}`, {
+    console.warn(`[WebsiteImage] Failed to load image: ${type}`, {
       attemptedUrl: e.currentTarget.src,
       fallbackUrl: FALLBACK_IMAGE,
-      normalizedType
+      normalizedType,
+      timestamp: new Date().toISOString()
     });
     
     setHasError(true);
@@ -49,7 +50,7 @@ const WebsiteImage: React.FC<WebsiteImageProps> = ({
   };
   
   const handleLoad = () => {
-    setLoadedImage(imageUrl);
+    setIsLoaded(true);
     if (onLoad) onLoad();
   };
   
@@ -57,11 +58,12 @@ const WebsiteImage: React.FC<WebsiteImageProps> = ({
     <img
       src={imageUrl}
       alt={altText || `${type} image`}
-      className={className}
+      className={`${className} ${hasError ? 'opacity-80' : ''} ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
       width={width}
       height={height}
       onLoad={handleLoad}
       onError={handleError}
+      style={{ transition: 'opacity 0.2s ease-in' }}
     />
   );
 };

@@ -15,6 +15,24 @@ export type WebsiteImageType =
 // Fallback image if storage access fails
 export const FALLBACK_IMAGE = 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_chart.png';
 
+// Direct mapping of images to URLs - use this as the source of truth
+const IMAGE_URL_MAP: Record<string, string> = {
+  'chart': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_chart.png',
+  'clipboard': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_clipboard.png',
+  'lefthand': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_lefthand.png',
+  'magnifying_glass': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_magnifying_glass.png',
+  'magnifying': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_magnifying_glass.png',
+  'overlook': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_overlook.png',
+  'report': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_report.png',
+  'welcome': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_welcome.png',
+  'healthcare': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_healthcare.png',
+  'metrics': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_metrics.png',
+  'analysis': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_analysis.png',
+  'profile': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_profile.png',
+  'favicon': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnomi_favicon.png',
+  'logo': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/g.nomi_logo.png',
+};
+
 /**
  * Get public URL for any image in our storage
  * @param imageName - Image name (can include prefix or not)
@@ -22,22 +40,21 @@ export const FALLBACK_IMAGE = 'https://qsecdncdiykzuimtaosp.supabase.co/storage/
  */
 export const getImageUrl = (imageName: string): string => {
   try {
-    let fileName;
-    
-    // Handle special cases for certain images with different naming patterns
-    if (imageName === 'favicon') {
-      fileName = 'gnomi_favicon.png';
-    } else if (imageName === 'logo') {
-      fileName = 'g.nomi_logo.png';
-    } else if (imageName === 'magnifying_glass' || imageName === 'magnifying') {
-      // Ensure we use the correct file name for magnifying glass
-      fileName = 'gnome_magnifying_glass.png';
-    } else {
-      // Handle gnome images - add prefix if needed
-      fileName = imageName.startsWith('gnome_') 
-        ? `${imageName}.png` 
-        : `gnome_${imageName}.png`;
+    // First check if we have a direct mapping for this image
+    if (IMAGE_URL_MAP[imageName]) {
+      return IMAGE_URL_MAP[imageName];
     }
+    
+    // Next check if we have a mapping for this image with gnome_ prefix
+    const withPrefix = `gnome_${imageName}`;
+    if (IMAGE_URL_MAP[withPrefix]) {
+      return IMAGE_URL_MAP[withPrefix];
+    }
+    
+    // If not found in mapping, generate a URL based on consistent pattern
+    const fileName = imageName.startsWith('gnome_') 
+      ? `${imageName}.png` 
+      : `gnome_${imageName}.png`;
     
     // Get the URL directly from storage without database queries
     const { data } = supabase
@@ -47,7 +64,7 @@ export const getImageUrl = (imageName: string): string => {
     
     return data?.publicUrl || FALLBACK_IMAGE;
   } catch (error) {
-    console.error('Error generating image URL:', error);
+    console.error('[ImageService] Error generating image URL:', error);
     return FALLBACK_IMAGE;
   }
 };
@@ -79,22 +96,20 @@ export const getImageForSection = (sectionType: string): WebsiteImageType => {
   return sectionToImageMap[sectionType] || 'chart';
 };
 
-// Stub for backward compatibility
-export const testDatabaseAccess = async (): Promise<any[]> => {
-  console.log('[ImageService] testDatabaseAccess called - database access is now bypassed');
-  return [];
-};
-
-// Legacy function for backward compatibility
+// Legacy functions for backward compatibility
 export const getImageByName = async (imageName: string): Promise<string> => {
   return getImageUrl(imageName);
 };
 
-// Legacy functions for backward compatibility
 export const prefetchImages = async (imageNames: string[]): Promise<void> => {
   console.log('[ImageService] Prefetch is now a no-op with direct URL approach');
 };
 
 export const clearImageCache = (): void => {
   console.log('[ImageService] Cache clearing is now a no-op with direct URL approach');
+};
+
+export const testDatabaseAccess = async (): Promise<any[]> => {
+  console.log('[ImageService] testDatabaseAccess called - database access is now bypassed');
+  return [];
 };

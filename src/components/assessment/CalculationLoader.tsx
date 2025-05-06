@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import WebsiteImage from '@/components/common/WebsiteImage';
 
 // Enhanced loading messages for better user experience
 const loadingMessages = [
@@ -9,10 +10,6 @@ const loadingMessages = [
   "Preparing your personalized healthcare insights..."
 ];
 
-// Preload the gnome image
-const gnomeImage = new Image();
-gnomeImage.src = "/lovable-uploads/20fcecdc-95a8-43d0-bfbd-c979000e58e5.png";
-
 interface CalculationLoaderProps {
   isVisible: boolean;
 }
@@ -20,16 +17,6 @@ interface CalculationLoaderProps {
 const CalculationLoader: React.FC<CalculationLoaderProps> = ({ isVisible }) => {
   const [progress, setProgress] = useState(0);
   const [messageIndex, setMessageIndex] = useState(0);
-  const [imageLoaded, setImageLoaded] = useState(false);
-  
-  useEffect(() => {
-    // Check if the image is already loaded
-    if (gnomeImage.complete) {
-      setImageLoaded(true);
-    } else {
-      gnomeImage.onload = () => setImageLoaded(true);
-    }
-  }, []);
   
   useEffect(() => {
     if (!isVisible) return;
@@ -71,17 +58,13 @@ const CalculationLoader: React.FC<CalculationLoaderProps> = ({ isVisible }) => {
         
         <div className="flex justify-center mb-8">
           <div className="relative">
-            {/* Gnome image in the center */}
+            {/* Gnome image in the center - using WebsiteImage component */}
             <div className="w-32 h-32 flex items-center justify-center">
-              <img 
-                src="/lovable-uploads/20fcecdc-95a8-43d0-bfbd-c979000e58e5.png" 
-                alt="Analysis Gnome" 
-                className={`w-32 h-32 object-contain z-10 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
-                style={{ transition: 'opacity 0.3s ease' }}
+              <WebsiteImage 
+                type="analysis"
+                altText="Analysis Gnome" 
+                className="w-32 h-32 object-contain z-10"
               />
-              {!imageLoaded && (
-                <div className="w-32 h-32 bg-gray-200 rounded-full animate-pulse"></div>
-              )}
             </div>
             {/* Spinning border */}
             <div 

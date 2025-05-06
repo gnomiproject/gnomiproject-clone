@@ -7,7 +7,7 @@ import MetricsTab from './tabs/MetricsTab';
 import SwotTab from './tabs/SwotTab';
 import DiseaseAndCareTab from './tabs/DiseaseAndCareTab';
 import DeepDiveRequestForm from '@/components/results/DeepDiveRequestForm';
-import { getImageForArchetype } from '@/utils/imageService';
+import { getImageUrl } from '@/utils/imageService';
 
 interface ArchetypeReportProps {
   archetypeId: ArchetypeId;
@@ -92,7 +92,7 @@ const InsightsView = ({
         familyName={familyName}
         familyColor={familyColor}
         archetypeHexColor={familyColor}
-        gnomeImage={getImageForArchetype(archetypeId)}
+        gnomeImage={`${familyId?.toLowerCase() || 'chart'}`}
       />
       
       <ArchetypeNavTabs activeTab={activeTab} onTabChange={setActiveTab} />

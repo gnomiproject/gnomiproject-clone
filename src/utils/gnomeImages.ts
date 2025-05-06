@@ -4,7 +4,7 @@
  * These images should be used across the application for consistency
  */
 
-// Direct image mapping to URLs
+// Direct image mapping to URLs - must match the IMAGE_URL_MAP in imageService.ts
 export const directImageMap: Record<string, string> = {
   'gnome_chart': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_chart.png',
   'charts': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_chart.png',
@@ -12,13 +12,15 @@ export const directImageMap: Record<string, string> = {
   'reports': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_report.png',
   'welcome': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_welcome.png',
   'magnifying_glass': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_magnifying_glass.png',
-  'magnifying': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_magnifying_glass.png', // Add alias for backward compatibility
+  'magnifying': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_magnifying_glass.png',
   'analysis': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_analysis.png',
   'profile': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_profile.png',
   'report': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_report.png',
-  'presentation': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_clipboard.png', // Changed from gnome_presentation to gnome_clipboard
+  'presentation': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_clipboard.png',
   'healthcare': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_healthcare.png',
   'metrics': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_metrics.png',
+  'lefthand': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_lefthand.png',
+  'overlook': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_overlook.png',
 };
 
 // Gnome image types with descriptive names
@@ -75,7 +77,7 @@ export const getGnomeForArchetype = (archetypeId: string): string => {
     'B2': 'charts'
   };
   
-  return archetypeToGnomeMap[archetypeId] || 'placeholder';
+  return archetypeToGnomeMap[archetypeId] || 'charts';
 };
 
 /**
@@ -95,5 +97,5 @@ export const getGnomeForSection = (sectionType: string): string => {
     'recommendations': 'charts'
   };
   
-  return sectionToGnomeMap[sectionType] || 'placeholder';
+  return sectionToGnomeMap[sectionType] || 'charts';
 };

@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { getImageByName } from '@/services/imageService';
-import { fallbackGnomeImage } from '@/utils/gnomeImages';
+import { getImageUrl, FALLBACK_IMAGE } from '@/utils/imageService';
 
 interface ImageByNameProps {
   imageName: string;
@@ -17,7 +16,7 @@ const ImageByName: React.FC<ImageByNameProps> = ({
   imageName,
   altText = 'Gnome Image',
   className = 'h-40 w-40 object-contain',
-  fallbackSrc = fallbackGnomeImage,
+  fallbackSrc = FALLBACK_IMAGE,
   width,
   height,
   onError
@@ -42,8 +41,8 @@ const ImageByName: React.FC<ImageByNameProps> = ({
         setLoading(true);
         setError(false);
         
-        // Use the simplified getImageByName function
-        const imageUrl = await getImageByName(imageName);
+        // Use the standardized getImageUrl function
+        const imageUrl = getImageUrl(imageName);
         
         if (isMounted) {
           if (imageUrl) {

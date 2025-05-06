@@ -60,7 +60,7 @@ const ArchetypeHeader = ({
           
           <div className="flex-shrink-0 hidden md:block">
             <WebsiteImage 
-              type={gnomeImage || `${familyId?.toLowerCase()}`}
+              type={gnomeImage || `${familyId?.toLowerCase() || 'chart'}`}
               altText={`${name} Guide`}
               className="h-48 object-contain"
             />
