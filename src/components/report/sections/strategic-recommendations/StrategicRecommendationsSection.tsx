@@ -58,7 +58,7 @@ const StrategicRecommendationsSection: React.FC<StrategicRecommendationsSectionP
         {/* Key Priorities Section - Now showing all recommendations */}
         <KeyPriorities recommendations={recommendations} />
         
-        {/* Success Metrics */}
+        {/* Success Metrics - Updated to emphasize comparison with archetype data */}
         <SuccessMetrics reportData={reportData} />
       </div>
     </Section>
