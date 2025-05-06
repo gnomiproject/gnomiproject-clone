@@ -135,7 +135,7 @@ const CostAnalysis = ({
                   <BarChart
                     data={[{
                       name: 'Specialty Rx',
-                      'Specialty Rx Cost': reportData["Cost_Specialty RX Allowed Amount PMPM"] || 0,
+                      'Your Cost': reportData["Cost_Specialty RX Allowed Amount PMPM"] || 0,
                       'Archetype Average': averageData["Cost_Specialty RX Allowed Amount PMPM"] || 0
                     }]}
                     margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
