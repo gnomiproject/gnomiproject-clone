@@ -84,15 +84,8 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
         familyName={familyName}
         shortDescription={shortDescription}
       />
-      
-      {/* Introduction title - Moved below the report introduction */}
-      <SectionTitle 
-        title="Introduction" 
-        subtitle={`Welcome to your ${archetypeName} Deep Dive Report`} 
-        className="mt-8"
-      />
-      
-      {/* Welcome Card - Now placed under the introduction title */}
+
+      {/* Welcome Card - Now placed at the top of the introduction */}
       <div className="mt-6">
         <WelcomeCard 
           userName={userName}
@@ -102,6 +95,13 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
           secondaryArchetype={secondaryArchetype}
         />
       </div>
+      
+      {/* Introduction title - Moved below the welcome card */}
+      <SectionTitle 
+        title="Introduction" 
+        subtitle={`Welcome to your ${archetypeName} Deep Dive Report`} 
+        className="mt-8"
+      />
       
       {/* Insights Card */}
       <div className="mt-8 mb-8">
@@ -114,7 +114,7 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
         />
       </div>
       
-      {/* Welcome section with gnome - Moved to the bottom of the introduction section */}
+      {/* Welcome section with gnome */}
       <div className="bg-blue-50 border border-blue-100 rounded-lg p-6 mb-6 mt-8">
         <div className="flex items-start gap-4">
           <WebsiteImage 

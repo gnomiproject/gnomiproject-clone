@@ -4,7 +4,6 @@ import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import ReportSections from './ReportSections';
 import ReportErrorHandler from '../components/ReportErrorHandler';
 import ReportDebugInfo from '../components/ReportDebugInfo';
-import BetaBadge from '@/components/shared/BetaBadge';
 
 interface DeepDiveReportContentProps {
   archetype: any;
@@ -63,9 +62,6 @@ const DeepDiveReportContent = ({
         userData={userData}
         averageData={averageData}
       />
-      
-      {/* Add sticky beta badge */}
-      <BetaBadge sticky={true} />
       
       {/* Debug information - shown in a less prominent way */}
       <ErrorBoundary>

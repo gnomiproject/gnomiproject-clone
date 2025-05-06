@@ -4,6 +4,7 @@ import { ArchetypeDetailedData } from '@/types/archetype';
 import ReportContainer from './components/ReportContainer';
 import DeepDiveReportContent from '@/components/report/sections/DeepDiveReportContent';
 import { ReportUserData } from '@/hooks/useReportUserData';
+import BetaBadge from '@/components/shared/BetaBadge';
 
 export interface DeepDiveReportProps {
   reportData: ArchetypeDetailedData;
@@ -36,6 +37,9 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Add sticky beta badge at the root level */}
+      <BetaBadge sticky={true} />
+      
       <ReportContainer 
         reportData={reportData}
         userData={userData}
