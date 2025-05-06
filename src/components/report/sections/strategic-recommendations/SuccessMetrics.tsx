@@ -89,15 +89,6 @@ const SuccessMetrics: React.FC<SuccessMetricsProps> = ({ reportData }) => {
           </div>
         ))}
       </div>
-
-      <div className="mt-8 bg-gray-50 p-5 rounded-lg border border-gray-200">
-        <h4 className="font-semibold mb-3">Recommended Tracking Cadence</h4>
-        <p className="text-sm text-gray-700 space-y-1">
-          <strong className="block">Monthly:</strong> Utilization trends and cost indicators<br />
-          <strong className="block">Quarterly:</strong> Comprehensive review of all metrics and program adjustments<br />
-          <strong className="block">Annually:</strong> Full program impact assessment and strategic adjustment
-        </p>
-      </div>
       
       <div className="mt-6 bg-purple-50 p-6 rounded-lg border border-purple-100">
         <h4 className="font-semibold text-purple-800 mb-3">Need Help Tracking These Metrics?</h4>
@@ -107,7 +98,7 @@ const SuccessMetrics: React.FC<SuccessMetricsProps> = ({ reportData }) => {
           and positively impact your company's healthcare program to ensure you're leading the pack.
         </p>
         <a 
-          href="mailto:contact@artemis.com?subject=Healthcare%20Analytics%20Inquiry"
+          href="mailto:artemis@nomihealth.com?subject=Healthcare%20Analytics%20Inquiry"
           className="inline-flex items-center text-purple-700 hover:text-purple-800 font-medium"
         >
           Contact us to learn more <ArrowRight className="ml-2 h-4 w-4" />
