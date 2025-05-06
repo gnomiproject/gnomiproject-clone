@@ -45,6 +45,7 @@ interface ReportContainerProps {
   debugInfo?: any;
   onNavigate?: (sectionId: string) => void;
   children?: React.ReactNode;
+  hideNavbar?: boolean; // Add this prop
 }
 
 const ReportContainer: React.FC<ReportContainerProps> = ({ 
@@ -54,7 +55,8 @@ const ReportContainer: React.FC<ReportContainerProps> = ({
   isAdminView = false,
   debugInfo,
   onNavigate,
-  children
+  children,
+  hideNavbar = false // Default to false for backward compatibility
 }) => {
   // Track performance
   useRenderPerformance('ReportContainer');
@@ -109,8 +111,8 @@ const ReportContainer: React.FC<ReportContainerProps> = ({
 
   return (
     <div className="relative min-h-screen bg-gray-50">
-      {/* Add Navbar at the top */}
-      <Navbar />
+      {/* Only show Navbar if hideNavbar is false */}
+      {!hideNavbar && <Navbar />}
       
       {/* Left navigation only on larger screens with adjusted position */}
       <div className="hidden lg:block fixed left-0 top-0 h-full print:hidden z-10">
@@ -129,7 +131,7 @@ const ReportContainer: React.FC<ReportContainerProps> = ({
 
       {/* Main report content */}
       <div 
-        className="lg:pl-64 py-6 print:py-0 print:pl-0 pt-16" // Added pt-16 to account for navbar
+        className={`lg:pl-64 py-6 print:py-0 print:pl-0 ${!hideNavbar ? 'pt-16' : 'pt-6'}`} // Adjust top padding based on navbar visibility
         ref={reportRef}
       >
         {children ? (

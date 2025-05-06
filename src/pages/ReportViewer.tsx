@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { isValidArchetypeId, normalizeArchetypeId } from '@/utils/archetypeValidation';
@@ -261,6 +260,7 @@ const ReportViewer = () => {
             lastStatusCheck={lastStatusCheck}
             onError={handleError}
             onRequestNewToken={handleRequestNewToken}
+            hideNavbar={true}
           />
         </div>
       </ErrorBoundary>
@@ -285,6 +285,7 @@ const ReportViewer = () => {
       lastStatusCheck={lastStatusCheck}
       onError={handleError}
       onRequestNewToken={handleRequestNewToken}
+      hideNavbar={true}
     />
   );
 };

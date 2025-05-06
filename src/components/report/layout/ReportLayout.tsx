@@ -8,13 +8,15 @@ interface ReportLayoutProps {
   activeSectionId: string;
   onNavigate: (sectionId: string) => void;
   isAdminView?: boolean;
+  hideNavbar?: boolean; // Add this prop
 }
 
 const ReportLayout: React.FC<ReportLayoutProps> = ({
   children,
   activeSectionId,
   onNavigate,
-  isAdminView = false
+  isAdminView = false,
+  hideNavbar = false // Default to false for backward compatibility
 }) => {
   // Default sections for the navigation
   const sections = [
@@ -34,12 +36,12 @@ const ReportLayout: React.FC<ReportLayoutProps> = ({
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Add Navbar at the top */}
-      <Navbar />
+      {/* Add Navbar at the top if hideNavbar is false */}
+      {!hideNavbar && <Navbar />}
       
       <div className="flex flex-col md:flex-row">
         {/* Left Navigation */}
-        <div className="md:sticky md:top-0 md:h-screen mt-16"> {/* Added mt-16 to account for navbar */}
+        <div className={`md:sticky md:top-0 md:h-screen ${!hideNavbar ? 'mt-16' : ''}`}> {/* Adjust margin based on navbar visibility */}
           <LeftNavigation 
             activeSectionId={activeSectionId} 
             onNavigate={onNavigate} 
@@ -48,7 +50,7 @@ const ReportLayout: React.FC<ReportLayoutProps> = ({
         </div>
         
         {/* Main Content Area */}
-        <div className="flex-1 md:max-h-screen md:overflow-y-auto pt-16"> {/* Added pt-16 to account for navbar */}
+        <div className={`flex-1 md:max-h-screen md:overflow-y-auto ${!hideNavbar ? 'pt-16' : ''}`}> {/* Adjust padding based on navbar visibility */}
           {children}
           
           {/* Admin indicator */}

@@ -1,10 +1,7 @@
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import ErrorBoundary from '@/components/shared/ErrorBoundary';
-import FallbackBanner from '@/components/report/FallbackBanner';
-import DeepDiveReport from '@/components/report/DeepDiveReport';
-import TokenStatusBanner from './TokenStatusBanner';
-import DebugButton from './DebugButton';
+import ReportContainer from '@/components/report/components/ReportContainer';
 
 interface ReportViewerContentProps {
   tokenStatus: 'valid' | 'checking' | 'warning' | 'error' | 'grace-period';
@@ -22,6 +19,7 @@ interface ReportViewerContentProps {
   lastStatusCheck: number;
   onError: (error: Error, errorInfo: React.ErrorInfo) => void;
   onRequestNewToken: () => void;
+  hideNavbar?: boolean; // Add this prop
 }
 
 const ReportViewerContent: React.FC<ReportViewerContentProps> = ({
@@ -39,48 +37,18 @@ const ReportViewerContent: React.FC<ReportViewerContentProps> = ({
   sessionStartTime,
   lastStatusCheck,
   onError,
-  onRequestNewToken
+  onRequestNewToken,
+  hideNavbar = false // Default to false for backward compatibility
 }) => {
-  // Determine if debug mode is active
-  const isDebugMode = isAdminView || window.location.search.includes('debug=true');
-
   return (
-    <ErrorBoundary onError={onError} name="Report Viewer">
-      <div className="min-h-screen bg-gray-50">
-        {/* Token status banners */}
-        <TokenStatusBanner 
-          tokenStatus={tokenStatus} 
-          onRequestNewToken={onRequestNewToken}
-          isUsingFallbackData={isUsingFallbackData}
-        />
-        
-        {/* Fallback data banner */}
-        <FallbackBanner 
-          show={isUsingFallbackData} 
-          message="This report is showing previously cached data because the latest data could not be retrieved."
-        />
-        
-        <DeepDiveReport
-          reportData={reportData}
-          userData={userData}
-          averageData={averageData}
-          isAdminView={isAdminView}
-          debugInfo={combinedDebugInfo}
-          isLoading={userDataLoading || reportLoading}
-          error={reportError || userDataError}
-        />
-      </div>
-      
-      {/* Debug button */}
-      <DebugButton
-        isVisible={isDebugMode}
-        sessionStartTime={sessionStartTime}
-        tokenStatus={tokenStatus}
-        lastStatusCheck={lastStatusCheck}
-        userData={userData}
-        isUsingFallbackData={isUsingFallbackData}
+    <ErrorBoundary onError={onError} name="Report Viewer Content">
+      <ReportContainer
         reportData={reportData}
+        userData={userData}
+        averageData={averageData}
+        isAdminView={isAdminView}
         debugInfo={combinedDebugInfo}
+        hideNavbar={hideNavbar} // Pass the hideNavbar prop to ReportContainer
       />
     </ErrorBoundary>
   );
