@@ -91,7 +91,8 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
     <div className="mt-2">
       {/* Welcome Card - Explicitly placed at the very top */}
       <div className="mb-6" data-section="welcome-card">
-        {console.log('[HomeIntroduction] Rendering WelcomeCard')}
+        {/* Debug logging */}
+        {console.log('[HomeIntroduction] Rendering WelcomeCard') || null}
         <WelcomeCard 
           userName={userName}
           archetypeName={archetypeName}
@@ -103,7 +104,8 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
 
       {/* Main report introduction */}
       <div data-section="report-introduction">
-        {console.log('[HomeIntroduction] Rendering ReportIntroduction')}
+        {/* Debug logging */}
+        {console.log('[HomeIntroduction] Rendering ReportIntroduction') || null}
         <ReportIntroduction 
           userData={userData} 
           reportData={archetypeData}
@@ -116,7 +118,8 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
       
       {/* Introduction title - Positioned after the welcome card and intro */}
       <div data-section="introduction-title">
-        {console.log('[HomeIntroduction] Rendering SectionTitle')}
+        {/* Debug logging */}
+        {console.log('[HomeIntroduction] Rendering SectionTitle') || null}
         <SectionTitle 
           title="Introduction" 
           subtitle={`Welcome to your ${archetypeName} Deep Dive Report`} 
@@ -126,7 +129,8 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
       
       {/* Insights Card */}
       <div className="mt-8 mb-8" data-section="insights-card">
-        {console.log('[HomeIntroduction] Rendering ArchetypeInsightsCard')}
+        {/* Debug logging */}
+        {console.log('[HomeIntroduction] Rendering ArchetypeInsightsCard') || null}
         <ArchetypeInsightsCard
           archetypeName={archetypeName}
           familyName={familyName}
@@ -138,7 +142,8 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
       
       {/* Welcome section with gnome */}
       <div className="bg-blue-50 border border-blue-100 rounded-lg p-6 mb-6 mt-8" data-section="welcome-section">
-        {console.log('[HomeIntroduction] Rendering welcome section with gnome')}
+        {/* Debug logging */}
+        {console.log('[HomeIntroduction] Rendering welcome section with gnome') || null}
         <div className="flex items-start gap-4">
           <WebsiteImage 
             type="magnifying_glass" 

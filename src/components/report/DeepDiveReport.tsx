@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { ArchetypeDetailedData } from '@/types/archetype';
 import ReportContainer from './components/ReportContainer';
@@ -42,6 +43,12 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
       userDataPresent: !!userData,
       betaBadgeModule: typeof BetaBadge
     });
+
+    // Check if BetaBadge is in DOM
+    setTimeout(() => {
+      const betaBadge = document.querySelector('.beta-badge-element');
+      console.log('[DeepDiveReport] BetaBadge in DOM:', !!betaBadge, betaBadge);
+    }, 500);
   }, [reportData, userData]);
 
   if (!reportData) {

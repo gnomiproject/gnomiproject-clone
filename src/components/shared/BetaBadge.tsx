@@ -46,7 +46,13 @@ export const BetaBadge: React.FC<BetaBadgeProps> = ({ className, sticky = false 
         <TooltipTrigger asChild>
           <div 
             className={`${baseClasses} ${stickyClasses} ${className || ''} beta-badge-element`}
-            style={{ zIndex: 9999 }} // Explicitly set high z-index
+            style={{ 
+              zIndex: 9999,
+              position: sticky ? 'relative' : 'initial',
+              display: 'inline-block',
+              opacity: 1,
+              pointerEvents: 'auto'
+            }} 
             data-testid="beta-badge"
           >
             BETA

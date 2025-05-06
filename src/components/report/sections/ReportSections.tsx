@@ -43,8 +43,8 @@ const ReportSections: React.FC<ReportSectionsProps> = ({
     
     // Log the HomeIntroduction component to ensure it exists and is importable
     console.log('[ReportSections] HomeIntroduction component:', {
-      component: HomeIntroduction,
-      type: typeof HomeIntroduction
+      component: typeof HomeIntroduction,
+      isFunction: typeof HomeIntroduction === 'function'
     });
     
     // Set timeout to check if intro has rendered
@@ -79,11 +79,13 @@ const ReportSections: React.FC<ReportSectionsProps> = ({
         </Section>
       </ErrorBoundary>
       
+      {/* Keep the rest of the sections */}
       {/* Archetype Profile Section */}
       <ErrorBoundary>
         <ArchetypeProfileSection archetypeData={reportData} />
       </ErrorBoundary>
       
+      {/* Rest of the sections */}
       {/* Demographics Section */}
       <ErrorBoundary>
         <DemographicsSection 
