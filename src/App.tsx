@@ -2,7 +2,7 @@
 import React, { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from '@/components/ui/sonner';
-import Navbar from '@/components/layout/Navbar';
+import FixedHeader from '@/components/layout/FixedHeader';
 import Index from '@/pages/Index';
 import NotFound from '@/pages/NotFound';
 
@@ -41,8 +41,11 @@ function App() {
   return (
     <BrowserRouter>
       <div className="app">
-        <Navbar />
-        <main>
+        {/* Fixed header on main routes */}
+        <FixedHeader />
+        
+        {/* Add padding to the main content to account for the fixed header */}
+        <main className="pt-16">
           <Routes>
             {/* Main application routes */}
             <Route path="/" element={<Index />} />
@@ -63,7 +66,7 @@ function App() {
               </Suspense>
             } />
             
-            {/* Report routes */}
+            {/* Report routes - these will handle their own headers */}
             <Route path="/insights/report/:archetypeId" element={
               <Suspense fallback={<PageLoader />}>
                 <Insights />

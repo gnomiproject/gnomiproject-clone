@@ -43,12 +43,6 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
       userDataPresent: !!userData,
       betaBadgeModule: typeof BetaBadge
     });
-
-    // Check if BetaBadge is in DOM
-    setTimeout(() => {
-      const betaBadge = document.querySelector('.beta-badge-element');
-      console.log('[DeepDiveReport] BetaBadge in DOM:', !!betaBadge, betaBadge);
-    }, 500);
   }, [reportData, userData]);
 
   if (!reportData) {
@@ -74,7 +68,7 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
         isAdminView={isAdminView}
         debugInfo={debugInfo}
         onNavigate={undefined}
-        hideNavbar={false}
+        hideNavbar={true} // Always hide navbar since we're using FixedHeader
       >
         <DeepDiveReportContent 
           archetype={reportData} 

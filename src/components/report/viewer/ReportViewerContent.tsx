@@ -3,6 +3,7 @@ import React from 'react';
 import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import ReportContainer from '@/components/report/components/ReportContainer';
 import DeepDiveReport from '@/components/report/DeepDiveReport';
+import FixedHeader from '@/components/layout/FixedHeader';
 
 interface ReportViewerContentProps {
   tokenStatus: 'valid' | 'checking' | 'warning' | 'error' | 'grace-period';
@@ -39,7 +40,7 @@ const ReportViewerContent: React.FC<ReportViewerContentProps> = ({
   lastStatusCheck,
   onError,
   onRequestNewToken,
-  hideNavbar = false // Default to false for backward compatibility
+  hideNavbar = false
 }) => {
   // Add debug logging to track what's being rendered
   console.log('[ReportViewerContent] Rendering with:', {
@@ -51,13 +52,19 @@ const ReportViewerContent: React.FC<ReportViewerContentProps> = ({
   
   return (
     <ErrorBoundary onError={onError} name="Report Viewer Content">
-      <DeepDiveReport
-        reportData={reportData}
-        userData={userData}
-        averageData={averageData}
-        isAdminView={isAdminView}
-        debugInfo={combinedDebugInfo}
-      />
+      {/* Always show FixedHeader, but hide nav links if hideNavbar is true */}
+      <FixedHeader hideNavLinks={hideNavbar} />
+      
+      {/* Add padding to the top to account for the fixed header */}
+      <div className="pt-16">
+        <DeepDiveReport
+          reportData={reportData}
+          userData={userData}
+          averageData={averageData}
+          isAdminView={isAdminView}
+          debugInfo={combinedDebugInfo}
+        />
+      </div>
     </ErrorBoundary>
   );
 };

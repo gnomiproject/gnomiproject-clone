@@ -5,7 +5,6 @@ import PrintButton from './PrintButton';
 import { useReportNavigation } from '../hooks/useReportNavigation';
 import { debounce } from '@/utils/debounce';
 import { useRenderPerformance } from '@/components/shared/PerformanceMonitor';
-import Navbar from '@/components/layout/Navbar';
 import ReportBodyContent from './ReportBodyContent';
 
 // Create sections array for LeftNavigation
@@ -63,6 +62,7 @@ const ReportContainer: React.FC<ReportContainerProps> = ({
     hasReportData: !!reportData, 
     hasUserData: !!userData,
     hasChildren: !!children,
+    hideNavbar,
     reportName: reportData?.name || reportData?.archetype_name,
     childrenType: children ? typeof children : 'none'
   });
@@ -134,11 +134,8 @@ const ReportContainer: React.FC<ReportContainerProps> = ({
 
     return (
       <div className="relative min-h-screen bg-gray-50">
-        {/* Only show Navbar if hideNavbar is false */}
-        {!hideNavbar && <Navbar />}
-        
         {/* Left navigation only on larger screens with adjusted position */}
-        <div className="hidden lg:block fixed left-0 top-0 h-full print:hidden z-10">
+        <div className="hidden lg:block fixed left-0 top-16 h-full print:hidden z-10"> {/* Adjust top position for fixed header */}
           <LeftNavigation 
             activeSectionId={activeSectionId}
             onNavigate={debouncedNavigate}
@@ -152,9 +149,9 @@ const ReportContainer: React.FC<ReportContainerProps> = ({
           documentTitle={`Healthcare Archetype Report - ${reportData?.archetype_name || reportData?.name || 'Unknown'}`} 
         />
 
-        {/* Main report content */}
+        {/* Main report content - apply padding-top to account for fixed header */}
         <div 
-          className={`lg:pl-64 py-6 print:py-0 print:pl-0 ${!hideNavbar ? 'pt-16' : 'pt-6'}`} // Adjust top padding based on navbar visibility
+          className="lg:pl-64 py-6 print:py-0 print:pl-0 pt-16" 
           ref={reportRef}
         >
           {children ? (
