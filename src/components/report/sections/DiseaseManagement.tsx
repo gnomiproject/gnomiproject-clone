@@ -4,7 +4,6 @@ import TopConditions from './disease/TopConditions';
 import BehavioralHealthConditions from './disease/BehavioralHealthConditions';
 import SpecialtyConditions from './disease/SpecialtyConditions';
 import MskConditions from './disease/MskConditions';
-import DiseaseInsights from './disease/DiseaseInsights';
 
 interface DiseaseManagementProps {
   reportData: any;
@@ -52,9 +51,6 @@ const DiseaseManagement = ({ reportData, averageData }: DiseaseManagementProps) 
 
       {/* MSK & Pain Conditions */}
       <MskConditions reportData={reportData} averageData={averageData} />
-
-      {/* Disease Insights */}
-      <DiseaseInsights reportData={reportData} />
     </div>
   );
 };
