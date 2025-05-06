@@ -79,13 +79,22 @@ const DistinctiveMetrics: React.FC<DistinctiveMetricsProps> = ({ metrics, archet
           const metricName = metric.Metric || metric.metric || '';
           const metricValue = metric["Archetype Value"] || metric.archetype_value || 0;
           const averageValue = metric["Archetype Average"] || metric.archetype_average || 0;
-          const difference = metric.Difference || metric.difference || 0;
+          
+          // Recalculate the percentage difference correctly
+          const percentDiff = calculatePercentageDifference(metricValue, averageValue);
+          
+          // Log the calculation to help diagnose issues
+          console.log(`[DistinctiveMetrics] Calculating difference for ${metricName}:`, {
+            value: metricValue,
+            average: averageValue,
+            calculation: `((${metricValue} - ${averageValue}) / ${averageValue}) * 100 = ${percentDiff.toFixed(1)}%`
+          });
           
           // Determine if lower is better for this metric
           const lowerIsBetter = isLowerBetter(metricName);
           
           // Determine if this is positive or negative
-          const isPositive = (difference > 0 && !lowerIsBetter) || (difference < 0 && lowerIsBetter);
+          const isPositive = (percentDiff > 0 && !lowerIsBetter) || (percentDiff < 0 && lowerIsBetter);
           
           // Format values based on their type
           const formattedValue = isCurrencyMetric(metricName) 
@@ -101,7 +110,7 @@ const DistinctiveMetrics: React.FC<DistinctiveMetricsProps> = ({ metrics, archet
               : formatNumber(averageValue, 'number', 1);
 
           // Format the difference as a percentage with sign
-          const formattedDifference = `${difference > 0 ? '+' : ''}${Math.abs(difference).toFixed(1)}%`;
+          const formattedDifference = `${Math.abs(percentDiff).toFixed(1)}%`;
           
           return (
             <div key={index} className="bg-white rounded-lg border shadow-sm overflow-hidden hover:shadow transition-shadow duration-200">
