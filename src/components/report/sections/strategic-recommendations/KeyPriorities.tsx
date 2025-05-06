@@ -19,6 +19,29 @@ const KeyPrioritiesBase: React.FC<KeyPrioritiesProps> = ({ recommendations }) =>
     return ensureArray<any>(recommendations, 'recommendations');
   }, [recommendations]);
   
+  // Format metric field names to be more readable
+  const formatMetricName = (metricKey: string): string => {
+    // Remove prefixes like "Dise_" or "Util_"
+    let formatted = metricKey.replace(/^(Dise|Util|Cost|SDOH|Risk|Gaps|Demo|Bene)_/i, '');
+    
+    // Replace underscores with spaces
+    formatted = formatted.replace(/_/g, ' ');
+    
+    // Handle specific abbreviations
+    formatted = formatted
+      .replace(/\bRX\b/g, 'Prescription')
+      .replace(/\bED\b/g, 'Emergency Department')
+      .replace(/\bPMPY\b/g, 'Per Member Per Year')
+      .replace(/\bPEPY\b/g, 'Per Employee Per Year')
+      .replace(/\bPMPM\b/g, 'Per Member Per Month')
+      .replace(/\bPEPM\b/g, 'Per Employee Per Month')
+      .replace(/\bPCP\b/g, 'Primary Care Provider')
+      .replace(/\bFU\b/g, 'Follow-up')
+      .replace(/\bSUD\b/g, 'Substance Use Disorder');
+    
+    return formatted;
+  };
+  
   // Early return for empty data case
   if (!safeRecommendations.length) {
     return (
@@ -56,7 +79,7 @@ const KeyPrioritiesBase: React.FC<KeyPrioritiesProps> = ({ recommendations }) =>
                   <div className="flex flex-wrap gap-1 mt-1">
                     {ensureArray(rec.metrics_references || rec.metrics).map((metric: string, i: number) => (
                       <span key={i} className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded">
-                        {metric}
+                        {formatMetricName(metric)}
                       </span>
                     ))}
                   </div>

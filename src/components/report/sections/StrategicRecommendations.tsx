@@ -2,7 +2,6 @@
 import React from 'react';
 import { ArchetypeDetailedData } from '@/types/archetype';
 import SectionTitle from '@/components/shared/SectionTitle';
-import GnomeImage from '@/components/common/GnomeImage';
 
 export interface StrategicRecommendationsProps {
   reportData?: ArchetypeDetailedData;
@@ -68,12 +67,30 @@ const StrategicRecommendations: React.FC<StrategicRecommendationsProps> = ({
   const rawRecommendations = data?.strategic_recommendations;
   const recommendations = ensureArray(rawRecommendations);
   
+  // Format metric field names to be more readable
+  const formatMetricName = (metricKey: string): string => {
+    // Remove prefixes like "Dise_" or "Util_"
+    let formatted = metricKey.replace(/^(Dise|Util|Cost|SDOH|Risk|Gaps|Demo|Bene)_/i, '');
+    
+    // Replace underscores with spaces
+    formatted = formatted.replace(/_/g, ' ');
+    
+    // Handle specific abbreviations
+    formatted = formatted
+      .replace(/\bRX\b/g, 'Prescription')
+      .replace(/\bED\b/g, 'Emergency Department')
+      .replace(/\bPMPY\b/g, 'Per Member Per Year')
+      .replace(/\bPEPY\b/g, 'Per Employee Per Year');
+    
+    return formatted;
+  };
+  
   return (
     <div className="space-y-6">
       <SectionTitle title="Strategic Recommendations" />
       <div className="bg-white rounded-lg p-6 shadow-sm">
         <div className="flex flex-col md:flex-row gap-6">
-          <div className="md:w-3/4">
+          <div className="w-full">
             <p className="text-gray-600 mb-6">
               Based on our analysis of {archetypeName}, we recommend the following strategies:
             </p>
@@ -93,7 +110,7 @@ const StrategicRecommendations: React.FC<StrategicRecommendationsProps> = ({
                         <div className="flex flex-wrap gap-1 mt-1">
                           {recommendation.metrics_references.map((metric: string, i: number) => (
                             <span key={i} className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded">
-                              {metric}
+                              {formatMetricName(metric)}
                             </span>
                           ))}
                         </div>
@@ -107,10 +124,6 @@ const StrategicRecommendations: React.FC<StrategicRecommendationsProps> = ({
                 No specific recommendations are available at this time.
               </p>
             )}
-          </div>
-          
-          <div className="md:w-1/4 flex justify-center">
-            <GnomeImage type="report" showDebug={false} />
           </div>
         </div>
       </div>

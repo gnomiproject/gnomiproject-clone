@@ -4,7 +4,6 @@ import { Section } from '@/components/shared/Section';
 import SectionTitle from '@/components/shared/SectionTitle';
 import KeyPriorities from './KeyPriorities';
 import SuccessMetrics from './SuccessMetrics';
-import GnomeImage from '@/components/common/GnomeImage';
 import { memoizedEnsureArray } from '@/utils/ensureArray';
 import { useRenderPerformance } from '@/components/shared/PerformanceMonitor';
 
@@ -43,7 +42,7 @@ const StrategicRecommendationsSection: React.FC<StrategicRecommendationsSectionP
     <Section id="strategic-recommendations">
       <div className="space-y-8">
         <div className="flex flex-col md:flex-row gap-6 items-center">
-          <div className="md:w-3/4">
+          <div className="w-full">
             <SectionTitle 
               title="Strategic Recommendations" 
               subtitle="Targeted strategies to optimize your healthcare benefits and improve outcomes"
@@ -53,9 +52,6 @@ const StrategicRecommendationsSection: React.FC<StrategicRecommendationsSectionP
               key strategic opportunities that can help improve health outcomes, enhance member 
               experience, and optimize healthcare spending.
             </p>
-          </div>
-          <div className="md:w-1/4 flex justify-center">
-            <GnomeImage type="chart" showDebug={false} />
           </div>
         </div>
 

@@ -19,6 +19,26 @@ export const RecommendationsTab = ({ report }: RecommendationsTabProps) => {
     ? report.strategic_recommendations 
     : Object.values(report.strategic_recommendations);
 
+  // Format metric field names to be more readable
+  const formatMetricName = (metricKey: string): string => {
+    // Remove prefixes like "Dise_" or "Util_"
+    let formatted = metricKey.replace(/^(Dise|Util|Cost|SDOH|Risk|Gaps|Demo|Bene)_/i, '');
+    
+    // Replace underscores with spaces
+    formatted = formatted.replace(/_/g, ' ');
+    
+    // Handle specific abbreviations
+    formatted = formatted
+      .replace(/\bRX\b/g, 'Prescription')
+      .replace(/\bED\b/g, 'Emergency Department')
+      .replace(/\bPMPY\b/g, 'Per Member Per Year')
+      .replace(/\bPEPY\b/g, 'Per Employee Per Year')
+      .replace(/\bPMPM\b/g, 'Per Member Per Month')
+      .replace(/\bPEPM\b/g, 'Per Employee Per Month');
+    
+    return formatted;
+  };
+
   return (
     <div className="space-y-6">
       {recommendationsArray.map((recommendation: any, index: number) => {
@@ -41,7 +61,7 @@ export const RecommendationsTab = ({ report }: RecommendationsTabProps) => {
                 <h5 className="text-sm font-medium text-gray-600 mb-2">Supporting Metrics:</h5>
                 <ul className="list-disc list-inside text-sm text-gray-600">
                   {metrics.map((metric: string, idx: number) => (
-                    <li key={idx}>{metric}</li>
+                    <li key={idx}>{formatMetricName(metric)}</li>
                   ))}
                 </ul>
               </div>
