@@ -29,6 +29,7 @@ const ReportViewer = () => {
   const [isUsingFallbackData, setIsUsingFallbackData] = useState<boolean>(false);
   const [sessionStartTime] = useState<number>(Date.now());
   const pageActive = useRef<boolean>(true);
+  const tokenCheckInitialized = useRef<boolean>(false);
   
   // Normalize the archetype ID to handle case sensitivity
   const archetypeId = rawArchetypeId ? normalizeArchetypeId(rawArchetypeId) : undefined;
@@ -96,7 +97,7 @@ const ReportViewer = () => {
     setIsUsingFallbackData(isFallbackData || false);
   }, [isFallbackData]);
   
-  // Use the token status hook
+  // Use the token status hook - ONLY INITIALIZE ONCE WHEN USER DATA AND REPORT DATA ARE READY
   const {
     tokenStatus,
     lastStatusCheck,
@@ -112,22 +113,28 @@ const ReportViewer = () => {
     reportData
   });
   
-  // Set up periodic token checks - now every 5 minutes instead of 30 seconds
+  // Set up a single periodic token check after everything is loaded
   useEffect(() => {
-    if (!token || isAdminView) return;
+    if (!token || isAdminView || tokenCheckInitialized.current) return;
     
-    // Set up timer for periodic checks - increased to 5 minutes
-    const timer = setInterval(() => {
-      // Only run check if page is active
-      if (pageActive.current) {
-        checkTokenStatus();
-      }
-    }, 5 * 60 * 1000); // Every 5 minutes
-    
-    return () => {
-      clearInterval(timer);
-    };
-  }, [token, isAdminView, checkTokenStatus]);
+    // Only set up the periodic check once
+    if (!userDataLoading && !reportLoading) {
+      tokenCheckInitialized.current = true;
+      console.log('[ReportViewer] Setting up token check interval');
+      
+      // Set up timer for periodic checks - increased to 5 minutes
+      const timer = setInterval(() => {
+        // Only run check if page is active
+        if (pageActive.current) {
+          checkTokenStatus();
+        }
+      }, 5 * 60 * 1000); // Every 5 minutes
+      
+      return () => {
+        clearInterval(timer);
+      };
+    }
+  }, [token, isAdminView, checkTokenStatus, userDataLoading, reportLoading]);
 
   // Handle manual refresh
   const handleRefresh = useCallback(() => {

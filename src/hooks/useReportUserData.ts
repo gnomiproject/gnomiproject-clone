@@ -1,5 +1,5 @@
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { fetchTokenAccess } from './reports/useFetchReportData';
 
@@ -44,6 +44,7 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
   const [error, setError] = useState<Error | null>(null);
   const [debugInfo, setDebugInfo] = useState<any>({});
   const [validationHistory, setValidationHistory] = useState<any[]>([]);
+  const hasExecutedInitialValidation = useRef<boolean>(false);
   
   // For admin-view special token, provide default user data
   useEffect(() => {
@@ -65,9 +66,16 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
       return;
     }
     
+    // Only run the token validation once
+    if (hasExecutedInitialValidation.current) {
+      return;
+    }
+    
     // Real token validation with useFetchReportData
     const validateToken = async () => {
       try {
+        hasExecutedInitialValidation.current = true;
+        
         if (!token || !archetypeId) {
           setIsValid(false);
           setUserData(null);

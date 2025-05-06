@@ -1,5 +1,4 @@
-
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 
 interface UseTokenStatusProps {
   token: string | undefined;
@@ -30,109 +29,163 @@ export const useTokenStatus = ({
   const [tokenStatus, setTokenStatus] = useState<'valid' | 'checking' | 'warning' | 'error' | 'grace-period'>('checking');
   const [lastStatusCheck, setLastStatusCheck] = useState<number>(Date.now());
   const [errorDetails, setErrorDetails] = useState<any>(null);
-  const [validationCount, setValidationCount] = useState<number>(0);
+  
+  // Tracking validation to prevent excessive calls
+  const validationCountRef = useRef<number>(0);
+  const hasRunInitialCheckRef = useRef<boolean>(false);
+  const isUnmountedRef = useRef<boolean>(false);
+  
+  // Store previous props to detect changes that should trigger revalidation
+  const prevPropsRef = useRef<{
+    token?: string;
+    isValidAccess?: boolean;
+    userDataError?: Error | null;
+  }>({});
 
   const checkTokenStatus = useCallback(() => {
-    if (token && !isAdminView) {
-      // Increment validation count
-      setValidationCount(prev => prev + 1);
+    // Skip if unmounted, admin view, or no token
+    if (isUnmountedRef.current || !token || isAdminView) return;
+    
+    // Increment validation count
+    validationCountRef.current += 1;
+    
+    // Implement maximum validation count to prevent infinite loops
+    if (validationCountRef.current > 100) {
+      console.warn('[ReportViewer] Maximum token validation count exceeded, assuming token is valid');
+      setTokenStatus('valid');
+      return;
+    }
+    
+    // Set status to checking
+    setTokenStatus('checking');
+    setLastStatusCheck(Date.now());
+    
+    const sessionDuration = (Date.now() - sessionStartTime) / 1000; // in seconds
+    console.log(`[ReportViewer] Checking token status at ${sessionDuration.toFixed(1)}s into session`);
+    
+    // Special case: If we have reportData and the token was previously valid,
+    // but now fails validation, we still allow viewing with a warning
+    const hasLoadedReportData = !!reportData;
+    
+    if (userDataError) {
+      console.warn('[ReportViewer] Token validation issue:', userDataError.message);
       
-      // Set status to checking
-      setTokenStatus('checking');
-      setLastStatusCheck(Date.now());
-      
-      const sessionDuration = (Date.now() - sessionStartTime) / 1000; // in seconds
-      console.log(`[ReportViewer] Checking token status at ${sessionDuration.toFixed(1)}s into session`);
-      
-      // Special case: If we have reportData and the token was previously valid,
-      // but now fails validation, we still allow viewing with a warning
-      const hasLoadedReportData = !!reportData;
-      
-      if (userDataError) {
-        console.warn('[ReportViewer] Token validation issue:', userDataError.message);
-        
-        // Check for grace period
-        if (userData?.status === 'grace-period') {
-          console.log('[ReportViewer] Token is in grace period, still showing data with warning');
-          setTokenStatus('grace-period');
-          return;
-        }
-        
-        // If we already loaded the report data, show warning but don't block access
-        if (hasLoadedReportData) {
-          console.log('[ReportViewer] Using progressive validation - showing report despite token issues');
-          setTokenStatus('warning');
-          return;
-        }
-        
-        // Otherwise, show error
-        setTokenStatus('error');
-        setErrorDetails({
-          type: 'token',
-          message: userDataError.message,
-          timestamp: Date.now()
-        });
-        return;
-      }
-      
-      if (!isValidAccess) {
-        console.warn('[ReportViewer] Token is not valid');
-        
-        // If we already loaded the report, still show it with a warning
-        if (hasLoadedReportData) {
-          console.log('[ReportViewer] Using progressive validation - showing report despite invalid token');
-          setTokenStatus('warning');
-          return;
-        }
-        
-        setTokenStatus('error');
-        setErrorDetails({
-          type: 'access',
-          message: 'Access validation failed',
-          timestamp: Date.now()
-        });
-        return;
-      }
-      
-      // Check if token is about to expire - adding null check and default value
-      if (userData?.status === 'expiring-soon') {
-        console.warn('[ReportViewer] Token will expire soon');
-        setTokenStatus('warning');
-        return;
-      } else if (userData?.status === 'grace-period') {
-        console.warn('[ReportViewer] Token is in grace period');
+      // Check for grace period
+      if (userData?.status === 'grace-period') {
+        console.log('[ReportViewer] Token is in grace period, still showing data with warning');
         setTokenStatus('grace-period');
         return;
       }
       
-      // All checks passed
-      setTokenStatus('valid');
-      setErrorDetails(null);
+      // If we already loaded the report data, show warning but don't block access
+      if (hasLoadedReportData) {
+        console.log('[ReportViewer] Using progressive validation - showing report despite token issues');
+        setTokenStatus('warning');
+        return;
+      }
+      
+      // Otherwise, show error
+      setTokenStatus('error');
+      setErrorDetails({
+        type: 'token',
+        message: userDataError.message,
+        timestamp: Date.now()
+      });
+      return;
     }
+    
+    if (!isValidAccess) {
+      console.warn('[ReportViewer] Token is not valid');
+      
+      // If we already loaded the report, still show it with a warning
+      if (hasLoadedReportData) {
+        console.log('[ReportViewer] Using progressive validation - showing report despite invalid token');
+        setTokenStatus('warning');
+        return;
+      }
+      
+      setTokenStatus('error');
+      setErrorDetails({
+        type: 'access',
+        message: 'Access validation failed',
+        timestamp: Date.now()
+      });
+      return;
+    }
+    
+    // Check if token is about to expire - adding null check and default value
+    if (userData?.status === 'expiring-soon') {
+      console.warn('[ReportViewer] Token will expire soon');
+      setTokenStatus('warning');
+      return;
+    } else if (userData?.status === 'grace-period') {
+      console.warn('[ReportViewer] Token is in grace period');
+      setTokenStatus('grace-period');
+      return;
+    }
+    
+    // All checks passed
+    setTokenStatus('valid');
+    setErrorDetails(null);
   }, [token, isAdminView, isValidAccess, userDataError, userData, sessionStartTime, reportData]);
 
-  // Initial token check - but only run once
+  // Detect changes in dependencies that should trigger a revalidation
+  const shouldRevalidate = useCallback(() => {
+    const prevProps = prevPropsRef.current;
+    
+    // Check if critical props changed
+    const tokenChanged = prevProps.token !== token;
+    const validAccessChanged = prevProps.isValidAccess !== isValidAccess;
+    const errorChanged = prevProps.userDataError !== userDataError;
+    
+    // Update ref with current props
+    prevPropsRef.current = {
+      token,
+      isValidAccess,
+      userDataError
+    };
+    
+    return tokenChanged || validAccessChanged || errorChanged;
+  }, [token, isValidAccess, userDataError]);
+
+  // Initial token check - run only once on mount
+  useEffect(() => {
+    if (!token || isAdminView || hasRunInitialCheckRef.current) return;
+    
+    // Mark that we've run the initial check
+    hasRunInitialCheckRef.current = true;
+    console.log('[useTokenStatus] Running initial token validation');
+    
+    // Run initial check
+    checkTokenStatus();
+    
+    return () => {
+      isUnmountedRef.current = true;
+    };
+  }, [token, isAdminView, checkTokenStatus]);
+  
+  // Handle prop changes that should trigger revalidation
+  useEffect(() => {
+    if (hasRunInitialCheckRef.current && shouldRevalidate()) {
+      console.log('[useTokenStatus] Critical props changed, revalidating token');
+      checkTokenStatus();
+    }
+  }, [token, isValidAccess, userDataError, shouldRevalidate, checkTokenStatus]);
+
+  // Set up periodic token checks - now every 5 minutes instead of more frequently
   useEffect(() => {
     if (!token || isAdminView) return;
     
-    // Only perform the initial check
-    checkTokenStatus();
+    console.log('[useTokenStatus] Setting up periodic token validation (every 5 minutes)');
     
-    // We're returning a cleanup function that does nothing
-    // This ensures the effect only runs once on mount
-    return () => {};
-  }, [token, isAdminView, checkTokenStatus]);
-
-  // Return before exceeding maximum validation count
-  if (validationCount > 100) {
-    console.warn('[ReportViewer] Maximum token validation count exceeded, assuming token is valid');
-    return {
-      tokenStatus: 'valid',
-      lastStatusCheck,
-      errorDetails,
-      checkTokenStatus
+    const timer = setInterval(() => {
+      checkTokenStatus();
+    }, 5 * 60 * 1000); // Every 5 minutes
+    
+    return () => {
+      clearInterval(timer);
     };
-  }
+  }, [token, isAdminView, checkTokenStatus]);
 
   return {
     tokenStatus,
