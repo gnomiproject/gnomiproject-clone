@@ -27,6 +27,13 @@ const StrategicRecommendationsSection: React.FC<StrategicRecommendationsSectionP
       ? memoizedEnsureArray(reportData.strategic_recommendations, 'strategic_recommendations') 
       : [];
     
+    // Add debug logging to see what's being processed
+    console.log('[StrategicRecommendationsSection] Processing recommendations:', {
+      rawRecommendations: reportData?.strategic_recommendations,
+      processedCount: recs.length,
+      processedData: recs
+    });
+    
     return recs;
   }, [reportData?.strategic_recommendations]);
 
@@ -50,7 +57,7 @@ const StrategicRecommendationsSection: React.FC<StrategicRecommendationsSectionP
           </div>
         </div>
 
-        {/* Key Priorities Section */}
+        {/* Key Priorities Section - Now showing all recommendations */}
         <KeyPriorities recommendations={recommendations} />
         
         {/* Success Metrics */}

@@ -15,16 +15,14 @@ const KeyPrioritiesBase: React.FC<KeyPrioritiesProps> = ({ recommendations }) =>
     memoizedEnsureArray<any>(recommendations, 'recommendations'),
   [recommendations]);
   
-  // Get the top 3 recommendations (or fewer if there aren't 3)
-  const topRecommendations = useMemo(() => 
-    safeRecommendations.slice(0, 3),
-  [safeRecommendations]);
+  // Show all recommendations instead of limiting to top 3
+  const allRecommendations = safeRecommendations;
 
   // Early return for empty data case
-  if (topRecommendations.length === 0) {
+  if (allRecommendations.length === 0) {
     return (
       <Card className="p-6">
-        <h3 className="text-xl font-semibold mb-4">Key Priorities</h3>
+        <h3 className="text-xl font-semibold mb-4">Strategic Recommendations</h3>
         <p className="text-gray-500 italic">No strategic recommendations are available at this time.</p>
       </Card>
     );
@@ -32,9 +30,9 @@ const KeyPrioritiesBase: React.FC<KeyPrioritiesProps> = ({ recommendations }) =>
 
   return (
     <Card className="p-6">
-      <h3 className="text-xl font-semibold mb-4">Key Priorities</h3>
+      <h3 className="text-xl font-semibold mb-4">Strategic Recommendations</h3>
       <div className="space-y-4">
-        {topRecommendations.map((rec, index) => (
+        {allRecommendations.map((rec, index) => (
           <div 
             key={index}
             className="flex gap-4 items-start p-4 rounded-lg border border-gray-100 bg-white shadow-sm"
@@ -45,6 +43,18 @@ const KeyPrioritiesBase: React.FC<KeyPrioritiesProps> = ({ recommendations }) =>
             <div>
               <h4 className="font-medium text-lg">{rec.title || `Priority ${index + 1}`}</h4>
               <p className="text-gray-600 mt-1">{rec.description || 'No description available'}</p>
+              {rec.metrics_references && rec.metrics_references.length > 0 && (
+                <div className="mt-3">
+                  <h5 className="text-xs font-medium text-gray-600">Related Metrics:</h5>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {rec.metrics_references.map((metric: string, i: number) => (
+                      <span key={i} className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded">
+                        {metric}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         ))}

@@ -26,7 +26,11 @@ const StrategicRecommendations: React.FC<StrategicRecommendationsProps> = ({
     hasData: !!data,
     dataName: archetypeName,
     rawRecommendations: data?.strategic_recommendations,
-    recommendationsType: typeof data?.strategic_recommendations
+    recommendationsType: typeof data?.strategic_recommendations,
+    recommendationCount: Array.isArray(data?.strategic_recommendations) ? 
+      data?.strategic_recommendations.length : 
+      (typeof data?.strategic_recommendations === 'object' && data?.strategic_recommendations ? 
+        Object.keys(data?.strategic_recommendations).length : 0)
   });
   
   // Enhanced helper function to ensure we're working with an array
@@ -74,23 +78,27 @@ const StrategicRecommendations: React.FC<StrategicRecommendationsProps> = ({
               Based on our analysis of {archetypeName}, we recommend the following strategies:
             </p>
             
-            {/* DEBUG VIEW: Display the raw data structure */}
-            <div className="bg-gray-50 p-4 rounded-lg mb-4">
-              <h3 className="text-sm font-mono">Debug Information</h3>
-              <div className="text-xs font-mono mt-2 overflow-auto max-h-32">
-                <p>Raw Data Type: {typeof rawRecommendations}</p>
-                <p>Is Array: {Array.isArray(rawRecommendations) ? 'Yes' : 'No'}</p>
-                <p>Processed Count: {recommendations.length}</p>
-              </div>
-            </div>
-            
-            {/* SIMPLIFIED VIEW: Just show text content safely */}
+            {/* Show all recommendations instead of limiting */}
             {recommendations.length > 0 ? (
               <div className="space-y-4">
                 {recommendations.map((recommendation: any, index: number) => (
                   <div key={index} className="border-l-4 border-blue-500 pl-4 py-1">
                     <h3 className="font-semibold text-lg">{recommendation.title || `Recommendation ${index + 1}`}</h3>
                     <p className="text-gray-600">{recommendation.description || 'No description available.'}</p>
+                    
+                    {/* Show metrics references if available */}
+                    {recommendation.metrics_references && recommendation.metrics_references.length > 0 && (
+                      <div className="mt-2">
+                        <h4 className="text-sm font-medium text-gray-500">Related Metrics:</h4>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {recommendation.metrics_references.map((metric: string, i: number) => (
+                            <span key={i} className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded">
+                              {metric}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -102,7 +110,7 @@ const StrategicRecommendations: React.FC<StrategicRecommendationsProps> = ({
           </div>
           
           <div className="md:w-1/4 flex justify-center">
-            <GnomeImage type="report" showDebug={true} />
+            <GnomeImage type="report" showDebug={false} />
           </div>
         </div>
       </div>

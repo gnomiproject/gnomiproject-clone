@@ -18,9 +18,20 @@ export const RecommendationsTab = ({ report }: RecommendationsTabProps) => {
   const recommendationsArray = Array.isArray(report.strategic_recommendations) 
     ? report.strategic_recommendations 
     : Object.values(report.strategic_recommendations);
+  
+  // Log the recommendations data to help with debugging
+  console.log('[RecommendationsTab] Recommendations data:', {
+    rawData: report.strategic_recommendations,
+    processedCount: recommendationsArray.length,
+    isArray: Array.isArray(report.strategic_recommendations)
+  });
 
   return (
     <div className="space-y-6">
+      <div className="bg-amber-50 border border-amber-200 p-3 rounded mb-4">
+        <p className="text-amber-800 font-medium">Found {recommendationsArray.length} recommendations</p>
+      </div>
+      
       {recommendationsArray.map((recommendation: any, index: number) => {
         // Extract fields with fallbacks for different data structures
         const title = recommendation.title || recommendation.name || `Recommendation ${index + 1}`;
