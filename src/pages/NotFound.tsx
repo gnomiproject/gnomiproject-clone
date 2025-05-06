@@ -14,6 +14,10 @@ const NotFound = () => {
     );
   }, [location.pathname]);
 
+  // Check if this is likely a report URL with a malformed path
+  const isLikelyReportPath = location.pathname.includes('/report/');
+  const suggestedArchetype = isLikelyReportPath ? location.pathname.split('/').pop() : null;
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-6">
       <div className="text-center max-w-lg">
@@ -25,6 +29,21 @@ const NotFound = () => {
             Attempted to access: <span className="font-mono bg-gray-100 px-2 py-1 rounded">{location.pathname}</span>
           </p>
           
+          {isLikelyReportPath && (
+            <div className="mt-4 py-3 px-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <p className="text-yellow-800">
+                It looks like you were trying to access a report. Try one of these options:
+              </p>
+              {suggestedArchetype && (
+                <div className="mt-2 space-x-2">
+                  <Link to={`/report/${suggestedArchetype}/admin-view`} className="text-blue-600 hover:underline text-sm">
+                    View {suggestedArchetype} with admin access
+                  </Link>
+                </div>
+              )}
+            </div>
+          )}
+          
           <div className="space-y-2">
             <Link to="/">
               <Button>
@@ -35,14 +54,14 @@ const NotFound = () => {
             <div className="mt-4 pt-4 border-t border-gray-200">
               <h3 className="font-semibold mb-2 text-gray-700">Quick Links:</h3>
               <div className="flex flex-wrap justify-center gap-2">
-                <Link to="/report/a1" className="text-blue-600 hover:underline text-sm">
-                  Report a1
+                <Link to="/report/a1/admin-view" className="text-blue-600 hover:underline text-sm">
+                  Report a1 (Admin View)
                 </Link>
-                <Link to="/report/a2" className="text-blue-600 hover:underline text-sm">
-                  Report a2
+                <Link to="/report/a2/admin-view" className="text-blue-600 hover:underline text-sm">
+                  Report a2 (Admin View)
                 </Link>
-                <Link to="/report/a3" className="text-blue-600 hover:underline text-sm">
-                  Report a3
+                <Link to="/report/a3/admin-view" className="text-blue-600 hover:underline text-sm">
+                  Report a3 (Admin View)
                 </Link>
                 <Link to="/insights" className="text-blue-600 hover:underline text-sm">
                   Insights

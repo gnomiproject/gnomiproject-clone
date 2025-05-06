@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { isValidArchetypeId, normalizeArchetypeId } from '@/utils/archetypeValidation';
@@ -29,6 +30,7 @@ const ReportViewer = () => {
   const [sessionStartTime] = useState<number>(Date.now());
   const pageActive = useRef<boolean>(true);
   const tokenCheckInitialized = useRef<boolean>(false);
+  const hasValidatedRef = useRef<boolean>(false);
   
   // Normalize the archetype ID to handle case sensitivity
   const archetypeId = rawArchetypeId ? normalizeArchetypeId(rawArchetypeId) : undefined;
@@ -269,24 +271,26 @@ const ReportViewer = () => {
 
   // Render the main content
   return (
-    <ReportViewerContent
-      tokenStatus={tokenStatus}
-      isAdminView={isAdminView}
-      reportData={reportData}
-      userData={userData}
-      averageData={averageData}
-      combinedDebugInfo={combinedDebugInfo}
-      userDataLoading={userDataLoading}
-      reportLoading={reportLoading}
-      reportError={reportError}
-      userDataError={userDataError}
-      isUsingFallbackData={isUsingFallbackData}
-      sessionStartTime={sessionStartTime}
-      lastStatusCheck={lastStatusCheck}
-      onError={handleError}
-      onRequestNewToken={handleRequestNewToken}
-      hideNavbar={true}
-    />
+    <ErrorBoundary onError={handleError} name="Report Viewer">
+      <ReportViewerContent
+        tokenStatus={tokenStatus}
+        isAdminView={isAdminView}
+        reportData={reportData}
+        userData={userData}
+        averageData={averageData}
+        combinedDebugInfo={combinedDebugInfo}
+        userDataLoading={userDataLoading}
+        reportLoading={reportLoading}
+        reportError={reportError}
+        userDataError={userDataError}
+        isUsingFallbackData={isUsingFallbackData}
+        sessionStartTime={sessionStartTime}
+        lastStatusCheck={lastStatusCheck}
+        onError={handleError}
+        onRequestNewToken={handleRequestNewToken}
+        hideNavbar={true}
+      />
+    </ErrorBoundary>
   );
 };
 

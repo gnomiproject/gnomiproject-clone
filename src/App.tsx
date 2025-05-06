@@ -70,13 +70,15 @@ function App() {
               </Suspense>
             } />
             
-            <Route path="/report/:archetypeId" element={
+            {/* Deep dive report route with token */}
+            <Route path="/report/:archetypeId/:token" element={
               <Suspense fallback={<PageLoader />}>
                 <ReportViewer />
               </Suspense>
             } />
             
-            <Route path="/report/:archetypeId/:token" element={
+            {/* Deep dive report route without token (fallback) */}
+            <Route path="/report/:archetypeId" element={
               <Suspense fallback={<PageLoader />}>
                 <ReportViewer />
               </Suspense>
