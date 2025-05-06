@@ -288,7 +288,8 @@ export const fetchReportData = async (
   reportType: ReportType
 ): Promise<ArchetypeDetailedData | null> => {
   // For insights reports, always use level3_report_secure
-  const dataSourceTable = reportType === 'insight' ? 'level3_report_secure' : getDataSource(reportType);
+  // Fix: Define the type more explicitly and handle string constants correctly
+  const dataSourceTable: string = reportType === 'insight' ? 'level3_report_secure' : getDataSource(reportType);
   
   console.log(`[fetchReportData] Querying ${dataSourceTable} for archetypeId ${archetypeId}`);
   
@@ -315,6 +316,7 @@ export const fetchReportData = async (
     console.error(`[fetchReportData] Error fetching report data:`, error);
     
     // Try fallback source for deep dive reports
+    // Fix: Use strict string comparison instead of type comparison
     if (reportType === 'deepDive' && dataSourceTable === 'level4_report_secure') {
       console.log(`[fetchReportData] Attempting fallback to level4_deepdive_report_data_secure`);
       try {
