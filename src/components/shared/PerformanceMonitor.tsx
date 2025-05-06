@@ -39,7 +39,7 @@ export const RenderCounter = ({
 /**
  * Utility to track render performance of components
  */
-export const useRenderPerformance = (componentName: string) => {
+export const useRenderPerformance = (componentName: string, options?: { silent?: boolean }) => {
   const startTime = useRef(performance.now());
   const renderCount = useRef(0);
   
@@ -48,7 +48,9 @@ export const useRenderPerformance = (componentName: string) => {
     const renderTime = performance.now() - startTime.current;
     
     // Only log in development to avoid console spam in production
-    if (process.env.NODE_ENV !== 'production') {
+    // Respect the silent option if provided
+    const isSilent = options?.silent === true;
+    if (process.env.NODE_ENV !== 'production' && !isSilent) {
       console.log(`[Performance] ${componentName} rendered in ${renderTime.toFixed(2)}ms (render #${renderCount.current})`);
     }
     

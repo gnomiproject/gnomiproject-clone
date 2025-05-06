@@ -60,8 +60,8 @@ const ReportContainer: React.FC<ReportContainerProps> = ({
 }) => {
   // Use React.memo to prevent unnecessary re-renders
   const MemoizedReportContainer = React.memo(() => {
-    // Track performance without affecting component behavior
-    useRenderPerformance('ReportContainer', { silent: true });
+    // Track performance without affecting component behavior - FIX: Remove the second argument
+    useRenderPerformance('ReportContainer');
     
     const reportRef = useRef<HTMLDivElement>(null);
     
