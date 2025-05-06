@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { getArchetypeColorHex } from '@/data/colors';
 import { ArchetypeId } from '@/types/archetype';
@@ -22,10 +22,26 @@ const WelcomeCard = ({
   const archetypeColor = getArchetypeColorHex(archetypeId);
   
   // Debug logging to verify rendering
-  console.log('[WelcomeCard] Rendering for:', { userName, archetypeName, archetypeId });
+  useEffect(() => {
+    console.log('[WelcomeCard] Component mounted with props:', { 
+      userName, 
+      archetypeName, 
+      archetypeId,
+      matchPercentage,
+      archetypeColor
+    });
+    
+    // Check if this component is actually in the DOM
+    setTimeout(() => {
+      const cardElement = document.querySelector('.welcome-card-container');
+      console.log('[WelcomeCard] Card element in DOM:', !!cardElement);
+    }, 200);
+  }, [userName, archetypeName, archetypeId, matchPercentage, archetypeColor]);
+  
+  console.log('[WelcomeCard] Rendering component for:', { userName, archetypeName });
   
   return (
-    <Card className="p-6 border border-gray-200 bg-gradient-to-br from-white to-slate-50 shadow-md">
+    <Card className="p-6 border border-gray-200 bg-gradient-to-br from-white to-slate-50 shadow-md welcome-card-container">
       <div className="flex flex-col md:flex-row items-start justify-between gap-4">
         <div>
           <div className="mb-2">

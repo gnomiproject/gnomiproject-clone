@@ -63,7 +63,8 @@ const ReportContainer: React.FC<ReportContainerProps> = ({
     hasReportData: !!reportData, 
     hasUserData: !!userData,
     hasChildren: !!children,
-    reportName: reportData?.name || reportData?.archetype_name
+    reportName: reportData?.name || reportData?.archetype_name,
+    childrenType: children ? typeof children : 'none'
   });
   
   // Use React.memo to prevent unnecessary re-renders
@@ -119,6 +120,17 @@ const ReportContainer: React.FC<ReportContainerProps> = ({
         </div>
       );
     }
+    
+    // Log children structure if provided
+    useEffect(() => {
+      if (children) {
+        console.log('[ReportContainer] Children provided:', {
+          type: typeof children,
+          isReactElement: React.isValidElement(children),
+          childrenProps: React.isValidElement(children) ? (children as React.ReactElement).props : 'Not an element'
+        });
+      }
+    }, [children]);
 
     return (
       <div className="relative min-h-screen bg-gray-50">
@@ -146,21 +158,27 @@ const ReportContainer: React.FC<ReportContainerProps> = ({
           ref={reportRef}
         >
           {children ? (
-            children
+            <>
+              {console.log('[ReportContainer] Rendering children directly')}
+              {children}
+            </>
           ) : (
-            <ReportBodyContent
-              reportData={reportData}
-              userData={userData}
-              averageData={averageData}
-              isAdminView={isAdminView}
-              debugInfo={debugInfo}
-              showDebugData={showDebugData}
-              showDiagnostics={showDiagnostics}
-              setShowDebugData={setShowDebugData}
-              setShowDiagnostics={setShowDiagnostics}
-              handleRefreshData={handleRefreshData}
-              isDebugMode={isDebugMode}
-            />
+            <>
+              {console.log('[ReportContainer] Rendering ReportBodyContent')}
+              <ReportBodyContent
+                reportData={reportData}
+                userData={userData}
+                averageData={averageData}
+                isAdminView={isAdminView}
+                debugInfo={debugInfo}
+                showDebugData={showDebugData}
+                showDiagnostics={showDiagnostics}
+                setShowDebugData={setShowDebugData}
+                setShowDiagnostics={setShowDiagnostics}
+                handleRefreshData={handleRefreshData}
+                isDebugMode={isDebugMode}
+              />
+            </>
           )}
         </div>
         

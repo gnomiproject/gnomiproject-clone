@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Section } from '@/components/shared/Section';
 import SectionTitle from '@/components/shared/SectionTitle';
 import ReportIntroduction from './ReportIntroduction';
@@ -62,21 +62,36 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
     "Moderate social determinants of health challenges"
   ];
   
-  // Enhanced debug logging
-  console.log('[HomeIntroduction] Rendering with data:', {
-    id: archetypeId,
-    name: archetypeName,
-    family: familyName,
-    description: shortDescription ? (shortDescription.substring(0, 50) + '...') : 'No description',
-    userData: userData ? `User data present for: ${userName}` : 'No user data',
-    archetypeObj: archetypeData ? 'Archetype data present' : 'No archetype data',
-    keyFindings: keyFindings ? `${keyFindings.length} findings found` : 'No key findings'
-  });
+  // Add more comprehensive debugging
+  useEffect(() => {
+    console.log('[HomeIntroduction] Component mounted with data:', {
+      id: archetypeId,
+      name: archetypeName,
+      family: familyName,
+      description: shortDescription ? (shortDescription.substring(0, 50) + '...') : 'No description',
+      userData: userData ? `User data present for: ${userName}` : 'No user data',
+      archetypeObj: archetypeData ? 'Archetype data present' : 'No archetype data',
+      keyFindings: keyFindings ? `${keyFindings.length} findings found` : 'No key findings',
+      welcomeCardComponent: typeof WelcomeCard,
+      reportIntroductionComponent: typeof ReportIntroduction,
+      insightsCardComponent: typeof ArchetypeInsightsCard
+    });
+    
+    // Check DOM elements
+    setTimeout(() => {
+      const welcomeCardEl = document.querySelector('[data-section="welcome-card"]');
+      console.log('[HomeIntroduction] Welcome card in DOM:', !!welcomeCardEl);
+      
+      const introTitleEl = document.querySelector('[data-section="introduction-title"]');
+      console.log('[HomeIntroduction] Introduction title in DOM:', !!introTitleEl);
+    }, 300);
+  }, [archetypeId, archetypeName, familyName, shortDescription, userData, userName, keyFindings]);
   
   return (
     <div className="mt-2">
       {/* Welcome Card - Explicitly placed at the very top */}
-      <div className="mb-6">
+      <div className="mb-6" data-section="welcome-card">
+        {console.log('[HomeIntroduction] Rendering WelcomeCard')}
         <WelcomeCard 
           userName={userName}
           archetypeName={archetypeName}
@@ -87,24 +102,31 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
       </div>
 
       {/* Main report introduction */}
-      <ReportIntroduction 
-        userData={userData} 
-        reportData={archetypeData}
-        archetypeId={archetypeId}
-        archetypeName={archetypeName}
-        familyName={familyName}
-        shortDescription={shortDescription}
-      />
+      <div data-section="report-introduction">
+        {console.log('[HomeIntroduction] Rendering ReportIntroduction')}
+        <ReportIntroduction 
+          userData={userData} 
+          reportData={archetypeData}
+          archetypeId={archetypeId}
+          archetypeName={archetypeName}
+          familyName={familyName}
+          shortDescription={shortDescription}
+        />
+      </div>
       
       {/* Introduction title - Positioned after the welcome card and intro */}
-      <SectionTitle 
-        title="Introduction" 
-        subtitle={`Welcome to your ${archetypeName} Deep Dive Report`} 
-        className="mt-8"
-      />
+      <div data-section="introduction-title">
+        {console.log('[HomeIntroduction] Rendering SectionTitle')}
+        <SectionTitle 
+          title="Introduction" 
+          subtitle={`Welcome to your ${archetypeName} Deep Dive Report`} 
+          className="mt-8"
+        />
+      </div>
       
       {/* Insights Card */}
-      <div className="mt-8 mb-8">
+      <div className="mt-8 mb-8" data-section="insights-card">
+        {console.log('[HomeIntroduction] Rendering ArchetypeInsightsCard')}
         <ArchetypeInsightsCard
           archetypeName={archetypeName}
           familyName={familyName}
@@ -115,7 +137,8 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
       </div>
       
       {/* Welcome section with gnome */}
-      <div className="bg-blue-50 border border-blue-100 rounded-lg p-6 mb-6 mt-8">
+      <div className="bg-blue-50 border border-blue-100 rounded-lg p-6 mb-6 mt-8" data-section="welcome-section">
+        {console.log('[HomeIntroduction] Rendering welcome section with gnome')}
         <div className="flex items-start gap-4">
           <WebsiteImage 
             type="magnifying_glass" 

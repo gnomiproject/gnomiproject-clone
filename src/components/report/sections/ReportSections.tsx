@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import { Section } from '@/components/shared/Section';
 import SectionTitle from '@/components/shared/SectionTitle';
@@ -26,6 +25,9 @@ const ReportSections: React.FC<ReportSectionsProps> = ({
   userData,
   averageData
 }) => {
+  // State to track when components have rendered
+  const [introRendered, setIntroRendered] = useState<boolean>(false);
+
   // Enhanced debug logging to track rendering and data flow
   console.log('[ReportSections] Rendering with data:', { 
     hasUserData: !!userData,
@@ -36,9 +38,33 @@ const ReportSections: React.FC<ReportSectionsProps> = ({
   });
 
   // Force this component to re-render after mount to ensure children render correctly
-  React.useEffect(() => {
+  useEffect(() => {
     console.log('[ReportSections] Component mounted');
+    
+    // Log the HomeIntroduction component to ensure it exists and is importable
+    console.log('[ReportSections] HomeIntroduction component:', {
+      component: HomeIntroduction,
+      type: typeof HomeIntroduction
+    });
+    
+    // Set timeout to check if intro has rendered
+    const timer = setTimeout(() => {
+      const introSection = document.getElementById('introduction');
+      console.log('[ReportSections] Checking if intro section exists:', !!introSection);
+      setIntroRendered(!!introSection);
+    }, 500);
+    
+    return () => clearTimeout(timer);
   }, []);
+  
+  // Delayed check for intro section
+  useEffect(() => {
+    if (introRendered) {
+      console.log('[ReportSections] Introduction section has rendered');
+    } else {
+      console.log('[ReportSections] Introduction section has not rendered yet');
+    }
+  }, [introRendered]);
 
   return (
     <>

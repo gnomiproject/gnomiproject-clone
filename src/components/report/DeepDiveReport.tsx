@@ -1,8 +1,7 @@
-
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ArchetypeDetailedData } from '@/types/archetype';
 import ReportContainer from './components/ReportContainer';
-import DeepDiveReportContent from '@/components/report/sections/DeepDiveReportContent';
+import DeepDiveReportContent from './DeepDiveReportContent';
 import { ReportUserData } from '@/hooks/useReportUserData';
 import BetaBadge from '@/components/shared/BetaBadge';
 
@@ -34,8 +33,19 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
     isAdminView,
     reportName: reportData?.name || reportData?.archetype_name
   });
+  
+  // Check data presence and structure
+  useEffect(() => {
+    console.log('[DeepDiveReport] Component mounted, checking data structure', {
+      reportDataType: typeof reportData,
+      reportDataStructure: reportData ? Object.keys(reportData) : 'No data',
+      userDataPresent: !!userData,
+      betaBadgeModule: typeof BetaBadge
+    });
+  }, [reportData, userData]);
 
   if (!reportData) {
+    console.warn('[DeepDiveReport] No report data available');
     return (
       <div className="p-4">
         <h2>No report data available</h2>

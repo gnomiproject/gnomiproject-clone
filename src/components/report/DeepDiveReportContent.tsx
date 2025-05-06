@@ -24,7 +24,7 @@ const DeepDiveReportContent = ({
   
   // Debug logging
   useEffect(() => {
-    console.log('[DeepDiveReportContent] Processing archetype data from level4_report_secure:', {
+    console.log('[DeepDiveReportContent] Component mounted with archetype data:', {
       id: archetypeId,
       name: archetypeName,
       familyId: archetype?.family_id || archetype?.familyId,
@@ -48,6 +48,7 @@ const DeepDiveReportContent = ({
   
   // If no archetype data, show error
   if (!archetype) {
+    console.error('[DeepDiveReportContent] No archetype data provided');
     return <ReportErrorHandler 
       archetypeName={archetypeName} 
       onRetry={() => window.location.reload()} 
@@ -56,17 +57,19 @@ const DeepDiveReportContent = ({
   
   console.log('[DeepDiveReportContent] Rendering with safeArchetype:', { 
     name: safeArchetype?.name || safeArchetype?.archetype_name,
-    hasUserData: !!userData 
+    hasUserData: !!userData,
+    reportSectionsComponent: typeof ReportSections
   });
   
-  // Ensure we're passing the complete archetype data to all components
   return (
     <div className="container mx-auto p-6">
-      <ReportSections 
-        reportData={safeArchetype}
-        userData={userData}
-        averageData={averageData}
-      />
+      <ErrorBoundary>
+        <ReportSections 
+          reportData={safeArchetype}
+          userData={userData}
+          averageData={averageData}
+        />
+      </ErrorBoundary>
       
       {/* Debug information - shown in a less prominent way */}
       <ErrorBoundary>
