@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { DollarSign, TrendingDown, AlertTriangle, PieChart } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -110,12 +111,25 @@ const CostAnalysis = ({
             {/* Avoidable ER Section */}
             <div className="md:w-1/2">
               <h3 className="text-lg font-medium mb-4">Avoidable Emergency Room Costs</h3>
-              <div className="bg-orange-100 p-6 rounded-lg text-center">
-                <h3 className="text-orange-800 font-medium mb-1">Potential Annual Savings</h3>
-                <div className="text-3xl font-bold text-orange-700">
-                  {formatNumber(reportData["Cost_Avoidable ER Potential Savings PMPY"] || 0, 'currency')}
-                </div>
-                <p className="text-sm text-orange-800 mt-1">per member per year</p>
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={[{
+                      name: 'Avoidable ER',
+                      'Archetype Cost': reportData["Cost_Avoidable ER Potential Savings PMPY"] || 0,
+                      'Population Average': averageData["Cost_Avoidable ER Potential Savings PMPY"] || 0
+                    }]}
+                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis tickFormatter={(value) => formatNumber(value, 'currency', 0)} />
+                    <Tooltip formatter={(value) => formatNumber(value as number, 'currency', 2)} />
+                    <Legend />
+                    <Bar dataKey="Archetype Cost" fill="#3b82f6" />
+                    <Bar dataKey="Population Average" fill="#93c5fd" />
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
               <div className="mt-4 text-sm">
                 <p>
