@@ -84,22 +84,7 @@ const CareOpportunities: React.FC<CareOpportunitiesProps> = ({
               </div>
             )}
             
-            {gapData.key_metrics && gapData.key_metrics.length > 0 && (
-              <div>
-                <h4 className="font-medium mb-2">Key Metrics</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {gapData.key_metrics.map((metric: any, index: number) => (
-                    <div key={index} className="bg-gray-50 p-3 rounded-md">
-                      <div className="font-medium">{metric.name}</div>
-                      <div className="flex justify-between text-sm mt-1">
-                        <span>Value: {(metric.value * 100).toFixed(1)}%</span>
-                        <span className="text-gray-600">{metric.context}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+            {/* Removed the key_metrics section as requested */}
           </div>
         );
       }
