@@ -97,7 +97,7 @@ const ReportViewer = () => {
     setIsUsingFallbackData(isFallbackData || false);
   }, [isFallbackData]);
   
-  // Use the token status hook - ONLY INITIALIZE ONCE WHEN USER DATA AND REPORT DATA ARE READY
+  // Use the token status hook - AFTER user data and report data are loaded
   const {
     tokenStatus,
     lastStatusCheck,
@@ -122,7 +122,7 @@ const ReportViewer = () => {
       tokenCheckInitialized.current = true;
       console.log('[ReportViewer] Setting up token check interval');
       
-      // Set up timer for periodic checks - increased to 5 minutes
+      // Set up timer for periodic checks - 5 minutes
       const timer = setInterval(() => {
         // Only run check if page is active
         if (pageActive.current) {
@@ -222,7 +222,8 @@ const ReportViewer = () => {
     />
   );
   
-  if (errorElement) {
+  // Only return the error element if there's an actual error
+  if (!isValidArchetype || (!isAdminView && !isValidAccess && !reportData) || (!reportData && reportError)) {
     return errorElement;
   }
 

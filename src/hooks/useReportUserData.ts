@@ -43,7 +43,6 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
   const [isValid, setIsValid] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
   const [debugInfo, setDebugInfo] = useState<any>({});
-  const [validationHistory, setValidationHistory] = useState<any[]>([]);
   const hasExecutedInitialValidation = useRef<boolean>(false);
   
   // For admin-view special token, provide default user data
@@ -63,6 +62,7 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
         isAdminView: true,
         timestamp: new Date().toISOString()
       });
+      hasExecutedInitialValidation.current = true;
       return;
     }
     
@@ -90,16 +90,6 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
         const { data, error, debugInfo } = await fetchTokenAccess(archetypeId, token);
         
         const validationTime = Date.now() - validationStartTime;
-        const validationResult = {
-          timestamp: new Date().toISOString(),
-          validationTimeMs: validationTime,
-          success: !error,
-          errorMessage: error?.message || null,
-          tokenStatus: data?.status || null
-        };
-        
-        // Add to validation history
-        setValidationHistory(prev => [validationResult, ...prev.slice(0, 9)]); // Keep last 10 validation attempts
         
         if (error) {
           setError(new Error(error.message || 'Invalid token'));
@@ -108,8 +98,7 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
           setDebugInfo({
             ...debugInfo,
             validationTime,
-            timestamp: new Date().toISOString(),
-            validationHistory: [validationResult, ...validationHistory.slice(0, 9)]
+            timestamp: new Date().toISOString()
           });
           console.warn(`[useReportUserData] Token validation failed in ${validationTime}ms:`, error);
         } else if (data) {
@@ -138,8 +127,7 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
             ...debugInfo,
             validationTime,
             tokenStatus: data.status,
-            timestamp: new Date().toISOString(),
-            validationHistory: [validationResult, ...validationHistory.slice(0, 9)]
+            timestamp: new Date().toISOString()
           });
           console.log(`[useReportUserData] Token validated successfully in ${validationTime}ms`);
         } else {
@@ -149,8 +137,7 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
           setDebugInfo({
             ...debugInfo,
             validationTime,
-            timestamp: new Date().toISOString(),
-            validationHistory: [validationResult, ...validationHistory.slice(0, 9)]
+            timestamp: new Date().toISOString()
           });
           console.warn(`[useReportUserData] No data returned from token validation in ${validationTime}ms`);
         }
@@ -170,7 +157,7 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
     };
     
     validateToken();
-  }, [token, archetypeId, validationHistory]);
+  }, [token, archetypeId]);
   
   return { 
     userData, 
@@ -179,7 +166,7 @@ export const useReportUserData = (token: string | undefined, archetypeId: string
     error, 
     debugInfo: {
       ...debugInfo,
-      validationHistory
+      hasExecutedInitialValidation: hasExecutedInitialValidation.current
     } 
   };
 };

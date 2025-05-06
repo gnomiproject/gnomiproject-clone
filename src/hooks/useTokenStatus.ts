@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect, useRef } from 'react';
 
 interface UseTokenStatusProps {
@@ -35,18 +36,19 @@ export const useTokenStatus = ({
   const hasRunInitialCheckRef = useRef<boolean>(false);
   const isUnmountedRef = useRef<boolean>(false);
   
-  // Store previous props to detect changes that should trigger revalidation
+  // Store previous props for comparison
   const prevPropsRef = useRef<{
     token?: string;
     isValidAccess?: boolean;
     userDataError?: Error | null;
+    reportData?: any | null;
   }>({});
 
   const checkTokenStatus = useCallback(() => {
     // Skip if unmounted, admin view, or no token
     if (isUnmountedRef.current || !token || isAdminView) return;
     
-    // Increment validation count
+    // Increment validation count for tracking
     validationCountRef.current += 1;
     
     // Implement maximum validation count to prevent infinite loops
@@ -113,7 +115,7 @@ export const useTokenStatus = ({
       return;
     }
     
-    // Check if token is about to expire - adding null check and default value
+    // Check if token is about to expire
     if (userData?.status === 'expiring-soon') {
       console.warn('[ReportViewer] Token will expire soon');
       setTokenStatus('warning');
@@ -137,16 +139,18 @@ export const useTokenStatus = ({
     const tokenChanged = prevProps.token !== token;
     const validAccessChanged = prevProps.isValidAccess !== isValidAccess;
     const errorChanged = prevProps.userDataError !== userDataError;
+    const reportDataChanged = prevProps.reportData !== reportData;
     
     // Update ref with current props
     prevPropsRef.current = {
       token,
       isValidAccess,
-      userDataError
+      userDataError,
+      reportData
     };
     
-    return tokenChanged || validAccessChanged || errorChanged;
-  }, [token, isValidAccess, userDataError]);
+    return tokenChanged || validAccessChanged || errorChanged || reportDataChanged;
+  }, [token, isValidAccess, userDataError, reportData]);
 
   // Initial token check - run only once on mount
   useEffect(() => {
@@ -156,30 +160,45 @@ export const useTokenStatus = ({
     hasRunInitialCheckRef.current = true;
     console.log('[useTokenStatus] Running initial token validation');
     
-    // Run initial check
-    checkTokenStatus();
+    // Update refs with initial values to prevent unnecessary revalidations
+    prevPropsRef.current = {
+      token,
+      isValidAccess,
+      userDataError,
+      reportData
+    };
+    
+    // Run initial check with slight delay to allow other hooks to finish
+    const timer = setTimeout(() => {
+      if (!isUnmountedRef.current) {
+        checkTokenStatus();
+      }
+    }, 100);
     
     return () => {
+      clearTimeout(timer);
       isUnmountedRef.current = true;
     };
-  }, [token, isAdminView, checkTokenStatus]);
+  }, [token, isAdminView, isValidAccess, userDataError, reportData, checkTokenStatus]);
   
-  // Handle prop changes that should trigger revalidation
+  // Handle prop changes that should trigger revalidation, but only after the initial check
   useEffect(() => {
     if (hasRunInitialCheckRef.current && shouldRevalidate()) {
       console.log('[useTokenStatus] Critical props changed, revalidating token');
       checkTokenStatus();
     }
-  }, [token, isValidAccess, userDataError, shouldRevalidate, checkTokenStatus]);
+  }, [token, isValidAccess, userDataError, reportData, shouldRevalidate, checkTokenStatus]);
 
-  // Set up periodic token checks - now every 5 minutes instead of more frequently
+  // Set up periodic token checks - once every 5 minutes
   useEffect(() => {
     if (!token || isAdminView) return;
     
     console.log('[useTokenStatus] Setting up periodic token validation (every 5 minutes)');
     
     const timer = setInterval(() => {
-      checkTokenStatus();
+      if (!isUnmountedRef.current) {
+        checkTokenStatus();
+      }
     }, 5 * 60 * 1000); // Every 5 minutes
     
     return () => {
