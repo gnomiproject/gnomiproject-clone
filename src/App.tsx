@@ -41,8 +41,14 @@ function App() {
   return (
     <BrowserRouter>
       <div className="app">
-        {/* Fixed header on main routes */}
-        <FixedHeader />
+        {/* Fixed header only on main routes, not on report routes */}
+        <Routes>
+          <Route path="/report/*" element={null} />
+          <Route path="/admin/report/*" element={null} />
+          <Route path="/admin/insights-report/*" element={null} />
+          <Route path="/admin/debug/*" element={null} />
+          <Route path="*" element={<FixedHeader />} />
+        </Routes>
         
         {/* Add padding to the main content to account for the fixed header */}
         <main className="pt-16">

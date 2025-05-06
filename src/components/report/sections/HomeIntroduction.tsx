@@ -96,17 +96,6 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
   
   return (
     <div className="mt-2">
-      {/* Welcome Card - Explicitly placed at the very top */}
-      <div className="mb-6" data-section="welcome-card">
-        <WelcomeCard 
-          userName={userName}
-          archetypeName={archetypeName}
-          archetypeId={archetypeId}
-          matchPercentage={matchPercentage}
-          secondaryArchetype={secondaryArchetype}
-        />
-      </div>
-
       {/* Main report introduction */}
       <div data-section="report-introduction">
         <ReportIntroduction 
@@ -119,12 +108,23 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
         />
       </div>
       
-      {/* Introduction title - Positioned after the welcome card and intro */}
+      {/* Introduction title - Positioned after the intro */}
       <div data-section="introduction-title">
         <SectionTitle 
           title="Introduction" 
           subtitle={`Welcome to your ${archetypeName} Deep Dive Report`} 
           className="mt-8"
+        />
+      </div>
+      
+      {/* Welcome Card - Moved below the Introduction title */}
+      <div className="mb-6 mt-4" data-section="welcome-card">
+        <WelcomeCard 
+          userName={userName}
+          archetypeName={archetypeName}
+          archetypeId={archetypeId}
+          matchPercentage={matchPercentage}
+          secondaryArchetype={secondaryArchetype}
         />
       </div>
       
