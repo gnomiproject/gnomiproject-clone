@@ -43,24 +43,24 @@ const RiskSDOHInsights: React.FC<RiskSDOHInsightsProps> = ({ reportData, average
   const highSdohRisks = sdohScore > (averageData?.['SDOH_Average SDOH'] || 0);
   
   // Generate insights based on the combination of risk and SDOH
-  let insightTitle = "Balanced Risk and Social Factors";
-  let insightText = "This population shows moderate health risks with average social determinants. Focus on preventive care and addressing specific SDOH barriers.";
+  let insightTitle = "Balanced Clinical Risk and Social Factors";
+  let insightText = "This population shows moderate clinical risks with average social determinants. Focus on preventive care and addressing specific SDOH barriers.";
   let recommendation = "Consider targeted interventions for specific SDOH factors that fall below average.";
   
   if (highRisk && highSdohRisks) {
-    insightTitle = "High Risk with Social Challenges";
-    insightText = "This population faces both elevated health risks and social determinant challenges, creating a potentially compounding effect on health outcomes.";
+    insightTitle = "High Clinical Risk with Social Challenges";
+    insightText = "This population faces both elevated clinical health risks and social determinant challenges, creating a potentially compounding effect on health outcomes.";
     recommendation = "Consider comprehensive interventions that address both clinical care needs and social support systems.";
   } else if (highRisk && !highSdohRisks) {
-    insightTitle = "High Risk with Strong Social Support";
-    insightText = "Despite elevated health risks, this population benefits from better-than-average social determinants, which may help mitigate some clinical risks.";
+    insightTitle = "High Clinical Risk with Strong Social Support";
+    insightText = "Despite elevated clinical health risks, this population benefits from better-than-average social determinants, which may help mitigate some clinical risks.";
     recommendation = "Leverage existing social strengths while addressing specific clinical risk factors.";
   } else if (!highRisk && highSdohRisks) {
-    insightTitle = "Low Risk with Social Challenges";
+    insightTitle = "Low Clinical Risk with Social Challenges";
     insightText = "This population shows lower clinical risk factors but faces challenges in social determinants that could affect long-term health outcomes if not addressed.";
     recommendation = "Focus on improving social determinants to maintain the lower clinical risk profile.";
   } else if (!highRisk && !highSdohRisks) {
-    insightTitle = "Low Risk with Strong Social Support";
+    insightTitle = "Low Clinical Risk with Strong Social Support";
     insightText = "This population has both lower clinical risk factors and better social determinants, positioning them for potentially better health outcomes.";
     recommendation = "Maintain prevention strategies and continue supporting the strong social factors already in place.";
   }
@@ -69,7 +69,7 @@ const RiskSDOHInsights: React.FC<RiskSDOHInsightsProps> = ({ reportData, average
     <Card className="p-6 shadow-sm">
       <div className="flex items-center gap-2 mb-4">
         <Info className="h-6 w-6 text-blue-500" />
-        <h3 className="text-xl font-semibold">Risk-SDOH Relationship Insights</h3>
+        <h3 className="text-xl font-semibold">Clinical Risk-SDOH Relationship Insights</h3>
       </div>
       
       <div className="bg-blue-50 p-5 rounded-lg mb-4">
@@ -83,7 +83,7 @@ const RiskSDOHInsights: React.FC<RiskSDOHInsightsProps> = ({ reportData, average
           <ul className="space-y-2 list-disc pl-5">
             <li>The relationship between clinical risks and social factors creates {highRisk ? 'challenges' : 'opportunities'} for this population.</li>
             <li>{sdohMetrics.length > 0 ? 'Notable SDOH factors affecting this archetype include ' + sdohMetrics[0]?.Metric : 'Address the SDOH factors that fall significantly below average.'}</li>
-            <li>Consider the {highRisk ? 'higher' : 'lower'} risk score when designing interventions.</li>
+            <li>Consider the {highRisk ? 'higher' : 'lower'} clinical risk score when designing interventions.</li>
           </ul>
         </div>
         

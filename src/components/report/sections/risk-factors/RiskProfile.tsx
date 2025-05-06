@@ -20,7 +20,7 @@ const RiskProfile: React.FC<RiskProfileProps> = ({ reportData, averageData }) =>
   // Calculate comparison metrics
   const percentDiff = calculatePercentageDifference(riskScore, avgRiskScore);
   
-  // For risk scores, higher values indicate greater clinical risks
+  // For clinical risk scores, higher values indicate greater clinical risks
   // Lower risk scores are associated with fewer health risks
   const higherRisks = percentDiff > 0;
   
@@ -45,28 +45,28 @@ const RiskProfile: React.FC<RiskProfileProps> = ({ reportData, averageData }) =>
   return (
     <Card className="p-6 shadow-sm">
       <div className="flex items-start justify-between">
-        <h3 className="text-xl font-semibold">Risk Profile</h3>
+        <h3 className="text-xl font-semibold">Clinical Risk Profile</h3>
         <Activity className="h-6 w-6 text-blue-500" />
       </div>
       
       <div className="mt-4">
         <div className="text-3xl font-bold">{formatNumber(riskScore, 'number', 2)}</div>
-        <div className="text-sm text-gray-500">Overall Risk Score</div>
+        <div className="text-sm text-gray-500">Overall Clinical Risk Score</div>
         
         <div className="mt-3">
           <span className={`text-sm font-medium ${color}`}>{text}</span>
         </div>
         
         <div className="mt-4 bg-gray-100 rounded-lg p-4">
-          <h4 className="font-medium mb-2">Risk Level:</h4>
+          <h4 className="font-medium mb-2">Clinical Risk Level:</h4>
           <div className={`text-lg font-semibold ${riskColor}`}>{riskLevel}</div>
           
           <p className="mt-2 text-sm text-gray-600">
-            This risk score factors in clinical history, demographic data, 
-            and utilization patterns to estimate potential health risks. 
+            This clinical risk score factors in healthcare claims, demographic data, 
+            and utilization patterns to estimate potential health risks based on the population's history. 
             {percentDiff < 0 ? 
-              ' This archetype shows lower risk factors compared to average.' : 
-              ' This archetype shows elevated risk factors compared to average.'}
+              ' This archetype shows lower clinical risk factors compared to average.' : 
+              ' This archetype shows elevated clinical risk factors compared to average.'}
           </p>
         </div>
       </div>

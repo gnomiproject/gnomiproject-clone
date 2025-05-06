@@ -31,7 +31,7 @@ const RiskFactors = ({ reportData, averageData }: RiskFactorsProps) => {
       <div className="space-y-8">
         <div className="flex flex-col md:flex-row gap-8">
           <div className="md:w-2/3">
-            <h1 className="text-3xl font-bold mb-6">Risk & SDOH Factors</h1>
+            <h1 className="text-3xl font-bold mb-6">Clinical Risk & SDOH Factors</h1>
             <p className="text-lg">
               This section analyzes clinical risk scores and social determinants of health.
               We'll expand this section in the next update.
@@ -63,11 +63,12 @@ const RiskFactors = ({ reportData, averageData }: RiskFactorsProps) => {
       {/* Section Header */}
       <div className="flex flex-col md:flex-row gap-8">
         <div className="md:w-2/3">
-          <h1 className="text-3xl font-bold mb-6">Risk & SDOH Factors</h1>
+          <h1 className="text-3xl font-bold mb-6">Clinical Risk & SDOH Factors</h1>
           <p className="text-lg">
             Social Determinants of Health (SDOH) are the conditions in which people are born, grow, live, 
             work, and age that impact their health outcomes. Higher SDOH scores indicate greater social risk factors,
-            which may negatively impact health. Understanding these factors helps identify 
+            which may negatively impact health. Clinical Risk scores are based on the population's claims and demographic history.
+            Understanding both clinical and social risk factors helps identify 
             barriers to healthcare access and opportunities for targeted interventions.
           </p>
         </div>
