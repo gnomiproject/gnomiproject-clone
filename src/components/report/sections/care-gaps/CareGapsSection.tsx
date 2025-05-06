@@ -20,7 +20,7 @@ const CareGapsSection: React.FC<CareGapsSectionProps> = ({ reportData, averageDa
   }
 
   // Get care_gaps content from reportData if available
-  const careGapsContent = reportData.care_gaps || "No care gaps analysis available for this archetype.";
+  const careGapsContent = reportData.care_gaps || "";
   
   // Check if we have enough metrics to display
   const hasMetrics = reportData["Gaps_Wellness Visit Adults"] !== undefined || 
@@ -42,7 +42,7 @@ const CareGapsSection: React.FC<CareGapsSectionProps> = ({ reportData, averageDa
         <div className="md:w-1/3 flex justify-center">
           <img
             src={gnomeImage}
-            alt="Care Gaps Gnome"
+            alt="Care Gaps Analysis"
             className="max-h-64 object-contain"
             onError={(e) => {
               (e.target as HTMLImageElement).src = '/assets/gnomes/placeholder.svg';
@@ -53,7 +53,7 @@ const CareGapsSection: React.FC<CareGapsSectionProps> = ({ reportData, averageDa
 
       {hasMetrics ? (
         <div className="space-y-6">
-          {/* Care Opportunities moved to the top */}
+          {/* Care Opportunities at the top */}
           <CareOpportunities 
             reportData={reportData}
             averageData={averageData}

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Lightbulb, Target, AlertCircle } from 'lucide-react';
+import { Lightbulb, Target } from 'lucide-react';
 
 interface CareOpportunitiesProps {
   reportData: any;
@@ -56,49 +56,39 @@ const CareOpportunities: React.FC<CareOpportunitiesProps> = ({
   
   // Parse and format the care gaps content if it's in JSON format
   const formatCareGapsContent = (content: string) => {
-    if (!content) return "No care gaps analysis available.";
+    if (!content) return null;
     
     try {
       // Check if the content is in JSON format
       if (content.trim().startsWith('{')) {
         const gapData = JSON.parse(content);
         
-        // Format the structured data into readable text
-        return (
-          <div className="space-y-4">
-            {gapData.overview && (
-              <div>
-                <h4 className="font-medium mb-2">Overview</h4>
-                <p>{gapData.overview}</p>
-              </div>
-            )}
-            
-            {gapData.findings && gapData.findings.length > 0 && (
-              <div>
-                <h4 className="font-medium mb-2">Key Findings</h4>
-                <ul className="list-disc pl-5 space-y-1">
-                  {gapData.findings.map((finding: string, index: number) => (
-                    <li key={index}>{finding}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            
-            {/* Removed the key_metrics section as requested */}
-          </div>
-        );
+        // Return only the findings section without overview
+        if (gapData.findings && gapData.findings.length > 0) {
+          return (
+            <div className="space-y-4">
+              <h4 className="font-medium mb-2">Key Findings</h4>
+              <ul className="list-disc pl-5 space-y-2">
+                {gapData.findings.map((finding: string, index: number) => (
+                  <li key={index}>{finding}</li>
+                ))}
+              </ul>
+            </div>
+          );
+        }
       }
       
-      // If not JSON, return as plain text
-      return content;
+      // If not JSON, return null to skip this section
+      return null;
     } catch (e) {
-      // If parsing fails, return the original content
+      // If parsing fails, return null
       console.error("Error parsing care gaps content:", e);
-      return content;
+      return null;
     }
   };
   
   const opportunities = findOpportunities();
+  const formattedContent = formatCareGapsContent(careGapsContent);
   
   return (
     <Card className={className}>
@@ -109,47 +99,65 @@ const CareOpportunities: React.FC<CareOpportunitiesProps> = ({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {opportunities.length > 0 ? (
+        {opportunities.length > 0 && (
           <div className="mb-6">
             <h3 className="text-sm font-medium mb-3">Top Improvement Opportunities</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {opportunities.map(gap => (
-                <div 
-                  key={gap.id}
-                  className="border border-amber-200 bg-amber-50 rounded-md p-3"
-                >
-                  <h4 className="font-medium text-amber-900">{gap.label}</h4>
-                  <div className="flex justify-between mt-2">
-                    <div>
-                      <div className="text-xs text-gray-500">Current</div>
-                      <div className="font-bold">{(gap.value * 100).toFixed(1)}%</div>
-                    </div>
-                    <div>
-                      <div className="text-xs text-gray-500">Average</div>
-                      <div className="font-bold">{(gap.avgValue * 100).toFixed(1)}%</div>
-                    </div>
-                    <div>
-                      <div className="text-xs text-gray-500">Gap</div>
-                      <div className="font-bold text-red-600">{gap.diffPercent}%</div>
+              {opportunities.map(gap => {
+                // Create shorter, cleaner labels
+                let shortLabel = gap.label
+                  .replace('Behavioral Health Follow-up', 'BH Follow-up')
+                  .replace('Emergency Department', 'ED')
+                  .replace('Children ADHD', 'ADHD')
+                  .replace('High Intensity Care SUD', 'SUD Care');
+                
+                // If still too long, truncate to reasonable length
+                if (shortLabel.length > 25) {
+                  shortLabel = shortLabel.substring(0, 25) + '...';
+                }
+                
+                return (
+                  <div 
+                    key={gap.id}
+                    className="border border-amber-200 bg-amber-50 rounded-md p-3"
+                  >
+                    <h4 className="font-medium text-amber-900 mb-2 h-12 flex items-center">
+                      {shortLabel}
+                    </h4>
+                    <div className="grid grid-cols-3 gap-2 text-center">
+                      <div>
+                        <div className="text-xs text-gray-500">Current</div>
+                        <div className="font-bold text-lg">{(gap.value * 100).toFixed(1)}%</div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-gray-500">Average</div>
+                        <div className="font-bold text-lg">{(gap.avgValue * 100).toFixed(1)}%</div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-gray-500">Gap</div>
+                        <div className="font-bold text-lg text-red-600">{gap.diffPercent}%</div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
-        ) : null}
+        )}
 
-        <div>
-          <h3 className="flex items-center text-sm font-medium mb-3">
-            <Lightbulb className="h-4 w-4 mr-2 text-amber-500" />
-            <span>Care Gaps Analysis</span>
-          </h3>
-          <div className="border border-gray-200 rounded-lg p-4 bg-white">
-            <div className="prose prose-sm max-w-none text-gray-700">
-              {formatCareGapsContent(careGapsContent)}
+        {formattedContent && (
+          <div>
+            <h3 className="flex items-center text-sm font-medium mb-3">
+              <Lightbulb className="h-4 w-4 mr-2 text-amber-500" />
+              <span>Care Gaps Analysis</span>
+            </h3>
+            <div className="border border-gray-200 rounded-lg p-4 bg-white">
+              <div className="prose prose-sm max-w-none text-gray-700">
+                {formattedContent}
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </CardContent>
     </Card>
   );
