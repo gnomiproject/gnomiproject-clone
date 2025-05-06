@@ -57,7 +57,7 @@ const DemographicsSection: React.FC<DemographicsSectionProps> = ({
   return (
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row gap-6">
-        <div className="md:w-2/3">
+        <div className="w-full">
           <h1 className="text-3xl font-bold mb-4">Demographics</h1>
           
           <p className="text-lg mb-6">
@@ -65,16 +65,6 @@ const DemographicsSection: React.FC<DemographicsSectionProps> = ({
             utilization patterns. This section analyzes key demographic characteristics of this 
             archetype compared to others.
           </p>
-        </div>
-        <div className="md:w-1/3 flex justify-center">
-          <img 
-            src="/assets/gnomes/gnome_clipboard.png" 
-            alt="Demographics" 
-            className="max-h-48 object-contain"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = '/assets/gnomes/placeholder.svg';
-            }}
-          />
         </div>
       </div>
       

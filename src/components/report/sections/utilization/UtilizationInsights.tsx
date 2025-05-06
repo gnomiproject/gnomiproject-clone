@@ -32,7 +32,7 @@ const UtilizationInsights = ({
             .trim();
             
           return {
-            overview: cleanedOverview || "Key utilization patterns for this archetype:",
+            // We'll not show the overview anymore as requested
             findings: parsed.findings || {}
             // We'll intentionally exclude key_metrics as they repeat information
           };
@@ -73,16 +73,11 @@ const UtilizationInsights = ({
       <CardContent className="p-6">
         {parsedInsights ? (
           <div className="space-y-4">
-            {/* Overview section - cleaned up */}
-            {parsedInsights.overview && (
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <p className="text-blue-800">{parsedInsights.overview}</p>
-              </div>
-            )}
+            {/* Overview section removed as requested */}
             
             {/* Findings section as bullet points */}
             {parsedInsights.findings && Object.keys(parsedInsights.findings).length > 0 && (
-              <div className="mt-4">
+              <div>
                 <h3 className="text-md font-medium mb-2">Key Findings:</h3>
                 <ul className="list-disc pl-5 space-y-2">
                   {Object.entries(parsedInsights.findings).map(([key, value]: [string, any], index) => {
@@ -109,12 +104,12 @@ const UtilizationInsights = ({
           // Fallback to raw string parsing and general information
           <div>
             {typeof reportData.utilization_patterns === 'string' && (
-              <div className="bg-blue-50 p-4 rounded-lg mb-4">
+              <div>
                 {reportData.utilization_patterns
                   .replace(/overview of utilization_patterns for archetype \w+/i, '')
                   .split('\n')
                   .map((line: string, index: number) => (
-                    line.trim() && <p key={index} className="text-blue-800 mb-2">{line.trim()}</p>
+                    line.trim() && <p key={index} className="text-gray-700 mb-2">{line.trim()}</p>
                   ))}
               </div>
             )}
