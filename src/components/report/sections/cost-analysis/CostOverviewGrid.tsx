@@ -34,30 +34,6 @@ const CostOverviewGrid = ({ reportData, averageData }: CostOverviewGridProps) =>
         betterDirection="lower"
         icon={<DollarSign className="h-5 w-5" />}
       />
-      
-      <CostCard 
-        title="Total Cost PMPY"
-        value={reportData["Cost_Medical & RX Paid Amount PMPY"] || 0}
-        average={averageData["Cost_Medical & RX Paid Amount PMPY"] || 0}
-        betterDirection="lower"
-        icon={<DollarSign className="h-5 w-5" />}
-      />
-      
-      <CostCard 
-        title="Medical Cost PMPY"
-        value={reportData["Cost_Medical Paid Amount PMPY"] || 0}
-        average={averageData["Cost_Medical Paid Amount PMPY"] || 0}
-        betterDirection="lower"
-        icon={<DollarSign className="h-5 w-5" />}
-      />
-      
-      <CostCard 
-        title="Rx Cost PMPY"
-        value={reportData["Cost_RX Paid Amount PMPY"] || 0}
-        average={averageData["Cost_RX Paid Amount PMPY"] || 0}
-        betterDirection="lower"
-        icon={<DollarSign className="h-5 w-5" />}
-      />
     </div>
   );
 };
