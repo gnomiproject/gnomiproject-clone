@@ -40,26 +40,26 @@ const RiskSDOHInsights: React.FC<RiskSDOHInsightsProps> = ({ reportData, average
                     
   // Determine archetype's status based on risk and SDOH scores
   const highRisk = riskScore > (averageData?.['Risk_Average Risk Score'] || 0);
-  const goodSdoh = sdohScore > (averageData?.['SDOH_Average SDOH'] || 0);
+  const highSdohRisks = sdohScore > (averageData?.['SDOH_Average SDOH'] || 0);
   
   // Generate insights based on the combination of risk and SDOH
   let insightTitle = "Balanced Risk and Social Factors";
   let insightText = "This population shows moderate health risks with average social determinants. Focus on preventive care and addressing specific SDOH barriers.";
   let recommendation = "Consider targeted interventions for specific SDOH factors that fall below average.";
   
-  if (highRisk && !goodSdoh) {
+  if (highRisk && highSdohRisks) {
     insightTitle = "High Risk with Social Challenges";
     insightText = "This population faces both elevated health risks and social determinant challenges, creating a potentially compounding effect on health outcomes.";
     recommendation = "Consider comprehensive interventions that address both clinical care needs and social support systems.";
-  } else if (highRisk && goodSdoh) {
+  } else if (highRisk && !highSdohRisks) {
     insightTitle = "High Risk with Strong Social Support";
     insightText = "Despite elevated health risks, this population benefits from better-than-average social determinants, which may help mitigate some clinical risks.";
     recommendation = "Leverage existing social strengths while addressing specific clinical risk factors.";
-  } else if (!highRisk && !goodSdoh) {
+  } else if (!highRisk && highSdohRisks) {
     insightTitle = "Low Risk with Social Challenges";
     insightText = "This population shows lower clinical risk factors but faces challenges in social determinants that could affect long-term health outcomes if not addressed.";
     recommendation = "Focus on improving social determinants to maintain the lower clinical risk profile.";
-  } else if (!highRisk && goodSdoh) {
+  } else if (!highRisk && !highSdohRisks) {
     insightTitle = "Low Risk with Strong Social Support";
     insightText = "This population has both lower clinical risk factors and better social determinants, positioning them for potentially better health outcomes.";
     recommendation = "Maintain prevention strategies and continue supporting the strong social factors already in place.";

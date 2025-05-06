@@ -19,11 +19,16 @@ const RiskProfile: React.FC<RiskProfileProps> = ({ reportData, averageData }) =>
   
   // Calculate comparison metrics
   const percentDiff = calculatePercentageDifference(riskScore, avgRiskScore);
-  const lowerIsBetter = isLowerBetter('risk');
-  const isPositive = (percentDiff > 0 && !lowerIsBetter) || (percentDiff < 0 && lowerIsBetter);
+  
+  // For risk scores, higher values indicate greater clinical risks
+  // Lower risk scores are associated with fewer health risks
+  const higherRisks = percentDiff > 0;
+  
   const comparisonWord = percentDiff > 0 ? "higher than" : "lower than";
   const text = `${Math.abs(percentDiff).toFixed(1)}% ${comparisonWord} average`;
-  const color = isPositive ? "text-green-600" : "text-amber-600";
+  
+  // Color based on risk assessment - higher risks (red), lower risks (green)
+  const color = higherRisks ? "text-red-600" : "text-green-600";
   
   // Determine risk level category
   let riskLevel = 'Moderate';

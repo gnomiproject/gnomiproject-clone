@@ -3,7 +3,7 @@ import React from 'react';
 import { Banknote, Hospital, Carrot, Bus } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { formatNumber } from '@/utils/formatters';
-import { calculatePercentageDifference, isLowerBetter } from '@/utils/reports/metricUtils';
+import { calculatePercentageDifference } from '@/utils/reports/metricUtils';
 
 interface EconomicAccessFactorsProps {
   reportData: any;
@@ -55,11 +55,20 @@ const EconomicAccessFactors: React.FC<EconomicAccessFactorsProps> = ({ reportDat
           
           // Calculate comparison data
           const percentDiff = calculatePercentageDifference(value, avgValue);
-          const lowerIsBetter = isLowerBetter(factor.fieldName);
-          const isPositive = (percentDiff > 0 && !lowerIsBetter) || (percentDiff < 0 && lowerIsBetter);
+          
+          // For SDOH factors, higher values typically indicate greater risks
+          // Exception: For access-related factors, higher might indicate better access
+          const isAccessFactor = factor.title.includes("Access") || factor.title === "Economic Security";
+          
+          // For access factors, higher is better (fewer risks), so lower would be red
+          // For risk factors, higher is worse (more risks), so higher would be red
+          const higherRisks = isAccessFactor ? percentDiff < 0 : percentDiff > 0;
+          
           const comparisonWord = percentDiff > 0 ? "higher than" : "lower than";
           const text = `${Math.abs(percentDiff).toFixed(1)}% ${comparisonWord} average`;
-          const color = isPositive ? "text-green-600" : "text-amber-600";
+          
+          // Color based on risk assessment - higher risks (red), lower risks (green)
+          const color = higherRisks ? "text-red-600" : "text-green-600";
 
           return (
             <div key={index} className="bg-gray-50 rounded-lg p-4 border border-gray-100">

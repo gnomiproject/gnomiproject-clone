@@ -3,7 +3,7 @@ import React from 'react';
 import { Smartphone, Home, GraduationCap, Heart, Baby, Store } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { formatNumber } from '@/utils/formatters';
-import { calculatePercentageDifference, isLowerBetter } from '@/utils/reports/metricUtils';
+import { calculatePercentageDifference } from '@/utils/reports/metricUtils';
 
 interface CommunityFactorsProps {
   reportData: any;
@@ -17,37 +17,43 @@ const CommunityFactors: React.FC<CommunityFactorsProps> = ({ reportData, average
       title: "Digital Access",
       fieldName: "SDOH_Average Digital Access",
       icon: <Smartphone className="h-5 w-5 text-blue-500" />,
-      description: "Access to internet and digital health tools"
+      description: "Access to internet and digital health tools",
+      isAccessFactor: true
     },
     {
       title: "Neighborhood Quality",
       fieldName: "SDOH_Average Neighborhood",
       icon: <Home className="h-5 w-5 text-amber-500" />,
-      description: "Safety, pollution, and general community health"
+      description: "Safety, pollution, and general community health",
+      isAccessFactor: true
     },
     {
       title: "Health Literacy",
       fieldName: "SDOH_Average Health Literacy",
       icon: <GraduationCap className="h-5 w-5 text-purple-500" />,
-      description: "Understanding health information and navigation"
+      description: "Understanding health information and navigation",
+      isAccessFactor: true
     },
     {
       title: "Women's Health Access",
       fieldName: "SDOH_Average Womens Health",
       icon: <Heart className="h-5 w-5 text-pink-500" />,
-      description: "Access to women's health services"
+      description: "Access to women's health services",
+      isAccessFactor: true
     },
     {
       title: "Childcare Access",
       fieldName: "SDOH_Average Childcare Access",
       icon: <Baby className="h-5 w-5 text-teal-500" />,
-      description: "Access to childcare services"
+      description: "Access to childcare services",
+      isAccessFactor: true
     },
     {
       title: "Amenities Access",
       fieldName: "SDOH_Average Amenities Access",
       icon: <Store className="h-5 w-5 text-indigo-500" />,
-      description: "Community resources and amenities"
+      description: "Community resources and amenities",
+      isAccessFactor: true
     }
   ];
 
@@ -67,11 +73,16 @@ const CommunityFactors: React.FC<CommunityFactorsProps> = ({ reportData, average
           
           // Calculate comparison data
           const percentDiff = calculatePercentageDifference(value, avgValue);
-          const lowerIsBetter = isLowerBetter(factor.fieldName);
-          const isPositive = (percentDiff > 0 && !lowerIsBetter) || (percentDiff < 0 && lowerIsBetter);
+          
+          // For access-related factors, higher values typically indicate better access (fewer risks)
+          // So when lower than average, this represents higher risks
+          const higherRisks = factor.isAccessFactor ? percentDiff < 0 : percentDiff > 0;
+          
           const comparisonWord = percentDiff > 0 ? "higher than" : "lower than";
           const text = `${Math.abs(percentDiff).toFixed(1)}% ${comparisonWord} average`;
-          const color = isPositive ? "text-green-600" : "text-amber-600";
+          
+          // Color based on risk assessment - higher risks (red), lower risks (green)
+          const color = higherRisks ? "text-red-600" : "text-green-600";
 
           return (
             <div key={index} className="bg-gray-50 rounded-lg p-4 border border-gray-100">
