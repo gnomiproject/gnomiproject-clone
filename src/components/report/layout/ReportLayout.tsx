@@ -1,6 +1,7 @@
 
 import React, { ReactNode } from 'react';
 import LeftNavigation from '../navigation/LeftNavigation';
+import Navbar from '@/components/layout/Navbar';
 
 interface ReportLayoutProps {
   children: ReactNode;
@@ -33,9 +34,12 @@ const ReportLayout: React.FC<ReportLayoutProps> = ({
 
   return (
     <div className="min-h-screen bg-white">
+      {/* Add Navbar at the top */}
+      <Navbar />
+      
       <div className="flex flex-col md:flex-row">
         {/* Left Navigation */}
-        <div className="md:sticky md:top-0 md:h-screen">
+        <div className="md:sticky md:top-0 md:h-screen mt-16"> {/* Added mt-16 to account for navbar */}
           <LeftNavigation 
             activeSectionId={activeSectionId} 
             onNavigate={onNavigate} 
@@ -44,7 +48,7 @@ const ReportLayout: React.FC<ReportLayoutProps> = ({
         </div>
         
         {/* Main Content Area */}
-        <div className="flex-1 md:max-h-screen md:overflow-y-auto">
+        <div className="flex-1 md:max-h-screen md:overflow-y-auto pt-16"> {/* Added pt-16 to account for navbar */}
           {children}
           
           {/* Admin indicator */}

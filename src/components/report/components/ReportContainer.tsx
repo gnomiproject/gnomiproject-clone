@@ -4,6 +4,7 @@ import PrintButton from './PrintButton';
 import { useReportNavigation } from '../hooks/useReportNavigation';
 import { debounce } from '@/utils/debounce';
 import { useRenderPerformance } from '@/components/shared/PerformanceMonitor';
+import Navbar from '@/components/layout/Navbar';
 
 // Create sections array for LeftNavigation - sections have been reordered as requested
 const REPORT_SECTIONS = [
@@ -152,7 +153,10 @@ const ReportContainer: React.FC<ReportContainerProps> = ({
 
   return (
     <div className="relative min-h-screen bg-gray-50">
-      {/* Left navigation only on larger screens */}
+      {/* Add Navbar at the top */}
+      <Navbar />
+      
+      {/* Left navigation only on larger screens with adjusted position */}
       <div className="hidden lg:block fixed left-0 top-0 h-full print:hidden z-10">
         <LeftNavigation 
           activeSectionId={activeSectionId}
@@ -169,7 +173,7 @@ const ReportContainer: React.FC<ReportContainerProps> = ({
 
       {/* Main report content with improved error handling and lazy loading */}
       <div 
-        className="lg:pl-64 py-6 print:py-0 print:pl-0"
+        className="lg:pl-64 py-6 print:py-0 print:pl-0 pt-16" // Added pt-16 to account for navbar
         ref={reportRef}
       >
         {children ? (
