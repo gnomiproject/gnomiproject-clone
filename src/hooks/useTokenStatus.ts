@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect, useRef } from 'react';
 
 interface UseTokenStatusProps {
@@ -188,17 +189,17 @@ export const useTokenStatus = ({
     }
   }, [token, isValidAccess, userDataError, reportData, shouldRevalidate, checkTokenStatus]);
 
-  // Set up periodic token checks - once every 5 minutes
+  // Set up periodic token checks - once every 30 minutes instead of 5 minutes
   useEffect(() => {
     if (!token || isAdminView) return;
     
-    console.log('[useTokenStatus] Setting up periodic token validation (every 5 minutes)');
+    console.log('[useTokenStatus] Setting up periodic token validation (every 30 minutes)');
     
     const timer = setInterval(() => {
       if (!isUnmountedRef.current) {
         checkTokenStatus();
       }
-    }, 5 * 60 * 1000); // Every 5 minutes
+    }, 30 * 60 * 1000); // Every 30 minutes
     
     return () => {
       clearInterval(timer);

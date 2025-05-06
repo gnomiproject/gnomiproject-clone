@@ -58,112 +58,119 @@ const ReportContainer: React.FC<ReportContainerProps> = ({
   children,
   hideNavbar = false // Default to false for backward compatibility
 }) => {
-  // Track performance
-  useRenderPerformance('ReportContainer');
-  
-  const reportRef = useRef<HTMLDivElement>(null);
-  
-  // Use the passed onNavigate function if provided, otherwise use the hook
-  const { activeSectionId, handleNavigate, isNavigating } = useReportNavigation();
-  
-  // State for debug tools
-  const [showDebugData, setShowDebugData] = useState(false);
-  const [showDiagnostics, setShowDiagnostics] = useState(false);
-  
-  // Debounce navigation to prevent rapid successive clicks
-  const debouncedNavigate = useCallback(
-    debounce((sectionId: string) => {
-      if (onNavigate) {
-        console.log(`[ReportContainer] Using provided onNavigate for section: ${sectionId}`);
-        onNavigate(sectionId);
-      } else {
-        console.log(`[ReportContainer] Using hook handleNavigate for section: ${sectionId}`);
-        handleNavigate(sectionId);
-      }
-    }, 300),
-    [onNavigate, handleNavigate]
-  );
-  
-  // Debug info
-  const isDebugMode = isAdminView || window.location.search.includes('debug=true');
-  
-  const handleRefreshData = useCallback(() => {
-    // Refresh data logic would go here
-    console.log("Refreshing report data");
-    window.location.reload();
-  }, []);
+  // Use React.memo to prevent unnecessary re-renders
+  const MemoizedReportContainer = React.memo(() => {
+    // Track performance without affecting component behavior
+    useRenderPerformance('ReportContainer', { silent: true });
+    
+    const reportRef = useRef<HTMLDivElement>(null);
+    
+    // Use the passed onNavigate function if provided, otherwise use the hook
+    const { activeSectionId, handleNavigate, isNavigating } = useReportNavigation();
+    
+    // State for debug tools
+    const [showDebugData, setShowDebugData] = useState(false);
+    const [showDiagnostics, setShowDiagnostics] = useState(false);
+    
+    // Debounce navigation to prevent rapid successive clicks
+    const debouncedNavigate = useCallback(
+      debounce((sectionId: string) => {
+        if (onNavigate) {
+          console.log(`[ReportContainer] Using provided onNavigate for section: ${sectionId}`);
+          onNavigate(sectionId);
+        } else {
+          console.log(`[ReportContainer] Using hook handleNavigate for section: ${sectionId}`);
+          handleNavigate(sectionId);
+        }
+      }, 300),
+      [onNavigate, handleNavigate]
+    );
+    
+    // Debug info
+    const isDebugMode = isAdminView || window.location.search.includes('debug=true');
+    
+    const handleRefreshData = useCallback(() => {
+      // Refresh specific data instead of reloading the whole page
+      console.log("Refreshing report data without page reload");
+      // We'll use more targeted data fetching instead of window.location.reload()
+      document.dispatchEvent(new CustomEvent('refreshReportData'));
+    }, []);
 
-  if (!reportData) {
-    console.error("[ReportContainer] No report data available");
+    if (!reportData) {
+      console.error("[ReportContainer] No report data available");
+      return (
+        <div className="p-8 bg-red-50 border border-red-200 rounded text-center">
+          <h2 className="text-xl font-bold text-red-700">Report Data Missing</h2>
+          <p className="mt-2 text-red-600">Unable to load report data. Please try refreshing the data.</p>
+          <button 
+            onClick={handleRefreshData} 
+            className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+          >
+            Refresh Data
+          </button>
+        </div>
+      );
+    }
+
     return (
-      <div className="p-8 bg-red-50 border border-red-200 rounded text-center">
-        <h2 className="text-xl font-bold text-red-700">Report Data Missing</h2>
-        <p className="mt-2 text-red-600">Unable to load report data. Please try refreshing the page.</p>
-        <button 
-          onClick={() => window.location.reload()} 
-          className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+      <div className="relative min-h-screen bg-gray-50">
+        {/* Only show Navbar if hideNavbar is false */}
+        {!hideNavbar && <Navbar />}
+        
+        {/* Left navigation only on larger screens with adjusted position */}
+        <div className="hidden lg:block fixed left-0 top-0 h-full print:hidden z-10">
+          <LeftNavigation 
+            activeSectionId={activeSectionId}
+            onNavigate={debouncedNavigate}
+            sections={REPORT_SECTIONS}
+          />
+        </div>
+        
+        {/* Print button */}
+        <PrintButton 
+          contentRef={reportRef} 
+          documentTitle={`Healthcare Archetype Report - ${reportData?.archetype_name || reportData?.name || 'Unknown'}`} 
+        />
+
+        {/* Main report content */}
+        <div 
+          className={`lg:pl-64 py-6 print:py-0 print:pl-0 ${!hideNavbar ? 'pt-16' : 'pt-6'}`} // Adjust top padding based on navbar visibility
+          ref={reportRef}
         >
-          Retry
-        </button>
+          {children ? (
+            children
+          ) : (
+            <ReportBodyContent
+              reportData={reportData}
+              userData={userData}
+              averageData={averageData}
+              isAdminView={isAdminView}
+              debugInfo={debugInfo}
+              showDebugData={showDebugData}
+              showDiagnostics={showDiagnostics}
+              setShowDebugData={setShowDebugData}
+              setShowDiagnostics={setShowDiagnostics}
+              handleRefreshData={handleRefreshData}
+              isDebugMode={isDebugMode}
+            />
+          )}
+        </div>
+        
+        {/* Debug Element - always present but only visible in debug mode and never in print */}
+        <div className={`fixed bottom-4 right-4 z-50 print:hidden ${isDebugMode ? 'block' : 'hidden'}`}>
+          <button
+            onClick={() => console.log("Debug Data:", { reportData, userData, averageData, activeSectionId })}
+            className="bg-gray-800 text-white px-3 py-1 rounded text-xs shadow-lg"
+          >
+            Log Debug Data
+          </button>
+        </div>
       </div>
     );
-  }
-
-  return (
-    <div className="relative min-h-screen bg-gray-50">
-      {/* Only show Navbar if hideNavbar is false */}
-      {!hideNavbar && <Navbar />}
-      
-      {/* Left navigation only on larger screens with adjusted position */}
-      <div className="hidden lg:block fixed left-0 top-0 h-full print:hidden z-10">
-        <LeftNavigation 
-          activeSectionId={activeSectionId}
-          onNavigate={debouncedNavigate}
-          sections={REPORT_SECTIONS}
-        />
-      </div>
-      
-      {/* Print button */}
-      <PrintButton 
-        contentRef={reportRef} 
-        documentTitle={`Healthcare Archetype Report - ${reportData?.archetype_name || reportData?.name || 'Unknown'}`} 
-      />
-
-      {/* Main report content */}
-      <div 
-        className={`lg:pl-64 py-6 print:py-0 print:pl-0 ${!hideNavbar ? 'pt-16' : 'pt-6'}`} // Adjust top padding based on navbar visibility
-        ref={reportRef}
-      >
-        {children ? (
-          children
-        ) : (
-          <ReportBodyContent
-            reportData={reportData}
-            userData={userData}
-            averageData={averageData}
-            isAdminView={isAdminView}
-            debugInfo={debugInfo}
-            showDebugData={showDebugData}
-            showDiagnostics={showDiagnostics}
-            setShowDebugData={setShowDebugData}
-            setShowDiagnostics={setShowDiagnostics}
-            handleRefreshData={handleRefreshData}
-            isDebugMode={isDebugMode}
-          />
-        )}
-      </div>
-      
-      {/* Debug Element - always present but only visible in debug mode and never in print */}
-      <div className={`fixed bottom-4 right-4 z-50 print:hidden ${isDebugMode ? 'block' : 'hidden'}`}>
-        <button
-          onClick={() => console.log("Debug Data:", { reportData, userData, averageData, activeSectionId })}
-          className="bg-gray-800 text-white px-3 py-1 rounded text-xs shadow-lg"
-        >
-          Log Debug Data
-        </button>
-      </div>
-    </div>
-  );
+  });
+  
+  // Return the memoized container
+  return <MemoizedReportContainer />;
 };
 
 export default React.memo(ReportContainer);

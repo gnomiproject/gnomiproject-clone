@@ -96,41 +96,56 @@ if (!rootElement) {
   console.log('Main.tsx: Application mounted successfully');
 }
 
-// Track DOM focus events with preview-specific handling
+// Improved focus tracking with reduced verbosity
 if (typeof window !== 'undefined') {
+  let lastFocusLogTimestamp = 0;
+  const FOCUS_LOG_INTERVAL = 60000; // Only log focus changes once per minute to reduce spam
+  
   document.addEventListener('focusin', (event) => {
-    const isPreview = window.location.hostname.includes('lovableproject');
-    // Log focus events but with reduced verbosity in production
-    if (import.meta.env.DEV || isPreview) {
-      console.log('Focus changed to:', 
-        document.activeElement?.tagName, 
-        document.activeElement?.id ? `#${document.activeElement.id}` : '',
-        '- User initiated:', event.isTrusted ? 'Yes' : 'No'
-      );
+    const now = Date.now();
+    // Only log if enough time has passed since last log
+    if (now - lastFocusLogTimestamp > FOCUS_LOG_INTERVAL) {
+      lastFocusLogTimestamp = now;
+      const isPreview = window.location.hostname.includes('lovableproject');
+      // Log focus events but with reduced verbosity in production
+      if (import.meta.env.DEV || isPreview) {
+        console.log('Focus changed to:', 
+          document.activeElement?.tagName, 
+          document.activeElement?.id ? `#${document.activeElement.id}` : '',
+          '- User initiated:', event.isTrusted ? 'Yes' : 'No'
+        );
+      }
     }
   });
   
-  // Special handling for preview environment
+  // Special handling for preview environment - avoid extra redraws
   if (window.location.hostname.includes('lovableproject')) {
     console.log('Running in Lovable preview environment - applying preview optimizations');
     
-    // Force layout recalculation after a short delay
+    // Only do this on initial load, not on subsequent interactions
     window.addEventListener('DOMContentLoaded', () => {
-      setTimeout(() => {
-        document.body.style.opacity = '0.99';
-        requestAnimationFrame(() => {
-          document.body.style.opacity = '1';
-        });
-      }, 200);
-    });
+      // Use a single RAF instead of opacity toggling
+      requestAnimationFrame(() => {
+        document.body.classList.add('preview-optimized');
+      });
+    }, { once: true });
   }
   
-  // Track autofocus elements
+  // Track autofocus elements - only once on initial load
   window.addEventListener('DOMContentLoaded', () => {
     const autofocusElements = document.querySelectorAll('[autofocus]');
     console.log(`Found ${autofocusElements.length} elements with autofocus attribute`);
     if (autofocusElements.length > 1) {
       console.warn('Multiple autofocus elements detected, this may cause focus conflicts');
     }
+  }, { once: true });
+  
+  // Improved visibility change handling to prevent unnecessary refresh cycles
+  document.addEventListener('visibilitychange', () => {
+    const isVisible = document.visibilityState === 'visible';
+    console.log(`[App] Page visibility changed: ${isVisible ? 'active' : 'background'}`);
+    
+    // Don't trigger any refreshes or validations on visibility change
+    // We'll let the periodic checks handle those if needed
   });
 }
