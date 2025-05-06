@@ -3,7 +3,6 @@ import React, { useMemo } from 'react';
 import { Section } from '@/components/shared/Section';
 import SectionTitle from '@/components/shared/SectionTitle';
 import KeyPriorities from './KeyPriorities';
-import ImplementationRoadmap from './ImplementationRoadmap';
 import ExpectedImpact from './ExpectedImpact';
 import SuccessMetrics from './SuccessMetrics';
 import GnomeImage from '@/components/common/GnomeImage';
@@ -54,9 +53,6 @@ const StrategicRecommendationsSection: React.FC<StrategicRecommendationsSectionP
 
         {/* Key Priorities Section */}
         <KeyPriorities recommendations={recommendations} />
-        
-        {/* Implementation Roadmap */}
-        <ImplementationRoadmap recommendations={recommendations} />
         
         {/* Expected Impact */}
         <ExpectedImpact reportData={reportData} />
