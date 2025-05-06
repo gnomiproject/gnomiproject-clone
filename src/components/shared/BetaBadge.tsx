@@ -9,14 +9,18 @@ import {
 
 interface BetaBadgeProps {
   className?: string;
+  sticky?: boolean;
 }
 
-export const BetaBadge: React.FC<BetaBadgeProps> = ({ className }) => {
+export const BetaBadge: React.FC<BetaBadgeProps> = ({ className, sticky = false }) => {
+  const baseClasses = "inline-block bg-teal-500 text-white px-2 py-0.5 text-xs font-bold rounded cursor-help print:hidden";
+  const stickyClasses = sticky ? "fixed bottom-6 right-6 z-10 shadow-md px-3 py-1 text-sm animate-pulse" : "ml-2 align-super";
+
   return (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <div className={`inline-block bg-teal-500 text-white px-2 py-0.5 text-xs font-bold rounded ml-2 align-super cursor-help print:hidden ${className || ''}`}>
+          <div className={`${baseClasses} ${stickyClasses} ${className || ''}`}>
             BETA
           </div>
         </TooltipTrigger>
