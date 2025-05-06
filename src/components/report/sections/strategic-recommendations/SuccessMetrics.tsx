@@ -41,21 +41,20 @@ const SuccessMetrics: React.FC<SuccessMetricsProps> = ({ reportData }) => {
       color: "purple"
     },
     {
-      category: "Member Experience",
+      category: "Risk Factors",
       metrics: [
-        "Care navigation utilization",
-        "Digital health engagement",
-        "Time to appointment",
-        "Access to care metrics"
+        "Concurrent Clinical Risk Score",
+        "Prospective Clinical Risk Score",
+        "Emerging Risk Indicators",
+        "SDOH Risk Factors"
       ],
-      color: "orange"
+      color: "amber"
     }
   ];
 
   return (
-    <Card className="p-6">
-      <div className="flex items-center gap-3 mb-4">
-        <Check className="h-6 w-6 text-purple-600" />
+    <Card className="p-6 shadow-sm">
+      <div className="mb-4">
         <h3 className="text-xl font-semibold">Success Metrics</h3>
       </div>
       
@@ -79,26 +78,24 @@ const SuccessMetrics: React.FC<SuccessMetricsProps> = ({ reportData }) => {
             <h4 className={`font-medium text-${category.color}-700 text-lg mb-3`}>
               {category.category}
             </h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
-              {category.metrics.map((metric, idx) => (
-                <div key={idx} className="flex items-start gap-2">
-                  <div className={`mt-1 flex-shrink-0 w-4 h-4 rounded-full bg-${category.color}-100 flex items-center justify-center`}>
-                    <div className={`w-2 h-2 rounded-full bg-${category.color}-500`}></div>
-                  </div>
-                  <span className="text-gray-700">{metric}</span>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {category.metrics.map((metric, mIndex) => (
+                <div key={mIndex} className="flex items-start gap-2">
+                  <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                  <span>{metric}</span>
                 </div>
               ))}
             </div>
           </div>
         ))}
       </div>
-      
-      <div className="mt-6 bg-gray-50 p-4 rounded-lg border border-gray-100">
-        <h4 className="font-medium text-gray-700 mb-2">Recommended Tracking Cadence</h4>
-        <p className="text-gray-600">
-          Monthly: Cost trends, care gap closure<br />
-          Quarterly: Utilization patterns, program engagement<br />
-          Annually: Full program impact assessment and strategic adjustment
+
+      <div className="mt-8 bg-gray-50 p-5 rounded-lg border border-gray-200">
+        <h4 className="font-semibold mb-3">Recommended Tracking Cadence</h4>
+        <p className="text-sm text-gray-700 space-y-1">
+          <strong className="block">Monthly:</strong> Utilization trends and cost indicators<br />
+          <strong className="block">Quarterly:</strong> Comprehensive review of all metrics and program adjustments<br />
+          <strong className="block">Annually:</strong> Full program impact assessment and strategic adjustment
         </p>
       </div>
       
