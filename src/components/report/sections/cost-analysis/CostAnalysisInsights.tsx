@@ -42,10 +42,14 @@ const CostAnalysisInsights = ({ costAnalysis }: CostAnalysisInsightsProps) => {
             
             // Check if this metric information is already covered in findings
             const isDuplicate = [...normalizedFindings].some(finding => {
-              return finding.includes(metricText) || 
-                     metricText.includes(finding) ||
-                     // Check specifically for the metric name in findings
-                     finding.includes(metric.name.toLowerCase());
+              // Ensure finding is a string before using string methods
+              if (typeof finding === 'string') {
+                return finding.includes(metricText) || 
+                       metricText.includes(finding) ||
+                       // Check specifically for the metric name in findings
+                       (typeof metric.name === 'string' && finding.includes(metric.name.toLowerCase()));
+              }
+              return false;
             });
             
             return !isDuplicate;
