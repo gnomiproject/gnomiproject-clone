@@ -8,6 +8,7 @@ import ArchetypeIdentityCard from './archetype-profile/ArchetypeIdentityCard';
 import KeyCharacteristicsList from './archetype-profile/KeyCharacteristicsList';
 import IndustryComposition from './archetype-profile/IndustryComposition';
 import ProfileNavigation from './archetype-profile/ProfileNavigation';
+import DistinctiveMetrics from './archetype-profile/DistinctiveMetrics';
 import { Card } from '@/components/ui/card';
 
 export interface ArchetypeProfileSectionProps {
@@ -91,36 +92,12 @@ const ArchetypeProfileSectionBase: React.FC<ArchetypeProfileSectionProps> = ({ a
           />
         )}
         
-        {/* Top Distinctive Metrics */}
+        {/* Top Distinctive Metrics - Using our improved component */}
         {topMetrics.length > 0 && (
-          <Card className="p-6">
-            <h3 className="text-xl font-semibold mb-4">Key Distinctive Metrics</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {topMetrics.map((metric, index) => (
-                <div key={index} className="border rounded-lg p-4">
-                  <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-medium text-gray-900">{metric.metric}</h4>
-                    <span className="text-xs px-2 py-1 rounded bg-gray-100 text-gray-700">{metric.category}</span>
-                  </div>
-                  <div className="flex justify-between mb-1">
-                    <span className="text-sm text-gray-500">Archetype value</span>
-                    <span className="font-semibold text-right">{metric.archetype_value.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between mb-2">
-                    <span className="text-sm text-gray-500">Average</span>
-                    <span className="text-right">{metric.archetype_average.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-end">
-                    <div 
-                      className={`text-sm font-medium ${metric.difference > 0 ? 'text-blue-600' : 'text-amber-600'}`}
-                    >
-                      {metric.difference > 0 ? '+' : ''}{metric.difference.toFixed(1)}%
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Card>
+          <DistinctiveMetrics 
+            metrics={topMetrics} 
+            archetypeId={archetypeId}
+          />
         )}
         
         {/* Industry Composition */}
