@@ -13,10 +13,13 @@ const BehavioralHealthConditions = ({ reportData, averageData }: BehavioralHealt
   // Check if we have valid data
   if (!reportData) return null;
 
-  // Define behavioral health conditions - removed Anxiety, Major Depression, and PTSD
+  // Define behavioral health conditions
   const conditions = [
     { id: 'Dise_Mental Health Disorder Prevalence', label: 'Mental Health Disorders' },
     { id: 'Dise_Substance Use Disorder Prevalence', label: 'Substance Use Disorders' },
+    { id: 'Dise_Anxiety Prevalence', label: 'Anxiety' },
+    { id: 'Dise_Major Recurrent Depression Prevalence', label: 'Major Depression' },
+    { id: 'Dise_PTSD Prevalence', label: 'PTSD' },
   ];
 
   // Determine if this archetype has higher than average behavioral health prevalence
