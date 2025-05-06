@@ -26,9 +26,16 @@ const ReportSections: React.FC<ReportSectionsProps> = ({
   userData,
   averageData
 }) => {
+  // Debug log to check if ReportSections is being rendered with correct data
+  console.log('[ReportSections] Rendering with data:', { 
+    hasUserData: !!userData,
+    hasReportData: !!reportData,
+    reportDataName: reportData?.name || reportData?.archetype_name
+  });
+
   return (
     <>
-      {/* Introduction Section */}
+      {/* Introduction Section - Making sure it appears first */}
       <ErrorBoundary>
         <HomeIntroduction 
           userData={userData}

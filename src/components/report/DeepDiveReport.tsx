@@ -36,9 +36,11 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Add sticky beta badge at the root level */}
-      <BetaBadge sticky={true} />
+    <div className="min-h-screen bg-gray-50 relative">
+      {/* Add sticky beta badge at the root level with high z-index */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <BetaBadge sticky={true} />
+      </div>
       
       <ReportContainer 
         reportData={reportData}
