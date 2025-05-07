@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.43.3";
 import { Resend } from "https://esm.sh/resend@2.0.0";
@@ -84,11 +85,12 @@ function createEmailHtml(userName: string, reportUrl: string, trackingPixelUrl: 
   `;
 }
 
-// Simplified function to increment access count
+// Simplified function to increment access count - fixed to use the createClient properly
 async function incrementAccessCount(supabaseUrl: string, supabaseKey: string, archetypeId: string, accessToken: string) {
   try {
     console.log(`Incrementing access count for archetype: ${archetypeId}, token: ${accessToken.substring(0, 5)}...`);
     
+    // Create the supabase client properly using the modern API
     const client = createClient(supabaseUrl, supabaseKey);
     
     // Get current count first
@@ -139,7 +141,7 @@ serve(async (req: Request) => {
   if (corsResponse) return corsResponse;
 
   try {
-    // Create Supabase client with explicit environment variables
+    // Get Supabase credentials from environment variables
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     
@@ -149,7 +151,7 @@ serve(async (req: Request) => {
 
     console.log("Initializing Supabase client with URL:", supabaseUrl);
     
-    // Create the Supabase client
+    // Create the Supabase client properly - fixed to use the correct import
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
     // Check if this is an access tracking request

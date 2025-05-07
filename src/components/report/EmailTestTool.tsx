@@ -8,7 +8,8 @@ import { Separator } from '@/components/ui/separator';
 import { Loader2 } from 'lucide-react';
 
 const EmailTestTool: React.FC = () => {
-  const [recipientEmail, setRecipientEmail] = useState('');
+  // Set the default email to gnomi@onenomi.com
+  const [recipientEmail, setRecipientEmail] = useState('gnomi@onenomi.com');
   const { sendTestEmail, processPendingReports, isSending, lastResult } = useEmailService();
   
   const handleSendTestEmail = async (e: React.FormEvent) => {
