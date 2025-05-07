@@ -56,7 +56,7 @@ serve(async (req: Request) => {
     console.log(`Sending test email to ${destinationEmail}`);
     
     const result = await resend.emails.send({
-      from: "Test <onboarding@resend.dev>",
+      from: "Gnomi <gnomi@onenomi.com>",
       to: [destinationEmail],
       subject: "Resend Test Email",
       html: `

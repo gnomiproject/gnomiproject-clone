@@ -17,6 +17,7 @@ const ReportView = lazy(() => import('@/pages/ReportView'));
 const ReportViewer = lazy(() => import('@/pages/ReportViewer'));
 const AdminReportViewer = lazy(() => import('@/pages/AdminReportViewer'));
 const AdminReportDebug = lazy(() => import('@/pages/AdminReportDebug'));
+const ReportEmailDiagnostic = lazy(() => import('@/components/report/ReportEmailDiagnostic'));
 const ReactQueryDevtools = lazy(() => 
   import('@tanstack/react-query-devtools').then(module => ({
     default: module.ReactQueryDevtools
@@ -115,6 +116,13 @@ function App() {
             <Route path="/admin/debug/:archetypeId" element={
               <Suspense fallback={<PageLoader />}>
                 <AdminReportDebug />
+              </Suspense>
+            } />
+            
+            {/* Email diagnostics route */}
+            <Route path="/admin/email-diagnostics" element={
+              <Suspense fallback={<PageLoader />}>
+                <ReportEmailDiagnostic />
               </Suspense>
             } />
             
