@@ -119,10 +119,22 @@ function App() {
               </Suspense>
             } />
             
-            {/* Email diagnostics route */}
+            {/* Email diagnostics routes - both with and without parameters */}
             <Route path="/admin/email-diagnostics" element={
               <Suspense fallback={<PageLoader />}>
                 <ReportEmailDiagnostic />
+              </Suspense>
+            } />
+            
+            <Route path="/admin/report-diagnostics" element={
+              <Suspense fallback={<PageLoader />}>
+                <ReportEmailDiagnostic initialTab="report-diagnostic" />
+              </Suspense>
+            } />
+            
+            <Route path="/admin/report-diagnostics/:archetypeId/:token" element={
+              <Suspense fallback={<PageLoader />}>
+                <ReportEmailDiagnostic initialTab="report-diagnostic" />
               </Suspense>
             } />
             
