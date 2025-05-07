@@ -127,26 +127,29 @@ export async function processPendingReports(
           // Continue with default name
         }
         
-        // Create email content - no tracking pixel for now
+        // Create email content - no tracking pixel for deliverability
         const emailHtml = createEmailHtml(recipientName, reportUrl);
+        
+        // Create a simple, direct subject line without special characters
+        const emailSubject = `Healthcare Report Now Available`;
         
         // Log all parameters before sending email
         log(`Preparing email with parameters:
           TO: ${report.email}
           FROM: Gnomi <gnomi@onenomi.com>
-          SUBJECT: Your ${archetypeName} Report
+          SUBJECT: ${emailSubject}
         `);
         
         // Send the email with minimal formatting
         const emailResult = await resend.emails.send({
           from: "Gnomi <gnomi@onenomi.com>",
           to: [report.email],
-          subject: `Your ${archetypeName} Report`,
+          subject: emailSubject,
           html: emailHtml,
-          text: `Hello ${recipientName}, your ${archetypeName} report is now available. Access it here: ${reportUrl}`,
+          text: `Hello ${recipientName}, your healthcare report is now available. Please check your account portal for access. If you have questions, please contact support.`,
         });
         
-        log(`Email send result:`, JSON.stringify(emailResult));
+        log(`Email send result: ${JSON.stringify(emailResult)}`);
         
         if (!emailResult || emailResult.error) {
           throw new Error(`Resend API error: ${emailResult?.error?.message || "Unknown error"}`);
