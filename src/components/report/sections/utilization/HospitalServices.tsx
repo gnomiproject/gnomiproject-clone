@@ -29,22 +29,22 @@ const HospitalServices = ({
   const chartData = [
     {
       name: 'Inpatient Admits',
-      'Your Population': reportData["Util_Inpatient Admits per 1k Members"] || 0,
+      'Your Archetype': reportData["Util_Inpatient Admits per 1k Members"] || 0,
       'Archetype Average': averageData["Util_Inpatient Admits per 1k Members"] || 0
     },
     {
       name: 'Inpatient Days',
-      'Your Population': reportData["Util_Inpatient Days per 1k Members"] || 0,
+      'Your Archetype': reportData["Util_Inpatient Days per 1k Members"] || 0,
       'Archetype Average': averageData["Util_Inpatient Days per 1k Members"] || 0
     },
     {
       name: 'Observation Stays',
-      'Your Population': reportData["Util_Observational Stays per 1k Members"] || 0,
+      'Your Archetype': reportData["Util_Observational Stays per 1k Members"] || 0,
       'Archetype Average': averageData["Util_Observational Stays per 1k Members"] || 0
     },
     {
       name: 'Outpatient Surgeries',
-      'Your Population': reportData["Util_Outpatient Surgeries per 1k Members"] || 0,
+      'Your Archetype': reportData["Util_Outpatient Surgeries per 1k Members"] || 0,
       'Archetype Average': averageData["Util_Outpatient Surgeries per 1k Members"] || 0
     }
   ];
@@ -76,7 +76,7 @@ const HospitalServices = ({
               />
               <Tooltip formatter={(value) => formatNumber(value as number, 'number', 0)} />
               <Legend />
-              <Bar dataKey="Your Population" fill="#3b82f6" />
+              <Bar dataKey="Your Archetype" fill="#3b82f6" />
               <Bar dataKey="Archetype Average" fill="#94a3b8" />
             </BarChart>
           </ResponsiveContainer>
