@@ -6,7 +6,6 @@
 import React from 'react';
 import { ArchetypeDetailedData } from '@/types/archetype';
 import DeepDiveSwotAnalysis from './DeepDiveSwotAnalysis';
-import SectionTitle from '@/components/shared/SectionTitle';
 
 export interface SwotAnalysisProps {
   reportData?: ArchetypeDetailedData;
@@ -24,9 +23,7 @@ const SwotAnalysis: React.FC<SwotAnalysisProps> = ({ reportData, archetypeData, 
   const data = reportData || archetypeData;
   
   return (
-    <>
-      <DeepDiveSwotAnalysis reportData={data} />
-    </>
+    <DeepDiveSwotAnalysis reportData={data} />
   );
 };
 

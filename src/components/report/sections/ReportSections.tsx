@@ -127,7 +127,7 @@ const ReportSections: React.FC<ReportSectionsProps> = ({
         </Section>
       </ErrorBoundary>
       
-      {/* SWOT Analysis Section */}
+      {/* SWOT Analysis Section - Removed SectionTitle since DeepDiveSwotAnalysis already has one */}
       <ErrorBoundary>
         <Section id="swot-analysis">
           <SwotAnalysis reportData={reportData} />
