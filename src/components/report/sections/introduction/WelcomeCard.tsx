@@ -3,6 +3,7 @@ import React, { useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { getArchetypeColorHex } from '@/data/colors';
 import { ArchetypeId } from '@/types/archetype';
+import WebsiteImage from '@/components/common/WebsiteImage';
 
 interface WelcomeCardProps {
   userName: string;
@@ -43,6 +44,14 @@ const WelcomeCard = ({
   return (
     <Card className="p-6 border border-gray-200 bg-gradient-to-br from-white to-slate-50 shadow-md welcome-card-container">
       <div className="flex flex-col md:flex-row items-start justify-between gap-4">
+        <div className="hidden md:block">
+          <WebsiteImage 
+            type="righthand" 
+            altText="Healthcare Gnome" 
+            className="h-32 w-auto"
+          />
+        </div>
+        
         <div>
           <div className="mb-2">
             <span 

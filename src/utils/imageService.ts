@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 // Common image types used throughout the site
@@ -10,6 +9,7 @@ export type WebsiteImageType =
   | 'magnifying'  // Add alias for backward compatibility
   | 'overlook'
   | 'favicon'
+  | 'righthand'
   | 'logo';
 
 // Fallback image if storage access fails
@@ -31,6 +31,7 @@ const IMAGE_URL_MAP: Record<string, string> = {
   'profile': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_profile.png',
   'favicon': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnomi_favicon.png',
   'logo': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/g.nomi_logo.png',
+  'righthand': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_righthand.png',
 };
 
 /**

@@ -1,4 +1,3 @@
-
 /**
  * Utility for centralized access to gnome images
  * These images should be used across the application for consistency
@@ -21,6 +20,7 @@ export const directImageMap: Record<string, string> = {
   'metrics': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_metrics.png',
   'lefthand': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_lefthand.png',
   'overlook': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_overlook.png',
+  'righthand': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_righthand.png',
 };
 
 // Gnome image types with descriptive names
