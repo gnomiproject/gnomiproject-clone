@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
@@ -183,6 +182,44 @@ const ReportDiagnosticTool: React.FC = () => {
     }
   };
 
+  // New function to directly test sending an email for a specific report
+  const testSendDirectEmailForReport = async (report: any) => {
+    if (!report || !report.email) {
+      toast.error('No valid report data');
+      return;
+    }
+    
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('test-email-direct', {
+        body: { 
+          email: report.email,
+          reportData: {
+            archetypeName: report.archetype_name || "Healthcare Archetype",
+            recipientName: report.name || "there",
+            reportUrl: report.access_url || `https://${new URL(supabase.supabaseUrl).host}/report/${report.archetype_id}/${report.access_token}`
+          }
+        }
+      });
+      
+      if (error) {
+        throw new Error(`Error invoking email test: ${error.message}`);
+      }
+      
+      if (data.success) {
+        toast.success(`Test email sent successfully to ${report.email}`);
+      } else {
+        toast.error(`Failed to send test email: ${data.error || 'Unknown error'}`);
+      }
+    } catch (err: any) {
+      console.error('Error sending test email:', err);
+      toast.error(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Update renderReportData function to add test email button
   const renderReportData = () => {
     if (!reportData) return null;
     
@@ -203,19 +240,35 @@ const ReportDiagnosticTool: React.FC = () => {
                         <strong>Status:</strong> {getStatusBadge(report.status)}
                       </div>
                       <div><strong>Created:</strong> {new Date(report.created_at).toLocaleString()}</div>
+                      <div><strong>Send Attempts:</strong> {report.email_send_attempts || 0}</div>
+                      {report.last_attempt_at && (
+                        <div><strong>Last Attempt:</strong> {new Date(report.last_attempt_at).toLocaleString()}</div>
+                      )}
+                      {report.email_error && (
+                        <div className="text-red-600 mt-1"><strong>Error:</strong> {report.email_error}</div>
+                      )}
                     </div>
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      className="ml-4"
-                      onClick={() => {
-                        setArchetypeId(report.archetype_id);
-                        navigate(`/report-diagnostic/${report.archetype_id}/${report.access_token}`);
-                        // We'll let the useEffect fetch the data
-                      }}
-                    >
-                      View Details
-                    </Button>
+                    <div className="flex flex-col space-y-2">
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => {
+                          setArchetypeId(report.archetype_id);
+                          navigate(`/report-diagnostic/${report.archetype_id}/${report.access_token}`);
+                          // We'll let the useEffect fetch the data
+                        }}
+                      >
+                        View Details
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="default"
+                        onClick={() => testSendDirectEmailForReport(report)}
+                        className="bg-blue-500 hover:bg-blue-600"
+                      >
+                        Test Send Email
+                      </Button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -248,6 +301,13 @@ const ReportDiagnosticTool: React.FC = () => {
                 <div><strong>Last Accessed:</strong> {new Date(reportData.last_accessed).toLocaleString()}</div>
               )}
               <div><strong>Access Count:</strong> {reportData.access_count || 0}</div>
+              <div><strong>Send Attempts:</strong> {reportData.email_send_attempts || 0}</div>
+              {reportData.last_attempt_at && (
+                <div><strong>Last Attempt:</strong> {new Date(reportData.last_attempt_at).toLocaleString()}</div>
+              )}
+              {reportData.email_error && (
+                <div className="text-red-600"><strong>Error:</strong> {reportData.email_error}</div>
+              )}
               {reportData.access_url && (
                 <div className="mt-2">
                   <strong>Access URL:</strong> 
@@ -262,6 +322,14 @@ const ReportDiagnosticTool: React.FC = () => {
                 </div>
               )}
             </div>
+            <Button
+              size="sm"
+              variant="default"
+              onClick={() => testSendDirectEmailForReport(reportData)}
+              className="bg-blue-500 hover:bg-blue-600"
+            >
+              Test Send Email
+            </Button>
           </div>
           <div className="mt-4 space-x-2">
             <Button 

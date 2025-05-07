@@ -15,6 +15,7 @@ export async function processPendingReports(
   
   try {
     // Create a Supabase client with the correct parameters
+    // Fix: Updated the client initialization to use the latest supported syntax in Deno
     const supabase = createClient(supabaseUrl, supabaseServiceKey, {
       auth: {
         persistSession: false,
