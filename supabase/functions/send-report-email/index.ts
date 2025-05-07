@@ -85,21 +85,20 @@ function createEmailHtml(userName: string, reportUrl: string, trackingPixelUrl: 
   `;
 }
 
-// Simplified function to increment access count - fixed to use the createClient properly
 async function incrementAccessCount(supabaseUrl: string, supabaseKey: string, archetypeId: string, accessToken: string) {
   try {
     console.log(`Incrementing access count for archetype: ${archetypeId}, token: ${accessToken.substring(0, 5)}...`);
     
-    // Create the supabase client properly using the modern API
-    const client = createClient(supabaseUrl, supabaseKey);
+    // Create a fresh Supabase client for this operation
+    const supabase = createClient(supabaseUrl, supabaseKey);
     
     // Get current count first
-    const { data: currentData, error: selectError } = await client
+    const { data: currentData, error: selectError } = await supabase
       .from("report_requests")
       .select("access_count")
       .eq("archetype_id", archetypeId)
       .eq("access_token", accessToken)
-      .single();
+      .maybeSingle();
       
     if (selectError) {
       console.error("Error fetching current access count:", selectError);
@@ -110,7 +109,7 @@ async function incrementAccessCount(supabaseUrl: string, supabaseKey: string, ar
     const currentCount = currentData?.access_count || 0;
     const newCount = currentCount + 1;
     
-    const { data, error } = await client
+    const { data, error } = await supabase
       .from("report_requests")
       .update({
         access_count: newCount,
@@ -151,7 +150,7 @@ serve(async (req: Request) => {
 
     console.log("Initializing Supabase client with URL:", supabaseUrl);
     
-    // Create the Supabase client properly - fixed to use the correct import
+    // Create a fresh Supabase client for the main request
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
     // Check if this is an access tracking request
@@ -199,6 +198,17 @@ serve(async (req: Request) => {
           }
         }
       );
+    }
+    
+    // Parse the JSON body if it exists
+    let requestBody = {};
+    if (req.method === "POST") {
+      try {
+        requestBody = await req.json();
+        console.log("Received request body:", JSON.stringify(requestBody));
+      } catch (e) {
+        console.log("No JSON body or invalid JSON");
+      }
     }
     
     console.log("Fetching pending report requests");
