@@ -87,16 +87,9 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
     }, 300);
   }, [archetypeId, archetypeName, familyName, shortDescription, userData, userName, keyFindings]);
   
-  // Log component rendering outside JSX
-  console.log('[HomeIntroduction] Rendering WelcomeCard');
-  console.log('[HomeIntroduction] Rendering ReportIntroduction');
-  console.log('[HomeIntroduction] Rendering SectionTitle');
-  console.log('[HomeIntroduction] Rendering ArchetypeInsightsCard');
-  console.log('[HomeIntroduction] Rendering welcome section with gnome');
-  
   return (
-    <div className="mt-2">
-      {/* Main report introduction */}
+    <div className="mt-1">
+      {/* Main report introduction with reduced top margin */}
       <div data-section="report-introduction">
         <ReportIntroduction 
           userData={userData} 
@@ -108,12 +101,12 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
         />
       </div>
       
-      {/* Introduction title - Positioned after the intro */}
+      {/* Introduction title - Positioned after the intro with reduced margin */}
       <div data-section="introduction-title">
         <SectionTitle 
           title="Introduction" 
           subtitle={`Welcome to your ${archetypeName} Deep Dive Report`} 
-          className="mt-8"
+          className="mt-6"
         />
       </div>
       

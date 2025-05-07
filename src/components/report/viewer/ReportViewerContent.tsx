@@ -3,7 +3,6 @@ import React from 'react';
 import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import ReportContainer from '@/components/report/components/ReportContainer';
 import DeepDiveReport from '@/components/report/DeepDiveReport';
-import FixedHeader from '@/components/layout/FixedHeader';
 
 interface ReportViewerContentProps {
   tokenStatus: 'valid' | 'checking' | 'warning' | 'error' | 'grace-period';
@@ -52,11 +51,8 @@ const ReportViewerContent: React.FC<ReportViewerContentProps> = ({
   
   return (
     <ErrorBoundary onError={onError} name="Report Viewer Content">
-      {/* Always show FixedHeader, but hide nav links if hideNavbar is true */}
-      <FixedHeader hideNavLinks={hideNavbar} />
-      
-      {/* Add padding to the top to account for the fixed header */}
-      <div className="pt-16">
+      {/* Add minimal top padding to account for the fixed header */}
+      <div className="pt-12">
         <DeepDiveReport
           reportData={reportData}
           userData={userData}

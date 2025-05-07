@@ -21,7 +21,7 @@ const FixedHeader: React.FC<FixedHeaderProps> = ({
   
   return (
     <header className={cn(
-      "fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm shadow-sm py-4 px-6",
+      "fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm shadow-sm py-3 px-6",
       className
     )}>
       <div className="container mx-auto flex items-center justify-between">
@@ -37,33 +37,31 @@ const FixedHeader: React.FC<FixedHeaderProps> = ({
           </Link>
         </div>
         
-        {/* Navigation */}
-        {!hideNavLinks && (
-          <NavigationMenu>
-            <NavigationMenuList>
-              <NavigationMenuItem>
-                <Link to="/" className={navigationMenuTriggerStyle()}>
-                  Home
-                </Link>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <Link to="/assessment" className={navigationMenuTriggerStyle()}>
-                  Assessment
-                </Link>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <Link to="/insights" className={navigationMenuTriggerStyle()}>
-                  Insights
-                </Link>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <Link to="/about" className={navigationMenuTriggerStyle()}>
-                  About
-                </Link>
-              </NavigationMenuItem>
-            </NavigationMenuList>
-          </NavigationMenu>
-        )}
+        {/* Navigation - Always show navigation links regardless of hideNavLinks prop */}
+        <NavigationMenu>
+          <NavigationMenuList>
+            <NavigationMenuItem>
+              <Link to="/" className={navigationMenuTriggerStyle()}>
+                Home
+              </Link>
+            </NavigationMenuItem>
+            <NavigationMenuItem>
+              <Link to="/assessment" className={navigationMenuTriggerStyle()}>
+                Assessment
+              </Link>
+            </NavigationMenuItem>
+            <NavigationMenuItem>
+              <Link to="/insights" className={navigationMenuTriggerStyle()}>
+                Insights
+              </Link>
+            </NavigationMenuItem>
+            <NavigationMenuItem>
+              <Link to="/about" className={navigationMenuTriggerStyle()}>
+                About
+              </Link>
+            </NavigationMenuItem>
+          </NavigationMenuList>
+        </NavigationMenu>
       </div>
     </header>
   );
