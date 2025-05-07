@@ -49,20 +49,23 @@ const WelcomeCard = ({
               className="inline-block px-3 py-1 text-xs font-medium rounded-full"
               style={{ backgroundColor: `${archetypeColor}20`, color: archetypeColor }}
             >
-              Archetype {archetypeId.toUpperCase()}
+              Archetype {archetypeId.toLowerCase()}
             </span>
           </div>
           
           <h2 className="text-xl font-semibold mb-1">
-            Welcome, <span className="text-primary">{userName}</span>
+            Welcome, <span style={{ color: archetypeColor }}>{userName}</span>
           </h2>
           
           <p className="text-gray-700">
-            We've analyzed your organization's health profile and matched you with the <strong>{archetypeName}</strong> archetype.
+            We've analyzed your organization's health profile and matched you with the <strong style={{ color: archetypeColor }}>{archetypeName}</strong> archetype.
           </p>
           
           <div className="mt-3 flex items-center flex-wrap gap-2">
-            <span className="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary font-medium">
+            <span 
+              className="inline-flex items-center px-3 py-1 rounded-full font-medium"
+              style={{ backgroundColor: `${archetypeColor}20`, color: archetypeColor }}
+            >
               {matchPercentage}% match
             </span>
             
