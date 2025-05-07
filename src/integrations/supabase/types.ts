@@ -914,6 +914,7 @@ export type Database = {
           last_accessed: string | null
           name: string | null
           organization: string | null
+          primary: number
           session_id: string | null
           status: string | null
         }
@@ -933,6 +934,7 @@ export type Database = {
           last_accessed?: string | null
           name?: string | null
           organization?: string | null
+          primary?: number
           session_id?: string | null
           status?: string | null
         }
@@ -952,6 +954,7 @@ export type Database = {
           last_accessed?: string | null
           name?: string | null
           organization?: string | null
+          primary?: number
           session_id?: string | null
           status?: string | null
         }

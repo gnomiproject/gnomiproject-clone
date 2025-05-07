@@ -91,7 +91,7 @@ serve(async (req: Request) => {
   if (corsResponse) return corsResponse;
 
   try {
-    // Create Supabase client
+    // Create Supabase client - FIXED: Properly create the Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     
@@ -99,6 +99,7 @@ serve(async (req: Request) => {
       throw new Error('Missing Supabase URL or service role key');
     }
 
+    // Create the Supabase client correctly
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
     // Check if this is an access tracking request
@@ -109,7 +110,7 @@ serve(async (req: Request) => {
       const reportId = pathParts[pathParts.length - 2];
       const accessToken = pathParts[pathParts.length - 1];
       
-      // Update access count and last accessed timestamp
+      // Update access count and last accessed timestamp using the correct API
       const { error: updateError } = await supabase
         .from('report_requests')
         .update({
