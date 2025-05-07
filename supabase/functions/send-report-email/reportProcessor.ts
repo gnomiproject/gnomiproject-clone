@@ -82,6 +82,19 @@ export async function processPendingReports(
       try {
         console.log(`Processing report: ${report.id} for ${report.email}`);
         
+        // Update attempts tracking in the database
+        const { error: updateAttemptError } = await supabase
+          .from("report_requests")
+          .update({ 
+            email_send_attempts: (report.email_send_attempts || 0) + 1,
+            last_attempt_at: new Date().toISOString()
+          })
+          .eq("id", report.id);
+          
+        if (updateAttemptError) {
+          console.warn(`Warning: Failed to update email_send_attempts: ${updateAttemptError.message}`);
+        }
+        
         // Access the stored URL or generate it if not available
         let reportUrl = report.access_url;
         if (!reportUrl) {
@@ -122,8 +135,6 @@ export async function processPendingReports(
           }
         }
         
-        console.log(`Sending email for ${archetypeName} to ${report.email}`);
-        
         // Create email content
         const emailHtml = createEmailHtml(report.name || "there", reportUrl, trackingPixel);
         
@@ -133,34 +144,69 @@ export async function processPendingReports(
           throw new Error("Missing RESEND_API_KEY environment variable");
         }
         
-        // Send the actual email
+        // Log email parameters before sending
+        console.log(`SENDING EMAIL with parameters:
+          TO: ${report.email}
+          FROM: Gnomi <gnomi@onenomi.com>
+          SUBJECT: Your ${archetypeName} Deep Dive Report is Ready
+          ARCHETYPE: ${archetypeName}
+          REPORT_URL: ${reportUrl}
+          TRACKING_URL: ${trackingPixel}
+        `);
+        
+        // Send the actual email - UPDATED FROM ADDRESS
         const emailResult = await resend.emails.send({
-          from: "Healthcare Reports <reports@onenomi.com>",
+          from: "Gnomi <gnomi@onenomi.com>",
           to: [report.email],
           subject: `Your ${archetypeName} Deep Dive Report is Ready`,
           html: emailHtml
         });
         
-        console.log(`Email sent to ${report.email}, result:`, JSON.stringify(emailResult));
+        console.log(`Email send result:`, JSON.stringify(emailResult));
         
-        // Update the report status
+        if (!emailResult || emailResult.error) {
+          throw new Error(`Resend API error: ${emailResult?.error?.message || "Unknown error"}`);
+        }
+        
+        // Update the report status and record the email ID
         const { error: updateError } = await supabase
           .from("report_requests")
-          .update({ status: "active" })
+          .update({ 
+            status: "active",
+            email_id: emailResult.id,
+            email_sent_at: new Date().toISOString()
+          })
           .eq("id", report.id);
           
         if (updateError) {
           throw new Error(`Error updating report status: ${updateError.message}`);
         }
         
+        console.log(`Successfully sent email for report ${report.id} with Resend ID: ${emailResult.id}`);
+        
         results.push({
           id: report.id,
           email: report.email,
           status: "processed",
+          email_id: emailResult.id,
           url: reportUrl
         });
       } catch (reportError) {
         console.error(`Error processing report ${report.id}:`, reportError);
+        
+        // Update the report with error information
+        try {
+          await supabase
+            .from("report_requests")
+            .update({
+              email_error: reportError.message,
+              email_error_at: new Date().toISOString()
+            })
+            .eq("id", report.id);
+        } catch (errorUpdateError) {
+          console.error("Failed to update error information:", errorUpdateError);
+        }
+        
         results.push({
           id: report.id,
           email: report.email,
