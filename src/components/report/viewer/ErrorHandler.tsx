@@ -40,9 +40,9 @@ const ErrorHandler: React.FC<ErrorHandlerProps> = ({
     return (
       <ReportError
         title="Invalid Report ID"
-        description={`The report ID "${rawArchetypeId}" is not valid.`}
-        action={() => navigate('/insights')}
-        actionText="Go to Insights"
+        message={`The report ID "${rawArchetypeId}" is not valid.`}
+        actionLabel="Go to Insights"
+        onAction={() => navigate('/insights')}
       />
     );
   }
@@ -52,15 +52,15 @@ const ErrorHandler: React.FC<ErrorHandlerProps> = ({
     return (
       <ReportError
         title="Access Denied"
-        description={
+        message={
           token
             ? "Your access token is invalid or has expired."
             : "No access token was provided. You need a valid token to view this report."
         }
-        action={onRequestNewToken}
-        actionText="Request Access"
+        actionLabel="Request Access"
+        onAction={onRequestNewToken}
         secondaryAction={onRetry}
-        secondaryActionText="Try Again"
+        secondaryActionLabel="Try Again"
       />
     );
   }
@@ -70,9 +70,9 @@ const ErrorHandler: React.FC<ErrorHandlerProps> = ({
     return (
       <ReportError
         title="Error Loading Report"
-        description={reportError.message || "An unexpected error occurred."}
-        action={onRetry}
-        actionText="Try Again"
+        message={reportError.message || "An unexpected error occurred."}
+        actionLabel="Try Again"
+        onAction={onRetry}
       />
     );
   }

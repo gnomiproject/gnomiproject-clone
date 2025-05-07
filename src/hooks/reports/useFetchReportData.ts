@@ -11,9 +11,9 @@ export const fetchTokenAccess = async (archetypeId: string, token: string) => {
   try {
     console.log(`[fetchTokenAccess] Validating token for ${archetypeId}`);
     
-    // Check token against report_access table
+    // Check token against report_requests table (not report_access)
     const { data, error } = await supabase
-      .from('report_access')
+      .from('report_requests')
       .select('*')
       .eq('archetype_id', archetypeId)
       .eq('access_token', token)
@@ -26,7 +26,7 @@ export const fetchTokenAccess = async (archetypeId: string, token: string) => {
         debugInfo: {
           timestamp: new Date().toISOString(),
           error: error.message,
-          source: 'report_access table'
+          source: 'report_requests table'
         }
       };
     }
@@ -38,7 +38,7 @@ export const fetchTokenAccess = async (archetypeId: string, token: string) => {
         debugInfo: {
           timestamp: new Date().toISOString(),
           message: 'No matching token found',
-          source: 'report_access table'
+          source: 'report_requests table'
         }
       };
     }
@@ -49,7 +49,7 @@ export const fetchTokenAccess = async (archetypeId: string, token: string) => {
       debugInfo: {
         timestamp: new Date().toISOString(),
         accessFound: true,
-        source: 'report_access table'
+        source: 'report_requests table'
       }
     };
   } catch (error) {
