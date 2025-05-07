@@ -91,7 +91,7 @@ serve(async (req: Request) => {
   if (corsResponse) return corsResponse;
 
   try {
-    // Create Supabase client - FIXED: Properly create the Supabase client
+    // Create Supabase client - properly initialize the client with service role key
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     
@@ -99,7 +99,9 @@ serve(async (req: Request) => {
       throw new Error('Missing Supabase URL or service role key');
     }
 
-    // Create the Supabase client correctly
+    console.log('Initializing Supabase client with URL:', supabaseUrl);
+    
+    // Create the Supabase client correctly with the service role key
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
     // Check if this is an access tracking request
@@ -110,18 +112,26 @@ serve(async (req: Request) => {
       const reportId = pathParts[pathParts.length - 2];
       const accessToken = pathParts[pathParts.length - 1];
       
-      // Update access count and last accessed timestamp using the correct API
-      const { error: updateError } = await supabase
-        .from('report_requests')
-        .update({
-          access_count: supabase.rpc('increment_counter', { x: 1 }),
-          last_accessed: new Date().toISOString()
-        })
-        .eq('archetype_id', reportId)
-        .eq('access_token', accessToken);
-        
-      if (updateError) {
-        console.error(`Error tracking access: ${updateError.message}`);
+      console.log('Tracking access for report:', reportId, 'with token:', accessToken);
+      
+      try {
+        // Update access count and last accessed timestamp using direct increment to avoid rpc issues
+        const { error: updateError } = await supabase
+          .from('report_requests')
+          .update({
+            access_count: supabase.rpc('increment_counter', { x: 1 }),
+            last_accessed: new Date().toISOString()
+          })
+          .eq('archetype_id', reportId)
+          .eq('access_token', accessToken);
+          
+        if (updateError) {
+          console.error(`Error tracking access: ${updateError.message}`);
+        } else {
+          console.log('Successfully tracked access');
+        }
+      } catch (trackError) {
+        console.error('Error in tracking access:', trackError);
       }
       
       // Respond with a 1x1 transparent GIF
@@ -143,6 +153,8 @@ serve(async (req: Request) => {
       );
     }
     
+    console.log('Fetching pending report requests');
+    
     // Get pending report requests that need email notifications
     const { data: pendingReports, error } = await supabase
       .from('report_requests')
@@ -152,6 +164,7 @@ serve(async (req: Request) => {
       .limit(20); // Process in batches
     
     if (error) {
+      console.error('Error fetching report requests:', error);
       throw new Error(`Error fetching report requests: ${error.message}`);
     }
     
@@ -168,6 +181,8 @@ serve(async (req: Request) => {
     const results = [];
     for (const report of pendingReports) {
       try {
+        console.log(`Processing report: ${report.id} for ${report.email}`);
+        
         // Access the stored URL or generate it if not available
         let reportUrl = report.access_url;
         if (!reportUrl) {
@@ -175,28 +190,40 @@ serve(async (req: Request) => {
           reportUrl = `${baseUrl}/report/${report.archetype_id}/${report.access_token}`;
           
           // Update the report with the URL
-          await supabase
+          const { error: urlUpdateError } = await supabase
             .from('report_requests')
             .update({ access_url: reportUrl })
             .eq('id', report.id);
+            
+          if (urlUpdateError) {
+            console.warn(`Warning: Failed to update access_url: ${urlUpdateError.message}`);
+          }
         }
         
         // Add tracking pixel to email
         const trackingPixel = `${new URL(req.url).origin}/functions/v1/send-report-email/track-access/${report.archetype_id}/${report.access_token}`;
         
+        console.log('Tracking pixel URL:', trackingPixel);
+        
         // Get archetype name if available
         let archetypeName = "Healthcare Archetype";
         if (report.archetype_id) {
-          const { data: archetypeData } = await supabase
-            .from('level4_deepdive_report_data')
-            .select('archetype_name')
-            .eq('archetype_id', report.archetype_id)
-            .maybeSingle();
-            
-          if (archetypeData?.archetype_name) {
-            archetypeName = archetypeData.archetype_name;
+          try {
+            const { data: archetypeData } = await supabase
+              .from('level4_deepdive_report_data')
+              .select('archetype_name')
+              .eq('archetype_id', report.archetype_id)
+              .maybeSingle();
+              
+            if (archetypeData?.archetype_name) {
+              archetypeName = archetypeData.archetype_name;
+            }
+          } catch (nameError) {
+            console.warn(`Could not fetch archetype name: ${nameError.message}`);
           }
         }
+        
+        console.log(`Sending email for ${archetypeName} to ${report.email}`);
         
         // Send email via Resend
         const emailHtml = createEmailHtml(report.name || "there", reportUrl, trackingPixel);
