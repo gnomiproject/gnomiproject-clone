@@ -1,6 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.43.3";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { Resend } from "https://esm.sh/resend@2.0.0";
 import { handleTracking } from "./tracking.ts";
 import { createEmailHtml } from "./emailTemplate.ts";
@@ -26,7 +26,7 @@ function handleCors(req: Request) {
 }
 
 serve(async (req: Request) => {
-  console.log("Function called with method:", req.method);
+  console.log(`Function called with method: ${req.method}, URL: ${req.url}`);
   
   // Handle CORS
   const corsResponse = handleCors(req);
@@ -41,8 +41,10 @@ serve(async (req: Request) => {
       throw new Error("Missing Supabase URL or service role key");
     }
 
-    console.log("Initializing Supabase client with URL:", supabaseUrl);
-    console.log("Service key starts with:", supabaseServiceKey.substring(0, 5) + "...");
+    console.log("Environment check:");
+    console.log(`- SUPABASE_URL set: ${!!supabaseUrl}`);
+    console.log(`- SUPABASE_SERVICE_ROLE_KEY set: ${!!supabaseServiceKey} (starts with: ${supabaseServiceKey.substring(0, 5)}...)`);
+    console.log(`- RESEND_API_KEY set: ${!!resendApiKey}`);
     
     // Check if this is an access tracking request
     const url = new URL(req.url);
@@ -63,29 +65,31 @@ serve(async (req: Request) => {
       }
     }
     
-    // Log environment variables (safe parts only)
-    console.log("Environment check:");
-    console.log("- SUPABASE_URL set:", !!supabaseUrl);
-    console.log("- SUPABASE_SERVICE_ROLE_KEY set:", !!supabaseServiceKey);
-    console.log("- RESEND_API_KEY set:", !!resendApiKey);
-    
     // Process pending reports
     console.log("Starting to process pending reports");
     const result = await processPendingReports(supabaseUrl, supabaseServiceKey, resend);
     console.log("Process result:", JSON.stringify(result));
     
     return new Response(
-      JSON.stringify(result),
+      JSON.stringify({
+        ...result,
+        timestamp: new Date().toISOString(),
+        requestId: crypto.randomUUID()
+      }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200,
+        status: result.success === false ? 500 : 200,
       }
     );
   } catch (error) {
     console.error("Error:", error.message);
     console.error("Stack trace:", error.stack);
     return new Response(
-      JSON.stringify({ error: error.message, stack: error.stack }),
+      JSON.stringify({ 
+        error: error.message, 
+        stack: error.stack,
+        timestamp: new Date().toISOString()
+      }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 500,
