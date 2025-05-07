@@ -68,7 +68,7 @@ const ReportSections: React.FC<ReportSectionsProps> = ({
     <>
       {/* Introduction Section - Making sure it appears first and with explicit section class */}
       <ErrorBoundary>
-        <Section id="introduction" className="mb-10 mt-0">
+        <Section id="introduction" className="mb-0 mt-0">
           <HomeIntroduction 
             userData={userData}
             archetypeData={reportData}
