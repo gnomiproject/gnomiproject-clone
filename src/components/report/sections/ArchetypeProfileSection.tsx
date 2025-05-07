@@ -3,7 +3,6 @@ import React, { memo } from 'react';
 import { ArchetypeDetailedData, DistinctiveMetric } from '@/types/archetype';
 import SectionTitle from '@/components/shared/SectionTitle';
 import { Section } from '@/components/shared/Section';
-import GnomePlaceholder from './introduction/GnomePlaceholder';
 import ArchetypeIdentityCard from './archetype-profile/ArchetypeIdentityCard';
 import KeyCharacteristicsList from './archetype-profile/KeyCharacteristicsList';
 import IndustryComposition from './archetype-profile/IndustryComposition';
@@ -64,16 +63,11 @@ const ArchetypeProfileSectionBase: React.FC<ArchetypeProfileSectionProps> = ({ a
   return (
     <Section id="archetype-profile">
       <div className="flex flex-col md:flex-row gap-6 items-start mb-8">
-        <div className="w-full md:w-2/3">
+        <div className="w-full">
           <SectionTitle 
             title="Archetype Profile" 
             subtitle="Detailed insights into the characteristics and behaviors that define your organization's archetype."
           />
-        </div>
-        <div className="w-full md:w-1/3 flex justify-center">
-          <div className="h-24 w-24">
-            <GnomePlaceholder type="magnifying" />
-          </div>
         </div>
       </div>
 
