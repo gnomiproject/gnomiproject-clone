@@ -43,8 +43,8 @@ const WelcomeCard = ({
   
   return (
     <Card className="p-6 border border-gray-200 bg-gradient-to-br from-white to-slate-50 shadow-md welcome-card-container">
-      <div className="flex flex-col md:flex-row items-start justify-between gap-4">
-        <div className="hidden md:block">
+      <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-2">
+        <div className="hidden md:block mr-2">
           <WebsiteImage 
             type="righthand" 
             altText="Healthcare Gnome" 
