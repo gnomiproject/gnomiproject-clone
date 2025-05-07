@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
@@ -9,6 +10,7 @@ import { Loader2, Search, FileSearch, AlertCircle, CheckCircle, RefreshCw } from
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useEmailService } from '@/hooks/useEmailService';
+import { getSupabaseUrl } from '@/integrations/supabase/client';
 
 const ReportDiagnosticTool: React.FC = () => {
   const params = useParams<{ archetypeId?: string, token?: string }>();
@@ -191,13 +193,16 @@ const ReportDiagnosticTool: React.FC = () => {
     
     setIsLoading(true);
     try {
+      // Get the base URL for report access
+      const baseUrl = getSupabaseUrl();
+      
       const { data, error } = await supabase.functions.invoke('test-email-direct', {
         body: { 
           email: report.email,
           reportData: {
             archetypeName: report.archetype_name || "Healthcare Archetype",
             recipientName: report.name || "there",
-            reportUrl: report.access_url || `https://${new URL(supabase.supabaseUrl).host}/report/${report.archetype_id}/${report.access_token}`
+            reportUrl: report.access_url || `${baseUrl}/report/${report.archetype_id}/${report.access_token}`
           }
         }
       });
