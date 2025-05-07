@@ -85,13 +85,42 @@ function createEmailHtml(userName: string, reportUrl: string, trackingPixelUrl: 
   `;
 }
 
+// Direct SQL update function to replace the RPC call for incrementing access count
+async function incrementAccessCount(supabaseUrl: string, supabaseKey: string, archetype_id: string, access_token: string) {
+  try {
+    const client = createClient(supabaseUrl, supabaseKey);
+    
+    // Use a direct SQL query to update the access count and timestamp
+    const { data, error } = await client
+      .from("report_requests")
+      .update({
+        access_count: client.rpc("increment_counter", { x: 1 }),
+        last_accessed: new Date().toISOString()
+      })
+      .eq("archetype_id", archetype_id)
+      .eq("access_token", access_token);
+    
+    if (error) {
+      console.error("Error in incrementAccessCount:", error);
+      return { success: false, error: error.message };
+    }
+    
+    return { success: true, data };
+  } catch (error) {
+    console.error("Exception in incrementAccessCount:", error);
+    return { success: false, error: String(error) };
+  }
+}
+
 serve(async (req: Request) => {
+  console.log("Function called with method:", req.method);
+  
   // Handle CORS
   const corsResponse = handleCors(req);
   if (corsResponse) return corsResponse;
 
   try {
-    // Create Supabase client - ensure correct import and initialization
+    // Create Supabase client with explicit environment variables
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     
@@ -101,7 +130,7 @@ serve(async (req: Request) => {
 
     console.log("Initializing Supabase client with URL:", supabaseUrl);
     
-    // Create the Supabase client with proper configuration
+    // Create the Supabase client
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
     // Check if this is an access tracking request
@@ -115,18 +144,16 @@ serve(async (req: Request) => {
       console.log("Tracking access for report:", reportId, "with token:", accessToken);
       
       try {
-        // Update access count and last accessed timestamp
-        const { error: updateError } = await supabase
-          .from("report_requests")
-          .update({
-            access_count: supabase.rpc("increment_counter", { x: 1 }),
-            last_accessed: new Date().toISOString()
-          })
-          .eq("archetype_id", reportId)
-          .eq("access_token", accessToken);
+        // Use the direct increment function instead of RPC
+        const result = await incrementAccessCount(
+          supabaseUrl,
+          supabaseServiceKey,
+          reportId,
+          accessToken
+        );
           
-        if (updateError) {
-          console.error(`Error tracking access: ${updateError.message}`);
+        if (!result.success) {
+          console.error(`Error tracking access: ${result.error}`);
         } else {
           console.log("Successfully tracked access");
         }
