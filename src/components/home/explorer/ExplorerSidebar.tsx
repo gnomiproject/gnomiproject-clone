@@ -34,10 +34,15 @@ const ExplorerSidebar: React.FC<ExplorerSidebarProps> = ({
   
   if (selectedFamilyId) {
     // Show family details when a family is selected
+    const familyInfo = getFamilyInfo(selectedFamilyId);
+    const archetypes = getAllArchetypeSummaries().filter(
+      a => a.familyId?.toLowerCase() === selectedFamilyId
+    );
+    
     return (
       <FamilyDetailView
-        familyInfo={getFamilyInfo(selectedFamilyId)}
-        archetypes={getAllArchetypeSummaries()}
+        familyInfo={familyInfo}
+        archetypes={archetypes}
         onSelectArchetype={handleArchetypeClick}
       />
     );

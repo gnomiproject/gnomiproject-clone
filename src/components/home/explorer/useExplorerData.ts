@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { healthcareArchetypes } from '@/data/healthcareArchetypes';
 import { useArchetypes } from '@/hooks/useArchetypes';
+import { FAMILY_COLORS } from '@/data/colors';
 
 export const useExplorerData = () => {
   const [renderCount, setRenderCount] = useState(0);
@@ -46,13 +47,25 @@ export const useExplorerData = () => {
     }))
   };
 
+  // Static family descriptions for consistency
+  const familyDescriptions = {
+    a: "Strategists focus on optimizing healthcare delivery through innovative approaches and proactive management strategies. They excel at anticipating needs and designing solutions.",
+    b: "Pragmatists balance practical considerations with healthcare outcomes, focusing on efficiency and cost-effectiveness without sacrificing quality of care.",
+    c: "Logisticians apply systematic approaches to healthcare management, prioritizing structure, consistency, and measurable outcomes across their organizations."
+  };
+
   // Create family info for display in the sidebar
   const getFamilyInfo = (familyId: 'a' | 'b' | 'c') => {
+    // Get proper family name from colors data
+    const familyName = FAMILY_COLORS[familyId].name;
+    
+    // Get data from DB or use fallback
     const family = getFamilyById(familyId.toUpperCase() as any);
+    
     return {
       id: familyId,
-      name: family?.name || `Family ${familyId.toUpperCase()}`,
-      description: family?.description || `Description for Family ${familyId.toUpperCase()}`,
+      name: familyName || `Family ${familyId.toUpperCase()}`,
+      description: familyDescriptions[familyId] || family?.description || `Description for Family ${familyId.toUpperCase()}`,
       commonTraits: family?.commonTraits || []
     };
   };

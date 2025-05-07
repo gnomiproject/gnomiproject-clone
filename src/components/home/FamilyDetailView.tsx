@@ -21,18 +21,10 @@ const FamilyDetailView: React.FC<FamilyDetailViewProps> = ({
   return (
     <div className={`animate-fade-in p-6 bg-white rounded-lg shadow-sm border-l-4 border-family-${familyInfo.id}`}>
       <h3 className={`text-2xl font-bold mb-3 text-family-${familyInfo.id}`}>
-        Family {familyInfo.id}: {familyInfo.name.toLowerCase()}
+        {familyInfo.name}
       </h3>
       
-      <p className="text-gray-600 mb-4">{familyInfo.description}</p>
-      
-      {/* Key Characteristics section */}
-      <h4 className="font-semibold text-gray-700 mb-2">Key Characteristics:</h4>
-      <ul className="list-disc list-inside text-gray-600 mb-4 space-y-1 text-left">
-        {familyInfo.commonTraits.map((trait, index) => (
-          <li key={index}>{trait}</li>
-        ))}
-      </ul>
+      <p className="text-gray-600 mb-6">{familyInfo.description}</p>
       
       <div className="mt-6 space-y-4">
         <h4 className="font-semibold text-gray-700">Archetypes in this family:</h4>
@@ -47,7 +39,7 @@ const FamilyDetailView: React.FC<FamilyDetailViewProps> = ({
               >
                 <h5 className={`font-semibold text-archetype-${archetype.id}`}>{archetype.name}</h5>
                 <p className="text-sm text-gray-600 mt-1">
-                  {archetype.key_characteristics || 'No key characteristics available'}
+                  {archetype.key_characteristics || archetype.description || 'No description available'}
                 </p>
               </div>
             ))
