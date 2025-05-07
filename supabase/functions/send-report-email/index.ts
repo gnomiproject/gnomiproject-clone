@@ -90,11 +90,11 @@ async function incrementAccessCount(supabaseUrl: string, supabaseKey: string, ar
   try {
     const client = createClient(supabaseUrl, supabaseKey);
     
-    // Use a direct SQL query to update the access count and timestamp
+    // Use a direct update query instead of RPC
     const { data, error } = await client
       .from("report_requests")
       .update({
-        access_count: client.rpc("increment_counter", { x: 1 }),
+        access_count: client.sql`COALESCE(access_count, 0) + 1`,
         last_accessed: new Date().toISOString()
       })
       .eq("archetype_id", archetype_id)
