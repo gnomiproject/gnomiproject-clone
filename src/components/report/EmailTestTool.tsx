@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
-import { ReloadIcon } from '@radix-ui/react-icons';
+import { Loader2 } from 'lucide-react';
 
 const EmailTestTool: React.FC = () => {
   const [recipientEmail, setRecipientEmail] = useState('');
@@ -46,7 +46,7 @@ const EmailTestTool: React.FC = () => {
         >
           {isSending ? (
             <>
-              <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Sending...
             </>
           ) : (
@@ -71,7 +71,7 @@ const EmailTestTool: React.FC = () => {
         >
           {isSending ? (
             <>
-              <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Processing...
             </>
           ) : (
