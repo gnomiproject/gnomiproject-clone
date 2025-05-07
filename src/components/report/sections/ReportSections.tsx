@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import { Section } from '@/components/shared/Section';
@@ -67,7 +68,7 @@ const ReportSections: React.FC<ReportSectionsProps> = ({
     <>
       {/* Introduction Section - Making sure it appears first and with explicit section class */}
       <ErrorBoundary>
-        <Section id="introduction" className="mb-10">
+        <Section id="introduction" className="mb-10 mt-0">
           <HomeIntroduction 
             userData={userData}
             archetypeData={reportData}
