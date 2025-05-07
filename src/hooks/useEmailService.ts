@@ -9,6 +9,7 @@ interface SendEmailParams {
 
 /**
  * Hook to handle sending emails through the test email service
+ * and processing pending reports
  */
 export function useEmailService() {
   const [isSending, setIsSending] = useState(false);
@@ -63,12 +64,13 @@ export function useEmailService() {
       // Include debugging info in the request body
       console.log("Calling send-report-email function to process pending reports");
       
-      // Call the send-report-email function with empty body - it will process all pending reports
+      // Call the send-report-email function with additional debug info
       const { data, error } = await supabase.functions.invoke('send-report-email', {
         method: 'POST',
         body: { 
           debug: true,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
+          source: 'manual-trigger'
         }
       });
       
@@ -79,11 +81,22 @@ export function useEmailService() {
       console.log("Processing result:", data);
       setLastResult(data);
       
+      if (data?.error) {
+        throw new Error(`Error from edge function: ${data.error}`);
+      }
+      
       const processed = data?.processed || 0;
+      const totalCount = data?.totalCount || 0;
+      
       if (processed > 0) {
         toast.success(`${processed} report emails processed successfully!`);
       } else {
-        toast.info('No pending reports found to process.');
+        // Show more detailed message when no reports were processed
+        if (data?.totalCount !== undefined) {
+          toast.info(`No pending reports found to process (${totalCount} total reports in system).`);
+        } else {
+          toast.info('No pending reports found to process.');
+        }
       }
       
       return { success: true, data };

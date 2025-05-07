@@ -8,7 +8,11 @@ import { processPendingReports } from "./reportProcessor.ts";
 import { corsHeaders } from "./cors.ts";
 
 // Initialize Resend client with API key
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+const resendApiKey = Deno.env.get("RESEND_API_KEY");
+if (!resendApiKey) {
+  console.error("Missing RESEND_API_KEY environment variable");
+}
+const resend = new Resend(resendApiKey);
 
 // Handle CORS preflight requests
 function handleCors(req: Request) {
@@ -58,6 +62,12 @@ serve(async (req: Request) => {
         console.log("No JSON body or invalid JSON");
       }
     }
+    
+    // Log environment variables (safe parts only)
+    console.log("Environment check:");
+    console.log("- SUPABASE_URL set:", !!supabaseUrl);
+    console.log("- SUPABASE_SERVICE_ROLE_KEY set:", !!supabaseServiceKey);
+    console.log("- RESEND_API_KEY set:", !!resendApiKey);
     
     // Process pending reports
     console.log("Starting to process pending reports");

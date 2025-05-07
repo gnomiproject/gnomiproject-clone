@@ -1,21 +1,27 @@
 
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
-import { Loader2, Search } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Loader2, Search, FileSearch, AlertCircle, CheckCircle, RefreshCw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useEmailService } from '@/hooks/useEmailService';
 
 const ReportDiagnosticTool: React.FC = () => {
   const params = useParams<{ archetypeId?: string, token?: string }>();
+  const navigate = useNavigate();
   const [archetypeId, setArchetypeId] = useState(params.archetypeId || '');
   const [accessToken, setAccessToken] = useState(params.token || '');
   const [isLoading, setIsLoading] = useState(false);
   const [reportData, setReportData] = useState<any>(null);
   const [isLookupMode, setIsLookupMode] = useState(!params.archetypeId || !params.token);
+  const [totalReports, setTotalReports] = useState<number | null>(null);
+  const [pendingReports, setPendingReports] = useState<number | null>(null);
+  const { processPendingReports, isSending: isProcessing } = useEmailService();
 
   useEffect(() => {
     // If URL contains both archetypeId and token, fetch report data automatically
@@ -24,7 +30,34 @@ const ReportDiagnosticTool: React.FC = () => {
       setAccessToken(params.token);
       fetchReportData(params.archetypeId, params.token);
     }
+    
+    // Get stats on report counts
+    fetchReportStats();
   }, [params.archetypeId, params.token]);
+
+  const fetchReportStats = async () => {
+    try {
+      // Get total count
+      const { count: totalCount, error: totalError } = await supabase
+        .from('report_requests')
+        .select('*', { count: 'exact', head: true });
+      
+      if (totalError) throw totalError;
+      setTotalReports(totalCount || 0);
+      
+      // Get pending count
+      const { count: pendingCount, error: pendingError } = await supabase
+        .from('report_requests')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'pending');
+      
+      if (pendingError) throw pendingError;
+      setPendingReports(pendingCount || 0);
+      
+    } catch (error) {
+      console.error("Error fetching report stats:", error);
+    }
+  };
 
   const fetchReportData = async (id: string, token: string) => {
     if (!id || !token) {
@@ -63,6 +96,9 @@ const ReportDiagnosticTool: React.FC = () => {
 
   const handleLookup = () => {
     fetchReportData(archetypeId, accessToken);
+    
+    // Update URL to include the archetype ID and token for sharing/bookmarking
+    navigate(`/report-diagnostic/${archetypeId}/${accessToken}`);
   };
   
   const updateReportStatus = async (newStatus: string) => {
@@ -84,6 +120,7 @@ const ReportDiagnosticTool: React.FC = () => {
       
       // Refresh the data
       await fetchReportData(archetypeId, accessToken);
+      await fetchReportStats();
       toast.success(`Status updated to ${newStatus}`);
     } catch (err: any) {
       console.error('Error updating status:', err);
@@ -98,7 +135,7 @@ const ReportDiagnosticTool: React.FC = () => {
     try {
       const { data, error } = await supabase
         .from('report_requests')
-        .select('id, email, archetype_id, status')
+        .select('id, email, archetype_id, status, created_at')
         .eq('status', 'pending')
         .order('created_at', { ascending: true });
       
@@ -115,11 +152,34 @@ const ReportDiagnosticTool: React.FC = () => {
           type: 'pendingReportsList'
         });
       }
+      
+      await fetchReportStats();
     } catch (err: any) {
       console.error('Error checking pending reports:', err);
       toast.error(err.message);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleProcessReports = async () => {
+    const result = await processPendingReports();
+    if (result.success) {
+      await fetchReportStats();
+      await checkPendingReports();
+    }
+  };
+  
+  const getStatusBadge = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case 'pending':
+        return <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">Pending</Badge>;
+      case 'active':
+        return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Active</Badge>;
+      case 'expired':
+        return <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200">Expired</Badge>;
+      default:
+        return <Badge variant="outline">{status}</Badge>;
     }
   };
 
@@ -130,16 +190,42 @@ const ReportDiagnosticTool: React.FC = () => {
       return (
         <div className="mt-4">
           <h3 className="text-lg font-medium">Pending Reports ({reportData.pendingReports.length})</h3>
-          <div className="bg-gray-50 rounded-md p-4 mt-2 max-h-80 overflow-auto">
-            {reportData.pendingReports.map((report: any) => (
-              <div key={report.id} className="mb-2 p-2 border border-gray-200 rounded">
-                <div><strong>ID:</strong> {report.id}</div>
-                <div><strong>Email:</strong> {report.email}</div>
-                <div><strong>Archetype:</strong> {report.archetype_id}</div>
-                <div><strong>Status:</strong> {report.status}</div>
-              </div>
-            ))}
-          </div>
+          {reportData.pendingReports.length > 0 ? (
+            <div className="bg-gray-50 rounded-md p-4 mt-2 max-h-80 overflow-auto">
+              {reportData.pendingReports.map((report: any) => (
+                <div key={report.id} className="mb-2 p-2 border border-gray-200 rounded">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <div><strong>ID:</strong> {report.id}</div>
+                      <div><strong>Email:</strong> {report.email}</div>
+                      <div><strong>Archetype:</strong> {report.archetype_id}</div>
+                      <div className="flex items-center gap-2">
+                        <strong>Status:</strong> {getStatusBadge(report.status)}
+                      </div>
+                      <div><strong>Created:</strong> {new Date(report.created_at).toLocaleString()}</div>
+                    </div>
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      className="ml-4"
+                      onClick={() => {
+                        setArchetypeId(report.archetype_id);
+                        navigate(`/report-diagnostic/${report.archetype_id}/${report.access_token}`);
+                        // We'll let the useEffect fetch the data
+                      }}
+                    >
+                      View Details
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="bg-gray-50 rounded-md p-4 mt-2 text-center">
+              <AlertCircle className="mx-auto h-8 w-8 text-yellow-500 mb-2" />
+              <p>No pending reports found in the database</p>
+            </div>
+          )}
         </div>
       );
     }
@@ -148,22 +234,41 @@ const ReportDiagnosticTool: React.FC = () => {
       <div className="mt-4">
         <h3 className="text-lg font-medium">Report Details</h3>
         <div className="bg-gray-50 rounded-md p-4 mt-2 max-h-80 overflow-auto">
-          <div><strong>ID:</strong> {reportData.id}</div>
-          <div><strong>Email:</strong> {reportData.email}</div>
-          <div><strong>Name:</strong> {reportData.name}</div>
-          <div><strong>Organization:</strong> {reportData.organization}</div>
-          <div><strong>Status:</strong> {reportData.status}</div>
-          <div><strong>Created:</strong> {new Date(reportData.created_at).toLocaleString()}</div>
-          {reportData.last_accessed && (
-            <div><strong>Last Accessed:</strong> {new Date(reportData.last_accessed).toLocaleString()}</div>
-          )}
-          <div><strong>Access Count:</strong> {reportData.access_count || 0}</div>
+          <div className="flex justify-between items-start">
+            <div>
+              <div><strong>ID:</strong> {reportData.id}</div>
+              <div><strong>Email:</strong> {reportData.email}</div>
+              <div><strong>Name:</strong> {reportData.name}</div>
+              <div><strong>Organization:</strong> {reportData.organization}</div>
+              <div className="flex items-center gap-2">
+                <strong>Status:</strong> {getStatusBadge(reportData.status)}
+              </div>
+              <div><strong>Created:</strong> {new Date(reportData.created_at).toLocaleString()}</div>
+              {reportData.last_accessed && (
+                <div><strong>Last Accessed:</strong> {new Date(reportData.last_accessed).toLocaleString()}</div>
+              )}
+              <div><strong>Access Count:</strong> {reportData.access_count || 0}</div>
+              {reportData.access_url && (
+                <div className="mt-2">
+                  <strong>Access URL:</strong> 
+                  <a 
+                    href={reportData.access_url} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:underline ml-1"
+                  >
+                    {reportData.access_url}
+                  </a>
+                </div>
+              )}
+            </div>
+          </div>
           <div className="mt-4 space-x-2">
             <Button 
               size="sm" 
               variant="outline" 
               onClick={() => updateReportStatus('pending')}
-              disabled={reportData.status === 'pending'}
+              disabled={reportData.status === 'pending' || isLoading}
             >
               Mark as Pending
             </Button>
@@ -171,7 +276,7 @@ const ReportDiagnosticTool: React.FC = () => {
               size="sm" 
               variant="outline" 
               onClick={() => updateReportStatus('active')}
-              disabled={reportData.status === 'active'}
+              disabled={reportData.status === 'active' || isLoading}
             >
               Mark as Active
             </Button>
@@ -183,7 +288,25 @@ const ReportDiagnosticTool: React.FC = () => {
 
   return (
     <Card className="p-6 max-w-3xl mx-auto">
-      <h2 className="text-xl font-bold mb-4">Report Diagnostic Tool</h2>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-xl font-bold">Report Diagnostic Tool</h2>
+        <div className="flex gap-2 items-center">
+          <span className="text-sm text-gray-500">
+            Total Reports: {totalReports !== null ? totalReports : '...'}
+          </span>
+          <Badge variant="secondary" className="ml-2">
+            {pendingReports !== null ? pendingReports : '...'} Pending
+          </Badge>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={fetchReportStats}
+            title="Refresh stats"
+          >
+            <RefreshCw className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
       
       {isLookupMode ? (
         <>
@@ -232,13 +355,13 @@ const ReportDiagnosticTool: React.FC = () => {
           
           <Separator className="my-4" />
           
-          <div className="mt-4">
-            <h3 className="text-lg font-medium mb-2">Pending Reports Check</h3>
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium">Pending Reports Check</h3>
             <Button 
               variant="outline" 
               onClick={checkPendingReports}
               disabled={isLoading}
-              className="w-full"
+              className="w-full mb-2"
             >
               {isLoading ? (
                 <>
@@ -246,7 +369,28 @@ const ReportDiagnosticTool: React.FC = () => {
                   Checking...
                 </>
               ) : (
-                'Check Pending Reports'
+                <>
+                  <FileSearch className="mr-2 h-4 w-4" />
+                  Check Pending Reports
+                </>
+              )}
+            </Button>
+            
+            <Button 
+              onClick={handleProcessReports}
+              disabled={isProcessing}
+              className="w-full"
+            >
+              {isProcessing ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  Process Pending Reports
+                </>
               )}
             </Button>
           </div>

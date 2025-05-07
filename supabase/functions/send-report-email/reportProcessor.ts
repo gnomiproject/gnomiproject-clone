@@ -14,15 +14,22 @@ export async function processPendingReports(
   console.log("Fetching pending report requests");
   
   try {
-    // Create a fresh Supabase client with correct initialization
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    // Create a Supabase client with the correct parameters
+    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+      }
+    });
     
-    // Log the URL and first few characters of the key for debugging
+    // Log the URL and service key (first few chars only for security)
     console.log(`Initializing Supabase client with URL: ${supabaseUrl}`);
     console.log(`Service key starts with: ${supabaseServiceKey.substring(0, 5)}...`);
     
+    // Extra logging to help debug
+    console.log("Executing query for pending report requests with status='pending'");
+    
     // Get pending report requests that need email notifications
-    console.log("Executing query for pending report requests");
     const { data: pendingReports, error } = await supabase
       .from("report_requests")
       .select("*")
@@ -38,7 +45,35 @@ export async function processPendingReports(
     console.log(`Found ${pendingReports?.length || 0} pending report requests`);
     
     if (!pendingReports || pendingReports.length === 0) {
-      return { message: "No pending reports found.", processed: 0 };
+      // Log raw counts to confirm database state
+      const { count, error: countError } = await supabase
+        .from("report_requests")
+        .select("*", { count: 'exact', head: true });
+      
+      console.log(`Total report requests in database: ${count || 'unknown'}`);
+      
+      if (countError) {
+        console.error("Error counting report requests:", countError);
+      }
+      
+      // Check if there are any with status that might be capitalized differently
+      const { data: altStatusReports, error: altError } = await supabase
+        .from("report_requests")
+        .select("id, status")
+        .ilike("status", "%pend%");
+      
+      if (altError) {
+        console.error("Error checking for alternate status formats:", altError);
+      } else if (altStatusReports?.length) {
+        console.log("Found reports with similar status:", 
+          altStatusReports.map(r => `${r.id}: ${r.status}`).join(", "));
+      }
+      
+      return { 
+        message: "No pending reports found.", 
+        processed: 0,
+        totalCount: count || 0
+      };
     }
     
     // Process each report request
