@@ -94,7 +94,7 @@ async function incrementAccessCount(supabaseUrl: string, supabaseKey: string, ar
     const { data, error } = await client
       .from("report_requests")
       .update({
-        access_count: client.sql`COALESCE(access_count, 0) + 1`,
+        access_count: 1 + (await client.from("report_requests").select("access_count").eq("archetype_id", archetype_id).eq("access_token", access_token).single()).data?.access_count || 0,
         last_accessed: new Date().toISOString()
       })
       .eq("archetype_id", archetype_id)
