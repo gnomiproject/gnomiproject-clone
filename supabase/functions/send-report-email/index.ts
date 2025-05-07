@@ -101,8 +101,13 @@ serve(async (req: Request) => {
 
     console.log('Initializing Supabase client with URL:', supabaseUrl);
     
-    // Create the Supabase client correctly with the service role key
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    // Fix: Create Supabase client properly using the updated import
+    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    });
     
     // Check if this is an access tracking request
     const url = new URL(req.url);
@@ -115,7 +120,7 @@ serve(async (req: Request) => {
       console.log('Tracking access for report:', reportId, 'with token:', accessToken);
       
       try {
-        // Update access count and last accessed timestamp using direct increment to avoid rpc issues
+        // Update access count and last accessed timestamp using direct update instead of RPC
         const { error: updateError } = await supabase
           .from('report_requests')
           .update({
