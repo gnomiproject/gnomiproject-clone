@@ -60,10 +60,10 @@ export function useEmailService() {
     setError(null);
     
     try {
-      // Call the send-report-email function to process pending reports
+      // Call the send-report-email function with empty body - it will process all pending reports
       const { data, error } = await supabase.functions.invoke('send-report-email', {
         method: 'POST',
-        body: { process: true }
+        body: {} // Just send an empty object, the function doesn't require specific parameters
       });
       
       if (error) {
