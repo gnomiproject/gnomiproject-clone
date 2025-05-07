@@ -4,6 +4,9 @@ project_id = "qsecdncdiykzuimtaosp"
 [functions.send-report-email]
 verify_jwt = false
 
+[functions.test-resend]
+verify_jwt = false
+
 [functions.create-increment-function]
 verify_jwt = false
 

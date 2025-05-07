@@ -85,27 +85,47 @@ function createEmailHtml(userName: string, reportUrl: string, trackingPixelUrl: 
   `;
 }
 
-// Direct SQL update function to replace the RPC call for incrementing access count
-async function incrementAccessCount(supabaseUrl: string, supabaseKey: string, archetype_id: string, access_token: string) {
+// Simplified function to increment access count
+async function incrementAccessCount(supabaseUrl: string, supabaseKey: string, archetypeId: string, accessToken: string) {
   try {
+    console.log(`Incrementing access count for archetype: ${archetypeId}, token: ${accessToken.substring(0, 5)}...`);
+    
     const client = createClient(supabaseUrl, supabaseKey);
     
-    // Use a direct update query instead of RPC
+    // Get current count first
+    const { data: currentData, error: selectError } = await client
+      .from("report_requests")
+      .select("access_count")
+      .eq("archetype_id", archetypeId)
+      .eq("access_token", accessToken)
+      .single();
+      
+    if (selectError) {
+      console.error("Error fetching current access count:", selectError);
+      return { success: false, error: selectError.message };
+    }
+    
+    // Increment count with a simple update
+    const currentCount = currentData?.access_count || 0;
+    const newCount = currentCount + 1;
+    
     const { data, error } = await client
       .from("report_requests")
       .update({
-        access_count: 1 + (await client.from("report_requests").select("access_count").eq("archetype_id", archetype_id).eq("access_token", access_token).single()).data?.access_count || 0,
+        access_count: newCount,
         last_accessed: new Date().toISOString()
       })
-      .eq("archetype_id", archetype_id)
-      .eq("access_token", access_token);
+      .eq("archetype_id", archetypeId)
+      .eq("access_token", accessToken)
+      .select();
     
     if (error) {
       console.error("Error in incrementAccessCount:", error);
       return { success: false, error: error.message };
     }
     
-    return { success: true, data };
+    console.log(`Successfully updated access count from ${currentCount} to ${newCount}`);
+    return { success: true, data, newCount };
   } catch (error) {
     console.error("Exception in incrementAccessCount:", error);
     return { success: false, error: String(error) };
@@ -141,10 +161,10 @@ serve(async (req: Request) => {
       const reportId = pathParts[pathParts.length - 2];
       const accessToken = pathParts[pathParts.length - 1];
       
-      console.log("Tracking access for report:", reportId, "with token:", accessToken);
+      console.log("Tracking access for report:", reportId, "with token:", accessToken.substring(0, 5) + "...");
       
       try {
-        // Use the direct increment function instead of RPC
+        // Use the direct increment function
         const result = await incrementAccessCount(
           supabaseUrl,
           supabaseServiceKey,
@@ -155,7 +175,7 @@ serve(async (req: Request) => {
         if (!result.success) {
           console.error(`Error tracking access: ${result.error}`);
         } else {
-          console.log("Successfully tracked access");
+          console.log("Successfully tracked access, new count:", result.newCount);
         }
       } catch (trackError) {
         console.error("Error in tracking access:", trackError);
@@ -252,8 +272,14 @@ serve(async (req: Request) => {
         
         console.log(`Sending email for ${archetypeName} to ${report.email}`);
         
-        // Send email via Resend
+        // Create email content
         const emailHtml = createEmailHtml(report.name || "there", reportUrl, trackingPixel);
+        
+        // Check if RESEND_API_KEY is set
+        const resendApiKey = Deno.env.get("RESEND_API_KEY");
+        if (!resendApiKey) {
+          throw new Error("Missing RESEND_API_KEY environment variable");
+        }
         
         // Send the actual email
         const emailResult = await resend.emails.send({
@@ -263,7 +289,7 @@ serve(async (req: Request) => {
           html: emailHtml
         });
         
-        console.log(`Email sent to ${report.email}, result:`, emailResult);
+        console.log(`Email sent to ${report.email}, result:`, JSON.stringify(emailResult));
         
         // Update the report status
         const { error: updateError } = await supabase
