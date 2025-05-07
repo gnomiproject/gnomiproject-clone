@@ -64,7 +64,7 @@ const WelcomeCard = ({
           <div className="mt-3 flex items-center flex-wrap gap-2">
             <span 
               className="inline-flex items-center px-3 py-1 rounded-full font-medium"
-              style={{ backgroundColor: `${archetypeColor}20`, color: archetypeColor }}
+              style={{ backgroundColor: `rgba(128, 128, 128, 0.15)`, color: '#555555' }}
             >
               {matchPercentage}% match
             </span>
