@@ -55,11 +55,11 @@ const Index = () => {
 
   return (
     <>
-      {/* Hero Section */}
-      <section className="py-8 bg-gradient-to-b from-blue-50 to-white relative overflow-hidden">
+      {/* Hero Section - Added pt-16 to account for fixed header height */}
+      <section className="py-8 pt-20 bg-gradient-to-b from-blue-50 to-white relative overflow-hidden">
         <div className="max-w-6xl mx-auto px-6 md:px-12">
           <div className="flex flex-col items-start">
-            {/* Gnome character positioned to the left */}
+            {/* Gnome character positioned to the left with adjusted margin */}
             <div className="mb-2 self-center md:self-start">
               <WebsiteImage 
                 type="overlook" 
