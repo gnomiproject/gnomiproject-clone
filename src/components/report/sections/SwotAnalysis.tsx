@@ -25,7 +25,6 @@ const SwotAnalysis: React.FC<SwotAnalysisProps> = ({ reportData, archetypeData, 
   
   return (
     <>
-      <SectionTitle title="SWOT Analysis" />
       <DeepDiveSwotAnalysis reportData={data} />
     </>
   );
