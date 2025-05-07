@@ -1,63 +1,56 @@
 
 /**
- * Create HTML email template for report notifications
+ * Create simplified HTML email template for report notifications
+ * Designed for maximum deliverability
  */
-export function createEmailHtml(userName: string, reportUrl: string, trackingPixelUrl: string) {
+export function createEmailHtml(userName: string, reportUrl: string, trackingPixelUrl?: string) {
+  // Get current year for copyright notice
+  const currentYear = new Date().getFullYear();
+  
   return `
     <!DOCTYPE html>
     <html>
     <head>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1">
-      <title>Your Healthcare Archetype Report</title>
+      <title>Your Healthcare Report</title>
       <style>
         body { 
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+          font-family: Arial, sans-serif; 
           line-height: 1.6;
           color: #333; 
           padding: 20px;
           max-width: 600px;
           margin: 0 auto;
         }
-        .container { background-color: #ffffff; border-radius: 8px; padding: 30px; }
-        .header { margin-bottom: 24px; }
-        .logo { max-width: 180px; margin-bottom: 20px; }
-        h1 { color: #4263eb; font-size: 24px; margin-top: 0; }
-        .content { margin-bottom: 30px; }
+        .content { margin-bottom: 20px; }
         .button {
           background-color: #4263eb;
           color: white;
-          padding: 12px 24px;
+          padding: 8px 16px;
           text-decoration: none;
           border-radius: 4px;
           display: inline-block;
-          font-weight: bold;
         }
-        .footer { font-size: 12px; color: #666; margin-top: 30px; }
-        .tracking { opacity: 0; position: absolute; }
+        .footer { font-size: 12px; color: #666; margin-top: 20px; border-top: 1px solid #eee; padding-top: 10px; }
       </style>
     </head>
     <body>
-      <div class="container">
-        <div class="header">
-          <h1>Your Healthcare Archetype Report is Ready</h1>
-        </div>
-        
-        <div class="content">
-          <p>Hello ${userName},</p>
-          <p>Thank you for your interest in our Healthcare Archetype Deep Dive Report. Your report has been created and is now available to view.</p>
-          <p>Click the button below to access your detailed report:</p>
-          <p>
-            <a href="${reportUrl}" class="button">View Your Report</a>
-          </p>
-          <p>This link will be valid for 30 days. If you have any questions about your report, please don't hesitate to reach out.</p>
-        </div>
-        
-        <div class="footer">
-          <p>© ${new Date().getFullYear()} Healthcare Archetype Analysis. All rights reserved.</p>
-        </div>
+      <div class="content">
+        <p>Hello ${userName},</p>
+        <p>Your Healthcare Report is now available to view.</p>
+        <p>
+          <a href="${reportUrl}" class="button">View Your Report</a>
+        </p>
+        <p>This link will be valid for 30 days.</p>
       </div>
-      <img src="${trackingPixelUrl}" alt="" class="tracking" />
+      
+      <div class="footer">
+        <p>© ${currentYear} Healthcare Archetype Analysis</p>
+        <p>To unsubscribe from these emails or manage your preferences, please reply to this email with "unsubscribe" in the subject line.</p>
+        <p>Healthcare Archetype Analysis, 123 Main St, Suite 100, Salt Lake City, UT 84101</p>
+      </div>
+      ${trackingPixelUrl ? `<!-- No tracking pixel for improved deliverability -->` : ''}
     </body>
     </html>
   `;

@@ -4,6 +4,16 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { Resend } from "https://esm.sh/resend@2.0.0";
 import { createEmailHtml } from "./emailTemplate.ts";
 
+// Helper for logging with timestamps
+const log = (message: string) => {
+  console.log(`[${new Date().toISOString()}] ${message}`);
+};
+
+// Helper for error logging with timestamps
+const logError = (message: string, error: any) => {
+  console.error(`[${new Date().toISOString()}] ERROR: ${message}`, error);
+};
+
 /**
  * Process and send emails for pending report requests
  */
@@ -12,7 +22,7 @@ export async function processPendingReports(
   supabaseServiceKey: string,
   resend: Resend
 ) {
-  console.log("Starting processPendingReports function");
+  log("Starting processPendingReports function");
   
   // Store results in this object
   const result = {
@@ -25,19 +35,16 @@ export async function processPendingReports(
   // Initialize Supabase client
   let supabase;
   try {
-    console.log(`Initializing Supabase with URL: ${supabaseUrl}`);
-    console.log(`Service key (first 5 chars): ${supabaseServiceKey.slice(0, 5)}...`);
+    log(`Initializing Supabase with URL: ${supabaseUrl}`);
     
+    // Create Supabase client with minimal options
     supabase = createClient(supabaseUrl, supabaseServiceKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false
-      }
+      auth: { persistSession: false }
     });
     
-    console.log("Supabase client successfully initialized");
+    log("Supabase client successfully initialized");
   } catch (initError) {
-    console.error("CRITICAL ERROR: Failed to initialize Supabase client:", initError);
+    logError("Failed to initialize Supabase client", initError);
     return { 
       processed: 0,
       success: false,
@@ -48,7 +55,7 @@ export async function processPendingReports(
   
   // Attempt to get pending report requests
   try {
-    console.log("Querying for pending report requests...");
+    log("Querying for pending report requests...");
     
     // Use a simple, direct query with minimal nesting or complexity
     const { data: pendingReports, error: fetchError } = await supabase
@@ -59,7 +66,7 @@ export async function processPendingReports(
       .limit(10);
     
     if (fetchError) {
-      console.error("Error fetching pending reports:", fetchError);
+      logError("Error fetching pending reports", fetchError);
       return { 
         success: false, 
         error: `Error fetching pending reports: ${fetchError.message}`,
@@ -67,25 +74,11 @@ export async function processPendingReports(
       };
     }
     
-    console.log(`Found ${pendingReports?.length || 0} pending reports to process`);
+    log(`Found ${pendingReports?.length || 0} pending reports to process`);
     
     // Handle case with no pending reports
     if (!pendingReports || pendingReports.length === 0) {
-      console.log("No pending reports found");
-      
-      // Get total count as a sanity check
-      try {
-        const { count, error: countError } = await supabase
-          .from("report_requests")
-          .select("*", { count: 'exact', head: true });
-        
-        if (!countError) {
-          console.log(`Total report requests in database: ${count || 0}`);
-        }
-      } catch (countErr) {
-        console.warn("Failed to get total count:", countErr);
-      }
-      
+      log("No pending reports found");
       return { 
         message: "No pending reports found to process", 
         processed: 0,
@@ -95,54 +88,71 @@ export async function processPendingReports(
     
     // Process each report
     for (const report of pendingReports) {
-      console.log(`Processing report ID: ${report.id} for ${report.email}`);
+      log(`Processing report ID: ${report.id} for ${report.email}`);
       
       try {
-        // 1. Update attempt counters first
-        const attemptUpdate = await updateAttemptCounters(supabase, report.id);
-        if (!attemptUpdate.success) {
-          console.warn(`Warning: Failed to update attempt counters: ${attemptUpdate.error}`);
-          // Continue anyway
+        // Update attempt count
+        try {
+          await supabase
+            .from("report_requests")
+            .update({ 
+              last_attempt_at: new Date().toISOString()
+            })
+            .eq("id", report.id);
+        } catch (attemptErr) {
+          log(`Warning: Could not update attempt counter: ${attemptErr.message}`);
+          // Continue with processing despite this error
         }
         
-        // 2. Generate report URL if needed
-        const reportUrl = generateReportUrl(supabaseUrl, report);
+        // Generate report URL
+        const reportUrl = report.access_url || `${new URL(supabaseUrl).origin}/report/${report.archetype_id}/${report.access_token}`;
         
-        // 3. Get archetype name for personalization
-        const archetypeName = await getArchetypeName(supabase, report.archetype_id) || "Healthcare Archetype";
+        // Get a simple name for personalization
+        const recipientName = report.name || "there";
         
-        // 4. Generate tracking pixel URL
-        const trackingPixel = `${new URL(supabaseUrl).origin}/functions/v1/send-report-email/track-access/${report.archetype_id}/${report.access_token}`;
-        console.log(`Tracking pixel URL: ${trackingPixel}`);
+        // Get a basic archetype name
+        let archetypeName = "Healthcare Report";
+        try {
+          const { data } = await supabase
+            .from("level4_deepdive_report_data")
+            .select("archetype_name")
+            .eq("archetype_id", report.archetype_id)
+            .maybeSingle();
+            
+          if (data?.archetype_name) {
+            archetypeName = data.archetype_name;
+          }
+        } catch (nameErr) {
+          log(`Could not fetch archetype name: ${nameErr.message}`);
+          // Continue with default name
+        }
         
-        // 5. Create email content
-        const emailHtml = createEmailHtml(report.name || "there", reportUrl, trackingPixel);
+        // Create email content - no tracking pixel for now
+        const emailHtml = createEmailHtml(recipientName, reportUrl);
         
-        // 6. Log all parameters before sending email
-        console.log(`SENDING EMAIL with parameters:
+        // Log all parameters before sending email
+        log(`Preparing email with parameters:
           TO: ${report.email}
           FROM: Gnomi <gnomi@onenomi.com>
-          SUBJECT: Your ${archetypeName} Deep Dive Report is Ready
-          ARCHETYPE: ${archetypeName}
-          REPORT_URL: ${reportUrl}
-          TRACKING_URL: ${trackingPixel}
+          SUBJECT: Your ${archetypeName} Report
         `);
         
-        // 7. Send the email
+        // Send the email with minimal formatting
         const emailResult = await resend.emails.send({
           from: "Gnomi <gnomi@onenomi.com>",
           to: [report.email],
-          subject: `Your ${archetypeName} Deep Dive Report is Ready`,
-          html: emailHtml
+          subject: `Your ${archetypeName} Report`,
+          html: emailHtml,
+          text: `Hello ${recipientName}, your ${archetypeName} report is now available. Access it here: ${reportUrl}`,
         });
         
-        console.log(`Email send result:`, JSON.stringify(emailResult));
+        log(`Email send result:`, JSON.stringify(emailResult));
         
         if (!emailResult || emailResult.error) {
           throw new Error(`Resend API error: ${emailResult?.error?.message || "Unknown error"}`);
         }
         
-        // 8. Update report status to active
+        // Update report status to active
         const { error: updateError } = await supabase
           .from("report_requests")
           .update({ 
@@ -154,10 +164,10 @@ export async function processPendingReports(
           .eq("id", report.id);
         
         if (updateError) {
-          console.warn(`Warning: Report status updated but database update failed: ${updateError.message}`);
+          log(`Warning: Report status updated but database update failed: ${updateError.message}`);
         }
         
-        console.log(`Successfully processed report ${report.id}`);
+        log(`Successfully processed report ${report.id}`);
         
         // Add to successful results
         result.results.push({
@@ -170,7 +180,7 @@ export async function processPendingReports(
         result.processed++;
         
       } catch (reportError) {
-        console.error(`Error processing report ${report.id}:`, reportError);
+        logError(`Error processing report ${report.id}`, reportError);
         
         // Update report with error info but don't change status
         try {
@@ -182,7 +192,7 @@ export async function processPendingReports(
             })
             .eq("id", report.id);
         } catch (errorUpdateError) {
-          console.error("Failed to update error information:", errorUpdateError);
+          logError("Failed to update error information", errorUpdateError);
         }
         
         // Add to results
@@ -198,7 +208,7 @@ export async function processPendingReports(
     return result;
     
   } catch (mainError) {
-    console.error("CRITICAL ERROR in processPendingReports:", mainError);
+    logError("CRITICAL ERROR in processPendingReports", mainError);
     return { 
       processed: 0,
       error: mainError.message,
@@ -206,76 +216,4 @@ export async function processPendingReports(
       stack: mainError.stack
     };
   }
-}
-
-/**
- * Helper function to update attempt counters
- */
-async function updateAttemptCounters(supabase, reportId) {
-  try {
-    const { error } = await supabase
-      .from("report_requests")
-      .update({ 
-        email_send_attempts: supabase.rpc('increment', { row_id: reportId, increment_by: 1, column_name: 'email_send_attempts' }),
-        last_attempt_at: new Date().toISOString()
-      })
-      .eq("id", reportId);
-    
-    if (error) {
-      return { success: false, error: error.message };
-    }
-    
-    return { success: true };
-  } catch (error) {
-    return { success: false, error: error.message };
-  }
-}
-
-/**
- * Helper function to generate report URL
- */
-function generateReportUrl(supabaseUrl, report) {
-  // Use existing URL if available
-  if (report.access_url) {
-    return report.access_url;
-  }
-  
-  // Generate new URL
-  const baseUrl = new URL(supabaseUrl).origin;
-  return `${baseUrl}/report/${report.archetype_id}/${report.access_token}`;
-}
-
-/**
- * Helper function to get archetype name
- */
-async function getArchetypeName(supabase, archetypeId) {
-  if (!archetypeId) return null;
-  
-  try {
-    // Try to get archetype name from level4 data
-    const { data, error } = await supabase
-      .from("level4_deepdive_report_data")
-      .select("archetype_name")
-      .eq("archetype_id", archetypeId)
-      .maybeSingle();
-    
-    if (!error && data?.archetype_name) {
-      return data.archetype_name;
-    }
-    
-    // Fallback to Core_Archetype_Overview
-    const { data: fallbackData, error: fallbackError } = await supabase
-      .from("Core_Archetype_Overview")
-      .select("name")
-      .eq("id", archetypeId)
-      .maybeSingle();
-    
-    if (!fallbackError && fallbackData?.name) {
-      return fallbackData.name;
-    }
-  } catch (error) {
-    console.warn(`Could not fetch archetype name: ${error.message}`);
-  }
-  
-  return null;
 }
