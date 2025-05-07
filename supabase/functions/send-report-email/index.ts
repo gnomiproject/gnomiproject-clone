@@ -38,6 +38,7 @@ serve(async (req: Request) => {
     }
 
     console.log("Initializing Supabase client with URL:", supabaseUrl);
+    console.log("Service key starts with:", supabaseServiceKey.substring(0, 5) + "...");
     
     // Check if this is an access tracking request
     const url = new URL(req.url);
@@ -48,7 +49,7 @@ serve(async (req: Request) => {
     }
     
     // Parse the JSON body if it exists
-    let requestBody = {};
+    let requestBody: any = {};
     if (req.method === "POST") {
       try {
         requestBody = await req.json();
@@ -59,7 +60,9 @@ serve(async (req: Request) => {
     }
     
     // Process pending reports
+    console.log("Starting to process pending reports");
     const result = await processPendingReports(supabaseUrl, supabaseServiceKey, resend);
+    console.log("Process result:", JSON.stringify(result));
     
     return new Response(
       JSON.stringify(result),
@@ -70,8 +73,9 @@ serve(async (req: Request) => {
     );
   } catch (error) {
     console.error("Error:", error.message);
+    console.error("Stack trace:", error.stack);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: error.message, stack: error.stack }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 500,

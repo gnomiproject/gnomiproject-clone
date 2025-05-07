@@ -1,236 +1,273 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Separator } from '@/components/ui/separator';
+import { Loader2, Search } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 const ReportDiagnosticTool: React.FC = () => {
-  const { archetypeId = '', token } = useParams();
+  const params = useParams<{ archetypeId?: string, token?: string }>();
+  const [archetypeId, setArchetypeId] = useState(params.archetypeId || '');
+  const [accessToken, setAccessToken] = useState(params.token || '');
+  const [isLoading, setIsLoading] = useState(false);
   const [reportData, setReportData] = useState<any>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [showRawData, setShowRawData] = useState(false);
-  const [diagnosticMode, setDiagnosticMode] = useState<'view' | 'lookup'>('view');
-  const [lookupToken, setLookupToken] = useState('');
-  const [lookupArchetypeId, setLookupArchetypeId] = useState('');
+  const [isLookupMode, setIsLookupMode] = useState(!params.archetypeId || !params.token);
 
   useEffect(() => {
-    // Only fetch when in view mode and we have parameters
-    if (diagnosticMode === 'view' && (archetypeId || token)) {
-      fetchReportData(archetypeId, token);
-    } else {
-      // If no parameters, switch to lookup mode automatically
-      setDiagnosticMode('lookup');
-      setLoading(false);
+    // If URL contains both archetypeId and token, fetch report data automatically
+    if (params.archetypeId && params.token) {
+      setArchetypeId(params.archetypeId);
+      setAccessToken(params.token);
+      fetchReportData(params.archetypeId, params.token);
     }
-  }, [archetypeId, token, diagnosticMode]);
+  }, [params.archetypeId, params.token]);
 
-  const fetchReportData = async (id: string, accessToken?: string) => {
-    console.log('Report Diagnostic - URL Parameters:', {
-      archetypeId: id,
-      token: accessToken ? `${accessToken.substring(0, 5)}...` : 'missing'
-    });
-
-    if (!accessToken || !id) {
-      setError('Missing token or archetypeId in URL');
-      setLoading(false);
+  const fetchReportData = async (id: string, token: string) => {
+    if (!id || !token) {
+      toast.error('Archetype ID and Access Token are required');
       return;
     }
 
+    setIsLoading(true);
     try {
-      // Validate token against report_requests
-      const { data: reportRequest, error: tokenError } = await supabase
+      // Fetch the report request data
+      const { data, error } = await supabase
         .from('report_requests')
         .select('*')
-        .eq('access_token', accessToken)
         .eq('archetype_id', id)
-        .eq('status', 'active')
+        .eq('access_token', token)
         .maybeSingle();
-
-      if (tokenError) {
-        console.error('Diagnostic - Token validation error:', tokenError);
-        setError(`Token validation failed: ${tokenError.message}`);
-        setLoading(false);
-        return;
+      
+      if (error) {
+        throw new Error(`Failed to fetch report data: ${error.message}`);
       }
-
-      if (!reportRequest) {
-        console.error('Diagnostic - No report request found for token');
-        setError('No valid report found with this token');
-        setLoading(false);
-        return;
+      
+      if (!data) {
+        toast.error('No report found with the provided ID and token');
+        setReportData(null);
+      } else {
+        setReportData(data);
+        toast.success('Report data fetched successfully');
       }
-
-      console.log('Diagnostic - Report request found:', {
-        id: reportRequest.id,
-        created: reportRequest.created_at,
-        expires: reportRequest.expires_at || 'none',
-        hasAssessmentResult: !!reportRequest.assessment_result
-      });
-
-      // Fetch archetype data
-      const { data: archetypeData, error: archetypeError } = await supabase
-        .from('level4_deepdive_report_data')
-        .select('*')
-        .eq('archetype_id', id)
-        .maybeSingle();
-
-      if (archetypeError) {
-        console.error('Diagnostic - Archetype data error:', archetypeError);
-        setError(`Archetype data error: ${archetypeError.message}`);
-        setLoading(false);
-        return;
-      }
-
-      if (!archetypeData) {
-        console.error('Diagnostic - No archetype data found');
-        setError(`No data found for archetype: ${id}`);
-        setLoading(false);
-        return;
-      }
-
-      console.log('Diagnostic - Archetype data found:', {
-        name: archetypeData.archetype_name || 'Unknown',
-        hasStrengths: archetypeData.strategic_recommendations ? 
-          (Array.isArray(archetypeData.strategic_recommendations) ? 
-            archetypeData.strategic_recommendations.length : 'N/A') : 'N/A'
-      });
-
-      setReportData({
-        reportRequest,
-        archetypeData
-      });
-    } catch (err) {
-      console.error('Diagnostic - Unexpected error:', err);
-      setError(err instanceof Error ? err.message : 'Unknown error');
+    } catch (err: any) {
+      console.error('Error fetching report data:', err);
+      toast.error(err.message);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   const handleLookup = () => {
-    if (lookupArchetypeId && lookupToken) {
-      fetchReportData(lookupArchetypeId, lookupToken);
-      setDiagnosticMode('view');
-    } else {
-      setError('Please enter both Archetype ID and Token');
+    fetchReportData(archetypeId, accessToken);
+  };
+  
+  const updateReportStatus = async (newStatus: string) => {
+    if (!reportData) {
+      toast.error('No report data loaded');
+      return;
+    }
+    
+    setIsLoading(true);
+    try {
+      const { error } = await supabase
+        .from('report_requests')
+        .update({ status: newStatus })
+        .eq('id', reportData.id);
+      
+      if (error) {
+        throw new Error(`Failed to update status: ${error.message}`);
+      }
+      
+      // Refresh the data
+      await fetchReportData(archetypeId, accessToken);
+      toast.success(`Status updated to ${newStatus}`);
+    } catch (err: any) {
+      console.error('Error updating status:', err);
+      toast.error(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  const checkPendingReports = async () => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('report_requests')
+        .select('id, email, archetype_id, status')
+        .eq('status', 'pending')
+        .order('created_at', { ascending: true });
+      
+      if (error) {
+        throw new Error(`Failed to check pending reports: ${error.message}`);
+      }
+      
+      if (!data || data.length === 0) {
+        toast.info('No pending reports found');
+      } else {
+        toast.success(`Found ${data.length} pending reports`);
+        setReportData({ 
+          pendingReports: data,
+          type: 'pendingReportsList'
+        });
+      }
+    } catch (err: any) {
+      console.error('Error checking pending reports:', err);
+      toast.error(err.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  const renderReportData = () => {
+    if (!reportData) return null;
+    
+    if (reportData.type === 'pendingReportsList') {
+      return (
+        <div className="mt-4">
+          <h3 className="text-lg font-medium">Pending Reports ({reportData.pendingReports.length})</h3>
+          <div className="bg-gray-50 rounded-md p-4 mt-2 max-h-80 overflow-auto">
+            {reportData.pendingReports.map((report: any) => (
+              <div key={report.id} className="mb-2 p-2 border border-gray-200 rounded">
+                <div><strong>ID:</strong> {report.id}</div>
+                <div><strong>Email:</strong> {report.email}</div>
+                <div><strong>Archetype:</strong> {report.archetype_id}</div>
+                <div><strong>Status:</strong> {report.status}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+    
+    return (
+      <div className="mt-4">
+        <h3 className="text-lg font-medium">Report Details</h3>
+        <div className="bg-gray-50 rounded-md p-4 mt-2 max-h-80 overflow-auto">
+          <div><strong>ID:</strong> {reportData.id}</div>
+          <div><strong>Email:</strong> {reportData.email}</div>
+          <div><strong>Name:</strong> {reportData.name}</div>
+          <div><strong>Organization:</strong> {reportData.organization}</div>
+          <div><strong>Status:</strong> {reportData.status}</div>
+          <div><strong>Created:</strong> {new Date(reportData.created_at).toLocaleString()}</div>
+          {reportData.last_accessed && (
+            <div><strong>Last Accessed:</strong> {new Date(reportData.last_accessed).toLocaleString()}</div>
+          )}
+          <div><strong>Access Count:</strong> {reportData.access_count || 0}</div>
+          <div className="mt-4 space-x-2">
+            <Button 
+              size="sm" 
+              variant="outline" 
+              onClick={() => updateReportStatus('pending')}
+              disabled={reportData.status === 'pending'}
+            >
+              Mark as Pending
+            </Button>
+            <Button 
+              size="sm" 
+              variant="outline" 
+              onClick={() => updateReportStatus('active')}
+              disabled={reportData.status === 'active'}
+            >
+              Mark as Active
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <Card className="p-6 m-6 max-w-4xl mx-auto">
+    <Card className="p-6 max-w-3xl mx-auto">
       <h2 className="text-xl font-bold mb-4">Report Diagnostic Tool</h2>
       
-      {diagnosticMode === 'lookup' ? (
-        <div className="mb-6 space-y-4">
-          <p className="text-gray-600">Enter report information to diagnose:</p>
-          <div className="space-y-3">
+      {isLookupMode ? (
+        <>
+          <div className="flex flex-col space-y-4 mb-6">
             <div>
-              <label className="block text-sm font-medium mb-1">Archetype ID</label>
-              <input 
-                type="text" 
-                className="w-full p-2 border border-gray-300 rounded"
-                value={lookupArchetypeId}
-                onChange={(e) => setLookupArchetypeId(e.target.value)}
-                placeholder="e.g., a1, b2, c3"
+              <label htmlFor="archetype-id" className="block text-sm font-medium mb-1">
+                Archetype ID
+              </label>
+              <Input
+                id="archetype-id"
+                value={archetypeId}
+                onChange={(e) => setArchetypeId(e.target.value)}
+                placeholder="Enter archetype ID"
               />
             </div>
+            
             <div>
-              <label className="block text-sm font-medium mb-1">Access Token</label>
-              <input 
-                type="text" 
-                className="w-full p-2 border border-gray-300 rounded"
-                value={lookupToken}
-                onChange={(e) => setLookupToken(e.target.value)}
+              <label htmlFor="access-token" className="block text-sm font-medium mb-1">
+                Access Token
+              </label>
+              <Input
+                id="access-token"
+                value={accessToken}
+                onChange={(e) => setAccessToken(e.target.value)}
                 placeholder="Enter access token"
               />
             </div>
-            <Button onClick={handleLookup} className="w-full">
-              Lookup Report
+            
+            <Button 
+              onClick={handleLookup}
+              disabled={isLoading || !archetypeId || !accessToken}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Loading...
+                </>
+              ) : (
+                <>
+                  <Search className="mr-2 h-4 w-4" />
+                  Lookup Report
+                </>
+              )}
             </Button>
           </div>
-        </div>
-      ) : (
-        <div>
-          <div className="mb-4">
-            <h3 className="font-semibold mb-2">URL Parameters</h3>
-            <div className="bg-gray-100 p-3 rounded">
-              <p><span className="font-medium">Archetype ID:</span> {archetypeId || lookupArchetypeId || 'Missing'}</p>
-              <p><span className="font-medium">Token:</span> {token ? `${token.substring(0, 5)}...` : 
-                     lookupToken ? `${lookupToken.substring(0, 5)}...` : 'Missing'}</p>
-            </div>
+          
+          <Separator className="my-4" />
+          
+          <div className="mt-4">
+            <h3 className="text-lg font-medium mb-2">Pending Reports Check</h3>
             <Button 
               variant="outline" 
-              size="sm" 
-              onClick={() => setDiagnosticMode('lookup')}
-              className="mt-2"
+              onClick={checkPendingReports}
+              disabled={isLoading}
+              className="w-full"
             >
-              Change Report
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Checking...
+                </>
+              ) : (
+                'Check Pending Reports'
+              )}
             </Button>
           </div>
-
-          {loading && (
-            <div className="text-center py-8">
-              <div className="animate-spin h-8 w-8 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-              <p>Loading report data...</p>
-            </div>
-          )}
-
-          {error && (
-            <div className="bg-red-50 border border-red-200 p-4 rounded mb-4">
-              <h3 className="font-semibold text-red-800 mb-2">Error</h3>
-              <p className="text-red-700">{error}</p>
-            </div>
-          )}
-
-          {reportData && (
-            <div className="space-y-4">
-              <div className="bg-green-50 border border-green-200 p-4 rounded">
-                <h3 className="font-semibold text-green-800">Report Data Loaded Successfully</h3>
-                <p className="mt-2">
-                  <span className="font-medium">Report for:</span> {reportData.archetypeData.archetype_name || 'Unnamed Archetype'}
-                </p>
-                <p>
-                  <span className="font-medium">Requested by:</span> {reportData.reportRequest.name} ({reportData.reportRequest.email})
-                </p>
-                <p>
-                  <span className="font-medium">Organization:</span> {reportData.reportRequest.organization}
-                </p>
-              </div>
-              
-              <div className="flex justify-end">
-                <Button 
-                  variant="outline" 
-                  onClick={() => setShowRawData(!showRawData)}
-                  size="sm"
-                >
-                  {showRawData ? 'Hide Raw Data' : 'Show Raw Data'}
-                </Button>
-              </div>
-              
-              {showRawData && (
-                <div className="bg-gray-100 p-4 rounded overflow-auto max-h-96">
-                  <h4 className="font-medium mb-2">Report Request Data</h4>
-                  <pre className="text-xs overflow-auto">
-                    {JSON.stringify(reportData.reportRequest, null, 2)}
-                  </pre>
-                  
-                  <h4 className="font-medium mt-4 mb-2">Archetype Data Sample</h4>
-                  <pre className="text-xs overflow-auto">
-                    {JSON.stringify({
-                      archetype_id: reportData.archetypeData.archetype_id,
-                      archetype_name: reportData.archetypeData.archetype_name,
-                      short_description: reportData.archetypeData.short_description,
-                      strategic_recommendations: reportData.archetypeData.strategic_recommendations?.slice(0, 2)
-                    }, null, 2)}
-                  </pre>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
+        </>
+      ) : (
+        <>
+          <div className="bg-gray-50 p-3 rounded text-sm overflow-auto mb-4">
+            <p><strong>Archetype ID:</strong> {archetypeId}</p>
+            <p><strong>Access Token:</strong> {accessToken}</p>
+            <Button 
+              variant="link" 
+              onClick={() => setIsLookupMode(true)}
+              className="p-0 h-auto text-blue-600"
+            >
+              Switch to Lookup Mode
+            </Button>
+          </div>
+        </>
       )}
+      
+      {renderReportData()}
     </Card>
   );
 };

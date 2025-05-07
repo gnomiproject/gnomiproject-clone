@@ -60,16 +60,23 @@ export function useEmailService() {
     setError(null);
     
     try {
+      // Include debugging info in the request body
+      console.log("Calling send-report-email function to process pending reports");
+      
       // Call the send-report-email function with empty body - it will process all pending reports
       const { data, error } = await supabase.functions.invoke('send-report-email', {
         method: 'POST',
-        body: {} // Just send an empty object, the function doesn't require specific parameters
+        body: { 
+          debug: true,
+          timestamp: new Date().toISOString()
+        }
       });
       
       if (error) {
         throw new Error(`Failed to process reports: ${error.message}`);
       }
       
+      console.log("Processing result:", data);
       setLastResult(data);
       
       const processed = data?.processed || 0;

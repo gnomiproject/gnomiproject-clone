@@ -14,10 +14,15 @@ export async function processPendingReports(
   console.log("Fetching pending report requests");
   
   try {
-    // Create a fresh Supabase client
+    // Create a fresh Supabase client with correct initialization
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
+    // Log the URL and first few characters of the key for debugging
+    console.log(`Initializing Supabase client with URL: ${supabaseUrl}`);
+    console.log(`Service key starts with: ${supabaseServiceKey.substring(0, 5)}...`);
+    
     // Get pending report requests that need email notifications
+    console.log("Executing query for pending report requests");
     const { data: pendingReports, error } = await supabase
       .from("report_requests")
       .select("*")
