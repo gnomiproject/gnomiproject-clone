@@ -30,8 +30,8 @@ const DeepDiveSuccessState = ({
           We've sent a confirmation to <span className="text-primary">{email}</span>
         </p>
         <p className="text-sm text-muted-foreground">
-          Please check your email for information on how to receive your detailed report.
-          You'll receive your report within 1-2 business days.
+          Check your email for a link to access your detailed report.
+          The report has been generated and is ready for you to view.
         </p>
       </div>
       

@@ -1,6 +1,10 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.43.3';
+import { Resend } from 'https://esm.sh/resend@2.0.0';
+
+// Initialize Resend client with API key
+const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
 
 // CORS headers for browser requests
 const corsHeaders = {
@@ -17,6 +21,68 @@ function handleCors(req: Request) {
     });
   }
   return null;
+}
+
+// Create HTML email template for report notifications
+function createEmailHtml(userName: string, reportUrl: string, trackingPixelUrl: string) {
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <title>Your Healthcare Archetype Report</title>
+      <style>
+        body { 
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+          line-height: 1.6;
+          color: #333; 
+          padding: 20px;
+          max-width: 600px;
+          margin: 0 auto;
+        }
+        .container { background-color: #ffffff; border-radius: 8px; padding: 30px; }
+        .header { margin-bottom: 24px; }
+        .logo { max-width: 180px; margin-bottom: 20px; }
+        h1 { color: #4263eb; font-size: 24px; margin-top: 0; }
+        .content { margin-bottom: 30px; }
+        .button {
+          background-color: #4263eb;
+          color: white;
+          padding: 12px 24px;
+          text-decoration: none;
+          border-radius: 4px;
+          display: inline-block;
+          font-weight: bold;
+        }
+        .footer { font-size: 12px; color: #666; margin-top: 30px; }
+        .tracking { opacity: 0; position: absolute; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>Your Healthcare Archetype Report is Ready</h1>
+        </div>
+        
+        <div class="content">
+          <p>Hello ${userName},</p>
+          <p>Thank you for your interest in our Healthcare Archetype Deep Dive Report. Your report has been created and is now available to view.</p>
+          <p>Click the button below to access your detailed report:</p>
+          <p>
+            <a href="${reportUrl}" class="button">View Your Report</a>
+          </p>
+          <p>This link will be valid for 30 days. If you have any questions about your report, please don't hesitate to reach out.</p>
+        </div>
+        
+        <div class="footer">
+          <p>© ${new Date().getFullYear()} Healthcare Archetype Analysis. All rights reserved.</p>
+        </div>
+      </div>
+      <img src="${trackingPixelUrl}" alt="" class="tracking" />
+    </body>
+    </html>
+  `;
 }
 
 serve(async (req: Request) => {
@@ -76,9 +142,6 @@ serve(async (req: Request) => {
       );
     }
     
-    // This function can be called directly or run on a schedule
-    // We'll handle both report creation confirmation emails and notification emails
-    
     // Get pending report requests that need email notifications
     const { data: pendingReports, error } = await supabase
       .from('report_requests')
@@ -120,16 +183,32 @@ serve(async (req: Request) => {
         // Add tracking pixel to email
         const trackingPixel = `${new URL(req.url).origin}/functions/v1/send-report-email/track-access/${report.archetype_id}/${report.access_token}`;
         
-        // Send email (in production, you'd integrate with an email service here)
-        // For now, just log the email that would be sent
-        console.log(`Would send email to ${report.email} with report link: ${reportUrl}`);
-        console.log(`Would include tracking pixel: ${trackingPixel}`);
+        // Get archetype name if available
+        let archetypeName = "Healthcare Archetype";
+        if (report.archetype_id) {
+          const { data: archetypeData } = await supabase
+            .from('level4_deepdive_report_data')
+            .select('archetype_name')
+            .eq('archetype_id', report.archetype_id)
+            .maybeSingle();
+            
+          if (archetypeData?.archetype_name) {
+            archetypeName = archetypeData.archetype_name;
+          }
+        }
         
-        // In a real implementation, you would:
-        // 1. Use an email service API like Resend, SendGrid, etc.
-        // 2. Create a nice HTML email template with the report link
-        // 3. Include an img tag with src set to the tracking pixel
-        // 4. Send the email with proper formatting
+        // Send email via Resend
+        const emailHtml = createEmailHtml(report.name || "there", reportUrl, trackingPixel);
+        
+        // Send the actual email
+        const emailResult = await resend.emails.send({
+          from: "Healthcare Archetype <reports@resend.dev>",
+          to: [report.email],
+          subject: `Your ${archetypeName} Deep Dive Report is Ready`,
+          html: emailHtml
+        });
+        
+        console.log(`Email sent to ${report.email}, result:`, emailResult);
         
         // Update the report status
         const { error: updateError } = await supabase

@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { addDays } from 'date-fns';
@@ -176,7 +176,7 @@ const DeepDiveFormContainer = ({
           email: data.email,
           organization: data.organization || null,
           comments: data.comments || null,
-          status: 'active',
+          status: 'pending', // Changed from 'active' to 'pending' to trigger email sending
           access_token: accessToken,
           created_at: new Date().toISOString(),
           expires_at: addDays(new Date(), 30).toISOString(),
@@ -214,7 +214,21 @@ const DeepDiveFormContainer = ({
         event_label: archetypeId
       });
       
-      toast.success(`Report request submitted successfully. We've sent a link to ${data.email}.`);
+      // Call the email sending function to immediately process the email
+      try {
+        // This direct invocation can be optional - the email will be sent automatically
+        // by the edge function when it runs next
+        const emailResponse = await supabase.functions.invoke('send-report-email', {
+          method: 'POST',
+          body: { trigger: 'form_submission' }
+        });
+        console.log('Email sending triggered:', emailResponse);
+      } catch (emailError) {
+        console.warn('Could not trigger immediate email sending:', emailError);
+        // Not critical - emails will be sent by scheduled runs
+      }
+      
+      toast.success(`Report request submitted successfully. We'll send a link to ${data.email}.`);
       
     } catch (error: any) {
       console.error('[DeepDiveFormContainer] Error submitting report request:', error);
