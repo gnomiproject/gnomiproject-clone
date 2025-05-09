@@ -6,11 +6,11 @@ import FixedHeader from '@/components/layout/FixedHeader';
 import Index from '@/pages/Index';
 import NotFound from '@/pages/NotFound';
 
-// Direct import for the Assessment page to resolve dynamic import issues
+// Direct imports for critical routes to avoid dynamic loading issues
 import Assessment from '@/pages/Assessment';
+import Insights from '@/pages/Insights'; // Changed from lazy loading to direct import
 
 // Lazy load other non-critical routes
-const Insights = lazy(() => import('@/pages/Insights'));
 const About = lazy(() => import('@/pages/About'));
 const Admin = lazy(() => import('@/pages/Admin'));
 const ReportView = lazy(() => import('@/pages/ReportView'));
@@ -51,16 +51,11 @@ function App() {
             {/* Main application routes */}
             <Route path="/" element={<Index />} />
             
-            {/* Direct render for Assessment to fix dynamic import issues */}
+            {/* Direct render for Assessment and Insights to fix dynamic import issues */}
             <Route path="/assessment" element={<Assessment />} />
+            <Route path="/insights" element={<Insights />} /> {/* Changed from Suspense wrapper */}
             
             {/* All other routes are lazy loaded */}
-            <Route path="/insights" element={
-              <Suspense fallback={<PageLoader />}>
-                <Insights />
-              </Suspense>
-            } />
-            
             <Route path="/about" element={
               <Suspense fallback={<PageLoader />}>
                 <About />

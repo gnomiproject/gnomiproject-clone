@@ -12,6 +12,12 @@ const Insights = () => {
   const { isFormVisible } = useFormFocusDetection();
   const { selectedArchetype, sessionResults, sessionAnswers, sessionId } = useInsightsData();
 
+  // Add debug logging to help identify issues
+  console.log('[Insights] Rendering main Insights page', { 
+    hasSelectedArchetype: !!selectedArchetype,
+    hasSessionResults: !!sessionResults
+  });
+
   // Handle retaking the assessment
   const handleRetakeAssessment = () => {
     // Navigate to assessment without clearing localStorage or sessionStorage
