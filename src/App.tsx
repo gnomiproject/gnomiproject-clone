@@ -1,14 +1,12 @@
 
-import React, { lazy, Suspense } from 'react';
+import React, { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from '@/components/ui/sonner';
 import FixedHeader from '@/components/layout/FixedHeader';
 import Index from '@/pages/Index';
 import NotFound from '@/pages/NotFound';
-
-// Direct imports for critical routes to avoid dynamic loading issues
 import Assessment from '@/pages/Assessment';
-import Insights from '@/pages/Insights'; // Changed from lazy loading to direct import
+import Insights from '@/pages/Insights'; // Direct import to avoid dynamic loading issues
 
 // Lazy load other non-critical routes
 const About = lazy(() => import('@/pages/About'));
@@ -37,12 +35,26 @@ const PageLoader = () => (
 );
 
 function App() {
-  console.log("App rendering: Route configuration loaded");
+  // Add module loading error tracking
+  useEffect(() => {
+    console.log("App rendering: Routes initialized");
+    
+    // Add global error handler for resource loading failures
+    const handleError = (event) => {
+      console.error("Resource loading error:", {
+        url: event.target?.src || event.target?.href || 'unknown',
+        type: event.target?.tagName || 'unknown'
+      });
+    };
+    
+    window.addEventListener('error', handleError, true);
+    return () => window.removeEventListener('error', handleError, true);
+  }, []);
   
   return (
     <BrowserRouter>
       <div className="app">
-        {/* Fixed header on all pages - Report pages will handle their header visibility themselves */}
+        {/* Fixed header on all pages */}
         <FixedHeader />
         
         {/* Routes without padding to account for header (individual pages will handle their own padding) */}
@@ -53,7 +65,8 @@ function App() {
             
             {/* Direct render for Assessment and Insights to fix dynamic import issues */}
             <Route path="/assessment" element={<Assessment />} />
-            <Route path="/insights" element={<Insights />} /> {/* Changed from Suspense wrapper */}
+            <Route path="/insights" element={<Insights />} />
+            <Route path="/insights/report/:archetypeId" element={<Insights />} />
             
             {/* All other routes are lazy loaded */}
             <Route path="/about" element={
@@ -63,20 +76,12 @@ function App() {
             } />
             
             {/* Report routes - these will handle their own headers */}
-            <Route path="/insights/report/:archetypeId" element={
-              <Suspense fallback={<PageLoader />}>
-                <Insights />
-              </Suspense>
-            } />
-            
-            {/* Deep dive report route with token */}
             <Route path="/report/:archetypeId/:token" element={
               <Suspense fallback={<PageLoader />}>
                 <ReportViewer />
               </Suspense>
             } />
             
-            {/* Deep dive report route without token (fallback) */}
             <Route path="/report/:archetypeId" element={
               <Suspense fallback={<PageLoader />}>
                 <ReportViewer />
@@ -114,7 +119,7 @@ function App() {
               </Suspense>
             } />
             
-            {/* Email diagnostics routes - both with and without parameters */}
+            {/* Email diagnostics routes */}
             <Route path="/admin/email-diagnostics" element={
               <Suspense fallback={<PageLoader />}>
                 <ReportEmailDiagnostic />

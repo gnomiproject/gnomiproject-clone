@@ -26,15 +26,15 @@ const InsightsContainer = ({
   const processedResultRef = useRef<any>(null);
   const [retrying, setRetrying] = React.useState(false);
   
-  // Debug calls to identify load sequence - only log once
+  // Enhanced debugging - log component initialization
   useEffect(() => {
-    console.log(`🔴 [InsightsContainer] Beginning data fetch for ${archetypeId} 🔴`);
+    console.log(`[InsightsContainer] Component mounted for archetype: ${archetypeId}`);
     
     return () => {
       mountedRef.current = false;
       console.log(`[InsightsContainer] Unmounting for ${archetypeId}`);
     };
-  }, [archetypeId]); // Only run on mount and archetypeId change
+  }, [archetypeId]);
   
   // Skip cache here to ensure we get fresh data
   const { 
@@ -54,31 +54,32 @@ const InsightsContainer = ({
     }
     
     renderCountRef.current += 1;
+    console.log(`[InsightsContainer] Processing assessment result for ${archetypeId}, render #${renderCountRef.current}`);
     
-    // Only log on first render or every 5 renders
-    if (renderCountRef.current === 1 || renderCountRef.current % 5 === 0) {
-      console.log(`🔴 [InsightsContainer] Mount/Render #${renderCountRef.current} for ${archetypeId} 🔴`);
-    }
-    
-    // Ensure exactData exists in assessmentResult
-    let processedResult;
-    if (assessmentResult && !assessmentResult.exactData) {
-      const storedEmployeeCount = sessionStorage.getItem('healthcareArchetypeExactEmployeeCount');
-      processedResult = {...assessmentResult};
-      processedResult.exactData = {
-        employeeCount: storedEmployeeCount ? Number(storedEmployeeCount) : null
+    try {
+      // Ensure exactData exists in assessmentResult
+      let processedResult;
+      if (assessmentResult && !assessmentResult.exactData) {
+        const storedEmployeeCount = sessionStorage.getItem('healthcareArchetypeExactEmployeeCount');
+        processedResult = {...assessmentResult};
+        processedResult.exactData = {
+          employeeCount: storedEmployeeCount ? Number(storedEmployeeCount) : null
+        };
+      } else {
+        processedResult = assessmentResult;
+      }
+      
+      // Cache the processed result
+      processedResultRef.current = {
+        originalId: archetypeId,
+        result: processedResult
       };
-    } else {
-      processedResult = assessmentResult;
+      
+      return processedResult;
+    } catch (err) {
+      console.error("[InsightsContainer] Error processing assessment result:", err);
+      return assessmentResult; // Return original on error
     }
-    
-    // Cache the processed result
-    processedResultRef.current = {
-      originalId: archetypeId,
-      result: processedResult
-    };
-    
-    return processedResult;
   }, [assessmentResult, archetypeId]);
   
   // Handle retry logic
@@ -103,6 +104,7 @@ const InsightsContainer = ({
   
   // Show error state if there's an API error
   if (error || !archetypeData) {
+    console.error("[InsightsContainer] Error loading archetype data:", error);
     return (
       <ArchetypeError 
         message="We're having trouble retrieving archetype data. Please try again later or retake the assessment."
