@@ -8,6 +8,7 @@ import MetricsTab from './tabs/MetricsTab';
 import SwotTab from './tabs/SwotTab';
 import DiseaseAndCareTab from './tabs/DiseaseAndCareTab';
 import DeepDiveRequestForm from '@/components/results/DeepDiveRequestForm';
+import ArchetypeFooter from './components/ArchetypeFooter';
 
 interface ArchetypeReportProps {
   archetypeId: ArchetypeId;
@@ -135,6 +136,9 @@ const InsightsView = ({
           />
         </div>
       )}
+
+      {/* Add ArchetypeFooter as an additional call-to-action */}
+      <ArchetypeFooter archetypeHexColor={familyColor} />
     </div>
   );
 };
