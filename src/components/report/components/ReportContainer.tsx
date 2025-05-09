@@ -136,7 +136,7 @@ const ReportContainer: React.FC<ReportContainerProps> = ({
       <div className="relative min-h-screen bg-gray-50">
         {/* Left navigation only on larger screens with adjusted position */}
         {!hideNavbar && (
-          <div className="hidden lg:block fixed left-0 top-16 h-full print:hidden z-10"> {/* Adjust top position for fixed header */}
+          <div className="hidden lg:block fixed left-0 top-16 h-full print:hidden z-10"> 
             <LeftNavigation 
               activeSectionId={activeSectionId}
               onNavigate={debouncedNavigate}

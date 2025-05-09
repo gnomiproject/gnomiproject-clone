@@ -23,6 +23,12 @@ const LeftNavigationBase: React.FC<LeftNavigationProps> = ({
   // Track render performance
   useRenderPerformance('LeftNavigation');
   
+  console.log('[LeftNavigation] Rendering with sections:', { 
+    sectionsCount: sections.length,
+    activeSectionId,
+    sections: sections.map(s => s.id)
+  });
+  
   // Use throttle instead of debounce for navigation links to ensure responsive UI
   // while still preventing excessive function calls
   const throttledNavigate = useCallback(

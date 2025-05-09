@@ -68,7 +68,7 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
         isAdminView={isAdminView}
         debugInfo={debugInfo}
         onNavigate={undefined}
-        hideNavbar={true} // Always hide navbar since we're using FixedHeader
+        hideNavbar={false} // Set to false to ensure the left navigation is visible
       >
         <DeepDiveReportContent 
           archetype={reportData} 
