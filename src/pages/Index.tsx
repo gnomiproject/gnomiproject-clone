@@ -57,14 +57,14 @@ const Index = () => {
     <>
       {/* Hero Section - Added pt-16 to account for fixed header height */}
       <section className="py-8 pt-20 bg-gradient-to-b from-blue-50 to-white relative overflow-hidden">
-        <div className="max-w-6xl mx-auto px-6 md:px-12">
-          <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-            {/* Gnome character positioned to the left */}
-            <div className="md:mt-4">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
+            {/* Gnome character positioned to the left - made larger */}
+            <div className="md:mt-1">
               <WebsiteImage 
                 type="overlook" 
                 altText="Healthcare Gnome" 
-                className="h-32 md:h-48 object-contain"
+                className="h-40 md:h-56 object-contain"
               />
             </div>
             
