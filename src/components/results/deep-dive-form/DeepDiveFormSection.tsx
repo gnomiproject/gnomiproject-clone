@@ -106,7 +106,7 @@ const DeepDiveFormSection = ({ form, onSubmit, isSubmitting, className = '' }: D
               Submitting...
             </>
           ) : (
-            "Request Deep Dive Report"
+            "Request Free Deep Dive Report"
           )}
         </Button>
       </form>

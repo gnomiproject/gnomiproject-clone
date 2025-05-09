@@ -6,6 +6,7 @@ import DeepDiveFormSection, { FormData } from './DeepDiveFormSection';
 import DeepDiveBenefits from './DeepDiveBenefits';
 import RetakeAssessmentLink from './RetakeAssessmentLink';
 import DeepDiveSuccessState from './DeepDiveSuccessState';
+import { Badge } from "@/components/ui/badge";
 
 interface FormLayoutProps {
   archetypeName: string;
@@ -38,13 +39,18 @@ const FormLayout = ({
       <Card className="w-full">
         <CardHeader>
           <CardTitle className="text-xl md:text-2xl flex items-center justify-between">
-            Get your {archetypeName} Deep Dive Report
+            <div className="flex items-center gap-3">
+              Get your {archetypeName} Deep Dive Report
+              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                Free
+              </Badge>
+            </div>
             <span className="print:hidden">
               <RetakeAssessmentLink onRetakeClick={onRetakeAssessment} />
             </span>
           </CardTitle>
           <CardDescription>
-            Complete the form below to receive your personalized report.
+            Complete the form below to receive your personalized report. This comprehensive report is provided at no cost.
           </CardDescription>
         </CardHeader>
         

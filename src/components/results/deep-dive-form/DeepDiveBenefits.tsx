@@ -22,8 +22,9 @@ const DeepDiveBenefits = ({ archetypeName }: DeepDiveBenefitsProps) => {
       </div>
       
       <div className="text-sm text-muted-foreground mt-4 pt-4 border-t">
-        Our team reviews each request individually to provide the most accurate
-        and valuable insights for your organization.
+        <p>Our team reviews each request individually to provide the most accurate
+        and valuable insights for your organization.</p>
+        <p className="mt-2 font-medium text-green-700">This detailed report is completely free of charge.</p>
       </div>
     </div>
   );
