@@ -40,7 +40,7 @@ const FormLayout = ({
         <CardHeader>
           <CardTitle className="text-xl md:text-2xl flex items-center justify-between">
             <div className="flex items-center gap-3">
-              Get your {archetypeName} Deep Dive Report
+              Get your FREE {archetypeName} Deep Dive Report
               <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
                 Free
               </Badge>
@@ -50,7 +50,7 @@ const FormLayout = ({
             </span>
           </CardTitle>
           <CardDescription>
-            Complete the form below to receive your personalized report. This comprehensive report is provided at no cost.
+            Complete the form below to receive your detailed archetype report. It's FREE!.
           </CardDescription>
         </CardHeader>
         
