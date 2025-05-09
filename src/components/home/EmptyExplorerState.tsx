@@ -6,12 +6,12 @@ import WebsiteImage from '@/components/common/WebsiteImage';
 const EmptyExplorerState: React.FC = () => {
   return (
     <div className="flex flex-col md:flex-row items-center bg-blue-50/50 rounded-lg border border-blue-100 p-6 shadow-sm">
-      {/* Left side: Gnome image */}
-      <div className="shrink-0 mb-4 md:mb-0 md:mr-6">
+      {/* Left side: Gnome image - made larger */}
+      <div className="shrink-0 mb-4 md:mb-0 md:mr-8">
         <WebsiteImage 
           type="lefthand" 
           altText="Friendly gnome character" 
-          className="h-32 md:h-40"
+          className="h-40 md:h-48 object-contain"
         />
       </div>
       
