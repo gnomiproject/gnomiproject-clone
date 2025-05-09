@@ -2,13 +2,17 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 const CallToActionSection = () => {
   return (
     <section className="bg-gradient-to-b from-white to-blue-50/30 py-20">
       <div className="container mx-auto px-6 max-w-4xl text-center">
-        <h2 className="text-4xl md:text-5xl font-bold mb-6">
+        <h2 className="text-4xl md:text-5xl font-bold mb-6 flex items-center justify-center gap-3">
           Ready to Discover Your Healthcare Archetype?
+          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+            Free
+          </Badge>
         </h2>
         
         <p className="text-gray-600 text-lg md:text-xl mb-8 leading-relaxed">
@@ -20,7 +24,7 @@ const CallToActionSection = () => {
         </p>
         
         <Button asChild size="lg" className="text-lg px-8 py-6 rounded-full">
-          <Link to="/assessment">Find Your Healthcare Archetype</Link>
+          <Link to="/assessment">Find Your Free Healthcare Archetype</Link>
         </Button>
       </div>
     </section>

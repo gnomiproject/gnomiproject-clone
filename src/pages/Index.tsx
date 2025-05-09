@@ -58,61 +58,63 @@ const Index = () => {
       {/* Hero Section - Added pt-16 to account for fixed header height */}
       <section className="py-8 pt-20 bg-gradient-to-b from-blue-50 to-white relative overflow-hidden">
         <div className="max-w-6xl mx-auto px-6 md:px-12">
-          <div className="flex flex-col items-start">
-            {/* Gnome character positioned to the left with adjusted margin */}
-            <div className="mb-2 self-center md:self-start">
+          <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+            {/* Gnome character positioned to the left */}
+            <div className="md:mt-4">
               <WebsiteImage 
                 type="overlook" 
                 altText="Healthcare Gnome" 
-                className="h-20 md:h-28"
+                className="h-32 md:h-48 object-contain"
               />
             </div>
             
-            {/* Title */}
-            <div className="mb-5 text-left w-full">
-              <h1 className="text-4xl md:text-5xl font-bold">
-                <span className="inline">What's Your Company's </span>
-                <span className="inline text-blue-500">Healthcare Personality?</span>
-              </h1>
-            </div>
+            <div className="flex flex-col">
+              {/* Title */}
+              <div className="mb-5 text-left w-full">
+                <h1 className="text-4xl md:text-5xl font-bold">
+                  <span className="inline">What's Your Company's </span>
+                  <span className="inline text-blue-500">Healthcare Personality?</span>
+                </h1>
+              </div>
 
-            <div className="max-w-3xl space-y-6">
-              <p className="text-xl text-gray-600">
-                Curious why your healthcare program differs from similar companies? Wonder which strategies would work best for your unique workforce?
-              </p>
-              
-              <p className="text-lg text-gray-600">
-                In just 3 minutes, discover which of our nine healthcare archetypes matches your organization. Based on data from 400+ companies and 7+ million members, these archetypes reveal insights that typical industry benchmarks miss.
-              </p>
-            </div>
+              <div className="max-w-3xl space-y-6">
+                <p className="text-xl text-gray-600">
+                  Curious why your healthcare program differs from similar companies? Wonder which strategies would work best for your unique workforce?
+                </p>
+                
+                <p className="text-lg text-gray-600">
+                  In just 3 minutes, discover which of our nine healthcare archetypes matches your organization. Based on data from 400+ companies and 7+ million members, these archetypes reveal insights that typical industry benchmarks miss.
+                </p>
+              </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-start pt-4">
-              <Button asChild size="lg" className="text-lg px-8">
-                <Link to="/assessment">Find Your Archetype</Link>
-              </Button>
-              
-              <Button 
-                variant="secondary" 
-                size="lg" 
-                onClick={scrollToArchetypes}
-                className="text-lg px-8 bg-blue-100 text-blue-600 hover:bg-blue-200"
-              >
-                Explore All Archetypes
-              </Button>
-            </div>
-
-            {dataExists === false && (
-              <div className="mt-6">
-                <p className="text-amber-600 mb-2">No archetype data found in database.</p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-start pt-4">
+                <Button asChild size="lg" className="text-lg px-8">
+                  <Link to="/assessment">Find Your Archetype</Link>
+                </Button>
+                
                 <Button 
-                  variant="outline" 
-                  onClick={handleMigrateData} 
-                  disabled={isMigrating}
+                  variant="secondary" 
+                  size="lg" 
+                  onClick={scrollToArchetypes}
+                  className="text-lg px-8 bg-blue-100 text-blue-600 hover:bg-blue-200"
                 >
-                  {isMigrating ? 'Migrating Data...' : 'Migrate Data to Database'}
+                  Explore All Archetypes
                 </Button>
               </div>
-            )}
+
+              {dataExists === false && (
+                <div className="mt-6">
+                  <p className="text-amber-600 mb-2">No archetype data found in database.</p>
+                  <Button 
+                    variant="outline" 
+                    onClick={handleMigrateData} 
+                    disabled={isMigrating}
+                  >
+                    {isMigrating ? 'Migrating Data...' : 'Migrate Data to Database'}
+                  </Button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </section>
