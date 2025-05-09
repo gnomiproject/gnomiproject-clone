@@ -1,4 +1,3 @@
-
 import React, { useEffect, useMemo, useRef } from 'react';
 import { ArchetypeId, ArchetypeDetailedData } from '@/types/archetype';
 import ArchetypeNavTabs from './components/ArchetypeNavTabs';
@@ -125,7 +124,8 @@ const InsightsView = ({
         {activeTab === 'disease-and-care' && <DiseaseAndCareTab archetypeData={reportData} />}
       </div>
 
-      {!hideRequestSection && processedAssessmentResult && (
+      {/* Always show the DeepDiveRequestForm unless explicitly hidden */}
+      {!hideRequestSection && (
         <div className="border-t border-gray-100 mt-6">
           <DeepDiveRequestForm
             archetypeId={archetypeId}

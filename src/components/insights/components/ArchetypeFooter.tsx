@@ -5,9 +5,10 @@ import { useNavigate } from 'react-router-dom';
 
 interface ArchetypeFooterProps {
   archetypeHexColor: string;
+  onRequestReport?: () => void;
 }
 
-const ArchetypeFooter = ({ archetypeHexColor }: ArchetypeFooterProps) => {
+const ArchetypeFooter = ({ archetypeHexColor, onRequestReport }: ArchetypeFooterProps) => {
   const navigate = useNavigate();
   
   // Get current archetype ID from URL if available
@@ -18,7 +19,13 @@ const ArchetypeFooter = ({ archetypeHexColor }: ArchetypeFooterProps) => {
   };
 
   const handleRequestClick = () => {
-    // Get the current archetype ID from URL or use a default path
+    // First try to use the provided callback
+    if (onRequestReport) {
+      onRequestReport();
+      return;
+    }
+    
+    // Fallback: Get the current archetype ID from URL or use a default path
     const archetypeId = getArchetypeIdFromUrl();
     
     if (!archetypeId) {
@@ -26,7 +33,7 @@ const ArchetypeFooter = ({ archetypeHexColor }: ArchetypeFooterProps) => {
       return;
     }
     
-    // Navigate to the insights/report/{archetypeId} route which should contain the PremiumReport component
+    // Navigate to the insights/report/{archetypeId} route
     navigate(`/insights/report/${archetypeId}`);
   };
 

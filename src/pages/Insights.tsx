@@ -70,6 +70,7 @@ const Insights = () => {
             onRetakeAssessment={handleRetakeAssessment}
             assessmentResult={sessionResults}
             assessmentAnswers={sessionAnswers}
+            hideRequestSection={false} // Explicitly set to false to ensure the form is shown
           />
         ) : (
           <NoAssessmentResults />

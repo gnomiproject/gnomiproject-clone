@@ -12,13 +12,15 @@ interface InsightsContainerProps {
   onRetakeAssessment: () => void;
   assessmentResult?: any;
   assessmentAnswers?: any;
+  hideRequestSection?: boolean;
 }
 
 const InsightsContainer = ({ 
   archetypeId, 
   onRetakeAssessment,
   assessmentResult,
-  assessmentAnswers 
+  assessmentAnswers,
+  hideRequestSection = false
 }: InsightsContainerProps) => {
   // Always define hooks first regardless of condition
   const renderCountRef = useRef(0);
@@ -138,13 +140,14 @@ const InsightsContainer = ({
     familyName: archetypeData.familyName || archetypeData.family_name || 'Healthcare Archetype'
   };
   
+  // Explicitly pass the hideRequestSection prop
   return (
     <InsightsView 
       archetypeId={archetypeId}
       reportData={safeArchetypeData}
       assessmentResult={processedAssessmentResult}
       assessmentAnswers={assessmentAnswers}
-      hideRequestSection={false}
+      hideRequestSection={hideRequestSection}
     />
   );
 };
