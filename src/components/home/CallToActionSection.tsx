@@ -10,9 +10,6 @@ const CallToActionSection = () => {
       <div className="container mx-auto px-6 max-w-4xl text-center">
         <h2 className="text-4xl md:text-5xl font-bold mb-6 flex items-center justify-center gap-3">
           Ready to Discover Your Healthcare Archetype?
-          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-            Free
-          </Badge>
         </h2>
         
         <p className="text-gray-600 text-lg md:text-xl mb-8 leading-relaxed">
