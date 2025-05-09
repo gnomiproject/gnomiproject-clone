@@ -19,6 +19,7 @@ export const useInsightsData = () => {
   const [sessionResults, setSessionResults] = useState<AssessmentResult | null>(null);
   const [sessionAnswers, setSessionAnswers] = useState<any | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const location = useLocation();
   const queryClient = useQueryClient();
   
@@ -31,6 +32,14 @@ export const useInsightsData = () => {
 
   // Add debug logging to track hook execution
   console.log('[useInsightsData] Hook initializing');
+
+  // Reset location processing on unmount or location change
+  useEffect(() => {
+    return () => {
+      // Reset the processed flag when component unmounts or route changes
+      locationProcessedRef.current = false;
+    };
+  }, [location.pathname]);
 
   // Load session ID and answers once
   useEffect(() => {
@@ -60,6 +69,7 @@ export const useInsightsData = () => {
   // Handle archetypes from different sources
   useEffect(() => {
     console.log("[useInsightsData] Checking for archetype data sources");
+    setIsLoading(true);
     
     try {
       // Avoid processing the same location state multiple times
@@ -125,11 +135,15 @@ export const useInsightsData = () => {
         
         // Clear the location state to avoid persisting the selection on refresh
         window.history.replaceState({}, document.title);
+        setIsLoading(false);
         return; // Exit early since we processed location state
       }
       
       // Only proceed with storage checks if we don't already have an archetype
-      if (lastArchetypeRef.current) return;
+      if (lastArchetypeRef.current) {
+        setIsLoading(false);
+        return;
+      }
       
       // Source 2: Check sessionStorage for results from current session
       const sessionResultsStr = sessionStorage.getItem(SESSION_RESULTS_KEY);
@@ -160,6 +174,7 @@ export const useInsightsData = () => {
             staleTime: 5 * 60 * 1000 // 5 minutes
           });
         }
+        setIsLoading(false);
         return; // Exit early since we have an archetype
       } 
       
@@ -203,6 +218,9 @@ export const useInsightsData = () => {
       }
     } catch (error) {
       console.error('[useInsightsData] Error processing archetype data:', error);
+    } finally {
+      // Always set loading to false to prevent infinite loading state
+      setIsLoading(false);
     }
   }, [location, queryClient]); // Remove sessionResults from the dependency array
 
@@ -210,6 +228,7 @@ export const useInsightsData = () => {
     selectedArchetype,
     sessionResults,
     sessionAnswers,
-    sessionId
+    sessionId,
+    isLoading
   };
 };

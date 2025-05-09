@@ -25,13 +25,22 @@ const InsightsContainer = ({
   const mountedRef = useRef(true);
   const processedResultRef = useRef<any>(null);
   const [retrying, setRetrying] = React.useState(false);
+  const [initialLoadComplete, setInitialLoadComplete] = React.useState(false);
   
   // Enhanced debugging - log component initialization
   useEffect(() => {
     console.log(`[InsightsContainer] Component mounted for archetype: ${archetypeId}`);
     
+    // Mark initial load as complete after a short delay
+    const timer = setTimeout(() => {
+      if (mountedRef.current) {
+        setInitialLoadComplete(true);
+      }
+    }, 500);
+    
     return () => {
       mountedRef.current = false;
+      clearTimeout(timer);
       console.log(`[InsightsContainer] Unmounting for ${archetypeId}`);
     };
   }, [archetypeId]);
@@ -98,12 +107,12 @@ const InsightsContainer = ({
   };
   
   // Show loading state
-  if (isLoading) {
+  if (isLoading && !initialLoadComplete) {
     return <ArchetypeLoadingSkeleton />;
   }
   
   // Show error state if there's an API error
-  if (error || !archetypeData) {
+  if ((error || !archetypeData) && initialLoadComplete) {
     console.error("[InsightsContainer] Error loading archetype data:", error);
     return (
       <ArchetypeError 
@@ -113,6 +122,11 @@ const InsightsContainer = ({
         isRetrying={retrying}
       />
     );
+  }
+  
+  // Handle the edge case where archetypeData is still undefined but we're not technically "loading"
+  if (!archetypeData) {
+    return <ArchetypeLoadingSkeleton />;
   }
   
   // Create a default fallback for basic props to prevent null errors
