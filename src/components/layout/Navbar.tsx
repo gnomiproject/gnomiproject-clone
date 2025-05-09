@@ -2,12 +2,17 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { Menu } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { BetaBadge } from '@/components/shared/BetaBadge';
 import WebsiteImage from '@/components/common/WebsiteImage';
 import { testRlsAccess } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { 
+  Sheet, 
+  SheetContent, 
+  SheetTrigger 
+} from '@/components/ui/sheet';
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -50,26 +55,24 @@ const Navbar = () => {
       </Link>
       
       {isMobile ? (
-        <>
-          <button 
-            onClick={toggleMobileMenu}
-            className="flex items-center p-2 focus:outline-none"
-            aria-label="Toggle navigation menu"
-          >
-            <Menu size={24} />
-          </button>
-          
-          {mobileMenuOpen && (
-            <div className="absolute top-full left-0 right-0 bg-white shadow-md z-50 mt-1">
-              <div className="flex flex-col py-3">
-                <MobileNavLink to="/" onClick={() => setMobileMenuOpen(false)}>Home</MobileNavLink>
-                <MobileNavLink to="/assessment" onClick={() => setMobileMenuOpen(false)}>Assessment</MobileNavLink>
-                <MobileNavLink to="/insights" onClick={() => setMobileMenuOpen(false)}>Insights</MobileNavLink>
-                <MobileNavLink to="/about" onClick={() => setMobileMenuOpen(false)}>About</MobileNavLink>
-              </div>
+        <Sheet>
+          <SheetTrigger asChild>
+            <button 
+              className="flex items-center p-2 focus:outline-none"
+              aria-label="Toggle navigation menu"
+            >
+              <Menu size={24} />
+            </button>
+          </SheetTrigger>
+          <SheetContent side="right" className="w-[250px] sm:w-[300px] pt-12">
+            <div className="flex flex-col py-3 space-y-1">
+              <MobileNavLink to="/">Home</MobileNavLink>
+              <MobileNavLink to="/assessment">Assessment</MobileNavLink>
+              <MobileNavLink to="/insights">Insights</MobileNavLink>
+              <MobileNavLink to="/about">About</MobileNavLink>
             </div>
-          )}
-        </>
+          </SheetContent>
+        </Sheet>
       ) : (
         <div className="flex items-center gap-8">
           <NavLink to="/">Home</NavLink>
@@ -116,7 +119,7 @@ const MobileNavLink = ({
       to={to}
       onClick={onClick}
       className={cn(
-        "text-base font-medium transition-colors px-6 py-2",
+        "text-base font-medium transition-colors py-3 px-4 rounded-md",
         isActive ? "text-blue-500 bg-gray-100" : "text-gray-800 hover:bg-gray-50 hover:text-blue-500"
       )}
     >
