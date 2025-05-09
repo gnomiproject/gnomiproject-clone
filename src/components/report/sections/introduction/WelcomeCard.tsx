@@ -43,8 +43,8 @@ const WelcomeCard = ({
   
   return (
     <Card className="p-6 border border-gray-200 bg-gradient-to-br from-white to-slate-50 shadow-md welcome-card-container">
-      <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-2">
-        <div className="hidden md:block mr-2">
+      <div className="flex flex-col md:flex-row items-center md:items-start gap-0">
+        <div className="hidden md:block">
           <WebsiteImage 
             type="righthand" 
             altText="Healthcare Gnome" 
@@ -63,7 +63,7 @@ const WelcomeCard = ({
           </div>
           
           <h2 className="text-xl font-semibold mb-1">
-            Welcome, <span style={{ color: archetypeColor }}>{userName}</span>
+            Welcome, <span className="text-gray-900 font-bold">{userName}</span>
           </h2>
           
           <p className="text-gray-700">
