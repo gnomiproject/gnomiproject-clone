@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartBar } from 'lucide-react';
@@ -34,7 +35,7 @@ const CarePathwayUtilization = ({
       </CardHeader>
       <CardContent className="p-4">
         <p className="text-gray-600 mb-6">
-          This analysis shows how members utilize primary, specialty, emergency, and urgent care services compared to the archetype average.
+          This analysis shows how members utilize primary, specialty, emergency, and urgent care services compared to the archetype average (a weighted average across all healthcare archetypes).
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

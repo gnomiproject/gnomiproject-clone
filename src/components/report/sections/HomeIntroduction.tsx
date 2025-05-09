@@ -5,6 +5,7 @@ import SectionTitle from '@/components/shared/SectionTitle';
 import ReportIntroduction from './ReportIntroduction';
 import WelcomeCard from './introduction/WelcomeCard';
 import ArchetypeInsightsCard from './introduction/ArchetypeInsightsCard';
+import AverageExplanationCard from './introduction/AverageExplanationCard';
 import WebsiteImage from '@/components/common/WebsiteImage';
 
 interface HomeIntroductionProps {
@@ -120,6 +121,9 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
           secondaryArchetype={secondaryArchetype}
         />
       </div>
+      
+      {/* Add Average Explanation Card */}
+      <AverageExplanationCard />
       
       {/* Insights Card */}
       <div className="mt-8 mb-8" data-section="insights-card">

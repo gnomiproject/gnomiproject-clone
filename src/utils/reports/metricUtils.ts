@@ -7,7 +7,7 @@
  * Calculate the percentage difference between a value and an average
  * 
  * @param value The value to compare
- * @param average The average to compare against
+ * @param average The archetype average to compare against
  * @returns The percentage difference (e.g., 10.5 for 10.5% higher)
  */
 export const calculatePercentageDifference = (value: number, average: number): number => {
@@ -95,7 +95,7 @@ export const formatPercentageDifference = (percentDiff: number): string => {
  * Get comparison text and color for a metric
  * 
  * @param value The value to compare
- * @param average The average to compare against
+ * @param average The archetype average to compare against
  * @param metricName The name of the metric
  * @returns Object with text and color properties
  */
@@ -115,12 +115,12 @@ export const getMetricComparisonText = (value: number, average: number, metricNa
   
   // Handle values that are virtually the same
   if (Math.abs(percentDiff) < 0.1) {
-    return { text: 'Same as average', color: 'text-gray-600' };
+    return { text: 'Same as archetype average', color: 'text-gray-600' };
   }
   
   // Determine display text
   const comparisonWord = percentDiff > 0 ? "higher than" : "lower than";
-  const text = `${Math.abs(percentDiff).toFixed(1)}% ${comparisonWord} average`;
+  const text = `${Math.abs(percentDiff).toFixed(1)}% ${comparisonWord} archetype average`;
   
   // Determine color for the comparison text
   const color = isPositive ? "text-green-600" : percentDiff === 0 ? "text-gray-600" : "text-amber-600";

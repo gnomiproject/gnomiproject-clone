@@ -1,8 +1,9 @@
 
 import React from 'react';
 import { Card } from '@/components/ui/card';
-import { ArrowDown, ArrowUp } from 'lucide-react';
+import { ArrowDown, ArrowUp, Info } from 'lucide-react';
 import { calculatePercentageDifference, getMetricComparisonText } from '@/utils/reports/metricUtils';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface MetricCardProps {
   title: string;
@@ -50,13 +51,25 @@ const MetricCard = ({
   return (
     <Card className="overflow-hidden border border-gray-100">
       <div className="p-4">
-        <h3 className="text-sm font-medium text-gray-600 mb-1">{title}</h3>
+        <h3 className="text-sm font-medium text-gray-600 mb-1 flex items-center">
+          {title}
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className="h-4 w-4 ml-2 text-gray-400 cursor-help" />
+              </TooltipTrigger>
+              <TooltipContent className="max-w-xs">
+                <p>Compared to a weighted average across all healthcare archetypes</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </h3>
         <div className="flex items-baseline gap-1">
           <span className="text-2xl font-bold">{formatValue(value)}</span>
         </div>
         <div className="mt-2 flex items-center justify-between">
           <span className="text-xs text-gray-500">
-            Avg: {formatValue(average)}
+            Archetype avg: {formatValue(average)}
           </span>
           <div className={`flex items-center ${isPositive ? 'text-green-600' : 'text-amber-600'}`}>
             {isPositive ? (

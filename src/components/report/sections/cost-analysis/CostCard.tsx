@@ -2,6 +2,8 @@
 import React from 'react';
 import { DollarSign } from 'lucide-react';
 import { formatNumber } from '@/utils/formatters';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Info } from 'lucide-react';
 
 interface CostCardProps { 
   title: string; 
@@ -30,7 +32,19 @@ const CostCard = ({
         }`}>
           {icon}
         </div>
-        <h3 className="font-medium">{title}</h3>
+        <h3 className="font-medium flex items-center">
+          {title}
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className="h-4 w-4 ml-2 text-gray-400 cursor-help" />
+              </TooltipTrigger>
+              <TooltipContent className="max-w-xs">
+                <p>Compared to a weighted average across all healthcare archetypes</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </h3>
       </div>
       <div className="mt-2">
         <div className="text-2xl font-bold">
@@ -48,24 +62,24 @@ const CostCard = ({
 };
 
 // Format comparison text and determine if it's positive or negative
-const formatComparison = (value: number, benchmark: number, betterDirection: 'higher' | 'lower' = 'higher'): { text: string; type: 'positive' | 'negative' | 'neutral' } => {
-  if (!value || !benchmark) {
+const formatComparison = (value: number, archetypeAverage: number, betterDirection: 'higher' | 'lower' = 'higher'): { text: string; type: 'positive' | 'negative' | 'neutral' } => {
+  if (!value || !archetypeAverage) {
     return { text: 'No comparison data', type: 'neutral' };
   }
   
-  const diff = value - benchmark;
-  const percentDiff = (diff / benchmark) * 100;
+  const diff = value - archetypeAverage;
+  const percentDiff = (diff / archetypeAverage) * 100;
   
   if (Math.abs(percentDiff) < 1) {
-    return { text: 'On par with population average', type: 'neutral' };
+    return { text: 'On par with archetype average', type: 'neutral' };
   }
   
   const direction = diff > 0 ? 'higher' : 'lower';
   
-  // Format the benchmark/average value
-  const formattedAverage = `$${benchmark.toLocaleString()}`;
+  // Format the archetype average value
+  const formattedAverage = `$${archetypeAverage.toLocaleString()}`;
     
-  const text = `${Math.abs(percentDiff).toFixed(1)}% ${direction} than average (${formattedAverage})`;
+  const text = `${Math.abs(percentDiff).toFixed(1)}% ${direction} than archetype average (${formattedAverage})`;
   
   // Determine if this is positive or negative based on the direction
   const isPositive = 

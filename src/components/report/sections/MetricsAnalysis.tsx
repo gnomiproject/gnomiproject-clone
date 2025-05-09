@@ -45,7 +45,7 @@ const MetricsAnalysis: React.FC<MetricsAnalysisProps> = ({
       <SectionTitle title="Metrics Analysis" />
       <div className="bg-white rounded-lg p-6 shadow-sm">
         <p className="text-gray-600 mb-6">
-          This section provides a detailed analysis of key metrics for {data.name || data.archetype_name}.
+          This section provides a detailed analysis of key metrics for {data.name || data.archetype_name}, compared to the archetype average (a weighted average across all healthcare archetypes).
         </p>
         
         <div className="mt-6 h-80">
@@ -64,7 +64,7 @@ const MetricsAnalysis: React.FC<MetricsAnalysisProps> = ({
               <YAxis />
               <Tooltip />
               <Bar dataKey="value" name="Your Archetype" fill="#8884d8" />
-              <Bar dataKey="average" name="Population Average" fill="#82ca9d" />
+              <Bar dataKey="average" name="Archetype Average" fill="#82ca9d" />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -80,18 +80,18 @@ const MetricsAnalysis: React.FC<MetricsAnalysisProps> = ({
                     <p className="text-xl font-bold">{metric.value.toLocaleString()}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm text-gray-500">Population average</p>
+                    <p className="text-sm text-gray-500">Archetype average</p>
                     <p className="text-lg">{metric.average.toLocaleString()}</p>
                   </div>
                 </div>
                 <div className="mt-2">
                   {metric.value > metric.average ? (
                     <p className="text-amber-600 text-sm">
-                      {Math.round((metric.value / metric.average - 1) * 100)}% higher than average
+                      {Math.round((metric.value / metric.average - 1) * 100)}% higher than archetype average
                     </p>
                   ) : (
                     <p className="text-green-600 text-sm">
-                      {Math.round((1 - metric.value / metric.average) * 100)}% lower than average
+                      {Math.round((1 - metric.value / metric.average) * 100)}% lower than archetype average
                     </p>
                   )}
                 </div>

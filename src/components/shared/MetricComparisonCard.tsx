@@ -2,6 +2,8 @@
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { calculatePercentageDifference, getMetricComparisonText } from '@/utils/reports/metricUtils';
+import { Info } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface MetricComparisonCardProps {
   title: string;
@@ -12,7 +14,7 @@ interface MetricComparisonCardProps {
 }
 
 /**
- * A card component that displays a metric value with a comparison to the average
+ * A card component that displays a metric value with a comparison to the archetype average
  */
 const MetricComparisonCard = ({ 
   title, 
@@ -33,14 +35,29 @@ const MetricComparisonCard = ({
   return (
     <Card className={`overflow-hidden ${className}`}>
       <CardContent className="p-6">
-        <h3 className="text-lg font-medium text-gray-700 mb-1">{title}</h3>
+        <h3 className="text-lg font-medium text-gray-700 mb-1 flex items-center">
+          {title}
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className="h-4 w-4 ml-2 text-gray-400 cursor-help" />
+              </TooltipTrigger>
+              <TooltipContent className="max-w-xs">
+                <p>Compared to a weighted average across all healthcare archetypes</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </h3>
         <div className="flex items-baseline gap-1">
           <span className="text-3xl font-bold">{value.toLocaleString()}</span>
           {unit && <span className="text-gray-500">{unit}</span>}
         </div>
-        <p className={`mt-2 ${color}`}>
-          {text}
-        </p>
+        <div className="flex justify-between items-center mt-2">
+          <span className="text-sm text-gray-500">Archetype avg: {formattedAverage}{unit}</span>
+          <p className={`${color}`}>
+            {text}
+          </p>
+        </div>
       </CardContent>
     </Card>
   );

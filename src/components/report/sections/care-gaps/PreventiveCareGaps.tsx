@@ -2,7 +2,8 @@
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { calculatePercentageDifference } from '@/utils/reports/metricUtils';
-import { Calendar } from 'lucide-react';
+import { Calendar, Info } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface PreventiveCareGapsProps {
   reportData: any;
@@ -35,7 +36,7 @@ const PreventiveCareGaps: React.FC<PreventiveCareGapsProps> = ({ reportData, ave
     
     const diff = calculatePercentageDifference(value, avgValue);
     const sign = diff > 0 ? '+' : '';
-    return `${sign}${diff.toFixed(1)}% vs avg`;
+    return `${sign}${diff.toFixed(1)}% vs archetype avg`;
   };
 
   const getTextColor = (value: number, avgValue: number) => {
@@ -51,6 +52,16 @@ const PreventiveCareGaps: React.FC<PreventiveCareGapsProps> = ({ reportData, ave
         <CardTitle className="flex items-center gap-2 text-lg">
           <Calendar className="h-5 w-5 text-blue-600" />
           <span>Preventive Care</span>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className="h-4 w-4 ml-2 text-gray-400 cursor-help" />
+              </TooltipTrigger>
+              <TooltipContent className="max-w-xs">
+                <p>All comparisons are to the archetype average (a weighted average across all healthcare archetypes)</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </CardTitle>
       </CardHeader>
       <CardContent>

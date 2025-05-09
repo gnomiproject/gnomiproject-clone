@@ -2,6 +2,8 @@
 import React, { useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { calculatePercentageDifference } from '@/utils/reports/metricUtils';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Info } from 'lucide-react';
 
 interface WorkforceSummaryCardProps {
   title: string;
@@ -36,7 +38,7 @@ const WorkforceSummaryCard: React.FC<WorkforceSummaryCardProps> = ({
       average,
       percentDiff,
       calculation: `(${value} - ${average}) / ${average} * 100 = ${percentDiff.toFixed(1)}%`,
-      source: 'Using All_Average from database'
+      source: 'Using archetype average'
     });
   }, [value, average, title, percentDiff]);
   
@@ -49,8 +51,8 @@ const WorkforceSummaryCard: React.FC<WorkforceSummaryCardProps> = ({
   // Determine display text
   const comparisonWord = percentDiff > 0 ? "higher than" : "lower than";
   const comparisonText = Math.abs(percentDiff) < 0.1 ? 
-    "same as average" : 
-    `${Math.abs(percentDiff).toFixed(1)}% ${comparisonWord} average`;
+    "same as archetype average" : 
+    `${Math.abs(percentDiff).toFixed(1)}% ${comparisonWord} archetype average`;
   
   // Determine color for the comparison text
   const textColor = isPositive ? "text-green-600" : Math.abs(percentDiff) < 0.1 ? "text-gray-600" : "text-amber-600";
@@ -62,7 +64,19 @@ const WorkforceSummaryCard: React.FC<WorkforceSummaryCardProps> = ({
           <div className="p-2 rounded-full bg-blue-100 text-blue-800 mr-2">
             {icon}
           </div>
-          <h3 className="text-sm font-medium text-gray-700">{title}</h3>
+          <h3 className="text-sm font-medium text-gray-700 flex items-center">
+            {title}
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="h-4 w-4 ml-2 text-gray-400 cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p>Compared to a weighted average across all healthcare archetypes</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </h3>
         </div>
         
         <div className="mt-2">
