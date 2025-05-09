@@ -12,19 +12,17 @@ const DeepDiveBenefits = ({ archetypeName }: DeepDiveBenefitsProps) => {
       <h3 className="font-semibold text-lg">Your {archetypeName} Deep Dive Report Includes:</h3>
       
       <div className="space-y-4">
-        <BenefitItem text="Detailed profile analysis customized for your healthcare organization" />
+        <BenefitItem text="Detailed profile analysis of your matched archetype" />
         <BenefitItem text="Strategic recommendations tailored to your archetype" />
         <BenefitItem text="Comprehensive utilization patterns analysis" />
-        <BenefitItem text="Cost efficiency opportunities specific to your needs" />
-        <BenefitItem text="Disease management insights for your population" />
-        <BenefitItem text="Demographic trend analysis" />
+        <BenefitItem text="Detailed cost savings opportunities" />
+        <BenefitItem text="Disease prevalence insights" />
+        <BenefitItem text="Holistic emographic insights" />
         <BenefitItem text="Care gap identification and solutions" />
       </div>
       
       <div className="text-sm text-muted-foreground mt-4 pt-4 border-t">
-        <p>Our team reviews each request individually to provide the most accurate
-        and valuable insights for your organization.</p>
-        <p className="mt-2 font-medium text-green-700">This detailed report is completely free of charge.</p>
+        <p>We'll email the report directly to your inbox. And, it's free!.</p>
       </div>
     </div>
   );
