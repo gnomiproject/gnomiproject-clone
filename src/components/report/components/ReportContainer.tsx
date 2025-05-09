@@ -7,7 +7,7 @@ import { debounce } from '@/utils/debounce';
 import { useRenderPerformance } from '@/components/shared/PerformanceMonitor';
 import ReportBodyContent from './ReportBodyContent';
 
-// Create sections array for LeftNavigation
+// Create sections array for LeftNavigation - Ensure this matches exactly with section IDs in ReportSections.tsx
 const REPORT_SECTIONS = [
   { id: 'introduction', name: 'Introduction' },
   { id: 'archetype-profile', name: 'Archetype Profile' },
@@ -135,13 +135,15 @@ const ReportContainer: React.FC<ReportContainerProps> = ({
     return (
       <div className="relative min-h-screen bg-gray-50">
         {/* Left navigation only on larger screens with adjusted position */}
-        <div className="hidden lg:block fixed left-0 top-16 h-full print:hidden z-10"> {/* Adjust top position for fixed header */}
-          <LeftNavigation 
-            activeSectionId={activeSectionId}
-            onNavigate={debouncedNavigate}
-            sections={REPORT_SECTIONS}
-          />
-        </div>
+        {!hideNavbar && (
+          <div className="hidden lg:block fixed left-0 top-16 h-full print:hidden z-10"> {/* Adjust top position for fixed header */}
+            <LeftNavigation 
+              activeSectionId={activeSectionId}
+              onNavigate={debouncedNavigate}
+              sections={REPORT_SECTIONS}
+            />
+          </div>
+        )}
         
         {/* Print button */}
         <PrintButton 
@@ -151,7 +153,7 @@ const ReportContainer: React.FC<ReportContainerProps> = ({
 
         {/* Main report content - apply padding-top to account for fixed header */}
         <div 
-          className="lg:pl-64 py-6 print:py-0 print:pl-0 pt-16" 
+          className={`${!hideNavbar ? 'lg:pl-64' : ''} py-6 print:py-0 print:pl-0 pt-16`}
           ref={reportRef}
         >
           {children ? (

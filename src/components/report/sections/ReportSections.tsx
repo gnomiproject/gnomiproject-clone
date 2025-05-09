@@ -83,12 +83,14 @@ const ReportSections: React.FC<ReportSectionsProps> = ({
         <ArchetypeProfileSection archetypeData={reportData} />
       </ErrorBoundary>
       
-      {/* Rest of the sections */}
+      {/* Demographics Section - Ensuring proper section ID */}
       <ErrorBoundary>
-        <DemographicsSection 
-          reportData={reportData} 
-          averageData={averageData} 
-        />
+        <Section id="demographics">
+          <DemographicsSection 
+            reportData={reportData} 
+            averageData={averageData} 
+          />
+        </Section>
       </ErrorBoundary>
       
       {/* Utilization Patterns Section */}
@@ -127,19 +129,21 @@ const ReportSections: React.FC<ReportSectionsProps> = ({
         </Section>
       </ErrorBoundary>
       
-      {/* SWOT Analysis Section - Removed SectionTitle since DeepDiveSwotAnalysis already has one */}
+      {/* SWOT Analysis Section */}
       <ErrorBoundary>
         <Section id="swot-analysis">
           <SwotAnalysis reportData={reportData} />
         </Section>
       </ErrorBoundary>
       
-      {/* Strategic Recommendations Section */}
+      {/* Strategic Recommendations Section - Fixed with proper ID */}
       <ErrorBoundary>
-        <StrategicRecommendationsSection
-          reportData={reportData}
-          averageData={averageData}
-        />
+        <Section id="recommendations">
+          <StrategicRecommendationsSection
+            reportData={reportData}
+            averageData={averageData}
+          />
+        </Section>
       </ErrorBoundary>
       
       {/* About This Report Section */}

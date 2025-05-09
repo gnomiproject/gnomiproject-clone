@@ -22,6 +22,7 @@ export const useReportNavigation = ({ initialSectionId = 'introduction' }: UseRe
       return;
     }
     
+    console.log(`[Navigation] Navigating to section: ${sectionId}`);
     setIsNavigating(true);
     setActiveSectionId(sectionId);
     lastNavigationTime.current = now;
@@ -30,10 +31,13 @@ export const useReportNavigation = ({ initialSectionId = 'introduction' }: UseRe
     const element = document.getElementById(sectionId);
     if (element) {
       try {
+        console.log(`[Navigation] Scrolling to element with ID: ${sectionId}`);
         element.scrollIntoView({ behavior: 'smooth' });
       } catch (error) {
         console.error('Error scrolling to section:', error);
       }
+    } else {
+      console.warn(`[Navigation] Element with ID ${sectionId} not found`);
     }
     
     // Reset navigation state after a short delay
@@ -48,8 +52,8 @@ export const useReportNavigation = ({ initialSectionId = 'introduction' }: UseRe
     const throttledScrollHandler = debounce(() => {
       if (isNavigating) return;
       
-      // Get all section elements
-      const sections = document.querySelectorAll('[id^="introduction"], [id^="executive-summary"], [id^="archetype-profile"], [id^="swot-analysis"], [id^="demographics"], [id^="cost-analysis"], [id^="utilization-patterns"], [id^="disease-management"], [id^="care-gaps"], [id^="risk-factors"], [id^="recommendations"], [id^="contact"]');
+      // Get all section elements - ensure these IDs match the ones in ReportSections.tsx
+      const sections = document.querySelectorAll('[id^="introduction"], [id^="executive-summary"], [id^="archetype-profile"], [id^="demographics"], [id^="utilization-patterns"], [id^="disease-management"], [id^="care-gaps"], [id^="risk-factors"], [id^="cost-analysis"], [id^="swot-analysis"], [id^="recommendations"], [id^="about-report"]');
       
       // Find the section that's most visible in the viewport
       let mostVisibleSection = null;
@@ -70,6 +74,7 @@ export const useReportNavigation = ({ initialSectionId = 'introduction' }: UseRe
       if (mostVisibleSection && maxVisibility > 0.3) {
         const sectionId = mostVisibleSection.id;
         if (sectionId !== activeSectionId) {
+          console.log(`[Navigation] Updating active section to ${sectionId} based on scroll`);
           setActiveSectionId(sectionId);
         }
       }

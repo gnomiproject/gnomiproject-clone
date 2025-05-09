@@ -8,6 +8,7 @@ import GeographicPresence from './demographics/GeographicPresence';
 import DemographicInsights from './demographics/DemographicInsights';
 import { formatNumber } from '@/utils/formatters';
 import { calculateCostPerMember } from '@/utils/reports/costUtils';
+import SectionTitle from '@/components/shared/SectionTitle';
 
 interface DemographicsSectionProps {
   reportData: any;
@@ -41,16 +42,6 @@ const DemographicsSection: React.FC<DemographicsSectionProps> = ({
   const avgAge = averageData?.["Demo_Average Age"] || 0;
   const avgSalary = averageData?.["Demo_Average Salary"] || 0;
   
-  // Log comparison data for debugging
-  console.log('[DemographicsSection] Comparison Data:', {
-    employees, avgEmployees,
-    members, avgMembers,
-    familySize, avgFamilySize,
-    states, avgStates,
-    age, avgAge,
-    salary, avgSalary
-  });
-  
   // Demographic insights
   const insights = reportData?.demographic_insights || '';
   
@@ -58,7 +49,10 @@ const DemographicsSection: React.FC<DemographicsSectionProps> = ({
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row gap-6">
         <div className="w-full">
-          <h1 className="text-3xl font-bold mb-4">Demographics</h1>
+          <SectionTitle 
+            title="Demographics" 
+            subtitle="Understanding your workforce population"
+          />
           
           <p className="text-lg mb-6">
             Understanding your workforce demographics provides valuable context for healthcare needs and 

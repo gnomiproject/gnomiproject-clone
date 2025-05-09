@@ -27,6 +27,7 @@ const LeftNavigationBase: React.FC<LeftNavigationProps> = ({
   // while still preventing excessive function calls
   const throttledNavigate = useCallback(
     throttle((sectionId: string) => {
+      console.log(`[LeftNavigation] Navigating to section: ${sectionId}`);
       onNavigate(sectionId);
     }, 250),
     [onNavigate]
