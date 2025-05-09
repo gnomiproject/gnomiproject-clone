@@ -48,19 +48,25 @@ const ExplorerSidebar: React.FC<ExplorerSidebarProps> = ({
     );
   }
 
-  // Default state: Show gnome and CTA with hyperlink instead of button
+  // Default state: Show gnome and CTA with hyperlink - now with horizontal layout
   return (
-    <div className="bg-blue-50 p-6 rounded-lg border border-blue-100 flex flex-col items-center justify-center">
-      <WebsiteImage 
-        type="lefthand" 
-        altText="Friendly gnome character"
-        className="h-32 mb-4"
-      />
+    <div className="bg-blue-50 p-6 rounded-lg border border-blue-100 flex flex-row items-center">
+      {/* Left side: Gnome image - increased size */}
+      <div className="shrink-0 mr-6">
+        <WebsiteImage 
+          type="lefthand" 
+          altText="Friendly gnome character"
+          className="h-40 md:h-48 object-contain"
+        />
+      </div>
       
-      <h3 className="text-2xl font-bold text-blue-700 mb-2">Come Play with the DNA!</h3>
-      <p className="text-gray-600 mb-6 text-center">
-        Click around the helix to explore what makes each archetype unique. Then <Link to="/assessment" className="text-blue-600 hover:text-blue-800 font-medium underline">take the assessment</Link> to discover which one matches your organization.
-      </p>
+      {/* Right side: Text and CTA */}
+      <div className="flex flex-col">
+        <h3 className="text-2xl font-bold text-blue-700 mb-2">Come Play with the DNA!</h3>
+        <p className="text-gray-600">
+          Click around the helix to explore what makes each archetype unique. Then <Link to="/assessment" className="text-blue-600 hover:text-blue-800 font-medium underline">take the assessment</Link> to discover which one matches your organization.
+        </p>
+      </div>
     </div>
   );
 };
