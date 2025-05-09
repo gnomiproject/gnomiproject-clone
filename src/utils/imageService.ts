@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 // Common image types used throughout the site
@@ -32,6 +33,11 @@ const IMAGE_URL_MAP: Record<string, string> = {
   'favicon': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnomi_favicon.png',
   'logo': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/g.nomi_logo.png',
   'righthand': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_righthand.png',
+  
+  // Add family fallbacks to avoid 404s
+  'a': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_chart.png',
+  'b': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_chart.png',
+  'c': 'https://qsecdncdiykzuimtaosp.supabase.co/storage/v1/object/public/gnome-images/gnome_chart.png',
 };
 
 /**
@@ -41,6 +47,11 @@ const IMAGE_URL_MAP: Record<string, string> = {
  */
 export const getImageUrl = (imageName: string): string => {
   try {
+    // Handle single-letter family identifiers (a, b, c)
+    if (/^[a-c]$/.test(imageName)) {
+      return IMAGE_URL_MAP['chart'];
+    }
+    
     // First check if we have a direct mapping for this image
     if (IMAGE_URL_MAP[imageName]) {
       return IMAGE_URL_MAP[imageName];
@@ -76,7 +87,7 @@ export const getImageUrl = (imageName: string): string => {
  * @returns The appropriate image type for this archetype
  */
 export const getImageForArchetype = (archetypeId: string): WebsiteImageType => {
-  // Using chart for all archetypes
+  // Always use chart for all archetypes
   return 'chart';
 };
 

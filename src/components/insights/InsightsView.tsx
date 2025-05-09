@@ -1,3 +1,4 @@
+
 import React, { useEffect, useMemo } from 'react';
 import { ArchetypeId, ArchetypeDetailedData } from '@/types/archetype';
 import ArchetypeNavTabs from './components/ArchetypeNavTabs';
@@ -92,7 +93,7 @@ const InsightsView = ({
         familyName={familyName}
         familyColor={familyColor}
         archetypeHexColor={familyColor}
-        gnomeImage={`${familyId?.toLowerCase() || 'chart'}`}
+        gnomeImage="chart"
       />
       
       <ArchetypeNavTabs activeTab={activeTab} onTabChange={setActiveTab} />

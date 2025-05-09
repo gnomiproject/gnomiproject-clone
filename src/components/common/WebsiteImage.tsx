@@ -24,20 +24,34 @@ const WebsiteImage: React.FC<WebsiteImageProps> = ({
   const [hasError, setHasError] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   
-  // Normalize image type to handle aliases like "magnifying" -> "magnifying_glass"
-  const normalizedType = type === 'magnifying' ? 'magnifying_glass' : type;
+  // Always use "chart" for family-specific requests to avoid 404s
+  let normalizedType = type;
+  
+  // If the type is a single letter (a, b, c) or looks like family ID, use chart instead
+  if (/^[a-c]$/.test(type) || /^family-[a-c]$/.test(type)) {
+    normalizedType = 'chart';
+    console.debug(`[WebsiteImage] Converting family identifier "${type}" to "chart"`);
+  }
+  
+  // Handle aliases for backward compatibility
+  if (normalizedType === 'magnifying') {
+    normalizedType = 'magnifying_glass';
+  }
   
   // Get the image URL from Supabase storage
   const imageUrl = getImageUrl(normalizedType);
   
   // Handle image loading errors
   const handleError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    console.warn(`[WebsiteImage] Failed to load image: ${type}`, {
-      attemptedUrl: e.currentTarget.src,
-      fallbackUrl: FALLBACK_IMAGE,
-      normalizedType,
-      timestamp: new Date().toISOString()
-    });
+    // Only log the first failure to reduce console noise
+    if (!hasError) {
+      console.warn(`[WebsiteImage] Failed to load image: ${type}`, {
+        attemptedUrl: e.currentTarget.src,
+        fallbackUrl: FALLBACK_IMAGE,
+        normalizedType,
+        timestamp: new Date().toISOString()
+      });
+    }
     
     setHasError(true);
     
