@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ArchetypeId } from '@/types/archetype';
 import { AssessmentResult } from '@/types/assessment';
 import { useQueryClient } from '@tanstack/react-query';
@@ -20,9 +20,19 @@ export const useInsightsData = () => {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const location = useLocation();
   const queryClient = useQueryClient();
+  
+  // Use refs to track if we've already processed data to prevent re-processing
+  const processedRef = useRef(false);
+  const locationProcessedRef = useRef(false);
+  
+  // Track last selected archetype to prevent duplicate work
+  const lastArchetypeRef = useRef<ArchetypeId | null>(null);
 
   // Load session ID and answers once
   useEffect(() => {
+    // Skip if we've already processed this data
+    if (processedRef.current) return;
+    
     const storedSessionId = sessionStorage.getItem(SESSION_ID_KEY);
     if (storedSessionId) {
       setSessionId(storedSessionId);
@@ -39,19 +49,21 @@ export const useInsightsData = () => {
         console.error("Could not parse assessment answers:", e);
       }
     }
-  }, []);
+    
+    processedRef.current = true;
+  }, []); // No dependencies - only run once
   
   // Handle archetypes from different sources
   useEffect(() => {
     console.log("[useInsightsData] Checking for archetype data sources");
     
-    let newArchetype: ArchetypeId | null = null;
-    let assessmentResults = null;
-    
-    if (location.state?.selectedArchetype) {
+    // Avoid processing the same location state multiple times
+    if (location.state?.selectedArchetype && !locationProcessedRef.current) {
+      locationProcessedRef.current = true;
+      
       console.log("[useInsightsData] Setting archetype from location state:", location.state.selectedArchetype);
       // Source 1: Direct navigation from Results
-      newArchetype = location.state.selectedArchetype;
+      const newArchetype = location.state.selectedArchetype;
       
       // Store in localStorage to persist across refreshes
       localStorage.setItem(INSIGHTS_STORAGE_KEY, newArchetype);
@@ -94,73 +106,101 @@ export const useInsightsData = () => {
         setSessionResults(tempResult);
       }
       
+      // Update selected archetype if it changed
+      if (newArchetype !== lastArchetypeRef.current) {
+        lastArchetypeRef.current = newArchetype;
+        setSelectedArchetype(newArchetype);
+        
+        // Pre-fetch the archetype data to fill the cache
+        queryClient.prefetchQuery({
+          queryKey: ['archetype', newArchetype],
+          staleTime: 5 * 60 * 1000 // 5 minutes
+        });
+      }
+      
       // Clear the location state to avoid persisting the selection on refresh
       window.history.replaceState({}, document.title);
-    } else {
-      // Source 2: Check sessionStorage for results from current session
-      const sessionResultsStr = sessionStorage.getItem(SESSION_RESULTS_KEY);
-      if (sessionResultsStr) {
-        console.log("[useInsightsData] Found session results in storage");
-        try {
-          assessmentResults = JSON.parse(sessionResultsStr);
-          
-          // Ensure exactData exists in the parsed result
-          if (!assessmentResults.exactData) {
-            const storedEmployeeCount = sessionStorage.getItem(SESSION_EXACT_EMPLOYEE_COUNT_KEY);
-            assessmentResults.exactData = {
-              employeeCount: storedEmployeeCount ? Number(storedEmployeeCount) : null
-            };
-          }
-          
-          setSessionResults(assessmentResults);
-          newArchetype = assessmentResults.primaryArchetype;
-          console.log("[useInsightsData] Using archetype from session storage:", newArchetype);
-        } catch (error) {
-          console.error('Error parsing session results:', error);
-          toast.error("Couldn't load your assessment results. Please try again.");
-        }
-      } else {
-        // Source 3: Try to retrieve from localStorage if no state is present
-        const storedArchetype = localStorage.getItem(INSIGHTS_STORAGE_KEY);
-        if (storedArchetype) {
-          console.log("[useInsightsData] Using archetype from local storage:", storedArchetype);
-          newArchetype = storedArchetype as ArchetypeId;
-          
-          // Check if we need to create assessment results from stored employee count
-          const storedEmployeeCount = sessionStorage.getItem(SESSION_EXACT_EMPLOYEE_COUNT_KEY);
-          if (storedEmployeeCount) {
-            assessmentResults = {
-              primaryArchetype: newArchetype,
-              secondaryArchetype: null,
-              tertiaryArchetype: null,
-              score: 1.0,
-              percentageMatch: 80,
-              resultTier: 'Basic',
-              exactData: {
-                employeeCount: Number(storedEmployeeCount)
-              }
-            };
-            console.log("[useInsightsData] Created assessment results from stored employee count");
-            setSessionResults(assessmentResults);
-            sessionStorage.setItem(SESSION_RESULTS_KEY, JSON.stringify(assessmentResults));
-          }
-        } else {
-          console.log("[useInsightsData] No archetype found in any storage");
-        }
-      }
+      return; // Exit early since we processed location state
     }
     
-    // Only update selectedArchetype if we found one
-    if (newArchetype) {
-      setSelectedArchetype(newArchetype);
+    // Only proceed with storage checks if we don't already have an archetype
+    if (lastArchetypeRef.current) return;
+    
+    // Source 2: Check sessionStorage for results from current session
+    const sessionResultsStr = sessionStorage.getItem(SESSION_RESULTS_KEY);
+    if (sessionResultsStr) {
+      console.log("[useInsightsData] Found session results in storage");
+      try {
+        const assessmentResults = JSON.parse(sessionResultsStr);
+        
+        // Ensure exactData exists in the parsed result
+        if (!assessmentResults.exactData) {
+          const storedEmployeeCount = sessionStorage.getItem(SESSION_EXACT_EMPLOYEE_COUNT_KEY);
+          assessmentResults.exactData = {
+            employeeCount: storedEmployeeCount ? Number(storedEmployeeCount) : null
+          };
+        }
+        
+        setSessionResults(assessmentResults);
+        const newArchetype = assessmentResults.primaryArchetype;
+        console.log("[useInsightsData] Using archetype from session storage:", newArchetype);
+        
+        if (newArchetype !== lastArchetypeRef.current) {
+          lastArchetypeRef.current = newArchetype;
+          setSelectedArchetype(newArchetype);
+          
+          // Pre-fetch data
+          queryClient.prefetchQuery({
+            queryKey: ['archetype', newArchetype],
+            staleTime: 5 * 60 * 1000 // 5 minutes
+          });
+        }
+        return; // Exit early since we have an archetype
+      } catch (error) {
+        console.error('Error parsing session results:', error);
+        toast.error("Couldn't load your assessment results. Please try again.");
+      }
+    } 
+    
+    // Source 3: Try to retrieve from localStorage if no state is present
+    const storedArchetype = localStorage.getItem(INSIGHTS_STORAGE_KEY);
+    if (storedArchetype) {
+      console.log("[useInsightsData] Using archetype from local storage:", storedArchetype);
+      const newArchetype = storedArchetype as ArchetypeId;
       
-      // Pre-fetch the archetype data to fill the cache
-      queryClient.prefetchQuery({
-        queryKey: ['archetype', newArchetype],
-        staleTime: 5 * 60 * 1000 // 5 minutes
-      });
+      // Check if we need to create assessment results from stored employee count
+      const storedEmployeeCount = sessionStorage.getItem(SESSION_EXACT_EMPLOYEE_COUNT_KEY);
+      if (storedEmployeeCount) {
+        const assessmentResults = {
+          primaryArchetype: newArchetype,
+          secondaryArchetype: null,
+          tertiaryArchetype: null,
+          score: 1.0,
+          percentageMatch: 80,
+          resultTier: 'Basic',
+          exactData: {
+            employeeCount: Number(storedEmployeeCount)
+          }
+        };
+        console.log("[useInsightsData] Created assessment results from stored employee count");
+        setSessionResults(assessmentResults);
+        sessionStorage.setItem(SESSION_RESULTS_KEY, JSON.stringify(assessmentResults));
+      }
+      
+      if (newArchetype !== lastArchetypeRef.current) {
+        lastArchetypeRef.current = newArchetype;
+        setSelectedArchetype(newArchetype);
+        
+        // Pre-fetch data
+        queryClient.prefetchQuery({
+          queryKey: ['archetype', newArchetype],
+          staleTime: 5 * 60 * 1000 // 5 minutes
+        });
+      }
+    } else {
+      console.log("[useInsightsData] No archetype found in any storage");
     }
-  }, [location, queryClient, sessionResults]);
+  }, [location, queryClient]); // Remove sessionResults from the dependency array
 
   return {
     selectedArchetype,

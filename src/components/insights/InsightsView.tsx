@@ -1,5 +1,5 @@
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { ArchetypeId, ArchetypeDetailedData } from '@/types/archetype';
 import ArchetypeNavTabs from './components/ArchetypeNavTabs';
 import ArchetypeHeader from './components/ArchetypeHeader';
@@ -8,7 +8,6 @@ import MetricsTab from './tabs/MetricsTab';
 import SwotTab from './tabs/SwotTab';
 import DiseaseAndCareTab from './tabs/DiseaseAndCareTab';
 import DeepDiveRequestForm from '@/components/results/DeepDiveRequestForm';
-import { getImageUrl } from '@/utils/imageService';
 
 interface ArchetypeReportProps {
   archetypeId: ArchetypeId;
@@ -27,15 +26,24 @@ const InsightsView = ({
 }: ArchetypeReportProps) => {
   // Always define hooks at the top level
   const [activeTab, setActiveTab] = React.useState('overview');
+  const processedRef = useRef(false);
+  const swotLoggedRef = useRef(false);
   
   // Process assessment data once with useMemo to prevent redundant processing
   const processedAssessmentResult = useMemo(() => {
+    // Skip if we've already processed this result for this archetype
+    if (processedRef.current) {
+      return assessmentResult;
+    }
+    
     // Only log once when the component mounts or when assessment data changes
     console.log('[InsightsView] Using assessment result data', {
       hasAssessmentResult: !!assessmentResult,
       archetypeId,
       exactEmployeeCount: assessmentResult?.exactData?.employeeCount
     });
+    
+    processedRef.current = true;
     
     // If assessment data exists but exactData doesn't, add it
     if (assessmentResult && !assessmentResult.exactData) {
@@ -51,14 +59,21 @@ const InsightsView = ({
 
   // Log SWOT data only once on mount or if reportData changes
   useEffect(() => {
-    if (reportData?.strengths) {
+    if (reportData?.strengths && !swotLoggedRef.current) {
       console.log('[InsightsView] SWOT data available:', {
         directStrengths: !!reportData.strengths,
         swotAnalysis: !!reportData.swot_analysis,
         enhancedSwot: !!reportData.enhanced?.swot
       });
+      swotLoggedRef.current = true;
     }
-  }, [reportData]);
+    
+    // Reset refs when archetypeId changes
+    return () => {
+      processedRef.current = false;
+      swotLoggedRef.current = false;
+    };
+  }, [reportData, archetypeId]);
 
   // Error check - if reportData is null or undefined, show an error message
   if (!reportData) {
@@ -110,7 +125,7 @@ const InsightsView = ({
         {activeTab === 'disease-and-care' && <DiseaseAndCareTab archetypeData={reportData} />}
       </div>
 
-      {!hideRequestSection && (
+      {!hideRequestSection && processedAssessmentResult && (
         <div className="border-t border-gray-100 mt-6">
           <DeepDiveRequestForm
             archetypeId={archetypeId}
@@ -124,5 +139,9 @@ const InsightsView = ({
   );
 };
 
-// Use React.memo to prevent unnecessary re-renders
-export default React.memo(InsightsView);
+// Use React.memo with a custom equality function to prevent unnecessary re-renders
+export default React.memo(InsightsView, (prevProps, nextProps) => {
+  return prevProps.archetypeId === nextProps.archetypeId && 
+         prevProps.reportData.id === nextProps.reportData.id &&
+         prevProps.hideRequestSection === nextProps.hideRequestSection;
+});

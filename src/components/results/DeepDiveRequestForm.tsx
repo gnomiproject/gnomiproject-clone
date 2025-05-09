@@ -1,5 +1,5 @@
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { ArchetypeId } from '@/types/archetype';
 import DeepDiveFormContainer from './deep-dive-form/DeepDiveFormContainer';
 
@@ -16,9 +16,17 @@ const DeepDiveRequestForm = ({
   assessmentAnswers,
   archetypeData 
 }: DeepDiveRequestFormProps) => {
-  // Use useMemo to process assessment result only once
+  // Use a ref to track if we've already processed this exact assessment result
+  const processedDataRef = useRef<{id: string, result: any} | null>(null);
+  
+  // Use useMemo to process assessment result only once for the same input
   const processedAssessmentResult = useMemo(() => {
-    // Only log once
+    // If we've already processed this exact result and archetypeId, return the cached value
+    if (processedDataRef.current?.id === archetypeId) {
+      return processedDataRef.current.result;
+    }
+    
+    // Only log once when processing a new result
     console.log('[DeepDiveRequestForm] Assessment data check', {
       hasAssessmentResult: !!assessmentResult,
       archetypeId,
@@ -26,15 +34,24 @@ const DeepDiveRequestForm = ({
     });
     
     // Clone and modify the assessment result if needed
+    let result;
     if (assessmentResult && !assessmentResult.exactData) {
       const storedEmployeeCount = sessionStorage.getItem('healthcareArchetypeExactEmployeeCount');
-      const result = {...assessmentResult};
+      result = {...assessmentResult};
       result.exactData = {
         employeeCount: storedEmployeeCount ? Number(storedEmployeeCount) : null
       };
-      return result;
+    } else {
+      result = assessmentResult;
     }
-    return assessmentResult;
+    
+    // Cache the processed result
+    processedDataRef.current = {
+      id: archetypeId,
+      result
+    };
+    
+    return result;
   }, [assessmentResult, archetypeId]);
 
   return (
@@ -47,5 +64,8 @@ const DeepDiveRequestForm = ({
   );
 };
 
-// Use React.memo to prevent unnecessary re-renders
-export default React.memo(DeepDiveRequestForm);
+// Use React.memo with a custom equality function to prevent unnecessary re-renders
+export default React.memo(DeepDiveRequestForm, (prevProps, nextProps) => {
+  return prevProps.archetypeId === nextProps.archetypeId &&
+         JSON.stringify(prevProps.assessmentResult?.exactData) === JSON.stringify(nextProps.assessmentResult?.exactData);
+});

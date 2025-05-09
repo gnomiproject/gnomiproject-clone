@@ -23,6 +23,7 @@ const InsightsContainer = ({
   // Always define hooks first regardless of condition
   const renderCountRef = useRef(0);
   const mountedRef = useRef(true);
+  const processedResultRef = useRef<any>(null);
   const [retrying, setRetrying] = React.useState(false);
   
   // Debug calls to identify load sequence - only log once
@@ -44,25 +45,40 @@ const InsightsContainer = ({
     dataSource 
   } = useGetArchetype(archetypeId, false); 
   
-  // Enhanced logging for assessment data tracing - using useMemo to prevent redundant processing
+  // Enhanced logging for assessment data tracing - using useMemo with strict equality check
   const processedAssessmentResult = useMemo(() => {
+    // Return cached result if we've already processed this exact assessmentResult
+    if (processedResultRef.current && 
+        processedResultRef.current.originalId === archetypeId) {
+      return processedResultRef.current.result;
+    }
+    
     renderCountRef.current += 1;
     
-    // Only log on first render or when assessment data changes
+    // Only log on first render or every 5 renders
     if (renderCountRef.current === 1 || renderCountRef.current % 5 === 0) {
       console.log(`🔴 [InsightsContainer] Mount/Render #${renderCountRef.current} for ${archetypeId} 🔴`);
     }
     
     // Ensure exactData exists in assessmentResult
+    let processedResult;
     if (assessmentResult && !assessmentResult.exactData) {
       const storedEmployeeCount = sessionStorage.getItem('healthcareArchetypeExactEmployeeCount');
-      const result = {...assessmentResult};
-      result.exactData = {
+      processedResult = {...assessmentResult};
+      processedResult.exactData = {
         employeeCount: storedEmployeeCount ? Number(storedEmployeeCount) : null
       };
-      return result;
+    } else {
+      processedResult = assessmentResult;
     }
-    return assessmentResult;
+    
+    // Cache the processed result
+    processedResultRef.current = {
+      originalId: archetypeId,
+      result: processedResult
+    };
+    
+    return processedResult;
   }, [assessmentResult, archetypeId]);
   
   // Handle retry logic
@@ -117,5 +133,8 @@ const InsightsContainer = ({
   );
 };
 
-// Use React.memo to prevent unnecessary re-renders
-export default React.memo(InsightsContainer);
+// Use React.memo with custom equality function to prevent unnecessary re-renders
+export default React.memo(InsightsContainer, (prevProps, nextProps) => {
+  return prevProps.archetypeId === nextProps.archetypeId &&
+         JSON.stringify(prevProps.assessmentResult) === JSON.stringify(nextProps.assessmentResult);
+});

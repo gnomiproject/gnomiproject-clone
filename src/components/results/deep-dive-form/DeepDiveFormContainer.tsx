@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { addDays } from 'date-fns';
@@ -41,6 +41,8 @@ const DeepDiveFormContainer = ({
   const [submittedEmail, setSubmittedEmail] = useState('');
   const [accessUrl, setAccessUrl] = useState('');
   const navigate = useNavigate();
+  const loggedRef = useRef(false);
+  const storageCheckedRef = useRef(false);
   
   // Form setup - must be called unconditionally
   const form = useForm<FormData>({
@@ -54,20 +56,31 @@ const DeepDiveFormContainer = ({
     },
   });
 
-  // Extended debug logging to trace the data flow
+  // Extended debug logging to trace the data flow - only do this once per component instance
   useEffect(() => {
-    console.log('[DeepDiveFormContainer] Assessment data received', {
-      archetypeId,
-      hasAssessmentResult: !!assessmentResult,
-      assessmentResultKeys: assessmentResult ? Object.keys(assessmentResult) : null,
-      hasExactData: assessmentResult?.exactData ? 'Yes' : 'No',
-      exactEmployeeCount: assessmentResult?.exactData?.employeeCount,
-      fullAssessmentResult: assessmentResult ? JSON.stringify(assessmentResult) : null
-    });
+    if (!loggedRef.current) {
+      console.log('[DeepDiveFormContainer] Assessment data received', {
+        archetypeId,
+        hasAssessmentResult: !!assessmentResult,
+        assessmentResultKeys: assessmentResult ? Object.keys(assessmentResult) : null,
+        hasExactData: assessmentResult?.exactData ? 'Yes' : 'No',
+        exactEmployeeCount: assessmentResult?.exactData?.employeeCount,
+      });
+      loggedRef.current = true;
+    }
+    
+    // Reset the logging flag when archetypeId changes
+    return () => {
+      loggedRef.current = false;
+      storageCheckedRef.current = false;
+    };
   }, [assessmentResult, archetypeId]);
   
-  // Check if user has already submitted a report in this session
+  // Check if user has already submitted a report in this session - only once
   useEffect(() => {
+    if (storageCheckedRef.current) return;
+    storageCheckedRef.current = true;
+    
     const hasSubmittedReport = sessionStorage.getItem(REPORT_SUBMITTED_KEY);
     if (hasSubmittedReport) {
       try {
@@ -116,9 +129,6 @@ const DeepDiveFormContainer = ({
     setIsSubmitting(true);
     
     try {
-      console.log('[DeepDiveFormContainer] Submitting form with data:', data);
-      console.log('[DeepDiveFormContainer] Assessment result before submission:', assessmentResult);
-      
       // Generate a unique ID for the report request
       const reportId = uuidv4();
       
@@ -146,8 +156,6 @@ const DeepDiveFormContainer = ({
       const generatedUrl = `${window.location.origin}/report/${archetypeId}/${accessToken}`;
       setAccessUrl(generatedUrl); // Store URL for potential display
       
-      console.log('[DeepDiveFormContainer] Generated access URL:', generatedUrl);
-      
       // Ensure assessment result is properly formatted for database storage
       let formattedAssessmentResult = null;
       if (assessmentResult) {
@@ -163,9 +171,6 @@ const DeepDiveFormContainer = ({
           }
         };
       }
-      
-      console.log('[DeepDiveFormContainer] Formatted assessment result for DB:', formattedAssessmentResult);
-      console.log('[DeepDiveFormContainer] About to insert into Supabase with employee count:', exactEmployeeCount);
       
       const { data: response, error } = await supabase
         .from('report_requests')
@@ -256,4 +261,9 @@ const DeepDiveFormContainer = ({
   );
 };
 
-export default DeepDiveFormContainer;
+// Use React.memo with custom equality function to prevent unnecessary re-renders
+export default React.memo(DeepDiveFormContainer, (prevProps, nextProps) => {
+  const prevCount = prevProps.assessmentResult?.exactData?.employeeCount;
+  const nextCount = nextProps.assessmentResult?.exactData?.employeeCount;
+  return prevProps.archetypeId === nextProps.archetypeId && prevCount === nextCount;
+});
