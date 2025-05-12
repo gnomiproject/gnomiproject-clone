@@ -1,8 +1,9 @@
 
 import React from 'react';
 import SectionTitle from '@/components/shared/SectionTitle';
-import Recommendations from '../Recommendations';
+import KeyPriorities from './KeyPriorities';
 import { ArchetypeDetailedData } from '@/types/archetype';
+import { ensureArray } from '@/utils/array/arrayUtils';
 
 interface StrategicRecommendationsSectionProps {
   reportData: ArchetypeDetailedData;
@@ -13,6 +14,17 @@ const StrategicRecommendationsSection: React.FC<StrategicRecommendationsSectionP
   reportData,
   averageData
 }) => {
+  // Extract strategic recommendations from either enhanced.strategicPriorities or strategic_recommendations
+  const recommendations = reportData?.enhanced?.strategicPriorities || reportData?.strategic_recommendations || [];
+  
+  // Extract success metrics if available
+  const successMetrics = reportData?.success_metrics || reportData?.enhanced?.successMetrics || [];
+  
+  console.log('[StrategicRecommendationsSection] Data:', {
+    hasRecommendations: Array.isArray(recommendations) ? recommendations.length > 0 : !!recommendations,
+    hasSuccessMetrics: Array.isArray(successMetrics) ? successMetrics.length > 0 : !!successMetrics
+  });
+  
   return (
     <div className="space-y-8">
       <SectionTitle 
@@ -21,7 +33,10 @@ const StrategicRecommendationsSection: React.FC<StrategicRecommendationsSectionP
       />
       
       <div className="space-y-6">
-        <Recommendations archetypeData={reportData} />
+        <KeyPriorities 
+          recommendations={recommendations} 
+          successMetrics={successMetrics} 
+        />
       </div>
     </div>
   );
