@@ -3,6 +3,7 @@ import React, { useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { ArchetypeDetailedData } from '@/types/archetype';
 import { ensureArray } from '@/utils/array/arrayUtils';
+import { formatFieldLabel } from '@/utils/reports/fieldFormatters';
 
 interface RecommendationsProps {
   archetypeData: ArchetypeDetailedData;
@@ -47,6 +48,11 @@ const Recommendations = ({ archetypeData }: RecommendationsProps) => {
     );
   }
 
+  // Format metric field names to be more readable
+  const formatMetricName = (metricKey: string): string => {
+    return formatFieldLabel(metricKey);
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -57,19 +63,19 @@ const Recommendations = ({ archetypeData }: RecommendationsProps) => {
           {recommendations.map((rec, index) => (
             <div 
               key={index}
-              className="p-4 bg-purple-50 rounded-lg border border-purple-100"
+              className="p-4 bg-blue-50 rounded-lg border border-blue-100"
             >
-              <h3 className="font-semibold text-purple-800 mb-2">
+              <h3 className="font-semibold text-blue-800 mb-2">
                 {index + 1}. {rec.title || rec.name || `Recommendation ${index + 1}`}
               </h3>
-              <p className="text-purple-700">{rec.description || rec.content || ''}</p>
+              <p className="text-gray-700">{rec.description || rec.content || ''}</p>
               
               {(rec.metrics_references || rec.metrics) && (rec.metrics_references?.length > 0 || rec.metrics?.length > 0) && (
                 <div className="mt-2">
-                  <h4 className="text-sm font-medium text-purple-600">Supporting Metrics:</h4>
-                  <ul className="list-disc list-inside text-sm text-purple-600">
+                  <h4 className="text-sm font-medium text-gray-600">Supporting Metrics:</h4>
+                  <ul className="list-disc list-inside text-sm text-gray-600">
                     {(rec.metrics_references || rec.metrics || []).map((metric, idx) => (
-                      <li key={idx}>{metric}</li>
+                      <li key={idx}>{formatMetricName(metric)}</li>
                     ))}
                   </ul>
                 </div>

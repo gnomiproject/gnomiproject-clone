@@ -2,6 +2,8 @@
 import React from 'react';
 import { ArchetypeDetailedData } from '@/types/archetype';
 import SectionTitle from '@/components/shared/SectionTitle';
+import { formatFieldLabel } from '@/utils/reports/fieldFormatters';
+import { ensureArray } from '@/utils/array/arrayUtils';
 
 export interface StrategicRecommendationsProps {
   reportData?: ArchetypeDetailedData;
@@ -33,7 +35,7 @@ const StrategicRecommendations: React.FC<StrategicRecommendationsProps> = ({
   });
   
   // Enhanced helper function to ensure we're working with an array
-  const ensureArray = (data: any): any[] => {
+  const ensureRecommendationsArray = (data: any): any[] => {
     if (!data) return [];
     
     // If it's already an array, return it
@@ -64,26 +66,8 @@ const StrategicRecommendations: React.FC<StrategicRecommendationsProps> = ({
   };
   
   // Extract strategic recommendations from the report data
-  const rawRecommendations = data?.strategic_recommendations;
-  const recommendations = ensureArray(rawRecommendations);
-  
-  // Format metric field names to be more readable
-  const formatMetricName = (metricKey: string): string => {
-    // Remove prefixes like "Dise_" or "Util_"
-    let formatted = metricKey.replace(/^(Dise|Util|Cost|SDOH|Risk|Gaps|Demo|Bene)_/i, '');
-    
-    // Replace underscores with spaces
-    formatted = formatted.replace(/_/g, ' ');
-    
-    // Handle specific abbreviations
-    formatted = formatted
-      .replace(/\bRX\b/g, 'Prescription')
-      .replace(/\bED\b/g, 'Emergency Department')
-      .replace(/\bPMPY\b/g, 'Per Member Per Year')
-      .replace(/\bPEPY\b/g, 'Per Employee Per Year');
-    
-    return formatted;
-  };
+  const rawRecommendations = data?.strategic_recommendations || data?.enhanced?.strategicPriorities;
+  const recommendations = ensureRecommendationsArray(rawRecommendations);
   
   return (
     <div className="space-y-6">
@@ -100,17 +84,18 @@ const StrategicRecommendations: React.FC<StrategicRecommendationsProps> = ({
               <div className="space-y-4">
                 {recommendations.map((recommendation: any, index: number) => (
                   <div key={index} className="border-l-4 border-blue-500 pl-4 py-1">
-                    <h3 className="font-semibold text-lg">{recommendation.title || `Recommendation ${index + 1}`}</h3>
-                    <p className="text-gray-600">{recommendation.description || 'No description available.'}</p>
+                    <h3 className="font-semibold text-lg">{recommendation.title || recommendation.name || `Recommendation ${index + 1}`}</h3>
+                    <p className="text-gray-600">{recommendation.description || recommendation.content || 'No description available.'}</p>
                     
                     {/* Show metrics references if available */}
-                    {recommendation.metrics_references && recommendation.metrics_references.length > 0 && (
+                    {(recommendation.metrics_references || recommendation.metrics) && 
+                     (recommendation.metrics_references?.length > 0 || recommendation.metrics?.length > 0) && (
                       <div className="mt-2">
                         <h4 className="text-sm font-medium text-gray-500">Related Metrics:</h4>
                         <div className="flex flex-wrap gap-1 mt-1">
-                          {recommendation.metrics_references.map((metric: string, i: number) => (
+                          {ensureArray(recommendation.metrics_references || recommendation.metrics).map((metric: string, i: number) => (
                             <span key={i} className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded">
-                              {formatMetricName(metric)}
+                              {formatFieldLabel(metric)}
                             </span>
                           ))}
                         </div>

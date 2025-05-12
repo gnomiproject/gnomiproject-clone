@@ -3,6 +3,7 @@ import React, { memo, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Star } from 'lucide-react';
 import { ensureArray } from '@/utils/array/arrayUtils';
+import { formatFieldLabel } from '@/utils/reports/fieldFormatters';
 
 interface KeyPrioritiesProps {
   recommendations: any[];
@@ -21,25 +22,7 @@ const KeyPrioritiesBase: React.FC<KeyPrioritiesProps> = ({ recommendations }) =>
   
   // Format metric field names to be more readable
   const formatMetricName = (metricKey: string): string => {
-    // Remove prefixes like "Dise_" or "Util_"
-    let formatted = metricKey.replace(/^(Dise|Util|Cost|SDOH|Risk|Gaps|Demo|Bene)_/i, '');
-    
-    // Replace underscores with spaces
-    formatted = formatted.replace(/_/g, ' ');
-    
-    // Handle specific abbreviations
-    formatted = formatted
-      .replace(/\bRX\b/g, 'Prescription')
-      .replace(/\bED\b/g, 'Emergency Department')
-      .replace(/\bPMPY\b/g, 'Per Member Per Year')
-      .replace(/\bPEPY\b/g, 'Per Employee Per Year')
-      .replace(/\bPMPM\b/g, 'Per Member Per Month')
-      .replace(/\bPEPM\b/g, 'Per Employee Per Month')
-      .replace(/\bPCP\b/g, 'Primary Care Provider')
-      .replace(/\bFU\b/g, 'Follow-up')
-      .replace(/\bSUD\b/g, 'Substance Use Disorder');
-    
-    return formatted;
+    return formatFieldLabel(metricKey);
   };
   
   // Early return for empty data case
