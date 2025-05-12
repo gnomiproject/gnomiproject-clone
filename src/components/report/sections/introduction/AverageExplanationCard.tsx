@@ -8,7 +8,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import WebsiteImage from '@/components/common/WebsiteImage'; 
+ 
 
 const AverageExplanationCard = () => {
   return (
