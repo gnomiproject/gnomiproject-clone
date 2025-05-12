@@ -43,3 +43,25 @@ export interface GenerationResult {
   /** Optional array of error messages if any failures occurred */
   errors?: string[];
 }
+
+/**
+ * Strategic recommendation interface used in reports
+ */
+export interface StrategicRecommendation {
+  recommendation_number?: number;
+  title?: string;
+  name?: string;
+  description?: string;
+  content?: string;
+  metrics_references?: string[];
+  metrics?: string[];
+}
+
+/**
+ * Success metric interface used in reports
+ */
+export interface SuccessMetric {
+  name?: string;
+  title?: string;
+  description?: string;
+}

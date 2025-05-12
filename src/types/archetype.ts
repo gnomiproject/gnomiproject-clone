@@ -92,6 +92,7 @@ export interface ArchetypeDetailedData {
     swot: SwotAnalysis;
     strategicPriorities: any[];
     costSavings: any[];
+    successMetrics?: any[]; // Add missing property
     riskProfile?: {
       score: string;
       comparison: string;
@@ -119,6 +120,9 @@ export interface ArchetypeDetailedData {
     description: string;
     metrics_references?: any[];
   }>;
+  
+  // Add missing property for success metrics
+  success_metrics?: any[];
   
   // Add missing properties needed by components
   fullDescription?: string;
