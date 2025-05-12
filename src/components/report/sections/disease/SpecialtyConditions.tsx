@@ -95,7 +95,7 @@ const SpecialtyConditions = ({ reportData, averageData }: SpecialtyConditionsPro
                     <span className={`text-sm ${diffClass}`}>
                       {diff > 0 ? '↑' : diff < 0 ? '↓' : '–'}
                       {' '}
-                      {Math.abs(Math.round(diffPercentage * 10) / 10)}% vs. avg
+                      {Math.abs(Math.round(diffPercentage * 10) / 10)}% vs. archetype avg
                     </span>
                   </div>
                 </div>
@@ -113,7 +113,7 @@ const SpecialtyConditions = ({ reportData, averageData }: SpecialtyConditionsPro
             <div className="text-right">
               <div className="text-2xl font-bold">{formatPercent(totalBurden)}</div>
               <div className={diffPercentage > 0 ? "text-amber-600" : "text-green-600"}>
-                {diffPercentage > 0 ? '+' : ''}{Math.round(diffPercentage)}% vs. benchmark
+                {diffPercentage > 0 ? '+' : ''}{Math.round(diffPercentage)}% vs. archetype avg
               </div>
             </div>
           </div>

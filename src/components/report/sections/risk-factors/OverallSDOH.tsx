@@ -26,7 +26,7 @@ const OverallSDOH: React.FC<OverallSDOHProps> = ({ reportData, averageData }) =>
   const fewerRisks = percentDiff < 0;
   
   const comparisonWord = percentDiff > 0 ? "higher than" : "lower than";
-  const text = `${Math.abs(percentDiff).toFixed(1)}% ${comparisonWord} average`;
+  const text = `${Math.abs(percentDiff).toFixed(1)}% ${comparisonWord} archetype average`;
   
   // Color based on risk assessment, not "better/worse" judgment
   const color = fewerRisks ? "text-green-600" : "text-amber-600";

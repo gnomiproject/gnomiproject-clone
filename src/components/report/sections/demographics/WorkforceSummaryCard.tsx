@@ -51,8 +51,8 @@ const WorkforceSummaryCard: React.FC<WorkforceSummaryCardProps> = ({
   // Determine display text
   const comparisonWord = percentDiff > 0 ? "higher than" : "lower than";
   const comparisonText = Math.abs(percentDiff) < 0.1 ? 
-    "same as archetype average" : 
-    `${Math.abs(percentDiff).toFixed(1)}% ${comparisonWord} archetype average`;
+    "same as the archetype average" : 
+    `${Math.abs(percentDiff).toFixed(1)}% ${comparisonWord} the archetype average`;
   
   // Determine color for the comparison text
   const textColor = isPositive ? "text-green-600" : Math.abs(percentDiff) < 0.1 ? "text-gray-600" : "text-amber-600";

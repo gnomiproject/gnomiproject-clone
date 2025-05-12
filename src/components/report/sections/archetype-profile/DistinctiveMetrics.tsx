@@ -132,7 +132,7 @@ const DistinctiveMetrics: React.FC<DistinctiveMetricsProps> = ({ metrics, archet
                   </div>
                   
                   <div className="text-right">
-                    <p className="text-xs text-gray-500 mb-1">Average</p>
+                    <p className="text-xs text-gray-500 mb-1">Archetype Average</p>
                     <p className="text-lg text-gray-700">{formattedAverage}</p>
                   </div>
                 </div>
@@ -146,7 +146,7 @@ const DistinctiveMetrics: React.FC<DistinctiveMetricsProps> = ({ metrics, archet
                     <ArrowDown className="h-3.5 w-3.5" />
                   )}
                   <span className="text-xs font-medium">
-                    {formattedDifference} from average
+                    {formattedDifference} from archetype average
                   </span>
                 </div>
               </div>

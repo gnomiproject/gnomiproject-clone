@@ -84,7 +84,7 @@ const BehavioralHealthGaps: React.FC<BehavioralHealthGapsProps> = ({
                 <div className="mt-2 flex justify-between items-baseline">
                   <span className="text-xl font-bold">{formatValue(value)}</span>
                   <span className={`text-sm ${textColor}`}>
-                    {diffPercent > 0 ? '+' : ''}{diffPercent.toFixed(1)}% vs avg
+                    {diffPercent > 0 ? '+' : ''}{diffPercent.toFixed(1)}% vs archetype avg
                   </span>
                 </div>
               </div>

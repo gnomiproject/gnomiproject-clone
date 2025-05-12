@@ -69,7 +69,7 @@ const ImmunizationGaps: React.FC<ImmunizationGapsProps> = ({ reportData, average
                 <div className="mt-1 flex justify-between items-baseline">
                   <span className="text-2xl font-bold">{formatValue(value)}</span>
                   <span className={`text-sm ${textColor}`}>
-                    {diffPercent > 0 ? '+' : ''}{diffPercent.toFixed(1)}% vs avg
+                    {diffPercent > 0 ? '+' : ''}{diffPercent.toFixed(1)}% vs archetype avg
                   </span>
                 </div>
                 <div className="flex items-center justify-between mt-2 text-xs text-gray-500">

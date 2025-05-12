@@ -63,7 +63,7 @@ const TopConditions = ({ reportData, averageData }: TopConditionsProps) => {
                 <div className="mt-2 flex justify-between items-baseline">
                   <span className="text-2xl font-bold">{formatPercent(value)}</span>
                   <span className={`text-sm ${diffClass}`}>
-                    {diffPercentage > 0 ? '+' : ''}{Math.round(diffPercentage)}% vs avg
+                    {diffPercentage > 0 ? '+' : ''}{Math.round(diffPercentage)}% vs archetype avg
                   </span>
                 </div>
                 <div className="mt-1 h-2 bg-gray-100 rounded-full overflow-hidden">

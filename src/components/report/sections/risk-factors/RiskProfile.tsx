@@ -25,7 +25,7 @@ const RiskProfile: React.FC<RiskProfileProps> = ({ reportData, averageData }) =>
   const higherRisks = percentDiff > 0;
   
   const comparisonWord = percentDiff > 0 ? "higher than" : "lower than";
-  const text = `${Math.abs(percentDiff).toFixed(1)}% ${comparisonWord} average`;
+  const text = `${Math.abs(percentDiff).toFixed(1)}% ${comparisonWord} archetype average`;
   
   // Color based on risk assessment - higher risks (red), lower risks (green)
   const color = higherRisks ? "text-red-600" : "text-green-600";
@@ -65,8 +65,8 @@ const RiskProfile: React.FC<RiskProfileProps> = ({ reportData, averageData }) =>
             This clinical risk score factors in healthcare claims, demographic data, 
             and utilization patterns to estimate potential health risks based on the population's history. 
             {percentDiff < 0 ? 
-              ' This archetype shows lower clinical risk factors compared to average.' : 
-              ' This archetype shows elevated clinical risk factors compared to average.'}
+              ' This archetype shows lower clinical risk factors compared to the archetype average.' : 
+              ' This archetype shows elevated clinical risk factors compared to the archetype average.'}
           </p>
         </div>
       </div>

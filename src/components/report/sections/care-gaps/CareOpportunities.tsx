@@ -130,7 +130,7 @@ const CareOpportunities: React.FC<CareOpportunitiesProps> = ({
                         <div className="font-bold text-lg">{(gap.value * 100).toFixed(1)}%</div>
                       </div>
                       <div>
-                        <div className="text-xs text-gray-500">Average</div>
+                        <div className="text-xs text-gray-500">Archetype Avg</div>
                         <div className="font-bold text-lg">{(gap.avgValue * 100).toFixed(1)}%</div>
                       </div>
                       <div>

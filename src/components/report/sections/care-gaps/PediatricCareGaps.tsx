@@ -62,7 +62,7 @@ const PediatricCareGaps: React.FC<PediatricCareGapsProps> = ({ reportData, avera
             <tr className="text-left">
               <th className="pb-2 font-medium text-gray-600">Age Group</th>
               <th className="pb-2 font-medium text-gray-600 text-right">Performance</th>
-              <th className="pb-2 font-medium text-gray-600 text-right">vs Avg</th>
+              <th className="pb-2 font-medium text-gray-600 text-right">vs Archetype Avg</th>
             </tr>
           </thead>
           <tbody>
