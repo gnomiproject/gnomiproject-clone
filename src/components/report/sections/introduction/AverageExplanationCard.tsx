@@ -26,7 +26,7 @@ const AverageExplanationCard = () => {
                     <Info className="h-4 w-4 ml-2 text-blue-600 cursor-help" />
                   </TooltipTrigger>
                   <TooltipContent className="max-w-xs">
-                    <p>All comparisons are to a single, consistent baseline across all reports.</p>
+                    <p>Your archetype is compared to the average across all archetypes..</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -35,7 +35,7 @@ const AverageExplanationCard = () => {
               Throughout this report, all metrics are compared to the <strong>archetype average</strong> — a weighted average across <em>all</em> healthcare archetypes. This provides a consistent baseline for comparison.
             </p>
             <p className="mt-2 text-blue-700">
-              This is not a comparison to your submitted data or to external benchmarks, but rather to our standardized cross-archetype average.
+              Contact our team to find out how your company-specific data compares to your matched archetype.
             </p>
           </div>
         </div>
