@@ -19,7 +19,7 @@ const AverageExplanationCard = () => {
           </div>
           <div>
             <h3 className="text-lg font-medium text-blue-800 flex items-center">
-              Understanding Comparisons in This Report
+              Quick Analytic Note on Archetype Averages
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
