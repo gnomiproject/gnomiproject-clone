@@ -16,7 +16,7 @@ const GnomePlaceholder = ({
   showDebug = false
 }: GnomePlaceholderProps) => {
   return (
-    <div className="flex items-center justify-center bg-gray-100 rounded-lg w-full h-full">
+    <div className="flex items-center justify-center bg-gray-100 rounded-lg w-full h-full relative">
       <WebsiteImage 
         type={type} 
         className={className} 

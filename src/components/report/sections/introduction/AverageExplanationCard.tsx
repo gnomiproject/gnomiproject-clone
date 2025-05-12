@@ -8,6 +8,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import WebsiteImage from '@/components/common/WebsiteImage'; 
 
 const AverageExplanationCard = () => {
   return (
@@ -15,7 +16,11 @@ const AverageExplanationCard = () => {
       <CardContent className="p-6">
         <div className="flex items-start gap-4">
           <div className="bg-blue-100 p-2 rounded-full">
-            <Scale className="h-5 w-5 text-blue-700" />
+            <WebsiteImage 
+              type="chart" 
+              className="h-5 w-5 text-blue-700"
+              altText="Chart icon" 
+            />
           </div>
           <div>
             <h3 className="text-lg font-medium text-blue-800 flex items-center">

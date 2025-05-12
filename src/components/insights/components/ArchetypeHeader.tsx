@@ -24,7 +24,7 @@ const ArchetypeHeader = ({
   familyColor,
   archetypeHexColor,
   dataSource,
-  gnomeImage
+  gnomeImage = 'chart'
 }: ArchetypeHeaderProps) => {
   return (
     <>
@@ -60,7 +60,7 @@ const ArchetypeHeader = ({
           
           <div className="flex-shrink-0 hidden md:block">
             <WebsiteImage 
-              type="chart"
+              type={gnomeImage || "chart"}
               altText={`${name} Guide`}
               className="h-48 object-contain"
             />
