@@ -32,7 +32,7 @@ const AverageExplanationCard = () => {
               </TooltipProvider>
             </h3>
             <p className="mt-2 text-blue-700">
-              Throughout this report, all metrics are compared to the <strong>archetype average</strong> — a weighted average across <em>all</em> healthcare archetypes. This provides a consistent baseline for comparison.
+              Throughout this report, all metrics are compared to the <strong>archetype average</strong> — a weighted average across <em>all</em> healthcare archetypes. This provides a consistent baseline for comparison and effectively represents a national market average.
             </p>
             <p className="mt-2 text-blue-700">
               Contact our team to find out how your company-specific data compares to your matched archetype.
