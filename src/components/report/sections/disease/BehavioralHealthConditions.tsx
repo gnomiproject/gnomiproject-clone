@@ -41,7 +41,7 @@ const BehavioralHealthConditions = ({ reportData, averageData }: BehavioralHealt
               <tr className="border-b border-gray-200">
                 <th className="text-left py-2 font-medium">Condition</th>
                 <th className="text-right py-2 font-medium">Prevalence</th>
-                <th className="text-right py-2 font-medium">Benchmark</th>
+                <th className="text-right py-2 font-medium">Archetype Average</th>
                 <th className="text-right py-2 font-medium">Difference</th>
               </tr>
             </thead>
