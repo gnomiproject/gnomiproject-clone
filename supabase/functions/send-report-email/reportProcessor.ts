@@ -155,19 +155,20 @@ export async function processPendingReports(
           throw new Error(`Resend API error: ${emailResult?.error?.message || "Unknown error"}`);
         }
         
-        // Update report status to active
+        // Update report status to active - FIX: explicitly using defined column names
         const { error: updateError } = await supabase
           .from("report_requests")
           .update({ 
             status: "active",
-            email_id: emailResult.id,
-            email_sent_at: new Date().toISOString(),
-            email_error: null
+            email_sent_at: new Date().toISOString()
           })
           .eq("id", report.id);
         
         if (updateError) {
-          log(`Warning: Report status updated but database update failed: ${updateError.message}`);
+          log(`Warning: Report status update failed: ${updateError.message}`);
+          // Continue processing despite this error
+        } else {
+          log(`Successfully updated report status to active for ID: ${report.id}`);
         }
         
         log(`Successfully processed report ${report.id}`);

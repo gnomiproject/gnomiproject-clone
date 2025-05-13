@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
@@ -224,7 +223,7 @@ const ReportDiagnosticTool: React.FC = () => {
     }
   };
 
-  // Update renderReportData function to add test email button
+  // Update renderReportData function to add email_sent_at field display
   const renderReportData = () => {
     if (!reportData) return null;
     
@@ -248,6 +247,9 @@ const ReportDiagnosticTool: React.FC = () => {
                       <div><strong>Send Attempts:</strong> {report.email_send_attempts || 0}</div>
                       {report.last_attempt_at && (
                         <div><strong>Last Attempt:</strong> {new Date(report.last_attempt_at).toLocaleString()}</div>
+                      )}
+                      {report.email_sent_at && (
+                        <div><strong>Email Sent:</strong> {new Date(report.email_sent_at).toLocaleString()}</div>
                       )}
                       {report.email_error && (
                         <div className="text-red-600 mt-1"><strong>Error:</strong> {report.email_error}</div>
@@ -304,6 +306,9 @@ const ReportDiagnosticTool: React.FC = () => {
               <div><strong>Created:</strong> {new Date(reportData.created_at).toLocaleString()}</div>
               {reportData.last_accessed && (
                 <div><strong>Last Accessed:</strong> {new Date(reportData.last_accessed).toLocaleString()}</div>
+              )}
+              {reportData.email_sent_at && (
+                <div><strong>Email Sent:</strong> {new Date(reportData.email_sent_at).toLocaleString()}</div>
               )}
               <div><strong>Access Count:</strong> {reportData.access_count || 0}</div>
               <div><strong>Send Attempts:</strong> {reportData.email_send_attempts || 0}</div>
