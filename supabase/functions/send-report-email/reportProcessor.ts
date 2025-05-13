@@ -136,13 +136,13 @@ export async function processPendingReports(
         // Log all parameters before sending email
         log(`Preparing email with parameters:
           TO: ${report.email}
-          FROM: Gnomi <gnomi@onenomi.com>
+          FROM: Reports <reports@g.nomihealth.com>
           SUBJECT: ${emailSubject}
         `);
         
         // Send the email with minimal formatting
         const emailResult = await resend.emails.send({
-          from: "Gnomi <gnomi@onenomi.com>",
+          from: "Reports <reports@g.nomihealth.com>",
           to: [report.email],
           subject: emailSubject,
           html: emailHtml,

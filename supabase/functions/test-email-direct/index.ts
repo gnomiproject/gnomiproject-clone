@@ -37,7 +37,7 @@ serve(async (req) => {
     // Set up default values
     const archetypeName = reportData?.archetypeName || "Healthcare Archetype";
     const recipientName = reportData?.recipientName || "there";
-    const reportUrl = reportData?.reportUrl || "https://onenomi.com";
+    const reportUrl = reportData?.reportUrl || "https://g.nomihealth.com";
     
     // Generate tracking pixel URL for test
     const trackingUrl = `${new URL(req.url).origin}/functions/v1/send-report-email/track-access/12345/test-token`;
@@ -45,7 +45,7 @@ serve(async (req) => {
     // Log params for debugging
     console.log(`SENDING TEST EMAIL with parameters:
       TO: ${email}
-      FROM: Gnomi <gnomi@onenomi.com>
+      FROM: Reports <reports@g.nomihealth.com>
       SUBJECT: Test Email - Your ${archetypeName} Report is Ready
       TRACKING_URL: ${trackingUrl}
     `);
@@ -66,7 +66,7 @@ serve(async (req) => {
 
     // Send the email
     const data = await resend.emails.send({
-      from: "Gnomi <gnomi@onenomi.com>",
+      from: "Reports <reports@g.nomihealth.com>",
       to: [email],
       subject: `Test Email - Your ${archetypeName} Report is Ready`,
       html: emailHtml,

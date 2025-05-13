@@ -13,8 +13,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 const EmailTestTool: React.FC = () => {
-  // Set the default email to gnomi@onenomi.com
-  const [recipientEmail, setRecipientEmail] = useState('gnomi@onenomi.com');
+  // Set the default email to reports@g.nomihealth.com
+  const [recipientEmail, setRecipientEmail] = useState('reports@g.nomihealth.com');
   const [testMultipleProviders, setTestMultipleProviders] = useState(false);
   const [isTestingProviders, setIsTestingProviders] = useState(false);
   const [testResults, setTestResults] = useState<any>(null);

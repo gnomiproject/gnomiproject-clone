@@ -90,7 +90,7 @@ serve(async (req) => {
         console.log(`Sending test email to ${testEmail}`);
         
         const data = await resend.emails.send({
-          from: "Gnomi <gnomi@onenomi.com>",
+          from: "Reports <reports@g.nomihealth.com>",
           to: [testEmail],
           subject: `Email Deliverability Test`,
           html: emailHtml,
