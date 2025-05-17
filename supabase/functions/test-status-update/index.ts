@@ -35,7 +35,7 @@ serve(async (req: Request) => {
     }
 
     // Parse the request body
-    const { reportId, newStatus = "active" } = await req.json();
+    const { reportId, newStatus = "active", sendNotification = false } = await req.json();
     
     if (!reportId) {
       return new Response(

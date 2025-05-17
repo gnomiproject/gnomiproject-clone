@@ -3,6 +3,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { Resend } from "https://esm.sh/resend@2.0.0";
 import { createEmailHtml } from "./emailTemplate.ts";
+import { createNotificationEmailHtml } from "./notificationTemplate.ts";
 
 // Helper for logging with timestamps
 const log = (message: string) => {
@@ -13,6 +14,39 @@ const log = (message: string) => {
 const logError = (message: string, error: any) => {
   console.error(`[${new Date().toISOString()}] ERROR: ${message}`, error);
 };
+
+// Function to send notification email to the team
+async function sendTeamNotification(resend: Resend, report: any) {
+  try {
+    log(`Sending notification email for report ${report.id}`);
+    
+    // Generate the notification email HTML using the report data
+    const notificationHtml = createNotificationEmailHtml(report);
+    
+    // Format the subject line with report ID and organization for easy identification
+    const emailSubject = `New Report Request: ${report.organization} [${report.archetype_id}]`;
+    
+    // Send the notification email to the team
+    const emailResult = await resend.emails.send({
+      from: "Reports <reports@g.nomihealth.com>",
+      to: ["artemis@nomihealth.com"],
+      subject: emailSubject,
+      html: notificationHtml,
+      text: `New report request from ${report.name} (${report.email}) for organization ${report.organization}, archetype ${report.archetype_id}. Access URL: ${report.access_url || 'Not available'}`,
+    });
+    
+    if (emailResult.error) {
+      throw new Error(`Failed to send team notification: ${emailResult.error.message}`);
+    }
+    
+    log(`Team notification email sent successfully for report ${report.id}`);
+    return true;
+  } catch (error) {
+    // Log the error but don't disrupt the main flow
+    logError(`Failed to send team notification for report ${report.id}`, error);
+    return false;
+  }
+}
 
 /**
  * Process and send emails for pending report requests
@@ -114,8 +148,10 @@ export async function processPendingReports(
           // Continue with processing despite this error
         }
         
-        // Generate report URL
-        const reportUrl = report.access_url || `${new URL(supabaseUrl).origin}/report/${report.archetype_id}/${report.access_token}`;
+        // Generate report URL if not already set
+        if (!report.access_url) {
+          report.access_url = `${new URL(supabaseUrl).origin}/report/${report.archetype_id}/${report.access_token}`;
+        }
         
         // Get a simple name for personalization
         const recipientName = report.name || "there";
@@ -138,7 +174,7 @@ export async function processPendingReports(
         }
         
         // Create email content - no tracking pixel for deliverability
-        const emailHtml = createEmailHtml(recipientName, reportUrl);
+        const emailHtml = createEmailHtml(recipientName, report.access_url);
         
         // Create a simple, direct subject line without special characters
         const emailSubject = `Healthcare Report Now Available`;
@@ -195,6 +231,9 @@ export async function processPendingReports(
         } else {
           log(`Successfully updated report ${report.id} status to active`);
         }
+        
+        // Send notification email to the team (don't block main flow)
+        await sendTeamNotification(resend, report);
         
         log(`Successfully processed report ${report.id}`);
         
