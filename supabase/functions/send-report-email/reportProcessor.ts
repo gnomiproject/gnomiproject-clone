@@ -2,51 +2,15 @@
 // Import directly from esm.sh using the proper Deno import pattern
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { Resend } from "https://esm.sh/resend@2.0.0";
-import { createEmailHtml } from "./emailTemplate.ts";
-import { createNotificationEmailHtml } from "./notificationTemplate.ts";
-
-// Helper for logging with timestamps
-const log = (message: string) => {
-  console.log(`[${new Date().toISOString()}] ${message}`);
-};
-
-// Helper for error logging with timestamps
-const logError = (message: string, error: any) => {
-  console.error(`[${new Date().toISOString()}] ERROR: ${message}`, error);
-};
-
-// Function to send notification email to the team
-async function sendTeamNotification(resend: Resend, report: any) {
-  try {
-    log(`Sending notification email for report ${report.id}`);
-    
-    // Generate the notification email HTML using the report data
-    const notificationHtml = createNotificationEmailHtml(report);
-    
-    // Format the subject line with report ID and organization for easy identification
-    const emailSubject = `New Report Request: ${report.organization} [${report.archetype_id}]`;
-    
-    // Send the notification email to the team
-    const emailResult = await resend.emails.send({
-      from: "Reports <reports@g.nomihealth.com>",
-      to: ["brian.woods@nomihealth.com"],
-      subject: emailSubject,
-      html: notificationHtml,
-      text: `New report request from ${report.name} (${report.email}) for organization ${report.organization}, archetype ${report.archetype_id}. Access URL: ${report.access_url || 'Not available'}`,
-    });
-    
-    if (emailResult.error) {
-      throw new Error(`Failed to send team notification: ${emailResult.error.message}`);
-    }
-    
-    log(`Team notification email sent successfully for report ${report.id}`);
-    return true;
-  } catch (error) {
-    // Log the error but don't disrupt the main flow
-    logError(`Failed to send team notification for report ${report.id}`, error);
-    return false;
-  }
-}
+import { log, logError } from "./utils/logging.ts";
+import { sendTeamNotification } from "./services/notificationService.ts";
+import { 
+  updateReportAttemptInfo,
+  fetchArchetypeName,
+  sendUserEmail,
+  updateReportStatus,
+  recordReportError
+} from "./services/reportService.ts";
 
 /**
  * Process and send emails for pending report requests
@@ -126,27 +90,7 @@ export async function processPendingReports(
       
       try {
         // Update attempt count and timestamp
-        try {
-          log(`Updating attempt information for report ${report.id}`);
-          const { data: attemptData, error: attemptErr } = await supabase
-            .from("report_requests")
-            .update({ 
-              last_attempt_at: new Date().toISOString(),
-              email_send_attempts: (report.email_send_attempts || 0) + 1
-            })
-            .eq("id", report.id)
-            .select();
-            
-          if (attemptErr) {
-            logError(`Warning: Could not update attempt counter for report ${report.id}`, attemptErr);
-            // Continue with processing despite this error
-          } else {
-            log(`Successfully updated attempt information for report ${report.id}`);
-          }
-        } catch (attemptErr) {
-          logError(`Warning: Could not update attempt counter: ${attemptErr.message}`, attemptErr);
-          // Continue with processing despite this error
-        }
+        await updateReportAttemptInfo(supabase, report.id, report.email_send_attempts);
         
         // Generate report URL if not already set
         if (!report.access_url) {
@@ -157,80 +101,13 @@ export async function processPendingReports(
         const recipientName = report.name || "there";
         
         // Get a basic archetype name
-        let archetypeName = "Healthcare Report";
-        try {
-          const { data } = await supabase
-            .from("level4_deepdive_report_data")
-            .select("archetype_name")
-            .eq("archetype_id", report.archetype_id)
-            .maybeSingle();
-            
-          if (data?.archetype_name) {
-            archetypeName = data.archetype_name;
-          }
-        } catch (nameErr) {
-          log(`Could not fetch archetype name: ${nameErr.message}`);
-          // Continue with default name
-        }
+        const archetypeName = await fetchArchetypeName(supabase, report.archetype_id);
         
-        // Create email content - no tracking pixel for deliverability
-        const emailHtml = createEmailHtml(recipientName, report.access_url);
+        // Send the email to the user
+        const emailResult = await sendUserEmail(resend, report, recipientName);
         
-        // Create a simple, direct subject line without special characters
-        const emailSubject = `Healthcare Report Now Available`;
-        
-        // Log all parameters before sending email
-        log(`Preparing email with parameters:
-          TO: ${report.email}
-          FROM: Reports <reports@g.nomihealth.com>
-          SUBJECT: ${emailSubject}
-        `);
-        
-        // Send the email with minimal formatting
-        const emailResult = await resend.emails.send({
-          from: "Reports <reports@g.nomihealth.com>",
-          to: [report.email],
-          subject: emailSubject,
-          html: emailHtml,
-          text: `Hello ${recipientName}, your healthcare report is now available. Please check your account portal for access. If you have questions, please contact support.`,
-        });
-        
-        log(`Email send result: ${JSON.stringify(emailResult)}`);
-        
-        if (!emailResult || emailResult.error) {
-          throw new Error(`Resend API error: ${emailResult?.error?.message || "Unknown error"}`);
-        }
-        
-        // Update report status to active with better error handling
-        log(`Updating report ${report.id} status to active after successful email send`);
-        const updateResult = await supabase
-          .from("report_requests")
-          .update({
-            status: "active",
-            email_sent_at: new Date().toISOString()
-          })
-          .eq("id", report.id)
-          .select();
-        
-        if (updateResult.error) {
-          logError(`Failed to update report ${report.id} status to active`, updateResult.error);
-          
-          // Try a simplified update as fallback
-          log(`Attempting simplified status update for report ${report.id}`);
-          const fallbackUpdate = await supabase
-            .from("report_requests")
-            .update({ status: "active" })
-            .eq("id", report.id);
-            
-          if (fallbackUpdate.error) {
-            logError(`Fallback update also failed for report ${report.id}`, fallbackUpdate.error);
-            // Record the error but continue processing other reports
-          } else {
-            log(`Fallback update succeeded for report ${report.id}`);
-          }
-        } else {
-          log(`Successfully updated report ${report.id} status to active`);
-        }
+        // Update report status to active
+        await updateReportStatus(supabase, report.id);
         
         // Send notification email to the team (don't block main flow)
         await sendTeamNotification(resend, report);
@@ -251,18 +128,7 @@ export async function processPendingReports(
         logError(`Error processing report ${report.id}`, reportError);
         
         // Update report with error info but don't change status
-        try {
-          log(`Recording error information for report ${report.id}`);
-          await supabase
-            .from("report_requests")
-            .update({
-              email_error: reportError.message,
-              email_error_at: new Date().toISOString()
-            })
-            .eq("id", report.id);
-        } catch (errorUpdateError) {
-          logError(`Failed to update error information for report ${report.id}`, errorUpdateError);
-        }
+        await recordReportError(supabase, report.id, reportError.message);
         
         // Add to results
         result.results.push({
