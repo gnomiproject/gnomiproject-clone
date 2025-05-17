@@ -908,10 +908,15 @@ export type Database = {
           comments: string | null
           created_at: string | null
           email: string | null
+          email_error: string | null
+          email_error_at: string | null
+          email_send_attempts: number | null
+          email_sent_at: string | null
           exact_employee_count: number | null
           expires_at: string | null
           id: string | null
           last_accessed: string | null
+          last_attempt_at: string | null
           name: string | null
           organization: string | null
           primary: number
@@ -928,10 +933,15 @@ export type Database = {
           comments?: string | null
           created_at?: string | null
           email?: string | null
+          email_error?: string | null
+          email_error_at?: string | null
+          email_send_attempts?: number | null
+          email_sent_at?: string | null
           exact_employee_count?: number | null
           expires_at?: string | null
           id?: string | null
           last_accessed?: string | null
+          last_attempt_at?: string | null
           name?: string | null
           organization?: string | null
           primary?: number
@@ -948,10 +958,15 @@ export type Database = {
           comments?: string | null
           created_at?: string | null
           email?: string | null
+          email_error?: string | null
+          email_error_at?: string | null
+          email_send_attempts?: number | null
+          email_sent_at?: string | null
           exact_employee_count?: number | null
           expires_at?: string | null
           id?: string | null
           last_accessed?: string | null
+          last_attempt_at?: string | null
           name?: string | null
           organization?: string | null
           primary?: number

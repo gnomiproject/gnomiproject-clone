@@ -91,16 +91,26 @@ export async function processPendingReports(
       log(`Processing report ID: ${report.id} for ${report.email}`);
       
       try {
-        // Update attempt count
+        // Update attempt count and timestamp
         try {
-          await supabase
+          log(`Updating attempt information for report ${report.id}`);
+          const { data: attemptData, error: attemptErr } = await supabase
             .from("report_requests")
             .update({ 
-              last_attempt_at: new Date().toISOString()
+              last_attempt_at: new Date().toISOString(),
+              email_send_attempts: (report.email_send_attempts || 0) + 1
             })
-            .eq("id", report.id);
+            .eq("id", report.id)
+            .select();
+            
+          if (attemptErr) {
+            logError(`Warning: Could not update attempt counter for report ${report.id}`, attemptErr);
+            // Continue with processing despite this error
+          } else {
+            log(`Successfully updated attempt information for report ${report.id}`);
+          }
         } catch (attemptErr) {
-          log(`Warning: Could not update attempt counter: ${attemptErr.message}`);
+          logError(`Warning: Could not update attempt counter: ${attemptErr.message}`, attemptErr);
           // Continue with processing despite this error
         }
         
@@ -155,20 +165,35 @@ export async function processPendingReports(
           throw new Error(`Resend API error: ${emailResult?.error?.message || "Unknown error"}`);
         }
         
-        // Update report status to active
-        const { error: updateError } = await supabase
+        // Update report status to active with better error handling
+        log(`Updating report ${report.id} status to active after successful email send`);
+        const updateResult = await supabase
           .from("report_requests")
           .update({
             status: "active",
             email_sent_at: new Date().toISOString()
           })
-          .eq("id", report.id);
+          .eq("id", report.id)
+          .select();
         
-        if (updateError) {
-          log(`Warning: Report status update failed: ${updateError.message}`);
-          // Continue processing despite this error
+        if (updateResult.error) {
+          logError(`Failed to update report ${report.id} status to active`, updateResult.error);
+          
+          // Try a simplified update as fallback
+          log(`Attempting simplified status update for report ${report.id}`);
+          const fallbackUpdate = await supabase
+            .from("report_requests")
+            .update({ status: "active" })
+            .eq("id", report.id);
+            
+          if (fallbackUpdate.error) {
+            logError(`Fallback update also failed for report ${report.id}`, fallbackUpdate.error);
+            // Record the error but continue processing other reports
+          } else {
+            log(`Fallback update succeeded for report ${report.id}`);
+          }
         } else {
-          log(`Successfully updated report status to active for ID: ${report.id}`);
+          log(`Successfully updated report ${report.id} status to active`);
         }
         
         log(`Successfully processed report ${report.id}`);
@@ -188,6 +213,7 @@ export async function processPendingReports(
         
         // Update report with error info but don't change status
         try {
+          log(`Recording error information for report ${report.id}`);
           await supabase
             .from("report_requests")
             .update({
@@ -196,7 +222,7 @@ export async function processPendingReports(
             })
             .eq("id", report.id);
         } catch (errorUpdateError) {
-          logError("Failed to update error information", errorUpdateError);
+          logError(`Failed to update error information for report ${report.id}`, errorUpdateError);
         }
         
         // Add to results
