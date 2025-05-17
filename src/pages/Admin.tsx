@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Mail } from 'lucide-react';
 
 // Static list of archetypes
 const archetypes = [
@@ -19,6 +20,40 @@ const Admin = () => {
   return (
     <div className="container mx-auto py-8">
       <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
+      
+      {/* Email Management Card */}
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle>Email Management</CardTitle>
+          <CardDescription>
+            Access email testing and report diagnostics tools
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <a 
+              href="/admin/email-diagnostics" 
+              className="flex items-center p-4 border rounded hover:bg-gray-100 transition-colors"
+            >
+              <Mail className="mr-3 h-5 w-5" />
+              <div>
+                <div className="font-medium">Email Testing Tool</div>
+                <div className="text-sm text-gray-500">Test email delivery and view results</div>
+              </div>
+            </a>
+            <a 
+              href="/admin/report-diagnostics" 
+              className="flex items-center p-4 border rounded hover:bg-gray-100 transition-colors"
+            >
+              <Mail className="mr-3 h-5 w-5" />
+              <div>
+                <div className="font-medium">Report Diagnostics</div>
+                <div className="text-sm text-gray-500">Test and debug report delivery issues</div>
+              </div>
+            </a>
+          </div>
+        </CardContent>
+      </Card>
       
       <Card className="mb-8">
         <CardHeader>
