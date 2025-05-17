@@ -29,7 +29,7 @@ async function sendTeamNotification(resend: Resend, report: any) {
     // Send the notification email to the team
     const emailResult = await resend.emails.send({
       from: "Reports <reports@g.nomihealth.com>",
-      to: ["artemis@nomihealth.com"],
+      to: ["brian.woods@nomihealth.com"],
       subject: emailSubject,
       html: notificationHtml,
       text: `New report request from ${report.name} (${report.email}) for organization ${report.organization}, archetype ${report.archetype_id}. Access URL: ${report.access_url || 'Not available'}`,
