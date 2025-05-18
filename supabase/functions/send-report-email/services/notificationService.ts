@@ -13,14 +13,14 @@ export async function sendTeamNotification(resend: any, report: any) {
       return { success: true, skipped: true };
     }
     
-    const teamNotificationEmail = Deno.env.get("TEAM_NOTIFICATION_EMAIL") || "team@example.com";
+    const teamNotificationEmail = Deno.env.get("TEAM_NOTIFICATION_EMAIL") || "team@g.nomihealth.com";
     
     // Generate HTML for team notification
     const html = createNotificationEmailHtml(report);
     
     // Send notification to team
     const { data, error } = await resend.emails.send({
-      from: 'Report Notification <reports@example.com>',
+      from: 'Report Notification <reports@g.nomihealth.com>',
       to: [teamNotificationEmail],
       subject: `New Report Request: ${report.archetype_name || report.archetype_id}`,
       html: html

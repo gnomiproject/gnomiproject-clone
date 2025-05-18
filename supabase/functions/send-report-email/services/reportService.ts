@@ -50,7 +50,7 @@ export async function sendUserEmail(resend: any, report: any, recipientName: str
   log(`Sending report email to ${report.email} for ${archetypeName}`);
   
   const { data, error } = await resend.emails.send({
-    from: 'Healthcare Report <reports@example.com>',
+    from: 'Healthcare Report <reports@g.nomihealth.com>',
     to: [report.email],
     subject: `Your ${archetypeName} Healthcare Report is Ready`,
     html: createReportEmailHtml({
