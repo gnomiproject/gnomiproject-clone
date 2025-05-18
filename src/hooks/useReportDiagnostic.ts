@@ -82,7 +82,26 @@ export const useReportDiagnostic = (initialArchetypeId: string = '', initialToke
         setReportData(null);
         return false;
       } else {
-        setReportData(data);
+        // If the archetype_name isn't in the report_requests table, we can try to fetch it separately
+        let reportWithArchetypeName = { ...data };
+        
+        try {
+          // Try to fetch the archetype name from Core_Archetype_Overview
+          const { data: archetypeData, error: archetypeError } = await supabase
+            .from('Core_Archetype_Overview')
+            .select('name')
+            .eq('id', id)
+            .maybeSingle();
+          
+          if (!archetypeError && archetypeData) {
+            reportWithArchetypeName.archetype_name = archetypeData.name;
+          }
+        } catch (err) {
+          console.error('Error fetching archetype name:', err);
+          // We'll continue even if this fails, as it's not critical
+        }
+        
+        setReportData(reportWithArchetypeName);
         toast.success('Report data fetched successfully');
         return true;
       }
@@ -129,9 +148,11 @@ export const useReportDiagnostic = (initialArchetypeId: string = '', initialToke
   const checkPendingReports = async () => {
     setIsLoading(true);
     try {
+      // Select only the columns that definitely exist in report_requests
+      // Removed 'archetype_name' from the select fields
       const { data, error } = await supabase
         .from('report_requests')
-        .select('id, email, archetype_id, status, created_at, name, access_token, email_send_attempts, last_attempt_at, email_error, email_sent_at, archetype_name')
+        .select('id, email, archetype_id, status, created_at, name, access_token, email_send_attempts, last_attempt_at, email_error, email_sent_at')
         .eq('status', 'pending')
         .order('created_at', { ascending: true });
       
@@ -144,7 +165,7 @@ export const useReportDiagnostic = (initialArchetypeId: string = '', initialToke
       } else {
         toast.success(`Found ${data.length} pending reports`);
         setReportData({ 
-          pendingReports: data,
+          pendingReports: data as ReportData[],
           type: 'pendingReportsList'
         });
       }
