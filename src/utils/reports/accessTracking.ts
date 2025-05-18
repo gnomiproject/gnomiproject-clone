@@ -14,32 +14,36 @@ export const trackReportAccess = async (
     // Log for debugging
     console.log(`[trackReportAccess] Tracking access for ${archetypeId} with token ${accessToken.substring(0, 5)}...`);
     
-    // First, try to update the existing record
-    // We'll first get the current count, then increment it
-    const { data: currentData } = await supabase
-      .from('report_requests')
-      .select('access_count')
-      .eq('archetype_id', archetypeId)
-      .eq('access_token', accessToken)
-      .single();
-      
-    const currentCount = currentData?.access_count || 0;
+    // Method 1: Direct RPC call to database function
+    // This is the most reliable method as it uses a security definer function
+    const { data: rpcData, error: rpcError } = await supabase.rpc(
+      'increment_report_access',
+      { p_access_token: accessToken, p_archetype_id: archetypeId }
+    );
     
-    // Now update with the incremented count
-    const { error } = await supabase
-      .from('report_requests')
-      .update({
-        last_accessed: new Date().toISOString(),
-        access_count: currentCount + 1
-      })
-      .eq('archetype_id', archetypeId)
-      .eq('access_token', accessToken);
-    
-    if (error) {
-      console.error('Error tracking report access via direct update:', error);
+    if (rpcError) {
+      console.error('Error tracking report access via RPC:', rpcError);
       
-      // As a fallback, call the increment-counter edge function
-      try {
+      // Method 2: Direct update to the database
+      // As fallback, try direct update to the report_requests table
+      console.log('[trackReportAccess] Falling back to direct update method');
+      
+      const { error } = await supabase
+        .from('report_requests')
+        .update({
+          last_accessed: new Date().toISOString(),
+          access_count: (rpcData?.access_count || 0) + 1
+        })
+        .eq('archetype_id', archetypeId)
+        .eq('access_token', accessToken);
+      
+      if (error) {
+        console.error('Error tracking report access via direct update:', error);
+        
+        // Method 3: Edge function as last resort
+        // Call the increment-counter edge function
+        console.log('[trackReportAccess] Falling back to edge function method');
+        
         const response = await supabase.functions.invoke('increment-counter', {
           body: { archetypeId, accessToken }
         });
@@ -48,15 +52,21 @@ export const trackReportAccess = async (
           throw new Error(response.error.message);
         }
         
-        console.log('Tracked access via edge function:', response.data);
-      } catch (fallbackErr) {
-        console.error('Edge function fallback failed:', fallbackErr);
+        console.log('[trackReportAccess] Tracked access via edge function:', response.data);
+      } else {
+        console.log('[trackReportAccess] Successfully updated access count via direct update');
       }
     } else {
-      console.log(`[trackReportAccess] Successfully updated access count to ${currentCount + 1}`);
+      console.log(`[trackReportAccess] Successfully tracked access via RPC. New count: ${rpcData?.access_count}`);
     }
+    
+    // Method 4: Loading a tracking pixel as additional fallback
+    // This happens separately in the component, since we need the DOM to load an image
   } catch (err) {
     console.error('Error tracking report access:', err);
+    
+    // Don't throw as this is a non-critical operation
+    // and shouldn't break the UI flow if it fails
   }
 };
 

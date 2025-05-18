@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { isValidArchetypeId, normalizeArchetypeId } from '@/utils/archetypeValidation';
@@ -10,6 +11,7 @@ import { checkCacheHealth, getCacheStats, clearAllCache } from '@/utils/reports/
 import { useTokenStatus } from '@/hooks/useTokenStatus';
 import ReportViewerContent from '@/components/report/viewer/ReportViewerContent';
 import ErrorHandler from '@/components/report/viewer/ErrorHandler';
+import { trackReportAccess } from '@/utils/reports/accessTracking';
 
 /**
  * Enhanced ReportViewer with improved error handling and fallback strategies
@@ -28,6 +30,7 @@ const ReportViewer = () => {
   const [isUsingFallbackData, setIsUsingFallbackData] = useState<boolean>(false);
   const [sessionStartTime] = useState<number>(Date.now());
   const hasValidatedRef = useRef<boolean>(false);
+  const hasTrackedAccessRef = useRef<boolean>(false);
   const navigate = useNavigate();
   
   // Removing page visibility tracking to prevent unnecessary operations
@@ -95,6 +98,23 @@ const ReportViewer = () => {
     error: userDataError,
     debugInfo: userDataDebugInfo
   } = useReportUserData(token, archetypeId || '');
+
+  // Track access when user data is valid and we have archetype ID and token
+  useEffect(() => {
+    if (!isAdminView && isValidAccess && archetypeId && token && !hasTrackedAccessRef.current) {
+      console.log(`[ReportViewer] Tracking access for ${archetypeId} with token ${token.substring(0, 5)}...`);
+      
+      // Track the report access
+      trackReportAccess(archetypeId, token)
+        .then(() => {
+          console.log('[ReportViewer] Successfully tracked report access');
+          hasTrackedAccessRef.current = true;
+        })
+        .catch(err => {
+          console.error('[ReportViewer] Error tracking report access:', err);
+        });
+    }
+  }, [archetypeId, token, isValidAccess, isAdminView]);
 
   // Log user data result
   useEffect(() => {
@@ -328,6 +348,16 @@ const ReportViewer = () => {
   // Render the main content
   return (
     <ErrorBoundary onError={handleError} name="Report Viewer">
+      {/* Add tracking pixel for server-side access tracking */}
+      {!isAdminView && token && archetypeId && (
+        <img 
+          src={`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/tracking/${archetypeId}/${token}`} 
+          alt=""
+          style={{ position: 'absolute', width: '1px', height: '1px', opacity: 0 }}
+          onError={(e) => console.error('Tracking pixel failed to load:', e)}
+        />
+      )}
+      
       <ReportViewerContent
         tokenStatus={tokenStatus}
         isAdminView={isAdminView}

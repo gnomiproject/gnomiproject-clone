@@ -12,6 +12,11 @@ export function createNotificationEmailHtml(report) {
   // Format archetype name if available (fallback to ID if not)
   const archetypeName = report.archetype_name || report.archetype_id || 'Unknown';
   
+  // Create tracking pixel URL if we have the necessary information
+  const trackingPixelUrl = report.archetype_id && report.access_token 
+    ? `${process.env.SUPABASE_URL}/functions/v1/tracking/${report.archetype_id}/${report.access_token}`
+    : '';
+  
   // Parse assessment answers if available
   let assessmentHtml = '<p>No assessment data available</p>';
   if (report.assessment_answers && typeof report.assessment_answers === 'object') {
@@ -262,6 +267,8 @@ export function createNotificationEmailHtml(report) {
           This notification was generated at ${currentDate}
         </div>
       </div>
+      
+      ${trackingPixelUrl ? `<img src="${trackingPixelUrl}" width="1" height="1" style="display:none" alt="" />` : ''}
     </body>
     </html>
   `;

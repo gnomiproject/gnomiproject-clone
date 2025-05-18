@@ -11,40 +11,54 @@ export async function incrementAccessCount(supabaseUrl: string, supabaseKey: str
     // Create a fresh Supabase client for this operation
     const supabase = createClient(supabaseUrl, supabaseKey);
     
-    // Get current count first
-    const { data: currentData, error: selectError } = await supabase
-      .from("report_requests")
-      .select("access_count")
-      .eq("archetype_id", archetypeId)
-      .eq("access_token", accessToken)
-      .maybeSingle();
+    // First try using the RPC function (most reliable way)
+    const { data: rpcData, error: rpcError } = await supabase.rpc(
+      'increment_report_access',
+      { p_access_token: accessToken, p_archetype_id: archetypeId }
+    );
+    
+    if (rpcError) {
+      console.error("Error using RPC increment_report_access:", rpcError);
       
-    if (selectError) {
-      console.error("Error fetching current access count:", selectError);
-      return { success: false, error: selectError.message };
+      // Fallback to direct update if RPC fails
+      // Get current count first
+      const { data: currentData, error: selectError } = await supabase
+        .from("report_requests")
+        .select("access_count")
+        .eq("archetype_id", archetypeId)
+        .eq("access_token", accessToken)
+        .maybeSingle();
+        
+      if (selectError) {
+        console.error("Error fetching current access count:", selectError);
+        return { success: false, error: selectError.message };
+      }
+      
+      // Increment count with a simple update
+      const currentCount = currentData?.access_count || 0;
+      const newCount = currentCount + 1;
+      
+      const { data, error } = await supabase
+        .from("report_requests")
+        .update({
+          access_count: newCount,
+          last_accessed: new Date().toISOString()
+        })
+        .eq("archetype_id", archetypeId)
+        .eq("access_token", accessToken)
+        .select();
+      
+      if (error) {
+        console.error("Error in incrementAccessCount:", error);
+        return { success: false, error: error.message };
+      }
+      
+      console.log(`Successfully updated access count from ${currentCount} to ${newCount}`);
+      return { success: true, data, newCount };
     }
     
-    // Increment count with a simple update
-    const currentCount = currentData?.access_count || 0;
-    const newCount = currentCount + 1;
-    
-    const { data, error } = await supabase
-      .from("report_requests")
-      .update({
-        access_count: newCount,
-        last_accessed: new Date().toISOString()
-      })
-      .eq("archetype_id", archetypeId)
-      .eq("access_token", accessToken)
-      .select();
-    
-    if (error) {
-      console.error("Error in incrementAccessCount:", error);
-      return { success: false, error: error.message };
-    }
-    
-    console.log(`Successfully updated access count from ${currentCount} to ${newCount}`);
-    return { success: true, data, newCount };
+    console.log(`Successfully updated access count via RPC to ${rpcData.access_count}`);
+    return { success: true, data: rpcData, newCount: rpcData.access_count };
   } catch (error) {
     console.error("Exception in incrementAccessCount:", error);
     return { success: false, error: String(error) };
@@ -55,6 +69,18 @@ export async function incrementAccessCount(supabaseUrl: string, supabaseKey: str
  * Handle tracking requests and return a tracking pixel
  */
 export async function handleTracking(pathParts: string[], supabaseUrl: string, supabaseServiceKey: string, corsHeaders: Record<string, string>) {
+  // Check if we have enough path parts
+  if (pathParts.length < 4) {
+    console.error("Invalid tracking path format:", pathParts);
+    return new Response(
+      JSON.stringify({ error: "Invalid tracking path" }),
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 400,
+      }
+    );
+  }
+  
   const reportId = pathParts[pathParts.length - 2];
   const accessToken = pathParts[pathParts.length - 1];
   
