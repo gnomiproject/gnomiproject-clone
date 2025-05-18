@@ -1,4 +1,4 @@
-
+import { createEmailHtml } from "../emailTemplate.ts";
 import { log, logError } from "../utils/logging.ts";
 
 /**
@@ -49,15 +49,27 @@ export async function sendUserEmail(resend: any, report: any, recipientName: str
   
   log(`Sending report email to ${report.email} for ${archetypeName}`);
   
+  // Generate a tracking pixel URL if needed
+  let trackingPixelUrl;
+  if (report.id) {
+    // Format could be customized based on your tracking implementation
+    const baseUrl = new URL(report.access_url || "https://g.nomihealth.com").origin;
+    trackingPixelUrl = `${baseUrl}/functions/v1/send-report-email/track-access/${report.id}/pixel`;
+  }
+  
+  // Use the improved email template
+  const html = createEmailHtml(
+    recipientName,
+    report.access_url,
+    trackingPixelUrl,
+    archetypeName
+  );
+  
   const { data, error } = await resend.emails.send({
-    from: 'Healthcare Report <reports@g.nomihealth.com>',
+    from: 'Nomi Health <reports@g.nomihealth.com>',
     to: [report.email],
-    subject: `Your ${archetypeName} Healthcare Report is Ready`,
-    html: createReportEmailHtml({
-      recipientName,
-      archetypeName,
-      reportUrl: report.access_url
-    })
+    subject: `Your ${archetypeName} Archetype Report is Ready`,
+    html: html
   });
   
   if (error) {
@@ -107,97 +119,4 @@ export async function recordReportError(supabase: any, reportId: string, errorMe
   }
 }
 
-/**
- * Create HTML template for report emails
- */
-function createReportEmailHtml(data: { 
-  recipientName: string,
-  archetypeName: string, 
-  reportUrl: string 
-}) {
-  return `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1">
-      <title>Your Healthcare Report</title>
-      <style>
-        body {
-          font-family: Arial, sans-serif;
-          line-height: 1.6;
-          color: #333;
-        }
-        .container {
-          max-width: 600px;
-          margin: 0 auto;
-          padding: 20px;
-        }
-        .header {
-          background-color: #4f46e5;
-          padding: 20px;
-          color: white;
-          text-align: center;
-          border-radius: 4px 4px 0 0;
-        }
-        .content {
-          background-color: #ffffff;
-          padding: 20px;
-          border: 1px solid #e5e7eb;
-          border-top: none;
-          border-radius: 0 0 4px 4px;
-        }
-        .button {
-          display: inline-block;
-          background-color: #4f46e5;
-          color: white;
-          text-decoration: none;
-          padding: 12px 20px;
-          border-radius: 4px;
-          margin-top: 20px;
-          font-weight: bold;
-        }
-        .footer {
-          margin-top: 20px;
-          text-align: center;
-          font-size: 12px;
-          color: #6b7280;
-        }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <div class="header">
-          <h1>Your Healthcare Report is Ready</h1>
-        </div>
-        <div class="content">
-          <p>Hello ${data.recipientName},</p>
-          
-          <p>Your requested healthcare report for <strong>${data.archetypeName}</strong> is now available! This report contains valuable insights and analysis based on your organization's profile and needs.</p>
-          
-          <p>To view your report, simply click the button below:</p>
-          
-          <div style="text-align: center;">
-            <a href="${data.reportUrl}" class="button">View My Report</a>
-          </div>
-          
-          <p>This report includes:</p>
-          <ul>
-            <li>Detailed demographic analysis</li>
-            <li>Cost optimization opportunities</li>
-            <li>Utilization patterns and insights</li>
-            <li>Strategic recommendations</li>
-          </ul>
-          
-          <p>If you have any questions about your report, please don't hesitate to contact our team.</p>
-          
-          <p>Thank you for using our healthcare analytics solution!</p>
-        </div>
-        <div class="footer">
-          <p>This report link is valid for 30 days. Please save or bookmark the report if you wish to access it beyond this period.</p>
-        </div>
-      </div>
-    </body>
-    </html>
-  `;
-}
+// The createReportEmailHtml function is no longer needed as we're using createEmailHtml from emailTemplate.ts
