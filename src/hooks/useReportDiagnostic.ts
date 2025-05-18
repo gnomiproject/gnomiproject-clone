@@ -20,7 +20,7 @@ export interface ReportData {
   last_attempt_at?: string;
   email_error?: string;
   access_url?: string;
-  archetype_name?: string;
+  archetype_name?: string;  // Added this property to the interface
   type?: string;
   pendingReports?: ReportData[];
 }
@@ -82,8 +82,8 @@ export const useReportDiagnostic = (initialArchetypeId: string = '', initialToke
         setReportData(null);
         return false;
       } else {
-        // If the archetype_name isn't in the report_requests table, we can try to fetch it separately
-        let reportWithArchetypeName = { ...data };
+        // Create a properly typed object with the report data
+        const reportWithArchetypeName: ReportData = { ...data };
         
         try {
           // Try to fetch the archetype name from Core_Archetype_Overview
