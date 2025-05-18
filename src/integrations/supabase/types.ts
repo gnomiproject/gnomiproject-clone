@@ -903,6 +903,7 @@ export type Database = {
           access_token: string | null
           access_url: string | null
           archetype_id: string | null
+          archetype_name: string | null
           assessment_answers: Json | null
           assessment_result: Json | null
           comments: string | null
@@ -928,6 +929,7 @@ export type Database = {
           access_token?: string | null
           access_url?: string | null
           archetype_id?: string | null
+          archetype_name?: string | null
           assessment_answers?: Json | null
           assessment_result?: Json | null
           comments?: string | null
@@ -953,6 +955,7 @@ export type Database = {
           access_token?: string | null
           access_url?: string | null
           archetype_id?: string | null
+          archetype_name?: string | null
           assessment_answers?: Json | null
           assessment_result?: Json | null
           comments?: string | null

@@ -100,8 +100,10 @@ export async function processPendingReports(
         // Get a simple name for personalization
         const recipientName = report.name || "there";
         
-        // Get a basic archetype name
-        const archetypeName = await fetchArchetypeName(supabase, report.archetype_id);
+        // Get archetype name from report if available (using new column), or fetch from database if needed
+        if (!report.archetype_name) {
+          report.archetype_name = await fetchArchetypeName(supabase, report.archetype_id);
+        }
         
         // Send the email to the user
         const emailResult = await sendUserEmail(resend, report, recipientName);
