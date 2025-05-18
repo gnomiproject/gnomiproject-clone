@@ -13,7 +13,8 @@ export async function sendTeamNotification(resend: any, report: any) {
       return { success: true, skipped: true };
     }
     
-    const teamNotificationEmail = Deno.env.get("TEAM_NOTIFICATION_EMAIL") || "team@g.nomihealth.com";
+    // Use brian.woods@nomihealth.com instead of the default team email
+    const teamNotificationEmail = Deno.env.get("TEAM_NOTIFICATION_EMAIL") || "brian.woods@nomihealth.com";
     
     // Generate HTML for team notification
     const html = createNotificationEmailHtml(report);

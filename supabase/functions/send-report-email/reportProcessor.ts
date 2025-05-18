@@ -103,6 +103,18 @@ export async function processPendingReports(
         // Get archetype name from report if available (using new column), or fetch from database if needed
         if (!report.archetype_name) {
           report.archetype_name = await fetchArchetypeName(supabase, report.archetype_id);
+          
+          // Update the report_requests table with the archetype_name
+          const { error: updateError } = await supabase
+            .from("report_requests")
+            .update({ archetype_name: report.archetype_name })
+            .eq("id", report.id);
+            
+          if (updateError) {
+            logError(`Error updating archetype_name for report ${report.id}`, updateError);
+          } else {
+            log(`Updated archetype_name to "${report.archetype_name}" for report ${report.id}`);
+          }
         }
         
         // Send the email to the user
