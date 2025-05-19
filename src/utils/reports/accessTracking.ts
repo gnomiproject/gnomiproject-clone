@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 /**
@@ -81,8 +80,21 @@ export const trackReportAccess = async (
     } else {
       // Safely handle returned data
       let accessCount: number | string | null = null;
+      
+      // Fix for the TypeScript error - Properly type check the rpcData
       if (rpcData && typeof rpcData === 'object') {
-        accessCount = 'access_count' in rpcData ? rpcData.access_count : null;
+        // Safely extract access_count with proper type handling
+        if ('access_count' in rpcData) {
+          const rawCount = rpcData.access_count;
+          if (typeof rawCount === 'number') {
+            accessCount = rawCount;
+          } else if (typeof rawCount === 'string') {
+            accessCount = rawCount;
+          } else if (rawCount !== null && rawCount !== undefined) {
+            // Convert other types to string representation
+            accessCount = String(rawCount);
+          }
+        }
       }
       
       console.log(`[trackReportAccess] Successfully tracked access via RPC. New count: ${accessCount}`);
