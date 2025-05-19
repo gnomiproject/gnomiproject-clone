@@ -49,11 +49,15 @@ serve(async (req: Request) => {
     console.log(`Received tracking request for path: ${url.pathname}`);
     console.log(`Path parts: ${JSON.stringify(pathParts)}`);
 
+    const requestId = req.headers.get('x-request-id') || crypto.randomUUID();
+    console.log(`Request ID: ${requestId}`);
+
     return handleTracking(
       pathParts, 
       supabaseUrl,
       supabaseServiceKey,
-      corsHeaders
+      corsHeaders,
+      requestId
     );
   } catch (error) {
     console.error("Error in tracking function:", error.message);

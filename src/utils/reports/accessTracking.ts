@@ -2,7 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 
 /**
- * Tracks when a user accesses a report by token
+ * Tracks when a user accesses a report by token, with deduplication
  * @param archetypeId The ID of the archetype
  * @param accessToken The access token for the report
  */
@@ -11,6 +11,22 @@ export const trackReportAccess = async (
   accessToken: string
 ): Promise<void> => {
   try {
+    // Prevent tracking during the same session
+    const sessionKey = `tracked_${archetypeId}_${accessToken}`;
+    const lastTracked = sessionStorage.getItem(sessionKey);
+    
+    // If we've tracked this session in the last 5 minutes, don't track again
+    if (lastTracked) {
+      const elapsedTime = Date.now() - parseInt(lastTracked, 10);
+      if (elapsedTime < 5 * 60 * 1000) {  // 5 minutes
+        console.log(`[trackReportAccess] Recently tracked, skipping (${Math.round(elapsedTime/1000)}s ago)`);
+        return;
+      }
+    }
+    
+    // Record that we're tracking this session now
+    sessionStorage.setItem(sessionKey, Date.now().toString());
+    
     // Log for debugging
     console.log(`[trackReportAccess] Tracking access for ${archetypeId} with token ${accessToken.substring(0, 5)}...`);
     
@@ -40,7 +56,13 @@ export const trackReportAccess = async (
         console.error('Error getting current access count:', getCurrentError);
       }
       
-      const currentCount = currentData?.access_count ? Number(currentData.access_count) : 0;
+      // Safely extract the access_count value
+      let currentCount = 0;
+      if (currentData && typeof currentData === 'object' && 'access_count' in currentData) {
+        currentCount = typeof currentData.access_count === 'number' 
+          ? currentData.access_count 
+          : parseInt(currentData.access_count as string, 10) || 0;
+      }
       
       const { error } = await supabase
         .from('report_requests')
@@ -53,39 +75,24 @@ export const trackReportAccess = async (
       
       if (error) {
         console.error('Error tracking report access via direct update:', error);
-        
-        // Method 3: Edge function as last resort
-        // Call the increment-counter edge function
-        console.log('[trackReportAccess] Falling back to edge function method');
-        
-        const response = await supabase.functions.invoke('increment-counter', {
-          body: { archetypeId, accessToken }
-        });
-        
-        if (response.error) {
-          throw new Error(response.error.message);
-        }
-        
-        console.log('[trackReportAccess] Tracked access via edge function:', response.data);
       } else {
         console.log('[trackReportAccess] Successfully updated access count via direct update');
       }
     } else {
-      // Safely handle rpcData which might be of type Json (string | number | boolean | null | Json[] | { [key: string]: Json })
-      const accessCount = typeof rpcData === 'object' && rpcData !== null && 'access_count' in rpcData 
-        ? rpcData.access_count 
-        : 'unknown';
+      // Safely handle returned data
+      let accessCount: number | string | null = null;
+      if (rpcData && typeof rpcData === 'object') {
+        accessCount = 'access_count' in rpcData ? rpcData.access_count : null;
+      }
       
       console.log(`[trackReportAccess] Successfully tracked access via RPC. New count: ${accessCount}`);
     }
     
-    // Method 4: Loading a tracking pixel as additional fallback
-    // This happens separately in the component, since we need the DOM to load an image
+    // No need for Method 3 (edge function) - we've moved to a dedicated tracking pixel
+    
   } catch (err) {
     console.error('Error tracking report access:', err);
-    
     // Don't throw as this is a non-critical operation
-    // and shouldn't break the UI flow if it fails
   }
 };
 

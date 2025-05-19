@@ -31,6 +31,7 @@ const ReportViewer = () => {
   const [sessionStartTime] = useState<number>(Date.now());
   const hasValidatedRef = useRef<boolean>(false);
   const hasTrackedAccessRef = useRef<boolean>(false);
+  const trackingPixelLoadedRef = useRef<boolean>(false);
   const navigate = useNavigate();
   
   // Removing page visibility tracking to prevent unnecessary operations
@@ -104,14 +105,14 @@ const ReportViewer = () => {
     if (!isAdminView && isValidAccess && archetypeId && token && !hasTrackedAccessRef.current) {
       console.log(`[ReportViewer] Tracking access for ${archetypeId} with token ${token.substring(0, 5)}...`);
       
-      // Track the report access
+      // Client-side tracking via RPC - uses deduplication
       trackReportAccess(archetypeId, token)
         .then(() => {
-          console.log('[ReportViewer] Successfully tracked report access');
+          console.log('[ReportViewer] Successfully tracked report access client-side');
           hasTrackedAccessRef.current = true;
         })
         .catch(err => {
-          console.error('[ReportViewer] Error tracking report access:', err);
+          console.error('[ReportViewer] Error tracking report access client-side:', err);
         });
     }
   }, [archetypeId, token, isValidAccess, isAdminView]);
@@ -231,7 +232,11 @@ const ReportViewer = () => {
       cacheHealth: checkCacheHealth(),
       cacheStats: getCacheStats(),
       isUsingFallbackData,
-      validationFrequency: '30 minutes' // Updated to 30 minutes
+      validationFrequency: '30 minutes',
+      trackingMethods: {
+        clientSide: hasTrackedAccessRef.current,
+        trackingPixel: trackingPixelLoadedRef.current
+      }
     }
   };
 
@@ -266,6 +271,17 @@ const ReportViewer = () => {
     } catch (e) {
       console.error('Error clearing debug logs:', e);
     }
+  }, []);
+
+  // Handle tracking pixel load
+  const handleTrackingPixelLoad = useCallback(() => {
+    console.log('[ReportViewer] Tracking pixel loaded successfully');
+    trackingPixelLoadedRef.current = true;
+  }, []);
+  
+  // Handle tracking pixel error
+  const handleTrackingPixelError = useCallback((e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    console.error('[ReportViewer] Tracking pixel failed to load:', e);
   }, []);
 
   // Show loading state
@@ -351,10 +367,11 @@ const ReportViewer = () => {
       {/* Add tracking pixel for server-side access tracking */}
       {!isAdminView && token && archetypeId && (
         <img 
-          src={`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/tracking/${archetypeId}/${token}`} 
+          src={`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/tracking/${archetypeId}/${token}?t=${new Date().getTime()}`} 
           alt=""
           style={{ position: 'absolute', width: '1px', height: '1px', opacity: 0 }}
-          onError={(e) => console.error('Tracking pixel failed to load:', e)}
+          onLoad={handleTrackingPixelLoad}
+          onError={handleTrackingPixelError}
         />
       )}
       
@@ -380,7 +397,7 @@ const ReportViewer = () => {
       {/* Debug toolbar - only visible in development */}
       {import.meta.env.DEV && (
         <div className="fixed bottom-0 left-0 right-0 bg-gray-900 text-white p-2 flex items-center justify-between text-xs z-50">
-          <div>Token: {tokenStatus} | Cache: {isUsingFallbackData ? 'Using Fallback' : 'Fresh'}</div>
+          <div>Token: {tokenStatus} | Cache: {isUsingFallbackData ? 'Using Fallback' : 'Fresh'} | Pixel: {trackingPixelLoadedRef.current ? 'Loaded' : 'Not Loaded'}</div>
           <div className="space-x-2">
             <button
               onClick={handleRefresh}

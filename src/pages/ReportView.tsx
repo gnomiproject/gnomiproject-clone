@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import InsightsReportContent from '@/components/report/sections/InsightsReportContent';
 import { useGetArchetype } from '@/hooks/useGetArchetype';
@@ -11,11 +11,15 @@ import { trackReportAccess } from '@/utils/reports/accessTracking';
 
 const ReportView = () => {
   const { archetypeId, token } = useParams();
+  const hasTrackedRef = useRef(false);
   
-  // Track report access when component mounts
+  // Track report access when component mounts - with deduplication
   useEffect(() => {
-    if (archetypeId && token) {
+    // Only track once per session for this component
+    if (archetypeId && token && !hasTrackedRef.current) {
+      console.log(`[ReportView] First view, tracking access for ${archetypeId}`);
       trackReportAccess(archetypeId, token);
+      hasTrackedRef.current = true;
     }
   }, [archetypeId, token]);
   
