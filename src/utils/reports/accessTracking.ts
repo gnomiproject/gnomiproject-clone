@@ -28,11 +28,25 @@ export const trackReportAccess = async (
       // As fallback, try direct update to the report_requests table
       console.log('[trackReportAccess] Falling back to direct update method');
       
+      // First get current count
+      const { data: currentData, error: getCurrentError } = await supabase
+        .from('report_requests')
+        .select('access_count')
+        .eq('archetype_id', archetypeId)
+        .eq('access_token', accessToken)
+        .maybeSingle();
+      
+      if (getCurrentError) {
+        console.error('Error getting current access count:', getCurrentError);
+      }
+      
+      const currentCount = currentData?.access_count ? Number(currentData.access_count) : 0;
+      
       const { error } = await supabase
         .from('report_requests')
         .update({
           last_accessed: new Date().toISOString(),
-          access_count: (rpcData?.access_count || 0) + 1
+          access_count: currentCount + 1
         })
         .eq('archetype_id', archetypeId)
         .eq('access_token', accessToken);
@@ -57,7 +71,12 @@ export const trackReportAccess = async (
         console.log('[trackReportAccess] Successfully updated access count via direct update');
       }
     } else {
-      console.log(`[trackReportAccess] Successfully tracked access via RPC. New count: ${rpcData?.access_count}`);
+      // Safely handle rpcData which might be of type Json (string | number | boolean | null | Json[] | { [key: string]: Json })
+      const accessCount = typeof rpcData === 'object' && rpcData !== null && 'access_count' in rpcData 
+        ? rpcData.access_count 
+        : 'unknown';
+      
+      console.log(`[trackReportAccess] Successfully tracked access via RPC. New count: ${accessCount}`);
     }
     
     // Method 4: Loading a tracking pixel as additional fallback

@@ -1,7 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.43.3";
-import { handleTracking } from "../send-report-email/tracking.ts";
+import { handleTracking } from "./tracking.ts";
 
 // CORS headers for browser requests
 const corsHeaders = {
