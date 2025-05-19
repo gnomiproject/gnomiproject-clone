@@ -13,8 +13,9 @@ export function createNotificationEmailHtml(report) {
   const archetypeName = report.archetype_name || report.archetype_id || 'Unknown';
   
   // Create tracking pixel URL if we have the necessary information
-  const trackingPixelUrl = report.archetype_id && report.access_token 
-    ? `${process.env.SUPABASE_URL}/functions/v1/tracking/${report.archetype_id}/${report.access_token}`
+  const supabaseUrl = Deno.env.get("SUPABASE_URL") || '';
+  const trackingPixelUrl = report.archetype_id && report.access_token && supabaseUrl 
+    ? `${supabaseUrl}/functions/v1/tracking/${report.archetype_id}/${report.access_token}`
     : '';
   
   // Parse assessment answers if available
