@@ -79,12 +79,14 @@ interface ConnectionErrorStateProps {
   archetypeError: Error | null;
   onRetry: () => void;
   isRetrying: boolean;
+  archetypeId: string; // Ensure we have this prop
 }
 
 export const ConnectionErrorStateHandler: React.FC<ConnectionErrorStateProps> = ({
   archetypeError,
   onRetry,
-  isRetrying
+  isRetrying,
+  archetypeId
 }) => {
   const navigate = useNavigate();
   
@@ -94,6 +96,7 @@ export const ConnectionErrorStateHandler: React.FC<ConnectionErrorStateProps> = 
         onRetry={onRetry}
         onRetakeAssessment={() => navigate('/assessment')}
         isRetrying={isRetrying}
+        archetypeId={archetypeId}
       />
     );
   }

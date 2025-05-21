@@ -47,6 +47,7 @@ const AssessmentResultsCard = ({
   if (error) {
     return <ArchetypeError 
       message={error} 
+      archetypeId={selectedArchetype}
       onRetry={onRetakeAssessment} 
       onRetakeAssessment={onRetakeAssessment} 
     />;
