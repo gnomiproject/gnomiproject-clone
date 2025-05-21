@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -173,7 +174,7 @@ const DeepDiveFormContainer = ({
           email: data.email,
           organization: data.organization || null,
           comments: data.comments || null,
-          status: 'pending', // Changed from 'active' to 'pending' to trigger email sending
+          status: 'active', // Changed from 'pending' to 'active' for immediate access
           access_token: accessToken,
           created_at: new Date().toISOString(),
           expires_at: addDays(new Date(), 30).toISOString(),

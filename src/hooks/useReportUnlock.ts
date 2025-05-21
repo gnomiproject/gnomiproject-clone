@@ -64,7 +64,7 @@ export const useReportUnlock = (archetypeId: string) => {
         };
       }
       
-      // Create a report request record in the database - updated to match deep dive form fields and database schema
+      // Create a report request record in the database - CHANGED STATUS FROM 'pending' TO 'active'
       const { data, error } = await supabase
         .from('report_requests')
         .insert({
@@ -75,7 +75,7 @@ export const useReportUnlock = (archetypeId: string) => {
           archetype_id: formData.archetypeId,
           exact_employee_count: formData.employeeCount, // Fixed column name to match database schema
           access_token: accessToken,
-          status: 'pending', // Changed from 'active' to 'pending' to trigger email sending
+          status: 'active', // Changed from 'pending' to 'active' to allow immediate report access
           expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
           assessment_answers: formData.assessmentAnswers,
           session_id: formData.sessionId || localStorage.getItem('session_id') || null,
@@ -130,7 +130,9 @@ export const useReportUnlock = (archetypeId: string) => {
         });
       }
       
-      // Call the email sending function to immediately process the email - like deep dive form
+      // Call the email sending function to immediately process the email
+      // This still sends the email but since the status is already 'active', 
+      // the user doesn't need to wait for the email to be sent to access the report
       try {
         const emailResponse = await supabase.functions.invoke('send-report-email', {
           method: 'POST',
