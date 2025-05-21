@@ -49,6 +49,7 @@ export const useReportUnlock = (archetypeId: string) => {
       const reportId = uuidv4();
       
       // Create a report request record in the database
+      // Fixed: Changed assessment_data to assessment_answers to match the database schema
       const { data, error } = await supabase
         .from('report_requests')
         .insert({
@@ -61,7 +62,7 @@ export const useReportUnlock = (archetypeId: string) => {
           access_token: accessToken,
           status: 'active',
           expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
-          assessment_data: formData.assessmentAnswers
+          assessment_answers: formData.assessmentAnswers // Fixed column name from assessment_data to assessment_answers
         })
         .select()
         .single();

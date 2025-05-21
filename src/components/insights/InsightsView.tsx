@@ -7,7 +7,6 @@ import OverviewTab from './tabs/OverviewTab';
 import MetricsTab from './tabs/MetricsTab';
 import SwotTab from './tabs/SwotTab';
 import DiseaseAndCareTab from './tabs/DiseaseAndCareTab';
-import DeepDiveRequestForm from '@/components/results/DeepDiveRequestForm';
 import UnlockReportModal from './UnlockReportModal';
 import UnlockSuccessMessage from './UnlockSuccessMessage';
 import { useReportUnlock, UnlockFormData } from '@/hooks/useReportUnlock';
@@ -319,18 +318,8 @@ const InsightsView = ({
           </>
         )}
       </div>
-
-      {/* Only show the request form section if not unlocked and not explicitly hidden */}
-      {!isUnlocked && !hideRequestSection && (
-        <div className="border-t border-gray-100 mt-6">
-          <DeepDiveRequestForm
-            archetypeId={archetypeId}
-            assessmentResult={processedAssessmentResult}
-            assessmentAnswers={assessmentAnswers}
-            archetypeData={reportData}
-          />
-        </div>
-      )}
+      
+      {/* Removed DeepDiveRequestForm section as it's now redundant with the UnlockReportModal */}
       
       {/* Unlock report modal with proper submission handler */}
       <UnlockReportModal
