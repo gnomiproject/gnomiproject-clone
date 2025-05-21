@@ -31,6 +31,12 @@ export const useReportUnlock = (archetypeId: string) => {
     setSubmissionError(null);
     
     try {
+      console.log('Submitting unlock form with data:', formData);
+      
+      if (!formData.name || !formData.email || !formData.organization) {
+        throw new Error('Please fill out all required fields');
+      }
+      
       // Generate a unique access token
       const accessToken = uuidv4();
       const reportId = uuidv4();
@@ -54,8 +60,11 @@ export const useReportUnlock = (archetypeId: string) => {
         .single();
         
       if (error) {
+        console.error('Database error creating report request:', error);
         throw new Error(`Failed to create report request: ${error.message}`);
       }
+      
+      console.log('Successfully created report request:', data);
       
       // Set unlocked state
       setIsUnlocked(true);
@@ -67,7 +76,12 @@ export const useReportUnlock = (archetypeId: string) => {
       });
       
       // Track initial access
-      await trackReportAccess(archetypeId, accessToken);
+      try {
+        await trackReportAccess(archetypeId, accessToken);
+      } catch (trackError) {
+        console.error('Error tracking initial access:', trackError);
+        // Don't fail the overall operation for tracking errors
+      }
       
       return { 
         success: true,

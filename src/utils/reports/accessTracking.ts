@@ -20,6 +20,8 @@ export const trackReportAccess = async (
   }
   
   try {
+    console.log(`Tracking report access for archetype: ${archetypeId}, token: ${token.substring(0, 5)}...`);
+    
     // Call the PostgreSQL function to increment the access counter
     const { data, error } = await supabase.rpc('increment_report_access', {
       p_access_token: token,

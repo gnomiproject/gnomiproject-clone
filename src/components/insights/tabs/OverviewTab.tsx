@@ -38,6 +38,16 @@ const OverviewTab = ({ archetypeData, familyColor, hideRequestSection = false }:
     (archetypeData?.summary?.description) || 
     "This archetype represents organizations with specific healthcare management approaches and characteristics.";
     
+  // Ensure we have the family name
+  const familyName = archetypeData?.familyName || archetypeData?.family_name || "Healthcare Family";
+
+  // Debug family name extraction
+  console.log('[OverviewTab] Family name data:', { 
+    fromFamilyName: archetypeData?.familyName,
+    fromFamily_name: archetypeData?.family_name,
+    finalValue: familyName
+  });
+
   return (
     <Card>
       <CardHeader style={{ borderBottom: `4px solid ${familyColor}` }}>
@@ -47,12 +57,12 @@ const OverviewTab = ({ archetypeData, familyColor, hideRequestSection = false }:
               {archetypeData?.name || archetypeData?.id?.toUpperCase() || 'Unknown Archetype'}
             </CardTitle>
             <p className="text-gray-600 mt-1">
-              {archetypeData?.familyName || archetypeData?.family_name || "Healthcare Archetype Family"}
+              {familyName || "Healthcare Archetype Family"}
             </p>
           </div>
           <div className="inline-flex items-center px-3 py-1 rounded-full text-sm" 
             style={{ backgroundColor: `${familyColor}20`, color: familyColor }}>
-            Family: {archetypeData?.familyName || archetypeData?.family_name || "Healthcare Archetype Family"}
+            Family: {familyName}
           </div>
         </div>
       </CardHeader>

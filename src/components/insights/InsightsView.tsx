@@ -1,3 +1,4 @@
+
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ArchetypeId, ArchetypeDetailedData } from '@/types/archetype';
 import ArchetypeNavTabs from './components/ArchetypeNavTabs';
@@ -172,7 +173,23 @@ const InsightsView = ({
     (reportData as any).Dise_Type_2_Diabetes_Prevalence
   );
 
-  // Update the UnlockReportModal component with the submissionError prop
+  console.log('[InsightsView] Rendering with data:', { 
+    name, 
+    familyName, 
+    familyId, 
+    familyColor, 
+    isUnlocked 
+  });
+
+  // Handle form submission with proper typing
+  const handleUnlockFormSubmit = async (formData: UnlockFormData) => {
+    console.log('[InsightsView] Submitting unlock form with data:', { 
+      ...formData, 
+      assessmentAnswers: 'present' in formData ? '[data present]' : '[no data]' 
+    });
+    return submitUnlockForm(formData);
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">
       <ArchetypeHeader 
@@ -319,7 +336,7 @@ const InsightsView = ({
       <UnlockReportModal
         isOpen={showUnlockModal}
         onClose={closeUnlockModal}
-        onSubmit={submitUnlockForm}
+        onSubmit={handleUnlockFormSubmit}
         isSubmitting={isSubmitting}
         archetypeId={archetypeId}
         archetypeName={name}
