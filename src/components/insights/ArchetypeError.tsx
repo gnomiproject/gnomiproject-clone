@@ -8,6 +8,7 @@ interface ArchetypeErrorProps {
   message?: string; 
   onRetry: () => void;
   onRetakeAssessment: () => void;
+  archetypeId: string;
   isRetrying?: boolean;
 }
 

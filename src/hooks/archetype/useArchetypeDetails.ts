@@ -54,9 +54,10 @@ export const useArchetypeDetails = (archetypeId?: ArchetypeId) => {
       } : undefined;
 
       // Combine all data
-      const detailedData: ArchetypeDetailed = {
+      const detailedData: ArchetypeDetailedData = {
         ...baseData,
         id: archetypeId,
+        familyId: baseData.family_id as FamilyId,
         family_id: baseData.family_id as FamilyId,
         key_characteristics: Array.isArray(baseData.key_characteristics) 
           ? baseData.key_characteristics.map(String)

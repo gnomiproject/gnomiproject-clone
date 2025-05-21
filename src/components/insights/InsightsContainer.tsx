@@ -1,8 +1,7 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import InsightsView from './InsightsView';
 import { ArchetypeId } from '@/types/archetype';
-import { useArchetypeLoader } from '@/hooks/useArchetypeLoader';
 import { useArchetypeDetails } from '@/hooks/archetype/useArchetypeDetails';
 import ArchetypeLoadingSkeleton from './ArchetypeLoadingSkeleton';
 import ArchetypeError from './ArchetypeError';
@@ -26,7 +25,6 @@ const InsightsContainer: React.FC<InsightsContainerProps> = ({
   const { isLoading, data: reportData, error } = useArchetypeDetails(archetypeId);
   const [showDebugData, setShowDebugData] = useState(false);
   const [showDiagnostics, setShowDiagnostics] = useState(false);
-  const { refreshArchetypeData } = useArchetypeLoader();
 
   // Toggle functions
   const toggleDebugData = () => setShowDebugData(prev => !prev);
@@ -39,9 +37,11 @@ const InsightsContainer: React.FC<InsightsContainerProps> = ({
   if (error || !reportData) {
     return (
       <ArchetypeError 
-        error={error} 
+        message={error ? error.message : "Failed to load archetype data"} 
         archetypeId={archetypeId}
-        onRetake={onRetakeAssessment}
+        onRetry={() => {}} // Provide an empty function since we don't have refreshArchetypeData
+        onRetakeAssessment={onRetakeAssessment}
+        isRetrying={false}
       />
     );
   }
