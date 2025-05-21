@@ -1,7 +1,19 @@
+
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
+import { trackReportAccess } from '@/utils/reports/accessTracking';
+
+// Define and export the UnlockFormData type
+export interface UnlockFormData {
+  name: string;
+  organization: string;
+  email: string;
+  archetypeId: string;
+  employeeCount?: number | null;
+  assessmentAnswers?: any;
+}
 
 export const useReportUnlock = (archetypeId: string) => {
   const [isUnlocked, setIsUnlocked] = useState<boolean>(false);
@@ -13,14 +25,37 @@ export const useReportUnlock = (archetypeId: string) => {
   const openUnlockModal = useCallback(() => setShowUnlockModal(true), []);
   const closeUnlockModal = useCallback(() => setShowUnlockModal(false), []);
 
-  // Submit form function
-  const submitUnlockForm = useCallback(async (formData: any) => {
+  // Submit form function - updated to return proper type
+  const submitUnlockForm = useCallback(async (formData: UnlockFormData): Promise<{ success: boolean; data?: any; error?: any }> => {
     setIsSubmitting(true);
     setSubmissionError(null);
     
     try {
-      // Process the form submission
-      // ...
+      // Generate a unique access token
+      const accessToken = uuidv4();
+      const reportId = uuidv4();
+      
+      // Create a report request record in the database
+      const { data, error } = await supabase
+        .from('report_requests')
+        .insert({
+          id: reportId,
+          name: formData.name,
+          email: formData.email,
+          organization: formData.organization,
+          archetype_id: formData.archetypeId,
+          employee_count: formData.employeeCount,
+          access_token: accessToken,
+          status: 'active',
+          expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
+          assessment_data: formData.assessmentAnswers
+        })
+        .select()
+        .single();
+        
+      if (error) {
+        throw new Error(`Failed to create report request: ${error.message}`);
+      }
       
       // Set unlocked state
       setIsUnlocked(true);
@@ -31,23 +66,33 @@ export const useReportUnlock = (archetypeId: string) => {
         description: "You now have access to all insights."
       });
       
-      return true;
+      // Track initial access
+      await trackReportAccess(archetypeId, accessToken);
+      
+      return { 
+        success: true,
+        data: data 
+      };
     } catch (error) {
       console.error('Error unlocking report:', error);
-      setSubmissionError(error instanceof Error ? error.message : 'Unknown error occurred');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      setSubmissionError(errorMessage);
       
       // Show error toast
       toast.error("Error unlocking report", {
-        description: error instanceof Error ? error.message : 'An unknown error occurred'
+        description: errorMessage
       });
       
-      return false;
+      return { 
+        success: false, 
+        error: errorMessage 
+      };
     } finally {
       setIsSubmitting(false);
     }
-  }, []);
+  }, [archetypeId]);
 
-  // Refresh data function - expects archetypeId as parameter
+  // Refresh data function
   const refreshData = useCallback(async (archetypeId: string) => {
     try {
       // Refresh data logic

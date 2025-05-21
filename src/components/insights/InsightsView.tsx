@@ -9,7 +9,7 @@ import DiseaseAndCareTab from './tabs/DiseaseAndCareTab';
 import DeepDiveRequestForm from '@/components/results/DeepDiveRequestForm';
 import UnlockReportModal from './UnlockReportModal';
 import UnlockSuccessMessage from './UnlockSuccessMessage';
-import { useReportUnlock } from '@/hooks/useReportUnlock';
+import { useReportUnlock, UnlockFormData } from '@/hooks/useReportUnlock';
 import { AlertCircle, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useArchetypeDetails } from '@/hooks/archetype/useArchetypeDetails';
