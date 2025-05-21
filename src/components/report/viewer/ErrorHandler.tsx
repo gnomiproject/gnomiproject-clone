@@ -83,7 +83,7 @@ const ErrorHandler: React.FC<ErrorHandlerProps> = ({
         actionLabel="Request New Token"
         onAction={onRequestNewToken}
         secondaryActionLabel="Back to Home"
-        onSecondaryAction={() => navigate('/')}
+        secondaryAction={() => navigate('/')}
       />
     );
   }
