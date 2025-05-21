@@ -74,9 +74,11 @@ export const useArchetypeDetails = (archetypeId?: ArchetypeId) => {
       } : undefined;
 
       // If a family_name property was returned in baseData, use it
-      const familyName = baseData.family_name || 
-                         (familyData ? familyData.name : null) || 
-                         `${baseData.family_id} Family`;
+      // Otherwise use the name from familyData or generate a fallback
+      const familyName = 
+                   (baseData.family_name) || 
+                   (familyData && familyData.name) || 
+                   `${baseData.family_id} Family`;
 
       console.log("Resolved family name:", familyName);
 

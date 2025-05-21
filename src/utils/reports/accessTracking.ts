@@ -35,11 +35,18 @@ export const trackReportAccess = async (
     
     // Log successful tracking with response data
     if (data) {
-      // The response is already properly typed from the RPC function
-      console.log('[trackReportAccess] Report access tracked successfully:', {
-        access_count: data.access_count,
-        last_accessed: data.last_accessed
-      });
+      // Fix the TypeScript error by properly type-checking the data object
+      if (typeof data === 'object' && data !== null) {
+        const accessCount = 'access_count' in data ? data.access_count : undefined;
+        const lastAccessed = 'last_accessed' in data ? data.last_accessed : undefined;
+        
+        console.log('[trackReportAccess] Report access tracked successfully:', {
+          access_count: accessCount,
+          last_accessed: lastAccessed
+        });
+      } else {
+        console.log('[trackReportAccess] Report access tracked, but data format is unexpected:', data);
+      }
     } else {
       console.log('[trackReportAccess] Report access tracked, but no data returned');
     }
