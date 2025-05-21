@@ -61,8 +61,11 @@ const UnlockReportModal: React.FC<UnlockReportModalProps> = ({
   });
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
+    // Create the formData with required properties
     const formData: UnlockFormData = {
-      ...values,
+      name: values.name, // Now properly required
+      organization: values.organization,
+      email: values.email,
       archetypeId,
       employeeCount,
       assessmentAnswers,
