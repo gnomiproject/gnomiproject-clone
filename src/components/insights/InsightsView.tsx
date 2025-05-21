@@ -40,7 +40,8 @@ const InsightsView = ({
     showUnlockModal,
     openUnlockModal,
     closeUnlockModal,
-    submitUnlockForm
+    submitUnlockForm,
+    submissionError
   } = useReportUnlock(archetypeId);
   
   // Process assessment data once with useMemo to prevent redundant processing
@@ -113,6 +114,7 @@ const InsightsView = ({
   // Fix: Use hexColor first, then fall back to hex_color for compatibility with database sources
   const familyColor = reportData?.hexColor || reportData?.color || (reportData as any)?.hex_color || '#4B5563';
 
+  // Update the UnlockReportModal component with the submissionError prop
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">
       <ArchetypeHeader 
@@ -159,7 +161,7 @@ const InsightsView = ({
                 </div>
                 <Button 
                   onClick={openUnlockModal}
-                  className="bg-blue-600 hover:bg-blue-700 flex-shrink-0"
+                  className="bg-blue-600 hover:bg-blue-700 transition-all duration-200 hover:scale-105"
                 >
                   Unlock Full Report
                 </Button>
@@ -172,17 +174,21 @@ const InsightsView = ({
         {activeTab === 'swot' && isUnlocked && <SwotTab archetypeData={reportData} />}
         {activeTab === 'disease-and-care' && isUnlocked && <DiseaseAndCareTab archetypeData={reportData} />}
         
-        {/* Conditionally show a placeholder if not unlocked and not on overview tab */}
+        {/* Enhanced placeholder if not unlocked and not on overview tab */}
         {!isUnlocked && activeTab !== 'overview' && (
-          <div className="py-12 px-4 text-center">
-            <Lock className="mx-auto h-12 w-12 text-gray-300 mb-4" />
-            <h3 className="text-lg font-medium text-gray-700 mb-2">This content is locked</h3>
-            <p className="text-gray-500 max-w-md mx-auto mb-6">
-              Unlock access to all detailed insights for your {name} archetype by providing a few details.
+          <div className="py-16 px-4 text-center">
+            <div className="relative inline-block mb-6">
+              <div className="absolute w-16 h-16 bg-blue-100 rounded-full left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 animate-pulse"></div>
+              <Lock className="mx-auto h-12 w-12 text-blue-600 relative z-10" />
+            </div>
+            <h3 className="text-xl font-medium text-gray-800 mb-2">Premium Content Locked</h3>
+            <p className="text-gray-600 max-w-md mx-auto mb-6">
+              Unlock access to all detailed insights for your {name} archetype by providing a few details. No credit card required.
             </p>
             <Button 
               onClick={openUnlockModal}
-              className="bg-blue-600 hover:bg-blue-700"
+              size="lg"
+              className="bg-blue-600 hover:bg-blue-700 transition-all duration-200 hover:scale-105"
             >
               Unlock Full Report
             </Button>
@@ -202,7 +208,7 @@ const InsightsView = ({
         </div>
       )}
       
-      {/* Unlock report modal */}
+      {/* Updated Unlock report modal with submissionError */}
       <UnlockReportModal
         isOpen={showUnlockModal}
         onClose={closeUnlockModal}
@@ -212,6 +218,7 @@ const InsightsView = ({
         archetypeName={name}
         employeeCount={processedAssessmentResult?.exactData?.employeeCount}
         assessmentAnswers={assessmentAnswers}
+        submissionError={submissionError}
       />
     </div>
   );

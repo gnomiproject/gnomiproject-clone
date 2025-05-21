@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { FileText, ChevronDown, StarHalf, PlusCircle, Lock } from "lucide-react";
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface ArchetypeNavTabsProps {
   activeTab: string;
@@ -50,6 +51,16 @@ const ArchetypeNavTabs = ({
     onTabChange(value);
   };
 
+  // Enhanced rendering for locked tabs
+  const renderLockedTabContent = (label: string, icon: React.ReactNode) => (
+    <div className="flex items-center relative">
+      {icon}
+      <span>{label}</span>
+      <Lock className="ml-2 w-3 h-3 text-blue-500 animate-pulse" />
+      <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-[8px] px-1 rounded-full">PRO</span>
+    </div>
+  );
+
   return (
     <div className="mb-8">
       {isMobile ? (
@@ -68,12 +79,17 @@ const ArchetypeNavTabs = ({
                 <DropdownMenuItem 
                   key={value}
                   onClick={() => handleTabChange(value)}
-                  className={`flex items-center px-4 py-2 ${activeTab === value ? 'bg-gray-100 text-blue-600' : ''} ${!isUnlocked && !alwaysUnlocked ? 'text-gray-400' : ''}`}
+                  className={`flex items-center px-4 py-2 
+                    ${activeTab === value ? 'bg-gray-100 text-blue-600' : ''} 
+                    ${!isUnlocked && !alwaysUnlocked ? 'text-gray-700 relative hover:bg-blue-50 hover:text-blue-600 transition-colors' : ''}`}
                 >
                   {icon}
                   {label}
                   {!isUnlocked && !alwaysUnlocked && (
-                    <Lock className="ml-auto h-3 w-3 text-gray-400" />
+                    <>
+                      <Lock className="ml-auto h-3 w-3 text-blue-500 animate-pulse" />
+                      <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-[8px] px-1 rounded-full">PRO</span>
+                    </>
                   )}
                 </DropdownMenuItem>
               ))}
@@ -81,7 +97,7 @@ const ArchetypeNavTabs = ({
           </DropdownMenu>
         </div>
       ) : (
-        // Desktop view: Tabs
+        // Desktop view: Tabs with tooltips for locked tabs
         <Tabs value={activeTab} onValueChange={handleTabChange}>
           <TabsList className="bg-gray-100 p-1 overflow-x-auto flex whitespace-nowrap max-w-full justify-center">
             <TabsTrigger value="overview">
@@ -89,29 +105,37 @@ const ArchetypeNavTabs = ({
               Overview
             </TabsTrigger>
             
-            <TabsTrigger value="metrics" disabled={!isUnlocked} className={!isUnlocked ? 'relative' : ''}>
-              <ChevronDown className="w-4 h-4 mr-2" />
-              Key Metrics
-              {!isUnlocked && (
-                <Lock className="w-3 h-3 ml-2 text-gray-400" />
-              )}
-            </TabsTrigger>
-            
-            <TabsTrigger value="swot" disabled={!isUnlocked} className={!isUnlocked ? 'relative' : ''}>
-              <StarHalf className="w-4 h-4 mr-2" />
-              SWOT Analysis
-              {!isUnlocked && (
-                <Lock className="w-3 h-3 ml-2 text-gray-400" />
-              )}
-            </TabsTrigger>
-            
-            <TabsTrigger value="disease-and-care" disabled={!isUnlocked} className={!isUnlocked ? 'relative' : ''}>
-              <PlusCircle className="w-4 h-4 mr-2" />
-              Disease & Care
-              {!isUnlocked && (
-                <Lock className="w-3 h-3 ml-2 text-gray-400" />
-              )}
-            </TabsTrigger>
+            {/* Enhanced locked tabs with tooltips */}
+            {Object.entries(tabOptions).filter(([key]) => key !== 'overview').map(([value, { label, icon, alwaysUnlocked }]) => (
+              !isUnlocked && !alwaysUnlocked ? (
+                <TooltipProvider key={value}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <TabsTrigger 
+                        value={value} 
+                        className="relative group border border-transparent hover:border-blue-200 overflow-visible cursor-pointer transition-all duration-200"
+                      >
+                        <div className="flex items-center relative">
+                          {icon}
+                          <span>{label}</span>
+                          <Lock className="ml-2 h-3.5 w-3.5 text-blue-500 group-hover:animate-pulse" />
+                          <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-[8px] px-1 rounded-full group-hover:scale-110 transition-transform">PRO</span>
+                        </div>
+                      </TabsTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="bg-blue-600 text-white border-blue-700 p-3">
+                      <p className="font-medium">Unlock {label}</p>
+                      <p className="text-xs text-blue-100">Click to get full insights access</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              ) : (
+                <TabsTrigger key={value} value={value}>
+                  {icon}
+                  {label}
+                </TabsTrigger>
+              )
+            ))}
           </TabsList>
         </Tabs>
       )}

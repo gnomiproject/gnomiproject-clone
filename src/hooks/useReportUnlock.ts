@@ -19,6 +19,7 @@ export const useReportUnlock = (archetypeId: string) => {
   const [isUnlocked, setIsUnlocked] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [showUnlockModal, setShowUnlockModal] = useState<boolean>(false);
+  const [submissionError, setSubmissionError] = useState<string | null>(null);
 
   // Check if the report is already unlocked on mount
   useEffect(() => {
@@ -33,23 +34,32 @@ export const useReportUnlock = (archetypeId: string) => {
   // Function to trigger the unlock modal
   const openUnlockModal = () => {
     setShowUnlockModal(true);
+    setSubmissionError(null); // Reset error on open
   };
 
   // Function to close the unlock modal
   const closeUnlockModal = () => {
     setShowUnlockModal(false);
+    setSubmissionError(null); // Reset error on close
   };
 
-  // Function to handle the form submission
+  // Function to handle the form submission with enhanced error handling
   const submitUnlockForm = async (formData: UnlockFormData) => {
     if (!archetypeId) {
       toast.error("Missing archetype ID");
-      return { success: false };
+      setSubmissionError("Missing archetype ID");
+      return { success: false, error: "Missing archetype ID" };
     }
     
     setIsSubmitting(true);
+    setSubmissionError(null);
     
     try {
+      console.log('Submitting unlock form with data:', {
+        ...formData,
+        assessmentAnswers: formData.assessmentAnswers ? '[data present]' : 'none'
+      });
+      
       // Submit the form data to create a report request
       const { data, error } = await supabase
         .from('report_requests')
@@ -66,7 +76,13 @@ export const useReportUnlock = (archetypeId: string) => {
         .select();
       
       if (error) {
-        throw new Error(`Failed to save report request: ${error.message}`);
+        console.error('Error submitting unlock form:', error);
+        const errorMsg = `Failed to save report request: ${error.message}`;
+        setSubmissionError(errorMsg);
+        toast.error("Failed to unlock report", {
+          description: "Please try again or contact support if the issue persists."
+        });
+        return { success: false, error: errorMsg };
       }
       
       // Mark the report as unlocked in localStorage
@@ -74,13 +90,21 @@ export const useReportUnlock = (archetypeId: string) => {
       setIsUnlocked(true);
       closeUnlockModal();
       
-      toast.success("Report unlocked! You now have access to all insights.");
+      toast.success("Report unlocked!", {
+        description: "You now have access to all insights."
+      });
       
       return { success: true, data };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error submitting unlock form:', error);
-      toast.error("Failed to unlock report. Please try again.");
-      return { success: false, error };
+      const errorMsg = error?.message || "An unknown error occurred";
+      setSubmissionError(errorMsg);
+      
+      toast.error("Failed to unlock report", {
+        description: "Please try again or contact support if the issue persists."
+      });
+      
+      return { success: false, error: errorMsg };
     } finally {
       setIsSubmitting(false);
     }
@@ -90,6 +114,7 @@ export const useReportUnlock = (archetypeId: string) => {
     isUnlocked,
     isSubmitting,
     showUnlockModal,
+    submissionError,
     openUnlockModal,
     closeUnlockModal,
     submitUnlockForm
