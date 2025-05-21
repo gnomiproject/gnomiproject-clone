@@ -4,7 +4,7 @@ project_id = "qsecdncdiykzuimtaosp"
 [api]
 enabled = true
 port = 54321
-schemas = ["public", "storage"]
+schemas = ["public", "storage", "graphql_public"]
 
 [db]
 port = 54322
@@ -25,20 +25,11 @@ enabled = true
 enabled = true
 site_url = "http://localhost:3000"
 
-[functions.send-report-email]
-verify_jwt = false
+[analytics]
+enabled = true
 
-[functions.increment-counter]
-verify_jwt = false
+[realtime]
+enabled = true
 
-[functions.tracking]
-verify_jwt = false
-
-[functions.test-email-direct]
-verify_jwt = false
-
-[functions.test-email-providers]
-verify_jwt = false
-
-[functions.test-resend]
-verify_jwt = false
+[functions.process-report-requests]
+verify_jwt = true

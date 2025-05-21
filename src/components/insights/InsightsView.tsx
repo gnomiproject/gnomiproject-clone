@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useRef } from 'react';
+
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ArchetypeId, ArchetypeDetailedData } from '@/types/archetype';
 import ArchetypeNavTabs from './components/ArchetypeNavTabs';
 import ArchetypeHeader from './components/ArchetypeHeader';
@@ -12,6 +13,8 @@ import UnlockSuccessMessage from './UnlockSuccessMessage';
 import { useReportUnlock } from '@/hooks/useReportUnlock';
 import { AlertCircle, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useArchetypeDetails } from '@/hooks/archetype/useArchetypeDetails';
+import { Badge } from '@/components/ui/badge';
 
 interface ArchetypeReportProps {
   archetypeId: ArchetypeId;
@@ -23,7 +26,7 @@ interface ArchetypeReportProps {
 
 const InsightsView = ({ 
   archetypeId, 
-  reportData, 
+  reportData: initialReportData, 
   assessmentResult,
   assessmentAnswers,
   hideRequestSection = false
@@ -32,6 +35,12 @@ const InsightsView = ({
   const [activeTab, setActiveTab] = React.useState('overview');
   const processedRef = useRef(false);
   const swotLoggedRef = useRef(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [reportData, setReportData] = useState<ArchetypeDetailedData>(initialReportData);
+  
+  // Refetch data capability
+  const { data: refreshedData, isLoading: refreshLoading, error: refreshError, refetch } = 
+    useArchetypeDetails(archetypeId, { staleTime: 0 });
   
   // Initialize unlock status hook
   const {
@@ -41,8 +50,44 @@ const InsightsView = ({
     openUnlockModal,
     closeUnlockModal,
     submitUnlockForm,
-    submissionError
+    submissionError,
+    refreshData
   } = useReportUnlock(archetypeId);
+  
+  // Listen for unlock status changes and refresh data when needed
+  useEffect(() => {
+    if (isUnlocked) {
+      console.log("[InsightsView] Report has been unlocked, refreshing data");
+      setIsLoading(true);
+      
+      // First try to refresh data through the hook
+      refreshData(archetypeId)
+        .then(success => {
+          if (success) {
+            console.log("[InsightsView] Successfully refreshed data through hook");
+            return;
+          }
+          
+          // If that fails, use the standard refetch
+          console.log("[InsightsView] Fallback to standard refetch");
+          return refetch();
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    }
+  }, [isUnlocked, archetypeId, refreshData, refetch]);
+  
+  // Update report data when refreshed data is available
+  useEffect(() => {
+    if (refreshedData && !refreshLoading) {
+      console.log("[InsightsView] Received refreshed data", {
+        hasSwotData: !!(refreshedData.swot_analysis || refreshedData.strengths),
+        isUnlocked
+      });
+      setReportData(refreshedData);
+    }
+  }, [refreshedData, refreshLoading, isUnlocked]);
   
   // Process assessment data once with useMemo to prevent redundant processing
   const processedAssessmentResult = useMemo(() => {
@@ -114,6 +159,20 @@ const InsightsView = ({
   // Fix: Use hexColor first, then fall back to hex_color for compatibility with database sources
   const familyColor = reportData?.hexColor || reportData?.color || (reportData as any)?.hex_color || '#4B5563';
 
+  // Debug data availability
+  const hasMetricsData = !!(
+    reportData.distinctive_metrics || 
+    reportData.detailed_metrics || 
+    (reportData as any).Cost_Medical_Paid_Amount_PEPY
+  );
+  
+  const hasSwotData = !!(reportData.strengths || reportData.swot_analysis);
+  
+  const hasDiseaseData = !!(
+    reportData.disease_prevalence || 
+    (reportData as any).Dise_Type_2_Diabetes_Prevalence
+  );
+
   // Update the UnlockReportModal component with the submissionError prop
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">
@@ -135,8 +194,16 @@ const InsightsView = ({
       />
       
       <div className="p-4 md:p-6">
+        {/* Show loading state while refreshing data */}
+        {isLoading && (
+          <div className="mb-4 p-3 bg-blue-50 border border-blue-100 rounded-md flex items-center">
+            <div className="mr-3 h-5 w-5 rounded-full border-2 border-blue-600 border-t-transparent animate-spin"></div>
+            <p className="text-blue-800">Loading your unlocked content...</p>
+          </div>
+        )}
+      
         {/* Show success message if unlocked */}
-        {isUnlocked && (
+        {isUnlocked && !isLoading && (
           <UnlockSuccessMessage archetypeName={name} />
         )}
         
@@ -170,29 +237,70 @@ const InsightsView = ({
           </div>
         )}
         
-        {activeTab === 'metrics' && isUnlocked && <MetricsTab archetypeData={reportData} />}
-        {activeTab === 'swot' && isUnlocked && <SwotTab archetypeData={reportData} />}
-        {activeTab === 'disease-and-care' && isUnlocked && <DiseaseAndCareTab archetypeData={reportData} />}
+        {activeTab === 'metrics' && (
+          <>
+            {isUnlocked ? (
+              <>
+                {hasMetricsData ? (
+                  <MetricsTab archetypeData={reportData} />
+                ) : (
+                  <div className="py-12 text-center">
+                    <Badge variant="warning" className="mb-2">Data Availability</Badge>
+                    <h3 className="text-xl font-medium text-gray-800">Metrics data is being prepared</h3>
+                    <p className="text-gray-600 mt-2 max-w-md mx-auto">
+                      Your metrics data is being processed and will be available soon. Please check back later.
+                    </p>
+                  </div>
+                )}
+              </>
+            ) : (
+              <UnlockPlaceholder name={name} onUnlock={openUnlockModal} />
+            )}
+          </>
+        )}
         
-        {/* Enhanced placeholder if not unlocked and not on overview tab */}
-        {!isUnlocked && activeTab !== 'overview' && (
-          <div className="py-16 px-4 text-center">
-            <div className="relative inline-block mb-6">
-              <div className="absolute w-16 h-16 bg-blue-100 rounded-full left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 animate-pulse"></div>
-              <Lock className="mx-auto h-12 w-12 text-blue-600 relative z-10" />
-            </div>
-            <h3 className="text-xl font-medium text-gray-800 mb-2">Premium Content Locked</h3>
-            <p className="text-gray-600 max-w-md mx-auto mb-6">
-              Unlock access to all detailed insights for your {name} archetype by providing a few details. No credit card required.
-            </p>
-            <Button 
-              onClick={openUnlockModal}
-              size="lg"
-              className="bg-blue-600 hover:bg-blue-700 transition-all duration-200 hover:scale-105"
-            >
-              Unlock Full Report
-            </Button>
-          </div>
+        {activeTab === 'swot' && (
+          <>
+            {isUnlocked ? (
+              <>
+                {hasSwotData ? (
+                  <SwotTab archetypeData={reportData} />
+                ) : (
+                  <div className="py-12 text-center">
+                    <Badge variant="warning" className="mb-2">Data Availability</Badge>
+                    <h3 className="text-xl font-medium text-gray-800">SWOT data is being prepared</h3>
+                    <p className="text-gray-600 mt-2 max-w-md mx-auto">
+                      Your SWOT analysis is being processed and will be available soon. Please check back later.
+                    </p>
+                  </div>
+                )}
+              </>
+            ) : (
+              <UnlockPlaceholder name={name} onUnlock={openUnlockModal} />
+            )}
+          </>
+        )}
+        
+        {activeTab === 'disease-and-care' && (
+          <>
+            {isUnlocked ? (
+              <>
+                {hasDiseaseData ? (
+                  <DiseaseAndCareTab archetypeData={reportData} />
+                ) : (
+                  <div className="py-12 text-center">
+                    <Badge variant="warning" className="mb-2">Data Availability</Badge>
+                    <h3 className="text-xl font-medium text-gray-800">Disease & Care data is being prepared</h3>
+                    <p className="text-gray-600 mt-2 max-w-md mx-auto">
+                      Your disease and care data is being processed and will be available soon. Please check back later.
+                    </p>
+                  </div>
+                )}
+              </>
+            ) : (
+              <UnlockPlaceholder name={name} onUnlock={openUnlockModal} />
+            )}
+          </>
         )}
       </div>
 
@@ -223,6 +331,27 @@ const InsightsView = ({
     </div>
   );
 };
+
+// Placeholder component for locked tabs
+const UnlockPlaceholder = ({ name, onUnlock }: { name: string, onUnlock: () => void }) => (
+  <div className="py-16 px-4 text-center">
+    <div className="relative inline-block mb-6">
+      <div className="absolute w-16 h-16 bg-blue-100 rounded-full left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 animate-pulse"></div>
+      <Lock className="mx-auto h-12 w-12 text-blue-600 relative z-10" />
+    </div>
+    <h3 className="text-xl font-medium text-gray-800 mb-2">Premium Content Locked</h3>
+    <p className="text-gray-600 max-w-md mx-auto mb-6">
+      Unlock access to all detailed insights for your {name} archetype by providing a few details. No credit card required.
+    </p>
+    <Button 
+      onClick={onUnlock}
+      size="lg"
+      className="bg-blue-600 hover:bg-blue-700 transition-all duration-200 hover:scale-105"
+    >
+      Unlock Full Report
+    </Button>
+  </div>
+);
 
 // Use React.memo with a custom equality function to prevent unnecessary re-renders
 export default React.memo(InsightsView, (prevProps, nextProps) => {
