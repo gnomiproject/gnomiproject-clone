@@ -1,4 +1,3 @@
-
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ArchetypeId, ArchetypeDetailedData } from '@/types/archetype';
 import ArchetypeNavTabs from './components/ArchetypeNavTabs';
@@ -61,7 +60,7 @@ const InsightsView = ({
       setIsLoading(true);
       
       // First try to refresh data through the hook
-      refreshData()
+      refreshData(archetypeId)
         .then(success => {
           if (success) {
             console.log("[InsightsView] Successfully refreshed data through hook");
