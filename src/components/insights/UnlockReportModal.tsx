@@ -29,6 +29,7 @@ const formSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   organization: z.string().min(1, 'Organization is required'),
   email: z.string().email('Invalid email address'),
+  comments: z.string().optional(), // Added optional comments field
 });
 
 interface UnlockReportModalProps {
@@ -60,13 +61,14 @@ const UnlockReportModal: React.FC<UnlockReportModalProps> = ({
       name: '',
       organization: '',
       email: '',
+      comments: '',
     },
   });
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     console.log("[UnlockReportModal] Form validation passed, submitting with values:", values);
     
-    // Create the formData with required properties
+    // Create the formData with required properties, including session ID from localStorage
     const formData: UnlockFormData = {
       name: values.name,
       organization: values.organization,
@@ -74,6 +76,8 @@ const UnlockReportModal: React.FC<UnlockReportModalProps> = ({
       archetypeId,
       employeeCount,
       assessmentAnswers,
+      sessionId: localStorage.getItem('session_id') || undefined,
+      comments: values.comments || undefined,
     };
     
     console.log("[UnlockReportModal] Calling onSubmit with formData:", {
@@ -159,6 +163,20 @@ const UnlockReportModal: React.FC<UnlockReportModalProps> = ({
                   <FormLabel>Email Address</FormLabel>
                   <FormControl>
                     <Input placeholder="you@example.com" type="email" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="comments"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Additional Comments (Optional)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Any specific areas you're interested in?" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

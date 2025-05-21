@@ -13,6 +13,8 @@ export interface UnlockFormData {
   archetypeId: string;
   employeeCount?: number | null;
   assessmentAnswers?: any;
+  sessionId?: string; // Added sessionId field
+  comments?: string; // Added comments field
 }
 
 export const useReportUnlock = (archetypeId: string) => {
@@ -37,7 +39,8 @@ export const useReportUnlock = (archetypeId: string) => {
         organization: formData.organization,
         archetypeId: formData.archetypeId,
         hasEmployeeCount: formData.employeeCount !== undefined,
-        hasAssessmentAnswers: formData.assessmentAnswers !== undefined
+        hasAssessmentAnswers: formData.assessmentAnswers !== undefined,
+        sessionId: formData.sessionId
       });
       
       if (!formData.name || !formData.email || !formData.organization) {
@@ -47,9 +50,21 @@ export const useReportUnlock = (archetypeId: string) => {
       // Generate a unique access token
       const accessToken = uuidv4();
       const reportId = uuidv4();
+
+      // Generate access URL for the report
+      const accessUrl = `${window.location.origin}/report/${formData.archetypeId}/${accessToken}`;
       
-      // Create a report request record in the database
-      // Fixed: Changed assessment_data to assessment_answers to match the database schema
+      // Format assessment result for database storage - matching deep dive form
+      let formattedAssessmentResult = null;
+      if (formData.assessmentAnswers && formData.employeeCount) {
+        formattedAssessmentResult = {
+          exactData: { 
+            employeeCount: formData.employeeCount 
+          }
+        };
+      }
+      
+      // Create a report request record in the database - updated to match deep dive form fields and database schema
       const { data, error } = await supabase
         .from('report_requests')
         .insert({
@@ -58,21 +73,36 @@ export const useReportUnlock = (archetypeId: string) => {
           email: formData.email,
           organization: formData.organization,
           archetype_id: formData.archetypeId,
-          employee_count: formData.employeeCount,
+          exact_employee_count: formData.employeeCount, // Fixed column name to match database schema
           access_token: accessToken,
-          status: 'active',
+          status: 'pending', // Changed from 'active' to 'pending' to trigger email sending
           expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
-          assessment_answers: formData.assessmentAnswers // Fixed column name from assessment_data to assessment_answers
+          assessment_answers: formData.assessmentAnswers,
+          session_id: formData.sessionId || localStorage.getItem('session_id') || null,
+          comments: formData.comments || null,
+          created_at: new Date().toISOString(),
+          access_url: accessUrl
         })
         .select()
         .single();
         
       if (error) {
         console.error('[useReportUnlock] Database error creating report request:', error);
-        throw new Error(`Failed to create report request: ${error.message}`);
+        const errorMsg = error.message.includes('column') 
+          ? `Database column error: ${error.message}` 
+          : `Failed to create report request: ${error.message}`;
+        throw new Error(errorMsg);
       }
       
       console.log('[useReportUnlock] Successfully created report request:', data);
+      
+      // Store submission record in session storage to prevent duplicate submissions - like deep dive form
+      sessionStorage.setItem('healthcareArchetypeReportSubmitted', JSON.stringify({
+        archetypeId: formData.archetypeId,
+        email: formData.email,
+        accessUrl: accessUrl,
+        timestamp: new Date().toISOString()
+      }));
       
       // Set unlocked state
       setIsUnlocked(true);
@@ -90,6 +120,26 @@ export const useReportUnlock = (archetypeId: string) => {
       } catch (trackError) {
         console.error('[useReportUnlock] Error tracking initial access:', trackError);
         // Don't fail the overall operation for tracking errors
+      }
+      
+      // Track event in Google Analytics if available - like deep dive form
+      if (window.gtag) {
+        window.gtag('event', 'unlock_report', {
+          event_category: 'engagement',
+          event_label: archetypeId
+        });
+      }
+      
+      // Call the email sending function to immediately process the email - like deep dive form
+      try {
+        const emailResponse = await supabase.functions.invoke('send-report-email', {
+          method: 'POST',
+          body: { trigger: 'form_submission' }
+        });
+        console.log('[useReportUnlock] Email sending triggered:', emailResponse);
+      } catch (emailError) {
+        console.warn('[useReportUnlock] Could not trigger immediate email sending:', emailError);
+        // Not critical - emails will be sent by scheduled runs
       }
       
       return { 
