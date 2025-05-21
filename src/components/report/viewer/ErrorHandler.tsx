@@ -1,22 +1,23 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { isValidArchetypeId } from '@/utils/archetypeValidation';
 import ReportError from '@/components/report/ReportError';
+import ArchetypeError from '@/components/insights/ArchetypeError';
 
 interface ErrorHandlerProps {
-  archetypeId: string | undefined;
-  rawArchetypeId: string | undefined;
+  archetypeId?: string;
+  rawArchetypeId?: string;
   isValidArchetype: boolean;
   isValidAccess: boolean;
   isAdminView: boolean;
-  token: string | undefined;
+  token?: string | null;
   userDataError: Error | null;
   reportError: Error | null;
   reportData: any;
   isUsingFallbackData: boolean;
   onRetry: () => void;
   onRequestNewToken: () => void;
+  tokenStatus?: 'valid' | 'checking' | 'warning' | 'error' | 'grace-period';
 }
 
 const ErrorHandler: React.FC<ErrorHandlerProps> = ({
@@ -31,53 +32,75 @@ const ErrorHandler: React.FC<ErrorHandlerProps> = ({
   reportData,
   isUsingFallbackData,
   onRetry,
-  onRequestNewToken
+  onRequestNewToken,
+  tokenStatus
 }) => {
   const navigate = useNavigate();
 
-  // Check if the archetype ID is invalid
-  if (!isValidArchetype) {
+  // 1. Handle invalid archetype ID
+  if (!isValidArchetype && rawArchetypeId) {
     return (
       <ReportError
-        title="Invalid Report ID"
-        message={`The report ID "${rawArchetypeId}" is not valid.`}
-        actionLabel="Go to Insights"
-        onAction={() => navigate('/insights')}
+        title="Invalid Archetype ID"
+        message={`The requested archetype ID "${rawArchetypeId}" is not valid.`}
+        actionLabel="Take Assessment"
+        onAction={() => navigate('/assessment')}
       />
     );
   }
 
-  // For non-admin views, check if access is valid and we don't have fallback data
-  if (!isAdminView && !isValidAccess && !reportData && !isUsingFallbackData) {
+  // 2. Handle connection errors - if there's a reportError with timeout
+  if (reportError && reportError.message?.includes('timeout') && !isUsingFallbackData) {
+    return (
+      <ArchetypeError
+        archetypeId={archetypeId || ''}
+        onRetry={onRetry}
+        onRetakeAssessment={() => navigate('/assessment')}
+        isRetrying={false}
+      />
+    );
+  }
+
+  // 3. Handle access token errors - only for non-admin and non-insights reports
+  if (!isAdminView && token && !isValidAccess && userDataError && !isUsingFallbackData) {
+    let errorTitle = "Access Denied";
+    let errorMessage = "Invalid or expired token for this report.";
+    
+    if (tokenStatus === "error") {
+      errorMessage = "Your access token has expired.";
+    } else if (tokenStatus === "grace-period") {
+      errorMessage = "Your access token is in the grace period. It will expire soon.";
+    }
+    
+    if (userDataError.message) {
+      errorMessage = `${errorMessage} Error: ${userDataError.message}`;
+    }
+    
     return (
       <ReportError
-        title="Access Denied"
-        message={
-          token
-            ? "Your access token is invalid or has expired."
-            : "No access token was provided. You need a valid token to view this report."
-        }
-        actionLabel="Request Access"
+        title={errorTitle}
+        message={errorMessage}
+        actionLabel="Request New Token"
         onAction={onRequestNewToken}
-        secondaryAction={onRetry}
-        secondaryActionLabel="Try Again"
+        secondaryActionLabel="Back to Home"
+        onSecondaryAction={() => navigate('/')}
       />
     );
   }
 
-  // Check for report error when no fallback data is available
-  if (!reportData && reportError && !isUsingFallbackData) {
+  // 4. No data found - means report doesn't exist
+  if (!reportData && !isUsingFallbackData && archetypeId && !reportError?.message?.includes('timeout')) {
     return (
       <ReportError
-        title="Error Loading Report"
-        message={reportError.message || "An unexpected error occurred."}
-        actionLabel="Try Again"
-        onAction={onRetry}
+        title="Report Not Found"
+        message={`We couldn't find a report for archetype "${archetypeId}". The report may not exist or you may not have access to it.`}
+        actionLabel="Take Assessment"
+        onAction={() => navigate('/assessment')}
       />
     );
   }
 
-  // Default case - no error or error with fallback data (handled elsewhere)
+  // No error detected - return null
   return null;
 };
 

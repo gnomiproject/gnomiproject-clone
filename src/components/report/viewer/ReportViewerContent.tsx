@@ -1,42 +1,90 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
-import { useSearchParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { isValidArchetypeId } from '@/utils/archetypeValidation';
 import { useArchetypeDetails } from '@/hooks/archetype/useArchetypeDetails';
-import { useReportData } from '@/hooks/report/useReportData';
+import { useReportAccess } from '@/hooks/useReportAccess';
 import { useUserData } from '@/hooks/user/useUserData';
 import { ReportLoadingStateHandler, DiagnosticsStateHandler, ValidationErrorStateHandler, ConnectionErrorStateHandler, AccessErrorStateHandler, DebugStateHandler, NoDataErrorStateHandler } from '@/components/report/states/ReportViewerStates';
 import ErrorHandler from '@/components/report/viewer/ErrorHandler';
 import ReportViewer from '@/components/report/viewer/ReportViewer';
-import { useToast } from "@/components/ui/use-toast"
+import { useToast } from "@/components/ui/use-toast";
 import { Button } from '@/components/ui/button';
 import { RefreshCw } from 'lucide-react';
 import { useLocalStorage } from 'usehooks-ts';
+import { ArchetypeId } from '@/types/archetype';
 
 interface ReportViewerContentProps {
   isInsightsReport?: boolean;
   isAdminView?: boolean;
+  tokenStatus?: 'valid' | 'checking' | 'warning' | 'error' | 'grace-period';
+  reportData?: any;
+  userData?: any;
+  averageData?: any;
+  combinedDebugInfo?: any;
+  userDataLoading?: boolean;
+  reportLoading?: boolean;
+  reportError?: Error | null;
+  userDataError?: Error | null;
+  isUsingFallbackData?: boolean;
+  sessionStartTime?: number;
+  lastStatusCheck?: number;
+  onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
+  onRequestNewToken?: () => void;
+  hideNavbar?: boolean;
 }
 
-const ReportViewerContent: React.FC<ReportViewerContentProps> = ({ isInsightsReport = false, isAdminView = false }) => {
+const ReportViewerContent: React.FC<ReportViewerContentProps> = ({ 
+  isInsightsReport = false, 
+  isAdminView = false,
+  tokenStatus,
+  reportData: providedReportData,
+  userData: providedUserData,
+  averageData: providedAverageData,
+  combinedDebugInfo,
+  userDataLoading: providedUserDataLoading,
+  reportLoading: providedReportLoading,
+  reportError: providedReportError,
+  userDataError: providedUserDataError,
+  isUsingFallbackData: providedIsUsingFallbackData,
+  onError,
+  onRequestNewToken,
+  hideNavbar
+}) => {
   const { toast } = useToast();
   const { archetypeId: rawArchetypeId } = useParams();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
   const archetypeId = rawArchetypeId || '';
   const isValidArchetype = isValidArchetypeId(archetypeId);
   const [showDiagnostics, setShowDiagnostics] = useState(false);
   const [showDebugData, setShowDebugData] = useState(false);
   const [isRetrying, setIsRetrying] = useState(false);
-  const [isUsingFallbackData, setIsUsingFallbackData] = useState(false);
+  const [isUsingFallbackData, setIsUsingFallbackData] = useState(providedIsUsingFallbackData || false);
   const [localArchetypeData, setLocalArchetypeData] = useLocalStorage(`archetypeData-${archetypeId}`, null);
   const [hasRequestedToken, setHasRequestedToken] = useState(false);
   const [isValidAccess, setIsValidAccess] = useState(true);
 
-  // Data fetching hooks
-  const { data: archetypeApiData, isLoading: archetypeLoading, error: archetypeError, refetch: refreshArchetypeData } = useArchetypeDetails(archetypeId);
-  const { data: reportData, isLoading: reportLoading, error: reportError, refetch: refreshReportData } = useReportData(archetypeId, token, isUsingFallbackData);
-  const { data: userData, isLoading: userDataLoading, error: userDataError } = useUserData(token, isInsightsReport);
+  // Use provided data if available, otherwise fetch it
+  const shouldFetchData = !providedReportData || !providedUserData;
+
+  // Data fetching hooks - only used if data is not provided
+  const { data: archetypeApiData, isLoading: archetypeLoading, error: archetypeError, refetch: refreshArchetypeData } = 
+    useArchetypeDetails(archetypeId as ArchetypeId);
+  
+  const { reportData: fetchedReportData, isLoading: reportDataLoading, error: reportDataError, refreshData: refreshReportData } = 
+    shouldFetchData ? useReportAccess({ archetypeId, token: token || '', isAdminView }) : { reportData: null, isLoading: false, error: null, refreshData: () => Promise.resolve() };
+  
+  const { data: fetchedUserData, isLoading: userDataFetchLoading, error: userDataFetchError } = 
+    shouldFetchData ? useUserData(token) : { data: null, isLoading: false, error: null };
+
+  // Use provided or fetched data
+  const reportData = providedReportData || fetchedReportData;
+  const userData = providedUserData || fetchedUserData;
+  const reportLoading = providedReportLoading !== undefined ? providedReportLoading : reportDataLoading;
+  const userDataLoading = providedUserDataLoading !== undefined ? providedUserDataLoading : userDataFetchLoading;
+  const reportError = providedReportError || reportDataError;
+  const userDataError = providedUserDataError || userDataFetchError;
 
   // Loading states
   const initialLoading = !archetypeId;
@@ -46,9 +94,14 @@ const ReportViewerContent: React.FC<ReportViewerContentProps> = ({ isInsightsRep
   const toggleDebugData = () => setShowDebugData(prev => !prev);
 
   // Function to request a new token
-  const onRequestNewToken = () => {
-    // Implement your logic to request a new token here
-    // This might involve calling an API or showing a modal
+  const handleRequestNewToken = () => {
+    // Use provided handler if available
+    if (onRequestNewToken) {
+      onRequestNewToken();
+      return;
+    }
+    
+    // Default implementation
     setHasRequestedToken(true);
     toast({
       title: "Requesting New Token",
@@ -59,35 +112,46 @@ const ReportViewerContent: React.FC<ReportViewerContentProps> = ({ isInsightsRep
   // Retry function
   const onRetry = useCallback(() => {
     setIsRetrying(true);
-    Promise.all([
-      refreshArchetypeData(),
-      refreshReportData()
-    ])
-    .then(() => {
-      setIsRetrying(false);
-      toast({
-        title: "Data Refreshed",
-        description: "Report data has been successfully refreshed.",
+    
+    // Use provided or default refresh methods
+    const refreshPromises = [];
+    
+    if (refreshArchetypeData) {
+      refreshPromises.push(refreshArchetypeData());
+    }
+    
+    if (refreshReportData) {
+      refreshPromises.push(refreshReportData());
+    }
+    
+    Promise.all(refreshPromises)
+      .then(() => {
+        setIsRetrying(false);
+        toast({
+          title: "Data Refreshed",
+          description: "Report data has been successfully refreshed.",
+        });
+      })
+      .catch(err => {
+        setIsRetrying(false);
+        toast({
+          variant: "destructive",
+          title: "Refresh Failed",
+          description: `Failed to refresh data: ${err.message}`,
+        });
       });
-    })
-    .catch(err => {
-      setIsRetrying(false);
-      toast({
-        variant: "destructive",
-        title: "Refresh Failed",
-        description: `Failed to refresh data: ${err.message}`,
-      });
-    });
   }, [refreshArchetypeData, refreshReportData, toast]);
 
   // useEffect to handle fallback data
   useEffect(() => {
-    if (!archetypeApiData && localArchetypeData) {
+    if (!providedIsUsingFallbackData && !archetypeApiData && localArchetypeData) {
       setIsUsingFallbackData(true);
+    } else if (providedIsUsingFallbackData !== undefined) {
+      setIsUsingFallbackData(providedIsUsingFallbackData);
     } else {
       setIsUsingFallbackData(false);
     }
-  }, [archetypeApiData, localArchetypeData]);
+  }, [archetypeApiData, localArchetypeData, providedIsUsingFallbackData]);
 
   // useEffect to validate access
   useEffect(() => {
@@ -164,7 +228,8 @@ const ReportViewerContent: React.FC<ReportViewerContentProps> = ({ isInsightsRep
         reportData={reportData}
         isUsingFallbackData={isUsingFallbackData}
         onRetry={onRetry}
-        onRequestNewToken={onRequestNewToken}
+        onRequestNewToken={handleRequestNewToken}
+        tokenStatus={tokenStatus}
       />
 
       {/* Report Viewer */}
