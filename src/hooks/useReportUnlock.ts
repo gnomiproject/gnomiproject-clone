@@ -71,13 +71,24 @@ export const useReportUnlock = (archetypeId: string) => {
           exact_employee_count: formData.employeeCount,
           assessment_answers: formData.assessmentAnswers,
           status: 'pending',
-          source: 'insights_page_unlock'
+          source: 'insights_page_unlock' // Now using the source column we added
         }])
         .select();
       
       if (error) {
         console.error('Error submitting unlock form:', error);
-        const errorMsg = `Failed to save report request: ${error.message}`;
+        
+        // Provide more specific error messages based on error type
+        let errorMsg = `Failed to save report request: ${error.message}`;
+        
+        if (error.code === '23505') {
+          errorMsg = "You've already submitted an unlock request for this report.";
+        } else if (error.code === '23502') {
+          errorMsg = "Please fill out all required fields.";
+        } else if (error.code.startsWith('22')) {
+          errorMsg = "There was a problem with the data you entered. Please check and try again.";
+        }
+        
         setSubmissionError(errorMsg);
         toast.error("Failed to unlock report", {
           description: "Please try again or contact support if the issue persists."

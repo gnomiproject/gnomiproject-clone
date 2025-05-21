@@ -922,6 +922,7 @@ export type Database = {
           organization: string | null
           primary: number
           session_id: string | null
+          source: string | null
           status: string | null
         }
         Insert: {
@@ -948,6 +949,7 @@ export type Database = {
           organization?: string | null
           primary?: number
           session_id?: string | null
+          source?: string | null
           status?: string | null
         }
         Update: {
@@ -974,6 +976,7 @@ export type Database = {
           organization?: string | null
           primary?: number
           session_id?: string | null
+          source?: string | null
           status?: string | null
         }
         Relationships: []

@@ -57,7 +57,6 @@ const ArchetypeNavTabs = ({
       {icon}
       <span>{label}</span>
       <Lock className="ml-2 w-3 h-3 text-blue-500 animate-pulse" />
-      <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-[8px] px-1 rounded-full">PRO</span>
     </div>
   );
 
@@ -86,10 +85,7 @@ const ArchetypeNavTabs = ({
                   {icon}
                   {label}
                   {!isUnlocked && !alwaysUnlocked && (
-                    <>
-                      <Lock className="ml-auto h-3 w-3 text-blue-500 animate-pulse" />
-                      <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-[8px] px-1 rounded-full">PRO</span>
-                    </>
+                    <Lock className="ml-auto h-3 w-3 text-blue-500 animate-pulse" />
                   )}
                 </DropdownMenuItem>
               ))}
@@ -119,7 +115,6 @@ const ArchetypeNavTabs = ({
                           {icon}
                           <span>{label}</span>
                           <Lock className="ml-2 h-3.5 w-3.5 text-blue-500 group-hover:animate-pulse" />
-                          <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-[8px] px-1 rounded-full group-hover:scale-110 transition-transform">PRO</span>
                         </div>
                       </TabsTrigger>
                     </TooltipTrigger>
