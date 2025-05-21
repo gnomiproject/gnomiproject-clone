@@ -134,6 +134,10 @@ export interface ArchetypeDetailedData {
   archetype_name?: string;
   top_distinctive_metrics?: DistinctiveMetric[] | string | Json;
   
+  // Add new properties required by InsightsView
+  detailed_metrics?: any;
+  disease_prevalence?: any;
+  
   // New properties from level3_report_data with correct naming
   // Demographics metrics
   "Demo_Average Family Size"?: number;

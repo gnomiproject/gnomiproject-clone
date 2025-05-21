@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { ArchetypeDetailedData, ArchetypeId, FamilyId } from '@/types/archetype';
 import { getFromCache, setInCache, clearFromCache } from '@/utils/reports/reportCache';
 import { processReportData } from '@/utils/reports/reportDataTransforms';
-import { validateReportToken } from '@/utils/reports/accessTracking';
+import { trackReportAccess } from '@/utils/reports/accessTracking';
 import { ensureArray } from '@/utils/array/ensureArray';
 import { ensureStringArray } from '@/utils/array/ensureStringArray';
 
@@ -107,6 +107,8 @@ export const useReportAccess = ({
         long_description: data.long_description,
         hexColor: data.hex_color,
         industries: data.industries,
+        detailed_metrics: data.detailed_metrics,
+        disease_prevalence: data.disease_prevalence,
         // Include any additional properties from the original data
         // but use the stringified array for key_characteristics
         ...Object.fromEntries(

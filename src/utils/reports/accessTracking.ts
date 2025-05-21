@@ -32,9 +32,12 @@ export const trackReportAccess = async (
     }
     
     if (data) {
+      // Type assertion to make TypeScript happy
+      const responseData = data as { access_count?: number, last_accessed?: string };
+      
       console.log('Report access tracked successfully:', {
-        access_count: data.access_count,
-        last_accessed: data.last_accessed
+        access_count: responseData.access_count,
+        last_accessed: responseData.last_accessed
       });
     }
     

@@ -40,7 +40,7 @@ const InsightsView = ({
   
   // Refetch data capability
   const { data: refreshedData, isLoading: refreshLoading, error: refreshError, refetch } = 
-    useArchetypeDetails(archetypeId, { staleTime: 0 });
+    useArchetypeDetails(archetypeId);
   
   // Initialize unlock status hook
   const {
@@ -61,7 +61,7 @@ const InsightsView = ({
       setIsLoading(true);
       
       // First try to refresh data through the hook
-      refreshData(archetypeId)
+      refreshData()
         .then(success => {
           if (success) {
             console.log("[InsightsView] Successfully refreshed data through hook");
@@ -245,7 +245,7 @@ const InsightsView = ({
                   <MetricsTab archetypeData={reportData} />
                 ) : (
                   <div className="py-12 text-center">
-                    <Badge variant="warning" className="mb-2">Data Availability</Badge>
+                    <Badge variant="outline" className="mb-2 bg-yellow-50 text-yellow-800 hover:bg-yellow-100">Data Availability</Badge>
                     <h3 className="text-xl font-medium text-gray-800">Metrics data is being prepared</h3>
                     <p className="text-gray-600 mt-2 max-w-md mx-auto">
                       Your metrics data is being processed and will be available soon. Please check back later.
@@ -267,7 +267,7 @@ const InsightsView = ({
                   <SwotTab archetypeData={reportData} />
                 ) : (
                   <div className="py-12 text-center">
-                    <Badge variant="warning" className="mb-2">Data Availability</Badge>
+                    <Badge variant="outline" className="mb-2 bg-yellow-50 text-yellow-800 hover:bg-yellow-100">Data Availability</Badge>
                     <h3 className="text-xl font-medium text-gray-800">SWOT data is being prepared</h3>
                     <p className="text-gray-600 mt-2 max-w-md mx-auto">
                       Your SWOT analysis is being processed and will be available soon. Please check back later.
@@ -289,7 +289,7 @@ const InsightsView = ({
                   <DiseaseAndCareTab archetypeData={reportData} />
                 ) : (
                   <div className="py-12 text-center">
-                    <Badge variant="warning" className="mb-2">Data Availability</Badge>
+                    <Badge variant="outline" className="mb-2 bg-yellow-50 text-yellow-800 hover:bg-yellow-100">Data Availability</Badge>
                     <h3 className="text-xl font-medium text-gray-800">Disease & Care data is being prepared</h3>
                     <p className="text-gray-600 mt-2 max-w-md mx-auto">
                       Your disease and care data is being processed and will be available soon. Please check back later.
