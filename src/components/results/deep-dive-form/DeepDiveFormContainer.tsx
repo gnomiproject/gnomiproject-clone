@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -10,13 +9,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { ArchetypeId } from '@/types/archetype';
 import DeepDiveFormSection, { FormSchema, FormData } from './DeepDiveFormSection';
 import FormLayout from './FormLayout';
-
-// Add Google Analytics gtag to the Window interface
-declare global {
-  interface Window {
-    gtag?: (command: string, action: string, params: object) => void;
-  }
-}
 
 // Session storage key for submitted report
 const REPORT_SUBMITTED_KEY = 'healthcareArchetypeReportSubmitted';
