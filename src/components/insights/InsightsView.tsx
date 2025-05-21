@@ -332,7 +332,7 @@ const InsightsView = ({
         </div>
       )}
       
-      {/* Updated Unlock report modal with submissionError */}
+      {/* Unlock report modal with proper submission handler */}
       <UnlockReportModal
         isOpen={showUnlockModal}
         onClose={closeUnlockModal}

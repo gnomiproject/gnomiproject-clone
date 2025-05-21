@@ -31,7 +31,14 @@ export const useReportUnlock = (archetypeId: string) => {
     setSubmissionError(null);
     
     try {
-      console.log('Submitting unlock form with data:', formData);
+      console.log('[useReportUnlock] Submitting form data:', {
+        name: formData.name,
+        email: formData.email,
+        organization: formData.organization,
+        archetypeId: formData.archetypeId,
+        hasEmployeeCount: formData.employeeCount !== undefined,
+        hasAssessmentAnswers: formData.assessmentAnswers !== undefined
+      });
       
       if (!formData.name || !formData.email || !formData.organization) {
         throw new Error('Please fill out all required fields');
@@ -60,11 +67,11 @@ export const useReportUnlock = (archetypeId: string) => {
         .single();
         
       if (error) {
-        console.error('Database error creating report request:', error);
+        console.error('[useReportUnlock] Database error creating report request:', error);
         throw new Error(`Failed to create report request: ${error.message}`);
       }
       
-      console.log('Successfully created report request:', data);
+      console.log('[useReportUnlock] Successfully created report request:', data);
       
       // Set unlocked state
       setIsUnlocked(true);
@@ -78,8 +85,9 @@ export const useReportUnlock = (archetypeId: string) => {
       // Track initial access
       try {
         await trackReportAccess(archetypeId, accessToken);
+        console.log('[useReportUnlock] Successfully tracked initial access');
       } catch (trackError) {
-        console.error('Error tracking initial access:', trackError);
+        console.error('[useReportUnlock] Error tracking initial access:', trackError);
         // Don't fail the overall operation for tracking errors
       }
       
@@ -88,7 +96,7 @@ export const useReportUnlock = (archetypeId: string) => {
         data: data 
       };
     } catch (error) {
-      console.error('Error unlocking report:', error);
+      console.error('[useReportUnlock] Error unlocking report:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       setSubmissionError(errorMessage);
       

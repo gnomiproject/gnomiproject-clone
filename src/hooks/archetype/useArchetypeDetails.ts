@@ -1,4 +1,3 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { ArchetypeId, ArchetypeDetailed, FamilyId, ArchetypeDetailedData } from '@/types/archetype';
@@ -19,6 +18,27 @@ export const useArchetypeDetails = (archetypeId?: ArchetypeId) => {
         .single();
 
       if (baseError) throw baseError;
+
+      console.log("Base archetype data loaded:", baseData);
+
+      // Get family details if available
+      let familyData = null;
+      try {
+        const { data: familyResult, error: familyError } = await supabase
+          .from('Core_Archetype_Families')
+          .select('*')
+          .eq('id', baseData.family_id)
+          .maybeSingle();
+        
+        if (!familyError && familyResult) {
+          familyData = familyResult;
+          console.log("Family data loaded:", familyData);
+        } else if (familyError) {
+          console.warn("Error loading family data:", familyError);
+        }
+      } catch (err) {
+        console.warn("Failed to load family data:", err);
+      }
 
       // Get SWOT analysis
       const { data: swotData, error: swotError } = await supabase
@@ -53,12 +73,21 @@ export const useArchetypeDetails = (archetypeId?: ArchetypeId) => {
         threats: Array.isArray(swotData.threats) ? swotData.threats.map(String) : []
       } : undefined;
 
+      // If a family_name property was returned in baseData, use it
+      const familyName = baseData.family_name || 
+                         (familyData ? familyData.name : null) || 
+                         `${baseData.family_id} Family`;
+
+      console.log("Resolved family name:", familyName);
+
       // Combine all data
       const detailedData: ArchetypeDetailedData = {
         ...baseData,
         id: archetypeId,
         familyId: baseData.family_id as FamilyId,
         family_id: baseData.family_id as FamilyId,
+        familyName: familyName,
+        family_name: familyName, // Ensure both camelCase and snake_case versions exist
         key_characteristics: Array.isArray(baseData.key_characteristics) 
           ? baseData.key_characteristics.map(String)
           : typeof baseData.key_characteristics === 'string'
@@ -80,6 +109,14 @@ export const useArchetypeDetails = (archetypeId?: ArchetypeId) => {
           metrics_references: Array.isArray(r.metrics_references) ? r.metrics_references : []
         }))
       };
+
+      console.log("Final detailed data:", {
+        id: detailedData.id,
+        name: detailedData.name,
+        familyId: detailedData.familyId, 
+        familyName: detailedData.familyName, 
+        family_name: detailedData.family_name
+      });
 
       return detailedData;
     },

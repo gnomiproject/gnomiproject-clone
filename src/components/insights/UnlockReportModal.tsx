@@ -64,6 +64,8 @@ const UnlockReportModal: React.FC<UnlockReportModalProps> = ({
   });
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
+    console.log("[UnlockReportModal] Form validation passed, submitting with values:", values);
+    
     // Create the formData with required properties
     const formData: UnlockFormData = {
       name: values.name,
@@ -74,7 +76,14 @@ const UnlockReportModal: React.FC<UnlockReportModalProps> = ({
       assessmentAnswers,
     };
     
+    console.log("[UnlockReportModal] Calling onSubmit with formData:", {
+      ...formData,
+      assessmentAnswers: assessmentAnswers ? '[data present]' : '[no data]'
+    });
+    
     const result = await onSubmit(formData);
+    console.log("[UnlockReportModal] Submit result:", result);
+    
     if (result.success) {
       form.reset();
     }

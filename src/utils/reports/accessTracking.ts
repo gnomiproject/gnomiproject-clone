@@ -15,12 +15,12 @@ export const trackReportAccess = async (
 ): Promise<boolean> => {
   // Skip tracking if no token or archetypeId provided
   if (!token || !archetypeId) {
-    console.warn('Cannot track report access: Missing token or archetype ID');
+    console.warn('[trackReportAccess] Cannot track report access: Missing token or archetype ID');
     return false;
   }
   
   try {
-    console.log(`Tracking report access for archetype: ${archetypeId}, token: ${token.substring(0, 5)}...`);
+    console.log(`[trackReportAccess] Tracking report access for archetype: ${archetypeId}, token: ${token.substring(0, 5)}...`);
     
     // Call the PostgreSQL function to increment the access counter
     const { data, error } = await supabase.rpc('increment_report_access', {
@@ -29,23 +29,24 @@ export const trackReportAccess = async (
     });
     
     if (error) {
-      console.error('Error tracking report access:', error);
+      console.error('[trackReportAccess] Error tracking report access:', error);
       return false;
     }
     
+    // Log successful tracking with response data
     if (data) {
-      // Type assertion to make TypeScript happy
-      const responseData = data as { access_count?: number, last_accessed?: string };
-      
-      console.log('Report access tracked successfully:', {
-        access_count: responseData.access_count,
-        last_accessed: responseData.last_accessed
+      // The response is already properly typed from the RPC function
+      console.log('[trackReportAccess] Report access tracked successfully:', {
+        access_count: data.access_count,
+        last_accessed: data.last_accessed
       });
+    } else {
+      console.log('[trackReportAccess] Report access tracked, but no data returned');
     }
     
     return true;
   } catch (err) {
-    console.error('Exception tracking report access:', err);
+    console.error('[trackReportAccess] Exception tracking report access:', err);
     return false;
   }
 };
