@@ -1,3 +1,4 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { ArchetypeId, ArchetypeDetailed, FamilyId, ArchetypeDetailedData } from '@/types/archetype';
@@ -73,10 +74,13 @@ export const useArchetypeDetails = (archetypeId?: ArchetypeId) => {
         threats: Array.isArray(swotData.threats) ? swotData.threats.map(String) : []
       } : undefined;
 
-      // If a family_name property was returned in baseData, use it
-      // Otherwise use the name from familyData or generate a fallback
+      // Resolve family name from available sources
+      // Check if baseData has a family_name property using type-safe approach
+      const baseFamilyName = 'family_name' in baseData ? baseData.family_name : undefined;
+      
+      // Then use family name from various sources with fallbacks
       const familyName = 
-                   (baseData.family_name) || 
+                   baseFamilyName || 
                    (familyData && familyData.name) || 
                    `${baseData.family_id} Family`;
 
