@@ -8,27 +8,47 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { FileText, ChevronDown, StarHalf, PlusCircle } from "lucide-react";
+import { FileText, ChevronDown, StarHalf, PlusCircle, Lock } from "lucide-react";
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface ArchetypeNavTabsProps {
   activeTab: string;
   onTabChange: (value: string) => void;
+  isUnlocked?: boolean;
+  onUnlockRequest?: () => void;
 }
 
-const ArchetypeNavTabs = ({ activeTab, onTabChange }: ArchetypeNavTabsProps) => {
+const ArchetypeNavTabs = ({ 
+  activeTab, 
+  onTabChange, 
+  isUnlocked = false, 
+  onUnlockRequest 
+}: ArchetypeNavTabsProps) => {
   const isMobile = useIsMobile();
   
   // Map of tab values to their display names and icons
   const tabOptions = {
-    'overview': { label: 'Overview', icon: <FileText className="w-4 h-4 mr-2" /> },
-    'metrics': { label: 'Key Metrics', icon: <ChevronDown className="w-4 h-4 mr-2" /> },
-    'swot': { label: 'SWOT Analysis', icon: <StarHalf className="w-4 h-4 mr-2" /> },
-    'disease-and-care': { label: 'Disease & Care', icon: <PlusCircle className="w-4 h-4 mr-2" /> }
+    'overview': { label: 'Overview', icon: <FileText className="w-4 h-4 mr-2" />, alwaysUnlocked: true },
+    'metrics': { label: 'Key Metrics', icon: <ChevronDown className="w-4 h-4 mr-2" />, alwaysUnlocked: false },
+    'swot': { label: 'SWOT Analysis', icon: <StarHalf className="w-4 h-4 mr-2" />, alwaysUnlocked: false },
+    'disease-and-care': { label: 'Disease & Care', icon: <PlusCircle className="w-4 h-4 mr-2" />, alwaysUnlocked: false }
   };
 
   // Get the current active tab's display information for mobile
   const activeTabInfo = tabOptions[activeTab as keyof typeof tabOptions] || tabOptions.overview;
+
+  // Handler for tab change with unlock check
+  const handleTabChange = (value: string) => {
+    const tabInfo = tabOptions[value as keyof typeof tabOptions];
+    
+    // If tab is locked and we're not already on the overview tab
+    if (!isUnlocked && !tabInfo.alwaysUnlocked && onUnlockRequest) {
+      onUnlockRequest();
+      return;
+    }
+    
+    onTabChange(value);
+  };
 
   return (
     <div className="mb-8">
@@ -44,14 +64,17 @@ const ArchetypeNavTabs = ({ activeTab, onTabChange }: ArchetypeNavTabsProps) => 
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="center" className="w-56 bg-white">
-              {Object.entries(tabOptions).map(([value, { label, icon }]) => (
+              {Object.entries(tabOptions).map(([value, { label, icon, alwaysUnlocked }]) => (
                 <DropdownMenuItem 
                   key={value}
-                  onClick={() => onTabChange(value)}
-                  className={`flex items-center px-4 py-2 ${activeTab === value ? 'bg-gray-100 text-blue-600' : ''}`}
+                  onClick={() => handleTabChange(value)}
+                  className={`flex items-center px-4 py-2 ${activeTab === value ? 'bg-gray-100 text-blue-600' : ''} ${!isUnlocked && !alwaysUnlocked ? 'text-gray-400' : ''}`}
                 >
                   {icon}
                   {label}
+                  {!isUnlocked && !alwaysUnlocked && (
+                    <Lock className="ml-auto h-3 w-3 text-gray-400" />
+                  )}
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>
@@ -59,23 +82,35 @@ const ArchetypeNavTabs = ({ activeTab, onTabChange }: ArchetypeNavTabsProps) => 
         </div>
       ) : (
         // Desktop view: Tabs
-        <Tabs value={activeTab} onValueChange={onTabChange}>
+        <Tabs value={activeTab} onValueChange={handleTabChange}>
           <TabsList className="bg-gray-100 p-1 overflow-x-auto flex whitespace-nowrap max-w-full justify-center">
             <TabsTrigger value="overview">
               <FileText className="w-4 h-4 mr-2" />
               Overview
             </TabsTrigger>
-            <TabsTrigger value="metrics">
+            
+            <TabsTrigger value="metrics" disabled={!isUnlocked} className={!isUnlocked ? 'relative' : ''}>
               <ChevronDown className="w-4 h-4 mr-2" />
               Key Metrics
+              {!isUnlocked && (
+                <Lock className="w-3 h-3 ml-2 text-gray-400" />
+              )}
             </TabsTrigger>
-            <TabsTrigger value="swot">
+            
+            <TabsTrigger value="swot" disabled={!isUnlocked} className={!isUnlocked ? 'relative' : ''}>
               <StarHalf className="w-4 h-4 mr-2" />
               SWOT Analysis
+              {!isUnlocked && (
+                <Lock className="w-3 h-3 ml-2 text-gray-400" />
+              )}
             </TabsTrigger>
-            <TabsTrigger value="disease-and-care">
+            
+            <TabsTrigger value="disease-and-care" disabled={!isUnlocked} className={!isUnlocked ? 'relative' : ''}>
               <PlusCircle className="w-4 h-4 mr-2" />
               Disease & Care
+              {!isUnlocked && (
+                <Lock className="w-3 h-3 ml-2 text-gray-400" />
+              )}
             </TabsTrigger>
           </TabsList>
         </Tabs>

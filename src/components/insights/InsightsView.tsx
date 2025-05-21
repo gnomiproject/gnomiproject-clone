@@ -7,6 +7,11 @@ import MetricsTab from './tabs/MetricsTab';
 import SwotTab from './tabs/SwotTab';
 import DiseaseAndCareTab from './tabs/DiseaseAndCareTab';
 import DeepDiveRequestForm from '@/components/results/DeepDiveRequestForm';
+import UnlockReportModal from './UnlockReportModal';
+import UnlockSuccessMessage from './UnlockSuccessMessage';
+import { useReportUnlock } from '@/hooks/useReportUnlock';
+import { AlertCircle, Lock } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface ArchetypeReportProps {
   archetypeId: ArchetypeId;
@@ -27,6 +32,16 @@ const InsightsView = ({
   const [activeTab, setActiveTab] = React.useState('overview');
   const processedRef = useRef(false);
   const swotLoggedRef = useRef(false);
+  
+  // Initialize unlock status hook
+  const {
+    isUnlocked,
+    isSubmitting,
+    showUnlockModal,
+    openUnlockModal,
+    closeUnlockModal,
+    submitUnlockForm
+  } = useReportUnlock(archetypeId);
   
   // Process assessment data once with useMemo to prevent redundant processing
   const processedAssessmentResult = useMemo(() => {
@@ -110,22 +125,73 @@ const InsightsView = ({
         gnomeImage="chart"
       />
       
-      <ArchetypeNavTabs activeTab={activeTab} onTabChange={setActiveTab} />
+      <ArchetypeNavTabs 
+        activeTab={activeTab} 
+        onTabChange={setActiveTab}
+        isUnlocked={isUnlocked}
+        onUnlockRequest={openUnlockModal}
+      />
       
       <div className="p-4 md:p-6">
-        {activeTab === 'overview' && (
-          <OverviewTab 
-            archetypeData={reportData} 
-            familyColor={familyColor}
-          />
+        {/* Show success message if unlocked */}
+        {isUnlocked && (
+          <UnlockSuccessMessage archetypeName={name} />
         )}
-        {activeTab === 'metrics' && <MetricsTab archetypeData={reportData} />}
-        {activeTab === 'swot' && <SwotTab archetypeData={reportData} />}
-        {activeTab === 'disease-and-care' && <DiseaseAndCareTab archetypeData={reportData} />}
+        
+        {activeTab === 'overview' && (
+          <div>
+            <OverviewTab 
+              archetypeData={reportData} 
+              familyColor={familyColor}
+            />
+            
+            {/* Unlock call-to-action when not unlocked yet */}
+            {!isUnlocked && (
+              <div className="mt-8 p-4 border border-blue-100 bg-blue-50 rounded-lg flex flex-col md:flex-row md:items-center gap-4">
+                <div className="flex-1">
+                  <h3 className="text-blue-800 font-medium flex items-center gap-2">
+                    <AlertCircle className="w-5 h-5" />
+                    Unlock your complete {name} archetype insights
+                  </h3>
+                  <p className="text-blue-700 mt-1">
+                    Get access to detailed metrics, SWOT analysis, and disease & care patterns by providing a few details.
+                  </p>
+                </div>
+                <Button 
+                  onClick={openUnlockModal}
+                  className="bg-blue-600 hover:bg-blue-700 flex-shrink-0"
+                >
+                  Unlock Full Report
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
+        
+        {activeTab === 'metrics' && isUnlocked && <MetricsTab archetypeData={reportData} />}
+        {activeTab === 'swot' && isUnlocked && <SwotTab archetypeData={reportData} />}
+        {activeTab === 'disease-and-care' && isUnlocked && <DiseaseAndCareTab archetypeData={reportData} />}
+        
+        {/* Conditionally show a placeholder if not unlocked and not on overview tab */}
+        {!isUnlocked && activeTab !== 'overview' && (
+          <div className="py-12 px-4 text-center">
+            <Lock className="mx-auto h-12 w-12 text-gray-300 mb-4" />
+            <h3 className="text-lg font-medium text-gray-700 mb-2">This content is locked</h3>
+            <p className="text-gray-500 max-w-md mx-auto mb-6">
+              Unlock access to all detailed insights for your {name} archetype by providing a few details.
+            </p>
+            <Button 
+              onClick={openUnlockModal}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              Unlock Full Report
+            </Button>
+          </div>
+        )}
       </div>
 
-      {/* Always show the DeepDiveRequestForm unless explicitly hidden */}
-      {!hideRequestSection && (
+      {/* Only show the request form section if not unlocked and not explicitly hidden */}
+      {!isUnlocked && !hideRequestSection && (
         <div className="border-t border-gray-100 mt-6">
           <DeepDiveRequestForm
             archetypeId={archetypeId}
@@ -135,6 +201,18 @@ const InsightsView = ({
           />
         </div>
       )}
+      
+      {/* Unlock report modal */}
+      <UnlockReportModal
+        isOpen={showUnlockModal}
+        onClose={closeUnlockModal}
+        onSubmit={submitUnlockForm}
+        isSubmitting={isSubmitting}
+        archetypeId={archetypeId}
+        archetypeName={name}
+        employeeCount={processedAssessmentResult?.exactData?.employeeCount}
+        assessmentAnswers={assessmentAnswers}
+      />
     </div>
   );
 };
