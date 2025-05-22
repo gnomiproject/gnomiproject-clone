@@ -62,9 +62,9 @@ const DeepDiveReportContainer: React.FC<DeepDiveReportContainerProps> = ({
       />
       
       {!hasRequiredData && reportData && (
-        <Alert variant="warning" className="mb-4">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
+        <Alert className="mb-4 bg-yellow-50 border-yellow-200">
+          <AlertCircle className="h-4 w-4 text-yellow-800" />
+          <AlertDescription className="text-yellow-800">
             Some cost data may be missing or incomplete. The report will display available data.
           </AlertDescription>
         </Alert>

@@ -3,6 +3,7 @@ import React, { useEffect } from 'react';
 import CostAnalysisInsights from './cost-analysis/CostAnalysisInsights';
 import CostOverviewGrid from './cost-analysis/CostOverviewGrid';
 import CostImpactAnalysis from './cost-analysis/CostImpactAnalysis';
+import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
