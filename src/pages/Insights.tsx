@@ -8,11 +8,33 @@ import useFormFocusDetection from '@/components/insights/FormFocusManager';
 import { useInsightsData } from '@/hooks/useInsightsData';
 import { toast } from 'sonner';
 
+// Key for storing unlocked archetypes in sessionStorage
+const UNLOCKED_ARCHETYPES_KEY = 'healthcareArchetypeUnlockedReports';
+
 const Insights = () => {
   const navigate = useNavigate();
   const { isFormVisible } = useFormFocusDetection();
   const { selectedArchetype, sessionResults, sessionAnswers, sessionId, isLoading } = useInsightsData();
   const [messageShown, setMessageShown] = useState(false);
+  const [isUnlocked, setIsUnlocked] = useState(false);
+
+  // Check if this archetype is unlocked in sessionStorage
+  useEffect(() => {
+    if (selectedArchetype) {
+      try {
+        const unlockedArchetypesStr = sessionStorage.getItem(UNLOCKED_ARCHETYPES_KEY);
+        if (unlockedArchetypesStr) {
+          const unlockedArchetypes = JSON.parse(unlockedArchetypesStr);
+          if (unlockedArchetypes.includes(selectedArchetype)) {
+            setIsUnlocked(true);
+            console.log(`[Insights] Found ${selectedArchetype} in unlocked archetypes list`);
+          }
+        }
+      } catch (error) {
+        console.error('[Insights] Error checking unlocked status:', error);
+      }
+    }
+  }, [selectedArchetype]);
 
   // Enhanced debug logging to track component initialization
   useEffect(() => {
@@ -21,7 +43,8 @@ const Insights = () => {
       hasSessionResults: !!sessionResults,
       selectedArchetypeId: selectedArchetype || 'none',
       pathname: window.location.pathname,
-      isLoading
+      isLoading,
+      isUnlocked
     });
     
     // Use a timeout to allow data loading to complete before showing message
@@ -71,7 +94,8 @@ const Insights = () => {
             onRetakeAssessment={handleRetakeAssessment}
             assessmentResult={sessionResults}
             assessmentAnswers={sessionAnswers}
-            hideRequestSection={false} // Explicitly set to false to ensure the form is shown
+            hideRequestSection={false}
+            isPreUnlocked={isUnlocked} // Pass the unlock status to InsightsContainer
           />
         ) : (
           <NoAssessmentResults />

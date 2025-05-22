@@ -13,17 +13,18 @@ interface InsightsSwotTabProps {
 }
 
 const InsightsSwotTab = ({ archetypeData }: InsightsSwotTabProps) => {
-  // Add logging to see what data we're receiving
+  // Enhanced debugging for received data
   useEffect(() => {
-    console.log("[InsightsSwotTab] Received archetype data for INSIGHTS tab:", {
+    console.log("[InsightsSwotTab] Received archetype data:", {
       id: archetypeData?.id || archetypeData?.archetype_id,
       name: archetypeData?.name || archetypeData?.archetype_name,
-      dataSource: 'level3_report_secure'
+      hasStrengths: !!archetypeData?.strengths,
+      hasSwot: !!archetypeData?.swot_analysis,
+      strengthsType: archetypeData?.strengths ? typeof archetypeData.strengths : 'undefined'
     });
 
-    // Enhanced debugging for SWOT data structure
+    // Log raw SWOT data structure for debugging
     if (archetypeData) {
-      // Log raw data for each SWOT section
       console.log("[InsightsSwotTab] Raw SWOT data structure:", {
         strengths: archetypeData.strengths,
         strengthsType: typeof archetypeData.strengths,
@@ -32,17 +33,6 @@ const InsightsSwotTab = ({ archetypeData }: InsightsSwotTabProps) => {
         opportunities: archetypeData.opportunities,
         threats: archetypeData.threats
       });
-      
-      // If strengths exist, log a sample
-      if (archetypeData.strengths) {
-        const sample = Array.isArray(archetypeData.strengths) 
-          ? archetypeData.strengths[0] 
-          : typeof archetypeData.strengths === 'object'
-            ? JSON.stringify(archetypeData.strengths).slice(0, 100)
-            : archetypeData.strengths;
-        
-        console.log("[InsightsSwotTab] Sample strength:", sample);
-      }
     }
   }, [archetypeData]);
 
@@ -52,22 +42,24 @@ const InsightsSwotTab = ({ archetypeData }: InsightsSwotTabProps) => {
     return <div className="p-4">Unable to load SWOT analysis data</div>;
   }
   
-  // Process the SWOT data using the dedicated utility function for Insights page
+  // Process the SWOT data using the dedicated utility function
   const { strengths, weaknesses, opportunities, threats } = processInsightsSwotData(archetypeData);
   
   // Log processed data
-  console.log("[InsightsSwotTab] Processed SWOT data from level3_report_secure:", {
+  console.log("[InsightsSwotTab] Processed SWOT data:", {
     strengthsCount: strengths.length,
     weaknessesCount: weaknesses.length,
     opportunitiesCount: opportunities.length,
-    threatsCount: threats.length,
-    firstStrength: strengths.length > 0 ? strengths[0] : 'none'
+    threatsCount: threats.length
   });
+
+  // Get the proper display name
+  const displayName = archetypeData.name || archetypeData.archetype_name || "This Archetype";
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-2xl">SWOT Analysis for {archetypeData.name || archetypeData.archetype_name || "This Archetype"}</CardTitle>
+        <CardTitle className="text-2xl">SWOT Analysis for {displayName}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

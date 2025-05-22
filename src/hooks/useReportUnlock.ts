@@ -1,5 +1,5 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
@@ -13,15 +13,50 @@ export interface UnlockFormData {
   archetypeId: string;
   employeeCount?: number | null;
   assessmentAnswers?: any;
-  sessionId?: string; // Added sessionId field
-  comments?: string; // Added comments field
+  sessionId?: string; 
+  comments?: string;
 }
 
+// Session storage key for unlocked archetypes
+const UNLOCKED_ARCHETYPES_KEY = 'healthcareArchetypeUnlockedReports';
+
 export const useReportUnlock = (archetypeId: string) => {
-  const [isUnlocked, setIsUnlocked] = useState<boolean>(false);
+  // Check sessionStorage on initialization to see if this archetype was previously unlocked
+  const checkIfPreviouslyUnlocked = (): boolean => {
+    try {
+      const unlockedArchetypesStr = sessionStorage.getItem(UNLOCKED_ARCHETYPES_KEY);
+      if (unlockedArchetypesStr) {
+        const unlockedArchetypes = JSON.parse(unlockedArchetypesStr);
+        return unlockedArchetypes.includes(archetypeId);
+      }
+    } catch (error) {
+      console.error('[useReportUnlock] Error checking unlock status:', error);
+    }
+    return false;
+  };
+
+  const [isUnlocked, setIsUnlocked] = useState<boolean>(checkIfPreviouslyUnlocked());
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [showUnlockModal, setShowUnlockModal] = useState<boolean>(false);
   const [submissionError, setSubmissionError] = useState<string | null>(null);
+
+  // Save unlock status to sessionStorage whenever it changes
+  useEffect(() => {
+    if (isUnlocked) {
+      try {
+        const unlockedArchetypesStr = sessionStorage.getItem(UNLOCKED_ARCHETYPES_KEY);
+        const unlockedArchetypes = unlockedArchetypesStr ? JSON.parse(unlockedArchetypesStr) : [];
+        
+        if (!unlockedArchetypes.includes(archetypeId)) {
+          unlockedArchetypes.push(archetypeId);
+          sessionStorage.setItem(UNLOCKED_ARCHETYPES_KEY, JSON.stringify(unlockedArchetypes));
+          console.log(`[useReportUnlock] Saved unlock status for ${archetypeId} to sessionStorage`);
+        }
+      } catch (error) {
+        console.error('[useReportUnlock] Error saving unlock status:', error);
+      }
+    }
+  }, [isUnlocked, archetypeId]);
 
   // Open/close modal functions
   const openUnlockModal = useCallback(() => setShowUnlockModal(true), []);
@@ -64,7 +99,7 @@ export const useReportUnlock = (archetypeId: string) => {
         };
       }
       
-      // Create a report request record in the database - CHANGED STATUS FROM 'pending' TO 'active'
+      // Create a report request record in the database
       const { data, error } = await supabase
         .from('report_requests')
         .insert({
@@ -73,9 +108,9 @@ export const useReportUnlock = (archetypeId: string) => {
           email: formData.email,
           organization: formData.organization,
           archetype_id: formData.archetypeId,
-          exact_employee_count: formData.employeeCount, // Fixed column name to match database schema
+          exact_employee_count: formData.employeeCount,
           access_token: accessToken,
-          status: 'active', // Changed from 'pending' to 'active' to allow immediate report access
+          status: 'active',
           expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
           assessment_answers: formData.assessmentAnswers,
           session_id: formData.sessionId || localStorage.getItem('session_id') || null,
@@ -96,7 +131,7 @@ export const useReportUnlock = (archetypeId: string) => {
       
       console.log('[useReportUnlock] Successfully created report request:', data);
       
-      // Store submission record in session storage to prevent duplicate submissions - like deep dive form
+      // Store submission record in session storage to prevent duplicate submissions
       sessionStorage.setItem('healthcareArchetypeReportSubmitted', JSON.stringify({
         archetypeId: formData.archetypeId,
         email: formData.email,
@@ -119,10 +154,9 @@ export const useReportUnlock = (archetypeId: string) => {
         console.log('[useReportUnlock] Successfully tracked initial access');
       } catch (trackError) {
         console.error('[useReportUnlock] Error tracking initial access:', trackError);
-        // Don't fail the overall operation for tracking errors
       }
       
-      // Track event in Google Analytics if available - like deep dive form
+      // Track event in Google Analytics if available
       if (window.gtag) {
         window.gtag('event', 'unlock_report', {
           event_category: 'engagement',
@@ -130,9 +164,7 @@ export const useReportUnlock = (archetypeId: string) => {
         });
       }
       
-      // Call the email sending function to immediately process the email
-      // This still sends the email but since the status is already 'active', 
-      // the user doesn't need to wait for the email to be sent to access the report
+      // Call the email sending function 
       try {
         const emailResponse = await supabase.functions.invoke('send-report-email', {
           method: 'POST',
@@ -141,7 +173,6 @@ export const useReportUnlock = (archetypeId: string) => {
         console.log('[useReportUnlock] Email sending triggered:', emailResponse);
       } catch (emailError) {
         console.warn('[useReportUnlock] Could not trigger immediate email sending:', emailError);
-        // Not critical - emails will be sent by scheduled runs
       }
       
       return { 
@@ -153,7 +184,6 @@ export const useReportUnlock = (archetypeId: string) => {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       setSubmissionError(errorMessage);
       
-      // Show error toast
       toast.error("Error unlocking report", {
         description: errorMessage
       });
@@ -171,7 +201,6 @@ export const useReportUnlock = (archetypeId: string) => {
   const refreshData = useCallback(async (archetypeId: string) => {
     try {
       console.log('[useReportUnlock] Refreshing data for archetypeId:', archetypeId);
-      // Make a direct request to level3_report_secure to get the latest data
       const { data, error } = await supabase
         .from('level3_report_secure')
         .select('*')

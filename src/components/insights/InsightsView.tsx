@@ -21,6 +21,7 @@ interface ArchetypeReportProps {
   assessmentResult?: any;
   assessmentAnswers?: any;
   hideRequestSection?: boolean;
+  isPreUnlocked?: boolean; // Added prop to receive unlock status from parent
 }
 
 const InsightsView = ({ 
@@ -28,7 +29,8 @@ const InsightsView = ({
   reportData: initialReportData, 
   assessmentResult,
   assessmentAnswers,
-  hideRequestSection = false
+  hideRequestSection = false,
+  isPreUnlocked = false // Default to false
 }: ArchetypeReportProps) => {
   // Always define hooks at the top level
   const [activeTab, setActiveTab] = React.useState('overview');
@@ -41,9 +43,9 @@ const InsightsView = ({
   const { data: refreshedData, isLoading: refreshLoading, error: refreshError, refetch } = 
     useArchetypeDetails(archetypeId);
   
-  // Initialize unlock status hook
+  // Initialize unlock status hook - pass isPreUnlocked to override initial state
   const {
-    isUnlocked,
+    isUnlocked: hookUnlocked,
     isSubmitting,
     showUnlockModal,
     openUnlockModal,
@@ -52,6 +54,18 @@ const InsightsView = ({
     submissionError,
     refreshData
   } = useReportUnlock(archetypeId);
+
+  // Combine the pre-unlocked state with the hook state
+  const isUnlocked = isPreUnlocked || hookUnlocked;
+  
+  // For debugging
+  useEffect(() => {
+    console.log("[InsightsView] Unlock status:", { 
+      isPreUnlocked, 
+      hookUnlocked, 
+      combinedUnlocked: isUnlocked 
+    });
+  }, [isPreUnlocked, hookUnlocked, isUnlocked]);
   
   // Listen for unlock status changes and refresh data when needed
   useEffect(() => {
@@ -150,11 +164,11 @@ const InsightsView = ({
     );
   }
 
-  // Log all available data to help with debugging
+  // Enhanced logging for data availability
   console.log('[InsightsView] Available data for tab rendering:', {
     hasMetricsData: !!(reportData.distinctive_metrics || reportData.detailed_metrics),
     hasSwotData: !!(reportData.strengths || reportData.swot_analysis),
-    hasDiseaseData: !!(reportData.disease_prevalence),
+    hasDiseaseData: !!(reportData["Dise_Heart Disease Prevalence"] || reportData["Dise_Type 2 Diabetes Prevalence"]),
     activeTab,
     isUnlocked
   });
@@ -177,8 +191,9 @@ const InsightsView = ({
   const hasSwotData = !!(reportData.strengths || reportData.swot_analysis);
   
   const hasDiseaseData = !!(
-    reportData.disease_prevalence || 
-    (reportData as any).Dise_Type_2_Diabetes_Prevalence
+    reportData["Dise_Heart Disease Prevalence"] || 
+    reportData["Dise_Type 2 Diabetes Prevalence"] ||
+    Object.keys(reportData).some(key => key.toLowerCase().includes('dise_'))
   );
 
   console.log('[InsightsView] Rendering with data:', { 
@@ -363,5 +378,6 @@ const UnlockPlaceholder = ({ name, onUnlock }: { name: string, onUnlock: () => v
 export default React.memo(InsightsView, (prevProps, nextProps) => {
   return prevProps.archetypeId === nextProps.archetypeId && 
          prevProps.reportData.id === nextProps.reportData.id &&
-         prevProps.hideRequestSection === nextProps.hideRequestSection;
+         prevProps.hideRequestSection === nextProps.hideRequestSection &&
+         prevProps.isPreUnlocked === nextProps.isPreUnlocked;
 });
