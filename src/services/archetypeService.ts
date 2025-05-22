@@ -41,12 +41,11 @@ export const fetchArchetypeData = async (archetypeId: ArchetypeId, skipCache: bo
       return null;
     }
     
-    // Enhanced logging for archetype name
+    // Enhanced logging for archetype name - only use properties that exist on the data object
     console.log("[archetypeService] Archetype data fetched:", { 
       id: data.archetype_id,
-      name: data.archetype_name || data.name,
+      archetype_name: data.archetype_name,
       familyName: data.family_name,
-      hasName: !!data.name,
       hasArchetypeName: !!data.archetype_name
     });
     
@@ -62,8 +61,8 @@ export const fetchArchetypeData = async (archetypeId: ArchetypeId, skipCache: bo
     // Normalize data to ensure both snake_case and camelCase properties are available
     const normalizedData = mapDatabaseResponseToInterface(data);
     
-    // Ensure the name property is always set correctly
-    normalizedData.name = normalizedData.archetype_name || normalizedData.name || archetypeId.toUpperCase();
+    // Ensure the name property is always set correctly - using properties that exist in the data
+    normalizedData.name = normalizedData.archetype_name || archetypeId.toUpperCase();
     
     // Store in cache
     cacheArchetype(archetypeId, normalizedData);
