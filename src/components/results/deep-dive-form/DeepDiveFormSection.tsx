@@ -26,10 +26,11 @@ interface DeepDiveFormSectionProps {
   form: UseFormReturn<FormData>;
   onSubmit: (data: FormData) => Promise<void>;
   isSubmitting: boolean;
+  archetypeName: string; // Add the archetypeName prop
   className?: string;
 }
 
-const DeepDiveFormSection = ({ form, onSubmit, isSubmitting, className = '' }: DeepDiveFormSectionProps) => {
+const DeepDiveFormSection = ({ form, onSubmit, isSubmitting, archetypeName, className = '' }: DeepDiveFormSectionProps) => {
   const handleSubmit = (data: FormData) => {
     console.log("[DeepDiveFormSection] Submitting form data:", data);
     return onSubmit(data);
@@ -106,7 +107,7 @@ const DeepDiveFormSection = ({ form, onSubmit, isSubmitting, className = '' }: D
               Submitting...
             </>
           ) : (
-            "Request Free Deep Dive Report"
+            `Request Free ${archetypeName} Deep Dive Report`
           )}
         </Button>
       </form>

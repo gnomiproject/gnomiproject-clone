@@ -61,7 +61,7 @@ const FormLayout = ({
         {/* Right column: Benefits */}
         <div className="md:col-span-5">
           <div className="sticky top-6">
-            <DeepDiveBenefits />
+            <DeepDiveBenefits archetypeName={archetypeName} />
             
             {/* Add retake assessment link at bottom of benefits section */}
             <div className="mt-6 text-center">
