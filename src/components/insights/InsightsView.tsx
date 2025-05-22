@@ -96,7 +96,8 @@ const InsightsView = ({
     if (refreshedData && !refreshLoading) {
       console.log("[InsightsView] Received refreshed data", {
         hasSwotData: !!(refreshedData.swot_analysis || refreshedData.strengths),
-        isUnlocked
+        isUnlocked,
+        archetypeName: refreshedData.name || refreshedData.archetype_name
       });
       setReportData(refreshedData);
     }
@@ -174,7 +175,8 @@ const InsightsView = ({
   });
 
   // Ensure we have all the required properties for rendering
-  const name = reportData?.name || reportData?.archetype_name || 'Unknown Archetype';
+  // Enhanced name resolution with better fallbacks
+  const name = reportData?.name || reportData?.archetype_name || reportData?.id?.toUpperCase() || 'Unnamed Archetype';
   const shortDescription = reportData?.short_description || '';
   const familyId = reportData?.familyId || reportData?.family_id;
   const familyName = reportData?.familyName || reportData?.family_name || '';
@@ -196,15 +198,14 @@ const InsightsView = ({
     Object.keys(reportData).some(key => key.toLowerCase().includes('dise_'))
   );
 
-  console.log('[InsightsView] Rendering with data:', { 
-    name, 
+  console.log('[InsightsView] Rendering with name resolution:', { 
+    fromName: reportData?.name,
+    fromArchetype_name: reportData?.archetype_name,
+    fromId: reportData?.id,
+    finalName: name,
     familyName, 
     familyId, 
-    familyColor, 
-    isUnlocked,
-    hasMetricsData,
-    hasSwotData,
-    hasDiseaseData
+    familyColor
   });
 
   // Handle form submission with proper typing

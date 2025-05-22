@@ -10,6 +10,12 @@ interface OverviewTabProps {
 }
 
 const OverviewTab = ({ archetypeData, familyColor, hideRequestSection = false }: OverviewTabProps) => {
+  // Enhanced name resolution with better fallbacks
+  const archetypeName = archetypeData?.name || 
+                        archetypeData?.archetype_name || 
+                        archetypeData?.id?.toUpperCase() || 
+                        'Unnamed Archetype';
+  
   // Get key characteristics with proper type handling and ensure it's an array
   const keyCharacteristics = (() => {
     const kc = archetypeData?.key_characteristics || 
@@ -41,11 +47,12 @@ const OverviewTab = ({ archetypeData, familyColor, hideRequestSection = false }:
   // Ensure we have the family name
   const familyName = archetypeData?.familyName || archetypeData?.family_name || "Healthcare Family";
 
-  // Debug family name extraction
-  console.log('[OverviewTab] Family name data:', { 
-    fromFamilyName: archetypeData?.familyName,
-    fromFamily_name: archetypeData?.family_name,
-    finalValue: familyName
+  // Debug name resolution
+  console.log('[OverviewTab] Archetype name resolution:', { 
+    fromName: archetypeData?.name,
+    fromArchetype_name: archetypeData?.archetype_name,
+    fromId: archetypeData?.id,
+    finalValue: archetypeName
   });
 
   return (
@@ -54,7 +61,7 @@ const OverviewTab = ({ archetypeData, familyColor, hideRequestSection = false }:
         <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-2">
           <div>
             <CardTitle className="text-2xl font-bold">
-              {archetypeData?.name || archetypeData?.id?.toUpperCase() || 'Unknown Archetype'}
+              {archetypeName}
             </CardTitle>
             <p className="text-gray-600 mt-1">
               {familyName || "Healthcare Archetype Family"}

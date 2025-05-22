@@ -41,8 +41,14 @@ export const fetchArchetypeData = async (archetypeId: ArchetypeId, skipCache: bo
       return null;
     }
     
-    // Log the available fields in the response to confirm table structure
-    console.log("[archetypeService] Available fields in level3_report_secure:", Object.keys(data));
+    // Enhanced logging for archetype name
+    console.log("[archetypeService] Archetype data fetched:", { 
+      id: data.archetype_id,
+      name: data.archetype_name || data.name,
+      familyName: data.family_name,
+      hasName: !!data.name,
+      hasArchetypeName: !!data.archetype_name
+    });
     
     // Enhanced logging specifically for SWOT data availability
     console.log("[archetypeService] SWOT data exists check:", {
@@ -55,6 +61,9 @@ export const fetchArchetypeData = async (archetypeId: ArchetypeId, skipCache: bo
     
     // Normalize data to ensure both snake_case and camelCase properties are available
     const normalizedData = mapDatabaseResponseToInterface(data);
+    
+    // Ensure the name property is always set correctly
+    normalizedData.name = normalizedData.archetype_name || normalizedData.name || archetypeId.toUpperCase();
     
     // Store in cache
     cacheArchetype(archetypeId, normalizedData);
