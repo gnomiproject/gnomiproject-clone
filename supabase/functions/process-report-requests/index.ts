@@ -46,12 +46,12 @@ serve(async (req: Request) => {
 
     console.log("Processing report requests with options:", options);
 
-    // Fetch pending report requests
+    // Fetch report requests that need emails sent (status='active' AND email_sent_at IS NULL)
     const { data: pendingRequests, error: fetchError } = await supabase
       .from("report_requests")
       .select("*")
-      .eq("status", "active")  // Process active reports that should have emails sent
-      .is("email_sent_at", null)  // That haven't had emails sent
+      .eq("status", "active")  // Using active status now
+      .is("email_sent_at", null)  // Email has not been sent yet
       .limit(limit)
       .order("created_at", { ascending: true });
 
@@ -114,7 +114,7 @@ serve(async (req: Request) => {
             } catch (emailError: any) {
               console.error(`Error sending email for request ${request.id}:`, emailError);
               
-              // Update record with email error
+              // Update record with email error but don't change the email_sent_at
               if (updateStatus) {
                 await supabase
                   .from("report_requests")
@@ -136,13 +136,12 @@ serve(async (req: Request) => {
             }
           }
 
-          // Update request status if enabled
+          // Update request status if enabled - now just updating email_sent_at
           if (updateStatus) {
             const { error: updateError } = await supabase
               .from("report_requests")
               .update({
-                email_sent_at: new Date().toISOString(),
-                status: "active", // Keep status as active
+                email_sent_at: new Date().toISOString(), // Mark as sent
                 access_url: accessUrl,
                 last_attempt_at: new Date().toISOString(),
                 email_send_attempts: (request.email_send_attempts || 0) + 1,

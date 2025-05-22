@@ -53,13 +53,14 @@ export async function processPendingReports(
   
   // Attempt to get pending report requests
   try {
-    log("Querying for pending report requests...");
+    log("Querying for report requests that need emails sent...");
     
-    // Use a simple, direct query with minimal nesting or complexity
+    // New query criteria: status='active', email_sent_at IS NULL
     const { data: pendingReports, error: fetchError } = await supabase
       .from("report_requests")
       .select("*")
-      .eq("status", "pending")
+      .eq("status", "active") // Using active status, not pending
+      .is("email_sent_at", null) // Email has not been sent yet
       .order("created_at", { ascending: true })
       .limit(10);
     
@@ -72,13 +73,13 @@ export async function processPendingReports(
       };
     }
     
-    log(`Found ${pendingReports?.length || 0} pending reports to process`);
+    log(`Found ${pendingReports?.length || 0} report requests needing email notifications`);
     
     // Handle case with no pending reports
     if (!pendingReports || pendingReports.length === 0) {
-      log("No pending reports found");
+      log("No reports found needing email notifications");
       return { 
-        message: "No pending reports found to process", 
+        message: "No reports found needing email notifications", 
         processed: 0,
         success: true
       };
@@ -120,7 +121,7 @@ export async function processPendingReports(
         // Send the email to the user
         const emailResult = await sendUserEmail(resend, report, recipientName);
         
-        // Update report status to active
+        // Update report status to mark email as sent
         await updateReportStatus(supabase, report.id);
         
         // Send notification email to the team (don't block main flow)

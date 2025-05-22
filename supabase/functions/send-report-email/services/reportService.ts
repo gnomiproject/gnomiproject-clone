@@ -82,7 +82,7 @@ export async function sendUserEmail(resend: any, report: any, recipientName: str
 }
 
 /**
- * Update report status to active after email is sent
+ * Update report status after email is sent
  */
 export async function updateReportStatus(supabase: any, reportId: string) {
   const { error } = await supabase
