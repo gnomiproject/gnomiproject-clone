@@ -43,6 +43,21 @@ const CostAnalysis = ({
     });
   }, [reportData, averageData, hasValidAverageData]);
 
+  // Safety check - if no data at all, show informative message
+  if (!reportData && !averageData) {
+    return (
+      <div className="space-y-8">
+        <h1 className="text-3xl font-bold mb-6">Cost Analysis</h1>
+        <Alert className="bg-yellow-50 border border-yellow-200">
+          <AlertCircle className="h-4 w-4 text-yellow-600" />
+          <AlertDescription className="text-yellow-800">
+            Cost analysis data is not available.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       <h1 className="text-3xl font-bold mb-6">Cost Analysis</h1>
@@ -78,12 +93,12 @@ const CostAnalysis = ({
 
       {/* Cost Overview Cards */}
       <ErrorBoundary>
-        <CostOverviewGrid reportData={reportData} averageData={averageData} />
+        <CostOverviewGrid reportData={reportData || {}} averageData={averageData || {}} />
       </ErrorBoundary>
 
       {/* Cost Impact Analysis Card */}
       <ErrorBoundary>
-        <CostImpactAnalysis reportData={reportData} averageData={averageData} />
+        <CostImpactAnalysis reportData={reportData || {}} averageData={averageData || {}} />
       </ErrorBoundary>
     </div>
   );

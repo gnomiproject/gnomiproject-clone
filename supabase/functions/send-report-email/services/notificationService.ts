@@ -20,7 +20,7 @@ export async function sendTeamNotification(resend: any, report: any) {
     try {
       const html = createNotificationEmailHtml(report);
       
-      // Send notification to team
+      // Send notification to team directly without creating a new report_requests entry
       const { data, error } = await resend.emails.send({
         from: 'Report Notification <reports@g.nomihealth.com>',
         to: [teamNotificationEmail],

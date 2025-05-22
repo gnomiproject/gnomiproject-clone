@@ -40,7 +40,8 @@ export const useCostAnalysis = (reportData: any, averageData: any) => {
     // Ensure average data is valid
     const validAverageData = averageData || {};
     
-    console.log('[useCostAnalysis] Processing cost metrics from:', {
+    // Log available fields for debugging
+    console.log('[useCostAnalysis] Available cost fields:', {
       hasCostAvoidableER: "Cost_Avoidable ER Potential Savings PMPY" in reportData,
       hasSpecialtyRx: "Cost_Specialty RX Allowed Amount PMPM" in reportData,
       reportDataKeys: Object.keys(reportData).filter(k => k.startsWith('Cost_')).slice(0, 5),

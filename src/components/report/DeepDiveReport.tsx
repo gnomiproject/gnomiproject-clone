@@ -46,29 +46,18 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
         "Cost_Avoidable ER Potential Savings PMPY": reportData["Cost_Avoidable ER Potential Savings PMPY"] !== undefined,
         "Cost_Specialty RX Allowed Amount PMPM": reportData["Cost_Specialty RX Allowed Amount PMPM"] !== undefined,
         "Cost_Medical & RX Paid Amount PMPY": reportData["Cost_Medical & RX Paid Amount PMPY"] !== undefined,
+        "Cost_Medical & RX Paid Amount PEPY": reportData["Cost_Medical & RX Paid Amount PEPY"] !== undefined,
         costFieldsCount: Object.keys(reportData).filter(k => k.startsWith('Cost_')).length
       });
     }
   }, [reportData, userData, averageData, isAdminView]);
 
-  // Enhance reportData with fallback values if needed
+  // Check for critical cost fields
   useEffect(() => {
-    if (reportData && !reportData["Cost_Avoidable ER Potential Savings PMPY"]) {
-      console.warn('[DeepDiveReport] Missing critical field in reportData: Cost_Avoidable ER Potential Savings PMPY');
+    if (reportData && !reportData["Cost_Medical & RX Paid Amount PEPY"]) {
+      console.warn('[DeepDiveReport] Missing critical field: Cost_Medical & RX Paid Amount PEPY');
     }
   }, [reportData]);
-  
-  // Check data presence and structure
-  useEffect(() => {
-    console.log('[DeepDiveReport] Component mounted, checking data structure', {
-      reportDataType: typeof reportData,
-      reportDataStructure: reportData ? Object.keys(reportData) : 'No data',
-      userDataPresent: !!userData,
-      averageDataPresent: !!averageData,
-      averageDataStructure: averageData ? Object.keys(averageData).filter(k => k.startsWith('Cost_')).slice(0, 5) : 'No data',
-      betaBadgeModule: typeof BetaBadge
-    });
-  }, [reportData, userData, averageData]);
 
   if (!reportData) {
     console.warn('[DeepDiveReport] No report data available');
@@ -82,6 +71,22 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
     );
   }
 
+  // Create a safe copy of reportData with default values for missing fields
+  const safeReportData = { ...reportData };
+  
+  // Ensure critical cost fields exist with at least zero values
+  if (safeReportData["Cost_Medical & RX Paid Amount PEPY"] === undefined) {
+    safeReportData["Cost_Medical & RX Paid Amount PEPY"] = 0;
+  }
+  
+  if (safeReportData["Cost_Medical Paid Amount PEPY"] === undefined) {
+    safeReportData["Cost_Medical Paid Amount PEPY"] = 0;
+  }
+  
+  if (safeReportData["Cost_RX Paid Amount PEPY"] === undefined) {
+    safeReportData["Cost_RX Paid Amount PEPY"] = 0;
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 relative">
       {/* Beta badge with improved visibility - fixed position with high z-index */}
@@ -91,18 +96,18 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
       
       <ErrorBoundary>
         <ReportContainer 
-          reportData={reportData}
+          reportData={safeReportData}
           userData={userData}
-          averageData={averageData}
+          averageData={averageData || {}}
           isAdminView={isAdminView}
           debugInfo={debugInfo}
           onNavigate={undefined}
           hideNavbar={false} // Set to false to ensure the left navigation is visible
         >
           <DeepDiveReportContent 
-            archetype={reportData} 
+            archetype={safeReportData} 
             userData={userData} 
-            averageData={averageData}
+            averageData={averageData || {}}
           />
         </ReportContainer>
       </ErrorBoundary>
