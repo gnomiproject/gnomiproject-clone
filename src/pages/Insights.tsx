@@ -19,6 +19,7 @@ const Insights = () => {
     console.log('[Insights] Component mounted successfully', { 
       hasSelectedArchetype: !!selectedArchetype,
       hasSessionResults: !!sessionResults,
+      selectedArchetypeId: selectedArchetype || 'none',
       pathname: window.location.pathname,
       isLoading
     });

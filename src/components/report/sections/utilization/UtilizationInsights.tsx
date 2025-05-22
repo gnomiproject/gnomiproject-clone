@@ -11,6 +11,13 @@ interface UtilizationInsightsProps {
 const UtilizationInsights = ({
   reportData
 }: UtilizationInsightsProps) => {
+  // Log available data for debugging
+  console.log('[UtilizationInsights] Received data:', {
+    hasUtilizationPatterns: !!reportData?.utilization_patterns,
+    dataType: typeof reportData?.utilization_patterns,
+    snippet: reportData?.utilization_patterns ? reportData.utilization_patterns.substring(0, 50) + '...' : 'N/A'
+  });
+  
   // Try to parse JSON data if it exists - memoized for better performance
   const parsedInsights = useMemo(() => {
     try {

@@ -170,11 +170,27 @@ export const useReportUnlock = (archetypeId: string) => {
   // Refresh data function
   const refreshData = useCallback(async (archetypeId: string) => {
     try {
-      // Refresh data logic
-      // ...
-      return true;
+      console.log('[useReportUnlock] Refreshing data for archetypeId:', archetypeId);
+      // Make a direct request to level3_report_secure to get the latest data
+      const { data, error } = await supabase
+        .from('level3_report_secure')
+        .select('*')
+        .eq('archetype_id', archetypeId)
+        .maybeSingle();
+        
+      if (error) {
+        console.error('[useReportUnlock] Error refreshing data:', error);
+        return false;
+      }
+      
+      if (data) {
+        console.log('[useReportUnlock] Successfully refreshed data');
+        return true;
+      }
+      
+      return false;
     } catch (error) {
-      console.error('Error refreshing data:', error);
+      console.error('[useReportUnlock] Error refreshing data:', error);
       return false;
     }
   }, []);

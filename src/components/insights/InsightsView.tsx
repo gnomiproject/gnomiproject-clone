@@ -150,15 +150,24 @@ const InsightsView = ({
     );
   }
 
+  // Log all available data to help with debugging
+  console.log('[InsightsView] Available data for tab rendering:', {
+    hasMetricsData: !!(reportData.distinctive_metrics || reportData.detailed_metrics),
+    hasSwotData: !!(reportData.strengths || reportData.swot_analysis),
+    hasDiseaseData: !!(reportData.disease_prevalence),
+    activeTab,
+    isUnlocked
+  });
+
   // Ensure we have all the required properties for rendering
   const name = reportData?.name || reportData?.archetype_name || 'Unknown Archetype';
   const shortDescription = reportData?.short_description || '';
   const familyId = reportData?.familyId || reportData?.family_id;
   const familyName = reportData?.familyName || reportData?.family_name || '';
-  // Fix: Use hexColor first, then fall back to hex_color for compatibility with database sources
+  // Fix: Use hexColor first, then fall back to color for compatibility with database sources
   const familyColor = reportData?.hexColor || reportData?.color || (reportData as any)?.hex_color || '#4B5563';
 
-  // Debug data availability
+  // Debug data availability - better checks for all possible object paths
   const hasMetricsData = !!(
     reportData.distinctive_metrics || 
     reportData.detailed_metrics || 
@@ -177,14 +186,17 @@ const InsightsView = ({
     familyName, 
     familyId, 
     familyColor, 
-    isUnlocked 
+    isUnlocked,
+    hasMetricsData,
+    hasSwotData,
+    hasDiseaseData
   });
 
   // Handle form submission with proper typing
   const handleUnlockFormSubmit = async (formData: UnlockFormData) => {
     console.log('[InsightsView] Submitting unlock form with data:', { 
       ...formData, 
-      assessmentAnswers: 'present' in formData ? '[data present]' : '[no data]' 
+      assessmentAnswers: assessmentAnswers ? '[data present]' : '[no data]' 
     });
     return submitUnlockForm(formData);
   };
@@ -254,72 +266,61 @@ const InsightsView = ({
         
         {activeTab === 'metrics' && (
           <>
-            {isUnlocked ? (
-              <>
-                {hasMetricsData ? (
-                  <MetricsTab archetypeData={reportData} />
-                ) : (
-                  <div className="py-12 text-center">
-                    <Badge variant="outline" className="mb-2 bg-yellow-50 text-yellow-800 hover:bg-yellow-100">Data Availability</Badge>
-                    <h3 className="text-xl font-medium text-gray-800">Metrics data is being prepared</h3>
-                    <p className="text-gray-600 mt-2 max-w-md mx-auto">
-                      Your metrics data is being processed and will be available soon. Please check back later.
-                    </p>
-                  </div>
-                )}
-              </>
-            ) : (
+            {/* IMPORTANT: Show metrics data regardless of unlock status if data exists */}
+            {hasMetricsData ? (
+              <MetricsTab archetypeData={reportData} />
+            ) : !isUnlocked ? (
               <UnlockPlaceholder name={name} onUnlock={openUnlockModal} />
+            ) : (
+              <div className="py-12 text-center">
+                <Badge variant="outline" className="mb-2 bg-yellow-50 text-yellow-800 hover:bg-yellow-100">Data Availability</Badge>
+                <h3 className="text-xl font-medium text-gray-800">Metrics data is being prepared</h3>
+                <p className="text-gray-600 mt-2 max-w-md mx-auto">
+                  Your metrics data is being processed and will be available soon. Please check back later.
+                </p>
+              </div>
             )}
           </>
         )}
         
         {activeTab === 'swot' && (
           <>
-            {isUnlocked ? (
-              <>
-                {hasSwotData ? (
-                  <SwotTab archetypeData={reportData} />
-                ) : (
-                  <div className="py-12 text-center">
-                    <Badge variant="outline" className="mb-2 bg-yellow-50 text-yellow-800 hover:bg-yellow-100">Data Availability</Badge>
-                    <h3 className="text-xl font-medium text-gray-800">SWOT data is being prepared</h3>
-                    <p className="text-gray-600 mt-2 max-w-md mx-auto">
-                      Your SWOT analysis is being processed and will be available soon. Please check back later.
-                    </p>
-                  </div>
-                )}
-              </>
-            ) : (
+            {/* IMPORTANT: Show SWOT data regardless of unlock status if data exists */}
+            {hasSwotData ? (
+              <SwotTab archetypeData={reportData} />
+            ) : !isUnlocked ? (
               <UnlockPlaceholder name={name} onUnlock={openUnlockModal} />
+            ) : (
+              <div className="py-12 text-center">
+                <Badge variant="outline" className="mb-2 bg-yellow-50 text-yellow-800 hover:bg-yellow-100">Data Availability</Badge>
+                <h3 className="text-xl font-medium text-gray-800">SWOT data is being prepared</h3>
+                <p className="text-gray-600 mt-2 max-w-md mx-auto">
+                  Your SWOT analysis is being processed and will be available soon. Please check back later.
+                </p>
+              </div>
             )}
           </>
         )}
         
         {activeTab === 'disease-and-care' && (
           <>
-            {isUnlocked ? (
-              <>
-                {hasDiseaseData ? (
-                  <DiseaseAndCareTab archetypeData={reportData} />
-                ) : (
-                  <div className="py-12 text-center">
-                    <Badge variant="outline" className="mb-2 bg-yellow-50 text-yellow-800 hover:bg-yellow-100">Data Availability</Badge>
-                    <h3 className="text-xl font-medium text-gray-800">Disease & Care data is being prepared</h3>
-                    <p className="text-gray-600 mt-2 max-w-md mx-auto">
-                      Your disease and care data is being processed and will be available soon. Please check back later.
-                    </p>
-                  </div>
-                )}
-              </>
-            ) : (
+            {/* IMPORTANT: Show Disease data regardless of unlock status if data exists */}
+            {hasDiseaseData ? (
+              <DiseaseAndCareTab archetypeData={reportData} />
+            ) : !isUnlocked ? (
               <UnlockPlaceholder name={name} onUnlock={openUnlockModal} />
+            ) : (
+              <div className="py-12 text-center">
+                <Badge variant="outline" className="mb-2 bg-yellow-50 text-yellow-800 hover:bg-yellow-100">Data Availability</Badge>
+                <h3 className="text-xl font-medium text-gray-800">Disease & Care data is being prepared</h3>
+                <p className="text-gray-600 mt-2 max-w-md mx-auto">
+                  Your disease and care data is being processed and will be available soon. Please check back later.
+                </p>
+              </div>
             )}
           </>
         )}
       </div>
-      
-      {/* Removed DeepDiveRequestForm section as it's now redundant with the UnlockReportModal */}
       
       {/* Unlock report modal with proper submission handler */}
       <UnlockReportModal
