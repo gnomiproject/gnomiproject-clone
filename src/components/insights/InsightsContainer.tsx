@@ -99,6 +99,16 @@ const InsightsContainer = ({
       </Alert>
     );
   }
+  
+  // Debug log to see what data is being passed to InsightsView
+  console.log('[InsightsContainer] Data passing to InsightsView:', {
+    hasStrengths: !!archetypeData.strengths,
+    hasWeaknesses: !!archetypeData.weaknesses,
+    hasOpportunities: !!archetypeData.opportunities,
+    hasThreats: !!archetypeData.threats,
+    hasSwotAnalysis: !!archetypeData.swot_analysis,
+    hasDiseaseData: !!(archetypeData["Dise_Heart Disease Prevalence"] || archetypeData["Dise_Type 2 Diabetes Prevalence"])
+  });
 
   return (
     <InsightsView 

@@ -49,7 +49,8 @@ export const fetchArchetypeData = async (archetypeId: ArchetypeId, skipCache: bo
       hasStrengthsField: 'strengths' in data,
       hasWeaknessesField: 'weaknesses' in data,
       hasOpportunitiesField: 'opportunities' in data,
-      hasThreatsField: 'threats' in data
+      hasThreatsField: 'threats' in data,
+      strengthsType: typeof data.strengths
     });
     
     // Normalize data to ensure both snake_case and camelCase properties are available

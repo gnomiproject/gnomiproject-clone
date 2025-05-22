@@ -119,6 +119,26 @@ serve(async (req: Request) => {
     
     log(`Status update successful: ${JSON.stringify(updatedReport)}`);
     
+    // If requested, trigger the email sending function
+    if (sendNotification) {
+      try {
+        log("Triggering email sending function");
+        const emailResult = await fetch(`${supabaseUrl}/functions/v1/send-report-email`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${supabaseServiceKey}`
+          },
+          body: JSON.stringify({ trigger: "manual", reportId })
+        });
+        
+        const emailResponse = await emailResult.json();
+        log(`Email function response: ${JSON.stringify(emailResponse)}`);
+      } catch (emailError) {
+        logError("Error triggering email function", emailError);
+      }
+    }
+    
     // Return the updated report data
     return new Response(
       JSON.stringify({
@@ -126,7 +146,8 @@ serve(async (req: Request) => {
         message: `Report status updated to ${newStatus}`,
         previousStatus: currentReport.status,
         newStatus: newStatus,
-        updatedReport: updatedReport[0]
+        updatedReport: updatedReport[0],
+        emailTriggered: sendNotification
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },

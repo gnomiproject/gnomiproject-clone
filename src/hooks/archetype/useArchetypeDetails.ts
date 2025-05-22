@@ -1,7 +1,8 @@
 
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { ArchetypeId, ArchetypeDetailed, FamilyId, ArchetypeDetailedData } from '@/types/archetype';
+import { fetchArchetypeData } from '@/services/archetypeService';
+import { supabase } from '@/integrations/supabase/client';
 
 export const useArchetypeDetails = (archetypeId?: ArchetypeId) => {
   const query = useQuery({
@@ -10,6 +11,21 @@ export const useArchetypeDetails = (archetypeId?: ArchetypeId) => {
       if (!archetypeId) {
         throw new Error("Archetype ID is required");
       }
+      
+      try {
+        // First try to get data from level3_report_secure (single source of truth for unlocked reports)
+        const secureData = await fetchArchetypeData(archetypeId, false);
+        
+        if (secureData) {
+          console.log("[useArchetypeDetails] Using data from level3_report_secure for", archetypeId);
+          return secureData;
+        }
+      } catch (err) {
+        console.warn("[useArchetypeDetails] Failed to fetch from level3_report_secure:", err);
+      }
+      
+      // Fallback to regular data sources if not available in level3_report_secure
+      console.log("[useArchetypeDetails] No data in level3_report_secure, falling back to standard tables");
       
       // First get base archetype data
       const { data: baseData, error: baseError } = await supabase
@@ -20,7 +36,7 @@ export const useArchetypeDetails = (archetypeId?: ArchetypeId) => {
 
       if (baseError) throw baseError;
 
-      console.log("Base archetype data loaded:", baseData);
+      console.log("[useArchetypeDetails] Base archetype data loaded:", baseData);
 
       // Get family details if available
       let familyData = null;
@@ -33,12 +49,12 @@ export const useArchetypeDetails = (archetypeId?: ArchetypeId) => {
         
         if (!familyError && familyResult) {
           familyData = familyResult;
-          console.log("Family data loaded:", familyData);
+          console.log("[useArchetypeDetails] Family data loaded:", familyData);
         } else if (familyError) {
-          console.warn("Error loading family data:", familyError);
+          console.warn("[useArchetypeDetails] Error loading family data:", familyError);
         }
       } catch (err) {
-        console.warn("Failed to load family data:", err);
+        console.warn("[useArchetypeDetails] Failed to load family data:", err);
       }
 
       // Get SWOT analysis
@@ -84,7 +100,7 @@ export const useArchetypeDetails = (archetypeId?: ArchetypeId) => {
                    (familyData && familyData.name) || 
                    `${baseData.family_id} Family`;
 
-      console.log("Resolved family name:", familyName);
+      console.log("[useArchetypeDetails] Resolved family name:", familyName);
 
       // Combine all data
       const detailedData: ArchetypeDetailedData = {
@@ -116,12 +132,13 @@ export const useArchetypeDetails = (archetypeId?: ArchetypeId) => {
         }))
       };
 
-      console.log("Final detailed data:", {
+      console.log("[useArchetypeDetails] Final detailed data:", {
         id: detailedData.id,
         name: detailedData.name,
         familyId: detailedData.familyId, 
-        familyName: detailedData.familyName, 
-        family_name: detailedData.family_name
+        familyName: detailedData.familyName,
+        hasSwot: !!detailedData.swot,
+        hasStrengths: !!detailedData.strengths
       });
 
       return detailedData;

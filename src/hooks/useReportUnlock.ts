@@ -62,7 +62,7 @@ export const useReportUnlock = (archetypeId: string) => {
   const openUnlockModal = useCallback(() => setShowUnlockModal(true), []);
   const closeUnlockModal = useCallback(() => setShowUnlockModal(false), []);
 
-  // Submit form function - updated to return proper type
+  // Submit form function - updated to return proper type and fix email issues
   const submitUnlockForm = useCallback(async (formData: UnlockFormData): Promise<{ success: boolean; data?: any; error?: any }> => {
     setIsSubmitting(true);
     setSubmissionError(null);
@@ -99,7 +99,23 @@ export const useReportUnlock = (archetypeId: string) => {
         };
       }
       
-      // Create a report request record in the database
+      // Get archetype name for better UX and emails
+      let archetypeName = '';
+      try {
+        const { data: archetypeData } = await supabase
+          .from('Core_Archetype_Overview')
+          .select('name')
+          .eq('id', formData.archetypeId)
+          .single();
+          
+        if (archetypeData) {
+          archetypeName = archetypeData.name;
+        }
+      } catch (nameError) {
+        console.warn('[useReportUnlock] Could not fetch archetype name:', nameError);
+      }
+      
+      // Create a report request record in the database - CRITICAL CHANGE: setting status to "pending"
       const { data, error } = await supabase
         .from('report_requests')
         .insert({
@@ -108,9 +124,10 @@ export const useReportUnlock = (archetypeId: string) => {
           email: formData.email,
           organization: formData.organization,
           archetype_id: formData.archetypeId,
+          archetype_name: archetypeName || undefined, // Add archetype name for better emails
           exact_employee_count: formData.employeeCount,
           access_token: accessToken,
-          status: 'active',
+          status: 'pending', // IMPORTANT: Set status to pending so email function processes it
           expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
           assessment_answers: formData.assessmentAnswers,
           session_id: formData.sessionId || localStorage.getItem('session_id') || null,
@@ -145,7 +162,7 @@ export const useReportUnlock = (archetypeId: string) => {
       
       // Show success message
       toast.success("Report unlocked successfully!", {
-        description: "You now have access to all insights."
+        description: "You now have access to all insights. Check your email soon for a confirmation."
       });
       
       // Track initial access
@@ -164,8 +181,9 @@ export const useReportUnlock = (archetypeId: string) => {
         });
       }
       
-      // Call the email sending function 
+      // Call the email sending function explicitly to ensure it runs
       try {
+        console.log('[useReportUnlock] Explicitly triggering email sending function');
         const emailResponse = await supabase.functions.invoke('send-report-email', {
           method: 'POST',
           body: { trigger: 'form_submission' }
