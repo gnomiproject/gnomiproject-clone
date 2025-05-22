@@ -52,6 +52,21 @@ class ErrorBoundary extends Component<Props, State> {
       sessionDuration
     });
     
+    // Special handling for "Cannot read properties of undefined" errors
+    if (error.message.includes("Cannot read properties of undefined")) {
+      const propertyMatch = error.message.match(/reading ['"]([^'"]+)['"]/);
+      const propertyName = propertyMatch ? propertyMatch[1] : 'unknown property';
+      
+      console.warn(`[ErrorBoundary] Data access error detected for property: ${propertyName}`);
+      
+      // Enhanced logging to help debug data access issues
+      console.group('[ErrorBoundary] Data Access Error Debug Info');
+      console.log('Property causing error:', propertyName);
+      console.log('Component stack:', errorInfo.componentStack);
+      console.log('Error occurred after:', `${sessionDuration.toFixed(2)} seconds`);
+      console.groupEnd();
+    }
+    
     // Call onError prop if provided
     if (this.props.onError) {
       this.props.onError(error, errorInfo);
@@ -102,6 +117,11 @@ class ErrorBoundary extends Component<Props, State> {
         ? new Date(this.state.errorTimestamp).toLocaleTimeString() 
         : 'unknown time';
       
+      // Check if error is related to missing cost data
+      const isCostDataError = this.state.error?.message.includes("Cost_") ||
+        (this.state.error?.message.includes("Cannot read properties of undefined") && 
+         this.state.errorInfo?.componentStack.includes("CostImpact"));
+      
       return (
         <div className="py-8 px-4 rounded-lg bg-red-50 border border-red-200 text-center">
           <div className="flex justify-center mb-4">
@@ -117,6 +137,12 @@ class ErrorBoundary extends Component<Props, State> {
           <p className="text-red-700 mb-4">
             {formattedError}
           </p>
+          
+          {isCostDataError && (
+            <p className="text-red-700 font-medium mb-4">
+              This appears to be an issue with missing cost data fields.
+            </p>
+          )}
           
           <p className="text-sm text-gray-600 mb-4">
             Error occurred at {errorTime}
@@ -168,6 +194,11 @@ class ErrorBoundary extends Component<Props, State> {
   
   private formatErrorMessage(error: Error): string {
     const message = error.message || String(error);
+    
+    // Special handling for cost data errors
+    if (message.includes("Cannot read properties of undefined") && message.includes("Cost_")) {
+      return `Missing cost data field. This could be because the requested cost metrics are not available for this archetype.`;
+    }
     
     // If it's a token or authentication error, provide more helpful message
     if (message.includes('token') || message.includes('auth') || message.includes('access')) {

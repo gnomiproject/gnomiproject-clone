@@ -5,6 +5,10 @@ import ReportContainer from './components/ReportContainer';
 import DeepDiveReportContent from './DeepDiveReportContent';
 import { ReportUserData } from '@/hooks/useReportUserData';
 import BetaBadge from '@/components/shared/BetaBadge';
+import ErrorBoundary from '@/components/shared/ErrorBoundary';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertTriangle } from 'lucide-react';
+import { processReportData } from '@/utils/reports/reportDataTransforms';
 
 export interface DeepDiveReportProps {
   reportData: ArchetypeDetailedData;
@@ -28,12 +32,31 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
   onRefresh
 }) => {
   // Debug logging to track component rendering and data
-  console.log('[DeepDiveReport] Rendering with data:', { 
-    hasReportData: !!reportData, 
-    hasUserData: !!userData,
-    isAdminView,
-    reportName: reportData?.name || reportData?.archetype_name
-  });
+  useEffect(() => {
+    console.log('[DeepDiveReport] Rendering with data:', { 
+      hasReportData: !!reportData, 
+      hasUserData: !!userData,
+      hasAverageData: !!averageData,
+      isAdminView,
+      reportName: reportData?.name || reportData?.archetype_name
+    });
+    
+    if (reportData) {
+      console.log('[DeepDiveReport] Cost data availability:', {
+        "Cost_Avoidable ER Potential Savings PMPY": reportData["Cost_Avoidable ER Potential Savings PMPY"] !== undefined,
+        "Cost_Specialty RX Allowed Amount PMPM": reportData["Cost_Specialty RX Allowed Amount PMPM"] !== undefined,
+        "Cost_Medical & RX Paid Amount PMPY": reportData["Cost_Medical & RX Paid Amount PMPY"] !== undefined,
+        costFieldsCount: Object.keys(reportData).filter(k => k.startsWith('Cost_')).length
+      });
+    }
+  }, [reportData, userData, averageData, isAdminView]);
+
+  // Enhance reportData with fallback values if needed
+  useEffect(() => {
+    if (reportData && !reportData["Cost_Avoidable ER Potential Savings PMPY"]) {
+      console.warn('[DeepDiveReport] Missing critical field in reportData: Cost_Avoidable ER Potential Savings PMPY');
+    }
+  }, [reportData]);
   
   // Check data presence and structure
   useEffect(() => {
@@ -41,15 +64,20 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
       reportDataType: typeof reportData,
       reportDataStructure: reportData ? Object.keys(reportData) : 'No data',
       userDataPresent: !!userData,
+      averageDataPresent: !!averageData,
+      averageDataStructure: averageData ? Object.keys(averageData).filter(k => k.startsWith('Cost_')).slice(0, 5) : 'No data',
       betaBadgeModule: typeof BetaBadge
     });
-  }, [reportData, userData]);
+  }, [reportData, userData, averageData]);
 
   if (!reportData) {
     console.warn('[DeepDiveReport] No report data available');
     return (
       <div className="p-4">
-        <h2>No report data available</h2>
+        <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>No report data available</AlertDescription>
+        </Alert>
       </div>
     );
   }
@@ -61,21 +89,23 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
         <BetaBadge sticky={true} />
       </div>
       
-      <ReportContainer 
-        reportData={reportData}
-        userData={userData}
-        averageData={averageData}
-        isAdminView={isAdminView}
-        debugInfo={debugInfo}
-        onNavigate={undefined}
-        hideNavbar={false} // Set to false to ensure the left navigation is visible
-      >
-        <DeepDiveReportContent 
-          archetype={reportData} 
-          userData={userData} 
+      <ErrorBoundary>
+        <ReportContainer 
+          reportData={reportData}
+          userData={userData}
           averageData={averageData}
-        />
-      </ReportContainer>
+          isAdminView={isAdminView}
+          debugInfo={debugInfo}
+          onNavigate={undefined}
+          hideNavbar={false} // Set to false to ensure the left navigation is visible
+        >
+          <DeepDiveReportContent 
+            archetype={reportData} 
+            userData={userData} 
+            averageData={averageData}
+          />
+        </ReportContainer>
+      </ErrorBoundary>
     </div>
   );
 };

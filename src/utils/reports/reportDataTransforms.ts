@@ -15,6 +15,10 @@ export interface AverageData {
   "Demo_Average States": number;
   "Risk_Average Risk Score": number;
   "Cost_Medical & RX Paid Amount PMPY": number;
+  "Cost_Avoidable ER Potential Savings PMPY": number;
+  "Cost_Medical Paid Amount PEPY": number;
+  "Cost_RX Paid Amount PEPY": number;
+  "Cost_Specialty RX Allowed Amount PMPM": number;
   [key: string]: any; // Allow for additional metrics
 }
 
@@ -24,7 +28,7 @@ export interface ProcessedReportData {
   averageData: AverageData;
 }
 
-// Create default average data for reports as a fallback
+// Create default average data for reports as a fallback - with extended fields
 export const createDefaultAverageData = (): AverageData => ({
   archetype_id: 'All_Average',
   archetype_name: 'Population Average',
@@ -37,6 +41,13 @@ export const createDefaultAverageData = (): AverageData => ({
   "Demo_Average States": 10,
   "Risk_Average Risk Score": 1.0,
   "Cost_Medical & RX Paid Amount PMPY": 5000,
+  "Cost_Medical & RX Paid Amount PEPY": 15000,
+  "Cost_Medical Paid Amount PMPY": 4000,
+  "Cost_Medical Paid Amount PEPY": 12000,
+  "Cost_RX Paid Amount PMPY": 1000,
+  "Cost_RX Paid Amount PEPY": 3000,
+  "Cost_Avoidable ER Potential Savings PMPY": 150,
+  "Cost_Specialty RX Allowed Amount PMPM": 50,
   "Util_Emergency Visits per 1k Members": 150,
   "Util_PCP Visits per 1k Members": 3000,
   "Util_Specialist Visits per 1k Members": 2500,
@@ -67,7 +78,11 @@ export const processReportData = async (data: ArchetypeDetailedData | null): Pro
       console.warn('[processReportData] No All_Average data found, using defaults');
       averageData = createDefaultAverageData();
     } else {
-      console.log('[processReportData] Using database All_Average data');
+      console.log('[processReportData] Using database All_Average data', {
+        hasCostAvoidableER: "Cost_Avoidable ER Potential Savings PMPY" in avgData,
+        hasSpecialtyRx: "Cost_Specialty RX Allowed Amount PMPM" in avgData,
+        costKeys: Object.keys(avgData).filter(k => k.startsWith('Cost_')).slice(0, 5)
+      });
       
       // Transform the data into our AverageData structure by creating a complete object first
       // Start with our default data structure to ensure all fields are present
@@ -86,6 +101,17 @@ export const processReportData = async (data: ArchetypeDetailedData | null): Pro
             )
         )
       };
+      
+      // Double check critical fields
+      if (!averageData["Cost_Avoidable ER Potential Savings PMPY"]) {
+        console.warn('[processReportData] Missing critical field: Cost_Avoidable ER Potential Savings PMPY');
+        averageData["Cost_Avoidable ER Potential Savings PMPY"] = createDefaultAverageData()["Cost_Avoidable ER Potential Savings PMPY"];
+      }
+      
+      if (!averageData["Cost_Specialty RX Allowed Amount PMPM"]) {
+        console.warn('[processReportData] Missing critical field: Cost_Specialty RX Allowed Amount PMPM');
+        averageData["Cost_Specialty RX Allowed Amount PMPM"] = createDefaultAverageData()["Cost_Specialty RX Allowed Amount PMPM"];
+      }
     }
   } catch (err) {
     console.error('[processReportData] Error in All_Average data fetch, using defaults:', err);
@@ -99,8 +125,30 @@ export const processReportData = async (data: ArchetypeDetailedData | null): Pro
     };
   }
 
+  // For the report data, ensure critical fields exist
+  const safeReportData = { ...data };
+  
+  // Make sure all critical cost fields exist
+  const criticalFields = [
+    "Cost_Avoidable ER Potential Savings PMPY",
+    "Cost_Specialty RX Allowed Amount PMPM",
+    "Cost_Medical & RX Paid Amount PMPY",
+    "Cost_Medical & RX Paid Amount PEPY",
+    "Cost_Medical Paid Amount PMPY",
+    "Cost_Medical Paid Amount PEPY",
+    "Cost_RX Paid Amount PMPY",
+    "Cost_RX Paid Amount PEPY"
+  ];
+  
+  criticalFields.forEach(field => {
+    if (safeReportData[field] === undefined) {
+      console.warn(`[processReportData] Missing field in report data: ${field}, using default value`);
+      safeReportData[field] = averageData[field] || 0;
+    }
+  });
+
   return {
-    reportData: data,
+    reportData: safeReportData as ArchetypeDetailedData,
     averageData
   };
 };

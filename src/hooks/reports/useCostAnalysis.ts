@@ -3,11 +3,13 @@ import { useMemo } from 'react';
 import { formatNumber } from '@/utils/formatters';
 
 /**
- * Hook for processing cost analysis data and metrics
+ * Hook for processing cost analysis data and metrics with improved error handling
  */
 export const useCostAnalysis = (reportData: any, averageData: any) => {
   // Parse the cost analysis text
   const costAnalysisData = useMemo(() => {
+    if (!reportData) return null;
+    
     const rawData = reportData?.cost_analysis || "";
     
     try {
@@ -15,14 +17,33 @@ export const useCostAnalysis = (reportData: any, averageData: any) => {
         return JSON.parse(rawData);
       }
     } catch (e) {
-      console.error('Error parsing cost analysis data:', e);
+      console.error('[useCostAnalysis] Error parsing cost analysis data:', e);
     }
     
     return null;
   }, [reportData]);
   
-  // Extract key cost metrics
+  // Extract key cost metrics with safety checks
   const costMetrics = useMemo(() => {
+    // If no reportData, return empty object with default values
+    if (!reportData) {
+      console.warn('[useCostAnalysis] No reportData available, using default metrics');
+      return {
+        totalCostPEPY: 0,
+        medicalCostPEPY: 0,
+        rxCostPEPY: 0,
+        avoidableER: 0,
+        specialtyRx: 0
+      };
+    }
+    
+    console.log('[useCostAnalysis] Processing cost metrics from:', {
+      hasCostAvoidableER: "Cost_Avoidable ER Potential Savings PMPY" in reportData,
+      hasSpecialtyRx: "Cost_Specialty RX Allowed Amount PMPM" in reportData,
+      reportDataKeys: Object.keys(reportData).filter(k => k.startsWith('Cost_')).slice(0, 5),
+      avoidableERValue: reportData["Cost_Avoidable ER Potential Savings PMPY"]
+    });
+    
     return {
       totalCostPEPY: reportData?.["Cost_Medical & RX Paid Amount PEPY"] || 0,
       medicalCostPEPY: reportData?.["Cost_Medical Paid Amount PEPY"] || 0,
