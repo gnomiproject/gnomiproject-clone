@@ -164,25 +164,55 @@ const DeepDiveFormContainer = ({
           }
         };
       }
+
+      // Get archetype name for better UX and emails
+      let archetypeName = '';
+      try {
+        // First check if archetypeData already has the name
+        if (archetypeData && archetypeData.name) {
+          archetypeName = archetypeData.name;
+        } else {
+          const { data: archetypeInfo } = await supabase
+            .from('Core_Archetype_Overview')
+            .select('name')
+            .eq('id', archetypeId)
+            .maybeSingle();
+            
+          if (archetypeInfo) {
+            archetypeName = archetypeInfo.name;
+          }
+        }
+        console.log(`[DeepDiveFormContainer] Using archetype name: ${archetypeName}`);
+      } catch (nameError) {
+        console.warn('[DeepDiveFormContainer] Could not fetch archetype name:', nameError);
+      }
+      
+      // Create current timestamp
+      const now = new Date().toISOString();
       
       const { data: response, error } = await supabase
         .from('report_requests')
         .insert({
           id: reportId,
           archetype_id: archetypeId,
+          archetype_name: archetypeName || undefined, // Add archetype name for better emails
           name: data.name,
           email: data.email,
           organization: data.organization || null,
           comments: data.comments || null,
-          status: 'active', // Changed from 'pending' to 'active' for immediate access
+          status: 'active', // Set to 'active' for immediate access and email sending
           access_token: accessToken,
-          created_at: new Date().toISOString(),
+          created_at: now,
           expires_at: addDays(new Date(), 30).toISOString(),
           session_id: data.sessionId || null,
           assessment_result: formattedAssessmentResult,
           assessment_answers: assessmentAnswers || null,
           exact_employee_count: exactEmployeeCount,
-          access_url: generatedUrl // Make sure this is set
+          access_url: generatedUrl,
+          email_sent_at: null, // Explicitly set to null so email sending function will process it
+          email_send_attempts: 0,
+          last_attempt_at: null,
+          access_count: 0
         })
         .select('id, access_token, access_url');
 
@@ -194,12 +224,11 @@ const DeepDiveFormContainer = ({
       console.log('[DeepDiveFormContainer] Report request created successfully:', response);
       
       // Store submission record in session storage to prevent multiple submissions
-      // Also store the accessUrl
       sessionStorage.setItem(REPORT_SUBMITTED_KEY, JSON.stringify({
         archetypeId: archetypeId,
         email: data.email,
         accessUrl: generatedUrl,
-        timestamp: new Date().toISOString()
+        timestamp: now
       }));
       
       // Set the success state
@@ -220,9 +249,9 @@ const DeepDiveFormContainer = ({
           method: 'POST',
           body: { trigger: 'form_submission' }
         });
-        console.log('Email sending triggered:', emailResponse);
+        console.log('[DeepDiveFormContainer] Email sending triggered:', emailResponse);
       } catch (emailError) {
-        console.warn('Could not trigger immediate email sending:', emailError);
+        console.warn('[DeepDiveFormContainer] Could not trigger immediate email sending:', emailError);
         // Not critical - emails will be sent by scheduled runs
       }
       

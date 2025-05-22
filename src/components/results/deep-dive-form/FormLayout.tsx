@@ -1,12 +1,13 @@
 
 import React from 'react';
-import { UseFormReturn } from "react-hook-form";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import DeepDiveFormSection, { FormData } from './DeepDiveFormSection';
+import { UseFormReturn } from 'react-hook-form';
+import { FormData } from './DeepDiveFormSection';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import DeepDiveFormSection from './DeepDiveFormSection';
 import DeepDiveBenefits from './DeepDiveBenefits';
-import RetakeAssessmentLink from './RetakeAssessmentLink';
 import DeepDiveSuccessState from './DeepDiveSuccessState';
-import { Badge } from "@/components/ui/badge";
+import RetakeAssessmentLink from './RetakeAssessmentLink';
 
 interface FormLayoutProps {
   archetypeName: string;
@@ -14,7 +15,7 @@ interface FormLayoutProps {
   submitSuccessful: boolean;
   submittedEmail: string;
   isSubmitting: boolean;
-  accessUrl?: string;
+  accessUrl: string; // Added to properly pass the access URL
   onRetakeAssessment: () => void;
   onResetForm: () => void;
   onSubmit: (data: FormData) => Promise<void>;
@@ -26,58 +27,55 @@ const FormLayout = ({
   submitSuccessful,
   submittedEmail,
   isSubmitting,
-  accessUrl = '',
+  accessUrl,
   onRetakeAssessment,
   onResetForm,
-  onSubmit
+  onSubmit,
 }: FormLayoutProps) => {
-  // Always log this, not conditionally
-  console.log("[FormLayout] Rendering with submitSuccessful:", submitSuccessful);
-  
   return (
-    <div className="flex flex-col space-y-6">
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle className="text-xl md:text-2xl flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              Get your FREE {archetypeName} Deep Dive Report
-              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                Free
-              </Badge>
-            </div>
-            <span className="print:hidden">
-              <RetakeAssessmentLink onRetakeClick={onRetakeAssessment} />
-            </span>
-          </CardTitle>
-          <CardDescription>
-            Complete the form below to receive your detailed archetype report. It's FREE!.
-          </CardDescription>
-        </CardHeader>
-        
-        <CardContent>
-          {submitSuccessful ? (
-            <DeepDiveSuccessState 
-              email={submittedEmail} 
-              archetypeName={archetypeName}
-              accessUrl={accessUrl}
-              onResetForm={onResetForm}
-            />
-          ) : (
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <DeepDiveFormSection 
-                  form={form} 
+    <div className="max-w-4xl mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+        {/* Left column: Form or success message */}
+        <div className="md:col-span-7">
+          <Card className="p-6 bg-white shadow-sm">
+            <div className="space-y-6">
+              {submitSuccessful ? (
+                <DeepDiveSuccessState 
+                  email={submittedEmail} 
+                  onRetakeAssessment={onRetakeAssessment}
+                  onResetForm={onResetForm} 
+                  accessUrl={accessUrl} // Pass the access URL to the success component
+                />
+              ) : (
+                <DeepDiveFormSection
+                  form={form}
                   onSubmit={onSubmit}
                   isSubmitting={isSubmitting}
+                  archetypeName={archetypeName}
                 />
-              </div>
-              <div>
-                <DeepDiveBenefits archetypeName={archetypeName} />
-              </div>
+              )}
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </Card>
+        </div>
+        
+        {/* Right column: Benefits */}
+        <div className="md:col-span-5">
+          <div className="sticky top-6">
+            <DeepDiveBenefits />
+            
+            {/* Add retake assessment link at bottom of benefits section */}
+            <div className="mt-6 text-center">
+              <Button 
+                variant="ghost" 
+                onClick={onRetakeAssessment}
+                className="text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50"
+              >
+                Retake assessment instead
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

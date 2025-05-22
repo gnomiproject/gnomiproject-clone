@@ -62,7 +62,7 @@ export const useReportUnlock = (archetypeId: string) => {
   const openUnlockModal = useCallback(() => setShowUnlockModal(true), []);
   const closeUnlockModal = useCallback(() => setShowUnlockModal(false), []);
 
-  // Submit form function - updated to return proper type and fix email issues
+  // Submit form function - fixed to ensure all necessary fields are properly set
   const submitUnlockForm = useCallback(async (formData: UnlockFormData): Promise<{ success: boolean; data?: any; error?: any }> => {
     setIsSubmitting(true);
     setSubmissionError(null);
@@ -82,9 +82,9 @@ export const useReportUnlock = (archetypeId: string) => {
         throw new Error('Please fill out all required fields');
       }
       
-      // Generate a unique access token
-      const accessToken = uuidv4();
+      // Generate a unique report ID and access token
       const reportId = uuidv4();
+      const accessToken = uuidv4();
 
       // Generate access URL for the report
       const accessUrl = `${window.location.origin}/report/${formData.archetypeId}/${accessToken}`;
@@ -106,16 +106,20 @@ export const useReportUnlock = (archetypeId: string) => {
           .from('Core_Archetype_Overview')
           .select('name')
           .eq('id', formData.archetypeId)
-          .single();
+          .maybeSingle();
           
         if (archetypeData) {
           archetypeName = archetypeData.name;
+          console.log(`[useReportUnlock] Retrieved archetype name: ${archetypeName}`);
         }
       } catch (nameError) {
         console.warn('[useReportUnlock] Could not fetch archetype name:', nameError);
       }
       
-      // Create a report request record in the database - CRITICAL CHANGE: setting status to "pending"
+      // Create current timestamp
+      const now = new Date().toISOString();
+      
+      // Create a report request record in the database - CRITICAL CHANGE: setting status to "active" 
       const { data, error } = await supabase
         .from('report_requests')
         .insert({
@@ -124,16 +128,19 @@ export const useReportUnlock = (archetypeId: string) => {
           email: formData.email,
           organization: formData.organization,
           archetype_id: formData.archetypeId,
-          archetype_name: archetypeName || undefined, // Add archetype name for better emails
+          archetype_name: archetypeName || undefined,
           exact_employee_count: formData.employeeCount,
           access_token: accessToken,
-          status: 'pending', // IMPORTANT: Set status to pending so email function processes it
+          status: 'active', // IMPORTANT: Set status to active so it's immediately available
           expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
           assessment_answers: formData.assessmentAnswers,
           session_id: formData.sessionId || localStorage.getItem('session_id') || null,
           comments: formData.comments || null,
-          created_at: new Date().toISOString(),
-          access_url: accessUrl
+          created_at: now,
+          access_url: accessUrl,
+          email_sent_at: null, // Explicitly set to null so email sending function will process it
+          email_send_attempts: 0,
+          last_attempt_at: null
         })
         .select()
         .single();
@@ -153,7 +160,7 @@ export const useReportUnlock = (archetypeId: string) => {
         archetypeId: formData.archetypeId,
         email: formData.email,
         accessUrl: accessUrl,
-        timestamp: new Date().toISOString()
+        timestamp: now
       }));
       
       // Set unlocked state

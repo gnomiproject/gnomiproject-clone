@@ -55,11 +55,11 @@ export async function processPendingReports(
   try {
     log("Querying for report requests that need emails sent...");
     
-    // New query criteria: status='active', email_sent_at IS NULL
+    // Query for active records that haven't had emails sent yet
     const { data: pendingReports, error: fetchError } = await supabase
       .from("report_requests")
       .select("*")
-      .eq("status", "active") // Using active status, not pending
+      .eq("status", "active") // Using active status
       .is("email_sent_at", null) // Email has not been sent yet
       .order("created_at", { ascending: true })
       .limit(10);
@@ -90,18 +90,40 @@ export async function processPendingReports(
       log(`Processing report ID: ${report.id} for ${report.email}`);
       
       try {
+        // Skip records with critical data missing
+        if (!report.id || !report.email || !report.archetype_id) {
+          logError(`Report ${report.id || 'unknown'} is missing critical data (id, email, or archetype_id)`, {
+            id: report.id,
+            email: report.email,
+            archetype_id: report.archetype_id
+          });
+          continue;
+        }
+        
         // Update attempt count and timestamp
         await updateReportAttemptInfo(supabase, report.id, report.email_send_attempts);
         
         // Generate report URL if not already set
-        if (!report.access_url) {
+        if (!report.access_url && report.access_token && report.archetype_id) {
           report.access_url = `${new URL(supabaseUrl).origin}/report/${report.archetype_id}/${report.access_token}`;
+          
+          // Update the URL in database
+          const { error: urlUpdateError } = await supabase
+            .from("report_requests")
+            .update({ access_url: report.access_url })
+            .eq("id", report.id);
+            
+          if (urlUpdateError) {
+            logError(`Error updating access_url for report ${report.id}`, urlUpdateError);
+          } else {
+            log(`Updated access_url to "${report.access_url}" for report ${report.id}`);
+          }
         }
         
         // Get a simple name for personalization
         const recipientName = report.name || "there";
         
-        // Get archetype name from report if available (using new column), or fetch from database if needed
+        // Get archetype name from report if available, or fetch from database if needed
         if (!report.archetype_name) {
           report.archetype_name = await fetchArchetypeName(supabase, report.archetype_id);
           
