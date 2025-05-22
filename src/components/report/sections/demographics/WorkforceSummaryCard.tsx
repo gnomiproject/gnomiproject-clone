@@ -28,19 +28,29 @@ const WorkforceSummaryCard: React.FC<WorkforceSummaryCardProps> = ({
     maximumFractionDigits: decimals
   }) : 'N/A';
   
-  // Calculate the percentage difference
-  const percentDiff = calculatePercentageDifference(value, average);
+  // Validate inputs before calculation
+  const validValue = typeof value === 'number' ? value : 0;
+  const validAverage = typeof average === 'number' && average !== 0 ? average : 
+    (title.includes('Age') ? 40 : 
+     title.includes('Family') ? 3.0 : 
+     title.includes('Employees') ? 5000 : 
+     title.includes('States') ? 10 : 
+     title.includes('Female') ? 0.51 : 
+     title.includes('Salary') ? 75000 : 1);
+  
+  // Calculate the percentage difference with validated inputs
+  const percentDiff = calculatePercentageDifference(validValue, validAverage);
   
   // Enhanced debug log to see what's happening with the calculations
   useEffect(() => {
     console.log(`[WorkforceSummaryCard] ${title} comparison:`, {
-      value,
-      average,
+      value: validValue,
+      average: validAverage,
       percentDiff,
-      calculation: `(${value} - ${average}) / ${average} * 100 = ${percentDiff.toFixed(1)}%`,
-      source: 'Using archetype average'
+      calculation: `(${validValue} - ${validAverage}) / ${validAverage} * 100 = ${percentDiff.toFixed(1)}%`,
+      source: validAverage === average ? 'Using provided average' : 'Using fallback average'
     });
-  }, [value, average, title, percentDiff]);
+  }, [validValue, validAverage, title, percentDiff, value, average]);
   
   // Determine if higher or lower is better based on the metric name
   const lowerIsBetter = title.toLowerCase().includes('cost') || title.toLowerCase().includes('risk');

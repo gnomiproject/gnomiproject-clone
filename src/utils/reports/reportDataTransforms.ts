@@ -81,7 +81,8 @@ export const processReportData = async (data: ArchetypeDetailedData | null): Pro
       console.log('[processReportData] Using database All_Average data', {
         hasCostAvoidableER: "Cost_Avoidable ER Potential Savings PMPY" in avgData,
         hasSpecialtyRx: "Cost_Specialty RX Allowed Amount PMPM" in avgData,
-        costKeys: Object.keys(avgData).filter(k => k.startsWith('Cost_')).slice(0, 5)
+        costKeys: Object.keys(avgData).filter(k => k.startsWith('Cost_')).slice(0, 5),
+        demoKeys: Object.keys(avgData).filter(k => k.startsWith('Demo_')).slice(0, 5)
       });
       
       // Transform the data into our AverageData structure by creating a complete object first
@@ -102,16 +103,45 @@ export const processReportData = async (data: ArchetypeDetailedData | null): Pro
         )
       };
       
-      // Double check critical fields
-      if (!averageData["Cost_Avoidable ER Potential Savings PMPY"]) {
-        console.warn('[processReportData] Missing critical field: Cost_Avoidable ER Potential Savings PMPY');
-        averageData["Cost_Avoidable ER Potential Savings PMPY"] = createDefaultAverageData()["Cost_Avoidable ER Potential Savings PMPY"];
-      }
+      // Double check critical cost fields
+      const criticalFields = [
+        // Cost fields
+        "Cost_Avoidable ER Potential Savings PMPY",
+        "Cost_Specialty RX Allowed Amount PMPM",
+        "Cost_Medical & RX Paid Amount PMPY",
+        "Cost_Medical & RX Paid Amount PEPY",
+        "Cost_Medical Paid Amount PMPY",
+        "Cost_Medical Paid Amount PEPY",
+        "Cost_RX Paid Amount PMPY",
+        "Cost_RX Paid Amount PEPY",
+        
+        // Demographic fields - added to solve average calculation issues
+        "Demo_Average Age",
+        "Demo_Average Family Size",
+        "Demo_Average Employees",
+        "Demo_Average Members",
+        "Demo_Average Percent Female",
+        "Demo_Average Salary",
+        "Demo_Average States"
+      ];
       
-      if (!averageData["Cost_Specialty RX Allowed Amount PMPM"]) {
-        console.warn('[processReportData] Missing critical field: Cost_Specialty RX Allowed Amount PMPM');
-        averageData["Cost_Specialty RX Allowed Amount PMPM"] = createDefaultAverageData()["Cost_Specialty RX Allowed Amount PMPM"];
-      }
+      criticalFields.forEach(field => {
+        if (averageData[field] === undefined || averageData[field] === null || averageData[field] === 0) {
+          console.warn(`[processReportData] Missing or zero value for critical field: ${field}, using default value`);
+          averageData[field] = createDefaultAverageData()[field];
+        }
+      });
+      
+      // Log demographic data to verify values
+      console.log('[processReportData] Processed demographic averages:', {
+        age: averageData["Demo_Average Age"],
+        familySize: averageData["Demo_Average Family Size"],
+        employees: averageData["Demo_Average Employees"],
+        members: averageData["Demo_Average Members"],
+        percentFemale: averageData["Demo_Average Percent Female"],
+        salary: averageData["Demo_Average Salary"],
+        states: averageData["Demo_Average States"]
+      });
     }
   } catch (err) {
     console.error('[processReportData] Error in All_Average data fetch, using defaults:', err);
@@ -130,6 +160,7 @@ export const processReportData = async (data: ArchetypeDetailedData | null): Pro
   
   // Make sure all critical cost fields exist
   const criticalFields = [
+    // Cost fields
     "Cost_Avoidable ER Potential Savings PMPY",
     "Cost_Specialty RX Allowed Amount PMPM",
     "Cost_Medical & RX Paid Amount PMPY",
@@ -137,7 +168,16 @@ export const processReportData = async (data: ArchetypeDetailedData | null): Pro
     "Cost_Medical Paid Amount PMPY",
     "Cost_Medical Paid Amount PEPY",
     "Cost_RX Paid Amount PMPY",
-    "Cost_RX Paid Amount PEPY"
+    "Cost_RX Paid Amount PEPY",
+    
+    // Demographic fields - added to solve average calculation issues
+    "Demo_Average Age",
+    "Demo_Average Family Size",
+    "Demo_Average Employees",
+    "Demo_Average Members",
+    "Demo_Average Percent Female",
+    "Demo_Average Salary",
+    "Demo_Average States"
   ];
   
   criticalFields.forEach(field => {

@@ -24,16 +24,24 @@ const CostAnalysis = ({
   const costAnalysis = reportData?.cost_analysis || 
     "No specific cost analysis insights available for this archetype.";
   
+  // Validate average data for key cost metrics
+  const hasValidAverageData = averageData && 
+    averageData["Cost_Avoidable ER Potential Savings PMPY"] > 0 &&
+    averageData["Cost_Specialty RX Allowed Amount PMPM"] > 0;
+  
   // Log component rendering information
   useEffect(() => {
     console.log('[CostAnalysis] Rendering with data:', {
       hasReportData: !!reportData,
       hasAverageData: !!averageData,
+      hasValidAverageData,
       hasCostAnalysisText: !!reportData?.cost_analysis,
       hasCostAvoidableER: reportData && "Cost_Avoidable ER Potential Savings PMPY" in reportData,
       hasSpecialtyRx: reportData && "Cost_Specialty RX Allowed Amount PMPM" in reportData,
+      avgCostAvoidableER: averageData?.["Cost_Avoidable ER Potential Savings PMPY"],
+      avgSpecialtyRx: averageData?.["Cost_Specialty RX Allowed Amount PMPM"]
     });
-  }, [reportData, averageData]);
+  }, [reportData, averageData, hasValidAverageData]);
 
   return (
     <div className="space-y-8">
@@ -52,6 +60,15 @@ const CostAnalysis = ({
           <AlertCircle className="h-4 w-4 text-yellow-600" />
           <AlertDescription className="text-yellow-800">
             Some cost data may be missing or incomplete. The report will display available data.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {!hasValidAverageData && (
+        <Alert className="bg-yellow-50 border border-yellow-200 mt-2">
+          <AlertCircle className="h-4 w-4 text-yellow-600" />
+          <AlertDescription className="text-yellow-800">
+            Some average comparison data may be missing. Comparisons might not be accurate.
           </AlertDescription>
         </Alert>
       )}

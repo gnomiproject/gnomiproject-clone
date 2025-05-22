@@ -36,12 +36,16 @@ export const useCostAnalysis = (reportData: any, averageData: any) => {
         specialtyRx: 0
       };
     }
+
+    // Ensure average data is valid
+    const validAverageData = averageData || {};
     
     console.log('[useCostAnalysis] Processing cost metrics from:', {
       hasCostAvoidableER: "Cost_Avoidable ER Potential Savings PMPY" in reportData,
       hasSpecialtyRx: "Cost_Specialty RX Allowed Amount PMPM" in reportData,
       reportDataKeys: Object.keys(reportData).filter(k => k.startsWith('Cost_')).slice(0, 5),
-      avoidableERValue: reportData["Cost_Avoidable ER Potential Savings PMPY"]
+      avoidableERValue: reportData["Cost_Avoidable ER Potential Savings PMPY"],
+      averageAvoidableERValue: validAverageData["Cost_Avoidable ER Potential Savings PMPY"]
     });
     
     return {
@@ -51,7 +55,7 @@ export const useCostAnalysis = (reportData: any, averageData: any) => {
       avoidableER: reportData?.["Cost_Avoidable ER Potential Savings PMPY"] || 0,
       specialtyRx: reportData?.["Cost_Specialty RX Allowed Amount PMPM"] || 0
     };
-  }, [reportData]);
+  }, [reportData, averageData]);
   
   return {
     costAnalysisData,

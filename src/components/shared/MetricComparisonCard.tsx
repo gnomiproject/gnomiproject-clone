@@ -23,14 +23,27 @@ const MetricComparisonCard = ({
   unit = '', 
   className = ''
 }: MetricComparisonCardProps) => {
-  // Calculate the percentage difference
-  const difference = calculatePercentageDifference(value, average);
-  const { text, color } = getMetricComparisonText(value, average, title);
+  // Validate inputs
+  const validValue = typeof value === 'number' ? value : 0;
+  const validAverage = typeof average === 'number' && average !== 0 ? average : 
+    (title.includes('Cost') ? 5000 : 1); // Fallback based on metric type
+    
+  // Calculate the percentage difference with validated inputs
+  const difference = calculatePercentageDifference(validValue, validAverage);
+  const { text, color } = getMetricComparisonText(validValue, validAverage, title);
   
   // Format the average value
   const formattedAverage = title.toLowerCase().includes('cost') ? 
-    `$${average.toLocaleString()}` : 
-    average.toLocaleString();
+    `$${validAverage.toLocaleString()}` : 
+    validAverage.toLocaleString();
+  
+  // Log validation info if using fallback
+  if (validAverage !== average) {
+    console.warn(`[MetricComparisonCard] Using fallback average for ${title}:`, {
+      originalAverage: average,
+      fallbackAverage: validAverage
+    });
+  }
   
   return (
     <Card className={`overflow-hidden ${className}`}>
@@ -49,7 +62,7 @@ const MetricComparisonCard = ({
           </TooltipProvider>
         </h3>
         <div className="flex items-baseline gap-1">
-          <span className="text-3xl font-bold">{value.toLocaleString()}</span>
+          <span className="text-3xl font-bold">{validValue.toLocaleString()}</span>
           {unit && <span className="text-gray-500">{unit}</span>}
         </div>
         <div className="flex justify-between items-center mt-2">

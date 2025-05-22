@@ -1,4 +1,3 @@
-
 /**
  * Utilities for working with metrics
  */
@@ -11,12 +10,32 @@
  * @returns The percentage difference (e.g., 10.5 for 10.5% higher)
  */
 export const calculatePercentageDifference = (value: number, average: number): number => {
-  // Handle edge cases to avoid division by zero
-  if (!value && !average) return 0;
-  if (!average) return value > 0 ? 100 : -100;
+  // Handle edge cases to avoid division by zero or invalid comparisons
+  if (value === null || value === undefined || average === null || average === undefined) {
+    console.warn('[calculatePercentageDifference] Invalid inputs:', { value, average });
+    return 0;
+  }
+  
+  // If both are the same (or very close), return 0 difference
+  if (Math.abs(value - average) < 0.001) return 0;
+  
+  // If average is zero or very close to zero
+  if (Math.abs(average) < 0.001) {
+    // Log the issue for debugging
+    console.warn('[calculatePercentageDifference] Near-zero average detected:', { value, average });
+    
+    // Return a reasonable bounded result
+    return value > 0 ? 100 : (value < 0 ? -100 : 0);
+  }
   
   // Calculate the difference as a percentage
-  return ((value - average) / average) * 100;
+  const percentDiff = ((value - average) / Math.abs(average)) * 100;
+  
+  // Bound the result to reasonable limits (+/- 1000%) to prevent extreme values
+  if (percentDiff > 1000) return 1000;
+  if (percentDiff < -1000) return -1000;
+  
+  return percentDiff;
 };
 
 /**
