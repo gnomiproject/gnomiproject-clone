@@ -71,11 +71,13 @@ const MetricsTab = ({ archetypeData }: MetricsTabProps) => {
                     archetypeData.distinctive_metrics.slice(0, 6).map((metric, index) => (
                       <MetricBar 
                         key={index}
-                        metric={metric.metric}
+                        title={metric.metric}
                         value={metric.archetype_value}
-                        average={metric.archetype_average}
-                        difference={metric.difference}
-                        significance={metric.significance || ''}
+                        format={metric.metric.toLowerCase().includes('cost') ? 'currency' : 
+                               (metric.metric.toLowerCase().includes('percent') ? 'percent' : 'number')}
+                        benchmark={metric.archetype_average}
+                        tooltipText={`${metric.significance || ''} ${Math.abs(metric.difference).toFixed(1)}% ${metric.difference > 0 ? 'higher' : 'lower'} than average`}
+                        color={metric.difference > 0 ? '#3b82f6' : '#10b981'}
                       />
                     )) : (
                       <p className="text-gray-500">Distinctive metrics data is not in the expected format.</p>
@@ -112,7 +114,7 @@ const MetricsTab = ({ archetypeData }: MetricsTabProps) => {
                           title={field.replace(/_/g, ' ')}
                           value={value}
                           format={field.includes('Amount') ? 'currency' : 
-                                 field.includes('Percent') ? 'percent' : 'decimal'}
+                                 field.includes('Percent') ? 'percent' : 'number'}
                         />
                       );
                     })}
