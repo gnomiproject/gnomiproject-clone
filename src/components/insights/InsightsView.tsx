@@ -244,8 +244,8 @@ const InsightsView = ({
           </div>
         )}
       
-        {/* Show success message if unlocked */}
-        {isUnlocked && !isLoading && (
+        {/* Only show success message on overview tab */}
+        {activeTab === 'overview' && isUnlocked && !isLoading && (
           <UnlockSuccessMessage archetypeName={name} />
         )}
         
