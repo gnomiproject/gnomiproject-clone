@@ -212,7 +212,8 @@ const DeepDiveFormContainer = ({
           email_sent_at: null, // Explicitly set to null so email sending function will process it
           email_send_attempts: 0,
           last_attempt_at: null,
-          access_count: 0
+          access_count: 0,
+          source: 'deep_dive_form' // Add source to track origin
         })
         .select('id, access_token, access_url');
 

@@ -140,7 +140,8 @@ export const useReportUnlock = (archetypeId: string) => {
           access_url: accessUrl,
           email_sent_at: null, // Explicitly set to null so email sending function will process it
           email_send_attempts: 0,
-          last_attempt_at: null
+          last_attempt_at: null,
+          source: 'insights_page_unlock' // Add source to track origin
         })
         .select()
         .single();

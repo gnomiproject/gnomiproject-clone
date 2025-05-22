@@ -63,7 +63,8 @@ export const useReportGeneration = () => {
           expires_at: expiryDate.toISOString(),
           name: 'Admin Generated Report',
           organization: 'Admin',
-          email: 'admin@example.com'
+          email: 'admin@example.com',
+          source: 'admin_generated' // Add source to track origin
         })
         .select();
         

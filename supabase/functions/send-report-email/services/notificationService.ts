@@ -7,6 +7,12 @@ import { log, logError } from "../utils/logging.ts";
  */
 export async function sendTeamNotification(resend: any, report: any) {
   try {
+    // Skip if report ID is missing (prevents creating duplicate records)
+    if (!report.id) {
+      log(`Skipping team notification for incomplete report record (missing ID)`);
+      return { success: false, skipped: true, reason: "missing_id" };
+    }
+    
     // Don't send team notification in test mode
     if (report.email && report.email.includes('test@')) {
       log(`Skipping team notification for test email: ${report.email}`);
@@ -24,7 +30,7 @@ export async function sendTeamNotification(resend: any, report: any) {
       const { data, error } = await resend.emails.send({
         from: 'Report Notification <reports@g.nomihealth.com>',
         to: [teamNotificationEmail],
-        subject: `New Report Request: ${report.archetype_name || report.archetype_id}`,
+        subject: `New Report Request: ${report.archetype_name || report.archetype_id} [${report.source || 'unknown_source'}]`,
         html: html
       });
       
@@ -32,7 +38,7 @@ export async function sendTeamNotification(resend: any, report: any) {
         throw new Error(`Failed to send team notification: ${error.message}`);
       }
       
-      log(`Team notification email sent for report ${report.id}`);
+      log(`Team notification email sent for report ${report.id} (source: ${report.source || 'unknown_source'})`);
       return { success: true, id: data.id };
     } catch (templateErr) {
       // Catch specific template generation errors to provide better diagnostics
@@ -42,12 +48,13 @@ export async function sendTeamNotification(resend: any, report: any) {
       const { data, error } = await resend.emails.send({
         from: 'Report Notification <reports@g.nomihealth.com>',
         to: [teamNotificationEmail],
-        subject: `New Report Request: ${report.archetype_name || report.archetype_id} (FALLBACK)`,
+        subject: `New Report Request: ${report.archetype_name || report.archetype_id} (FALLBACK) [${report.source || 'unknown_source'}]`,
         html: `<h1>New Report Request</h1>
                <p>A new report was requested, but there was an error generating the detailed notification.</p>
                <p>Report ID: ${report.id}</p>
                <p>Email: ${report.email || 'Not provided'}</p>
                <p>Archetype: ${report.archetype_name || report.archetype_id}</p>
+               <p>Source: ${report.source || 'unknown_source'}</p>
                <p>Error: ${templateErr.message}</p>`
       });
       
@@ -60,7 +67,7 @@ export async function sendTeamNotification(resend: any, report: any) {
     }
   } catch (err) {
     // Log error but don't fail the whole process
-    logError(`Error sending team notification for report ${report.id}`, err);
+    logError(`Error sending team notification for report ${report.id || 'unknown'}`, err);
     return { success: false, error: err.message };
   }
 }

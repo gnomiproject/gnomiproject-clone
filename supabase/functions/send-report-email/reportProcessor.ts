@@ -56,11 +56,13 @@ export async function processPendingReports(
     log("Querying for report requests that need emails sent...");
     
     // Query for active records that haven't had emails sent yet
+    // CRITICAL FIX: Only select records with a valid ID to prevent processing invalid records
     const { data: pendingReports, error: fetchError } = await supabase
       .from("report_requests")
       .select("*")
       .eq("status", "active") // Using active status
       .is("email_sent_at", null) // Email has not been sent yet
+      .not("id", "is", null) // Make sure ID is not null
       .order("created_at", { ascending: true })
       .limit(10);
     
@@ -87,7 +89,7 @@ export async function processPendingReports(
     
     // Process each report
     for (const report of pendingReports) {
-      log(`Processing report ID: ${report.id} for ${report.email}`);
+      log(`Processing report ID: ${report.id} for ${report.email} [source: ${report.source || 'unknown'}]`);
       
       try {
         // Skip records with critical data missing
@@ -95,7 +97,8 @@ export async function processPendingReports(
           logError(`Report ${report.id || 'unknown'} is missing critical data (id, email, or archetype_id)`, {
             id: report.id,
             email: report.email,
-            archetype_id: report.archetype_id
+            archetype_id: report.archetype_id,
+            source: report.source
           });
           continue;
         }

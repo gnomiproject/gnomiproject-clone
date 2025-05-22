@@ -58,7 +58,8 @@ export function useReportRequest(): UseReportRequestResult {
           access_token: accessToken,
           status: 'pending', // This will be picked up by the scheduled function
           created_at: new Date().toISOString(),
-          expires_at: expiresAt.toISOString()
+          expires_at: expiresAt.toISOString(),
+          source: 'report_request_form' // Add source to track origin
         })
         .select('id')
         .single();
