@@ -6,7 +6,7 @@
 import { percentageCalculatorService } from '@/services/PercentageCalculatorService';
 
 /**
- * Calculate the percentage difference between a value and an average using centralized service
+ * Calculate the percentage difference between a value and an average using centralized service (ASYNC)
  * 
  * @param value The value to compare
  * @param average The archetype average to compare against
@@ -36,7 +36,8 @@ export const calculatePercentageDifference = async (
 };
 
 /**
- * Legacy synchronous version for backward compatibility
+ * Synchronous version for immediate calculations (BACKWARD COMPATIBILITY)
+ * Use this for components that need immediate results
  */
 export const calculatePercentageDifferenceSync = (value: number, average: number): number => {
   // Handle edge cases to avoid division by zero or invalid comparisons
@@ -82,7 +83,7 @@ export const isLowerBetter = (metricName: string): boolean => {
 };
 
 /**
- * Get comparison text and color for a metric using centralized service
+ * Get comparison text and color for a metric using centralized service (ASYNC)
  */
 export const getMetricComparisonText = async (
   value: number, 
@@ -114,7 +115,7 @@ export const getMetricComparisonText = async (
 };
 
 /**
- * Legacy synchronous version for backward compatibility
+ * Synchronous version for immediate use (BACKWARD COMPATIBILITY)
  */
 export const getMetricComparisonTextSync = (value: number, average: number, metricName: string): { text: string; color: string } => {
   if (!value || !average) {

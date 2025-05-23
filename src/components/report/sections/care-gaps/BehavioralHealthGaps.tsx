@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { calculatePercentageDifference } from '@/utils/reports/metricUtils';
+import { calculatePercentageDifferenceSync } from '@/utils/reports/metricUtils';
 import { Brain } from 'lucide-react';
 
 interface BehavioralHealthGapsProps {
@@ -67,7 +67,7 @@ const BehavioralHealthGaps: React.FC<BehavioralHealthGapsProps> = ({
           {metrics.map(metric => {
             const value = reportData[metric.id] || 0;
             const avgValue = averageData?.[metric.id] || 0;
-            const diffPercent = calculatePercentageDifference(value, avgValue);
+            const diffPercent = calculatePercentageDifferenceSync(value, avgValue);
             
             // Determine styling based on performance
             const bgColor = value >= avgValue ? 'bg-green-50' : 'bg-red-50';

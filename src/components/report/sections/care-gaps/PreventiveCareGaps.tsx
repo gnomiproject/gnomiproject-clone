@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { calculatePercentageDifference } from '@/utils/reports/metricUtils';
+import { calculatePercentageDifferenceSync } from '@/utils/reports/metricUtils';
 import { Calendar, Info } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -34,7 +34,7 @@ const PreventiveCareGaps: React.FC<PreventiveCareGapsProps> = ({ reportData, ave
   const formatComparison = (value: number | undefined, avgValue: number | undefined): string => {
     if (value === undefined || avgValue === undefined) return '';
     
-    const diff = calculatePercentageDifference(value, avgValue);
+    const diff = calculatePercentageDifferenceSync(value, avgValue);
     const sign = diff > 0 ? '+' : '';
     return `${sign}${diff.toFixed(1)}% vs archetype avg`;
   };

@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatPercent } from '@/utils/formatters';
-import { calculatePercentageDifference } from '@/utils/reports/metricUtils';
+import { calculatePercentageDifferenceSync } from '@/utils/reports/metricUtils';
 import { Activity, Beaker, Pill, Eye } from 'lucide-react';
 
 interface SpecialtyConditionsProps {
@@ -53,7 +53,7 @@ const SpecialtyConditions = ({ reportData, averageData }: SpecialtyConditionsPro
   }, 0);
 
   // Determine if this archetype has significantly different prevalence
-  const diffPercentage = calculatePercentageDifference(totalBurden, avgTotalBurden);
+  const diffPercentage = calculatePercentageDifferenceSync(totalBurden, avgTotalBurden);
 
   return (
     <Card>
@@ -76,7 +76,7 @@ const SpecialtyConditions = ({ reportData, averageData }: SpecialtyConditionsPro
             const value = reportData[condition.id] || 0;
             const avgValue = averageData && averageData[condition.id] ? averageData[condition.id] : 0;
             const diff = value - avgValue;
-            const diffPercentage = calculatePercentageDifference(value, avgValue);
+            const diffPercentage = calculatePercentageDifferenceSync(value, avgValue);
             const diffClass = diff > 0 ? "text-amber-600" : diff < 0 ? "text-green-600" : "text-gray-500";
             
             return (

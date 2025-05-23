@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { calculatePercentageDifference } from '@/utils/reports/metricUtils';
+import { calculatePercentageDifferenceSync } from '@/utils/reports/metricUtils';
 import { Activity } from 'lucide-react';
 
 interface ChronicConditionGapsProps {
@@ -70,7 +70,7 @@ const ChronicConditionGaps: React.FC<ChronicConditionGapsProps> = ({ reportData,
                 {groupMetrics.map(metric => {
                   const value = reportData[metric.id] || 0;
                   const avgValue = averageData?.[metric.id] || 0;
-                  const diffPercent = calculatePercentageDifference(value, avgValue);
+                  const diffPercent = calculatePercentageDifferenceSync(value, avgValue);
                   
                   // Determine color based on performance
                   const textColor = value >= avgValue ? 'text-green-700' : 'text-red-700';

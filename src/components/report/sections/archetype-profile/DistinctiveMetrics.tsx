@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import { ArrowUp, ArrowDown } from 'lucide-react';
 import { useDistinctiveMetrics } from '@/hooks/archetype/useDistinctiveMetrics';
 import { formatNumber } from '@/utils/formatters';
-import { calculatePercentageDifference, isLowerBetter } from '@/utils/reports/metricUtils';
+import { calculatePercentageDifferenceSync, isLowerBetter } from '@/utils/reports/metricUtils';
 import { ArchetypeId } from '@/types/archetype';
 
 interface DistinctiveMetricsProps {
@@ -81,7 +81,7 @@ const DistinctiveMetrics: React.FC<DistinctiveMetricsProps> = ({ metrics, archet
           const averageValue = metric["Archetype Average"] || metric.archetype_average || 0;
           
           // Recalculate the percentage difference correctly
-          const percentDiff = calculatePercentageDifference(metricValue, averageValue);
+          const percentDiff = calculatePercentageDifferenceSync(metricValue, averageValue);
           
           // Log the calculation to help diagnose issues
           console.log(`[DistinctiveMetrics] Calculating difference for ${metricName}:`, {

@@ -1,7 +1,7 @@
 
 import React, { useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
-import { calculatePercentageDifference } from '@/utils/reports/metricUtils';
+import { calculatePercentageDifferenceSync } from '@/utils/reports/metricUtils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Info } from 'lucide-react';
 
@@ -39,7 +39,7 @@ const WorkforceSummaryCard: React.FC<WorkforceSummaryCardProps> = ({
      title.includes('Salary') ? 75000 : 1);
   
   // Calculate the percentage difference with validated inputs
-  const percentDiff = calculatePercentageDifference(validValue, validAverage);
+  const percentDiff = calculatePercentageDifferenceSync(validValue, validAverage);
   
   // Enhanced debug log to see what's happening with the calculations
   useEffect(() => {

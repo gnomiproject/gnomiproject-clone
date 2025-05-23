@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { calculatePercentageDifference } from '@/utils/reports/metricUtils';
+import { calculatePercentageDifferenceSync } from '@/utils/reports/metricUtils';
 import { User } from 'lucide-react';
 
 interface PediatricCareGapsProps {
@@ -69,7 +69,7 @@ const PediatricCareGaps: React.FC<PediatricCareGapsProps> = ({ reportData, avera
             {pediatricMetrics.map(metric => {
               const value = reportData[metric.id] || 0;
               const avgValue = averageData?.[metric.id] || 0;
-              const diffPercent = calculatePercentageDifference(value, avgValue);
+              const diffPercent = calculatePercentageDifferenceSync(value, avgValue);
               const statusClass = getStatusClass(value, avgValue);
               
               return (

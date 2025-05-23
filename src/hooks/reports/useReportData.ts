@@ -72,8 +72,11 @@ export const useReportData = (
           throw new Error('No report data found');
         }
 
+        // Convert the database result to ArchetypeDetailedData format
+        const typedReportData = reportData as unknown as ArchetypeDetailedData;
+
         // Process the data using the centralized service
-        const processedReportData = await processReportData(reportData);
+        const processedReportData = await processReportData(typedReportData);
         
         // Cache the processed data
         setInCache(cacheKey, processedReportData);
