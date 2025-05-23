@@ -1,40 +1,161 @@
 
 import { useState, useCallback, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { ArchetypeDetailedData } from '@/types/archetype';
-import { useReportAccess } from '../useReportAccess';
+import { useQuery } from '@tanstack/react-query';
+import { ArchetypeDetailedData, ArchetypeId } from '@/types/archetype';
+import { trackReportAccess } from '@/utils/reports/accessTracking';
+import { getFromCache, setInCache, clearFromCache } from '@/utils/reports/reportCache';
+import { processReportData } from '@/utils/reports/reportDataTransforms';
+import { averageDataService } from '@/services/AverageDataService';
+import { percentageCalculatorService } from '@/services/PercentageCalculatorService';
 
 interface UseReportDataResult {
-  reportData: any;
-  archetypeData: ArchetypeDetailedData | null;
-  averageData: any | null;
+  reportData: ArchetypeDetailedData | null;
+  averageData: any;
   isLoading: boolean;
   error: Error | null;
   debugInfo: any;
-  refreshData: () => Promise<void>;
-  isUsingFallbackData?: boolean;
+  refreshData: () => void;
+  isUsingFallbackData: boolean;
 }
 
-/**
- * Hook to fetch report data for a specified archetype
- * 
- * This is a wrapper around useReportAccess that provides a consistent interface
- * for components that need report data
- */
 export const useReportData = (
-  archetypeId: string,
-  token: string | undefined,
-  options = {
-    isAdminView: false,
-    skipCache: false
-  }
+  archetypeId: ArchetypeId,
+  token?: string,
+  isAdminView: boolean = false
 ): UseReportDataResult => {
-  // Use the refactored hook for data fetching
-  return useReportAccess({
-    archetypeId,
-    token: token || '',
-    isAdminView: options.isAdminView,
-    skipCache: options.skipCache
+  const [error, setError] = useState<Error | null>(null);
+  const [debugInfo, setDebugInfo] = useState<any>({});
+  const [isUsingFallbackData, setIsUsingFallbackData] = useState(false);
+
+  // Create a stable cache key
+  const cacheKey = `report-data-${archetypeId}-${isAdminView ? 'admin' : 'user'}`;
+
+  const {
+    data: processedData,
+    isLoading,
+    error: queryError,
+    refetch
+  } = useQuery({
+    queryKey: ['report-data', archetypeId, isAdminView],
+    queryFn: async () => {
+      console.log(`[useReportData] Fetching data for ${archetypeId}, admin: ${isAdminView}`);
+      
+      try {
+        // Try to get from cache first
+        const cachedData = getFromCache(cacheKey);
+        if (cachedData) {
+          console.log(`[useReportData] Using cached data for ${archetypeId}`);
+          setIsUsingFallbackData(false);
+          return cachedData;
+        }
+
+        // Determine which table to use based on admin status
+        const tableName = isAdminView ? 'level4_report_secure' : 'level4_report_secure';
+        
+        console.log(`[useReportData] Fetching from ${tableName} for ${archetypeId}`);
+        
+        // Fetch the main report data
+        const { data: reportData, error: reportError } = await supabase
+          .from(tableName)
+          .select('*')
+          .eq('archetype_id', archetypeId)
+          .single();
+
+        if (reportError) {
+          console.error(`[useReportData] Error fetching from ${tableName}:`, reportError);
+          throw new Error(`Failed to fetch report data: ${reportError.message}`);
+        }
+
+        if (!reportData) {
+          throw new Error('No report data found');
+        }
+
+        // Process the data using the centralized service
+        const processedReportData = await processReportData(reportData);
+        
+        // Cache the processed data
+        setInCache(cacheKey, processedReportData);
+        setIsUsingFallbackData(false);
+        
+        console.log(`[useReportData] Successfully processed data for ${archetypeId}`);
+        return processedReportData;
+
+      } catch (fetchError) {
+        console.error(`[useReportData] Error in data fetching:`, fetchError);
+        
+        // Try to get fallback data from cache
+        const fallbackData = getFromCache(`${cacheKey}-fallback`);
+        if (fallbackData) {
+          console.log(`[useReportData] Using fallback cached data for ${archetypeId}`);
+          setIsUsingFallbackData(true);
+          return fallbackData;
+        }
+        
+        // As a last resort, create minimal data structure
+        console.log(`[useReportData] Creating minimal fallback data for ${archetypeId}`);
+        const fallbackProcessedData = await processReportData(null);
+        setIsUsingFallbackData(true);
+        return fallbackProcessedData;
+      }
+    },
+    retry: 1,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false
   });
+
+  // Track access when data is loaded (only for non-admin views with tokens)
+  useEffect(() => {
+    if (!isAdminView && token && archetypeId && processedData?.reportData) {
+      trackReportAccess(archetypeId, token);
+    }
+  }, [archetypeId, token, isAdminView, processedData]);
+
+  // Update error state
+  useEffect(() => {
+    if (queryError) {
+      setError(queryError as Error);
+    } else {
+      setError(null);
+    }
+  }, [queryError]);
+
+  // Update debug info
+  useEffect(() => {
+    setDebugInfo({
+      dataSource: isAdminView ? 'level4_report_secure (admin)' : 'level4_report_secure',
+      hasReportData: !!processedData?.reportData,
+      hasAverageData: !!processedData?.averageData,
+      isUsingFallbackData,
+      cacheKey,
+      timestamp: new Date().toISOString()
+    });
+  }, [processedData, isAdminView, isUsingFallbackData, cacheKey]);
+
+  const refreshData = useCallback(() => {
+    console.log(`[useReportData] Manual refresh requested for ${archetypeId}`);
+    
+    // Clear caches
+    clearFromCache(cacheKey);
+    averageDataService.clearCache();
+    percentageCalculatorService.clearCache();
+    
+    // Refetch data
+    refetch();
+    
+    toast.success('Data refreshed', {
+      description: 'Report data has been updated from the server'
+    });
+  }, [cacheKey, refetch, archetypeId]);
+
+  return {
+    reportData: processedData?.reportData || null,
+    averageData: processedData?.averageData || null,
+    isLoading,
+    error,
+    debugInfo,
+    refreshData,
+    isUsingFallbackData
+  };
 };
