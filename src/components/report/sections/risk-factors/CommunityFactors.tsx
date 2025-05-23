@@ -3,7 +3,7 @@ import React from 'react';
 import { Smartphone, Home, GraduationCap, Heart, Baby, Store } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { formatNumber } from '@/utils/formatters';
-import { calculatePercentageDifference } from '@/utils/reports/metricUtils';
+import { calculatePercentageDifferenceSync } from '@/utils/reports/metricUtils';
 
 interface CommunityFactorsProps {
   reportData: any;
@@ -71,8 +71,8 @@ const CommunityFactors: React.FC<CommunityFactorsProps> = ({ reportData, average
           const avgValue = averageData?.[factor.fieldName] || 
                           averageData?.[factor.fieldName.replace(/ /g, '_')] || 0;
           
-          // Calculate comparison data
-          const percentDiff = calculatePercentageDifference(value, avgValue);
+          // Calculate comparison data using the synchronous version
+          const percentDiff = calculatePercentageDifferenceSync(value, avgValue);
           
           // For access-related factors, higher values typically indicate better access (fewer risks)
           // So when lower than average, this represents higher risks

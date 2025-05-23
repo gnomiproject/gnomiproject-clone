@@ -3,7 +3,7 @@ import React from 'react';
 import { BarChart2 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { formatNumber } from '@/utils/formatters';
-import { calculatePercentageDifference, isLowerBetter } from '@/utils/reports/metricUtils';
+import { calculatePercentageDifferenceSync, isLowerBetter } from '@/utils/reports/metricUtils';
 
 interface OverallSDOHProps {
   reportData: any;
@@ -17,8 +17,8 @@ const OverallSDOH: React.FC<OverallSDOHProps> = ({ reportData, averageData }) =>
   const avgSdohScore = averageData?.['SDOH_Average SDOH'] || 
                        averageData?.SDOH_Average_SDOH || 0;
   
-  // Calculate comparison metrics
-  const percentDiff = calculatePercentageDifference(sdohScore, avgSdohScore);
+  // Calculate comparison metrics using the synchronous version
+  const percentDiff = calculatePercentageDifferenceSync(sdohScore, avgSdohScore);
   
   // For SDOH, lower values indicate fewer social determinant risks
   // Note: This is different from isLowerBetter() - we're not saying lower is "better"

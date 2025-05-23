@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { ArrowDown, ArrowUp, Info } from 'lucide-react';
-import { calculatePercentageDifference, getMetricComparisonText } from '@/utils/reports/metricUtils';
+import { calculatePercentageDifferenceSync, getMetricComparisonTextSync } from '@/utils/reports/metricUtils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface MetricCardProps {
@@ -22,9 +22,9 @@ const MetricCard = ({
   decimals = 0,
   lowerIsBetter = false
 }: MetricCardProps) => {
-  // Calculate the percentage difference
-  const difference = calculatePercentageDifference(value, average);
-  const { text, color } = getMetricComparisonText(value, average, title);
+  // Calculate the percentage difference using the synchronous version
+  const difference = calculatePercentageDifferenceSync(value, average);
+  const { text, color } = getMetricComparisonTextSync(value, average, title);
   
   // Determine if this is better or worse based on lowerIsBetter flag
   const isPositive = (lowerIsBetter && difference < 0) || (!lowerIsBetter && difference > 0);

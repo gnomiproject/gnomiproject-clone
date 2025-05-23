@@ -8,9 +8,13 @@ export interface ProcessedReportData {
   averageData: StandardizedAverageData;
 }
 
+// Re-export StandardizedAverageData for use in other files
+export type AverageData = StandardizedAverageData;
+
 // Create default average data for reports as a fallback - with extended fields
 export const createDefaultAverageData = (): StandardizedAverageData => {
-  return averageDataService.getFallbackAverageData();
+  // Use the public method to get fallback data
+  return averageDataService.getDefaultAverageData();
 };
 
 // Process report data into correct format and fetch All_Average data using centralized service

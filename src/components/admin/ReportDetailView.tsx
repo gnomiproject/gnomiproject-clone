@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, Download, FileText, Copy, Check } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { calculatePercentageDifference } from '@/utils/reports/metricUtils';
+import { calculatePercentageDifferenceSync } from '@/utils/reports/metricUtils';
 import { OverviewTab } from './report-sections/OverviewTab';
 import { MetricsTab } from './report-sections/MetricsTab';
 import { SwotTab } from './report-sections/SwotTab';
@@ -112,7 +112,6 @@ const ReportDetailView = ({ archetypeId, isOpen, onClose }: ReportDetailViewProp
     }
   };
 
-  // Process metrics to add correct percentage differences
   const processMetricsWithPercentages = (metrics: any, averageData: any) => {
     if (!metrics || !averageData) return metrics;
 
@@ -128,7 +127,7 @@ const ReportDetailView = ({ archetypeId, isOpen, onClose }: ReportDetailViewProp
           const avgValue = averageData[fullMetricKey];
 
           if (currentValue && avgValue) {
-            const percentDiff = calculatePercentageDifference(currentValue, avgValue);
+            const percentDiff = calculatePercentageDifferenceSync(currentValue, avgValue);
             processedMetrics[category][metricKey].percentDifference = percentDiff;
             processedMetrics[category][metricKey].formattedDifference = 
               `${percentDiff > 0 ? '+' : ''}${percentDiff.toFixed(1)}%`;

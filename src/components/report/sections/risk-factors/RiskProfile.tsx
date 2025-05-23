@@ -3,7 +3,7 @@ import React from 'react';
 import { Activity } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { formatNumber } from '@/utils/formatters';
-import { calculatePercentageDifference, isLowerBetter } from '@/utils/reports/metricUtils';
+import { calculatePercentageDifferenceSync, isLowerBetter } from '@/utils/reports/metricUtils';
 
 interface RiskProfileProps {
   reportData: any;
@@ -17,8 +17,8 @@ const RiskProfile: React.FC<RiskProfileProps> = ({ reportData, averageData }) =>
   const avgRiskScore = averageData?.['Risk_Average Risk Score'] || 
                       averageData?.Risk_Average_Risk_Score || 0;
   
-  // Calculate comparison metrics
-  const percentDiff = calculatePercentageDifference(riskScore, avgRiskScore);
+  // Calculate comparison metrics using the synchronous version
+  const percentDiff = calculatePercentageDifferenceSync(riskScore, avgRiskScore);
   
   // For clinical risk scores, higher values indicate greater clinical risks
   // Lower risk scores are associated with fewer health risks

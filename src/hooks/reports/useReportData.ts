@@ -6,13 +6,13 @@ import { useQuery } from '@tanstack/react-query';
 import { ArchetypeDetailedData, ArchetypeId } from '@/types/archetype';
 import { trackReportAccess } from '@/utils/reports/accessTracking';
 import { getFromCache, setInCache, clearFromCache } from '@/utils/reports/reportCache';
-import { processReportData } from '@/utils/reports/reportDataTransforms';
-import { averageDataService } from '@/services/AverageDataService';
+import { processReportData, ProcessedReportData } from '@/utils/reports/reportDataTransforms';
+import { averageDataService, StandardizedAverageData } from '@/services/AverageDataService';
 import { percentageCalculatorService } from '@/services/PercentageCalculatorService';
 
 interface UseReportDataResult {
   reportData: ArchetypeDetailedData | null;
-  averageData: any;
+  averageData: StandardizedAverageData;
   isLoading: boolean;
   error: Error | null;
   debugInfo: any;
@@ -154,7 +154,7 @@ export const useReportData = (
 
   return {
     reportData: processedData?.reportData || null,
-    averageData: processedData?.averageData || null,
+    averageData: processedData?.averageData || {},
     isLoading,
     error,
     debugInfo,

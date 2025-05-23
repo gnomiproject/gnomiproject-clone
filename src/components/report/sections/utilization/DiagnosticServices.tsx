@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Search } from 'lucide-react';
 import { formatNumber } from '@/utils/formatters';
-import { calculatePercentageDifference } from '@/utils/reports/metricUtils';
+import { calculatePercentageDifferenceSync } from '@/utils/reports/metricUtils';
 
 interface DiagnosticServicesProps {
   reportData: any;
@@ -27,12 +27,12 @@ const DiagnosticServices = ({
 
   const labServices = reportData["Util_Lab Services per 1k Members"] || 0;
   const avgLabServices = averageData["Util_Lab Services per 1k Members"] || 0;
-  const labDiff = calculatePercentageDifference(labServices, avgLabServices);
+  const labDiff = calculatePercentageDifferenceSync(labServices, avgLabServices);
   const labClass = labDiff > 10 ? "text-amber-600" : (labDiff < -10 ? "text-green-600" : "text-gray-600");
 
   const radiologyServices = reportData["Util_Radiology Services per 1k Members"] || 0;
   const avgRadiologyServices = averageData["Util_Radiology Services per 1k Members"] || 0;
-  const radiologyDiff = calculatePercentageDifference(radiologyServices, avgRadiologyServices);
+  const radiologyDiff = calculatePercentageDifferenceSync(radiologyServices, avgRadiologyServices);
   const radiologyClass = radiologyDiff > 10 ? "text-amber-600" : (radiologyDiff < -10 ? "text-green-600" : "text-gray-600");
 
   return (

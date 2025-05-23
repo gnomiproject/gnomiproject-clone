@@ -1,15 +1,11 @@
-
 import { ArchetypeDetailedData } from '@/types/archetype';
 import { AverageData } from './reportDataTransforms';
+import { ProcessedReportData } from './reportDataTransforms';
 import { toast } from 'sonner';
 
 // Interface for cached report data
 export interface CachedReport {
-  data: {
-    reportData: ArchetypeDetailedData | null;
-    userData: any;
-    averageData: AverageData;
-  };
+  data: ProcessedReportData;
   timestamp: number;
   expiresAt: number;
 }
@@ -72,141 +68,49 @@ const isCacheValid = (cachedReport: CachedReport | null): boolean => {
   return isValid;
 };
 
-export const getFromCache = (cacheKey: string): CachedReport | null => {
-  const cachedReport = reportCache.get(cacheKey) || null;
+// Get data from cache
+export const getFromCache = (key: string): ProcessedReportData | null => {
+  const cachedReport = reportCache.get(key);
   
-  // Log cache hit/miss
-  if (cachedReport) {
-    console.log(`[reportCache] Cache hit for key: ${cacheKey.substring(0, 15)}...`);
-  } else {
-    console.log(`[reportCache] Cache miss for key: ${cacheKey.substring(0, 15)}...`);
+  // Check if cache is valid, return null if not
+  if (!isCacheValid(cachedReport || null)) {
+    console.log(`[reportCache] Cache miss or expired for ${key}`);
     return null;
   }
   
-  // Check if cache is still valid
-  if (!isCacheValid(cachedReport)) {
-    console.log(`[reportCache] Cache expired for key: ${cacheKey.substring(0, 15)}...`);
-    reportCache.delete(cacheKey);
-    persistCache();
-    return null;
-  }
-  
-  // Calculate remaining TTL in minutes
-  const remainingMinutes = Math.round((cachedReport.expiresAt - Date.now()) / 60000);
-  console.log(`[reportCache] Using cached data with ~${remainingMinutes} minutes TTL remaining`);
-  
-  return cachedReport;
+  console.log(`[reportCache] Cache hit for ${key}, valid for ${Math.round((cachedReport!.expiresAt - Date.now()) / 60000)} more minutes`);
+  return cachedReport!.data;
 };
 
-export const setInCache = (cacheKey: string, data: CachedReport['data']): void => {
+// Set data in cache
+export const setInCache = (key: string, data: ProcessedReportData, ttlMs: number = CACHE_CONFIG.DEFAULT_TTL_MS): void => {
   const now = Date.now();
-  const expiresAt = now + CACHE_CONFIG.DEFAULT_TTL_MS;
   
-  const entry = {
+  const cacheItem: CachedReport = {
     data,
     timestamp: now,
-    expiresAt
+    expiresAt: now + ttlMs
   };
   
-  reportCache.set(cacheKey, entry);
+  reportCache.set(key, cacheItem);
   persistCache();
-  
-  console.log(`[reportCache] Data cached with key: ${cacheKey.substring(0, 15)}... (expires in ${CACHE_CONFIG.DEFAULT_TTL_MS / 60000} minutes)`);
+  console.log(`[reportCache] Set ${key} in cache, expires in ${Math.round(ttlMs / 60000)} minutes`);
 };
 
-export const clearFromCache = (cacheKey: string): void => {
-  if (reportCache.has(cacheKey)) {
-    console.log(`[reportCache] Clearing cache for key: ${cacheKey.substring(0, 15)}...`);
-    reportCache.delete(cacheKey);
-    persistCache();
-  } else {
-    console.log(`[reportCache] No cache found for key: ${cacheKey.substring(0, 15)}...`);
-  }
+// Clear data from cache
+export const clearFromCache = (key: string): void => {
+  reportCache.delete(key);
+  persistCache();
+  console.log(`[reportCache] Cleared ${key} from cache`);
 };
 
-// New function to clear all cache
+// Clear all cache
 export const clearAllCache = (): void => {
-  const itemCount = reportCache.size;
   reportCache.clear();
-  sessionStorage.removeItem(CACHE_CONFIG.SESSION_STORAGE_KEY);
-  console.log(`[reportCache] Cleared all cached data (${itemCount} items)`);
-  toast.info(`Cache cleared (${itemCount} reports)`, {
-    description: "All report data will be re-fetched from the server"
+  persistCache();
+  console.log(`[reportCache] Cleared all cache entries`);
+  
+  toast.success('Cache cleared', {
+    description: 'All cached report data has been cleared'
   });
-};
-
-// New function to get cache stats for debugging
-export const getCacheStats = (): {
-  size: number;
-  keys: string[];
-  oldestTimestamp: number | null;
-  newestTimestamp: number | null;
-  oldestKey: string | null;
-  newestKey: string | null;
-  averageTtlMinutes: number;
-} => {
-  let oldestTimestamp = null;
-  let newestTimestamp = null;
-  let oldestKey = null;
-  let newestKey = null;
-  let totalTtl = 0;
-  const keys: string[] = [];
-  const now = Date.now();
-  
-  reportCache.forEach((value, key) => {
-    keys.push(key);
-    
-    if (oldestTimestamp === null || value.timestamp < oldestTimestamp) {
-      oldestTimestamp = value.timestamp;
-      oldestKey = key;
-    }
-    
-    if (newestTimestamp === null || value.timestamp > newestTimestamp) {
-      newestTimestamp = value.timestamp;
-      newestKey = key;
-    }
-    
-    totalTtl += value.expiresAt - now;
-  });
-  
-  const averageTtlMinutes = reportCache.size > 0 ? Math.round((totalTtl / reportCache.size) / 60000) : 0;
-  
-  return {
-    size: reportCache.size,
-    keys,
-    oldestTimestamp,
-    newestTimestamp,
-    oldestKey,
-    newestKey,
-    averageTtlMinutes
-  };
-};
-
-// New function to check if any items in cache are nearing expiration
-export const checkCacheHealth = (): {
-  healthy: boolean;
-  nearingExpiration: number;
-  expired: number;
-  total: number;
-} => {
-  let nearingExpiration = 0;
-  let expired = 0;
-  const now = Date.now();
-  
-  reportCache.forEach(cachedReport => {
-    const timeRemaining = cachedReport.expiresAt - now;
-    
-    if (timeRemaining <= 0) {
-      expired++;
-    } else if (timeRemaining < CACHE_CONFIG.WARNING_THRESHOLD_MS) {
-      nearingExpiration++;
-    }
-  });
-  
-  return {
-    healthy: (nearingExpiration === 0 && expired === 0),
-    nearingExpiration,
-    expired,
-    total: reportCache.size
-  };
 };

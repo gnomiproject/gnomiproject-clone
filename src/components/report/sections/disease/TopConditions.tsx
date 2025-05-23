@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatPercent } from '@/utils/formatters';
-import { calculatePercentageDifference } from '@/utils/reports/metricUtils';
+import { calculatePercentageDifferenceSync } from '@/utils/reports/metricUtils';
 import { Activity } from 'lucide-react';
 
 interface TopConditionsProps {
@@ -51,7 +51,7 @@ const TopConditions = ({ reportData, averageData }: TopConditionsProps) => {
             const value = reportData[condition.id] || 0;
             const avgValue = averageData && averageData[condition.id] ? averageData[condition.id] : 0;
             const diff = value - avgValue;
-            const diffPercentage = calculatePercentageDifference(value, avgValue);
+            const diffPercentage = calculatePercentageDifferenceSync(value, avgValue);
             const isHigher = value > avgValue;
             const diffClass = diffPercentage === 0 ? "text-gray-600" : 
                              isHigher ? "text-amber-600" : "text-green-600";

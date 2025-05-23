@@ -3,7 +3,7 @@ import React from 'react';
 import { Banknote, Hospital, Carrot, Bus } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { formatNumber } from '@/utils/formatters';
-import { calculatePercentageDifference } from '@/utils/reports/metricUtils';
+import { calculatePercentageDifferenceSync } from '@/utils/reports/metricUtils';
 
 interface EconomicAccessFactorsProps {
   reportData: any;
@@ -53,8 +53,8 @@ const EconomicAccessFactors: React.FC<EconomicAccessFactorsProps> = ({ reportDat
           const avgValue = averageData?.[factor.fieldName] || 
                           averageData?.[factor.fieldName.replace(/ /g, '_')] || 0;
           
-          // Calculate comparison data
-          const percentDiff = calculatePercentageDifference(value, avgValue);
+          // Calculate comparison data using the synchronous version
+          const percentDiff = calculatePercentageDifferenceSync(value, avgValue);
           
           // For SDOH factors, higher values typically indicate greater risks
           // Exception: For access-related factors, higher might indicate better access
