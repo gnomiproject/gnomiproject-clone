@@ -1,5 +1,5 @@
+
 import { ArchetypeDetailedData } from '@/types/archetype';
-import { AverageData } from './reportDataTransforms';
 import { ProcessedReportData } from './reportDataTransforms';
 import { toast } from 'sonner';
 
@@ -113,4 +113,49 @@ export const clearAllCache = (): void => {
   toast.success('Cache cleared', {
     description: 'All cached report data has been cleared'
   });
+};
+
+// Check cache health - returns diagnostic information
+export const checkCacheHealth = () => {
+  const now = Date.now();
+  const cacheEntries = Array.from(reportCache.entries());
+  
+  const health = {
+    totalEntries: cacheEntries.length,
+    validEntries: 0,
+    expiredEntries: 0,
+    warningEntries: 0,
+    memoryUsage: cacheEntries.length * 1024 // rough estimate
+  };
+  
+  cacheEntries.forEach(([key, cached]) => {
+    const timeRemaining = cached.expiresAt - now;
+    
+    if (timeRemaining <= 0) {
+      health.expiredEntries++;
+    } else if (timeRemaining < CACHE_CONFIG.WARNING_THRESHOLD_MS) {
+      health.warningEntries++;
+    } else {
+      health.validEntries++;
+    }
+  });
+  
+  return health;
+};
+
+// Get cache statistics
+export const getCacheStats = () => {
+  const now = Date.now();
+  const entries = Array.from(reportCache.entries()).map(([key, cached]) => ({
+    key,
+    age: Math.round((now - cached.timestamp) / 60000), // minutes
+    timeToExpiry: Math.round((cached.expiresAt - now) / 60000), // minutes
+    isExpired: cached.expiresAt <= now
+  }));
+  
+  return {
+    totalEntries: reportCache.size,
+    entries,
+    config: CACHE_CONFIG
+  };
 };

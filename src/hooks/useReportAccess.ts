@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
 import { ArchetypeDetailedData, ArchetypeId, FamilyId } from '@/types/archetype';
 import { getFromCache, setInCache, clearFromCache } from '@/utils/reports/reportCache';
-import { processReportData } from '@/utils/reports/reportDataTransforms';
+import { processReportData, ProcessedReportData } from '@/utils/reports/reportDataTransforms';
 import { trackReportAccess } from '@/utils/reports/accessTracking';
 import { ensureArray } from '@/utils/array/ensureArray';
 import { ensureStringArray } from '@/utils/array/ensureStringArray';
@@ -45,7 +45,7 @@ export const useReportAccess = ({
   const queryKey = ['report-access', archetypeId, token];
   
   // Function to fetch report data from level4_report_secure
-  const fetchReportData = useCallback(async () => {
+  const fetchReportData = useCallback(async (): Promise<ProcessedReportData> => {
     console.log(`[useReportAccess] Fetching report data for ${archetypeId}`);
     
     if (!archetypeId) {
@@ -62,16 +62,16 @@ export const useReportAccess = ({
         console.log(`[useReportAccess] Using cached data for ${archetypeId}`);
         
         // Ensure key_characteristics is properly formatted in cached data
-        if (cachedData.data?.reportData) {
+        if (cachedData.reportData) {
           // Create a new object with properly typed key_characteristics first
-          const keyCharacteristicsArray = ensureStringArray(cachedData.data.reportData?.key_characteristics) as string[];
-          cachedData.data.reportData = {
+          const keyCharacteristicsArray = ensureStringArray(cachedData.reportData?.key_characteristics) as string[];
+          cachedData.reportData = {
             key_characteristics: keyCharacteristicsArray,
-            ...cachedData.data.reportData
+            ...cachedData.reportData
           };
         }
         
-        return cachedData.data;
+        return cachedData;
       }
     }
     
@@ -119,11 +119,8 @@ export const useReportAccess = ({
       // Process the data with async now
       const processedData = await processReportData(mappedData);
       
-      // Save to cache - include empty userData to match expected cache structure
-      setInCache(cacheKey, {
-        ...processedData,
-        userData: {}
-      });
+      // Save to cache
+      setInCache(cacheKey, processedData);
       
       // Store as fallback data in localStorage
       try {
@@ -146,7 +143,7 @@ export const useReportAccess = ({
   }, [archetypeId, token, skipCache]);
   
   // Function to get fallback data from localStorage
-  const getFallbackData = useCallback(() => {
+  const getFallbackData = useCallback((): ProcessedReportData | null => {
     try {
       const fallbackData = localStorage.getItem(`${FALLBACK_REPORT_KEY}-${archetypeId}`);
       if (fallbackData) {
@@ -234,11 +231,14 @@ export const useReportAccess = ({
     }
   }, [archetypeId, token, refetch, getFallbackData]);
   
+  // Get fallback data if needed
+  const fallbackData = isUsingFallbackData ? getFallbackData() : null;
+  
   // Return the data and functions
   return {
-    reportData: reportData?.reportData || (isUsingFallbackData ? getFallbackData()?.reportData : null),
-    archetypeData: reportData?.reportData || (isUsingFallbackData ? getFallbackData()?.reportData : null),
-    averageData: reportData?.averageData || (isUsingFallbackData ? getFallbackData()?.averageData : null),
+    reportData: reportData?.reportData || fallbackData?.reportData || null,
+    archetypeData: reportData?.reportData || fallbackData?.reportData || null,
+    averageData: reportData?.averageData || fallbackData?.averageData || null,
     isLoading,
     error: error || (queryError as Error) || null,
     debugInfo: {
