@@ -22,27 +22,27 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
   const familyName = archetypeData?.family_name || archetypeData?.familyName || 'Unknown Family';
   const shortDescription = archetypeData?.short_description || 'An archetype focused on optimizing healthcare management';
   
-  // Prepare metrics for the grid
+  // Use exact database field names to match production - no camelCase transformations
   const metrics = {
     cost: {
       name: "Total Cost PEPY",
       value: archetypeData?.["Cost_Medical & RX Paid Amount PEPY"] || 0,
-      average: averageData?.medicalRxPaidAmountPEPY || 15000
+      average: averageData?.["Cost_Medical & RX Paid Amount PEPY"] || 15000
     },
     risk: {
       name: "Risk Score",
       value: archetypeData?.["Risk_Average Risk Score"] || 0,
-      average: averageData?.averageRiskScore || 1.0
+      average: averageData?.["Risk_Average Risk Score"] || 1.0
     },
     emergency: {
       name: "ER Visits per 1K",
       value: archetypeData?.["Util_Emergency Visits per 1k Members"] || 0,
-      average: averageData?.emergencyVisitsPer1k || 150
+      average: averageData?.["Util_Emergency Visits per 1k Members"] || 150
     },
     specialist: {
       name: "Specialist Visits per 1K",
       value: archetypeData?.["Util_Specialist Visits per 1k Members"] || 0,
-      average: averageData?.specialistVisitsPer1k || 2500
+      average: averageData?.["Util_Specialist Visits per 1k Members"] || 2500
     }
   };
 

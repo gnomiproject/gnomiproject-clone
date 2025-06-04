@@ -5,13 +5,38 @@ import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
 import { ArchetypeDetailedData, ArchetypeId, FamilyId } from '@/types/archetype';
 import { getFromCache, setInCache, clearFromCache } from '@/utils/reports/reportCache';
-import { processReportData, ProcessedReportData } from '@/utils/reports/reportDataTransforms';
-import { trackReportAccess } from '@/utils/reports/accessTracking';
-import { ensureArray } from '@/utils/array/ensureArray';
 import { ensureStringArray } from '@/utils/array/ensureStringArray';
 
 // Local storage key for fallback report data
 const FALLBACK_REPORT_KEY = 'report_data_fallback';
+
+// Static average data to match production
+const STATIC_AVERAGE_DATA = {
+  archetype_id: 'All_Average',
+  archetype_name: 'Population Average',
+  "Demo_Average Age": 40,
+  "Demo_Average Family Size": 3.0,
+  "Demo_Average Employees": 5000,
+  "Demo_Average Members": 15000,
+  "Demo_Average Percent Female": 0.51,
+  "Demo_Average Salary": 75000,
+  "Demo_Average States": 10,
+  "Risk_Average Risk Score": 1.0,
+  "Cost_Medical & RX Paid Amount PMPY": 5000,
+  "Cost_Medical & RX Paid Amount PEPY": 15000,
+  "Cost_Medical Paid Amount PMPY": 4000,
+  "Cost_Medical Paid Amount PEPY": 12000,
+  "Cost_RX Paid Amount PMPY": 1000,
+  "Cost_RX Paid Amount PEPY": 3000,
+  "Cost_Avoidable ER Potential Savings PMPY": 150,
+  "Cost_Specialty RX Allowed Amount PMPM": 50,
+  "Util_Emergency Visits per 1k Members": 150,
+  "Util_PCP Visits per 1k Members": 3000,
+  "Util_Specialist Visits per 1k Members": 2500,
+  "Util_Urgent Care Visits per 1k Members": 200,
+  "Util_Telehealth Adoption": 0.15,
+  "Util_Percent of Members who are Non-Utilizers": 0.2
+};
 
 interface UseReportAccessOptions {
   archetypeId: string;
@@ -44,9 +69,9 @@ export const useReportAccess = ({
   // Query key for this report
   const queryKey = ['report-access', archetypeId, token];
   
-  // Function to fetch report data from level4_report_secure
-  const fetchReportData = useCallback(async (): Promise<ProcessedReportData> => {
-    console.log(`[useReportAccess] Fetching report data for ${archetypeId}`);
+  // Function to fetch report data from level4_deepdive_report_data (production table)
+  const fetchReportData = useCallback(async () => {
+    console.log(`[useReportAccess] Fetching report data for ${archetypeId} from level4_deepdive_report_data`);
     
     if (!archetypeId) {
       throw new Error('Missing archetype ID');
@@ -60,26 +85,15 @@ export const useReportAccess = ({
       const cachedData = getFromCache(cacheKey);
       if (cachedData) {
         console.log(`[useReportAccess] Using cached data for ${archetypeId}`);
-        
-        // Ensure key_characteristics is properly formatted in cached data
-        if (cachedData.reportData) {
-          // Create a new object with properly typed key_characteristics first
-          const keyCharacteristicsArray = ensureStringArray(cachedData.reportData?.key_characteristics) as string[];
-          cachedData.reportData = {
-            key_characteristics: keyCharacteristicsArray,
-            ...cachedData.reportData
-          };
-        }
-        
         return cachedData;
       }
     }
     
-    // For admin view or valid token, fetch the data
+    // For admin view or valid token, fetch the data from production table
     try {
-      // Fetch from level4_report_secure table
+      // Fetch from level4_deepdive_report_data table (production data source)
       const { data, error } = await supabase
-        .from('level4_report_secure')
+        .from('level4_deepdive_report_data')
         .select('*')
         .eq('archetype_id', archetypeId)
         .maybeSingle();
@@ -94,30 +108,30 @@ export const useReportAccess = ({
         throw new Error(`No report data found for ${archetypeId}`);
       }
       
-      // Convert key_characteristics to string[] before creating mappedData
+      // Minimal processing - just ensure key_characteristics is a string array
       const keyCharacteristicsArray = ensureStringArray(data.key_characteristics) as string[];
       
-      // Then create the mappedData object with explicit typing
-      const mappedData: ArchetypeDetailedData = {
+      // Create the archetype data with minimal transformation
+      const archetypeData: ArchetypeDetailedData = {
         id: data.archetype_id as ArchetypeId,
         name: data.archetype_name,
         familyId: data.family_id as FamilyId || 'unknown' as FamilyId,
-        key_characteristics: keyCharacteristicsArray, // Explicitly use the string array we prepared
+        key_characteristics: keyCharacteristicsArray,
         short_description: data.short_description,
         long_description: data.long_description,
         hexColor: data.hex_color,
         industries: data.industries,
         detailed_metrics: data.detailed_metrics,
         disease_prevalence: data.disease_prevalence,
-        // Include any additional properties from the original data
-        // but use the stringified array for key_characteristics
-        ...Object.fromEntries(
-          Object.entries(data).filter(([key]) => key !== 'key_characteristics')
-        )
+        // Include all other raw database fields without transformation
+        ...data
       };
       
-      // Process the data with async now
-      const processedData = await processReportData(mappedData);
+      // Return raw data structure without processing layers
+      const processedData = {
+        reportData: archetypeData,
+        averageData: STATIC_AVERAGE_DATA
+      };
       
       // Save to cache
       setInCache(cacheKey, processedData);
@@ -143,7 +157,7 @@ export const useReportAccess = ({
   }, [archetypeId, token, skipCache]);
   
   // Function to get fallback data from localStorage
-  const getFallbackData = useCallback((): ProcessedReportData | null => {
+  const getFallbackData = useCallback(() => {
     try {
       const fallbackData = localStorage.getItem(`${FALLBACK_REPORT_KEY}-${archetypeId}`);
       if (fallbackData) {
@@ -152,7 +166,6 @@ export const useReportAccess = ({
         
         // Ensure key_characteristics is properly formatted in fallback data
         if (parsed.reportData) {
-          // Create a new object with properly typed key_characteristics
           const keyCharacteristicsArray = ensureStringArray(parsed.reportData?.key_characteristics) as string[];
           parsed.reportData = {
             key_characteristics: keyCharacteristicsArray,
@@ -169,7 +182,7 @@ export const useReportAccess = ({
     return null;
   }, [archetypeId]);
   
-  // Use React Query for data fetching - using the meta property for error handling in v5
+  // Use React Query for data fetching
   const { 
     data: reportData, 
     isLoading, 
@@ -186,7 +199,6 @@ export const useReportAccess = ({
     retry: 1,
     retryDelay: 5000,
     meta: {
-      // Use meta property instead of onError
       onError: (error: Error) => {
         console.error('Error fetching report data:', error);
         setError(error);
@@ -238,14 +250,16 @@ export const useReportAccess = ({
   return {
     reportData: reportData?.reportData || fallbackData?.reportData || null,
     archetypeData: reportData?.reportData || fallbackData?.reportData || null,
-    averageData: reportData?.averageData || fallbackData?.averageData || null,
+    averageData: reportData?.averageData || fallbackData?.averageData || STATIC_AVERAGE_DATA,
     isLoading,
     error: error || (queryError as Error) || null,
     debugInfo: {
       ...debugInfo,
       isUsingFallbackData,
       queryKey,
-      hasError: !!error || !!queryError
+      hasError: !!error || !!queryError,
+      dataSource: 'level4_deepdive_report_data',
+      processingLayers: 'minimal'
     },
     refreshData,
     isUsingFallbackData
