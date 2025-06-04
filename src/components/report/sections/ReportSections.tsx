@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import { Section } from '@/components/shared/Section';
 import SectionTitle from '@/components/shared/SectionTitle';
@@ -26,47 +26,9 @@ const ReportSections: React.FC<ReportSectionsProps> = ({
   userData,
   averageData
 }) => {
-  // State to track when components have rendered
-  const [introRendered, setIntroRendered] = useState<boolean>(false);
-
-  // Enhanced debug logging to track rendering and data flow
-  console.log('[ReportSections] Rendering with data:', { 
-    hasUserData: !!userData,
-    hasReportData: !!reportData,
-    reportDataName: reportData?.name || reportData?.archetype_name,
-    reportDataId: reportData?.id || reportData?.archetype_id,
-    familyName: reportData?.family_name
-  });
-
-  // Check if HomeIntroduction exists and is properly imported
-  useEffect(() => {
-    console.log('[ReportSections] Component mounted');
-    
-    // Log the HomeIntroduction component to ensure it exists and is importable
-    console.log('[ReportSections] HomeIntroduction component:', {
-      component: typeof HomeIntroduction,
-      isFunction: typeof HomeIntroduction === 'function'
-    });
-    
-    // Set timeout to check if intro has rendered
-    const timer = setTimeout(() => {
-      const introSection = document.getElementById('introduction');
-      console.log('[ReportSections] Checking if intro section exists:', !!introSection);
-      setIntroRendered(!!introSection);
-      
-      // Check if the introduction content is actually visible
-      if (introSection) {
-        const welcomeCard = introSection.querySelector('[data-section="welcome-card"]');
-        console.log('[ReportSections] Welcome card exists in intro section:', !!welcomeCard);
-      }
-    }, 500);
-    
-    return () => clearTimeout(timer);
-  }, []);
-
   return (
     <>
-      {/* Introduction Section - Making sure it appears first and with explicit section class */}
+      {/* Introduction Section */}
       <ErrorBoundary>
         <Section id="introduction" className="mb-0 mt-0">
           <HomeIntroduction 
@@ -77,13 +39,12 @@ const ReportSections: React.FC<ReportSectionsProps> = ({
         </Section>
       </ErrorBoundary>
       
-      {/* Keep the rest of the sections */}
       {/* Archetype Profile Section */}
       <ErrorBoundary>
         <ArchetypeProfileSection archetypeData={reportData} />
       </ErrorBoundary>
       
-      {/* Demographics Section - Ensuring proper section ID */}
+      {/* Demographics Section */}
       <ErrorBoundary>
         <Section id="demographics">
           <DemographicsSection 
@@ -136,7 +97,7 @@ const ReportSections: React.FC<ReportSectionsProps> = ({
         </Section>
       </ErrorBoundary>
       
-      {/* Strategic Recommendations Section - Fixed with proper ID */}
+      {/* Strategic Recommendations Section */}
       <ErrorBoundary>
         <Section id="recommendations">
           <StrategicRecommendationsSection
