@@ -5,6 +5,7 @@ import SectionTitle from '@/components/shared/SectionTitle';
 import ReportIntroduction from './ReportIntroduction';
 import WelcomeCard from './introduction/WelcomeCard';
 import MetricCardsGrid from './introduction/MetricCardsGrid';
+import ExecutiveSummaryCard from './introduction/ExecutiveSummaryCard';
 import ReportDiscoveryCard from './introduction/ReportDiscoveryCard';
 
 interface HomeIntroductionProps {
@@ -21,6 +22,11 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
   const userName = userData?.name || 'Healthcare Leader';
   const familyName = archetypeData?.family_name || archetypeData?.familyName || 'Unknown Family';
   const shortDescription = archetypeData?.short_description || 'An archetype focused on optimizing healthcare management';
+  const organizationSize = userData?.exact_employee_count || userData?.assessment_result?.exactData?.employeeCount;
+  
+  // Extract executive summary and key insights
+  const executiveSummary = archetypeData?.executive_summary;
+  const keyInsights = archetypeData?.key_findings || [];
   
   // Use exact database field names to match production - no camelCase transformations
   const metrics = {
@@ -65,7 +71,7 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
         className="mt-8"
       />
       
-      {/* Welcome Card */}
+      {/* Welcome Card with enhanced information */}
       <div className="mb-6">
         <WelcomeCard 
           userName={userName}
@@ -73,10 +79,22 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
           archetypeId={archetypeId}
           matchPercentage={matchPercentage}
           secondaryArchetype={userData?.assessment_result?.secondaryArchetype?.name}
+          organizationSize={organizationSize}
         />
       </div>
       
-      {/* Key Metrics Grid */}
+      {/* Executive Summary Card */}
+      {(executiveSummary || keyInsights.length > 0) && (
+        <div className="mb-6">
+          <ExecutiveSummaryCard 
+            executiveSummary={executiveSummary}
+            archetypeName={archetypeName}
+            keyInsights={keyInsights}
+          />
+        </div>
+      )}
+      
+      {/* Key Metrics Grid with enhanced comparisons */}
       <div className="mb-8">
         <MetricCardsGrid metrics={metrics} />
       </div>
