@@ -17,17 +17,17 @@ const EnhancedDistinctiveMetrics: React.FC<EnhancedDistinctiveMetricsProps> = ({
   archetypeId,
   archetypeColor = '#6E59A5'
 }) => {
-  // Helper function to safely parse metrics with improved property handling
+  // Simplified function to parse metrics with direct property access
   const parseMetrics = () => {
-    console.log('[EnhancedDistinctiveMetrics] Raw data:', {
+    console.log('[EnhancedDistinctiveMetrics] Raw inputs:', {
       distinctiveMetrics,
       topDistinctiveMetrics,
       archetypeId
     });
 
-    // First try distinctiveMetrics prop
+    // First try distinctiveMetrics prop (array)
     if (distinctiveMetrics && Array.isArray(distinctiveMetrics) && distinctiveMetrics.length > 0) {
-      console.log('[EnhancedDistinctiveMetrics] Using distinctiveMetrics prop:', distinctiveMetrics);
+      console.log('[EnhancedDistinctiveMetrics] Using distinctiveMetrics array:', distinctiveMetrics);
       return distinctiveMetrics;
     }
     
@@ -45,11 +45,10 @@ const EnhancedDistinctiveMetrics: React.FC<EnhancedDistinctiveMetricsProps> = ({
           return [];
         }
       } else if (typeof topDistinctiveMetrics === 'object') {
-        // Handle case where it might be a single object
         parsedMetrics = [topDistinctiveMetrics];
       }
       
-      console.log('[EnhancedDistinctiveMetrics] Parsed metrics from topDistinctiveMetrics:', parsedMetrics);
+      console.log('[EnhancedDistinctiveMetrics] Using topDistinctiveMetrics:', parsedMetrics);
       return Array.isArray(parsedMetrics) ? parsedMetrics : [];
     }
     
@@ -99,31 +98,10 @@ const EnhancedDistinctiveMetrics: React.FC<EnhancedDistinctiveMetricsProps> = ({
     return `${(value * 100).toFixed(1)}%`;
   };
 
-  // Helper function to get metric value with fallback property names
-  const getMetricValue = (metric: any, propertyName: string) => {
-    // Direct property access first
-    if (metric[propertyName] !== undefined && metric[propertyName] !== null) {
-      return metric[propertyName];
-    }
-    
-    // Try common variations
-    const variations = {
-      value: ['value', 'archetype_value', 'Archetype Value'],
-      average: ['average', 'archetype_average', 'Archetype Average'],
-      difference: ['difference', 'Difference'],
-      metric: ['metric', 'Metric'],
-      category: ['category', 'Category']
-    };
-    
-    const possibleNames = variations[propertyName] || [propertyName];
-    
-    for (const name of possibleNames) {
-      if (metric[name] !== undefined && metric[name] !== null) {
-        return metric[name];
-      }
-    }
-    
-    return 0; // Default fallback
+  // Calculate percentage difference safely
+  const calculatePercentageDifference = (value: number, average: number): number => {
+    if (!value || !average || average === 0) return 0;
+    return ((value - average) / average) * 100;
   };
 
   return (
@@ -140,22 +118,23 @@ const EnhancedDistinctiveMetrics: React.FC<EnhancedDistinctiveMetricsProps> = ({
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {metrics.slice(0, 6).map((metric, index) => {
-            // Handle both property naming conventions with extensive logging
-            const metricName = getMetricValue(metric, 'metric') || 'Unknown Metric';
-            const metricValue = getMetricValue(metric, 'value');
-            const averageValue = getMetricValue(metric, 'average');
-            const difference = getMetricValue(metric, 'difference');
-            const category = getMetricValue(metric, 'category') || '';
+            // Access properties directly from the database structure
+            const metricName = metric.metric || metric.Metric || 'Unknown Metric';
+            const metricValue = metric.value ?? metric.archetype_value ?? metric['Archetype Value'] ?? 0;
+            const averageValue = metric.average ?? metric.archetype_average ?? metric['Archetype Average'] ?? 0;
+            
+            // Calculate the percentage difference
+            const percentDiff = calculatePercentageDifference(metricValue, averageValue);
+            
+            const category = metric.category || metric.Category || '';
 
-            console.log(`[EnhancedDistinctiveMetrics] Metric ${index}:`, {
+            console.log(`[EnhancedDistinctiveMetrics] Metric ${index} processed:`, {
               raw: metric,
-              parsed: {
-                metricName,
-                metricValue,
-                averageValue,
-                difference,
-                category
-              }
+              metricName,
+              metricValue,
+              averageValue,
+              percentDiff,
+              category
             });
 
             return (
@@ -164,7 +143,7 @@ const EnhancedDistinctiveMetrics: React.FC<EnhancedDistinctiveMetricsProps> = ({
                   <h4 className="font-medium text-gray-900 text-sm leading-tight">
                     {metricName}
                   </h4>
-                  {getSignificanceIcon(difference)}
+                  {getSignificanceIcon(percentDiff)}
                 </div>
                 
                 <div className="space-y-2">
@@ -190,9 +169,9 @@ const EnhancedDistinctiveMetrics: React.FC<EnhancedDistinctiveMetricsProps> = ({
                   
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Difference:</span>
-                    <span className={`font-medium ${getDifferenceColor(difference)}`}>
-                      {typeof difference === 'number' && difference !== 0
-                        ? `${difference > 0 ? '+' : ''}${(difference * 100).toFixed(1)}%`
+                    <span className={`font-medium ${getDifferenceColor(percentDiff)}`}>
+                      {percentDiff !== 0
+                        ? `${percentDiff > 0 ? '+' : ''}${percentDiff.toFixed(1)}%`
                         : 'N/A'
                       }
                     </span>

@@ -22,14 +22,8 @@ const ArchetypeProfileSectionBase: React.FC<ArchetypeProfileSectionProps> = ({ a
     hasDistinctiveMetrics: !!(archetypeData?.distinctive_metrics),
     hasTopMetrics: !!(archetypeData?.top_distinctive_metrics),
     hasKeyCharacteristics: !!(archetypeData?.key_characteristics),
-    distinctiveMetricsPreview: archetypeData?.distinctive_metrics ? 
-      (Array.isArray(archetypeData.distinctive_metrics) ? 
-        `Array with ${archetypeData.distinctive_metrics.length} items` : 
-        typeof archetypeData.distinctive_metrics) : 'Missing',
-    topMetricsPreview: archetypeData?.top_distinctive_metrics ? 
-      (Array.isArray(archetypeData.top_distinctive_metrics) ? 
-        `Array with ${archetypeData.top_distinctive_metrics.length} items` : 
-        typeof archetypeData.top_distinctive_metrics) : 'Missing'
+    distinctiveMetricsRaw: archetypeData?.distinctive_metrics,
+    topMetricsRaw: archetypeData?.top_distinctive_metrics
   });
   
   if (!archetypeData) {
@@ -48,7 +42,7 @@ const ArchetypeProfileSectionBase: React.FC<ArchetypeProfileSectionProps> = ({ a
   const archetypeBadge = archetypeId.includes('_') ? archetypeId.split('_')[0] : archetypeId;
   const archetypeColor = archetypeData.hexColor || archetypeData.hex_color || '#6E59A5';
 
-  // Helper function to safely convert distinctive_metrics
+  // Simplified function to safely convert distinctive_metrics
   const getDistinctiveMetrics = () => {
     console.log('[ArchetypeProfileSection] Processing distinctive_metrics:', {
       raw: archetypeData.distinctive_metrics,
@@ -62,14 +56,14 @@ const ArchetypeProfileSectionBase: React.FC<ArchetypeProfileSectionProps> = ({ a
     }
     
     if (Array.isArray(archetypeData.distinctive_metrics)) {
-      console.log('[ArchetypeProfileSection] distinctive_metrics is already an array:', archetypeData.distinctive_metrics);
+      console.log('[ArchetypeProfileSection] distinctive_metrics is already an array');
       return archetypeData.distinctive_metrics;
     }
     
     if (typeof archetypeData.distinctive_metrics === 'string') {
       try {
         const parsed = JSON.parse(archetypeData.distinctive_metrics);
-        console.log('[ArchetypeProfileSection] Parsed distinctive_metrics from string:', parsed);
+        console.log('[ArchetypeProfileSection] Parsed distinctive_metrics from string');
         return Array.isArray(parsed) ? parsed : [];
       } catch (error) {
         console.error('[ArchetypeProfileSection] Error parsing distinctive_metrics string:', error);
@@ -123,7 +117,7 @@ const ArchetypeProfileSectionBase: React.FC<ArchetypeProfileSectionProps> = ({ a
           archetypeColor={archetypeColor}
         />
         
-        {/* Enhanced Distinctive Metrics */}
+        {/* Enhanced Distinctive Metrics - Pass both props for maximum compatibility */}
         <EnhancedDistinctiveMetrics
           distinctiveMetrics={processedDistinctiveMetrics}
           topDistinctiveMetrics={archetypeData.top_distinctive_metrics}
