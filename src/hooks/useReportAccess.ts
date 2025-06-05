@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -115,6 +116,7 @@ export const useReportAccess = ({
         id: data.archetype_id as ArchetypeId,
         name: data.archetype_name,
         familyId: data.family_id as FamilyId || 'unknown' as FamilyId,
+        family_id: data.family_id as FamilyId || 'unknown' as FamilyId, // Explicitly type this field
         key_characteristics: ensureStringArray(data.key_characteristics) as string[],
         short_description: data.short_description,
         long_description: data.long_description,
@@ -165,7 +167,8 @@ export const useReportAccess = ({
         if (parsed.reportData) {
           parsed.reportData = {
             ...parsed.reportData,
-            key_characteristics: ensureStringArray(parsed.reportData?.key_characteristics) as string[]
+            key_characteristics: ensureStringArray(parsed.reportData?.key_characteristics) as string[],
+            family_id: parsed.reportData?.family_id as FamilyId || 'unknown' as FamilyId // Ensure this is properly typed too
           };
         }
         
