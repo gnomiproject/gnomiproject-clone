@@ -37,9 +37,9 @@ export const createDefaultAverageData = () => {
   };
 };
 
-// Simplified process function that just returns data as-is to match production
+// Enhanced process function that preserves original data structure while ensuring proper type conversion
 export const processReportData = async (data: ArchetypeDetailedData | null): Promise<ProcessedReportData> => {
-  console.log('[processReportData] Using simplified processing to match production');
+  console.log('[processReportData] Processing data with enhanced distinctive metrics handling');
   
   const averageData = createDefaultAverageData();
 
@@ -50,9 +50,41 @@ export const processReportData = async (data: ArchetypeDetailedData | null): Pro
     };
   }
 
-  // Return data without processing layers - just as production did
+  // Process distinctive metrics to ensure they're properly formatted
+  let processedDistinctiveMetrics = data.distinctive_metrics;
+  
+  if (data.distinctive_metrics) {
+    console.log('[processReportData] Processing distinctive_metrics:', {
+      type: typeof data.distinctive_metrics,
+      isArray: Array.isArray(data.distinctive_metrics),
+      length: Array.isArray(data.distinctive_metrics) ? data.distinctive_metrics.length : 'N/A'
+    });
+
+    if (typeof data.distinctive_metrics === 'string') {
+      try {
+        processedDistinctiveMetrics = JSON.parse(data.distinctive_metrics);
+        console.log('[processReportData] Parsed distinctive_metrics from string');
+      } catch (error) {
+        console.error('[processReportData] Error parsing distinctive_metrics:', error);
+        processedDistinctiveMetrics = [];
+      }
+    }
+  }
+
+  // Return data with processed distinctive metrics
+  const processedData = {
+    ...data,
+    distinctive_metrics: processedDistinctiveMetrics
+  };
+
+  console.log('[processReportData] Final processed data:', {
+    hasDistinctiveMetrics: !!(processedData.distinctive_metrics),
+    distinctiveMetricsType: typeof processedData.distinctive_metrics,
+    distinctiveMetricsLength: Array.isArray(processedData.distinctive_metrics) ? processedData.distinctive_metrics.length : 'N/A'
+  });
+
   return {
-    reportData: data,
+    reportData: processedData,
     averageData
   };
 };

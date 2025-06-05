@@ -16,16 +16,20 @@ export interface ArchetypeProfileSectionProps {
 }
 
 const ArchetypeProfileSectionBase: React.FC<ArchetypeProfileSectionProps> = ({ archetypeData }) => {
-  console.log('[ArchetypeProfileSection] Rendering focused version with data:', {
+  console.log('[ArchetypeProfileSection] Rendering with data:', {
     name: archetypeData?.name || archetypeData?.archetype_name || 'Unknown',
     hasKeyFindings: !!(archetypeData?.key_findings || archetypeData?.keyFindings),
     hasDistinctiveMetrics: !!(archetypeData?.distinctive_metrics),
     hasTopMetrics: !!(archetypeData?.top_distinctive_metrics),
     hasKeyCharacteristics: !!(archetypeData?.key_characteristics),
-    dataPreview: {
-      keyFindings: (archetypeData?.key_findings || archetypeData?.keyFindings) ? `${Array.isArray(archetypeData.key_findings || archetypeData.keyFindings) ? (archetypeData.key_findings || archetypeData.keyFindings).length : 'Unknown'} findings` : 'Missing',
-      distinctiveMetrics: archetypeData?.distinctive_metrics ? `${Array.isArray(archetypeData.distinctive_metrics) ? archetypeData.distinctive_metrics.length : 'Unknown'} metrics` : 'Missing'
-    }
+    distinctiveMetricsPreview: archetypeData?.distinctive_metrics ? 
+      (Array.isArray(archetypeData.distinctive_metrics) ? 
+        `Array with ${archetypeData.distinctive_metrics.length} items` : 
+        typeof archetypeData.distinctive_metrics) : 'Missing',
+    topMetricsPreview: archetypeData?.top_distinctive_metrics ? 
+      (Array.isArray(archetypeData.top_distinctive_metrics) ? 
+        `Array with ${archetypeData.top_distinctive_metrics.length} items` : 
+        typeof archetypeData.top_distinctive_metrics) : 'Missing'
   });
   
   if (!archetypeData) {
@@ -46,15 +50,34 @@ const ArchetypeProfileSectionBase: React.FC<ArchetypeProfileSectionProps> = ({ a
 
   // Helper function to safely convert distinctive_metrics
   const getDistinctiveMetrics = () => {
-    if (!archetypeData.distinctive_metrics) return [];
-    if (Array.isArray(archetypeData.distinctive_metrics)) return archetypeData.distinctive_metrics;
+    console.log('[ArchetypeProfileSection] Processing distinctive_metrics:', {
+      raw: archetypeData.distinctive_metrics,
+      type: typeof archetypeData.distinctive_metrics,
+      isArray: Array.isArray(archetypeData.distinctive_metrics)
+    });
+
+    if (!archetypeData.distinctive_metrics) {
+      console.log('[ArchetypeProfileSection] No distinctive_metrics found');
+      return [];
+    }
+    
+    if (Array.isArray(archetypeData.distinctive_metrics)) {
+      console.log('[ArchetypeProfileSection] distinctive_metrics is already an array:', archetypeData.distinctive_metrics);
+      return archetypeData.distinctive_metrics;
+    }
+    
     if (typeof archetypeData.distinctive_metrics === 'string') {
       try {
-        return JSON.parse(archetypeData.distinctive_metrics);
-      } catch {
+        const parsed = JSON.parse(archetypeData.distinctive_metrics);
+        console.log('[ArchetypeProfileSection] Parsed distinctive_metrics from string:', parsed);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        console.error('[ArchetypeProfileSection] Error parsing distinctive_metrics string:', error);
         return [];
       }
     }
+    
+    console.log('[ArchetypeProfileSection] distinctive_metrics is unknown type, returning empty array');
     return [];
   };
 
@@ -72,6 +95,9 @@ const ArchetypeProfileSectionBase: React.FC<ArchetypeProfileSectionProps> = ({ a
     }
     return [];
   };
+
+  const processedDistinctiveMetrics = getDistinctiveMetrics();
+  console.log('[ArchetypeProfileSection] Final processed distinctive metrics:', processedDistinctiveMetrics);
 
   return (
     <Section id="archetype-profile">
@@ -99,7 +125,7 @@ const ArchetypeProfileSectionBase: React.FC<ArchetypeProfileSectionProps> = ({ a
         
         {/* Enhanced Distinctive Metrics */}
         <EnhancedDistinctiveMetrics
-          distinctiveMetrics={getDistinctiveMetrics()}
+          distinctiveMetrics={processedDistinctiveMetrics}
           topDistinctiveMetrics={archetypeData.top_distinctive_metrics}
           archetypeId={archetypeId}
           archetypeColor={archetypeColor}

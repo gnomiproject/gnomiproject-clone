@@ -19,30 +19,65 @@ const EnhancedDistinctiveMetrics: React.FC<EnhancedDistinctiveMetricsProps> = ({
 }) => {
   // Helper function to safely parse metrics with improved property handling
   const parseMetrics = () => {
+    console.log('[EnhancedDistinctiveMetrics] Raw data:', {
+      distinctiveMetrics,
+      topDistinctiveMetrics,
+      archetypeId
+    });
+
+    // First try distinctiveMetrics prop
     if (distinctiveMetrics && Array.isArray(distinctiveMetrics) && distinctiveMetrics.length > 0) {
+      console.log('[EnhancedDistinctiveMetrics] Using distinctiveMetrics prop:', distinctiveMetrics);
       return distinctiveMetrics;
     }
     
+    // Then try topDistinctiveMetrics
     if (topDistinctiveMetrics) {
+      let parsedMetrics = [];
+      
       if (Array.isArray(topDistinctiveMetrics)) {
-        return topDistinctiveMetrics;
-      }
-      if (typeof topDistinctiveMetrics === 'string') {
+        parsedMetrics = topDistinctiveMetrics;
+      } else if (typeof topDistinctiveMetrics === 'string') {
         try {
-          return JSON.parse(topDistinctiveMetrics);
-        } catch {
+          parsedMetrics = JSON.parse(topDistinctiveMetrics);
+        } catch (error) {
+          console.error('[EnhancedDistinctiveMetrics] Error parsing topDistinctiveMetrics string:', error);
           return [];
         }
+      } else if (typeof topDistinctiveMetrics === 'object') {
+        // Handle case where it might be a single object
+        parsedMetrics = [topDistinctiveMetrics];
       }
+      
+      console.log('[EnhancedDistinctiveMetrics] Parsed metrics from topDistinctiveMetrics:', parsedMetrics);
+      return Array.isArray(parsedMetrics) ? parsedMetrics : [];
     }
     
+    console.log('[EnhancedDistinctiveMetrics] No metrics found');
     return [];
   };
 
   const metrics = parseMetrics();
 
+  console.log('[EnhancedDistinctiveMetrics] Final metrics to display:', metrics);
+
   if (metrics.length === 0) {
-    return null;
+    return (
+      <Card className="border-l-4" style={{ borderLeftColor: archetypeColor }}>
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <TrendingUp className="h-5 w-5" style={{ color: archetypeColor }} />
+            Distinctive Metrics
+          </CardTitle>
+          <p className="text-sm text-gray-600">
+            Key metrics where {archetypeId} differs significantly from the archetype average
+          </p>
+        </CardHeader>
+        <CardContent>
+          <p className="text-gray-600">No distinctive metrics available for this archetype.</p>
+        </CardContent>
+      </Card>
+    );
   }
 
   // Helper function to get the significance icon
@@ -65,8 +100,30 @@ const EnhancedDistinctiveMetrics: React.FC<EnhancedDistinctiveMetricsProps> = ({
   };
 
   // Helper function to get metric value with fallback property names
-  const getMetricValue = (metric: any, primaryKey: string, fallbackKey: string) => {
-    return metric[primaryKey] ?? metric[fallbackKey] ?? 0;
+  const getMetricValue = (metric: any, propertyName: string) => {
+    // Direct property access first
+    if (metric[propertyName] !== undefined && metric[propertyName] !== null) {
+      return metric[propertyName];
+    }
+    
+    // Try common variations
+    const variations = {
+      value: ['value', 'archetype_value', 'Archetype Value'],
+      average: ['average', 'archetype_average', 'Archetype Average'],
+      difference: ['difference', 'Difference'],
+      metric: ['metric', 'Metric'],
+      category: ['category', 'Category']
+    };
+    
+    const possibleNames = variations[propertyName] || [propertyName];
+    
+    for (const name of possibleNames) {
+      if (metric[name] !== undefined && metric[name] !== null) {
+        return metric[name];
+      }
+    }
+    
+    return 0; // Default fallback
   };
 
   return (
@@ -83,12 +140,23 @@ const EnhancedDistinctiveMetrics: React.FC<EnhancedDistinctiveMetricsProps> = ({
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {metrics.slice(0, 6).map((metric, index) => {
-            // Handle both property naming conventions
-            const metricName = metric.metric || metric.Metric || 'Unknown Metric';
-            const metricValue = getMetricValue(metric, 'value', 'archetype_value');
-            const averageValue = getMetricValue(metric, 'average', 'archetype_average');
-            const difference = getMetricValue(metric, 'difference', 'Difference');
-            const category = metric.category || metric.Category || '';
+            // Handle both property naming conventions with extensive logging
+            const metricName = getMetricValue(metric, 'metric') || 'Unknown Metric';
+            const metricValue = getMetricValue(metric, 'value');
+            const averageValue = getMetricValue(metric, 'average');
+            const difference = getMetricValue(metric, 'difference');
+            const category = getMetricValue(metric, 'category') || '';
+
+            console.log(`[EnhancedDistinctiveMetrics] Metric ${index}:`, {
+              raw: metric,
+              parsed: {
+                metricName,
+                metricValue,
+                averageValue,
+                difference,
+                category
+              }
+            });
 
             return (
               <div key={index} className="p-4 bg-gray-50 rounded-lg border">
@@ -105,7 +173,7 @@ const EnhancedDistinctiveMetrics: React.FC<EnhancedDistinctiveMetricsProps> = ({
                     <span className="font-medium">
                       {typeof metricValue === 'number' 
                         ? (metricValue < 1 ? formatPercentage(metricValue) : metricValue.toLocaleString())
-                        : 'N/A'
+                        : metricValue || 'N/A'
                       }
                     </span>
                   </div>
@@ -115,7 +183,7 @@ const EnhancedDistinctiveMetrics: React.FC<EnhancedDistinctiveMetricsProps> = ({
                     <span className="font-medium">
                       {typeof averageValue === 'number' 
                         ? (averageValue < 1 ? formatPercentage(averageValue) : averageValue.toLocaleString())
-                        : 'N/A'
+                        : averageValue || 'N/A'
                       }
                     </span>
                   </div>
@@ -123,7 +191,7 @@ const EnhancedDistinctiveMetrics: React.FC<EnhancedDistinctiveMetricsProps> = ({
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Difference:</span>
                     <span className={`font-medium ${getDifferenceColor(difference)}`}>
-                      {difference 
+                      {typeof difference === 'number' && difference !== 0
                         ? `${difference > 0 ? '+' : ''}${(difference * 100).toFixed(1)}%`
                         : 'N/A'
                       }
