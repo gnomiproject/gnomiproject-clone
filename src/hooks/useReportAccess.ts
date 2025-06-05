@@ -3,7 +3,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
-import { ArchetypeDetailedData, ArchetypeId, FamilyId } from '@/types/archetype';
+import { ArchetypeDetailedData, ArchetypeId, FamilyId, SwotAnalysis } from '@/types/archetype';
 import { getFromCache, setInCache, clearFromCache } from '@/utils/reports/reportCache';
 import { ensureStringArray } from '@/utils/array/ensureStringArray';
 
@@ -118,6 +118,7 @@ export const useReportAccess = ({
         familyId: data.family_id as FamilyId || 'unknown' as FamilyId,
         family_id: data.family_id as FamilyId || 'unknown' as FamilyId, // Explicitly type this field
         key_characteristics: ensureStringArray(data.key_characteristics) as string[],
+        swot_analysis: data.swot_analysis as SwotAnalysis, // Explicitly type this field
         short_description: data.short_description,
         long_description: data.long_description,
         hexColor: data.hex_color,
@@ -168,7 +169,8 @@ export const useReportAccess = ({
           parsed.reportData = {
             ...parsed.reportData,
             key_characteristics: ensureStringArray(parsed.reportData?.key_characteristics) as string[],
-            family_id: parsed.reportData?.family_id as FamilyId || 'unknown' as FamilyId // Ensure this is properly typed too
+            family_id: parsed.reportData?.family_id as FamilyId || 'unknown' as FamilyId, // Ensure this is properly typed too
+            swot_analysis: parsed.reportData?.swot_analysis as SwotAnalysis // Ensure this is properly typed too
           };
         }
         
