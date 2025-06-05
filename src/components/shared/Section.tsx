@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { cn } from '@/lib/utils';
 
 interface SectionProps {
   id?: string;
@@ -8,19 +7,20 @@ interface SectionProps {
   children: React.ReactNode;
 }
 
-export const Section = ({
-  id,
-  className,
-  children,
-}: SectionProps) => {
+export const Section: React.FC<SectionProps> = ({ 
+  id, 
+  className = '', 
+  children 
+}) => {
+  console.log(`[Section] Rendering section with id: ${id}`);
+  
   return (
-    <section
-      id={id}
-      className={cn('py-12', className)}
+    <section 
+      id={id} 
+      className={`w-full ${className}`}
+      style={{ minHeight: '50px' }} // Ensure section has minimum height
     >
-      <div className="container mx-auto">
-        {children}
-      </div>
+      {children}
     </section>
   );
 };

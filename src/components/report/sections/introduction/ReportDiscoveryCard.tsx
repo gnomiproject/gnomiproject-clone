@@ -1,46 +1,58 @@
 
 import React from 'react';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { ArrowRight } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Search, BarChart3, TrendingUp } from 'lucide-react';
 
 const ReportDiscoveryCard = () => {
   return (
-    <Card className="bg-slate-50 p-6 border border-slate-100">
-      <h3 className="text-xl font-semibold mb-4">What You'll Discover in This Report</h3>
-      
-      <ul className="space-y-3 mb-6">
-        <li className="flex items-start">
-          <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center mr-3 mt-0.5">
-            <span className="text-primary font-bold text-sm">1</span>
+    <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
+      <CardHeader className="pb-4">
+        <CardTitle className="flex items-center gap-2 text-lg">
+          <Search className="h-5 w-5 text-blue-600" />
+          Discover Your Report
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-blue-100">
+              <BarChart3 className="h-5 w-5 text-blue-600" />
+            </div>
+            <div>
+              <h4 className="font-medium text-gray-900">Deep Analytics</h4>
+              <p className="text-sm text-gray-600">Comprehensive metrics and insights</p>
+            </div>
           </div>
-          <span>Comprehensive analysis of your population's healthcare utilization patterns</span>
-        </li>
-        <li className="flex items-start">
-          <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center mr-3 mt-0.5">
-            <span className="text-primary font-bold text-sm">2</span>
+          
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-green-100">
+              <TrendingUp className="h-5 w-5 text-green-600" />
+            </div>
+            <div>
+              <h4 className="font-medium text-gray-900">Strategic Guidance</h4>
+              <p className="text-sm text-gray-600">Actionable recommendations</p>
+            </div>
           </div>
-          <span>Insights into cost drivers specific to your archetype</span>
-        </li>
-        <li className="flex items-start">
-          <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center mr-3 mt-0.5">
-            <span className="text-primary font-bold text-sm">3</span>
+          
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-purple-100">
+              <Search className="h-5 w-5 text-purple-600" />
+            </div>
+            <div>
+              <h4 className="font-medium text-gray-900">Industry Benchmarks</h4>
+              <p className="text-sm text-gray-600">Compare against peers</p>
+            </div>
           </div>
-          <span>Strategic recommendations tailored to your organization's profile</span>
-        </li>
-        <li className="flex items-start">
-          <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center mr-3 mt-0.5">
-            <span className="text-primary font-bold text-sm">4</span>
-          </div>
-          <span>Actionable opportunities for improving healthcare outcomes</span>
-        </li>
-      </ul>
-      
-      <div className="mt-6 flex justify-end">
-        <Button className="bg-[#46E0D3] hover:bg-[#3BC0B5] text-white">
-          Start Exploring <ArrowRight className="ml-2 h-4 w-4" />
-        </Button>
-      </div>
+        </div>
+        
+        <div className="bg-white p-4 rounded-lg border border-blue-200">
+          <p className="text-sm text-gray-700">
+            This report provides a comprehensive analysis of your organization's healthcare patterns, 
+            comparing your metrics against industry benchmarks and providing strategic recommendations 
+            for optimization and cost savings.
+          </p>
+        </div>
+      </CardContent>
     </Card>
   );
 };

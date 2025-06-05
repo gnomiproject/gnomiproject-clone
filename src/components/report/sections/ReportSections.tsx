@@ -26,16 +26,24 @@ const ReportSections: React.FC<ReportSectionsProps> = ({
   userData,
   averageData
 }) => {
+  console.log('[ReportSections] Rendering with:', {
+    hasReportData: !!reportData,
+    hasUserData: !!userData,
+    hasAverageData: !!averageData
+  });
+
   return (
     <>
-      {/* Introduction Section */}
+      {/* Introduction Section - ALWAYS RENDER FIRST */}
       <ErrorBoundary>
-        <Section id="introduction" className="mb-0 mt-0">
-          <HomeIntroduction 
-            userData={userData}
-            archetypeData={reportData}
-            averageData={averageData}
-          />
+        <Section id="introduction" className="mb-8 mt-0 bg-white">
+          <div className="min-h-[200px]">
+            <HomeIntroduction 
+              userData={userData}
+              archetypeData={reportData}
+              averageData={averageData}
+            />
+          </div>
         </Section>
       </ErrorBoundary>
       
