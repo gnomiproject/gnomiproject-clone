@@ -1,11 +1,16 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
-import { ArchetypeDetailedData, ArchetypeId, FamilyId, SwotAnalysis } from '@/types/archetype';
+import { ArchetypeDetailedData, ArchetypeId, FamilyId } from '@/types/archetype';
 import { getFromCache, setInCache, clearFromCache } from '@/utils/reports/reportCache';
 import { ensureStringArray } from '@/utils/array/ensureStringArray';
+import { 
+  convertJsonToSwotAnalysis, 
+  convertJsonToDistinctiveMetrics, 
+  convertJsonToStringArray,
+  convertJsonToStrategicRecommendations 
+} from '@/utils/typeConverters';
 
 // Local storage key for fallback report data
 const FALLBACK_REPORT_KEY = 'report_data_fallback';
@@ -69,6 +74,36 @@ export const useReportAccess = ({
   // Query key for this report
   const queryKey = ['report-access', archetypeId, token];
   
+  // Function to safely process database data into strongly-typed application data
+  const processRawData = useCallback((data: any): ArchetypeDetailedData => {
+    console.log('[useReportAccess] Processing raw data:', data);
+    
+    return {
+      // Spread all raw database fields first
+      ...data,
+      // Then override with safely converted versions
+      id: data.archetype_id as ArchetypeId,
+      name: data.archetype_name,
+      familyId: data.family_id as FamilyId || 'unknown' as FamilyId,
+      family_id: data.family_id as FamilyId || 'unknown' as FamilyId,
+      key_characteristics: convertJsonToStringArray(data.key_characteristics),
+      swot_analysis: convertJsonToSwotAnalysis(data.swot_analysis),
+      swot: convertJsonToSwotAnalysis(data.swot_analysis || data.swot),
+      strengths: convertJsonToStringArray(data.strengths),
+      weaknesses: convertJsonToStringArray(data.weaknesses),
+      opportunities: convertJsonToStringArray(data.opportunities),
+      threats: convertJsonToStringArray(data.threats),
+      distinctive_metrics: convertJsonToDistinctiveMetrics(data.distinctive_metrics),
+      strategic_recommendations: convertJsonToStrategicRecommendations(data.strategic_recommendations),
+      short_description: data.short_description,
+      long_description: data.long_description,
+      hexColor: data.hex_color,
+      industries: data.industries,
+      detailed_metrics: data.detailed_metrics,
+      disease_prevalence: data.disease_prevalence
+    };
+  }, []);
+  
   // Function to fetch report data from level4_deepdive_report_data (production table)
   const fetchReportData = useCallback(async () => {
     console.log(`[useReportAccess] Fetching report data for ${archetypeId} from level4_deepdive_report_data`);
@@ -108,24 +143,8 @@ export const useReportAccess = ({
         throw new Error(`No report data found for ${archetypeId}`);
       }
       
-      // Create the archetype data with proper type conversion - spread first, then override
-      const archetypeData: ArchetypeDetailedData = {
-        // Spread all raw database fields first
-        ...data,
-        // Then override with properly typed versions
-        id: data.archetype_id as ArchetypeId,
-        name: data.archetype_name,
-        familyId: data.family_id as FamilyId || 'unknown' as FamilyId,
-        family_id: data.family_id as FamilyId || 'unknown' as FamilyId, // Explicitly type this field
-        key_characteristics: ensureStringArray(data.key_characteristics) as string[],
-        swot_analysis: data.swot_analysis as SwotAnalysis, // Explicitly type this field
-        short_description: data.short_description,
-        long_description: data.long_description,
-        hexColor: data.hex_color,
-        industries: data.industries,
-        detailed_metrics: data.detailed_metrics,
-        disease_prevalence: data.disease_prevalence
-      };
+      // Process the data safely using our conversion utilities
+      const archetypeData = processRawData(data);
       
       // Return raw data structure without processing layers
       const processedData = {
@@ -154,7 +173,7 @@ export const useReportAccess = ({
       console.error(`[useReportAccess] Error fetching data:`, err);
       throw err;
     }
-  }, [archetypeId, token, skipCache]);
+  }, [archetypeId, token, skipCache, processRawData]);
   
   // Function to get fallback data from localStorage
   const getFallbackData = useCallback(() => {
@@ -164,14 +183,9 @@ export const useReportAccess = ({
         const parsed = JSON.parse(fallbackData);
         console.log(`[useReportAccess] Using fallback data for ${archetypeId} from ${parsed.timestamp}`);
         
-        // Ensure key_characteristics is properly formatted in fallback data - spread first, then override
+        // Safely process fallback data using our conversion utilities
         if (parsed.reportData) {
-          parsed.reportData = {
-            ...parsed.reportData,
-            key_characteristics: ensureStringArray(parsed.reportData?.key_characteristics) as string[],
-            family_id: parsed.reportData?.family_id as FamilyId || 'unknown' as FamilyId, // Ensure this is properly typed too
-            swot_analysis: parsed.reportData?.swot_analysis as SwotAnalysis // Ensure this is properly typed too
-          };
+          parsed.reportData = processRawData(parsed.reportData);
         }
         
         setIsUsingFallbackData(true);
@@ -181,7 +195,7 @@ export const useReportAccess = ({
       console.error('Error loading fallback data:', e);
     }
     return null;
-  }, [archetypeId]);
+  }, [archetypeId, processRawData]);
   
   // Use React Query for data fetching
   const { 
@@ -260,7 +274,7 @@ export const useReportAccess = ({
       queryKey,
       hasError: !!error || !!queryError,
       dataSource: 'level4_deepdive_report_data',
-      processingLayers: 'minimal'
+      processingLayers: 'safe_type_conversion'
     },
     refreshData,
     isUsingFallbackData

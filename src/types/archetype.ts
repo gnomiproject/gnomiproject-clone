@@ -1,4 +1,3 @@
-
 export type ArchetypeId = 'a1' | 'a2' | 'a3' | 'b1' | 'b2' | 'b3' | 'c1' | 'c2' | 'c3';
 export type FamilyId = 'a' | 'b' | 'c';
 
@@ -32,10 +31,10 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 
 // Define a strongly-typed SWOT structure
 export interface SwotAnalysis {
-  strengths: string[] | Json;
-  weaknesses: string[] | Json;
-  opportunities: string[] | Json;
-  threats: string[] | Json;
+  strengths: string[];
+  weaknesses: string[];
+  opportunities: string[];
+  threats: string[];
 }
 
 // Define a strongly-typed distinctive metric structure
@@ -65,18 +64,19 @@ export interface ArchetypeDetailed extends Archetype {
   }>;
 }
 
-export interface ArchetypeDetailedData {
+// Flexible interface for database raw data (allows Json types)
+export interface ArchetypeDetailedDataRaw {
   id: ArchetypeId;
   name: string;
   familyId: FamilyId;
   familyName?: string;
-  family_name?: string; // Added for compatibility with level3_report_data
+  family_name?: string;
   color?: string;
   hexColor?: string;
   short_description?: string;
   long_description?: string;
-  key_characteristics?: string[];
-  industries?: string; // Added for compatibility with level3_report_data
+  key_characteristics?: string[] | Json;
+  industries?: string;
   summary?: {
     description: string;
     keyCharacteristics: string[];
@@ -92,7 +92,7 @@ export interface ArchetypeDetailedData {
     swot: SwotAnalysis;
     strategicPriorities: any[];
     costSavings: any[];
-    successMetrics?: any[]; // Add missing property
+    successMetrics?: any[];
     riskProfile?: {
       score: string;
       comparison: string;
@@ -103,16 +103,101 @@ export interface ArchetypeDetailedData {
       }>;
     };
   };
-  // Add full compatibility with ArchetypeDetailed
   family_id?: FamilyId;
-  swot?: SwotAnalysis;
-  swot_analysis?: SwotAnalysis;
-  // Add standalone properties for SWOT analysis 
+  swot?: SwotAnalysis | Json;
+  swot_analysis?: SwotAnalysis | Json;
   strengths?: string[] | Json;
   weaknesses?: string[] | Json;
   opportunities?: string[] | Json;
   threats?: string[] | Json;
+  distinctive_metrics?: Array<DistinctiveMetric> | Json;
+  strategic_recommendations?: Array<{
+    recommendation_number: number;
+    title: string;
+    description: string;
+    metrics_references?: any[];
+  }> | Json;
+  success_metrics?: any[];
+  fullDescription?: string;
+  keyFindings?: string[];
+  archetype_id?: string;
+  archetype_name?: string;
+  top_distinctive_metrics?: DistinctiveMetric[] | string | Json;
+  detailed_metrics?: any;
+  disease_prevalence?: any;
   
+  "Demo_Average Family Size"?: number;
+  "Demo_Average Age"?: number;
+  "Demo_Average Employees"?: number;
+  "Demo_Average States"?: number;
+  "Demo_Average Percent Female"?: number;
+  "Util_Emergency Visits per 1k Members"?: number;
+  "Util_Specialist Visits per 1k Members"?: number;
+  "Util_Inpatient Admits per 1k Members"?: number;
+  "Util_Percent of Members who are Non-Utilizers"?: number;
+  "Risk_Average Risk Score"?: number;
+  "SDOH_Average SDOH"?: number;
+  "Cost_Medical & RX Paid Amount PEPY"?: number;
+  "Cost_Medical & RX Paid Amount PMPY"?: number;
+  "Cost_Avoidable ER Potential Savings PMPY"?: number;
+  "Cost_Medical Paid Amount PEPY"?: number;
+  "Cost_RX Paid Amount PEPY"?: number;
+  "Dise_Heart Disease Prevalence"?: number;
+  "Dise_Type 2 Diabetes Prevalence"?: number;
+  "Dise_Mental Health Disorder Prevalence"?: number;
+  "Dise_Substance Use Disorder Prevalence"?: number;
+  "Gaps_Diabetes RX Adherence"?: number;
+  "Gaps_Behavioral Health FU ED Visit Mental Illness"?: number;
+  "Gaps_Cancer Screening Breast"?: number;
+  "Gaps_Wellness Visit Adults"?: number;
+}
+
+// Processed interface for application use (strongly typed)
+export interface ArchetypeDetailedData {
+  id: ArchetypeId;
+  name: string;
+  familyId: FamilyId;
+  familyName?: string;
+  family_name?: string;
+  color?: string;
+  hexColor?: string;
+  short_description?: string;
+  long_description?: string;
+  key_characteristics?: string[];
+  industries?: string;
+  summary?: {
+    description: string;
+    keyCharacteristics: string[];
+  };
+  standard?: {
+    fullDescription: string;
+    keyCharacteristics: string[];
+    overview: string;
+    keyStatistics: Record<string, any>;
+    keyInsights: any[];
+  };
+  enhanced?: {
+    swot: SwotAnalysis;
+    strategicPriorities: any[];
+    costSavings: any[];
+    successMetrics?: any[];
+    riskProfile?: {
+      score: string;
+      comparison: string;
+      conditions: Array<{
+        name: string;
+        value: string;
+        barWidth: string;
+      }>;
+    };
+  };
+  family_id?: FamilyId;
+  swot?: SwotAnalysis;
+  swot_analysis?: SwotAnalysis;
+  strengths?: string[];
+  weaknesses?: string[];
+  opportunities?: string[];
+  threats?: string[];
   distinctive_metrics?: Array<DistinctiveMetric>;
   strategic_recommendations?: Array<{
     recommendation_number: number;
@@ -120,56 +205,35 @@ export interface ArchetypeDetailedData {
     description: string;
     metrics_references?: any[];
   }>;
-  
-  // Add missing property for success metrics
   success_metrics?: any[];
-  
-  // Add missing properties needed by components
   fullDescription?: string;
   keyFindings?: string[];
-  
-  // Add properties for compatibility with level4_deepdive_report_data
-  // These are the fields we need from the database tables
   archetype_id?: string;
   archetype_name?: string;
   top_distinctive_metrics?: DistinctiveMetric[] | string | Json;
-  
-  // Add new properties required by InsightsView
   detailed_metrics?: any;
   disease_prevalence?: any;
   
-  // New properties from level3_report_data with correct naming
-  // Demographics metrics
   "Demo_Average Family Size"?: number;
   "Demo_Average Age"?: number;
   "Demo_Average Employees"?: number;
   "Demo_Average States"?: number;
   "Demo_Average Percent Female"?: number;
-  
-  // Utilization metrics
   "Util_Emergency Visits per 1k Members"?: number;
   "Util_Specialist Visits per 1k Members"?: number;
   "Util_Inpatient Admits per 1k Members"?: number;
   "Util_Percent of Members who are Non-Utilizers"?: number;
-  
-  // Risk metrics
   "Risk_Average Risk Score"?: number;
   "SDOH_Average SDOH"?: number;
-  
-  // Cost metrics
   "Cost_Medical & RX Paid Amount PEPY"?: number;
   "Cost_Medical & RX Paid Amount PMPY"?: number;
   "Cost_Avoidable ER Potential Savings PMPY"?: number;
   "Cost_Medical Paid Amount PEPY"?: number;
   "Cost_RX Paid Amount PEPY"?: number;
-  
-  // Disease metrics
   "Dise_Heart Disease Prevalence"?: number;
   "Dise_Type 2 Diabetes Prevalence"?: number;
   "Dise_Mental Health Disorder Prevalence"?: number;
   "Dise_Substance Use Disorder Prevalence"?: number;
-  
-  // Care gap metrics
   "Gaps_Diabetes RX Adherence"?: number;
   "Gaps_Behavioral Health FU ED Visit Mental Illness"?: number;
   "Gaps_Cancer Screening Breast"?: number;
