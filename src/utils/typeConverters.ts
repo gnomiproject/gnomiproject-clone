@@ -1,110 +1,127 @@
+// Type definitions for better type safety
+export interface SwotAnalysis {
+  strengths: string[];
+  weaknesses: string[];
+  opportunities: string[];
+  threats: string[];
+}
 
-import { Json } from '@/integrations/supabase/types';
-import { SwotAnalysis, DistinctiveMetric } from '@/types/archetype';
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
-/**
- * Safely converts Json to SwotAnalysis with proper validation and fallbacks
- */
-export function convertJsonToSwotAnalysis(json: Json): SwotAnalysis {
-  if (!json || typeof json !== 'object' || Array.isArray(json)) {
+// Helper function to safely convert JSON to SWOT Analysis
+export const convertJsonToSwotAnalysis = (data: any): SwotAnalysis | undefined => {
+  if (!data) return undefined;
+  
+  // If it's already a proper SWOT object
+  if (typeof data === 'object' && !Array.isArray(data) && data.strengths) {
     return {
-      strengths: [],
-      weaknesses: [],
-      opportunities: [],
-      threats: []
+      strengths: convertJsonToStringArray(data.strengths) || [],
+      weaknesses: convertJsonToStringArray(data.weaknesses) || [],
+      opportunities: convertJsonToStringArray(data.opportunities) || [],
+      threats: convertJsonToStringArray(data.threats) || []
     };
   }
-
-  const obj = json as { [key: string]: Json };
   
-  return {
-    strengths: convertJsonToStringArray(obj.strengths || []),
-    weaknesses: convertJsonToStringArray(obj.weaknesses || []),
-    opportunities: convertJsonToStringArray(obj.opportunities || []),
-    threats: convertJsonToStringArray(obj.threats || [])
-  };
-}
-
-/**
- * Safely converts Json to DistinctiveMetric array with proper validation and fallbacks
- */
-export function convertJsonToDistinctiveMetrics(json: Json): DistinctiveMetric[] {
-  if (!json || !Array.isArray(json)) {
-    return [];
-  }
-
-  return json
-    .filter((item): item is { [key: string]: Json } => 
-      item && typeof item === 'object' && !Array.isArray(item)
-    )
-    .map(item => ({
-      metric: typeof item.metric === 'string' ? item.metric : '',
-      category: typeof item.category === 'string' ? item.category : '',
-      archetype_value: typeof item.archetype_value === 'number' ? item.archetype_value : 0,
-      archetype_average: typeof item.archetype_average === 'number' ? item.archetype_average : 0,
-      difference: typeof item.difference === 'number' ? item.difference : 0,
-      significance: typeof item.significance === 'string' ? item.significance : undefined
-    }));
-}
-
-/**
- * Safely converts Json to string array with proper validation and fallbacks
- */
-export function convertJsonToStringArray(json: Json): string[] {
-  if (!json) {
-    return [];
-  }
-
-  // If it's already an array
-  if (Array.isArray(json)) {
-    return json
-      .filter((item): item is string => typeof item === 'string')
-      .filter(item => item.trim().length > 0);
-  }
-
-  // If it's a string, try to parse it or split it
-  if (typeof json === 'string') {
-    // Try to parse as JSON first
+  // If it's a JSON string
+  if (typeof data === 'string') {
     try {
-      const parsed = JSON.parse(json);
-      if (Array.isArray(parsed)) {
-        return parsed
-          .filter((item): item is string => typeof item === 'string')
-          .filter(item => item.trim().length > 0);
-      }
+      const parsed = JSON.parse(data);
+      return convertJsonToSwotAnalysis(parsed);
     } catch {
-      // If JSON parsing fails, treat as single string or comma-separated
-      if (json.includes(',')) {
-        return json.split(',').map(s => s.trim()).filter(s => s.length > 0);
-      }
-      return json.trim() ? [json.trim()] : [];
+      return undefined;
     }
   }
+  
+  return undefined;
+};
 
-  return [];
-}
-
-/**
- * Safely converts Json to strategic recommendations array
- */
-export function convertJsonToStrategicRecommendations(json: Json): Array<{
-  recommendation_number: number;
-  title: string;
-  description: string;
-  metrics_references?: any[];
-}> {
-  if (!json || !Array.isArray(json)) {
-    return [];
+// Helper function to safely convert JSON to distinctive metrics array with improved property handling
+export const convertJsonToDistinctiveMetrics = (data: any): Array<any> => {
+  if (!data) return [];
+  
+  // Handle array data
+  if (Array.isArray(data)) {
+    return data.map(metric => normalizeMetricProperties(metric));
   }
+  
+  // Handle string data
+  if (typeof data === 'string') {
+    try {
+      const parsed = JSON.parse(data);
+      if (Array.isArray(parsed)) {
+        return parsed.map(metric => normalizeMetricProperties(metric));
+      }
+    } catch {
+      return [];
+    }
+  }
+  
+  // Handle object data
+  if (typeof data === 'object') {
+    return [normalizeMetricProperties(data)];
+  }
+  
+  return [];
+};
 
-  return json
-    .filter((item): item is { [key: string]: Json } => 
-      item && typeof item === 'object' && !Array.isArray(item)
-    )
-    .map((item, index) => ({
-      recommendation_number: typeof item.recommendation_number === 'number' ? item.recommendation_number : index + 1,
-      title: typeof item.title === 'string' ? item.title : '',
-      description: typeof item.description === 'string' ? item.description : '',
-      metrics_references: Array.isArray(item.metrics_references) ? item.metrics_references : []
-    }));
-}
+// Helper function to normalize metric property names for consistency
+const normalizeMetricProperties = (metric: any): any => {
+  if (!metric || typeof metric !== 'object') return metric;
+  
+  return {
+    // Keep all original properties
+    ...metric,
+    // Normalize property names - ensure both naming conventions are available
+    metric: metric.metric || metric.Metric || '',
+    category: metric.category || metric.Category || '',
+    value: metric.value ?? metric.archetype_value ?? metric['Archetype Value'] ?? 0,
+    average: metric.average ?? metric.archetype_average ?? metric['Archetype Average'] ?? 0,
+    difference: metric.difference ?? metric.Difference ?? 0,
+    significance: metric.significance || metric.Significance || '',
+    // Also keep the original property names for backward compatibility
+    archetype_value: metric.archetype_value ?? metric.value ?? metric['Archetype Value'] ?? 0,
+    archetype_average: metric.archetype_average ?? metric.average ?? metric['Archetype Average'] ?? 0
+  };
+};
+
+// Helper function to safely convert JSON to string array
+export const convertJsonToStringArray = (data: any): string[] => {
+  if (!data) return [];
+  
+  if (Array.isArray(data)) {
+    return data.filter(item => typeof item === 'string' || typeof item === 'number')
+               .map(item => String(item));
+  }
+  
+  if (typeof data === 'string') {
+    try {
+      const parsed = JSON.parse(data);
+      return convertJsonToStringArray(parsed);
+    } catch {
+      // If it's not JSON, treat as a single string or split by newlines
+      return data.split('\n').filter(Boolean);
+    }
+  }
+  
+  return [];
+};
+
+// Helper function to safely convert JSON to strategic recommendations
+export const convertJsonToStrategicRecommendations = (data: any): Array<any> => {
+  if (!data) return [];
+  
+  if (Array.isArray(data)) {
+    return data;
+  }
+  
+  if (typeof data === 'string') {
+    try {
+      const parsed = JSON.parse(data);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+  
+  return [];
+};

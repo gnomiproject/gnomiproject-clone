@@ -7,11 +7,11 @@ export interface ProcessedReportData {
   averageData: any;
 }
 
-// Static average data to match production exactly
+// Static average data updated to use "Archetype Average" terminology
 export const createDefaultAverageData = () => {
   return {
     archetype_id: 'All_Average',
-    archetype_name: 'Population Average',
+    archetype_name: 'Archetype Average',
     "Demo_Average Age": 40,
     "Demo_Average Family Size": 3.0,
     "Demo_Average Employees": 5000,
