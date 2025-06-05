@@ -119,8 +119,8 @@ export const useArchetypeDetails = (archetypeId?: ArchetypeId) => {
         distinctive_metrics: metricsData?.map(m => ({
           metric: m.metric,
           category: m.category,
-          archetype_value: m.archetype_value,
-          archetype_average: m.archetype_average,
+          value: m.archetype_value,
+          average: m.archetype_average,
           difference: m.difference,
           significance: m.significance
         })),

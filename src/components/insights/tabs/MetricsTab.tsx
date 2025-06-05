@@ -72,10 +72,10 @@ const MetricsTab = ({ archetypeData }: MetricsTabProps) => {
                       <MetricBar 
                         key={index}
                         title={metric.metric}
-                        value={metric.archetype_value}
+                        value={metric.value}
                         format={metric.metric.toLowerCase().includes('cost') ? 'currency' : 
                                (metric.metric.toLowerCase().includes('percent') ? 'percent' : 'number')}
-                        benchmark={metric.archetype_average}
+                        benchmark={metric.average}
                         tooltipText={`${metric.significance || ''} ${Math.abs(metric.difference).toFixed(1)}% ${metric.difference > 0 ? 'higher' : 'lower'} than average`}
                         color={metric.difference > 0 ? '#3b82f6' : '#10b981'}
                       />
