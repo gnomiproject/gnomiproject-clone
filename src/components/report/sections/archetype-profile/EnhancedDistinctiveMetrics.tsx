@@ -17,7 +17,7 @@ const EnhancedDistinctiveMetrics: React.FC<EnhancedDistinctiveMetricsProps> = ({
   archetypeId,
   archetypeColor = '#6E59A5'
 }) => {
-  // Simplified function to parse metrics with direct property access
+  // Enhanced function to parse metrics with proper property prioritization
   const parseMetrics = () => {
     console.log('[EnhancedDistinctiveMetrics] Raw inputs:', {
       distinctiveMetrics,
@@ -25,13 +25,13 @@ const EnhancedDistinctiveMetrics: React.FC<EnhancedDistinctiveMetricsProps> = ({
       archetypeId
     });
 
-    // First try distinctiveMetrics prop (array)
+    // First prioritize distinctiveMetrics prop (should contain parsed array from database)
     if (distinctiveMetrics && Array.isArray(distinctiveMetrics) && distinctiveMetrics.length > 0) {
       console.log('[EnhancedDistinctiveMetrics] Using distinctiveMetrics array:', distinctiveMetrics);
       return distinctiveMetrics;
     }
     
-    // Then try topDistinctiveMetrics
+    // Then try topDistinctiveMetrics as fallback
     if (topDistinctiveMetrics) {
       let parsedMetrics = [];
       
@@ -118,8 +118,10 @@ const EnhancedDistinctiveMetrics: React.FC<EnhancedDistinctiveMetricsProps> = ({
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {metrics.slice(0, 6).map((metric, index) => {
-            // Access properties directly from the database structure
+            // Enhanced property access with comprehensive fallbacks and prioritization
             const metricName = metric.metric || metric.Metric || 'Unknown Metric';
+            
+            // Prioritize standard property names: value/average first, then archetype_value/archetype_average
             const metricValue = metric.value ?? metric.archetype_value ?? metric['Archetype Value'] ?? 0;
             const averageValue = metric.average ?? metric.archetype_average ?? metric['Archetype Average'] ?? 0;
             

@@ -50,9 +50,15 @@ export const processReportData = async (data: ArchetypeDetailedData | null): Pro
     };
   }
 
-  // Process distinctive metrics with more robust handling
-  let processedDistinctiveMetrics = data.distinctive_metrics;
+  // Process distinctive metrics with robust handling and prioritization
+  let processedDistinctiveMetrics = [];
   
+  console.log('[processReportData] Raw distinctive_metrics:', {
+    distinctive_metrics: data.distinctive_metrics,
+    top_distinctive_metrics: data.top_distinctive_metrics
+  });
+
+  // First try distinctive_metrics (primary source)
   if (data.distinctive_metrics) {
     console.log('[processReportData] Processing distinctive_metrics:', {
       type: typeof data.distinctive_metrics,
@@ -60,29 +66,31 @@ export const processReportData = async (data: ArchetypeDetailedData | null): Pro
       raw: data.distinctive_metrics
     });
 
-    if (typeof data.distinctive_metrics === 'string') {
+    if (Array.isArray(data.distinctive_metrics)) {
+      processedDistinctiveMetrics = data.distinctive_metrics;
+      console.log('[processReportData] Using distinctive_metrics array directly');
+    } else if (typeof data.distinctive_metrics === 'string') {
       try {
         processedDistinctiveMetrics = JSON.parse(data.distinctive_metrics);
-        console.log('[processReportData] Parsed distinctive_metrics from string:', processedDistinctiveMetrics);
+        console.log('[processReportData] Parsed distinctive_metrics from string');
       } catch (error) {
         console.error('[processReportData] Error parsing distinctive_metrics:', error);
-        processedDistinctiveMetrics = [];
       }
-    } else if (Array.isArray(data.distinctive_metrics)) {
-      console.log('[processReportData] distinctive_metrics is already an array');
-      processedDistinctiveMetrics = data.distinctive_metrics;
     }
   }
 
-  // Process top_distinctive_metrics similarly
-  let processedTopDistinctiveMetrics = data.top_distinctive_metrics;
-  
-  if (data.top_distinctive_metrics && typeof data.top_distinctive_metrics === 'string') {
-    try {
-      processedTopDistinctiveMetrics = JSON.parse(data.top_distinctive_metrics);
-      console.log('[processReportData] Parsed top_distinctive_metrics from string');
-    } catch (error) {
-      console.error('[processReportData] Error parsing top_distinctive_metrics:', error);
+  // If no distinctive_metrics, try top_distinctive_metrics as fallback
+  if (processedDistinctiveMetrics.length === 0 && data.top_distinctive_metrics) {
+    console.log('[processReportData] Falling back to top_distinctive_metrics');
+    
+    if (Array.isArray(data.top_distinctive_metrics)) {
+      processedDistinctiveMetrics = data.top_distinctive_metrics;
+    } else if (typeof data.top_distinctive_metrics === 'string') {
+      try {
+        processedDistinctiveMetrics = JSON.parse(data.top_distinctive_metrics);
+      } catch (error) {
+        console.error('[processReportData] Error parsing top_distinctive_metrics:', error);
+      }
     }
   }
 
@@ -90,14 +98,15 @@ export const processReportData = async (data: ArchetypeDetailedData | null): Pro
   const processedData = {
     ...data,
     distinctive_metrics: processedDistinctiveMetrics,
-    top_distinctive_metrics: processedTopDistinctiveMetrics
+    top_distinctive_metrics: data.top_distinctive_metrics
   };
 
   console.log('[processReportData] Final processed data:', {
     hasDistinctiveMetrics: !!(processedData.distinctive_metrics),
     hasTopDistinctiveMetrics: !!(processedData.top_distinctive_metrics),
     distinctiveMetricsType: typeof processedData.distinctive_metrics,
-    distinctiveMetricsLength: Array.isArray(processedData.distinctive_metrics) ? processedData.distinctive_metrics.length : 'N/A'
+    distinctiveMetricsLength: Array.isArray(processedData.distinctive_metrics) ? processedData.distinctive_metrics.length : 'N/A',
+    distinctiveMetricsFirst3: Array.isArray(processedData.distinctive_metrics) ? processedData.distinctive_metrics.slice(0, 3) : 'N/A'
   });
 
   return {

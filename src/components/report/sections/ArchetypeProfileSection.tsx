@@ -42,7 +42,7 @@ const ArchetypeProfileSectionBase: React.FC<ArchetypeProfileSectionProps> = ({ a
   const archetypeBadge = archetypeId.includes('_') ? archetypeId.split('_')[0] : archetypeId;
   const archetypeColor = archetypeData.hexColor || archetypeData.hex_color || '#6E59A5';
 
-  // Simplified function to safely convert distinctive_metrics
+  // Enhanced function to safely convert distinctive_metrics with priority handling
   const getDistinctiveMetrics = () => {
     console.log('[ArchetypeProfileSection] Processing distinctive_metrics:', {
       raw: archetypeData.distinctive_metrics,
@@ -50,28 +50,43 @@ const ArchetypeProfileSectionBase: React.FC<ArchetypeProfileSectionProps> = ({ a
       isArray: Array.isArray(archetypeData.distinctive_metrics)
     });
 
-    if (!archetypeData.distinctive_metrics) {
-      console.log('[ArchetypeProfileSection] No distinctive_metrics found');
-      return [];
-    }
-    
-    if (Array.isArray(archetypeData.distinctive_metrics)) {
-      console.log('[ArchetypeProfileSection] distinctive_metrics is already an array');
-      return archetypeData.distinctive_metrics;
-    }
-    
-    if (typeof archetypeData.distinctive_metrics === 'string') {
-      try {
-        const parsed = JSON.parse(archetypeData.distinctive_metrics);
-        console.log('[ArchetypeProfileSection] Parsed distinctive_metrics from string');
-        return Array.isArray(parsed) ? parsed : [];
-      } catch (error) {
-        console.error('[ArchetypeProfileSection] Error parsing distinctive_metrics string:', error);
-        return [];
+    // Priority 1: distinctive_metrics
+    if (archetypeData.distinctive_metrics) {
+      if (Array.isArray(archetypeData.distinctive_metrics)) {
+        console.log('[ArchetypeProfileSection] distinctive_metrics is already an array');
+        return archetypeData.distinctive_metrics;
+      }
+      
+      if (typeof archetypeData.distinctive_metrics === 'string') {
+        try {
+          const parsed = JSON.parse(archetypeData.distinctive_metrics);
+          console.log('[ArchetypeProfileSection] Parsed distinctive_metrics from string');
+          return Array.isArray(parsed) ? parsed : [];
+        } catch (error) {
+          console.error('[ArchetypeProfileSection] Error parsing distinctive_metrics string:', error);
+        }
       }
     }
     
-    console.log('[ArchetypeProfileSection] distinctive_metrics is unknown type, returning empty array');
+    // Priority 2: top_distinctive_metrics as fallback
+    if (archetypeData.top_distinctive_metrics) {
+      console.log('[ArchetypeProfileSection] Falling back to top_distinctive_metrics');
+      
+      if (Array.isArray(archetypeData.top_distinctive_metrics)) {
+        return archetypeData.top_distinctive_metrics;
+      }
+      
+      if (typeof archetypeData.top_distinctive_metrics === 'string') {
+        try {
+          const parsed = JSON.parse(archetypeData.top_distinctive_metrics);
+          return Array.isArray(parsed) ? parsed : [];
+        } catch (error) {
+          console.error('[ArchetypeProfileSection] Error parsing top_distinctive_metrics string:', error);
+        }
+      }
+    }
+    
+    console.log('[ArchetypeProfileSection] No distinctive metrics found, returning empty array');
     return [];
   };
 
@@ -117,7 +132,7 @@ const ArchetypeProfileSectionBase: React.FC<ArchetypeProfileSectionProps> = ({ a
           archetypeColor={archetypeColor}
         />
         
-        {/* Enhanced Distinctive Metrics - Pass both props for maximum compatibility */}
+        {/* Enhanced Distinctive Metrics - Pass processed array directly */}
         <EnhancedDistinctiveMetrics
           distinctiveMetrics={processedDistinctiveMetrics}
           topDistinctiveMetrics={archetypeData.top_distinctive_metrics}

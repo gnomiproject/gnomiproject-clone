@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -15,10 +16,10 @@ import {
 // Local storage key for fallback report data
 const FALLBACK_REPORT_KEY = 'report_data_fallback';
 
-// Static average data to match production
+// Static average data updated to use "Archetype Average" terminology
 const STATIC_AVERAGE_DATA = {
   archetype_id: 'All_Average',
-  archetype_name: 'Population Average',
+  archetype_name: 'Archetype Average',
   "Demo_Average Age": 40,
   "Demo_Average Family Size": 3.0,
   "Demo_Average Employees": 5000,
@@ -143,8 +144,15 @@ export const useReportAccess = ({
         throw new Error(`No report data found for ${archetypeId}`);
       }
       
+      console.log(`[useReportAccess] Raw data from database:`, {
+        distinctive_metrics: data.distinctive_metrics,
+        top_distinctive_metrics: data.top_distinctive_metrics
+      });
+      
       // Process the data safely using our conversion utilities
       const archetypeData = processRawData(data);
+      
+      console.log(`[useReportAccess] Processed distinctive_metrics:`, archetypeData.distinctive_metrics);
       
       // Return raw data structure without processing layers
       const processedData = {
