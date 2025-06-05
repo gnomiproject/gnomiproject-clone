@@ -3,7 +3,7 @@ import { Section } from '@/components/shared/Section';
 import ReportDebugTools from '../ReportDebugTools';
 
 // Import section components directly without lazy loading
-import ReportIntroduction from '../sections/ReportIntroduction';
+import HomeIntroduction from '../sections/HomeIntroduction';
 import ArchetypeProfile from '../sections/ArchetypeProfile';
 import DemographicsSection from '../sections/DemographicsSection';
 import UtilizationPatterns from '../sections/UtilizationPatterns';
@@ -77,16 +77,20 @@ const ReportBody: React.FC<ReportBodyProps> = ({
 
   return (
     <div className="max-w-5xl mx-auto px-4 print:px-8">
-      {/* Sections in the reordered sequence - all loaded up front */}
+      {/* Enhanced Introduction section using HomeIntroduction */}
       <Section id="introduction">
-        <ReportIntroduction 
-          userData={userData} 
-          reportData={reportData}
-          archetypeId={reportData?.archetype_id || reportData?.id}
-          archetypeName={reportData?.name || reportData?.archetype_name}
-          familyName={reportData?.family_name}
-          shortDescription={reportData?.short_description}
-        />
+        {sectionErrors['introduction'] ? (
+          <div className="py-8 px-4 border border-red-200 bg-red-50 rounded-lg">
+            <h3 className="text-lg font-medium text-red-800">Error Loading Introduction</h3>
+            <p className="text-red-700 mt-2">{sectionErrors['introduction']}</p>
+          </div>
+        ) : (
+          <HomeIntroduction 
+            userData={userData} 
+            archetypeData={reportData}
+            averageData={averageData}
+          />
+        )}
       </Section>
       
       <Section id="archetype-profile">
@@ -99,6 +103,7 @@ const ReportBody: React.FC<ReportBodyProps> = ({
           <ArchetypeProfile reportData={reportData} />
         )}
       </Section>
+      
       
       <Section id="demographics">
         {sectionErrors['demographics'] ? (
