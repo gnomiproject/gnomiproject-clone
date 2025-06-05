@@ -22,10 +22,10 @@ const ArchetypeProfileBase: React.FC<ArchetypeProfileProps> = ({ archetypeData, 
   console.log('[ArchetypeProfile] Rendering enhanced version with data:', {
     hasData: !!data,
     name: data?.name || data?.archetype_name || 'Unknown',
-    hasExecutiveSummary: !!data?.executive_summary,
-    hasKeyFindings: !!data?.key_findings,
-    hasDistinctiveMetrics: !!data?.distinctive_metrics,
-    hasStrategicRecommendations: !!data?.strategic_recommendations
+    hasExecutiveSummary: !!(data?.executive_summary),
+    hasKeyFindings: !!(data?.key_findings || data?.keyFindings),
+    hasDistinctiveMetrics: !!(data?.distinctive_metrics),
+    hasStrategicRecommendations: !!(data?.strategic_recommendations)
   });
 
   if (!data) {
@@ -43,6 +43,35 @@ const ArchetypeProfileBase: React.FC<ArchetypeProfileProps> = ({ archetypeData, 
   const archetypeColor = data.hexColor || data.hex_color || '#6E59A5';
   const archetypeId = data.id || data.archetype_id || '';
   const archetypeBadge = archetypeId.includes('_') ? archetypeId.split('_')[0] : archetypeId;
+  
+  // Helper function to safely convert distinctive_metrics
+  const getDistinctiveMetrics = () => {
+    if (!data.distinctive_metrics) return [];
+    if (Array.isArray(data.distinctive_metrics)) return data.distinctive_metrics;
+    if (typeof data.distinctive_metrics === 'string') {
+      try {
+        return JSON.parse(data.distinctive_metrics);
+      } catch {
+        return [];
+      }
+    }
+    return [];
+  };
+
+  // Helper function to get key findings
+  const getKeyFindings = () => {
+    const findings = data.key_findings || data.keyFindings;
+    if (!findings) return [];
+    if (Array.isArray(findings)) return findings;
+    if (typeof findings === 'string') {
+      try {
+        return JSON.parse(findings);
+      } catch {
+        return [];
+      }
+    }
+    return [];
+  };
   
   return (
     <div className="space-y-6">
@@ -92,13 +121,13 @@ const ArchetypeProfileBase: React.FC<ArchetypeProfileProps> = ({ archetypeData, 
 
       {/* Key Findings */}
       <KeyFindingsSection
-        keyFindings={data.key_findings}
+        keyFindings={getKeyFindings()}
         archetypeColor={archetypeColor}
       />
 
       {/* Enhanced Distinctive Metrics */}
       <EnhancedDistinctiveMetrics
-        distinctiveMetrics={data.distinctive_metrics}
+        distinctiveMetrics={getDistinctiveMetrics()}
         topDistinctiveMetrics={data.top_distinctive_metrics}
         archetypeId={archetypeId}
         archetypeColor={archetypeColor}

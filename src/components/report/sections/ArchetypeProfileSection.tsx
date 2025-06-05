@@ -20,14 +20,14 @@ export interface ArchetypeProfileSectionProps {
 const ArchetypeProfileSectionBase: React.FC<ArchetypeProfileSectionProps> = ({ archetypeData }) => {
   console.log('[ArchetypeProfileSection] Rendering with enhanced data:', {
     name: archetypeData?.name || archetypeData?.archetype_name || 'Unknown',
-    hasExecutiveSummary: !!archetypeData?.executive_summary,
-    hasKeyFindings: !!archetypeData?.key_findings,
-    hasDistinctiveMetrics: !!archetypeData?.distinctive_metrics,
-    hasTopMetrics: !!archetypeData?.top_distinctive_metrics,
-    hasStrategicRecommendations: !!archetypeData?.strategic_recommendations,
+    hasExecutiveSummary: !!(archetypeData?.executive_summary),
+    hasKeyFindings: !!(archetypeData?.key_findings || archetypeData?.keyFindings),
+    hasDistinctiveMetrics: !!(archetypeData?.distinctive_metrics),
+    hasTopMetrics: !!(archetypeData?.top_distinctive_metrics),
+    hasStrategicRecommendations: !!(archetypeData?.strategic_recommendations),
     dataPreview: {
       executiveSummary: archetypeData?.executive_summary ? 'Present' : 'Missing',
-      keyFindings: archetypeData?.key_findings ? `${Array.isArray(archetypeData.key_findings) ? archetypeData.key_findings.length : 'Unknown'} findings` : 'Missing',
+      keyFindings: (archetypeData?.key_findings || archetypeData?.keyFindings) ? `${Array.isArray(archetypeData.key_findings || archetypeData.keyFindings) ? (archetypeData.key_findings || archetypeData.keyFindings).length : 'Unknown'} findings` : 'Missing',
       distinctiveMetrics: archetypeData?.distinctive_metrics ? `${Array.isArray(archetypeData.distinctive_metrics) ? archetypeData.distinctive_metrics.length : 'Unknown'} metrics` : 'Missing'
     }
   });
@@ -48,6 +48,35 @@ const ArchetypeProfileSectionBase: React.FC<ArchetypeProfileSectionProps> = ({ a
   const archetypeBadge = archetypeId.includes('_') ? archetypeId.split('_')[0] : archetypeId;
   const archetypeColor = archetypeData.hexColor || archetypeData.hex_color || '#6E59A5';
   const archetypeName = archetypeData.name || archetypeData.archetype_name || 'Unknown Archetype';
+
+  // Helper function to safely convert distinctive_metrics
+  const getDistinctiveMetrics = () => {
+    if (!archetypeData.distinctive_metrics) return [];
+    if (Array.isArray(archetypeData.distinctive_metrics)) return archetypeData.distinctive_metrics;
+    if (typeof archetypeData.distinctive_metrics === 'string') {
+      try {
+        return JSON.parse(archetypeData.distinctive_metrics);
+      } catch {
+        return [];
+      }
+    }
+    return [];
+  };
+
+  // Helper function to get key findings
+  const getKeyFindings = () => {
+    const findings = archetypeData.key_findings || archetypeData.keyFindings;
+    if (!findings) return [];
+    if (Array.isArray(findings)) return findings;
+    if (typeof findings === 'string') {
+      try {
+        return JSON.parse(findings);
+      } catch {
+        return [];
+      }
+    }
+    return [];
+  };
 
   return (
     <Section id="archetype-profile">
@@ -76,13 +105,13 @@ const ArchetypeProfileSectionBase: React.FC<ArchetypeProfileSectionProps> = ({ a
         
         {/* Key Findings - New component */}
         <KeyFindingsSection
-          keyFindings={archetypeData.key_findings}
+          keyFindings={getKeyFindings()}
           archetypeColor={archetypeColor}
         />
         
         {/* Enhanced Distinctive Metrics - Replaces the old component */}
         <EnhancedDistinctiveMetrics
-          distinctiveMetrics={archetypeData.distinctive_metrics}
+          distinctiveMetrics={getDistinctiveMetrics()}
           topDistinctiveMetrics={archetypeData.top_distinctive_metrics}
           archetypeId={archetypeId}
           archetypeColor={archetypeColor}

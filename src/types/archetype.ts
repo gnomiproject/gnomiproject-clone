@@ -73,6 +73,7 @@ export interface ArchetypeDetailedDataRaw {
   family_name?: string;
   color?: string;
   hexColor?: string;
+  hex_color?: string;
   short_description?: string;
   long_description?: string;
   key_characteristics?: string[] | Json;
@@ -120,6 +121,8 @@ export interface ArchetypeDetailedDataRaw {
   success_metrics?: any[];
   fullDescription?: string;
   keyFindings?: string[];
+  key_findings?: string[] | Json;
+  executive_summary?: string;
   archetype_id?: string;
   archetype_name?: string;
   top_distinctive_metrics?: DistinctiveMetric[] | string | Json;
@@ -161,6 +164,7 @@ export interface ArchetypeDetailedData {
   family_name?: string;
   color?: string;
   hexColor?: string;
+  hex_color?: string;
   short_description?: string;
   long_description?: string;
   key_characteristics?: string[];
@@ -208,6 +212,8 @@ export interface ArchetypeDetailedData {
   success_metrics?: any[];
   fullDescription?: string;
   keyFindings?: string[];
+  key_findings?: string[];
+  executive_summary?: string;
   archetype_id?: string;
   archetype_name?: string;
   top_distinctive_metrics?: DistinctiveMetric[] | string | Json;
