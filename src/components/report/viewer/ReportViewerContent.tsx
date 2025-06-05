@@ -81,6 +81,7 @@ const ReportViewerContent: React.FC<ReportViewerContentProps> = ({
   // Use provided or fetched data
   const reportData = providedReportData || fetchedReportData;
   const userData = providedUserData || fetchedUserData;
+  const averageData = providedAverageData;
   const reportLoading = providedReportLoading !== undefined ? providedReportLoading : reportDataLoading;
   const userDataLoading = providedUserDataLoading !== undefined ? providedUserDataLoading : userDataFetchLoading;
   const reportError = providedReportError || reportDataError;
@@ -237,6 +238,8 @@ const ReportViewerContent: React.FC<ReportViewerContentProps> = ({
         <ReportViewer
           archetypeId={archetypeId}
           reportData={reportData}
+          userData={userData}
+          averageData={averageData}
           showDiagnostics={showDiagnostics}
           toggleDiagnostics={toggleDiagnostics}
           showDebugData={showDebugData}

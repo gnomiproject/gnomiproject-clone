@@ -7,6 +7,8 @@ import { Eye, EyeOff, RefreshCw } from 'lucide-react';
 interface ReportViewerProps {
   archetypeId: string;
   reportData: any;
+  userData?: any;
+  averageData?: any;
   showDiagnostics: boolean;
   toggleDiagnostics: () => void;
   showDebugData: boolean;
@@ -18,6 +20,8 @@ interface ReportViewerProps {
 const ReportViewer: React.FC<ReportViewerProps> = ({
   archetypeId,
   reportData,
+  userData,
+  averageData,
   showDiagnostics,
   toggleDiagnostics,
   showDebugData,
@@ -30,6 +34,8 @@ const ReportViewer: React.FC<ReportViewerProps> = ({
   // Add logging for debugging
   console.log('[ReportViewer] Rendering with data:', {
     hasData: !!reportData,
+    hasUserData: !!userData,
+    hasAverageData: !!averageData,
     archetypeId,
     isInsightsReport,
     isAdminView,
@@ -87,6 +93,8 @@ const ReportViewer: React.FC<ReportViewerProps> = ({
       {/* Main Report Container */}
       <ReportContainer 
         reportData={reportData}
+        userData={userData}
+        averageData={averageData}
         isAdminView={isAdminView}
       />
     </div>
