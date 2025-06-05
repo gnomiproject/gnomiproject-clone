@@ -113,7 +113,7 @@ export const useReportAccess = ({
         id: data.archetype_id as ArchetypeId,
         name: data.archetype_name,
         familyId: data.family_id as FamilyId || 'unknown' as FamilyId,
-        key_characteristics: ensureStringArray(data.key_characteristics),
+        key_characteristics: ensureStringArray(data.key_characteristics) as string[],
         short_description: data.short_description,
         long_description: data.long_description,
         hexColor: data.hex_color,
@@ -165,7 +165,7 @@ export const useReportAccess = ({
         if (parsed.reportData) {
           parsed.reportData = {
             ...parsed.reportData,
-            key_characteristics: ensureStringArray(parsed.reportData?.key_characteristics)
+            key_characteristics: ensureStringArray(parsed.reportData?.key_characteristics) as string[]
           };
         }
         
