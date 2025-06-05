@@ -17,8 +17,8 @@ const EnhancedDistinctiveMetrics: React.FC<EnhancedDistinctiveMetricsProps> = ({
   archetypeId,
   archetypeColor = '#6E59A5'
 }) => {
-  // Enhanced function to parse metrics with proper property prioritization
-  const parseMetrics = () => {
+  // SIMPLIFIED function to get metrics - use database property names directly
+  const getMetrics = () => {
     console.log('[EnhancedDistinctiveMetrics] Raw inputs:', {
       distinctiveMetrics,
       topDistinctiveMetrics,
@@ -56,7 +56,7 @@ const EnhancedDistinctiveMetrics: React.FC<EnhancedDistinctiveMetricsProps> = ({
     return [];
   };
 
-  const metrics = parseMetrics();
+  const metrics = getMetrics();
 
   console.log('[EnhancedDistinctiveMetrics] Final metrics to display:', metrics);
 
@@ -118,18 +118,15 @@ const EnhancedDistinctiveMetrics: React.FC<EnhancedDistinctiveMetricsProps> = ({
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {metrics.slice(0, 6).map((metric, index) => {
-            // Enhanced property access with comprehensive fallbacks and prioritization
-            const metricName = metric.metric || metric.Metric || 'Unknown Metric';
-            
-            // Prioritize standard property names: value/average first, then archetype_value/archetype_average
-            const metricValue = metric.value ?? metric.archetype_value ?? metric['Archetype Value'] ?? 0;
-            const averageValue = metric.average ?? metric.archetype_average ?? metric['Archetype Average'] ?? 0;
+            // SIMPLIFIED property access - use database property names directly
+            const metricName = metric.metric || 'Unknown Metric';
+            const metricValue = metric.value || 0;
+            const averageValue = metric.average || 0;
+            const category = metric.category || '';
             
             // Calculate the percentage difference
             const percentDiff = calculatePercentageDifference(metricValue, averageValue);
             
-            const category = metric.category || metric.Category || '';
-
             console.log(`[EnhancedDistinctiveMetrics] Metric ${index} processed:`, {
               raw: metric,
               metricName,

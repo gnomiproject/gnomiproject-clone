@@ -37,12 +37,12 @@ export interface SwotAnalysis {
   threats: string[];
 }
 
-// Define a strongly-typed distinctive metric structure
+// Define a strongly-typed distinctive metric structure - FIXED to match database schema
 export interface DistinctiveMetric {
   metric: string;
   category: string;
-  archetype_value: number;
-  archetype_average: number;
+  value: number;          // Changed from archetype_value to match database
+  average: number;        // Changed from archetype_average to match database
   difference: number;
   significance?: string;
 }

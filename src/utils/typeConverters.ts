@@ -1,3 +1,4 @@
+
 // Type definitions for better type safety
 export interface SwotAnalysis {
   strengths: string[];
@@ -35,13 +36,13 @@ export const convertJsonToSwotAnalysis = (data: any): SwotAnalysis | undefined =
   return undefined;
 };
 
-// Helper function to safely convert JSON to distinctive metrics array with improved property handling
+// Helper function to safely convert JSON to distinctive metrics array - SIMPLIFIED
 export const convertJsonToDistinctiveMetrics = (data: any): Array<any> => {
   if (!data) return [];
   
-  // Handle array data
+  // Handle array data - no property normalization needed since database is consistent
   if (Array.isArray(data)) {
-    return data.map(metric => normalizeMetricProperties(metric));
+    return data;
   }
   
   // Handle string data
@@ -49,7 +50,7 @@ export const convertJsonToDistinctiveMetrics = (data: any): Array<any> => {
     try {
       const parsed = JSON.parse(data);
       if (Array.isArray(parsed)) {
-        return parsed.map(metric => normalizeMetricProperties(metric));
+        return parsed;
       }
     } catch {
       return [];
@@ -58,30 +59,10 @@ export const convertJsonToDistinctiveMetrics = (data: any): Array<any> => {
   
   // Handle object data
   if (typeof data === 'object') {
-    return [normalizeMetricProperties(data)];
+    return [data];
   }
   
   return [];
-};
-
-// Helper function to normalize metric property names for consistency
-const normalizeMetricProperties = (metric: any): any => {
-  if (!metric || typeof metric !== 'object') return metric;
-  
-  return {
-    // Keep all original properties
-    ...metric,
-    // Normalize property names - ensure both naming conventions are available
-    metric: metric.metric || metric.Metric || '',
-    category: metric.category || metric.Category || '',
-    value: metric.value ?? metric.archetype_value ?? metric['Archetype Value'] ?? 0,
-    average: metric.average ?? metric.archetype_average ?? metric['Archetype Average'] ?? 0,
-    difference: metric.difference ?? metric.Difference ?? 0,
-    significance: metric.significance || metric.Significance || '',
-    // Also keep the original property names for backward compatibility
-    archetype_value: metric.archetype_value ?? metric.value ?? metric['Archetype Value'] ?? 0,
-    archetype_average: metric.archetype_average ?? metric.average ?? metric['Archetype Average'] ?? 0
-  };
 };
 
 // Helper function to safely convert JSON to string array

@@ -37,9 +37,9 @@ export const createDefaultAverageData = () => {
   };
 };
 
-// Enhanced process function to ensure distinctive metrics are properly parsed
+// SIMPLIFIED process function - database schema is consistent
 export const processReportData = async (data: ArchetypeDetailedData | null): Promise<ProcessedReportData> => {
-  console.log('[processReportData] Processing data with enhanced distinctive metrics handling');
+  console.log('[processReportData] Processing data with simplified handling');
   
   const averageData = createDefaultAverageData();
 
@@ -50,22 +50,13 @@ export const processReportData = async (data: ArchetypeDetailedData | null): Pro
     };
   }
 
-  // Process distinctive metrics with robust handling and prioritization
+  // Process distinctive metrics - simplified since database uses consistent property names
   let processedDistinctiveMetrics = [];
   
-  console.log('[processReportData] Raw distinctive_metrics:', {
-    distinctive_metrics: data.distinctive_metrics,
-    top_distinctive_metrics: data.top_distinctive_metrics
-  });
+  console.log('[processReportData] Raw distinctive_metrics:', data.distinctive_metrics);
 
-  // First try distinctive_metrics (primary source)
+  // Directly use distinctive_metrics since it should have correct property names (value/average)
   if (data.distinctive_metrics) {
-    console.log('[processReportData] Processing distinctive_metrics:', {
-      type: typeof data.distinctive_metrics,
-      isArray: Array.isArray(data.distinctive_metrics),
-      raw: data.distinctive_metrics
-    });
-
     if (Array.isArray(data.distinctive_metrics)) {
       processedDistinctiveMetrics = data.distinctive_metrics;
       console.log('[processReportData] Using distinctive_metrics array directly');
@@ -79,35 +70,13 @@ export const processReportData = async (data: ArchetypeDetailedData | null): Pro
     }
   }
 
-  // If no distinctive_metrics, try top_distinctive_metrics as fallback
-  if (processedDistinctiveMetrics.length === 0 && data.top_distinctive_metrics) {
-    console.log('[processReportData] Falling back to top_distinctive_metrics');
-    
-    if (Array.isArray(data.top_distinctive_metrics)) {
-      processedDistinctiveMetrics = data.top_distinctive_metrics;
-    } else if (typeof data.top_distinctive_metrics === 'string') {
-      try {
-        processedDistinctiveMetrics = JSON.parse(data.top_distinctive_metrics);
-      } catch (error) {
-        console.error('[processReportData] Error parsing top_distinctive_metrics:', error);
-      }
-    }
-  }
-
   // Return data with processed distinctive metrics
   const processedData = {
     ...data,
-    distinctive_metrics: processedDistinctiveMetrics,
-    top_distinctive_metrics: data.top_distinctive_metrics
+    distinctive_metrics: processedDistinctiveMetrics
   };
 
-  console.log('[processReportData] Final processed data:', {
-    hasDistinctiveMetrics: !!(processedData.distinctive_metrics),
-    hasTopDistinctiveMetrics: !!(processedData.top_distinctive_metrics),
-    distinctiveMetricsType: typeof processedData.distinctive_metrics,
-    distinctiveMetricsLength: Array.isArray(processedData.distinctive_metrics) ? processedData.distinctive_metrics.length : 'N/A',
-    distinctiveMetricsFirst3: Array.isArray(processedData.distinctive_metrics) ? processedData.distinctive_metrics.slice(0, 3) : 'N/A'
-  });
+  console.log('[processReportData] Final processed distinctive metrics:', processedDistinctiveMetrics);
 
   return {
     reportData: processedData,
