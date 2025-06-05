@@ -1,31 +1,31 @@
 
 import React, { memo } from 'react';
-import { ArchetypeDetailedData, DistinctiveMetric } from '@/types/archetype';
+import { ArchetypeDetailedData } from '@/types/archetype';
 import SectionTitle from '@/components/shared/SectionTitle';
 import { Card } from '@/components/ui/card';
+import ExecutiveSummaryCard from './archetype-profile/ExecutiveSummaryCard';
+import KeyFindingsSection from './archetype-profile/KeyFindingsSection';
 import KeyCharacteristicsList from './archetype-profile/KeyCharacteristicsList';
 import IndustryComposition from './archetype-profile/IndustryComposition';
-import DistinctiveMetrics from './archetype-profile/DistinctiveMetrics';
+import EnhancedDistinctiveMetrics from './archetype-profile/EnhancedDistinctiveMetrics';
+import StrategicOpportunitiesPreview from './archetype-profile/StrategicOpportunitiesPreview';
 
 export interface ArchetypeProfileProps {
   archetypeData?: ArchetypeDetailedData;
-  reportData?: ArchetypeDetailedData;  // Added for backward compatibility
+  reportData?: ArchetypeDetailedData;
 }
 
-// Base component implementation
 const ArchetypeProfileBase: React.FC<ArchetypeProfileProps> = ({ archetypeData, reportData }) => {
   // Use archetypeData as primary, fall back to reportData
   const data = archetypeData || reportData;
 
-  // Add debugging
-  console.log('[ArchetypeProfile] Rendering with data:', {
+  console.log('[ArchetypeProfile] Rendering enhanced version with data:', {
     hasData: !!data,
     name: data?.name || data?.archetype_name || 'Unknown',
-    hasDescription: !!data?.long_description,
-    hasCharacteristics: !!data?.key_characteristics,
-    hasTopMetrics: !!data?.top_distinctive_metrics,
-    topMetricsType: data?.top_distinctive_metrics ? typeof data.top_distinctive_metrics : 'undefined',
-    topMetricsValue: data?.top_distinctive_metrics ? JSON.stringify(data.top_distinctive_metrics).substring(0, 100) + '...' : 'None'
+    hasExecutiveSummary: !!data?.executive_summary,
+    hasKeyFindings: !!data?.key_findings,
+    hasDistinctiveMetrics: !!data?.distinctive_metrics,
+    hasStrategicRecommendations: !!data?.strategic_recommendations
   });
 
   if (!data) {
@@ -40,30 +40,9 @@ const ArchetypeProfileBase: React.FC<ArchetypeProfileProps> = ({ archetypeData, 
   }
 
   const displayName = data.name || data.archetype_name || 'Unknown Archetype';
-  const archetypeColor = data.hexColor || '#6E59A5';
-  
-  // Extract the archetype ID to create the badge (e.g., "B2" from "B2_Steady_Returns")
+  const archetypeColor = data.hexColor || data.hex_color || '#6E59A5';
   const archetypeId = data.id || data.archetype_id || '';
   const archetypeBadge = archetypeId.includes('_') ? archetypeId.split('_')[0] : archetypeId;
-  
-  // Parse top distinctive metrics if available
-  const parseTopDistinctiveMetrics = (): DistinctiveMetric[] => {
-    if (!data.top_distinctive_metrics) return [];
-    
-    try {
-      if (typeof data.top_distinctive_metrics === 'string') {
-        return JSON.parse(data.top_distinctive_metrics);
-      } else {
-        return data.top_distinctive_metrics as DistinctiveMetric[];
-      }
-    } catch (error) {
-      console.error('Error parsing top_distinctive_metrics:', error);
-      return [];
-    }
-  };
-  
-  const topMetrics = parseTopDistinctiveMetrics();
-  console.log('[ArchetypeProfile] Parsed top metrics:', topMetrics);
   
   return (
     <div className="space-y-6">
@@ -71,18 +50,19 @@ const ArchetypeProfileBase: React.FC<ArchetypeProfileProps> = ({ archetypeData, 
         <div className="w-full">
           <SectionTitle 
             title="Archetype Profile" 
-            subtitle="Understanding the characteristics and behaviors of your organization's archetype."
+            subtitle="Comprehensive analysis of your archetype's characteristics and strategic insights."
           />
         </div>
       </div>
       
+      {/* Main Identity Card */}
       <Card className="overflow-hidden">
         <div 
           className="h-3"
           style={{ background: archetypeColor }}
         />
         <div className="p-6">
-          <div className="flex items-center gap-3 mb-3">
+          <div className="flex items-center gap-3 mb-4">
             <h3 className="text-xl font-semibold">{displayName}</h3>
             {archetypeBadge && (
               <div 
@@ -94,42 +74,58 @@ const ArchetypeProfileBase: React.FC<ArchetypeProfileProps> = ({ archetypeData, 
             )}
           </div>
           
-          <div className="space-y-6">
-            {/* Description */}
+          <div className="space-y-4">
             <div>
               <h4 className="text-lg font-medium mb-2">Description</h4>
               <p className="text-gray-600">{data.long_description || 'No detailed description available.'}</p>
             </div>
-            
-            {/* Key Characteristics */}
-            <div>
-              <h4 className="text-lg font-medium mb-2">Key Characteristics</h4>
-              {data.key_characteristics ? (
-                <KeyCharacteristicsList 
-                  characteristics={data.key_characteristics} 
-                  archetypeColor={archetypeColor} 
-                />
-              ) : (
-                <p className="text-gray-600">No key characteristics available.</p>
-              )}
-            </div>
-            
-            {/* Common Industries */}
-            <div>
-              <h4 className="text-lg font-medium mb-2">Common Industries</h4>
-              <IndustryComposition industries={data.industries || ''} />
-            </div>
           </div>
         </div>
       </Card>
-      
-      {/* Top Distinctive Metrics - Using our improved component */}
-      {topMetrics.length > 0 && (
-        <DistinctiveMetrics 
-          metrics={topMetrics} 
-          archetypeId={archetypeId}
-        />
+
+      {/* Executive Summary */}
+      <ExecutiveSummaryCard
+        executiveSummary={data.executive_summary}
+        archetypeName={displayName}
+        archetypeColor={archetypeColor}
+      />
+
+      {/* Key Findings */}
+      <KeyFindingsSection
+        keyFindings={data.key_findings}
+        archetypeColor={archetypeColor}
+      />
+
+      {/* Enhanced Distinctive Metrics */}
+      <EnhancedDistinctiveMetrics
+        distinctiveMetrics={data.distinctive_metrics}
+        topDistinctiveMetrics={data.top_distinctive_metrics}
+        archetypeId={archetypeId}
+        archetypeColor={archetypeColor}
+      />
+
+      {/* Key Characteristics */}
+      {data.key_characteristics && (
+        <div>
+          <h4 className="text-lg font-medium mb-4">Key Characteristics</h4>
+          <KeyCharacteristicsList 
+            characteristics={data.key_characteristics} 
+            archetypeColor={archetypeColor} 
+          />
+        </div>
       )}
+
+      {/* Strategic Opportunities Preview */}
+      <StrategicOpportunitiesPreview
+        strategicRecommendations={data.strategic_recommendations}
+        archetypeColor={archetypeColor}
+      />
+
+      {/* Common Industries */}
+      <div>
+        <h4 className="text-lg font-medium mb-4">Common Industries</h4>
+        <IndustryComposition industries={data.industries || ''} />
+      </div>
     </div>
   );
 };
