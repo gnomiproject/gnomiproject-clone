@@ -24,8 +24,21 @@ const WelcomeCard = ({
 }: WelcomeCardProps) => {
   const archetypeColor = getArchetypeColorHex(archetypeId as any);
   
-  // Debug logging to verify the userName prop
+  // Enhanced debug logging to verify the userName prop
+  console.log('=== WelcomeCard DEBUG START ===');
   console.log('[WelcomeCard] Received userName:', userName);
+  console.log('[WelcomeCard] userName type:', typeof userName);
+  console.log('[WelcomeCard] userName length:', userName?.length);
+  console.log('[WelcomeCard] userName is fallback:', userName === 'Healthcare Professional' || userName === 'Healthcare Leader');
+  console.log('[WelcomeCard] All props:', {
+    userName,
+    archetypeName,
+    archetypeId,
+    matchPercentage,
+    secondaryArchetype,
+    organizationSize
+  });
+  console.log('=== WelcomeCard DEBUG END ===');
   
   return (
     <Card className="border-l-4 bg-gradient-to-r from-blue-50 to-white" 

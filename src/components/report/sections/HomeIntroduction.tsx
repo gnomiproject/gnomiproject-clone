@@ -15,38 +15,101 @@ interface HomeIntroductionProps {
 }
 
 const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroductionProps) => {
-  // Enhanced debug logging for user data
+  // COMPREHENSIVE DEBUG LOGGING
+  console.log('=== HomeIntroduction DEBUG START ===');
   console.log('[HomeIntroduction] Full userData object:', userData);
-  console.log('[HomeIntroduction] User data properties:', {
-    name: userData?.name,
-    organization: userData?.organization,
-    email: userData?.email,
-    assessmentResult: userData?.assessment_result,
-    exactEmployeeCount: userData?.exact_employee_count,
-    allKeys: userData ? Object.keys(userData) : 'No userData'
-  });
+  console.log('[HomeIntroduction] userData type:', typeof userData);
+  console.log('[HomeIntroduction] userData is null:', userData === null);
+  console.log('[HomeIntroduction] userData is undefined:', userData === undefined);
+  
+  if (userData) {
+    console.log('[HomeIntroduction] userData keys:', Object.keys(userData));
+    console.log('[HomeIntroduction] userData.name:', userData.name);
+    console.log('[HomeIntroduction] userData.organization:', userData.organization);
+    console.log('[HomeIntroduction] userData.assessment_result:', userData.assessment_result);
+    
+    // Check for various possible property paths
+    const possibleNamePaths = [
+      userData.name,
+      userData.user_name,
+      userData.full_name,
+      userData.display_name,
+      userData?.assessment_result?.name,
+      userData?.assessment_result?.user_name,
+      userData?.assessment_result?.userData?.name,
+      userData?.profile?.name,
+      userData?.userProfile?.name
+    ];
+    
+    const possibleOrgPaths = [
+      userData.organization,
+      userData.company,
+      userData.organization_name,
+      userData?.assessment_result?.organization,
+      userData?.assessment_result?.company,
+      userData?.assessment_result?.userData?.organization,
+      userData?.profile?.organization,
+      userData?.userProfile?.organization
+    ];
+    
+    console.log('[HomeIntroduction] Possible name values:', possibleNamePaths.filter(Boolean));
+    console.log('[HomeIntroduction] Possible org values:', possibleOrgPaths.filter(Boolean));
+  }
+  
+  console.log('[HomeIntroduction] archetypeData sample:', archetypeData ? {
+    id: archetypeData.id || archetypeData.archetype_id,
+    name: archetypeData.name || archetypeData.archetype_name
+  } : 'No archetype data');
+  console.log('=== HomeIntroduction DEBUG END ===');
 
   // Ensure we always have fallback data
   const safeUserData = userData || {};
   const safeArchetypeData = archetypeData || {};
   const safeAverageData = averageData || {};
 
-  // Enhanced user name extraction with multiple fallback paths
-  const userName = safeUserData?.name || 
-                  safeUserData?.assessment_result?.name ||
-                  safeUserData?.assessment_result?.userData?.name ||
-                  'Healthcare Leader';
+  // Try multiple possible paths for user name with comprehensive fallback logic
+  let userName = null;
+  
+  // Check direct properties first
+  if (safeUserData.name) userName = safeUserData.name;
+  else if (safeUserData.user_name) userName = safeUserData.user_name;
+  else if (safeUserData.full_name) userName = safeUserData.full_name;
+  else if (safeUserData.display_name) userName = safeUserData.display_name;
+  
+  // Check nested assessment_result paths
+  else if (safeUserData.assessment_result?.name) userName = safeUserData.assessment_result.name;
+  else if (safeUserData.assessment_result?.user_name) userName = safeUserData.assessment_result.user_name;
+  else if (safeUserData.assessment_result?.userData?.name) userName = safeUserData.assessment_result.userData.name;
+  
+  // Check profile paths
+  else if (safeUserData.profile?.name) userName = safeUserData.profile.name;
+  else if (safeUserData.userProfile?.name) userName = safeUserData.userProfile.name;
+  
+  // Final fallback
+  if (!userName) userName = 'Healthcare Professional';
 
-  // Enhanced organization extraction with multiple fallback paths  
-  const userOrganization = safeUserData?.organization ||
-                          safeUserData?.assessment_result?.organization ||
-                          safeUserData?.assessment_result?.userData?.organization ||
-                          undefined;
+  // Try multiple possible paths for organization
+  let userOrganization = null;
+  
+  // Check direct properties first
+  if (safeUserData.organization) userOrganization = safeUserData.organization;
+  else if (safeUserData.company) userOrganization = safeUserData.company;
+  else if (safeUserData.organization_name) userOrganization = safeUserData.organization_name;
+  
+  // Check nested assessment_result paths
+  else if (safeUserData.assessment_result?.organization) userOrganization = safeUserData.assessment_result.organization;
+  else if (safeUserData.assessment_result?.company) userOrganization = safeUserData.assessment_result.company;
+  else if (safeUserData.assessment_result?.userData?.organization) userOrganization = safeUserData.assessment_result.userData.organization;
+  
+  // Check profile paths
+  else if (safeUserData.profile?.organization) userOrganization = safeUserData.profile.organization;
+  else if (safeUserData.userProfile?.organization) userOrganization = safeUserData.userProfile.organization;
 
-  console.log('[HomeIntroduction] Extracted user info:', {
+  console.log('[HomeIntroduction] Final extracted values:', {
     extractedName: userName,
     extractedOrganization: userOrganization,
-    fallbackUsed: userName === 'Healthcare Leader'
+    usedFallbackName: userName === 'Healthcare Professional',
+    hasOrganization: !!userOrganization
   });
 
   // Get key values with safe fallbacks

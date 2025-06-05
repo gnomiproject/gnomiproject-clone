@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { format } from 'date-fns';
 import { ArchetypeId } from '@/types/archetype';
@@ -28,13 +27,22 @@ const ReportIntroduction = ({
   userName,
   userOrganization
 }: ReportIntroductionProps) => {
-  // Enhanced debug logging
+  // COMPREHENSIVE DEBUG LOGGING
+  console.log('=== ReportIntroduction DEBUG START ===');
   console.log('[ReportIntroduction] Props received:', {
     hasUserData: !!userData,
     userName,
     userOrganization,
+    userDataType: typeof userData,
     userDataKeys: userData ? Object.keys(userData) : 'No userData'
   });
+  
+  if (userData) {
+    console.log('[ReportIntroduction] Full userData:', userData);
+    console.log('[ReportIntroduction] userData.name:', userData.name);
+    console.log('[ReportIntroduction] userData.organization:', userData.organization);
+  }
+  console.log('=== ReportIntroduction DEBUG END ===');
 
   // Get report date and basic user data with enhanced extraction
   const reportDate = userData?.created_at ? format(new Date(userData.created_at), 'MMMM d, yyyy') : format(new Date(), 'MMMM d, yyyy');
@@ -44,22 +52,48 @@ const ReportIntroduction = ({
                        userData?.assessment_result?.exactData?.employeeCount ||
                        userData?.assessment_result?.exact_employee_count;
 
-  // Use provided userName and userOrganization, or extract from userData with fallbacks
-  const displayName = userName || 
-                     userData?.name || 
-                     userData?.assessment_result?.name ||
-                     'Healthcare Professional';
-                     
-  const displayOrganization = userOrganization || 
-                             userData?.organization || 
-                             userData?.assessment_result?.organization ||
-                             'Healthcare Organization';
+  // Use provided userName and userOrganization from props if available,
+  // otherwise try to extract from userData with comprehensive fallback paths
+  let displayName = userName;
+  let displayOrganization = userOrganization;
+  
+  if (!displayName && userData) {
+    // Try multiple possible paths for name
+    displayName = userData.name || 
+                 userData.user_name ||
+                 userData.full_name ||
+                 userData.display_name ||
+                 userData?.assessment_result?.name ||
+                 userData?.assessment_result?.user_name ||
+                 userData?.assessment_result?.userData?.name ||
+                 userData?.profile?.name ||
+                 userData?.userProfile?.name ||
+                 'Healthcare Professional';
+  }
+  
+  if (!displayOrganization && userData) {
+    // Try multiple possible paths for organization
+    displayOrganization = userData.organization ||
+                         userData.company ||
+                         userData.organization_name ||
+                         userData?.assessment_result?.organization ||
+                         userData?.assessment_result?.company ||
+                         userData?.assessment_result?.userData?.organization ||
+                         userData?.profile?.organization ||
+                         userData?.userProfile?.organization;
+  }
+  
+  // Final fallbacks
+  if (!displayName) displayName = 'Healthcare Professional';
+  if (!displayOrganization) displayOrganization = 'Healthcare Organization';
 
   console.log('[ReportIntroduction] Final display values:', {
     displayName,
     displayOrganization,
     reportDate,
-    employeeCount
+    employeeCount,
+    nameSource: userName ? 'props' : 'extracted',
+    orgSource: userOrganization ? 'props' : 'extracted'
   });
 
   const archetypeColor = archetypeId ? getArchetypeColorHex(archetypeId) : '#00B0F0';

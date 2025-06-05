@@ -45,16 +45,35 @@ const ReportBody: React.FC<ReportBodyProps> = ({
   // Keep track of section errors for error handling
   const [sectionErrors, setSectionErrors] = useState<Record<string, string>>({});
 
-  // Add debug logging
+  // COMPREHENSIVE DEBUG LOGGING AT TOP LEVEL
+  console.log('=== ReportBody DEBUG START ===');
   console.log('[ReportBody] Rendering with data:', {
     hasReportData: !!reportData, 
     hasUserData: !!userData,
-    reportDataSample: reportData ? {
+    userDataType: typeof userData,
+    userDataIsNull: userData === null,
+    userDataIsUndefined: userData === undefined
+  });
+  
+  if (userData) {
+    console.log('[ReportBody] Full userData object:', userData);
+    console.log('[ReportBody] userData keys:', Object.keys(userData));
+    console.log('[ReportBody] userData.name:', userData.name);
+    console.log('[ReportBody] userData.organization:', userData.organization);
+  } else {
+    console.log('[ReportBody] No userData available');
+  }
+  
+  if (reportData) {
+    console.log('[ReportBody] reportData sample:', {
       id: reportData.id || reportData.archetype_id,
       name: reportData.name || reportData.archetype_name,
       hasKeyFindings: !!reportData.key_findings
-    } : 'No data'
-  });
+    });
+  } else {
+    console.log('[ReportBody] No reportData available');
+  }
+  console.log('=== ReportBody DEBUG END ===');
 
   // Error handling function for section rendering errors
   const handleSectionError = (sectionId: string, error: any) => {
