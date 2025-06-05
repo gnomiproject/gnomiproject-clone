@@ -4,12 +4,10 @@ import { ArchetypeDetailedData } from '@/types/archetype';
 import SectionTitle from '@/components/shared/SectionTitle';
 import { Section } from '@/components/shared/Section';
 import ArchetypeIdentityCard from './archetype-profile/ArchetypeIdentityCard';
-import ExecutiveSummaryCard from './archetype-profile/ExecutiveSummaryCard';
 import KeyFindingsSection from './archetype-profile/KeyFindingsSection';
 import KeyCharacteristicsList from './archetype-profile/KeyCharacteristicsList';
 import IndustryComposition from './archetype-profile/IndustryComposition';
 import EnhancedDistinctiveMetrics from './archetype-profile/EnhancedDistinctiveMetrics';
-import StrategicOpportunitiesPreview from './archetype-profile/StrategicOpportunitiesPreview';
 import ProfileNavigation from './archetype-profile/ProfileNavigation';
 import { Card } from '@/components/ui/card';
 
@@ -18,15 +16,13 @@ export interface ArchetypeProfileSectionProps {
 }
 
 const ArchetypeProfileSectionBase: React.FC<ArchetypeProfileSectionProps> = ({ archetypeData }) => {
-  console.log('[ArchetypeProfileSection] Rendering with enhanced data:', {
+  console.log('[ArchetypeProfileSection] Rendering focused version with data:', {
     name: archetypeData?.name || archetypeData?.archetype_name || 'Unknown',
-    hasExecutiveSummary: !!(archetypeData?.executive_summary),
     hasKeyFindings: !!(archetypeData?.key_findings || archetypeData?.keyFindings),
     hasDistinctiveMetrics: !!(archetypeData?.distinctive_metrics),
     hasTopMetrics: !!(archetypeData?.top_distinctive_metrics),
-    hasStrategicRecommendations: !!(archetypeData?.strategic_recommendations),
+    hasKeyCharacteristics: !!(archetypeData?.key_characteristics),
     dataPreview: {
-      executiveSummary: archetypeData?.executive_summary ? 'Present' : 'Missing',
       keyFindings: (archetypeData?.key_findings || archetypeData?.keyFindings) ? `${Array.isArray(archetypeData.key_findings || archetypeData.keyFindings) ? (archetypeData.key_findings || archetypeData.keyFindings).length : 'Unknown'} findings` : 'Missing',
       distinctiveMetrics: archetypeData?.distinctive_metrics ? `${Array.isArray(archetypeData.distinctive_metrics) ? archetypeData.distinctive_metrics.length : 'Unknown'} metrics` : 'Missing'
     }
@@ -47,7 +43,6 @@ const ArchetypeProfileSectionBase: React.FC<ArchetypeProfileSectionProps> = ({ a
   const archetypeId = archetypeData.id || archetypeData.archetype_id || '';
   const archetypeBadge = archetypeId.includes('_') ? archetypeId.split('_')[0] : archetypeId;
   const archetypeColor = archetypeData.hexColor || archetypeData.hex_color || '#6E59A5';
-  const archetypeName = archetypeData.name || archetypeData.archetype_name || 'Unknown Archetype';
 
   // Helper function to safely convert distinctive_metrics
   const getDistinctiveMetrics = () => {
@@ -84,7 +79,7 @@ const ArchetypeProfileSectionBase: React.FC<ArchetypeProfileSectionProps> = ({ a
         <div className="w-full">
           <SectionTitle 
             title="Archetype Profile" 
-            subtitle="Comprehensive analysis of your organization's healthcare archetype characteristics, patterns, and strategic opportunities."
+            subtitle="Understanding the characteristics and patterns that define your healthcare archetype."
           />
         </div>
       </div>
@@ -96,20 +91,13 @@ const ArchetypeProfileSectionBase: React.FC<ArchetypeProfileSectionProps> = ({ a
           archetypeBadge={archetypeBadge}
         />
         
-        {/* Executive Summary - New enhanced component */}
-        <ExecutiveSummaryCard
-          executiveSummary={archetypeData.executive_summary}
-          archetypeName={archetypeName}
-          archetypeColor={archetypeColor}
-        />
-        
-        {/* Key Findings - New component */}
+        {/* Key Findings */}
         <KeyFindingsSection
           keyFindings={getKeyFindings()}
           archetypeColor={archetypeColor}
         />
         
-        {/* Enhanced Distinctive Metrics - Replaces the old component */}
+        {/* Enhanced Distinctive Metrics */}
         <EnhancedDistinctiveMetrics
           distinctiveMetrics={getDistinctiveMetrics()}
           topDistinctiveMetrics={archetypeData.top_distinctive_metrics}
@@ -124,12 +112,6 @@ const ArchetypeProfileSectionBase: React.FC<ArchetypeProfileSectionProps> = ({ a
             archetypeColor={archetypeColor}
           />
         )}
-        
-        {/* Strategic Opportunities Preview - New component */}
-        <StrategicOpportunitiesPreview
-          strategicRecommendations={archetypeData.strategic_recommendations}
-          archetypeColor={archetypeColor}
-        />
         
         {/* Industry Composition */}
         <IndustryComposition industries={archetypeData.industries || ''} />

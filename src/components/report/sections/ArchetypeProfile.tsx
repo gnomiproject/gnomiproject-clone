@@ -3,12 +3,10 @@ import React, { memo } from 'react';
 import { ArchetypeDetailedData } from '@/types/archetype';
 import SectionTitle from '@/components/shared/SectionTitle';
 import { Card } from '@/components/ui/card';
-import ExecutiveSummaryCard from './archetype-profile/ExecutiveSummaryCard';
 import KeyFindingsSection from './archetype-profile/KeyFindingsSection';
 import KeyCharacteristicsList from './archetype-profile/KeyCharacteristicsList';
 import IndustryComposition from './archetype-profile/IndustryComposition';
 import EnhancedDistinctiveMetrics from './archetype-profile/EnhancedDistinctiveMetrics';
-import StrategicOpportunitiesPreview from './archetype-profile/StrategicOpportunitiesPreview';
 
 export interface ArchetypeProfileProps {
   archetypeData?: ArchetypeDetailedData;
@@ -19,13 +17,12 @@ const ArchetypeProfileBase: React.FC<ArchetypeProfileProps> = ({ archetypeData, 
   // Use archetypeData as primary, fall back to reportData
   const data = archetypeData || reportData;
 
-  console.log('[ArchetypeProfile] Rendering enhanced version with data:', {
+  console.log('[ArchetypeProfile] Rendering focused version with data:', {
     hasData: !!data,
     name: data?.name || data?.archetype_name || 'Unknown',
-    hasExecutiveSummary: !!(data?.executive_summary),
     hasKeyFindings: !!(data?.key_findings || data?.keyFindings),
     hasDistinctiveMetrics: !!(data?.distinctive_metrics),
-    hasStrategicRecommendations: !!(data?.strategic_recommendations)
+    hasKeyCharacteristics: !!(data?.key_characteristics)
   });
 
   if (!data) {
@@ -79,7 +76,7 @@ const ArchetypeProfileBase: React.FC<ArchetypeProfileProps> = ({ archetypeData, 
         <div className="w-full">
           <SectionTitle 
             title="Archetype Profile" 
-            subtitle="Comprehensive analysis of your archetype's characteristics and strategic insights."
+            subtitle="Understanding the characteristics and patterns that define your healthcare archetype."
           />
         </div>
       </div>
@@ -112,13 +109,6 @@ const ArchetypeProfileBase: React.FC<ArchetypeProfileProps> = ({ archetypeData, 
         </div>
       </Card>
 
-      {/* Executive Summary */}
-      <ExecutiveSummaryCard
-        executiveSummary={data.executive_summary}
-        archetypeName={displayName}
-        archetypeColor={archetypeColor}
-      />
-
       {/* Key Findings */}
       <KeyFindingsSection
         keyFindings={getKeyFindings()}
@@ -143,12 +133,6 @@ const ArchetypeProfileBase: React.FC<ArchetypeProfileProps> = ({ archetypeData, 
           />
         </div>
       )}
-
-      {/* Strategic Opportunities Preview */}
-      <StrategicOpportunitiesPreview
-        strategicRecommendations={data.strategic_recommendations}
-        archetypeColor={archetypeColor}
-      />
 
       {/* Common Industries */}
       <div>
