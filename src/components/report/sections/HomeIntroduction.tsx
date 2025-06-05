@@ -15,13 +15,15 @@ interface HomeIntroductionProps {
 }
 
 const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroductionProps) => {
-  // Debug logging
-  console.log('[HomeIntroduction] Rendering with data:', {
-    hasUserData: !!userData,
-    hasArchetypeData: !!archetypeData,
-    hasAverageData: !!averageData,
-    userData,
-    archetypeData
+  // Enhanced debug logging for user data
+  console.log('[HomeIntroduction] Full userData object:', userData);
+  console.log('[HomeIntroduction] User data properties:', {
+    name: userData?.name,
+    organization: userData?.organization,
+    email: userData?.email,
+    assessmentResult: userData?.assessment_result,
+    exactEmployeeCount: userData?.exact_employee_count,
+    allKeys: userData ? Object.keys(userData) : 'No userData'
   });
 
   // Ensure we always have fallback data
@@ -29,11 +31,28 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
   const safeArchetypeData = archetypeData || {};
   const safeAverageData = averageData || {};
 
+  // Enhanced user name extraction with multiple fallback paths
+  const userName = safeUserData?.name || 
+                  safeUserData?.assessment_result?.name ||
+                  safeUserData?.assessment_result?.userData?.name ||
+                  'Healthcare Leader';
+
+  // Enhanced organization extraction with multiple fallback paths  
+  const userOrganization = safeUserData?.organization ||
+                          safeUserData?.assessment_result?.organization ||
+                          safeUserData?.assessment_result?.userData?.organization ||
+                          undefined;
+
+  console.log('[HomeIntroduction] Extracted user info:', {
+    extractedName: userName,
+    extractedOrganization: userOrganization,
+    fallbackUsed: userName === 'Healthcare Leader'
+  });
+
   // Get key values with safe fallbacks
   const archetypeId = safeArchetypeData?.id || safeArchetypeData?.archetype_id || 'a1';
   const archetypeName = safeArchetypeData?.name || safeArchetypeData?.archetype_name || 'Healthcare Archetype';
   const matchPercentage = safeUserData?.assessment_result?.percentageMatch || 85;
-  const userName = safeUserData?.name || 'Healthcare Leader';
   const familyName = safeArchetypeData?.family_name || safeArchetypeData?.familyName || 'Healthcare Family';
   const shortDescription = safeArchetypeData?.short_description || 'An archetype focused on optimizing healthcare management';
   const organizationSize = safeUserData?.exact_employee_count || safeUserData?.assessment_result?.exactData?.employeeCount;
@@ -70,7 +89,7 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
 
   return (
     <div className="mb-8">
-      {/* Report Introduction */}
+      {/* Report Introduction with proper user data */}
       <ReportIntroduction 
         userData={safeUserData} 
         reportData={safeArchetypeData}
@@ -78,6 +97,8 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
         archetypeName={archetypeName}
         familyName={familyName}
         shortDescription={shortDescription}
+        userName={userName}
+        userOrganization={userOrganization}
       />
       
       {/* Introduction Section Title */}
@@ -87,7 +108,7 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
         className="mt-8"
       />
       
-      {/* Welcome Card with enhanced information */}
+      {/* Welcome Card with proper user name */}
       <div className="mb-6">
         <WelcomeCard 
           userName={userName}

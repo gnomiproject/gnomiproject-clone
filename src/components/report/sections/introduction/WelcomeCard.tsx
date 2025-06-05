@@ -24,6 +24,9 @@ const WelcomeCard = ({
 }: WelcomeCardProps) => {
   const archetypeColor = getArchetypeColorHex(archetypeId as any);
   
+  // Debug logging to verify the userName prop
+  console.log('[WelcomeCard] Received userName:', userName);
+  
   return (
     <Card className="border-l-4 bg-gradient-to-r from-blue-50 to-white" 
           style={{ borderLeftColor: archetypeColor }}>

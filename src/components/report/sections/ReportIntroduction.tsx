@@ -14,6 +14,8 @@ interface ReportIntroductionProps {
   archetypeName?: string;
   familyName?: string;
   shortDescription?: string;
+  userName?: string;
+  userOrganization?: string;
 }
 
 const ReportIntroduction = ({ 
@@ -22,11 +24,44 @@ const ReportIntroduction = ({
   archetypeId = 'a1' as ArchetypeId,
   archetypeName,
   familyName,
-  shortDescription
+  shortDescription,
+  userName,
+  userOrganization
 }: ReportIntroductionProps) => {
-  // Get report date and basic user data
-  const reportDate = userData?.created_at ? format(new Date(userData.created_at), 'MMMM d, yyyy') : 'N/A';
-  const employeeCount = userData?.exact_employee_count || userData?.assessment_result?.exactData?.employeeCount;
+  // Enhanced debug logging
+  console.log('[ReportIntroduction] Props received:', {
+    hasUserData: !!userData,
+    userName,
+    userOrganization,
+    userDataKeys: userData ? Object.keys(userData) : 'No userData'
+  });
+
+  // Get report date and basic user data with enhanced extraction
+  const reportDate = userData?.created_at ? format(new Date(userData.created_at), 'MMMM d, yyyy') : format(new Date(), 'MMMM d, yyyy');
+  
+  // Extract employee count with multiple fallback paths
+  const employeeCount = userData?.exact_employee_count || 
+                       userData?.assessment_result?.exactData?.employeeCount ||
+                       userData?.assessment_result?.exact_employee_count;
+
+  // Use provided userName and userOrganization, or extract from userData with fallbacks
+  const displayName = userName || 
+                     userData?.name || 
+                     userData?.assessment_result?.name ||
+                     'Healthcare Professional';
+                     
+  const displayOrganization = userOrganization || 
+                             userData?.organization || 
+                             userData?.assessment_result?.organization ||
+                             'Healthcare Organization';
+
+  console.log('[ReportIntroduction] Final display values:', {
+    displayName,
+    displayOrganization,
+    reportDate,
+    employeeCount
+  });
+
   const archetypeColor = archetypeId ? getArchetypeColorHex(archetypeId) : '#00B0F0';
 
   return (
@@ -44,11 +79,11 @@ const ReportIntroduction = ({
           <div className="text-right hidden md:block">
             <p className="text-sm text-gray-600">
               <span>
-                Prepared for: <span className="font-semibold">{userData?.name || 'N/A'}</span>
+                Prepared for: <span className="font-semibold">{displayName}</span>
               </span>
             </p>
             <p className="text-sm text-gray-600 mt-1">
-              {userData?.organization || 'N/A'}
+              {displayOrganization}
             </p>
             <p className="text-sm text-gray-600 mt-1">
               Report Date: {reportDate}
@@ -76,6 +111,9 @@ const ReportIntroduction = ({
           </p>
         </div>
         <div className="h-0.5 w-full bg-gray-300 mt-2"></div>
+        <div className="mt-2 text-sm text-gray-600">
+          Prepared for: {displayName} | {displayOrganization}
+        </div>
       </div>
     </div>
   );
