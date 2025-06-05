@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -108,8 +107,11 @@ export const useReportAccess = ({
         throw new Error(`No report data found for ${archetypeId}`);
       }
       
-      // Create the archetype data with proper type conversion
+      // Create the archetype data with proper type conversion - spread first, then override
       const archetypeData: ArchetypeDetailedData = {
+        // Spread all raw database fields first
+        ...data,
+        // Then override with properly typed versions
         id: data.archetype_id as ArchetypeId,
         name: data.archetype_name,
         familyId: data.family_id as FamilyId || 'unknown' as FamilyId,
@@ -119,9 +121,7 @@ export const useReportAccess = ({
         hexColor: data.hex_color,
         industries: data.industries,
         detailed_metrics: data.detailed_metrics,
-        disease_prevalence: data.disease_prevalence,
-        // Include all other raw database fields without transformation
-        ...data
+        disease_prevalence: data.disease_prevalence
       };
       
       // Return raw data structure without processing layers
@@ -161,7 +161,7 @@ export const useReportAccess = ({
         const parsed = JSON.parse(fallbackData);
         console.log(`[useReportAccess] Using fallback data for ${archetypeId} from ${parsed.timestamp}`);
         
-        // Ensure key_characteristics is properly formatted in fallback data
+        // Ensure key_characteristics is properly formatted in fallback data - spread first, then override
         if (parsed.reportData) {
           parsed.reportData = {
             ...parsed.reportData,
