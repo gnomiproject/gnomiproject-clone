@@ -108,15 +108,12 @@ export const useReportAccess = ({
         throw new Error(`No report data found for ${archetypeId}`);
       }
       
-      // Ensure key_characteristics is a string array - fix the type mismatch
-      const keyCharacteristicsArray = ensureStringArray(data.key_characteristics);
-      
-      // Create the archetype data with minimal transformation
+      // Create the archetype data with proper type conversion
       const archetypeData: ArchetypeDetailedData = {
         id: data.archetype_id as ArchetypeId,
         name: data.archetype_name,
         familyId: data.family_id as FamilyId || 'unknown' as FamilyId,
-        key_characteristics: keyCharacteristicsArray,
+        key_characteristics: ensureStringArray(data.key_characteristics),
         short_description: data.short_description,
         long_description: data.long_description,
         hexColor: data.hex_color,
@@ -166,10 +163,9 @@ export const useReportAccess = ({
         
         // Ensure key_characteristics is properly formatted in fallback data
         if (parsed.reportData) {
-          const keyCharacteristicsArray = ensureStringArray(parsed.reportData?.key_characteristics);
           parsed.reportData = {
             ...parsed.reportData,
-            key_characteristics: keyCharacteristicsArray
+            key_characteristics: ensureStringArray(parsed.reportData?.key_characteristics)
           };
         }
         
