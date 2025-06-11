@@ -16,6 +16,7 @@ const MetricsValidator = ({ metrics }: MetricsValidatorProps) => {
   if (incorrectAverages.length > 0) {
     console.error('[MetricsValidator] 🚨 WRONG AVERAGES DETECTED:', incorrectAverages);
     console.error('[MetricsValidator] This indicates averageData is not being passed correctly!');
+    console.error('[MetricsValidator] Full metrics object:', metrics);
   } else {
     console.log('[MetricsValidator] ✅ All average values are CORRECT!');
   }
@@ -25,6 +26,9 @@ const MetricsValidator = ({ metrics }: MetricsValidatorProps) => {
     return (
       <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
         <strong>Debug Warning:</strong> Incorrect average values detected: {incorrectAverages.join(', ')}
+        <div className="mt-2 text-xs">
+          <strong>Expected:</strong> Cost=13440, Risk=0.95, Emergency=135, Specialist=2250
+        </div>
       </div>
     );
   }

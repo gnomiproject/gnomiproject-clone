@@ -19,6 +19,14 @@ interface MetricCardsGridProps {
 }
 
 const MetricCardsGrid = ({ metrics }: MetricCardsGridProps) => {
+  // CRITICAL DEBUG: Log what we're receiving
+  console.log('[MetricCardsGrid] 🎯 RECEIVED METRICS:', {
+    cost: { value: metrics.cost.value, average: metrics.cost.average },
+    risk: { value: metrics.risk.value, average: metrics.risk.average },
+    emergency: { value: metrics.emergency.value, average: metrics.emergency.average },
+    specialist: { value: metrics.specialist.value, average: metrics.specialist.average }
+  });
+
   const calculatePercentageDiff = (value: number, average: number) => {
     if (average === 0) return 0;
     return ((value - average) / average) * 100;
@@ -69,6 +77,15 @@ const MetricCardsGrid = ({ metrics }: MetricCardsGridProps) => {
       ? formatCurrency(average)
       : formatNumber(average, decimals) + suffix;
 
+    // CRITICAL DEBUG: Log each card's data
+    console.log(`[MetricCardsGrid] 📊 ${title}:`, {
+      value, 
+      average, 
+      formattedValue, 
+      formattedAverage,
+      percentDiff: percentDiff.toFixed(1) + '%'
+    });
+
     return (
       <Card className="relative overflow-hidden">
         <CardContent className="p-6">
@@ -97,7 +114,7 @@ const MetricCardsGrid = ({ metrics }: MetricCardsGridProps) => {
             <div className="space-y-1">
               <p className="text-2xl font-bold text-gray-900">{formattedValue}</p>
               <p className="text-sm text-gray-500">
-                Archetype Avg: {formattedAverage}
+                Population Avg: {formattedAverage}
               </p>
             </div>
           </div>
@@ -106,8 +123,8 @@ const MetricCardsGrid = ({ metrics }: MetricCardsGridProps) => {
             <div className="mt-3 pt-3 border-t border-gray-100">
               <p className="text-xs text-gray-600">
                 {isPositive 
-                  ? `${Math.abs(percentDiff).toFixed(1)}% above archetype average`
-                  : `${Math.abs(percentDiff).toFixed(1)}% below archetype average`
+                  ? `${Math.abs(percentDiff).toFixed(1)}% above population average`
+                  : `${Math.abs(percentDiff).toFixed(1)}% below population average`
                 }
               </p>
             </div>
@@ -123,7 +140,7 @@ const MetricCardsGrid = ({ metrics }: MetricCardsGridProps) => {
         <h3 className="text-lg font-semibold text-gray-900">Key Performance Indicators</h3>
         <div className="flex items-center gap-2 text-sm text-gray-500">
           <Activity className="w-4 h-4" />
-          <span>Compared to archetype benchmarks</span>
+          <span>Compared to population benchmarks</span>
         </div>
       </div>
       
