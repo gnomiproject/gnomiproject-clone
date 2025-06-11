@@ -1,13 +1,14 @@
 
 import React from 'react';
-import { Section } from '@/components/shared/Section';
 import SectionTitle from '@/components/shared/SectionTitle';
 import ReportIntroduction from './ReportIntroduction';
 import WelcomeCard from './introduction/WelcomeCard';
 import MetricCardsGrid from './introduction/MetricCardsGrid';
 import ExecutiveSummaryCard from './introduction/ExecutiveSummaryCard';
 import ReportDiscoveryCard from './introduction/ReportDiscoveryCard';
-import { averageDataService } from '@/services/AverageDataService';
+import MetricsValidator from './introduction/MetricsValidator';
+import { extractUserData, extractArchetypeData } from './introduction/utils/userDataExtraction';
+import { buildMetrics } from './introduction/utils/metricExtraction';
 
 interface HomeIntroductionProps {
   userData: any;
@@ -16,9 +17,9 @@ interface HomeIntroductionProps {
 }
 
 const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroductionProps) => {
-  // CRITICAL DEBUG LOGGING - Focus on averageData investigation
-  console.log('=== HomeIntroduction CRITICAL DEBUG START ===');
-  console.log('[HomeIntroduction] Raw props received:', {
+  // CRITICAL DEBUG LOGGING
+  console.log('=== HomeIntroduction REFACTORED VERSION ===');
+  console.log('[HomeIntroduction] Props received:', {
     hasUserData: !!userData,
     hasArchetypeData: !!archetypeData,
     hasAverageData: !!averageData,
@@ -40,159 +41,35 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
       const value = averageData[field];
       console.log(`  ${field}: ${value} (type: ${typeof value}, exists: ${value !== undefined})`);
     });
-    
-    // Check if it's using fallback data
-    const isUsingFallback = averageDataService.isUsingFallbackData();
-    console.log('[HomeIntroduction] AverageDataService using fallback:', isUsingFallback);
   } else {
     console.error('[HomeIntroduction] ❌ NO AVERAGE DATA RECEIVED - This is the problem!');
   }
 
-  // Ensure we always have fallback data
-  const safeUserData = userData || {};
-  const safeArchetypeData = archetypeData || {};
-  const safeAverageData = averageData || {};
+  // Extract user and archetype data using utilities
+  const { userName, userOrganization } = extractUserData(userData);
+  const {
+    archetypeId,
+    archetypeName,
+    matchPercentage,
+    familyName,
+    shortDescription,
+    organizationSize,
+    executiveSummary,
+    keyInsights
+  } = extractArchetypeData(archetypeData, userData);
 
-  // FIXED: Extract user data with comprehensive fallback logic
-  let userName = null;
-  if (safeUserData.name) userName = safeUserData.name;
-  else if (safeUserData.user_name) userName = safeUserData.user_name;
-  else if (safeUserData.full_name) userName = safeUserData.full_name;
-  else if (safeUserData.display_name) userName = safeUserData.display_name;
-  else if (safeUserData.assessment_result?.name) userName = safeUserData.assessment_result.name;
-  else if (safeUserData.assessment_result?.user_name) userName = safeUserData.assessment_result.user_name;
-  else if (safeUserData.assessment_result?.userData?.name) userName = safeUserData.assessment_result.userData.name;
-  else if (safeUserData.profile?.name) userName = safeUserData.profile.name;
-  else if (safeUserData.userProfile?.name) userName = safeUserData.userProfile.name;
-  if (!userName) userName = 'Healthcare Professional';
-
-  let userOrganization = null;
-  if (safeUserData.organization) userOrganization = safeUserData.organization;
-  else if (safeUserData.company) userOrganization = safeUserData.company;
-  else if (safeUserData.organization_name) userOrganization = safeUserData.organization_name;
-  else if (safeUserData.assessment_result?.organization) userOrganization = safeUserData.assessment_result.organization;
-  else if (safeUserData.assessment_result?.company) userOrganization = safeUserData.assessment_result.company;
-  else if (safeUserData.assessment_result?.userData?.organization) userOrganization = safeUserData.assessment_result.userData.organization;
-  else if (safeUserData.profile?.organization) userOrganization = safeUserData.profile.organization;
-  else if (safeUserData.userProfile?.organization) userOrganization = safeUserData.userProfile.organization;
-
-  console.log('[HomeIntroduction] Final extracted user values:', {
-    extractedName: userName,
-    extractedOrganization: userOrganization,
-    usedFallbackName: userName === 'Healthcare Professional',
-    hasOrganization: !!userOrganization
-  });
-
-  // Get key archetype values with safe fallbacks
-  const archetypeId = safeArchetypeData?.id || safeArchetypeData?.archetype_id || 'a1';
-  const archetypeName = safeArchetypeData?.name || safeArchetypeData?.archetype_name || 'Healthcare Archetype';
-  const matchPercentage = safeUserData?.assessment_result?.percentageMatch || 85;
-  const familyName = safeArchetypeData?.family_name || safeArchetypeData?.familyName || 'Healthcare Family';
-  const shortDescription = safeArchetypeData?.short_description || 'An archetype focused on optimizing healthcare management';
-  const organizationSize = safeUserData?.exact_employee_count || safeUserData?.assessment_result?.exactData?.employeeCount;
-  
-  // Extract executive summary and key insights with fallbacks
-  const executiveSummary = safeArchetypeData?.executive_summary;
-  const keyInsights = safeArchetypeData?.key_findings || [];
-
-  // CRITICAL FIX: Use actual averageData values, not hardcoded fallbacks
-  const getAverageValue = (fieldName: string, hardcodedFallback: number) => {
-    // First try to get the value from averageData
-    if (safeAverageData && safeAverageData[fieldName] !== undefined && safeAverageData[fieldName] !== null) {
-      const value = safeAverageData[fieldName];
-      console.log(`[HomeIntroduction] ✅ Using REAL average for ${fieldName}: ${value}`);
-      return value;
-    }
-    
-    // Only use hardcoded fallback if no data is available
-    console.warn(`[HomeIntroduction] ⚠️ Using FALLBACK average for ${fieldName}: ${hardcodedFallback}`);
-    return hardcodedFallback;
-  };
-
-  // CRITICAL FIX: Extract archetype values from the correct data source
-  const getArchetypeValue = (fieldName: string, fallbackValue: number) => {
-    // Try archetypeData first
-    if (safeArchetypeData && safeArchetypeData[fieldName] !== undefined && safeArchetypeData[fieldName] !== null) {
-      const value = safeArchetypeData[fieldName];
-      console.log(`[HomeIntroduction] ✅ Using archetype value for ${fieldName}: ${value}`);
-      return value;
-    }
-    
-    console.warn(`[HomeIntroduction] ⚠️ Using fallback archetype value for ${fieldName}: ${fallbackValue}`);
-    return fallbackValue;
-  };
-
-  // FIXED: Build metrics using actual data, not hardcoded values
-  const metrics = {
-    cost: {
-      name: "Total Cost PEPY",
-      value: getArchetypeValue("Cost_Medical & RX Paid Amount PEPY", 12000),
-      average: getAverageValue("Cost_Medical & RX Paid Amount PEPY", 13440)
-    },
-    risk: {
-      name: "Risk Score", 
-      value: getArchetypeValue("Risk_Average Risk Score", 1.0),
-      average: getAverageValue("Risk_Average Risk Score", 0.95)
-    },
-    emergency: {
-      name: "ER Visits per 1K",
-      value: getArchetypeValue("Util_Emergency Visits per 1k Members", 120),
-      average: getAverageValue("Util_Emergency Visits per 1k Members", 135)
-    },
-    specialist: {
-      name: "Specialist Visits per 1K", 
-      value: getArchetypeValue("Util_Specialist Visits per 1k Members", 2200),
-      average: getAverageValue("Util_Specialist Visits per 1k Members", 2250)
-    }
-  };
-
-  // COMPREHENSIVE VALIDATION: Log final metric values
-  console.log('[HomeIntroduction] FINAL METRICS USED:', {
-    cost: { 
-      archetype: metrics.cost.value, 
-      average: metrics.cost.average,
-      isCorrectAverage: metrics.cost.average === 13440
-    },
-    risk: { 
-      archetype: metrics.risk.value, 
-      average: metrics.risk.average,
-      isCorrectAverage: metrics.risk.average === 0.95
-    },
-    emergency: { 
-      archetype: metrics.emergency.value, 
-      average: metrics.emergency.average,
-      isCorrectAverage: metrics.emergency.average === 135
-    },
-    specialist: { 
-      archetype: metrics.specialist.value, 
-      average: metrics.specialist.average,
-      isCorrectAverage: metrics.specialist.average === 2250
-    }
-  });
-
-  // Alert if wrong averages are being used
-  const incorrectAverages = [];
-  if (metrics.cost.average !== 13440) incorrectAverages.push(`Cost: ${metrics.cost.average} ≠ 13440`);
-  if (metrics.risk.average !== 0.95) incorrectAverages.push(`Risk: ${metrics.risk.average} ≠ 0.95`);
-  if (metrics.emergency.average !== 135) incorrectAverages.push(`Emergency: ${metrics.emergency.average} ≠ 135`);
-  if (metrics.specialist.average !== 2250) incorrectAverages.push(`Specialist: ${metrics.specialist.average} ≠ 2250`);
-
-  if (incorrectAverages.length > 0) {
-    console.error('[HomeIntroduction] 🚨 WRONG AVERAGES DETECTED:', incorrectAverages);
-    console.error('[HomeIntroduction] This indicates averageData is not being passed correctly!');
-    console.error('[HomeIntroduction] Raw averageData:', safeAverageData);
-  } else {
-    console.log('[HomeIntroduction] ✅ All average values are CORRECT!');
-  }
-
-  console.log('=== HomeIntroduction CRITICAL DEBUG END ===');
+  // Build metrics using the utility function
+  const metrics = buildMetrics(archetypeData, averageData);
 
   return (
     <div className="mb-8">
-      {/* Report Introduction with proper user data */}
+      {/* Metrics Validator - shows warning in dev if averages are wrong */}
+      <MetricsValidator metrics={metrics} />
+      
+      {/* Report Introduction */}
       <ReportIntroduction 
-        userData={safeUserData} 
-        reportData={safeArchetypeData}
+        userData={userData || {}} 
+        reportData={archetypeData || {}}
         archetypeId={archetypeId}
         archetypeName={archetypeName}
         familyName={familyName}
@@ -208,19 +85,19 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
         className="mt-8"
       />
       
-      {/* Welcome Card with proper user name */}
+      {/* Welcome Card */}
       <div className="mb-6">
         <WelcomeCard 
           userName={userName}
           archetypeName={archetypeName}
           archetypeId={archetypeId}
           matchPercentage={matchPercentage}
-          secondaryArchetype={safeUserData?.assessment_result?.secondaryArchetype?.name}
+          secondaryArchetype={userData?.assessment_result?.secondaryArchetype?.name}
           organizationSize={organizationSize}
         />
       </div>
       
-      {/* Executive Summary Card - Always show with fallback content */}
+      {/* Executive Summary Card */}
       <div className="mb-6">
         <ExecutiveSummaryCard 
           executiveSummary={executiveSummary}
@@ -229,7 +106,7 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
         />
       </div>
       
-      {/* Key Metrics Grid with enhanced comparisons */}
+      {/* Key Metrics Grid - NOW USING CORRECT AVERAGES */}
       <div className="mb-8">
         <MetricCardsGrid metrics={metrics} />
       </div>

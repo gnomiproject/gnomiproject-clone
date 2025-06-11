@@ -48,6 +48,15 @@ export const useReportData = (
         if (cachedData) {
           console.log(`[useReportData] ✅ Using cached data for ${archetypeId}`);
           setIsUsingFallbackData(false);
+          
+          // CRITICAL: Ensure cached data has averageData
+          if (!cachedData.averageData) {
+            console.warn('[useReportData] Cached data missing averageData, fetching fresh...');
+            const freshAverageData = await averageDataService.getAverageData();
+            cachedData.averageData = freshAverageData;
+            setInCache(cacheKey, cachedData); // Update cache
+          }
+          
           return cachedData;
         }
 
@@ -81,17 +90,26 @@ export const useReportData = (
         // Convert the database result to ArchetypeDetailedData format
         const typedReportData = reportData as unknown as ArchetypeDetailedData;
 
-        // CRITICAL: Get average data from service
-        console.log(`[useReportData] 📈 Fetching average data...`);
+        // CRITICAL: ALWAYS get average data from service - this is the fix!
+        console.log(`[useReportData] 📈 FORCE FETCHING average data...`);
         const averageData = await averageDataService.getAverageData();
         
-        // CRITICAL DEBUG: Log the average data we just fetched
-        console.log(`[useReportData] 🎯 AVERAGE DATA FETCHED:`, {
-          hasAverageData: !!averageData,
-          costPEPY: averageData["Cost_Medical & RX Paid Amount PEPY"],
-          riskScore: averageData["Risk_Average Risk Score"],
-          emergencyVisits: averageData["Util_Emergency Visits per 1k Members"],
-          specialistVisits: averageData["Util_Specialist Visits per 1k Members"],
+        // CRITICAL VALIDATION: Ensure we have the correct values
+        const expectedCost = 13440;
+        const expectedRisk = 0.95;
+        const expectedEmergency = 135;
+        const expectedSpecialist = 2250;
+        
+        const actualCost = averageData["Cost_Medical & RX Paid Amount PEPY"];
+        const actualRisk = averageData["Risk_Average Risk Score"];
+        const actualEmergency = averageData["Util_Emergency Visits per 1k Members"];
+        const actualSpecialist = averageData["Util_Specialist Visits per 1k Members"];
+        
+        console.log(`[useReportData] 🎯 AVERAGE DATA VALIDATION:`, {
+          cost: { expected: expectedCost, actual: actualCost, correct: actualCost === expectedCost },
+          risk: { expected: expectedRisk, actual: actualRisk, correct: actualRisk === expectedRisk },
+          emergency: { expected: expectedEmergency, actual: actualEmergency, correct: actualEmergency === expectedEmergency },
+          specialist: { expected: expectedSpecialist, actual: actualSpecialist, correct: actualSpecialist === expectedSpecialist },
           isUsingFallback: averageDataService.isUsingFallbackData()
         });
 
@@ -104,11 +122,12 @@ export const useReportData = (
           averageData: averageData // Explicitly include the averageData
         };
         
-        console.log(`[useReportData] 🎯 FINAL RESULT STRUCTURE:`, {
+        console.log(`[useReportData] 🎯 FINAL RESULT VALIDATION:`, {
           hasReportData: !!finalResult.reportData,
           hasAverageData: !!finalResult.averageData,
           averageDataKeys: finalResult.averageData ? Object.keys(finalResult.averageData).length : 0,
-          costPEPYInResult: finalResult.averageData ? finalResult.averageData["Cost_Medical & RX Paid Amount PEPY"] : 'missing'
+          costPEPYInResult: finalResult.averageData ? finalResult.averageData["Cost_Medical & RX Paid Amount PEPY"] : 'missing',
+          finalResultCorrect: finalResult.averageData && finalResult.averageData["Cost_Medical & RX Paid Amount PEPY"] === 13440
         });
         
         // Cache the processed data
@@ -126,6 +145,13 @@ export const useReportData = (
         if (fallbackData) {
           console.log(`[useReportData] ⚠️ Using fallback cached data for ${archetypeId}`);
           setIsUsingFallbackData(true);
+          
+          // Ensure fallback data has correct averageData
+          if (!fallbackData.averageData) {
+            const fallbackAverageData = averageDataService.getDefaultAverageData();
+            fallbackData.averageData = fallbackAverageData;
+          }
+          
           return fallbackData;
         }
         
@@ -197,6 +223,7 @@ export const useReportData = (
     hasAverageData: !!processedData?.averageData,
     averageDataType: typeof processedData?.averageData,
     costPEPYValue: processedData?.averageData ? processedData.averageData["Cost_Medical & RX Paid Amount PEPY"] : 'missing',
+    isCorrectValue: processedData?.averageData ? processedData.averageData["Cost_Medical & RX Paid Amount PEPY"] === 13440 : false,
     isLoading,
     error: !!error
   });
