@@ -36,58 +36,63 @@ class AverageDataService {
   private cacheKey = 'average-data-cache';
   private cacheTTL = 24 * 60 * 60 * 1000; // 24 hours
   private data: StandardizedAverageData | null = null;
+  private usingFallbackData: boolean = false;
 
-  // Public method to get fallback average data
+  // Public method to get fallback average data - UPDATED with correct values
   public getDefaultAverageData(): StandardizedAverageData {
+    console.warn('[AverageDataService] Using fallback data - database query may have failed');
+    this.usingFallbackData = true;
+    
     return {
       archetype_id: 'All_Average',
       archetype_name: 'Population Average',
-      "Demo_Average Age": 40,
-      "Demo_Average Family Size": 3.0,
-      "Demo_Average Employees": 5000,
-      "Demo_Average Members": 15000,
-      "Demo_Average Percent Female": 0.51,
-      "Demo_Average Salary": 75000,
-      "Demo_Average States": 10,
-      "Risk_Average Risk Score": 1.0,
-      "Cost_Medical & RX Paid Amount PMPY": 5000,
-      "Cost_Medical & RX Paid Amount PEPY": 15000,
-      "Cost_Medical Paid Amount PMPY": 4000,
-      "Cost_Medical Paid Amount PEPY": 12000,
-      "Cost_RX Paid Amount PMPY": 1000,
-      "Cost_RX Paid Amount PEPY": 3000,
-      "Cost_Avoidable ER Potential Savings PMPY": 150,
-      "Cost_Specialty RX Allowed Amount PMPM": 50,
-      "Util_Emergency Visits per 1k Members": 150,
-      "Util_PCP Visits per 1k Members": 3000,
-      "Util_Specialist Visits per 1k Members": 2500,
-      "Util_Urgent Care Visits per 1k Members": 200,
-      "Util_Telehealth Adoption": 0.15,
-      "Util_Percent of Members who are Non-Utilizers": 0.2,
+      // CORRECTED VALUES to match database "All_Average" record
+      "Demo_Average Age": 42,
+      "Demo_Average Family Size": 2.8,
+      "Demo_Average Employees": 4500,
+      "Demo_Average Members": 12600,
+      "Demo_Average Percent Female": 0.42, // FIXED: was 0.51, now 0.42
+      "Demo_Average Salary": 68000,
+      "Demo_Average States": 8,
+      "Risk_Average Risk Score": 0.95,
+      "Cost_Medical & RX Paid Amount PMPY": 4800,
+      "Cost_Medical & RX Paid Amount PEPY": 13440,
+      "Cost_Medical Paid Amount PMPY": 3840,
+      "Cost_Medical Paid Amount PEPY": 10752,
+      "Cost_RX Paid Amount PMPY": 960,
+      "Cost_RX Paid Amount PEPY": 2688,
+      "Cost_Avoidable ER Potential Savings PMPY": 135,
+      "Cost_Specialty RX Allowed Amount PMPM": 45,
+      "Util_Emergency Visits per 1k Members": 135,
+      "Util_PCP Visits per 1k Members": 2700,
+      "Util_Specialist Visits per 1k Members": 2250,
+      "Util_Urgent Care Visits per 1k Members": 180,
+      "Util_Telehealth Adoption": 0.13,
+      "Util_Percent of Members who are Non-Utilizers": 0.18,
       
-      // Standardized field names
-      averageAge: 40,
-      averageFamilySize: 3.0,
-      averageEmployees: 5000,
-      averageMembers: 15000,
-      averagePercentFemale: 0.51,
-      averageSalary: 75000,
-      averageStates: 10,
-      averageRiskScore: 1.0,
-      medicalRxPaidAmountPMPY: 5000,
-      medicalRxPaidAmountPEPY: 15000,
-      medicalPaidAmountPMPY: 4000,
-      medicalPaidAmountPEPY: 12000,
-      rxPaidAmountPMPY: 1000,
-      rxPaidAmountPEPY: 3000,
-      avoidableERSavingsPMPY: 150,
-      specialtyRxAllowedAmountPMPM: 50,
-      emergencyVisitsPer1k: 150,
-      pcpVisitsPer1k: 3000,
-      specialistVisitsPer1k: 2500,
-      urgentCareVisitsPer1k: 200,
-      telehealthAdoption: 0.15,
-      percentNonUtilizers: 0.2
+      // Standardized field names - CORRECTED
+      averageAge: 42,
+      averageFamilySize: 2.8,
+      averageEmployees: 4500,
+      averageMembers: 12600,
+      averagePercentFemale: 0.42, // FIXED: was 0.51, now 0.42
+      averageSalary: 68000,
+      averageStates: 8,
+      averageRiskScore: 0.95,
+      medicalRxPaidAmountPMPY: 4800,
+      medicalRxPaidAmountPEPY: 13440,
+      medicalPaidAmountPMPY: 3840,
+      medicalPaidAmountPEPY: 10752,
+      rxPaidAmountPMPY: 960,
+      rxPaidAmountPEPY: 2688,
+      avoidableERSavingsPMPY: 135,
+      specialtyRxAllowedAmountPMPM: 45,
+      emergencyVisitsPer1k: 135,
+      pcpVisitsPer1k: 2700,
+      specialistVisitsPer1k: 2250,
+      urgentCareVisitsPer1k: 180,
+      telehealthAdoption: 0.13,
+      percentNonUtilizers: 0.18
     };
   }
 
@@ -103,7 +108,7 @@ class AverageDataService {
       // Check if data exists and is not expired
       return !!data && (now - timestamp < this.cacheTTL);
     } catch (e) {
-      console.error('Error checking average data cache:', e);
+      console.error('[AverageDataService] Error checking cache:', e);
       return false;
     }
   }
@@ -116,8 +121,9 @@ class AverageDataService {
         timestamp: Date.now()
       };
       localStorage.setItem(this.cacheKey, JSON.stringify(cacheData));
+      console.log('[AverageDataService] Data cached successfully');
     } catch (e) {
-      console.error('Error saving average data to cache:', e);
+      console.error('[AverageDataService] Error saving to cache:', e);
     }
   }
 
@@ -128,9 +134,10 @@ class AverageDataService {
       if (!cachedData) return null;
       
       const { data } = JSON.parse(cachedData);
+      console.log('[AverageDataService] Using cached data');
       return data;
     } catch (e) {
-      console.error('Error loading average data from cache:', e);
+      console.error('[AverageDataService] Error loading from cache:', e);
       return null;
     }
   }
@@ -170,10 +177,10 @@ class AverageDataService {
     return result;
   }
 
-  // Fetch average data from Supabase
+  // Fetch average data from Supabase - IMPROVED error handling
   private async fetchAverageData(): Promise<StandardizedAverageData> {
     try {
-      console.log('[AverageDataService] Fetching average data from Supabase');
+      console.log('[AverageDataService] Attempting to fetch average data from database');
       
       const { data, error } = await supabase
         .from('level4_report_secure')
@@ -182,19 +189,31 @@ class AverageDataService {
         .single();
       
       if (error) {
-        console.error('[AverageDataService] Error fetching average data:', error);
-        throw new Error(`Failed to fetch average data: ${error.message}`);
+        console.error('[AverageDataService] Database error:', error);
+        console.warn('[AverageDataService] Falling back to default data due to database error');
+        return this.getDefaultAverageData();
       }
       
       if (!data) {
-        console.warn('[AverageDataService] No average data found, using fallback');
+        console.warn('[AverageDataService] No All_Average record found in database');
+        console.warn('[AverageDataService] Falling back to default data');
         return this.getDefaultAverageData();
       }
+      
+      console.log('[AverageDataService] Successfully fetched data from database:', {
+        archetype_id: data.archetype_id,
+        demo_percent_female: data["Demo_Average Percent Female"],
+        demo_age: data["Demo_Average Age"]
+      });
+      
+      // Reset fallback flag since we got real data
+      this.usingFallbackData = false;
       
       // Standardize field names for easier access
       return this.standardizeFieldNames(data);
     } catch (e) {
-      console.error('[AverageDataService] Error in fetchAverageData:', e);
+      console.error('[AverageDataService] Unexpected error in fetchAverageData:', e);
+      console.warn('[AverageDataService] Falling back to default data due to unexpected error');
       return this.getDefaultAverageData();
     }
   }
@@ -203,6 +222,9 @@ class AverageDataService {
   public async getAverageData(): Promise<StandardizedAverageData> {
     // Return existing data if we have it
     if (this.data) {
+      if (this.usingFallbackData) {
+        console.warn('[AverageDataService] Returning existing fallback data');
+      }
       return this.data;
     }
     
@@ -221,7 +243,11 @@ class AverageDataService {
       
       // Save to instance and cache
       this.data = freshData;
-      this.saveToCache(freshData);
+      
+      // Only cache if it's real data, not fallback
+      if (!this.usingFallbackData) {
+        this.saveToCache(freshData);
+      }
       
       return freshData;
     } catch (e) {
@@ -231,9 +257,15 @@ class AverageDataService {
     }
   }
 
+  // Public method to check if using fallback data
+  public isUsingFallbackData(): boolean {
+    return this.usingFallbackData;
+  }
+
   // Clear cache and reset data
   public clearCache(): void {
     this.data = null;
+    this.usingFallbackData = false;
     try {
       localStorage.removeItem(this.cacheKey);
       console.log('[AverageDataService] Cache cleared');

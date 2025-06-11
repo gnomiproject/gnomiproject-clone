@@ -1,5 +1,6 @@
 
 import { ArchetypeDetailedData } from '@/types/archetype';
+import { averageDataService } from '@/services/AverageDataService';
 
 // Interface for processed report data - simplified to match production
 export interface ProcessedReportData {
@@ -7,41 +8,27 @@ export interface ProcessedReportData {
   averageData: any;
 }
 
-// Static average data updated to use "Archetype Average" terminology
-export const createDefaultAverageData = () => {
-  return {
-    archetype_id: 'All_Average',
-    archetype_name: 'Archetype Average',
-    "Demo_Average Age": 40,
-    "Demo_Average Family Size": 3.0,
-    "Demo_Average Employees": 5000,
-    "Demo_Average Members": 15000,
-    "Demo_Average Percent Female": 0.51,
-    "Demo_Average Salary": 75000,
-    "Demo_Average States": 10,
-    "Risk_Average Risk Score": 1.0,
-    "Cost_Medical & RX Paid Amount PMPY": 5000,
-    "Cost_Medical & RX Paid Amount PEPY": 15000,
-    "Cost_Medical Paid Amount PMPY": 4000,
-    "Cost_Medical Paid Amount PEPY": 12000,
-    "Cost_RX Paid Amount PMPY": 1000,
-    "Cost_RX Paid Amount PEPY": 3000,
-    "Cost_Avoidable ER Potential Savings PMPY": 150,
-    "Cost_Specialty RX Allowed Amount PMPM": 50,
-    "Util_Emergency Visits per 1k Members": 150,
-    "Util_PCP Visits per 1k Members": 3000,
-    "Util_Specialist Visits per 1k Members": 2500,
-    "Util_Urgent Care Visits per 1k Members": 200,
-    "Util_Telehealth Adoption": 0.15,
-    "Util_Percent of Members who are Non-Utilizers": 0.2
-  };
-};
-
-// SIMPLIFIED process function - database schema is consistent
+// SIMPLIFIED process function - now uses AverageDataService for consistency
 export const processReportData = async (data: ArchetypeDetailedData | null): Promise<ProcessedReportData> => {
-  console.log('[processReportData] Processing data with simplified handling');
+  console.log('[processReportData] Processing data with improved average data handling');
   
-  const averageData = createDefaultAverageData();
+  // Get average data from the centralized service
+  const averageData = await averageDataService.getAverageData();
+  
+  // Log if we're using fallback data
+  if (averageDataService.isUsingFallbackData()) {
+    console.warn('[processReportData] Using fallback average data - database may be unavailable');
+  } else {
+    console.log('[processReportData] Using database average data');
+  }
+
+  // Validate average data consistency
+  console.log('[processReportData] Average data validation:', {
+    percentFemale: averageData["Demo_Average Percent Female"],
+    age: averageData["Demo_Average Age"],
+    familySize: averageData["Demo_Average Family Size"],
+    dataSource: averageDataService.isUsingFallbackData() ? 'fallback' : 'database'
+  });
 
   if (!data) {
     return {
@@ -76,12 +63,27 @@ export const processReportData = async (data: ArchetypeDetailedData | null): Pro
     distinctive_metrics: processedDistinctiveMetrics
   };
 
-  console.log('[processReportData] Final processed distinctive metrics:', processedDistinctiveMetrics);
+  console.log('[processReportData] Final processed data with consistent averages:', {
+    hasDistinctiveMetrics: processedDistinctiveMetrics.length > 0,
+    averageDataSource: averageDataService.isUsingFallbackData() ? 'fallback' : 'database',
+    percentFemaleAverage: averageData["Demo_Average Percent Female"]
+  });
 
   return {
     reportData: processedData,
     averageData
   };
+};
+
+// Legacy function for backward compatibility - now uses AverageDataService
+export const createDefaultAverageData = async () => {
+  const averageData = await averageDataService.getAverageData();
+  
+  if (averageDataService.isUsingFallbackData()) {
+    console.warn('[createDefaultAverageData] Returning fallback average data');
+  }
+  
+  return averageData;
 };
 
 // Legacy function for backward compatibility
