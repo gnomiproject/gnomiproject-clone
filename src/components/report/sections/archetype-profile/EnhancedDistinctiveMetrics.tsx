@@ -147,7 +147,7 @@ const EnhancedDistinctiveMetrics: React.FC<EnhancedDistinctiveMetricsProps> = ({
                 
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Your Value:</span>
+                    <span className="text-gray-600">Your Archetype:</span>
                     <span className="font-medium">
                       {typeof metricValue === 'number' 
                         ? (metricValue < 1 ? formatPercentage(metricValue) : metricValue.toLocaleString())
