@@ -36,8 +36,8 @@ const DemographicsSection: React.FC<DemographicsSectionProps> = ({
         const freshAverageData = await averageDataService.getAverageData();
         
         // Check if the passed averageData is different from the service data
-        const passedPercentFemale = averageData?.["Demo_Average Percent Female"];
-        const servicePercentFemale = freshAverageData["Demo_Average Percent Female"];
+        const passedPercentFemale = Number(averageData?.["Demo_Average Percent Female"]) || 0;
+        const servicePercentFemale = Number(freshAverageData["Demo_Average Percent Female"]) || 0;
         
         if (passedPercentFemale && servicePercentFemale && Math.abs(passedPercentFemale - servicePercentFemale) > 0.01) {
           console.warn('[DemographicsSection] Data inconsistency detected:', {
@@ -66,23 +66,23 @@ const DemographicsSection: React.FC<DemographicsSectionProps> = ({
     validateAverageData();
   }, [averageData]);
 
-  // Extract demographic data
-  const employees = reportData?.["Demo_Average Employees"] || 0;
-  const members = reportData?.["Demo_Average Members"] || 0;
-  const familySize = reportData?.["Demo_Average Family Size"] || 0;
-  const states = reportData?.["Demo_Average States"] || 0;
-  const percentFemale = reportData?.["Demo_Average Percent Female"] || 0;
-  const age = reportData?.["Demo_Average Age"] || 0;
-  const salary = reportData?.["Demo_Average Salary"] || 0;
+  // Extract demographic data with proper type conversion
+  const employees = Number(reportData?.["Demo_Average Employees"]) || 0;
+  const members = Number(reportData?.["Demo_Average Members"]) || 0;
+  const familySize = Number(reportData?.["Demo_Average Family Size"]) || 0;
+  const states = Number(reportData?.["Demo_Average States"]) || 0;
+  const percentFemale = Number(reportData?.["Demo_Average Percent Female"]) || 0;
+  const age = Number(reportData?.["Demo_Average Age"]) || 0;
+  const salary = Number(reportData?.["Demo_Average Salary"]) || 0;
   
-  // Extract average data for comparison - use validated data
-  const avgEmployees = validatedAverageData?.["Demo_Average Employees"] || 0;
-  const avgMembers = validatedAverageData?.["Demo_Average Members"] || 0;
-  const avgFamilySize = validatedAverageData?.["Demo_Average Family Size"] || 0;
-  const avgStates = validatedAverageData?.["Demo_Average States"] || 0;
-  const avgPercentFemale = validatedAverageData?.["Demo_Average Percent Female"] || 0;
-  const avgAge = validatedAverageData?.["Demo_Average Age"] || 0;
-  const avgSalary = validatedAverageData?.["Demo_Average Salary"] || 0;
+  // Extract average data for comparison - use validated data with proper type conversion
+  const avgEmployees = Number(validatedAverageData?.["Demo_Average Employees"]) || 0;
+  const avgMembers = Number(validatedAverageData?.["Demo_Average Members"]) || 0;
+  const avgFamilySize = Number(validatedAverageData?.["Demo_Average Family Size"]) || 0;
+  const avgStates = Number(validatedAverageData?.["Demo_Average States"]) || 0;
+  const avgPercentFemale = Number(validatedAverageData?.["Demo_Average Percent Female"]) || 0;
+  const avgAge = Number(validatedAverageData?.["Demo_Average Age"]) || 0;
+  const avgSalary = Number(validatedAverageData?.["Demo_Average Salary"]) || 0;
   
   // Demographic insights
   const insights = reportData?.demographic_insights || '';
