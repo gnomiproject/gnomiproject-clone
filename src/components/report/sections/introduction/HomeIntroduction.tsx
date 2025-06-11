@@ -1,15 +1,15 @@
 
 import React from 'react';
 import SectionTitle from '@/components/shared/SectionTitle';
-import ReportIntroduction from './ReportIntroduction';
-import WelcomeCard from './introduction/WelcomeCard';
-import MetricCardsGrid from './introduction/MetricCardsGrid';
-import ExecutiveSummaryCard from './introduction/ExecutiveSummaryCard';
-import ReportDiscoveryCard from './introduction/ReportDiscoveryCard';
-import MetricsValidator from './introduction/MetricsValidator';
-import CacheClearButton from './introduction/CacheClearButton';
-import { extractUserData, extractArchetypeData } from './introduction/utils/userDataExtraction';
-import { buildMetrics } from './introduction/utils/metricExtraction';
+import ReportIntroduction from '../ReportIntroduction';
+import WelcomeCard from './WelcomeCard';
+import MetricCardsGrid from './MetricCardsGrid';
+import ExecutiveSummaryCard from './ExecutiveSummaryCard';
+import ReportDiscoveryCard from './ReportDiscoveryCard';
+import MetricsValidator from './MetricsValidator';
+import CacheClearButton from './CacheClearButton';
+import { extractUserData, extractArchetypeData } from './utils/userDataExtraction';
+import { buildMetrics } from './utils/metricExtraction';
 
 interface HomeIntroductionProps {
   userData: any;
