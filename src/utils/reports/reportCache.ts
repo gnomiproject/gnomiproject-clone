@@ -1,4 +1,3 @@
-
 import { ArchetypeDetailedData } from '@/types/archetype';
 import { ProcessedReportData } from './reportDataTransforms';
 import { toast } from 'sonner';
@@ -17,13 +16,7 @@ const CACHE_CONFIG = {
   WARNING_THRESHOLD_MS: 4 * 60 * 60 * 1000, // 4 hours before expiration
   MINIMUM_VALID_TTL_MS: 30 * 60 * 1000, // 30 minutes minimum validity
   SESSION_STORAGE_KEY: 'report-cache-manifest',
-  CURRENT_VERSION: 2, // Increment to invalidate all existing cache
-  EXPECTED_AVERAGE_VALUES: {
-    costPEPY: 13440,
-    riskScore: 0.95,
-    emergencyVisits: 135,
-    specialistVisits: 2250
-  }
+  CURRENT_VERSION: 3, // Increment to invalidate all existing cache
 };
 
 // Simple in-memory cache for report data
@@ -82,36 +75,27 @@ const persistCache = () => {
   }
 };
 
-// Validate cached average data has correct values
+// Validate cached average data has required structure (not exact values)
 const validateAverageData = (cachedData: ProcessedReportData): boolean => {
   if (!cachedData.averageData) {
-    console.warn('[reportCache] Cache validation failed: no averageData');
     return false;
   }
   
-  const expected = CACHE_CONFIG.EXPECTED_AVERAGE_VALUES;
-  const actual = cachedData.averageData;
+  // Check for required structure, not exact values
+  const requiredFields = [
+    "Cost_Medical & RX Paid Amount PEPY",
+    "Risk_Average Risk Score",
+    "Util_Emergency Visits per 1k Members",
+    "Util_Specialist Visits per 1k Members"
+  ];
   
-  const costPEPY = actual["Cost_Medical & RX Paid Amount PEPY"];
-  const riskScore = actual["Risk_Average Risk Score"];
-  const emergencyVisits = actual["Util_Emergency Visits per 1k Members"];
-  const specialistVisits = actual["Util_Specialist Visits per 1k Members"];
-  
-  const isValid = (
-    costPEPY === expected.costPEPY &&
-    riskScore === expected.riskScore &&
-    emergencyVisits === expected.emergencyVisits &&
-    specialistVisits === expected.specialistVisits
-  );
-  
-  if (!isValid) {
-    console.warn('[reportCache] Cache validation failed: incorrect average values', {
-      expected,
-      actual: { costPEPY, riskScore, emergencyVisits, specialistVisits }
-    });
+  for (const field of requiredFields) {
+    if (cachedData.averageData[field] === undefined || cachedData.averageData[field] === null) {
+      return false;
+    }
   }
   
-  return isValid;
+  return true;
 };
 
 // Check if cached data is still valid
@@ -120,7 +104,6 @@ const isCacheValid = (cachedReport: CachedReport | null): boolean => {
   
   // Check version
   if (!cachedReport.version || cachedReport.version < CACHE_CONFIG.CURRENT_VERSION) {
-    console.warn('[reportCache] Cache invalidated due to version mismatch');
     return false;
   }
   
@@ -129,13 +112,11 @@ const isCacheValid = (cachedReport: CachedReport | null): boolean => {
   const timeRemaining = cachedReport.expiresAt - now;
   
   if (!isTimeValid) {
-    console.warn('[reportCache] Cache expired');
     return false;
   }
   
-  // Validate average data correctness
+  // Validate average data structure
   if (!validateAverageData(cachedReport.data)) {
-    console.warn('[reportCache] Cache invalidated due to incorrect average values');
     return false;
   }
   
@@ -145,7 +126,6 @@ const isCacheValid = (cachedReport: CachedReport | null): boolean => {
     
     // If less than minimum TTL remaining, invalidate cache
     if (timeRemaining < CACHE_CONFIG.MINIMUM_VALID_TTL_MS) {
-      console.warn(`[reportCache] Cache invalidated - too close to expiration`);
       return false;
     }
   }
@@ -176,7 +156,7 @@ export const getFromCache = (key: string): ProcessedReportData | null => {
 export const setInCache = (key: string, data: ProcessedReportData, ttlMs: number = CACHE_CONFIG.DEFAULT_TTL_MS): void => {
   // Validate data before caching
   if (!validateAverageData(data)) {
-    console.error(`[reportCache] Refusing to cache invalid data for ${key}`);
+    console.log(`[reportCache] Skipping cache for ${key} - data structure validation failed`);
     return;
   }
   

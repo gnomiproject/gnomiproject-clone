@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 // Standard interface for average data to ensure consistent field access
@@ -32,20 +33,20 @@ export interface StandardizedAverageData {
 }
 
 class AverageDataService {
-  private cacheKey = 'average-data-cache-v2'; // Updated cache key version
+  private cacheKey = 'average-data-cache-v3'; // Updated cache key version
   private cacheTTL = 24 * 60 * 60 * 1000; // 24 hours
   private data: StandardizedAverageData | null = null;
   private usingFallbackData: boolean = false;
 
-  // Public method to get fallback average data - CORRECTED VALUES
+  // Public method to get fallback average data
   public getDefaultAverageData(): StandardizedAverageData {
-    console.warn('[AverageDataService] Using corrected fallback data');
+    console.log('[AverageDataService] Using fallback average data');
     this.usingFallbackData = true;
     
     return {
       archetype_id: 'All_Average',
       archetype_name: 'Population Average',
-      // CORRECTED VALUES to match expected values in intro metrics
+      // Standard fallback values
       "Demo_Average Age": 42,
       "Demo_Average Family Size": 2.8,
       "Demo_Average Employees": 4500,
@@ -53,23 +54,23 @@ class AverageDataService {
       "Demo_Average Percent Female": 0.42,
       "Demo_Average Salary": 68000,
       "Demo_Average States": 8,
-      "Risk_Average Risk Score": 0.95, // CORRECTED: was 1.0, now 0.95
+      "Risk_Average Risk Score": 0.95,
       "Cost_Medical & RX Paid Amount PMPY": 4800,
-      "Cost_Medical & RX Paid Amount PEPY": 13440, // CORRECTED: was 15000, now 13440
+      "Cost_Medical & RX Paid Amount PEPY": 13440,
       "Cost_Medical Paid Amount PMPY": 3840,
       "Cost_Medical Paid Amount PEPY": 10752,
       "Cost_RX Paid Amount PMPY": 960,
       "Cost_RX Paid Amount PEPY": 2688,
       "Cost_Avoidable ER Potential Savings PMPY": 135,
       "Cost_Specialty RX Allowed Amount PMPM": 45,
-      "Util_Emergency Visits per 1k Members": 135, // CORRECTED: was 150, now 135
+      "Util_Emergency Visits per 1k Members": 135,
       "Util_PCP Visits per 1k Members": 2700,
-      "Util_Specialist Visits per 1k Members": 2250, // CORRECTED: was 2500, now 2250
+      "Util_Specialist Visits per 1k Members": 2250,
       "Util_Urgent Care Visits per 1k Members": 180,
       "Util_Telehealth Adoption": 0.13,
       "Util_Percent of Members who are Non-Utilizers": 0.18,
       
-      // Standardized field names - CORRECTED
+      // Standardized field names
       averageAge: 42,
       averageFamilySize: 2.8,
       averageEmployees: 4500,
@@ -77,38 +78,39 @@ class AverageDataService {
       averagePercentFemale: 0.42,
       averageSalary: 68000,
       averageStates: 8,
-      averageRiskScore: 0.95, // CORRECTED
+      averageRiskScore: 0.95,
       medicalRxPaidAmountPMPY: 4800,
-      medicalRxPaidAmountPEPY: 13440, // CORRECTED
+      medicalRxPaidAmountPEPY: 13440,
       medicalPaidAmountPMPY: 3840,
       medicalPaidAmountPEPY: 10752,
       rxPaidAmountPMPY: 960,
       rxPaidAmountPEPY: 2688,
       avoidableERSavingsPMPY: 135,
       specialtyRxAllowedAmountPMPM: 45,
-      emergencyVisitsPer1k: 135, // CORRECTED
+      emergencyVisitsPer1k: 135,
       pcpVisitsPer1k: 2700,
-      specialistVisitsPer1k: 2250, // CORRECTED
+      specialistVisitsPer1k: 2250,
       urgentCareVisitsPer1k: 180,
       telehealthAdoption: 0.13,
       percentNonUtilizers: 0.18
     };
   }
 
-  // Validate that the data has correct expected values
+  // Validate that the data has required structure (not exact values)
   private validateAverageData(data: any): boolean {
     if (!data) return false;
     
-    const expectedValues = {
-      "Cost_Medical & RX Paid Amount PEPY": 13440,
-      "Risk_Average Risk Score": 0.95,
-      "Util_Emergency Visits per 1k Members": 135,
-      "Util_Specialist Visits per 1k Members": 2250
-    };
+    // Check for required fields structure, not exact values
+    const requiredFields = [
+      "Cost_Medical & RX Paid Amount PEPY",
+      "Risk_Average Risk Score",
+      "Util_Emergency Visits per 1k Members",
+      "Util_Specialist Visits per 1k Members"
+    ];
     
-    for (const [field, expectedValue] of Object.entries(expectedValues)) {
-      if (data[field] !== expectedValue) {
-        console.warn(`[AverageDataService] Data validation failed for ${field}: expected ${expectedValue}, got ${data[field]}`);
+    for (const field of requiredFields) {
+      if (data[field] === undefined || data[field] === null || typeof data[field] !== 'number') {
+        console.warn(`[AverageDataService] Missing or invalid field: ${field}`);
         return false;
       }
     }
@@ -125,12 +127,12 @@ class AverageDataService {
       const { data, timestamp } = JSON.parse(cachedData);
       const now = Date.now();
       
-      // Check if data exists, is not expired, and has correct values
+      // Check if data exists, is not expired, and has valid structure
       const isTimeValid = data && (now - timestamp < this.cacheTTL);
       const isDataValid = isTimeValid && this.validateAverageData(data);
       
       if (!isDataValid && isTimeValid) {
-        console.warn('[AverageDataService] Cache has incorrect values, invalidating');
+        console.warn('[AverageDataService] Cache has invalid structure, clearing');
         localStorage.removeItem(this.cacheKey);
         return false;
       }
@@ -207,10 +209,10 @@ class AverageDataService {
     return result;
   }
 
-  // Fetch average data from Supabase - FORCE FRESH DATA
+  // Fetch average data from Supabase
   private async fetchAverageData(): Promise<StandardizedAverageData> {
     try {
-      console.log('[AverageDataService] 🔄 FORCE FETCHING fresh average data from database');
+      console.log('[AverageDataService] Fetching average data from database');
       
       const { data, error } = await supabase
         .from('level4_deepdive_report_data')
@@ -220,29 +222,23 @@ class AverageDataService {
       
       if (error) {
         console.error('[AverageDataService] Database error:', error);
-        console.warn('[AverageDataService] Falling back to corrected default data');
+        console.log('[AverageDataService] Falling back to default data');
         return this.getDefaultAverageData();
       }
       
       if (!data) {
         console.warn('[AverageDataService] No All_Average record found in database');
-        console.warn('[AverageDataService] Falling back to corrected default data');
+        console.log('[AverageDataService] Falling back to default data');
         return this.getDefaultAverageData();
       }
       
-      // Validate the fetched data
+      // Validate the fetched data structure
       if (!this.validateAverageData(data)) {
-        console.error('[AverageDataService] Database data failed validation, using corrected fallback');
+        console.error('[AverageDataService] Database data failed structure validation, using fallback');
         return this.getDefaultAverageData();
       }
       
-      console.log('[AverageDataService] ✅ Successfully fetched and validated data from database:', {
-        archetype_id: data.archetype_id,
-        cost_pepy: data["Cost_Medical & RX Paid Amount PEPY"],
-        risk_score: data["Risk_Average Risk Score"],
-        emergency_visits: data["Util_Emergency Visits per 1k Members"],
-        specialist_visits: data["Util_Specialist Visits per 1k Members"]
-      });
+      console.log('[AverageDataService] ✅ Successfully fetched and validated data from database');
       
       // Reset fallback flag since we got valid real data
       this.usingFallbackData = false;
@@ -251,16 +247,23 @@ class AverageDataService {
       return this.standardizeFieldNames(data);
     } catch (e) {
       console.error('[AverageDataService] Unexpected error in fetchAverageData:', e);
-      console.warn('[AverageDataService] Falling back to corrected default data');
+      console.log('[AverageDataService] Falling back to default data');
       return this.getDefaultAverageData();
     }
   }
 
-  // Public method to get average data (ALWAYS FETCH FRESH FOR NOW)
+  // Public method to get average data
   public async getAverageData(): Promise<StandardizedAverageData> {
-    // TEMPORARY: Always fetch fresh data to ensure correct values
-    console.log('[AverageDataService] 🔄 Forcing fresh data fetch to ensure correct values');
-    
+    // Check cache first
+    if (this.isCacheValid()) {
+      const cachedData = this.loadFromCache();
+      if (cachedData) {
+        this.data = cachedData;
+        this.usingFallbackData = false;
+        return cachedData;
+      }
+    }
+
     try {
       const freshData = await this.fetchAverageData();
       
@@ -270,9 +273,6 @@ class AverageDataService {
       // Only cache if it's real data and passes validation
       if (!this.usingFallbackData && this.validateAverageData(freshData)) {
         this.saveToCache(freshData);
-        console.log('[AverageDataService] ✅ Cached validated real data');
-      } else {
-        console.warn('[AverageDataService] Not caching fallback/invalid data');
       }
       
       return freshData;
