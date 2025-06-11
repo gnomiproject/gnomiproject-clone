@@ -95,7 +95,7 @@ const WelcomeCard = ({
           <div className="flex items-center gap-2 text-blue-700 bg-blue-50 p-3 rounded-lg">
             <Users className="w-5 h-5" />
             <p className="text-sm font-medium">
-              This analysis is based on industry benchmarks and your specific organizational profile.
+              This analysis is based on archetype benchmarks and your specific organizational profile.
             </p>
           </div>
         </div>

@@ -7,6 +7,7 @@ import WelcomeCard from './introduction/WelcomeCard';
 import MetricCardsGrid from './introduction/MetricCardsGrid';
 import ExecutiveSummaryCard from './introduction/ExecutiveSummaryCard';
 import ReportDiscoveryCard from './introduction/ReportDiscoveryCard';
+import { averageDataService } from '@/services/AverageDataService';
 
 interface HomeIntroductionProps {
   userData: any;
@@ -15,12 +16,34 @@ interface HomeIntroductionProps {
 }
 
 const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroductionProps) => {
-  // COMPREHENSIVE DEBUG LOGGING
+  // COMPREHENSIVE DEBUG LOGGING - Enhanced for data validation
   console.log('=== HomeIntroduction DEBUG START ===');
   console.log('[HomeIntroduction] Full userData object:', userData);
   console.log('[HomeIntroduction] userData type:', typeof userData);
   console.log('[HomeIntroduction] userData is null:', userData === null);
   console.log('[HomeIntroduction] userData is undefined:', userData === undefined);
+  
+  // NEW: Enhanced averageData validation and logging
+  console.log('[HomeIntroduction] averageData received:', averageData);
+  console.log('[HomeIntroduction] averageData type:', typeof averageData);
+  if (averageData) {
+    console.log('[HomeIntroduction] averageData keys:', Object.keys(averageData));
+    console.log('[HomeIntroduction] averageData demo fields:', {
+      percentFemale: averageData["Demo_Average Percent Female"],
+      age: averageData["Demo_Average Age"],
+      familySize: averageData["Demo_Average Family Size"],
+      employees: averageData["Demo_Average Employees"]
+    });
+    console.log('[HomeIntroduction] averageData cost fields:', {
+      costPEPY: averageData["Cost_Medical & RX Paid Amount PEPY"],
+      costPMPY: averageData["Cost_Medical & RX Paid Amount PMPY"],
+      riskScore: averageData["Risk_Average Risk Score"]
+    });
+  }
+  
+  // Check if we're using fallback data from the service
+  const isUsingServiceFallback = averageDataService.isUsingFallbackData();
+  console.log('[HomeIntroduction] AverageDataService using fallback:', isUsingServiceFallback);
   
   if (userData) {
     console.log('[HomeIntroduction] userData keys:', Object.keys(userData));
@@ -66,6 +89,26 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
   const safeUserData = userData || {};
   const safeArchetypeData = archetypeData || {};
   const safeAverageData = averageData || {};
+
+  // NEW: Validate that we have the expected average data fields
+  const requiredAverageFields = [
+    "Demo_Average Percent Female",
+    "Demo_Average Age", 
+    "Demo_Average Family Size",
+    "Cost_Medical & RX Paid Amount PEPY",
+    "Risk_Average Risk Score",
+    "Util_Emergency Visits per 1k Members",
+    "Util_Specialist Visits per 1k Members"
+  ];
+  
+  const missingFields = requiredAverageFields.filter(field => 
+    safeAverageData[field] === undefined || safeAverageData[field] === null
+  );
+  
+  if (missingFields.length > 0) {
+    console.warn('[HomeIntroduction] Missing average data fields:', missingFields);
+    console.warn('[HomeIntroduction] This may cause fallback values to be used');
+  }
 
   // Try multiple possible paths for user name with comprehensive fallback logic
   let userName = null;
@@ -124,31 +167,72 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
   const executiveSummary = safeArchetypeData?.executive_summary;
   const keyInsights = safeArchetypeData?.key_findings || [];
   
-  // Use exact database field names with safe fallbacks
+  // FIXED: Use exact database field names with CORRECTED fallback values from AverageDataService
+  const getAverageDataFallback = () => {
+    // Use the same fallback values as AverageDataService for consistency
+    return {
+      "Cost_Medical & RX Paid Amount PEPY": 13440,  // CORRECTED: was 15000
+      "Risk_Average Risk Score": 0.95,
+      "Util_Emergency Visits per 1k Members": 135,  // CORRECTED: was 150
+      "Util_Specialist Visits per 1k Members": 2250 // CORRECTED: was 2500
+    };
+  };
+  
+  const fallbackAverages = getAverageDataFallback();
+  
   const metrics = {
     cost: {
       name: "Total Cost PEPY",
       value: safeArchetypeData?.["Cost_Medical & RX Paid Amount PEPY"] || 12000,
-      average: safeAverageData?.["Cost_Medical & RX Paid Amount PEPY"] || 15000
+      average: safeAverageData?.["Cost_Medical & RX Paid Amount PEPY"] || fallbackAverages["Cost_Medical & RX Paid Amount PEPY"]
     },
     risk: {
       name: "Risk Score",
       value: safeArchetypeData?.["Risk_Average Risk Score"] || 1.0,
-      average: safeAverageData?.["Risk_Average Risk Score"] || 1.0
+      average: safeAverageData?.["Risk_Average Risk Score"] || fallbackAverages["Risk_Average Risk Score"]
     },
     emergency: {
       name: "ER Visits per 1K",
       value: safeArchetypeData?.["Util_Emergency Visits per 1k Members"] || 120,
-      average: safeAverageData?.["Util_Emergency Visits per 1k Members"] || 150
+      average: safeAverageData?.["Util_Emergency Visits per 1k Members"] || fallbackAverages["Util_Emergency Visits per 1k Members"]
     },
     specialist: {
       name: "Specialist Visits per 1K",
       value: safeArchetypeData?.["Util_Specialist Visits per 1k Members"] || 2200,
-      average: safeAverageData?.["Util_Specialist Visits per 1k Members"] || 2500
+      average: safeAverageData?.["Util_Specialist Visits per 1k Members"] || fallbackAverages["Util_Specialist Visits per 1k Members"]
     }
   };
 
-  console.log('[HomeIntroduction] Processed metrics:', metrics);
+  // NEW: Log which values are using fallbacks vs real data
+  console.log('[HomeIntroduction] Metrics data source analysis:', {
+    cost: {
+      usingFallback: !safeAverageData?.["Cost_Medical & RX Paid Amount PEPY"],
+      value: metrics.cost.average,
+      source: safeAverageData?.["Cost_Medical & RX Paid Amount PEPY"] ? 'database' : 'fallback'
+    },
+    risk: {
+      usingFallback: !safeAverageData?.["Risk_Average Risk Score"],
+      value: metrics.risk.average,
+      source: safeAverageData?.["Risk_Average Risk Score"] ? 'database' : 'fallback'
+    },
+    emergency: {
+      usingFallback: !safeAverageData?.["Util_Emergency Visits per 1k Members"],
+      value: metrics.emergency.average,
+      source: safeAverageData?.["Util_Emergency Visits per 1k Members"] ? 'database' : 'fallback'
+    },
+    specialist: {
+      usingFallback: !safeAverageData?.["Util_Specialist Visits per 1k Members"],
+      value: metrics.specialist.average,
+      source: safeAverageData?.["Util_Specialist Visits per 1k Members"] ? 'database' : 'fallback'
+    }
+  });
+
+  console.log('[HomeIntroduction] Final processed metrics with consistent averages:', {
+    hasDistinctiveMetrics: Array.isArray(keyInsights) ? keyInsights.length > 0 : false,
+    averageDataSource: isUsingServiceFallback ? 'fallback' : 'database',
+    costPEPYAverage: metrics.cost.average,
+    riskScoreAverage: metrics.risk.average
+  });
 
   return (
     <div className="mb-8">

@@ -39,8 +39,8 @@ const ReportDiscoveryCard = () => {
               <Search className="h-5 w-5 text-purple-600" />
             </div>
             <div>
-              <h4 className="font-medium text-gray-900">Industry Benchmarks</h4>
-              <p className="text-sm text-gray-600">Compare against peers</p>
+              <h4 className="font-medium text-gray-900">Archetype Benchmarks</h4>
+              <p className="text-sm text-gray-600">Compare against archetype averages</p>
             </div>
           </div>
         </div>
@@ -48,7 +48,7 @@ const ReportDiscoveryCard = () => {
         <div className="bg-white p-4 rounded-lg border border-blue-200">
           <p className="text-sm text-gray-700">
             This report provides a comprehensive analysis of your organization's healthcare patterns, 
-            comparing your metrics against industry benchmarks and providing strategic recommendations 
+            comparing your metrics against archetype benchmarks and providing strategic recommendations 
             for optimization and cost savings.
           </p>
         </div>
