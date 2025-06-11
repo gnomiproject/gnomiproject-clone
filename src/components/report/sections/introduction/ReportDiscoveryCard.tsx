@@ -47,9 +47,9 @@ const ReportDiscoveryCard = () => {
         
         <div className="bg-white p-4 rounded-lg border border-blue-200">
           <p className="text-sm text-gray-700">
-            This report provides a comprehensive analysis of your organization's healthcare patterns, 
-            comparing your metrics against archetype benchmarks and providing strategic recommendations 
-            for optimization and cost savings.
+            This report provides insights based on the healthcare archetype that most closely matches your organization. 
+            The analysis includes benchmarking against archetype patterns and strategic recommendations 
+            for optimization and cost savings based on similar organizations.
           </p>
         </div>
       </CardContent>
