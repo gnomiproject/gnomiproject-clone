@@ -114,7 +114,7 @@ const MetricCardsGrid = ({ metrics }: MetricCardsGridProps) => {
             <div className="space-y-1">
               <p className="text-2xl font-bold text-gray-900">{formattedValue}</p>
               <p className="text-sm text-gray-500">
-                Population Avg: {formattedAverage}
+                Archetype Avg: {formattedAverage}
               </p>
             </div>
           </div>
@@ -123,8 +123,8 @@ const MetricCardsGrid = ({ metrics }: MetricCardsGridProps) => {
             <div className="mt-3 pt-3 border-t border-gray-100">
               <p className="text-xs text-gray-600">
                 {isPositive 
-                  ? `${Math.abs(percentDiff).toFixed(1)}% above population average`
-                  : `${Math.abs(percentDiff).toFixed(1)}% below population average`
+                  ? `${Math.abs(percentDiff).toFixed(1)}% above archetype average`
+                  : `${Math.abs(percentDiff).toFixed(1)}% below archetype average`
                 }
               </p>
             </div>
@@ -140,7 +140,7 @@ const MetricCardsGrid = ({ metrics }: MetricCardsGridProps) => {
         <h3 className="text-lg font-semibold text-gray-900">Key Performance Indicators</h3>
         <div className="flex items-center gap-2 text-sm text-gray-500">
           <Activity className="w-4 h-4" />
-          <span>Compared to population benchmarks</span>
+          <span>Compared to archetype benchmarks</span>
         </div>
       </div>
       
