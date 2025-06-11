@@ -16,97 +16,74 @@ interface HomeIntroductionProps {
 }
 
 const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroductionProps) => {
-  // ENHANCED DEBUG LOGGING - Focus on averageData investigation
-  console.log('=== HomeIntroduction DEEP DEBUG START ===');
-  console.log('[HomeIntroduction] averageData received:', averageData);
-  console.log('[HomeIntroduction] averageData type:', typeof averageData);
-  console.log('[HomeIntroduction] averageData is null/undefined:', averageData === null || averageData === undefined);
-  
+  // CRITICAL DEBUG LOGGING - Focus on averageData investigation
+  console.log('=== HomeIntroduction CRITICAL DEBUG START ===');
+  console.log('[HomeIntroduction] Raw props received:', {
+    hasUserData: !!userData,
+    hasArchetypeData: !!archetypeData,
+    hasAverageData: !!averageData,
+    averageDataType: typeof averageData,
+    averageDataKeys: averageData ? Object.keys(averageData).length : 0
+  });
+
+  // Log the specific average data values we need
   if (averageData) {
-    console.log('[HomeIntroduction] averageData keys count:', Object.keys(averageData).length);
-    console.log('[HomeIntroduction] averageData first 10 keys:', Object.keys(averageData).slice(0, 10));
+    const criticalFields = [
+      "Cost_Medical & RX Paid Amount PEPY",
+      "Risk_Average Risk Score", 
+      "Util_Emergency Visits per 1k Members",
+      "Util_Specialist Visits per 1k Members"
+    ];
     
-    // Check specific fields we need for metrics
-    const costPEPY = averageData["Cost_Medical & RX Paid Amount PEPY"];
-    const riskScore = averageData["Risk_Average Risk Score"];
-    const emergencyVisits = averageData["Util_Emergency Visits per 1k Members"];
-    const specialistVisits = averageData["Util_Specialist Visits per 1k Members"];
-    
-    console.log('[HomeIntroduction] CRITICAL METRIC VALUES:', {
-      costPEPY: { value: costPEPY, type: typeof costPEPY, exists: costPEPY !== undefined },
-      riskScore: { value: riskScore, type: typeof riskScore, exists: riskScore !== undefined },
-      emergencyVisits: { value: emergencyVisits, type: typeof emergencyVisits, exists: emergencyVisits !== undefined },
-      specialistVisits: { value: specialistVisits, type: typeof specialistVisits, exists: specialistVisits !== undefined }
+    console.log('[HomeIntroduction] CRITICAL FIELD VALUES:');
+    criticalFields.forEach(field => {
+      const value = averageData[field];
+      console.log(`  ${field}: ${value} (type: ${typeof value}, exists: ${value !== undefined})`);
     });
+    
+    // Check if it's using fallback data
+    const isUsingFallback = averageDataService.isUsingFallbackData();
+    console.log('[HomeIntroduction] AverageDataService using fallback:', isUsingFallback);
   } else {
-    console.warn('[HomeIntroduction] averageData is null/undefined - this should not happen!');
+    console.error('[HomeIntroduction] ❌ NO AVERAGE DATA RECEIVED - This is the problem!');
   }
-  
-  // Check if we're using fallback data from the service
-  const isUsingServiceFallback = averageDataService.isUsingFallbackData();
-  console.log('[HomeIntroduction] AverageDataService using fallback:', isUsingServiceFallback);
-  
-  if (userData) {
-    console.log('[HomeIntroduction] userData keys:', Object.keys(userData));
-  }
-  
-  console.log('[HomeIntroduction] archetypeData sample:', archetypeData ? {
-    id: archetypeData.id || archetypeData.archetype_id,
-    name: archetypeData.name || archetypeData.archetype_name
-  } : 'No archetype data');
-  console.log('=== HomeIntroduction DEEP DEBUG END ===');
 
   // Ensure we always have fallback data
   const safeUserData = userData || {};
   const safeArchetypeData = archetypeData || {};
   const safeAverageData = averageData || {};
 
-  // Try multiple possible paths for user name with comprehensive fallback logic
+  // FIXED: Extract user data with comprehensive fallback logic
   let userName = null;
-  
-  // Check direct properties first
   if (safeUserData.name) userName = safeUserData.name;
   else if (safeUserData.user_name) userName = safeUserData.user_name;
   else if (safeUserData.full_name) userName = safeUserData.full_name;
   else if (safeUserData.display_name) userName = safeUserData.display_name;
-  
-  // Check nested assessment_result paths
   else if (safeUserData.assessment_result?.name) userName = safeUserData.assessment_result.name;
   else if (safeUserData.assessment_result?.user_name) userName = safeUserData.assessment_result.user_name;
   else if (safeUserData.assessment_result?.userData?.name) userName = safeUserData.assessment_result.userData.name;
-  
-  // Check profile paths
   else if (safeUserData.profile?.name) userName = safeUserData.profile.name;
   else if (safeUserData.userProfile?.name) userName = safeUserData.userProfile.name;
-  
-  // Final fallback
   if (!userName) userName = 'Healthcare Professional';
 
-  // Try multiple possible paths for organization
   let userOrganization = null;
-  
-  // Check direct properties first
   if (safeUserData.organization) userOrganization = safeUserData.organization;
   else if (safeUserData.company) userOrganization = safeUserData.company;
   else if (safeUserData.organization_name) userOrganization = safeUserData.organization_name;
-  
-  // Check nested assessment_result paths
   else if (safeUserData.assessment_result?.organization) userOrganization = safeUserData.assessment_result.organization;
   else if (safeUserData.assessment_result?.company) userOrganization = safeUserData.assessment_result.company;
   else if (safeUserData.assessment_result?.userData?.organization) userOrganization = safeUserData.assessment_result.userData.organization;
-  
-  // Check profile paths
   else if (safeUserData.profile?.organization) userOrganization = safeUserData.profile.organization;
   else if (safeUserData.userProfile?.organization) userOrganization = safeUserData.userProfile.organization;
 
-  console.log('[HomeIntroduction] Final extracted values:', {
+  console.log('[HomeIntroduction] Final extracted user values:', {
     extractedName: userName,
     extractedOrganization: userOrganization,
     usedFallbackName: userName === 'Healthcare Professional',
     hasOrganization: !!userOrganization
   });
 
-  // Get key values with safe fallbacks
+  // Get key archetype values with safe fallbacks
   const archetypeId = safeArchetypeData?.id || safeArchetypeData?.archetype_id || 'a1';
   const archetypeName = safeArchetypeData?.name || safeArchetypeData?.archetype_name || 'Healthcare Archetype';
   const matchPercentage = safeUserData?.assessment_result?.percentageMatch || 85;
@@ -117,87 +94,98 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
   // Extract executive summary and key insights with fallbacks
   const executiveSummary = safeArchetypeData?.executive_summary;
   const keyInsights = safeArchetypeData?.key_findings || [];
-  
-  // FIXED: Extract average values properly with detailed validation
-  const getAverageValue = (fieldName: string, fallbackValue: number) => {
-    const value = safeAverageData[fieldName];
-    const isValid = value !== undefined && value !== null && typeof value === 'number';
+
+  // CRITICAL FIX: Use actual averageData values, not hardcoded fallbacks
+  const getAverageValue = (fieldName: string, hardcodedFallback: number) => {
+    // First try to get the value from averageData
+    if (safeAverageData && safeAverageData[fieldName] !== undefined && safeAverageData[fieldName] !== null) {
+      const value = safeAverageData[fieldName];
+      console.log(`[HomeIntroduction] ✅ Using REAL average for ${fieldName}: ${value}`);
+      return value;
+    }
     
-    console.log(`[HomeIntroduction] getAverageValue for ${fieldName}:`, {
-      rawValue: value,
-      isValid,
-      willUseFallback: !isValid,
-      fallbackValue
-    });
-    
-    return isValid ? value : fallbackValue;
+    // Only use hardcoded fallback if no data is available
+    console.warn(`[HomeIntroduction] ⚠️ Using FALLBACK average for ${fieldName}: ${hardcodedFallback}`);
+    return hardcodedFallback;
   };
 
-  // CORRECTED: Use the actual averageData values, not hardcoded fallbacks
+  // CRITICAL FIX: Extract archetype values from the correct data source
+  const getArchetypeValue = (fieldName: string, fallbackValue: number) => {
+    // Try archetypeData first
+    if (safeArchetypeData && safeArchetypeData[fieldName] !== undefined && safeArchetypeData[fieldName] !== null) {
+      const value = safeArchetypeData[fieldName];
+      console.log(`[HomeIntroduction] ✅ Using archetype value for ${fieldName}: ${value}`);
+      return value;
+    }
+    
+    console.warn(`[HomeIntroduction] ⚠️ Using fallback archetype value for ${fieldName}: ${fallbackValue}`);
+    return fallbackValue;
+  };
+
+  // FIXED: Build metrics using actual data, not hardcoded values
   const metrics = {
     cost: {
       name: "Total Cost PEPY",
-      value: safeArchetypeData?.["Cost_Medical & RX Paid Amount PEPY"] || 12000,
+      value: getArchetypeValue("Cost_Medical & RX Paid Amount PEPY", 12000),
       average: getAverageValue("Cost_Medical & RX Paid Amount PEPY", 13440)
     },
     risk: {
-      name: "Risk Score",
-      value: safeArchetypeData?.["Risk_Average Risk Score"] || 1.0,
+      name: "Risk Score", 
+      value: getArchetypeValue("Risk_Average Risk Score", 1.0),
       average: getAverageValue("Risk_Average Risk Score", 0.95)
     },
     emergency: {
       name: "ER Visits per 1K",
-      value: safeArchetypeData?.["Util_Emergency Visits per 1k Members"] || 120,
+      value: getArchetypeValue("Util_Emergency Visits per 1k Members", 120),
       average: getAverageValue("Util_Emergency Visits per 1k Members", 135)
     },
     specialist: {
-      name: "Specialist Visits per 1K",
-      value: safeArchetypeData?.["Util_Specialist Visits per 1k Members"] || 2200,
+      name: "Specialist Visits per 1K", 
+      value: getArchetypeValue("Util_Specialist Visits per 1k Members", 2200),
       average: getAverageValue("Util_Specialist Visits per 1k Members", 2250)
     }
   };
 
-  // COMPREHENSIVE logging to show what values are actually being used
-  console.log('[HomeIntroduction] FINAL METRICS VALIDATION:', {
-    costMetric: {
-      archetype: metrics.cost.value,
+  // COMPREHENSIVE VALIDATION: Log final metric values
+  console.log('[HomeIntroduction] FINAL METRICS USED:', {
+    cost: { 
+      archetype: metrics.cost.value, 
       average: metrics.cost.average,
-      expectedAverage: 13440,
-      averageIsCorrect: metrics.cost.average === 13440
+      isCorrectAverage: metrics.cost.average === 13440
     },
-    riskMetric: {
-      archetype: metrics.risk.value,
+    risk: { 
+      archetype: metrics.risk.value, 
       average: metrics.risk.average,
-      expectedAverage: 0.95,
-      averageIsCorrect: metrics.risk.average === 0.95
+      isCorrectAverage: metrics.risk.average === 0.95
     },
-    emergencyMetric: {
-      archetype: metrics.emergency.value,
+    emergency: { 
+      archetype: metrics.emergency.value, 
       average: metrics.emergency.average,
-      expectedAverage: 135,
-      averageIsCorrect: metrics.emergency.average === 135
+      isCorrectAverage: metrics.emergency.average === 135
     },
-    specialistMetric: {
-      archetype: metrics.specialist.value,
+    specialist: { 
+      archetype: metrics.specialist.value, 
       average: metrics.specialist.average,
-      expectedAverage: 2250,
-      averageIsCorrect: metrics.specialist.average === 2250
+      isCorrectAverage: metrics.specialist.average === 2250
     }
   });
 
-  // Log if any averages are wrong
-  const wrongAverages = [];
-  if (metrics.cost.average !== 13440) wrongAverages.push(`Cost: got ${metrics.cost.average}, expected 13440`);
-  if (metrics.risk.average !== 0.95) wrongAverages.push(`Risk: got ${metrics.risk.average}, expected 0.95`);
-  if (metrics.emergency.average !== 135) wrongAverages.push(`Emergency: got ${metrics.emergency.average}, expected 135`);
-  if (metrics.specialist.average !== 2250) wrongAverages.push(`Specialist: got ${metrics.specialist.average}, expected 2250`);
-  
-  if (wrongAverages.length > 0) {
-    console.error('[HomeIntroduction] INCORRECT AVERAGE VALUES DETECTED:', wrongAverages);
-    console.error('[HomeIntroduction] Raw averageData for troubleshooting:', safeAverageData);
+  // Alert if wrong averages are being used
+  const incorrectAverages = [];
+  if (metrics.cost.average !== 13440) incorrectAverages.push(`Cost: ${metrics.cost.average} ≠ 13440`);
+  if (metrics.risk.average !== 0.95) incorrectAverages.push(`Risk: ${metrics.risk.average} ≠ 0.95`);
+  if (metrics.emergency.average !== 135) incorrectAverages.push(`Emergency: ${metrics.emergency.average} ≠ 135`);
+  if (metrics.specialist.average !== 2250) incorrectAverages.push(`Specialist: ${metrics.specialist.average} ≠ 2250`);
+
+  if (incorrectAverages.length > 0) {
+    console.error('[HomeIntroduction] 🚨 WRONG AVERAGES DETECTED:', incorrectAverages);
+    console.error('[HomeIntroduction] This indicates averageData is not being passed correctly!');
+    console.error('[HomeIntroduction] Raw averageData:', safeAverageData);
   } else {
-    console.log('[HomeIntroduction] ✅ All average values are correct!');
+    console.log('[HomeIntroduction] ✅ All average values are CORRECT!');
   }
+
+  console.log('=== HomeIntroduction CRITICAL DEBUG END ===');
 
   return (
     <div className="mb-8">

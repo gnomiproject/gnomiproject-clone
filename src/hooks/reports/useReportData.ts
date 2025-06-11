@@ -40,13 +40,13 @@ export const useReportData = (
   } = useQuery({
     queryKey: ['report-data', archetypeId, isAdminView],
     queryFn: async () => {
-      console.log(`[useReportData] Fetching data for ${archetypeId}, admin: ${isAdminView}`);
+      console.log(`[useReportData] 🔍 Fetching data for ${archetypeId}, admin: ${isAdminView}`);
       
       try {
         // Try to get from cache first
         const cachedData = getFromCache(cacheKey);
         if (cachedData) {
-          console.log(`[useReportData] Using cached data for ${archetypeId}`);
+          console.log(`[useReportData] ✅ Using cached data for ${archetypeId}`);
           setIsUsingFallbackData(false);
           return cachedData;
         }
@@ -54,7 +54,7 @@ export const useReportData = (
         // Determine which table to use based on admin status
         const tableName = isAdminView ? 'level4_report_secure' : 'level4_report_secure';
         
-        console.log(`[useReportData] Fetching from ${tableName} for ${archetypeId}`);
+        console.log(`[useReportData] 📊 Fetching from ${tableName} for ${archetypeId}`);
         
         // Fetch the main report data
         const { data: reportData, error: reportError } = await supabase
@@ -64,7 +64,7 @@ export const useReportData = (
           .single();
 
         if (reportError) {
-          console.error(`[useReportData] Error fetching from ${tableName}:`, reportError);
+          console.error(`[useReportData] ❌ Error fetching from ${tableName}:`, reportError);
           throw new Error(`Failed to fetch report data: ${reportError.message}`);
         }
 
@@ -72,35 +72,73 @@ export const useReportData = (
           throw new Error('No report data found');
         }
 
+        console.log(`[useReportData] ✅ Raw report data fetched for ${archetypeId}:`, {
+          hasData: !!reportData,
+          archetypeId: reportData.archetype_id,
+          keysCount: Object.keys(reportData).length
+        });
+
         // Convert the database result to ArchetypeDetailedData format
         const typedReportData = reportData as unknown as ArchetypeDetailedData;
+
+        // CRITICAL: Get average data from service
+        console.log(`[useReportData] 📈 Fetching average data...`);
+        const averageData = await averageDataService.getAverageData();
+        
+        // CRITICAL DEBUG: Log the average data we just fetched
+        console.log(`[useReportData] 🎯 AVERAGE DATA FETCHED:`, {
+          hasAverageData: !!averageData,
+          costPEPY: averageData["Cost_Medical & RX Paid Amount PEPY"],
+          riskScore: averageData["Risk_Average Risk Score"],
+          emergencyVisits: averageData["Util_Emergency Visits per 1k Members"],
+          specialistVisits: averageData["Util_Specialist Visits per 1k Members"],
+          isUsingFallback: averageDataService.isUsingFallbackData()
+        });
 
         // Process the data using the centralized service
         const processedReportData = await processReportData(typedReportData);
         
+        // CRITICAL: Ensure averageData is included in the final result
+        const finalResult = {
+          ...processedReportData,
+          averageData: averageData // Explicitly include the averageData
+        };
+        
+        console.log(`[useReportData] 🎯 FINAL RESULT STRUCTURE:`, {
+          hasReportData: !!finalResult.reportData,
+          hasAverageData: !!finalResult.averageData,
+          averageDataKeys: finalResult.averageData ? Object.keys(finalResult.averageData).length : 0,
+          costPEPYInResult: finalResult.averageData ? finalResult.averageData["Cost_Medical & RX Paid Amount PEPY"] : 'missing'
+        });
+        
         // Cache the processed data
-        setInCache(cacheKey, processedReportData);
+        setInCache(cacheKey, finalResult);
         setIsUsingFallbackData(false);
         
-        console.log(`[useReportData] Successfully processed data for ${archetypeId}`);
-        return processedReportData;
+        console.log(`[useReportData] ✅ Successfully processed data for ${archetypeId}`);
+        return finalResult;
 
       } catch (fetchError) {
-        console.error(`[useReportData] Error in data fetching:`, fetchError);
+        console.error(`[useReportData] ❌ Error in data fetching:`, fetchError);
         
         // Try to get fallback data from cache
         const fallbackData = getFromCache(`${cacheKey}-fallback`);
         if (fallbackData) {
-          console.log(`[useReportData] Using fallback cached data for ${archetypeId}`);
+          console.log(`[useReportData] ⚠️ Using fallback cached data for ${archetypeId}`);
           setIsUsingFallbackData(true);
           return fallbackData;
         }
         
-        // As a last resort, create minimal data structure
-        console.log(`[useReportData] Creating minimal fallback data for ${archetypeId}`);
+        // As a last resort, create minimal data structure with fallback average data
+        console.log(`[useReportData] 🆘 Creating minimal fallback data for ${archetypeId}`);
+        const fallbackAverageData = averageDataService.getDefaultAverageData();
         const fallbackProcessedData = await processReportData(null);
+        const fallbackResult = {
+          ...fallbackProcessedData,
+          averageData: fallbackAverageData
+        };
         setIsUsingFallbackData(true);
-        return fallbackProcessedData;
+        return fallbackResult;
       }
     },
     retry: 1,
@@ -130,6 +168,7 @@ export const useReportData = (
       dataSource: isAdminView ? 'level4_report_secure (admin)' : 'level4_report_secure',
       hasReportData: !!processedData?.reportData,
       hasAverageData: !!processedData?.averageData,
+      averageDataKeys: processedData?.averageData ? Object.keys(processedData.averageData).length : 0,
       isUsingFallbackData,
       cacheKey,
       timestamp: new Date().toISOString()
@@ -137,7 +176,7 @@ export const useReportData = (
   }, [processedData, isAdminView, isUsingFallbackData, cacheKey]);
 
   const refreshData = useCallback(() => {
-    console.log(`[useReportData] Manual refresh requested for ${archetypeId}`);
+    console.log(`[useReportData] 🔄 Manual refresh requested for ${archetypeId}`);
     
     // Clear caches
     clearFromCache(cacheKey);
@@ -151,6 +190,16 @@ export const useReportData = (
       description: 'Report data has been updated from the server'
     });
   }, [cacheKey, refetch, archetypeId]);
+
+  // CRITICAL DEBUG: Log what we're returning
+  console.log(`[useReportData] 🎯 RETURNING TO COMPONENT:`, {
+    hasReportData: !!processedData?.reportData,
+    hasAverageData: !!processedData?.averageData,
+    averageDataType: typeof processedData?.averageData,
+    costPEPYValue: processedData?.averageData ? processedData.averageData["Cost_Medical & RX Paid Amount PEPY"] : 'missing',
+    isLoading,
+    error: !!error
+  });
 
   return {
     reportData: processedData?.reportData || null,
