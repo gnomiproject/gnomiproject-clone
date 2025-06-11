@@ -1,35 +1,31 @@
 
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { TrendingUp, Users, Building2 } from 'lucide-react';
-import { getArchetypeColorHex } from '@/data/colors';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Building, Users, TrendingUp, Target } from 'lucide-react';
 
 interface WelcomeCardProps {
   userName: string;
   archetypeName: string;
   archetypeId: string;
-  matchPercentage: number;
+  matchPercentage?: number;
   secondaryArchetype?: string;
-  organizationSize?: number;
+  organizationSize?: string | number;
 }
 
-const WelcomeCard = ({ 
-  userName, 
-  archetypeName, 
-  archetypeId, 
-  matchPercentage,
+const WelcomeCard = ({
+  userName,
+  archetypeName,
+  archetypeId,
+  matchPercentage = 85,
   secondaryArchetype,
   organizationSize
 }: WelcomeCardProps) => {
-  const archetypeColor = getArchetypeColorHex(archetypeId as any);
-  
-  // Enhanced debug logging to verify the userName prop
+  // COMPREHENSIVE DEBUG LOGGING
   console.log('=== WelcomeCard DEBUG START ===');
   console.log('[WelcomeCard] Received userName:', userName);
   console.log('[WelcomeCard] userName type:', typeof userName);
   console.log('[WelcomeCard] userName length:', userName?.length);
-  console.log('[WelcomeCard] userName is fallback:', userName === 'Healthcare Professional' || userName === 'Healthcare Leader');
+  console.log('[WelcomeCard] userName is fallback:', userName === 'Healthcare Professional');
   console.log('[WelcomeCard] All props:', {
     userName,
     archetypeName,
@@ -39,66 +35,77 @@ const WelcomeCard = ({
     organizationSize
   });
   console.log('=== WelcomeCard DEBUG END ===');
-  
+
+  const formatOrganizationSize = (size: string | number | undefined): string => {
+    if (!size) return '';
+    
+    if (typeof size === 'number') {
+      return `${size.toLocaleString()} employees`;
+    }
+    
+    // If it's already a string, return as is
+    return size.toString();
+  };
+
   return (
-    <Card className="border-l-4 bg-gradient-to-r from-blue-50 to-white" 
-          style={{ borderLeftColor: archetypeColor }}>
-      <CardContent className="p-6">
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex-1">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              Welcome, {userName}
-            </h2>
-            <div className="flex items-center gap-3 mb-3">
-              <Badge 
-                variant="secondary" 
-                className="text-lg px-3 py-1 font-semibold"
-                style={{ backgroundColor: `${archetypeColor}20`, color: archetypeColor }}
-              >
-                {archetypeName}
-              </Badge>
-              <Badge variant="outline" className="flex items-center gap-1">
-                <TrendingUp className="w-4 h-4" />
-                {matchPercentage}% Match
-              </Badge>
-            </div>
+    <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
+      <CardHeader className="pb-4">
+        <CardTitle className="flex items-center gap-2 text-xl">
+          <Building className="h-6 w-6 text-blue-600" />
+          Welcome to Your Deep Dive Report
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex items-start gap-3">
+          <div className="p-2 bg-blue-100 rounded-lg">
+            <Users className="h-5 w-5 text-blue-600" />
           </div>
-          
-          {organizationSize && (
-            <div className="text-right">
-              <div className="flex items-center gap-2 text-gray-600 mb-1">
-                <Building2 className="w-4 h-4" />
-                <span className="text-sm">Organization Size</span>
-              </div>
-              <p className="text-xl font-bold text-gray-900">
-                {organizationSize.toLocaleString()} employees
-              </p>
-            </div>
-          )}
-        </div>
-        
-        <div className="space-y-3">
-          <p className="text-gray-700 leading-relaxed">
-            Based on your assessment, your organization aligns most closely with the <strong>{archetypeName}</strong> archetype. 
-            This report provides comprehensive insights into your healthcare spending patterns, utilization trends, and strategic opportunities.
-          </p>
-          
-          {secondaryArchetype && (
-            <div className="bg-gray-50 p-3 rounded-lg border">
-              <p className="text-sm text-gray-600">
-                <span className="font-medium">Secondary Archetype:</span> Your organization also shows characteristics of the {secondaryArchetype} archetype, 
-                which may indicate opportunities for hybrid strategies.
-              </p>
-            </div>
-          )}
-          
-          <div className="flex items-center gap-2 text-blue-700 bg-blue-50 p-3 rounded-lg">
-            <Users className="w-5 h-5" />
-            <p className="text-sm font-medium">
-              This analysis is based on archetype benchmarks and your specific organizational profile.
+          <div className="flex-1">
+            <h3 className="font-semibold text-gray-900">Hello, {userName}!</h3>
+            <p className="text-gray-600 text-sm mt-1">
+              Based on your assessment, your organization most closely aligns with the <span className="font-medium text-blue-700">{archetypeName}</span> archetype.
             </p>
           </div>
         </div>
+
+        <div className="flex items-start gap-3">
+          <div className="p-2 bg-green-100 rounded-lg">
+            <Target className="h-5 w-5 text-green-600" />
+          </div>
+          <div className="flex-1">
+            <h4 className="font-medium text-gray-900">Archetype Match</h4>
+            <p className="text-gray-600 text-sm mt-1">
+              {matchPercentage}% compatibility with the {archetypeName} profile
+              {organizationSize && (
+                <span className="block mt-1">
+                  Organization size: {formatOrganizationSize(organizationSize)}
+                </span>
+              )}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-start gap-3">
+          <div className="p-2 bg-purple-100 rounded-lg">
+            <TrendingUp className="h-5 w-5 text-purple-600" />
+          </div>
+          <div className="flex-1">
+            <h4 className="font-medium text-gray-900">Report Overview</h4>
+            <p className="text-gray-600 text-sm mt-1 leading-relaxed">
+              This report analyzes the {archetypeName} archetype patterns that best match your organization. 
+              The insights and benchmarks are based on aggregated data from similar organizations within this archetype, 
+              providing strategic recommendations for optimization and cost savings.
+            </p>
+          </div>
+        </div>
+
+        {secondaryArchetype && (
+          <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+            <p className="text-sm text-blue-700">
+              <span className="font-medium">Secondary match:</span> Your organization also shows characteristics of the {secondaryArchetype} archetype.
+            </p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
