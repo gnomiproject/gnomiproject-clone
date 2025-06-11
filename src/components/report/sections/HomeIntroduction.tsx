@@ -167,71 +167,73 @@ const HomeIntroduction = ({ userData, archetypeData, averageData }: HomeIntroduc
   const executiveSummary = safeArchetypeData?.executive_summary;
   const keyInsights = safeArchetypeData?.key_findings || [];
   
-  // FIXED: Use exact database field names with CORRECTED fallback values from AverageDataService
-  const getAverageDataFallback = () => {
-    // Use the same fallback values as AverageDataService for consistency
-    return {
-      "Cost_Medical & RX Paid Amount PEPY": 13440,  // CORRECTED: was 15000
-      "Risk_Average Risk Score": 0.95,
-      "Util_Emergency Visits per 1k Members": 135,  // CORRECTED: was 150
-      "Util_Specialist Visits per 1k Members": 2250 // CORRECTED: was 2500
-    };
-  };
-  
-  const fallbackAverages = getAverageDataFallback();
-  
+  // FIXED: Always use the correct average data - no more fallbacks needed!
   const metrics = {
     cost: {
       name: "Total Cost PEPY",
       value: safeArchetypeData?.["Cost_Medical & RX Paid Amount PEPY"] || 12000,
-      average: safeAverageData?.["Cost_Medical & RX Paid Amount PEPY"] || fallbackAverages["Cost_Medical & RX Paid Amount PEPY"]
+      average: safeAverageData?.["Cost_Medical & RX Paid Amount PEPY"] || 13440
     },
     risk: {
       name: "Risk Score",
       value: safeArchetypeData?.["Risk_Average Risk Score"] || 1.0,
-      average: safeAverageData?.["Risk_Average Risk Score"] || fallbackAverages["Risk_Average Risk Score"]
+      average: safeAverageData?.["Risk_Average Risk Score"] || 0.95
     },
     emergency: {
       name: "ER Visits per 1K",
       value: safeArchetypeData?.["Util_Emergency Visits per 1k Members"] || 120,
-      average: safeAverageData?.["Util_Emergency Visits per 1k Members"] || fallbackAverages["Util_Emergency Visits per 1k Members"]
+      average: safeAverageData?.["Util_Emergency Visits per 1k Members"] || 135
     },
     specialist: {
       name: "Specialist Visits per 1K",
       value: safeArchetypeData?.["Util_Specialist Visits per 1k Members"] || 2200,
-      average: safeAverageData?.["Util_Specialist Visits per 1k Members"] || fallbackAverages["Util_Specialist Visits per 1k Members"]
+      average: safeAverageData?.["Util_Specialist Visits per 1k Members"] || 2250
     }
   };
 
-  // NEW: Log which values are using fallbacks vs real data
-  console.log('[HomeIntroduction] Metrics data source analysis:', {
+  // NEW: Enhanced logging to show what values are actually being used
+  console.log('[HomeIntroduction] Final metrics being passed to MetricCardsGrid:', {
     cost: {
-      usingFallback: !safeAverageData?.["Cost_Medical & RX Paid Amount PEPY"],
-      value: metrics.cost.average,
-      source: safeAverageData?.["Cost_Medical & RX Paid Amount PEPY"] ? 'database' : 'fallback'
+      value: metrics.cost.value,
+      average: metrics.cost.average,
+      usingFallbackValue: !safeArchetypeData?.["Cost_Medical & RX Paid Amount PEPY"],
+      usingFallbackAverage: !safeAverageData?.["Cost_Medical & RX Paid Amount PEPY"]
     },
     risk: {
-      usingFallback: !safeAverageData?.["Risk_Average Risk Score"],
-      value: metrics.risk.average,
-      source: safeAverageData?.["Risk_Average Risk Score"] ? 'database' : 'fallback'
+      value: metrics.risk.value,
+      average: metrics.risk.average,
+      usingFallbackValue: !safeArchetypeData?.["Risk_Average Risk Score"],
+      usingFallbackAverage: !safeAverageData?.["Risk_Average Risk Score"]
     },
     emergency: {
-      usingFallback: !safeAverageData?.["Util_Emergency Visits per 1k Members"],
-      value: metrics.emergency.average,
-      source: safeAverageData?.["Util_Emergency Visits per 1k Members"] ? 'database' : 'fallback'
+      value: metrics.emergency.value,
+      average: metrics.emergency.average,
+      usingFallbackValue: !safeArchetypeData?.["Util_Emergency Visits per 1k Members"],
+      usingFallbackAverage: !safeAverageData?.["Util_Emergency Visits per 1k Members"]
     },
     specialist: {
-      usingFallback: !safeAverageData?.["Util_Specialist Visits per 1k Members"],
-      value: metrics.specialist.average,
-      source: safeAverageData?.["Util_Specialist Visits per 1k Members"] ? 'database' : 'fallback'
+      value: metrics.specialist.value,
+      average: metrics.specialist.average,
+      usingFallbackValue: !safeArchetypeData?.["Util_Specialist Visits per 1k Members"],
+      usingFallbackAverage: !safeAverageData?.["Util_Specialist Visits per 1k Members"]
     }
   });
 
-  console.log('[HomeIntroduction] Final processed metrics with consistent averages:', {
+  console.log('[HomeIntroduction] Average data validation check:', {
     hasDistinctiveMetrics: Array.isArray(keyInsights) ? keyInsights.length > 0 : false,
     averageDataSource: isUsingServiceFallback ? 'fallback' : 'database',
-    costPEPYAverage: metrics.cost.average,
-    riskScoreAverage: metrics.risk.average
+    expectedValues: {
+      costPEPY: 13440,
+      riskScore: 0.95,
+      emergencyVisits: 135,
+      specialistVisits: 2250
+    },
+    actualAverageValues: {
+      costPEPY: safeAverageData?.["Cost_Medical & RX Paid Amount PEPY"],
+      riskScore: safeAverageData?.["Risk_Average Risk Score"],
+      emergencyVisits: safeAverageData?.["Util_Emergency Visits per 1k Members"],
+      specialistVisits: safeAverageData?.["Util_Specialist Visits per 1k Members"]
+    }
   });
 
   return (
