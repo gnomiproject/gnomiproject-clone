@@ -79,17 +79,49 @@ const EnhancedDistinctiveMetrics: React.FC<EnhancedDistinctiveMetricsProps> = ({
     );
   }
 
-  // Helper function to get the significance icon
-  const getSignificanceIcon = (difference: number) => {
-    if (difference > 0) return <ArrowUp className="h-4 w-4 text-green-600" />;
-    if (difference < 0) return <ArrowDown className="h-4 w-4 text-red-600" />;
+  // Helper function to determine if higher values are worse for a metric
+  const isHigherWorse = (metricName: string): boolean => {
+    const higherWorseTerms = [
+      'sdoh', 'risk', 'cost', 'emergency', 'inpatient', 'readmission', 
+      'mortality', 'complication', 'infection', 'error', 'avoidable', 
+      'preventable', 'unnecessary', 'fraud', 'waste', 'abuse'
+    ];
+    
+    const metricNameLower = metricName.toLowerCase();
+    return higherWorseTerms.some(term => metricNameLower.includes(term));
+  };
+
+  // Helper function to get the significance icon with proper color logic
+  const getSignificanceIcon = (difference: number, metricName: string) => {
+    const higherIsWorse = isHigherWorse(metricName);
+    
+    if (difference > 0) {
+      // Value is higher than average
+      return higherIsWorse ? 
+        <ArrowUp className="h-4 w-4 text-red-600" /> : 
+        <ArrowUp className="h-4 w-4 text-green-600" />;
+    }
+    if (difference < 0) {
+      // Value is lower than average
+      return higherIsWorse ? 
+        <ArrowDown className="h-4 w-4 text-green-600" /> : 
+        <ArrowDown className="h-4 w-4 text-red-600" />;
+    }
     return <Minus className="h-4 w-4 text-gray-400" />;
   };
 
-  // Helper function to get the difference color
-  const getDifferenceColor = (difference: number) => {
-    if (difference > 0) return 'text-green-600';
-    if (difference < 0) return 'text-red-600';
+  // Helper function to get the difference color with proper logic
+  const getDifferenceColor = (difference: number, metricName: string) => {
+    const higherIsWorse = isHigherWorse(metricName);
+    
+    if (difference > 0) {
+      // Value is higher than average
+      return higherIsWorse ? 'text-red-600' : 'text-green-600';
+    }
+    if (difference < 0) {
+      // Value is lower than average
+      return higherIsWorse ? 'text-green-600' : 'text-red-600';
+    }
     return 'text-gray-600';
   };
 
@@ -133,7 +165,8 @@ const EnhancedDistinctiveMetrics: React.FC<EnhancedDistinctiveMetricsProps> = ({
               metricValue,
               averageValue,
               percentDiff,
-              category
+              category,
+              isHigherWorse: isHigherWorse(metricName)
             });
 
             return (
@@ -142,7 +175,7 @@ const EnhancedDistinctiveMetrics: React.FC<EnhancedDistinctiveMetricsProps> = ({
                   <h4 className="font-medium text-gray-900 text-sm leading-tight">
                     {metricName}
                   </h4>
-                  {getSignificanceIcon(percentDiff)}
+                  {getSignificanceIcon(percentDiff, metricName)}
                 </div>
                 
                 <div className="space-y-2">
@@ -168,7 +201,7 @@ const EnhancedDistinctiveMetrics: React.FC<EnhancedDistinctiveMetricsProps> = ({
                   
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Difference:</span>
-                    <span className={`font-medium ${getDifferenceColor(percentDiff)}`}>
+                    <span className={`font-medium ${getDifferenceColor(percentDiff, metricName)}`}>
                       {percentDiff !== 0
                         ? `${percentDiff > 0 ? '+' : ''}${percentDiff.toFixed(1)}%`
                         : 'N/A'
