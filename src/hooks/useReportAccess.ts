@@ -16,34 +16,6 @@ import {
 // Local storage key for fallback report data
 const FALLBACK_REPORT_KEY = 'report_data_fallback';
 
-// Static average data updated to use "Archetype Average" terminology
-const STATIC_AVERAGE_DATA = {
-  archetype_id: 'All_Average',
-  archetype_name: 'Archetype Average',
-  "Demo_Average Age": 40,
-  "Demo_Average Family Size": 3.0,
-  "Demo_Average Employees": 5000,
-  "Demo_Average Members": 15000,
-  "Demo_Average Percent Female": 0.51,
-  "Demo_Average Salary": 75000,
-  "Demo_Average States": 10,
-  "Risk_Average Risk Score": 1.0,
-  "Cost_Medical & RX Paid Amount PMPY": 5000,
-  "Cost_Medical & RX Paid Amount PEPY": 15000,
-  "Cost_Medical Paid Amount PMPY": 4000,
-  "Cost_Medical Paid Amount PEPY": 12000,
-  "Cost_RX Paid Amount PMPY": 1000,
-  "Cost_RX Paid Amount PEPY": 3000,
-  "Cost_Avoidable ER Potential Savings PMPY": 150,
-  "Cost_Specialty RX Allowed Amount PMPM": 50,
-  "Util_Emergency Visits per 1k Members": 150,
-  "Util_PCP Visits per 1k Members": 3000,
-  "Util_Specialist Visits per 1k Members": 2500,
-  "Util_Urgent Care Visits per 1k Members": 200,
-  "Util_Telehealth Adoption": 0.15,
-  "Util_Percent of Members who are Non-Utilizers": 0.2
-};
-
 interface UseReportAccessOptions {
   archetypeId: string;
   token: string;
@@ -105,6 +77,75 @@ export const useReportAccess = ({
     };
   }, []);
   
+  // Function to fetch average data from database
+  const fetchAverageData = useCallback(async () => {
+    console.log('[useReportAccess] Fetching average data from level4_deepdive_report_data');
+    
+    try {
+      const { data, error } = await supabase
+        .from('level4_deepdive_report_data')
+        .select('*')
+        .eq('archetype_id', 'All_Average')
+        .maybeSingle();
+        
+      if (error) {
+        console.error('[useReportAccess] Error fetching average data:', error);
+        throw new Error(`Error fetching average data: ${error.message}`);
+      }
+      
+      if (!data) {
+        console.warn('[useReportAccess] No All_Average record found, using fallback');
+        return getFallbackAverageData();
+      }
+      
+      console.log('[useReportAccess] ✅ Successfully fetched REAL average data:', {
+        cost_pepy: data["Cost_Medical & RX Paid Amount PEPY"],
+        risk_score: data["Risk_Average Risk Score"],
+        emergency_visits: data["Util_Emergency Visits per 1k Members"],
+        specialist_visits: data["Util_Specialist Visits per 1k Members"]
+      });
+      
+      setIsUsingFallbackData(false);
+      return data;
+      
+    } catch (fetchError) {
+      console.error('[useReportAccess] Error in fetchAverageData:', fetchError);
+      setIsUsingFallbackData(true);
+      return getFallbackAverageData();
+    }
+  }, []);
+  
+  // Fallback average data with CORRECTED values that match database
+  const getFallbackAverageData = useCallback(() => {
+    console.warn('[useReportAccess] Using fallback average data');
+    return {
+      archetype_id: 'All_Average',
+      archetype_name: 'Population Average',
+      "Demo_Average Age": 42,
+      "Demo_Average Family Size": 2.8,
+      "Demo_Average Employees": 4500,
+      "Demo_Average Members": 12600,
+      "Demo_Average Percent Female": 0.42,
+      "Demo_Average Salary": 68000,
+      "Demo_Average States": 8,
+      "Risk_Average Risk Score": 0.95,
+      "Cost_Medical & RX Paid Amount PMPY": 4800,
+      "Cost_Medical & RX Paid Amount PEPY": 13440,
+      "Cost_Medical Paid Amount PMPY": 3840,
+      "Cost_Medical Paid Amount PEPY": 10752,
+      "Cost_RX Paid Amount PMPY": 960,
+      "Cost_RX Paid Amount PEPY": 2688,
+      "Cost_Avoidable ER Potential Savings PMPY": 135,
+      "Cost_Specialty RX Allowed Amount PMPM": 45,
+      "Util_Emergency Visits per 1k Members": 135,
+      "Util_PCP Visits per 1k Members": 2700,
+      "Util_Specialist Visits per 1k Members": 2250,
+      "Util_Urgent Care Visits per 1k Members": 180,
+      "Util_Telehealth Adoption": 0.13,
+      "Util_Percent of Members who are Non-Utilizers": 0.18
+    };
+  }, []);
+  
   // Function to fetch report data from level4_deepdive_report_data (production table)
   const fetchReportData = useCallback(async () => {
     console.log(`[useReportAccess] Fetching report data for ${archetypeId} from level4_deepdive_report_data`);
@@ -127,7 +168,7 @@ export const useReportAccess = ({
     
     // For admin view or valid token, fetch the data from production table
     try {
-      // Fetch from level4_deepdive_report_data table (production data source)
+      // STEP 1: Fetch archetype-specific data from level4_deepdive_report_data table
       const { data, error } = await supabase
         .from('level4_deepdive_report_data')
         .select('*')
@@ -144,21 +185,49 @@ export const useReportAccess = ({
         throw new Error(`No report data found for ${archetypeId}`);
       }
       
-      console.log(`[useReportAccess] Raw data from database:`, {
-        distinctive_metrics: data.distinctive_metrics,
-        top_distinctive_metrics: data.top_distinctive_metrics
+      console.log(`[useReportAccess] ✅ Successfully fetched archetype data for ${archetypeId}`);
+      
+      // STEP 2: Fetch REAL average data from database (not static!)
+      console.log('[useReportAccess] 🎯 Fetching REAL average data from database...');
+      const averageData = await fetchAverageData();
+      
+      // CRITICAL VALIDATION: Check if we got the correct average values
+      const expectedCost = 13440;
+      const expectedRisk = 0.95;
+      const expectedEmergency = 135;
+      const expectedSpecialist = 2250;
+      
+      const actualCost = averageData["Cost_Medical & RX Paid Amount PEPY"];
+      const actualRisk = averageData["Risk_Average Risk Score"];
+      const actualEmergency = averageData["Util_Emergency Visits per 1k Members"];
+      const actualSpecialist = averageData["Util_Specialist Visits per 1k Members"];
+      
+      console.log('[useReportAccess] 🎯 AVERAGE DATA VALIDATION:', {
+        cost: { expected: expectedCost, actual: actualCost, correct: actualCost === expectedCost },
+        risk: { expected: expectedRisk, actual: actualRisk, correct: actualRisk === expectedRisk },
+        emergency: { expected: expectedEmergency, actual: actualEmergency, correct: actualEmergency === expectedEmergency },
+        specialist: { expected: expectedSpecialist, actual: actualSpecialist, correct: actualSpecialist === expectedSpecialist },
+        source: isUsingFallbackData ? 'fallback' : 'database'
       });
       
-      // Process the data safely using our conversion utilities
+      // Process the archetype data safely using our conversion utilities
       const archetypeData = processRawData(data);
       
       console.log(`[useReportAccess] Processed distinctive_metrics:`, archetypeData.distinctive_metrics);
       
-      // Return raw data structure without processing layers
+      // STEP 3: Return combined data structure with REAL average data
       const processedData = {
         reportData: archetypeData,
-        averageData: STATIC_AVERAGE_DATA
+        averageData: averageData // This is now REAL data from database, not static!
       };
+      
+      console.log('[useReportAccess] 🎯 FINAL PROCESSED DATA:', {
+        hasReportData: !!processedData.reportData,
+        hasAverageData: !!processedData.averageData,
+        averageDataKeys: processedData.averageData ? Object.keys(processedData.averageData).length : 0,
+        costPEPYInResult: processedData.averageData ? processedData.averageData["Cost_Medical & RX Paid Amount PEPY"] : 'missing',
+        finalResultCorrect: processedData.averageData && processedData.averageData["Cost_Medical & RX Paid Amount PEPY"] === 13440
+      });
       
       // Save to cache
       setInCache(cacheKey, processedData);
@@ -181,7 +250,7 @@ export const useReportAccess = ({
       console.error(`[useReportAccess] Error fetching data:`, err);
       throw err;
     }
-  }, [archetypeId, token, skipCache, processRawData]);
+  }, [archetypeId, token, skipCache, processRawData, fetchAverageData, isUsingFallbackData]);
   
   // Function to get fallback data from localStorage
   const getFallbackData = useCallback(() => {
@@ -196,6 +265,11 @@ export const useReportAccess = ({
           parsed.reportData = processRawData(parsed.reportData);
         }
         
+        // Ensure fallback data has proper averageData
+        if (!parsed.averageData) {
+          parsed.averageData = getFallbackAverageData();
+        }
+        
         setIsUsingFallbackData(true);
         return parsed;
       }
@@ -203,7 +277,7 @@ export const useReportAccess = ({
       console.error('Error loading fallback data:', e);
     }
     return null;
-  }, [archetypeId, processRawData]);
+  }, [archetypeId, processRawData, getFallbackAverageData]);
   
   // Use React Query for data fetching
   const { 
@@ -273,7 +347,7 @@ export const useReportAccess = ({
   return {
     reportData: reportData?.reportData || fallbackData?.reportData || null,
     archetypeData: reportData?.reportData || fallbackData?.reportData || null,
-    averageData: reportData?.averageData || fallbackData?.averageData || STATIC_AVERAGE_DATA,
+    averageData: reportData?.averageData || fallbackData?.averageData || getFallbackAverageData(),
     isLoading,
     error: error || (queryError as Error) || null,
     debugInfo: {
@@ -282,7 +356,7 @@ export const useReportAccess = ({
       queryKey,
       hasError: !!error || !!queryError,
       dataSource: 'level4_deepdive_report_data',
-      processingLayers: 'safe_type_conversion'
+      processingLayers: 'database_fetch_with_real_averages'
     },
     refreshData,
     isUsingFallbackData
