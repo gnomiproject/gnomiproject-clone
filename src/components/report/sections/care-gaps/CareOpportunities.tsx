@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Lightbulb, Target } from 'lucide-react';
@@ -16,7 +15,6 @@ const CareOpportunities: React.FC<CareOpportunitiesProps> = ({
   careGapsContent,
   className = ""
 }) => {
-  // Find the metrics with the largest gaps vs average (potential opportunities)
   const findOpportunities = () => {
     const gaps = [];
     
@@ -54,7 +52,6 @@ const CareOpportunities: React.FC<CareOpportunitiesProps> = ({
       .replace('ED', 'Emergency Department');
   };
   
-  // Parse and format the care gaps content if it's in JSON format
   const formatCareGapsContent = (content: string) => {
     if (!content) return null;
     
@@ -126,7 +123,7 @@ const CareOpportunities: React.FC<CareOpportunitiesProps> = ({
                     </h4>
                     <div className="grid grid-cols-3 gap-2 text-center">
                       <div>
-                        <div className="text-xs text-gray-500">Current</div>
+                        <div className="text-xs text-gray-500">Your Archetype</div>
                         <div className="font-bold text-lg">{(gap.value * 100).toFixed(1)}%</div>
                       </div>
                       <div>
