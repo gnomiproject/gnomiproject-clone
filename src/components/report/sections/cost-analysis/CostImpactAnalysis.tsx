@@ -44,14 +44,14 @@ const CostImpactAnalysis = ({ reportData, averageData }: CostImpactAnalysisProps
   // Prepare data for charts
   const avoidableERData = [{
     name: 'Avoidable ER',
-    'Archetype Cost': getReportValue("Cost_Avoidable ER Potential Savings PMPY"),
-    'Population Average': getAverageValue("Cost_Avoidable ER Potential Savings PMPY")
+    'Your Archetype': getReportValue("Cost_Avoidable ER Potential Savings PMPY"),
+    'Archetype Average': getAverageValue("Cost_Avoidable ER Potential Savings PMPY")
   }];
   
   const specialtyRxData = [{
     name: 'Specialty Rx',
-    'Archetype Cost': getReportValue("Cost_Specialty RX Allowed Amount PMPM"),
-    'Population Average': getAverageValue("Cost_Specialty RX Allowed Amount PMPM")
+    'Your Archetype': getReportValue("Cost_Specialty RX Allowed Amount PMPM"),
+    'Archetype Average': getAverageValue("Cost_Specialty RX Allowed Amount PMPM")
   }];
   
   // Calculate specialty Rx percentage of total pharmacy spend
@@ -83,8 +83,8 @@ const CostImpactAnalysis = ({ reportData, averageData }: CostImpactAnalysisProps
                   <YAxis tickFormatter={(value) => formatNumber(value, 'currency', 0)} />
                   <Tooltip formatter={(value) => formatNumber(value as number, 'currency', 2)} />
                   <Legend />
-                  <Bar dataKey="Archetype Cost" fill="#3b82f6" />
-                  <Bar dataKey="Population Average" fill="#93c5fd" />
+                  <Bar dataKey="Your Archetype" fill="#3b82f6" />
+                  <Bar dataKey="Archetype Average" fill="#93c5fd" />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -116,8 +116,8 @@ const CostImpactAnalysis = ({ reportData, averageData }: CostImpactAnalysisProps
                   <YAxis tickFormatter={(value) => formatNumber(value, 'currency', 0)} />
                   <Tooltip formatter={(value) => formatNumber(value as number, 'currency', 2)} />
                   <Legend />
-                  <Bar dataKey="Archetype Cost" fill="#3b82f6" />
-                  <Bar dataKey="Population Average" fill="#93c5fd" />
+                  <Bar dataKey="Your Archetype" fill="#3b82f6" />
+                  <Bar dataKey="Archetype Average" fill="#93c5fd" />
                 </BarChart>
               </ResponsiveContainer>
             </div>
