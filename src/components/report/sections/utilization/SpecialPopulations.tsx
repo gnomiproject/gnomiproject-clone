@@ -44,6 +44,26 @@ const SpecialPopulations = ({
   const COLORS = ['#0088FE', '#e0e0e0'];
   const HIGH_COST_COLORS = ['#FF8042', '#e0e0e0'];
 
+  // Custom legend component
+  const renderLegend = (props: any, colors: string[]) => {
+    const { payload } = props;
+    return (
+      <div className="flex justify-center gap-4 mt-4">
+        {payload.map((entry: any, index: number) => (
+          <div key={`legend-${index}`} className="flex items-center gap-2">
+            <div 
+              className="w-3 h-3 rounded-sm" 
+              style={{ backgroundColor: colors[index] }}
+            />
+            <span className="text-sm text-gray-600">
+              {entry.value}: {formatPercent(entry.payload.value, 0)}
+            </span>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <Card className="mt-6">
       <CardHeader className="pb-3">
@@ -61,14 +81,14 @@ const SpecialPopulations = ({
           {/* Non-Utilizers */}
           <div className="border rounded-lg p-6">
             <h3 className="text-lg font-medium mb-4 text-center">Member Utilization</h3>
-            <div className="h-64 relative">
+            <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
                     data={utilizationData}
                     cx="50%"
                     cy="50%"
-                    outerRadius={70}
+                    outerRadius={80}
                     fill="#8884d8"
                     dataKey="value"
                   >
@@ -79,18 +99,8 @@ const SpecialPopulations = ({
                   <Tooltip formatter={(value) => formatPercent(value as number, 1)} />
                 </PieChart>
               </ResponsiveContainer>
-              {/* Custom labels positioned outside the chart */}
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="text-center">
-                  <div className="text-sm font-medium text-blue-600 mb-1">
-                    Non-Utilizers: {formatPercent(nonUtilizers, 0)}
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    Utilizers: {formatPercent(1 - nonUtilizers, 0)}
-                  </div>
-                </div>
-              </div>
             </div>
+            {renderLegend({ payload: utilizationData.map((item, index) => ({ value: item.name, payload: item })) }, COLORS)}
             <div className="mt-4 text-sm text-center space-y-2">
               <p className="text-gray-700 font-medium">
                 {formatPercent(nonUtilizers)} of members did not use any healthcare services
@@ -104,14 +114,14 @@ const SpecialPopulations = ({
           {/* High Cost Claimants */}
           <div className="border rounded-lg p-6">
             <h3 className="text-lg font-medium mb-4 text-center">High Cost Claimant Impact</h3>
-            <div className="h-64 relative">
+            <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
                     data={spendingData}
                     cx="50%"
                     cy="50%"
-                    outerRadius={70}
+                    outerRadius={80}
                     fill="#8884d8"
                     dataKey="value"
                   >
@@ -122,18 +132,8 @@ const SpecialPopulations = ({
                   <Tooltip formatter={(value) => formatPercent(value as number, 1)} />
                 </PieChart>
               </ResponsiveContainer>
-              {/* Custom labels positioned outside the chart */}
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="text-center">
-                  <div className="text-sm font-medium text-orange-600 mb-1">
-                    High Cost Claimants: {formatPercent(highCostClaimants, 0)}
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    All Others: {formatPercent(1 - highCostClaimants, 0)}
-                  </div>
-                </div>
-              </div>
             </div>
+            {renderLegend({ payload: spendingData.map((item, index) => ({ value: item.name, payload: item })) }, HIGH_COST_COLORS)}
             <div className="mt-4 text-sm text-center space-y-2">
               <p className="text-gray-700 font-medium">
                 {formatPercent(highCostClaimants)} of members account for {formatPercent(highCostSpend)} of spending
