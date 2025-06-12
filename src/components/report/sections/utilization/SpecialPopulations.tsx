@@ -44,6 +44,29 @@ const SpecialPopulations = ({
   const COLORS = ['#0088FE', '#e0e0e0'];
   const HIGH_COST_COLORS = ['#FF8042', '#e0e0e0'];
 
+  // Custom label function to prevent overlap
+  const renderCustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, name }) => {
+    if (percent < 0.05) return null; // Don't show labels for very small segments
+    
+    const RADIAN = Math.PI / 180;
+    const radius = innerRadius + (outerRadius - innerRadius) * 1.2;
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+    return (
+      <text 
+        x={x} 
+        y={y} 
+        fill="#374151"
+        textAnchor={x > cx ? 'start' : 'end'} 
+        dominantBaseline="central"
+        className="text-sm font-medium"
+      >
+        {`${name}: ${(percent * 100).toFixed(0)}%`}
+      </text>
+    );
+  };
+
   return (
     <Card className="mt-6">
       <CardHeader className="pb-3">
@@ -57,37 +80,36 @@ const SpecialPopulations = ({
           Analysis of non-utilizers and high-cost claimants and their impact on overall healthcare spending.
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Non-Utilizers */}
           <div className="border rounded-lg p-6">
             <h3 className="text-lg font-medium mb-4 text-center">Member Utilization</h3>
-            <div className="h-64">
+            <div className="h-72">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
                     data={utilizationData}
                     cx="50%"
                     cy="50%"
-                    outerRadius={80}
+                    labelLine={false}
+                    label={renderCustomLabel}
+                    outerRadius={85}
                     fill="#8884d8"
                     dataKey="value"
-                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                    labelLine={false}
                   >
                     {utilizationData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Legend />
                   <Tooltip formatter={(value) => formatPercent(value as number, 1)} />
                 </PieChart>
               </ResponsiveContainer>
             </div>
-            <div className="mt-4 text-sm text-center">
+            <div className="mt-4 text-sm text-center space-y-2">
               <p className="text-gray-700 font-medium">
                 {formatPercent(nonUtilizers)} of members did not use any healthcare services
               </p>
-              <p className="text-gray-500 text-xs mt-1">
+              <p className="text-gray-500 text-xs">
                 Archetype average: {formatPercent(averageData["Util_Percent of Members who are Non-Utilizers"] || 0)}
               </p>
             </div>
@@ -96,33 +118,32 @@ const SpecialPopulations = ({
           {/* High Cost Claimants */}
           <div className="border rounded-lg p-6">
             <h3 className="text-lg font-medium mb-4 text-center">High Cost Claimant Impact</h3>
-            <div className="h-64">
+            <div className="h-72">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
                     data={spendingData}
                     cx="50%"
                     cy="50%"
-                    outerRadius={80}
+                    labelLine={false}
+                    label={renderCustomLabel}
+                    outerRadius={85}
                     fill="#8884d8"
                     dataKey="value"
-                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                    labelLine={false}
                   >
                     {spendingData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={HIGH_COST_COLORS[index % HIGH_COST_COLORS.length]} />
                     ))}
                   </Pie>
-                  <Legend />
                   <Tooltip formatter={(value) => formatPercent(value as number, 1)} />
                 </PieChart>
               </ResponsiveContainer>
             </div>
-            <div className="mt-4 text-sm text-center">
+            <div className="mt-4 text-sm text-center space-y-2">
               <p className="text-gray-700 font-medium">
                 {formatPercent(highCostClaimants)} of members account for {formatPercent(highCostSpend)} of spending
               </p>
-              <p className="text-gray-500 text-xs mt-1">
+              <p className="text-gray-500 text-xs">
                 Archetype average: {formatPercent(averageData["Util_Percent of Members who are High Cost Claimants"] || 0)} of members account for {formatPercent(averageData["Util_Percent of Allowed Amount Spent on High Cost Claimants"] || 0)} of spending
               </p>
             </div>
