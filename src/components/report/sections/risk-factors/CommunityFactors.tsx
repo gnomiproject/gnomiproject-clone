@@ -18,42 +18,42 @@ const CommunityFactors: React.FC<CommunityFactorsProps> = ({ reportData, average
       fieldName: "SDOH_Average Digital Access",
       icon: <Smartphone className="h-5 w-5 text-blue-500" />,
       description: "Access to internet and digital health tools",
-      isAccessFactor: true
+      isRiskFactor: true // Higher values = higher risk (digital divide)
     },
     {
       title: "Neighborhood Quality",
       fieldName: "SDOH_Average Neighborhood",
       icon: <Home className="h-5 w-5 text-amber-500" />,
       description: "Safety, pollution, and general community health",
-      isAccessFactor: true
+      isRiskFactor: true // Higher values = higher risk (neighborhood issues)
     },
     {
       title: "Health Literacy",
       fieldName: "SDOH_Average Health Literacy",
       icon: <GraduationCap className="h-5 w-5 text-purple-500" />,
       description: "Understanding health information and navigation",
-      isAccessFactor: true
+      isRiskFactor: true // Higher values = higher risk (health literacy barriers)
     },
     {
       title: "Women's Health Access",
       fieldName: "SDOH_Average Womens Health",
       icon: <Heart className="h-5 w-5 text-pink-500" />,
       description: "Access to women's health services",
-      isAccessFactor: true
+      isRiskFactor: true // Higher values = higher risk (access barriers)
     },
     {
       title: "Childcare Access",
       fieldName: "SDOH_Average Childcare Access",
       icon: <Baby className="h-5 w-5 text-teal-500" />,
       description: "Access to childcare services",
-      isAccessFactor: true
+      isRiskFactor: true // Higher values = higher risk (childcare barriers)
     },
     {
       title: "Amenities Access",
       fieldName: "SDOH_Average Amenities Access",
       icon: <Store className="h-5 w-5 text-indigo-500" />,
       description: "Community resources and amenities",
-      isAccessFactor: true
+      isRiskFactor: true // Higher values = higher risk (amenities barriers)
     }
   ];
 
@@ -74,15 +74,15 @@ const CommunityFactors: React.FC<CommunityFactorsProps> = ({ reportData, average
           // Calculate comparison data using the synchronous version
           const percentDiff = calculatePercentageDifferenceSync(value, avgValue);
           
-          // For access-related factors, higher values typically indicate better access (fewer risks)
-          // So when lower than average, this represents higher risks
-          const higherRisks = factor.isAccessFactor ? percentDiff < 0 : percentDiff > 0;
+          // For SDOH risk factors, higher values indicate higher risks
+          // So higher than average = more risk (red), lower than average = less risk (green)
+          const higherRisk = percentDiff > 0;
           
           const comparisonWord = percentDiff > 0 ? "higher than" : "lower than";
           const text = `${Math.abs(percentDiff).toFixed(1)}% ${comparisonWord} average`;
           
           // Color based on risk assessment - higher risks (red), lower risks (green)
-          const color = higherRisks ? "text-red-600" : "text-green-600";
+          const color = higherRisk ? "text-red-600" : "text-green-600";
 
           return (
             <div key={index} className="bg-gray-50 rounded-lg p-4 border border-gray-100">

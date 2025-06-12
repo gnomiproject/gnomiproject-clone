@@ -17,25 +17,29 @@ const EconomicAccessFactors: React.FC<EconomicAccessFactorsProps> = ({ reportDat
       title: "Economic Security",
       fieldName: "SDOH_Average Economic Insecurity",
       icon: <Banknote className="h-5 w-5 text-emerald-500" />,
-      description: "Financial stability and economic resources"
+      description: "Financial stability and economic resources",
+      isRiskFactor: true // Higher values = higher risk
     },
     {
       title: "Healthcare Access",
       fieldName: "SDOH_Average Healthcare Access",
       icon: <Hospital className="h-5 w-5 text-blue-500" />,
-      description: "Access to healthcare providers and services"
+      description: "Access to healthcare providers and services",
+      isRiskFactor: true // Higher values = higher risk (barriers to access)
     },
     {
       title: "Food Access",
       fieldName: "SDOH_Average Food Access",
       icon: <Carrot className="h-5 w-5 text-orange-500" />,
-      description: "Access to healthy food options and nutrition"
+      description: "Access to healthy food options and nutrition",
+      isRiskFactor: true // Higher values = higher risk (food insecurity)
     },
     {
       title: "Transportation",
       fieldName: "SDOH_Average Transportation",
       icon: <Bus className="h-5 w-5 text-indigo-500" />,
-      description: "Availability of transportation to access healthcare"
+      description: "Availability of transportation to access healthcare",
+      isRiskFactor: true // Higher values = higher risk (transportation barriers)
     }
   ];
 
@@ -56,19 +60,15 @@ const EconomicAccessFactors: React.FC<EconomicAccessFactorsProps> = ({ reportDat
           // Calculate comparison data using the synchronous version
           const percentDiff = calculatePercentageDifferenceSync(value, avgValue);
           
-          // For SDOH factors, higher values typically indicate greater risks
-          // Exception: For access-related factors, higher might indicate better access
-          const isAccessFactor = factor.title.includes("Access") || factor.title === "Economic Security";
-          
-          // For access factors, higher is better (fewer risks), so lower would be red
-          // For risk factors, higher is worse (more risks), so higher would be red
-          const higherRisks = isAccessFactor ? percentDiff < 0 : percentDiff > 0;
+          // For SDOH risk factors, higher values indicate higher risks
+          // So higher than average = more risk (red), lower than average = less risk (green)
+          const higherRisk = percentDiff > 0;
           
           const comparisonWord = percentDiff > 0 ? "higher than" : "lower than";
           const text = `${Math.abs(percentDiff).toFixed(1)}% ${comparisonWord} average`;
           
           // Color based on risk assessment - higher risks (red), lower risks (green)
-          const color = higherRisks ? "text-red-600" : "text-green-600";
+          const color = higherRisk ? "text-red-600" : "text-green-600";
 
           return (
             <div key={index} className="bg-gray-50 rounded-lg p-4 border border-gray-100">

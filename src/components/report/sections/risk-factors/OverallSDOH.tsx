@@ -20,16 +20,15 @@ const OverallSDOH: React.FC<OverallSDOHProps> = ({ reportData, averageData }) =>
   // Calculate comparison metrics using the synchronous version
   const percentDiff = calculatePercentageDifferenceSync(sdohScore, avgSdohScore);
   
-  // For SDOH, lower values indicate fewer social determinant risks
-  // Note: This is different from isLowerBetter() - we're not saying lower is "better"
-  // but rather that lower values represent fewer social risk factors
-  const fewerRisks = percentDiff < 0;
+  // For SDOH, higher values indicate higher social risk factors (worse)
+  // So higher than average = higher risk (red), lower than average = lower risk (green)
+  const higherRisk = percentDiff > 0;
   
   const comparisonWord = percentDiff > 0 ? "higher than" : "lower than";
   const text = `${Math.abs(percentDiff).toFixed(1)}% ${comparisonWord} archetype average`;
   
-  // Color based on risk assessment, not "better/worse" judgment
-  const color = fewerRisks ? "text-green-600" : "text-amber-600";
+  // Color based on risk assessment - higher risks (red), lower risks (green)
+  const color = higherRisk ? "text-red-600" : "text-green-600";
   
   // Determine SDOH level category
   let sdohLevel = 'Moderate Social Risk Factors';
@@ -39,7 +38,7 @@ const OverallSDOH: React.FC<OverallSDOHProps> = ({ reportData, averageData }) =>
     sdohLevel = 'Higher Social Risk Factors';
     sdohColor = 'text-red-500';
   } else if (sdohScore < avgSdohScore * 0.95) {
-    sdohLevel = 'Fewer Social Risk Factors';
+    sdohLevel = 'Lower Social Risk Factors';
     sdohColor = 'text-green-500';
   }
 
