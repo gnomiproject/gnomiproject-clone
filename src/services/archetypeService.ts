@@ -49,6 +49,14 @@ export const fetchArchetypeData = async (archetypeId: ArchetypeId, skipCache: bo
       hasArchetypeName: !!data.archetype_name
     });
     
+    // CRITICAL DEBUG: Log distinctive_metrics specifically
+    console.log("[archetypeService] === DISTINCTIVE METRICS DEBUG ===");
+    console.log("[archetypeService] distinctive_metrics exists:", !!data.distinctive_metrics);
+    console.log("[archetypeService] distinctive_metrics type:", typeof data.distinctive_metrics);
+    console.log("[archetypeService] distinctive_metrics value:", data.distinctive_metrics);
+    console.log("[archetypeService] distinctive_metrics length:", Array.isArray(data.distinctive_metrics) ? data.distinctive_metrics.length : 'not array');
+    console.log("[archetypeService] ======================================");
+    
     // Enhanced logging specifically for SWOT data availability
     console.log("[archetypeService] SWOT data exists check:", {
       hasStrengthsField: 'strengths' in data,
@@ -63,6 +71,12 @@ export const fetchArchetypeData = async (archetypeId: ArchetypeId, skipCache: bo
     
     // Ensure the name property is always set correctly - using properties that exist in the data
     normalizedData.name = normalizedData.archetype_name || archetypeId.toUpperCase();
+    
+    // PRESERVE DISTINCTIVE METRICS: Make sure it's not lost during normalization
+    if (data.distinctive_metrics) {
+      normalizedData.distinctive_metrics = data.distinctive_metrics;
+      console.log("[archetypeService] Preserved distinctive_metrics in normalized data:", normalizedData.distinctive_metrics);
+    }
     
     // Store in cache
     cacheArchetype(archetypeId, normalizedData);

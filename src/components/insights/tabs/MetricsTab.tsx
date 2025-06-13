@@ -12,23 +12,42 @@ interface MetricsTabProps {
 }
 
 const MetricsTab = ({ archetypeData }: MetricsTabProps) => {
-  console.log('[MetricsTab] Received data:', {
-    hasDetailedMetrics: !!archetypeData.detailed_metrics,
-    hasDistinctiveMetrics: !!archetypeData.distinctive_metrics,
-    hasRawData: !!(archetypeData as any)['Cost_Medical & RX Paid Amount PEPY'],
-    keys: Object.keys(archetypeData).filter(k => k.startsWith('Cost_') || k.startsWith('Util_') || k.startsWith('Demo_') || k.startsWith('Risk_') || k.startsWith('SDOH_')).slice(0, 10)
-  });
-
-  // Check if we have processed distinctive metrics first
-  const hasProcessedDistinctiveMetrics = Array.isArray(archetypeData.distinctive_metrics) && archetypeData.distinctive_metrics.length > 0;
+  // COMPREHENSIVE DEBUGGING: Log all incoming data
+  console.log('[MetricsTab] === DEBUGGING DISTINCTIVE METRICS ===');
+  console.log('[MetricsTab] Raw archetypeData keys:', Object.keys(archetypeData || {}));
+  console.log('[MetricsTab] distinctive_metrics raw:', archetypeData?.distinctive_metrics);
+  console.log('[MetricsTab] distinctive_metrics type:', typeof archetypeData?.distinctive_metrics);
+  console.log('[MetricsTab] distinctive_metrics length:', Array.isArray(archetypeData?.distinctive_metrics) ? archetypeData.distinctive_metrics.length : 'not array');
   
-  // For level 3 insights report, we need to extract metrics directly from the raw data
+  // Check if distinctive_metrics is a JSON string that needs parsing
+  let processedDistinctiveMetrics = null;
+  if (archetypeData?.distinctive_metrics) {
+    if (typeof archetypeData.distinctive_metrics === 'string') {
+      try {
+        processedDistinctiveMetrics = JSON.parse(archetypeData.distinctive_metrics);
+        console.log('[MetricsTab] Parsed string distinctive_metrics:', processedDistinctiveMetrics);
+      } catch (e) {
+        console.error('[MetricsTab] Failed to parse distinctive_metrics string:', e);
+      }
+    } else if (Array.isArray(archetypeData.distinctive_metrics)) {
+      processedDistinctiveMetrics = archetypeData.distinctive_metrics;
+      console.log('[MetricsTab] Using array distinctive_metrics:', processedDistinctiveMetrics);
+    } else if (typeof archetypeData.distinctive_metrics === 'object') {
+      processedDistinctiveMetrics = archetypeData.distinctive_metrics;
+      console.log('[MetricsTab] Using object distinctive_metrics:', processedDistinctiveMetrics);
+    }
+  }
+
+  console.log('[MetricsTab] Final processedDistinctiveMetrics:', processedDistinctiveMetrics);
+  console.log('[MetricsTab] ============================================');
+
+  // Function to get metric value from raw data
   const getMetricValue = (fieldName: string): number | undefined => {
     const value = (archetypeData as any)[fieldName];
     return typeof value === 'number' ? value : undefined;
   };
 
-  // Create distinctive metrics from raw data if we don't have processed ones
+  // Create distinctive metrics from raw data as fallback
   const createDistinctiveMetricsFromRaw = () => {
     const rawMetrics = [
       {
@@ -52,8 +71,8 @@ const MetricsTab = ({ archetypeData }: MetricsTabProps) => {
         format: "percent" as const
       },
       {
-        title: "Medical & RX Paid Amount PMPY",
-        field: "Cost_Medical & RX Paid Amount PMPY",
+        title: "Medical & RX Paid Amount PEPY",
+        field: "Cost_Medical & RX Paid Amount PEPY",
         format: "currency" as const
       }
     ];
@@ -65,19 +84,24 @@ const MetricsTab = ({ archetypeData }: MetricsTabProps) => {
       metric: metric.title,
       value: getMetricValue(metric.field)!,
       format: metric.format,
-      // For now, we'll show without comparison since we don't have average data in level3
       average: undefined,
       difference: 0,
       significance: ''
     }));
   };
 
-  // Get distinctive metrics - either processed or created from raw data
-  const distinctiveMetrics = hasProcessedDistinctiveMetrics 
-    ? archetypeData.distinctive_metrics 
-    : createDistinctiveMetricsFromRaw();
+  // Determine which distinctive metrics to use
+  let distinctiveMetrics = null;
+  
+  if (processedDistinctiveMetrics && Array.isArray(processedDistinctiveMetrics) && processedDistinctiveMetrics.length > 0) {
+    distinctiveMetrics = processedDistinctiveMetrics;
+    console.log('[MetricsTab] Using processed distinctive metrics:', distinctiveMetrics.length, 'items');
+  } else {
+    distinctiveMetrics = createDistinctiveMetricsFromRaw();
+    console.log('[MetricsTab] Using fallback distinctive metrics:', distinctiveMetrics.length, 'items');
+  }
 
-  // Define the key metrics that should be available in level 3 data
+  // Define the key metrics available in level3 data
   const level3Metrics = [
     {
       title: "Total Healthcare Cost",
@@ -145,7 +169,7 @@ const MetricsTab = ({ archetypeData }: MetricsTabProps) => {
     totalDefined: level3Metrics.length,
     available: availableMetrics.length,
     availableFields: availableMetrics.map(m => m.field),
-    distinctiveMetrics: distinctiveMetrics?.length || 0
+    distinctiveMetricsCount: distinctiveMetrics?.length || 0
   });
 
   // Group metrics by category

@@ -83,6 +83,11 @@ export const useGetArchetype = (archetypeId: ArchetypeId, skipCache: boolean = f
     
     try {
       if (data) {
+        console.log("[useGetArchetype] === PROCESSING DATA DEBUG ===");
+        console.log("[useGetArchetype] Received data distinctive_metrics:", data.distinctive_metrics);
+        console.log("[useGetArchetype] Distinctive metrics type:", typeof data.distinctive_metrics);
+        console.log("[useGetArchetype] ===================================");
+        
         // Extract family data from the level3_report_secure response
         const extractedFamilyData = {
           id: data.family_id,
