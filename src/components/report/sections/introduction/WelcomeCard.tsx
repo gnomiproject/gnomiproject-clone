@@ -47,6 +47,15 @@ const WelcomeCard = ({
     return size.toString();
   };
 
+  // Extract family name from archetype ID (first letter)
+  const familyLetter = archetypeId?.charAt(0)?.toLowerCase() || '';
+  const familyNames: { [key: string]: string } = {
+    'a': 'Advanced',
+    'b': 'Pragmatist', 
+    'c': 'Coordinated'
+  };
+  const familyName = familyNames[familyLetter] || 'Healthcare';
+
   return (
     <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
       <CardHeader className="pb-4">
@@ -73,9 +82,9 @@ const WelcomeCard = ({
             <Target className="h-5 w-5 text-green-600" />
           </div>
           <div className="flex-1">
-            <h4 className="font-medium text-gray-900">Archetype Match</h4>
+            <h4 className="font-medium text-gray-900">Archetype Classification</h4>
             <p className="text-gray-600 text-sm mt-1">
-              {matchPercentage}% compatibility with the {archetypeName} profile
+              Archetype Code: <span className="font-medium text-green-700">{archetypeId?.toUpperCase()}</span> | Family: <span className="font-medium text-green-700">{familyName}</span>
               {organizationSize && (
                 <span className="block mt-1">
                   Organization size: {formatOrganizationSize(organizationSize)}
