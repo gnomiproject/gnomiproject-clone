@@ -39,6 +39,23 @@ const MetricsTab = ({ archetypeData }: MetricsTabProps) => {
   }
 
   console.log('[MetricsTab] Final processedDistinctiveMetrics:', processedDistinctiveMetrics);
+  
+  // Enhanced debugging for each individual metric
+  if (processedDistinctiveMetrics && Array.isArray(processedDistinctiveMetrics)) {
+    console.log('[MetricsTab] Individual metrics analysis:');
+    processedDistinctiveMetrics.forEach((metric, index) => {
+      console.log(`[MetricsTab] Metric ${index}:`, {
+        metric: metric.metric,
+        value: metric.value,
+        format: metric.format,
+        average: metric.average,
+        difference: metric.difference,
+        significance: metric.significance,
+        fullObject: metric
+      });
+    });
+  }
+  
   console.log('[MetricsTab] ============================================');
 
   // Function to get metric value from raw data
@@ -94,8 +111,47 @@ const MetricsTab = ({ archetypeData }: MetricsTabProps) => {
   let distinctiveMetrics = null;
   
   if (processedDistinctiveMetrics && Array.isArray(processedDistinctiveMetrics) && processedDistinctiveMetrics.length > 0) {
-    distinctiveMetrics = processedDistinctiveMetrics;
+    // Ensure the processed metrics have the correct structure
+    distinctiveMetrics = processedDistinctiveMetrics.map(metric => {
+      // Handle different possible property names and structures
+      const metricName = metric.metric || metric.Metric || metric.title || 'Unknown Metric';
+      const metricValue = metric.value !== undefined ? metric.value : 
+                         metric.archetype_value !== undefined ? metric.archetype_value :
+                         metric['Archetype Value'] !== undefined ? metric['Archetype Value'] : 0;
+      const averageValue = metric.average !== undefined ? metric.average :
+                          metric.archetype_average !== undefined ? metric.archetype_average :
+                          metric['Archetype Average'] !== undefined ? metric['Archetype Average'] : undefined;
+      const differenceValue = metric.difference !== undefined ? metric.difference :
+                             metric.Difference !== undefined ? metric.Difference : 0;
+      
+      // Determine format based on metric name if not provided
+      let format = metric.format || 'number';
+      if (metricName.toLowerCase().includes('cost') || metricName.toLowerCase().includes('amount') || metricName.toLowerCase().includes('paid')) {
+        format = 'currency';
+      } else if (metricName.toLowerCase().includes('percent') || metricName.toLowerCase().includes('prevalence') || metricName.toLowerCase().includes('access') || metricName.toLowerCase().includes('adoption')) {
+        format = 'percent';
+      }
+      
+      console.log(`[MetricsTab] Processing metric "${metricName}":`, {
+        originalMetric: metric,
+        extractedValue: metricValue,
+        extractedAverage: averageValue,
+        extractedDifference: differenceValue,
+        determinedFormat: format
+      });
+      
+      return {
+        metric: metricName,
+        value: metricValue,
+        format: format,
+        average: averageValue,
+        difference: differenceValue,
+        significance: metric.significance || metric.Significance || ''
+      };
+    });
+    
     console.log('[MetricsTab] Using processed distinctive metrics:', distinctiveMetrics.length, 'items');
+    console.log('[MetricsTab] Final processed metrics:', distinctiveMetrics);
   } else {
     distinctiveMetrics = createDistinctiveMetricsFromRaw();
     console.log('[MetricsTab] Using fallback distinctive metrics:', distinctiveMetrics.length, 'items');
@@ -196,8 +252,7 @@ const MetricsTab = ({ archetypeData }: MetricsTabProps) => {
                   key={index}
                   title={metric.metric}
                   value={metric.value}
-                  format={metric.format || (metric.metric.toLowerCase().includes('cost') ? 'currency' : 
-                         (metric.metric.toLowerCase().includes('percent') || metric.metric.toLowerCase().includes('adoption') ? 'percent' : 'number'))}
+                  format={metric.format}
                   benchmark={metric.average}
                   tooltipText={metric.average ? 
                     `${metric.significance || ''} ${Math.abs(metric.difference || 0).toFixed(1)}% ${(metric.difference || 0) > 0 ? 'higher' : 'lower'} than average` :
