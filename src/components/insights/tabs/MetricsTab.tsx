@@ -15,16 +15,67 @@ const MetricsTab = ({ archetypeData }: MetricsTabProps) => {
   console.log('[MetricsTab] Received data:', {
     hasDetailedMetrics: !!archetypeData.detailed_metrics,
     hasDistinctiveMetrics: !!archetypeData.distinctive_metrics,
-    hasCostMetric: !!(archetypeData as any).Cost_Medical_Paid_Amount_PEPY,
-    hasLevel3Fields: !!(archetypeData as any)['Cost_Medical & RX Paid Amount PEPY'],
+    hasRawData: !!(archetypeData as any)['Cost_Medical & RX Paid Amount PEPY'],
     keys: Object.keys(archetypeData).filter(k => k.startsWith('Cost_') || k.startsWith('Util_') || k.startsWith('Demo_') || k.startsWith('Risk_') || k.startsWith('SDOH_')).slice(0, 10)
   });
 
+  // Check if we have processed distinctive metrics first
+  const hasProcessedDistinctiveMetrics = Array.isArray(archetypeData.distinctive_metrics) && archetypeData.distinctive_metrics.length > 0;
+  
   // For level 3 insights report, we need to extract metrics directly from the raw data
   const getMetricValue = (fieldName: string): number | undefined => {
     const value = (archetypeData as any)[fieldName];
     return typeof value === 'number' ? value : undefined;
   };
+
+  // Create distinctive metrics from raw data if we don't have processed ones
+  const createDistinctiveMetricsFromRaw = () => {
+    const rawMetrics = [
+      {
+        title: "Access to Health Insurance",
+        field: "Bene_Access to Health Insurance",
+        format: "percent" as const
+      },
+      {
+        title: "Telehealth Adoption", 
+        field: "Util_Telehealth Adoption",
+        format: "percent" as const
+      },
+      {
+        title: "Specialist Visits per 1k Members",
+        field: "Util_Specialist Visits per 1k Members", 
+        format: "number" as const
+      },
+      {
+        title: "Mental Health Disorder Prevalence",
+        field: "Dise_Mental Health Disorder Prevalence",
+        format: "percent" as const
+      },
+      {
+        title: "Medical & RX Paid Amount PMPY",
+        field: "Cost_Medical & RX Paid Amount PMPY",
+        format: "currency" as const
+      }
+    ];
+
+    return rawMetrics.filter(metric => {
+      const value = getMetricValue(metric.field);
+      return value !== undefined && value !== null;
+    }).map(metric => ({
+      metric: metric.title,
+      value: getMetricValue(metric.field)!,
+      format: metric.format,
+      // For now, we'll show without comparison since we don't have average data in level3
+      average: undefined,
+      difference: 0,
+      significance: ''
+    }));
+  };
+
+  // Get distinctive metrics - either processed or created from raw data
+  const distinctiveMetrics = hasProcessedDistinctiveMetrics 
+    ? archetypeData.distinctive_metrics 
+    : createDistinctiveMetricsFromRaw();
 
   // Define the key metrics that should be available in level 3 data
   const level3Metrics = [
@@ -93,7 +144,8 @@ const MetricsTab = ({ archetypeData }: MetricsTabProps) => {
   console.log('[MetricsTab] Available metrics:', {
     totalDefined: level3Metrics.length,
     available: availableMetrics.length,
-    availableFields: availableMetrics.map(m => m.field)
+    availableFields: availableMetrics.map(m => m.field),
+    distinctiveMetrics: distinctiveMetrics?.length || 0
   });
 
   // Group metrics by category
@@ -105,29 +157,29 @@ const MetricsTab = ({ archetypeData }: MetricsTabProps) => {
     return acc;
   }, {} as Record<string, typeof availableMetrics>);
 
-  // If we have processed distinctive metrics, show those as well
-  const hasDistinctiveMetrics = Array.isArray(archetypeData.distinctive_metrics) && archetypeData.distinctive_metrics.length > 0;
-
   return (
     <div className="space-y-8">
-      {/* Show distinctive metrics if available (this would be from processed data) */}
-      {hasDistinctiveMetrics && (
+      {/* Show distinctive metrics */}
+      {distinctiveMetrics && distinctiveMetrics.length > 0 && (
         <Card className="shadow-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-xl">Distinctive Metrics</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {archetypeData.distinctive_metrics!.slice(0, 6).map((metric, index) => (
+              {distinctiveMetrics.slice(0, 6).map((metric, index) => (
                 <MetricBar 
                   key={index}
                   title={metric.metric}
                   value={metric.value}
-                  format={metric.metric.toLowerCase().includes('cost') ? 'currency' : 
-                         (metric.metric.toLowerCase().includes('percent') ? 'percent' : 'number')}
+                  format={metric.format || (metric.metric.toLowerCase().includes('cost') ? 'currency' : 
+                         (metric.metric.toLowerCase().includes('percent') || metric.metric.toLowerCase().includes('adoption') ? 'percent' : 'number'))}
                   benchmark={metric.average}
-                  tooltipText={`${metric.significance || ''} ${Math.abs(metric.difference).toFixed(1)}% ${metric.difference > 0 ? 'higher' : 'lower'} than average`}
-                  color={metric.difference > 0 ? '#3b82f6' : '#10b981'}
+                  tooltipText={metric.average ? 
+                    `${metric.significance || ''} ${Math.abs(metric.difference || 0).toFixed(1)}% ${(metric.difference || 0) > 0 ? 'higher' : 'lower'} than average` :
+                    'Individual archetype value'
+                  }
+                  color={(metric.difference || 0) > 0 ? '#3b82f6' : '#10b981'}
                 />
               ))}
             </div>
