@@ -19,25 +19,32 @@ const MetricBar = ({
   title, 
   value, 
   format, 
-  color = '#3b82f6',
+  color = '#6b7280',
   isGap = false,
   benchmark,
   tooltipText,
   maxValue = 1
 }: MetricBarProps) => {
-  const normalizedValue = Math.min(value / maxValue, 1);
-  const barWidth = `${Math.min(normalizedValue * 100, 100)}%`;
   const formattedValue = formatNumber(value, format, 1);
-  
   const formattedBenchmark = benchmark !== undefined 
     ? formatNumber(benchmark, format, 1)
     : null;
   
+  // Calculate difference for display
+  const difference = benchmark !== undefined ? value - benchmark : 0;
+  const percentDifference = benchmark !== undefined && benchmark !== 0 
+    ? ((difference / Math.abs(benchmark)) * 100)
+    : 0;
+  
+  const formattedDifference = Math.abs(percentDifference) >= 0.1 
+    ? `${percentDifference > 0 ? '+' : ''}${percentDifference.toFixed(1)}%`
+    : '±0%';
+  
   return (
-    <div className="space-y-1">
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-1">
-          <p className="text-sm font-medium">{title}</p>
+    <div className="space-y-3 p-4 bg-gray-50 rounded-lg border">
+      <div className="flex justify-between items-start">
+        <div className="flex items-center gap-1 flex-1">
+          <p className="text-sm font-medium text-gray-900">{title}</p>
           {tooltipText && (
             <TooltipProvider>
               <Tooltip>
@@ -53,39 +60,32 @@ const MetricBar = ({
             </TooltipProvider>
           )}
         </div>
-        <p className="text-sm font-semibold">{formattedValue}</p>
       </div>
       
-      <div className="h-2 bg-gray-100 rounded-full overflow-hidden relative">
-        <div 
-          className="h-full rounded-full" 
-          style={{ 
-            width: barWidth,
-            backgroundColor: color,
-            opacity: isGap ? 0.8 : 1,
-          }} 
-        />
+      {/* Main Value Display */}
+      <div className="space-y-2">
+        <div className="flex justify-between items-center">
+          <span className="text-xs font-medium text-gray-600">Archetype Value</span>
+          <span className="text-lg font-bold text-gray-900">{formattedValue}</span>
+        </div>
         
         {benchmark !== undefined && (
-          <div 
-            className="absolute top-0 bottom-0 w-0.5 bg-gray-800"
-            style={{ 
-              left: `${Math.min((benchmark / maxValue) * 100, 100)}%`,
-            }}
-          />
+          <>
+            <div className="flex justify-between items-center">
+              <span className="text-xs font-medium text-gray-600">Average</span>
+              <span className="text-sm font-semibold text-gray-700">{formattedBenchmark}</span>
+            </div>
+            
+            <div className="flex justify-between items-center pt-1 border-t border-gray-200">
+              <span className="text-xs font-medium text-gray-600">Difference</span>
+              <span className="text-sm font-semibold text-gray-800">{formattedDifference}</span>
+            </div>
+          </>
         )}
       </div>
       
-      {benchmark !== undefined && (
-        <div className="flex justify-end">
-          <p className="text-xs text-gray-500">
-            Benchmark: {formattedBenchmark}
-          </p>
-        </div>
-      )}
-      
       {isGap && (
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-gray-500 mt-2">
           {value > 0.5 ? 'Significant improvement opportunity' : 'Performing well'}
         </p>
       )}

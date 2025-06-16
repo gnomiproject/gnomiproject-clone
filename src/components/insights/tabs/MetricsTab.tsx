@@ -1,9 +1,9 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArchetypeDetailedData } from '@/types/archetype';
 import MetricBar from '../metrics/MetricBar';
 import { Badge } from '@/components/ui/badge';
-import { formatNumber } from '@/utils/formatters';
 
 interface MetricsTabProps {
   archetypeData: ArchetypeDetailedData;
@@ -264,10 +264,10 @@ const MetricsTab = ({ archetypeData }: MetricsTabProps) => {
                     format={metric.format}
                     benchmark={metric.average}
                     tooltipText={metric.average ? 
-                      `${metric.significance || ''} ${Math.abs(metric.difference || 0).toFixed(1)}% ${(metric.difference || 0) > 0 ? 'higher' : 'lower'} than average` :
+                      `Comparison to average across all archetypes` :
                       'Individual archetype value'
                     }
-                    color={(metric.difference || 0) > 0 ? '#3b82f6' : '#10b981'}
+                    color="#6b7280"
                   />
                 );
               })}
