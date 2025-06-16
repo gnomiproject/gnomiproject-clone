@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArchetypeDetailedData } from '@/types/archetype';
@@ -65,12 +66,14 @@ const MetricsTab = ({ archetypeData }: MetricsTabProps) => {
 
   // Helper function to fix percentage values that are already in decimal format
   const normalizePercentageValue = (value: number, metricName: string): number => {
-    // If the metric name suggests it's a percentage and the value is between 0 and 1, 
-    // it's likely already in decimal format, so convert to percentage
+    // Only convert to percentage if the metric name suggests it's a percentage 
+    // AND the value is clearly in decimal format (between 0 and 1)
+    // Be more conservative - only convert if value is definitely a decimal
     if ((metricName.toLowerCase().includes('access') || 
          metricName.toLowerCase().includes('adoption') || 
          metricName.toLowerCase().includes('prevalence')) && 
-        value > 0 && value <= 1) {
+        value > 0 && value < 1) {  // Changed <= 1 to < 1 to be more conservative
+      console.log(`[MetricsTab] Converting decimal ${value} to percentage for ${metricName}`);
       return value * 100;
     }
     return value;
@@ -144,11 +147,18 @@ const MetricsTab = ({ archetypeData }: MetricsTabProps) => {
         format = 'currency';
       } else if (metricName.toLowerCase().includes('percent') || metricName.toLowerCase().includes('prevalence') || metricName.toLowerCase().includes('access') || metricName.toLowerCase().includes('adoption')) {
         format = 'percent';
-        // Fix percentage values that are in decimal format
+        // Fix percentage values that are in decimal format - be more conservative
+        const originalValue = metricValue;
         metricValue = normalizePercentageValue(metricValue, metricName);
         if (averageValue !== undefined) {
           averageValue = normalizePercentageValue(averageValue, metricName);
         }
+        
+        console.log(`[MetricsTab] Percentage processing for "${metricName}":`, {
+          originalValue,
+          processedValue: metricValue,
+          wasConverted: originalValue !== metricValue
+        });
       }
       
       console.log(`[MetricsTab] Processing metric "${metricName}":`, {
