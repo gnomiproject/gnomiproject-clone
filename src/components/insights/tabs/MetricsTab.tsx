@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArchetypeDetailedData } from '@/types/archetype';
@@ -47,8 +48,10 @@ const MetricsTab = ({ archetypeData }: MetricsTabProps) => {
       console.log(`[MetricsTab] Metric ${index}:`, {
         metric: metric.metric,
         value: metric.value,
+        archetype_value: metric.archetype_value,
         format: metric.format,
         average: metric.average,
+        archetype_average: metric.archetype_average,
         difference: metric.difference,
         significance: metric.significance,
         fullObject: metric
@@ -175,12 +178,14 @@ const MetricsTab = ({ archetypeData }: MetricsTabProps) => {
     distinctiveMetrics = processedDistinctiveMetrics.map(metric => {
       // Handle different possible property names and structures
       const metricName = metric.metric || metric.Metric || metric.title || 'Unknown Metric';
-      let metricValue = metric.value !== undefined ? metric.value : 
-                       metric.archetype_value !== undefined ? metric.archetype_value :
+      
+      // FIXED: Use the correct property names for value extraction
+      let metricValue = metric.archetype_value !== undefined ? metric.archetype_value :
+                       metric.value !== undefined ? metric.value : 
                        metric['Archetype Value'] !== undefined ? metric['Archetype Value'] : 0;
       
-      let averageValue = metric.average !== undefined ? metric.average :
-                        metric.archetype_average !== undefined ? metric.archetype_average :
+      let averageValue = metric.archetype_average !== undefined ? metric.archetype_average :
+                        metric.average !== undefined ? metric.average :
                         metric['Archetype Average'] !== undefined ? metric['Archetype Average'] : undefined;
       
       const differenceValue = metric.difference !== undefined ? metric.difference :
