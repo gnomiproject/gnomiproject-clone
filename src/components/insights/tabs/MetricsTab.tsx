@@ -1,8 +1,9 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArchetypeDetailedData } from '@/types/archetype';
 import MetricCard from '../metrics/MetricCard';
-import MetricBar from '../metrics/metricsBar/MetricBar';
+import MetricBar from '../metrics/MetricBar';
 import { Badge } from '@/components/ui/badge';
 import { formatNumber } from '@/utils/formatters';
 
