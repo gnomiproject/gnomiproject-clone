@@ -87,7 +87,7 @@ const MetricBar = ({
         {benchmark !== undefined && (
           <>
             <div className="flex justify-between items-center">
-              <span className="text-xs font-medium text-gray-600">Average</span>
+              <span className="text-xs font-medium text-gray-600">Archetype Average</span>
               <span className="text-sm font-semibold text-gray-700">{formattedBenchmark}</span>
             </div>
             
