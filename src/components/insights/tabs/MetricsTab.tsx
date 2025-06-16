@@ -1,5 +1,4 @@
 
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArchetypeDetailedData } from '@/types/archetype';
@@ -219,10 +218,11 @@ const MetricsTab = ({ archetypeData }: MetricsTabProps) => {
         wasAverageConverted: averageValue !== processedAverage
       });
       
+      // FIX: Return the processed values as the main value and format fields
       return {
         metric: metricName,
-        value: processedValue,
-        format: format,
+        value: processedValue,  // This is the key fix - use processedValue
+        format: format,         // This is the key fix - include format
         average: processedAverage,
         difference: differenceValue,
         significance: metric.significance || metric.Significance || ''
