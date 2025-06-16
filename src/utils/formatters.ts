@@ -24,11 +24,12 @@ export const formatNumber = (value: number, type: 'currency' | 'percent' | 'numb
         }).format(value);
       
       case 'percent':
-        return new Intl.NumberFormat('en-US', { 
-          style: 'percent', 
+        // FIXED: Don't use Intl percent formatter as it expects decimal values
+        // We already have percentage values (90.94), so just add % sign
+        return new Intl.NumberFormat('en-US', {
           minimumFractionDigits: decimals,
           maximumFractionDigits: decimals
-        }).format(value);
+        }).format(value) + '%';
       
       default:
         return new Intl.NumberFormat('en-US', {
