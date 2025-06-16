@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArchetypeDetailedData } from '@/types/archetype';
@@ -64,6 +63,19 @@ const MetricsTab = ({ archetypeData }: MetricsTabProps) => {
     return typeof value === 'number' ? value : undefined;
   };
 
+  // Helper function to fix percentage values that are already in decimal format
+  const normalizePercentageValue = (value: number, metricName: string): number => {
+    // If the metric name suggests it's a percentage and the value is between 0 and 1, 
+    // it's likely already in decimal format, so convert to percentage
+    if ((metricName.toLowerCase().includes('access') || 
+         metricName.toLowerCase().includes('adoption') || 
+         metricName.toLowerCase().includes('prevalence')) && 
+        value > 0 && value <= 1) {
+      return value * 100;
+    }
+    return value;
+  };
+
   // Create distinctive metrics from raw data as fallback
   const createDistinctiveMetricsFromRaw = () => {
     const rawMetrics = [
@@ -115,12 +127,14 @@ const MetricsTab = ({ archetypeData }: MetricsTabProps) => {
     distinctiveMetrics = processedDistinctiveMetrics.map(metric => {
       // Handle different possible property names and structures
       const metricName = metric.metric || metric.Metric || metric.title || 'Unknown Metric';
-      const metricValue = metric.value !== undefined ? metric.value : 
-                         metric.archetype_value !== undefined ? metric.archetype_value :
-                         metric['Archetype Value'] !== undefined ? metric['Archetype Value'] : 0;
-      const averageValue = metric.average !== undefined ? metric.average :
-                          metric.archetype_average !== undefined ? metric.archetype_average :
-                          metric['Archetype Average'] !== undefined ? metric['Archetype Average'] : undefined;
+      let metricValue = metric.value !== undefined ? metric.value : 
+                       metric.archetype_value !== undefined ? metric.archetype_value :
+                       metric['Archetype Value'] !== undefined ? metric['Archetype Value'] : 0;
+      
+      let averageValue = metric.average !== undefined ? metric.average :
+                        metric.archetype_average !== undefined ? metric.archetype_average :
+                        metric['Archetype Average'] !== undefined ? metric['Archetype Average'] : undefined;
+      
       const differenceValue = metric.difference !== undefined ? metric.difference :
                              metric.Difference !== undefined ? metric.Difference : 0;
       
@@ -130,6 +144,11 @@ const MetricsTab = ({ archetypeData }: MetricsTabProps) => {
         format = 'currency';
       } else if (metricName.toLowerCase().includes('percent') || metricName.toLowerCase().includes('prevalence') || metricName.toLowerCase().includes('access') || metricName.toLowerCase().includes('adoption')) {
         format = 'percent';
+        // Fix percentage values that are in decimal format
+        metricValue = normalizePercentageValue(metricValue, metricName);
+        if (averageValue !== undefined) {
+          averageValue = normalizePercentageValue(averageValue, metricName);
+        }
       }
       
       console.log(`[MetricsTab] Processing metric "${metricName}":`, {
@@ -137,7 +156,8 @@ const MetricsTab = ({ archetypeData }: MetricsTabProps) => {
         extractedValue: metricValue,
         extractedAverage: averageValue,
         extractedDifference: differenceValue,
-        determinedFormat: format
+        determinedFormat: format,
+        wasNormalized: format === 'percent' && metric.value !== metricValue
       });
       
       return {
