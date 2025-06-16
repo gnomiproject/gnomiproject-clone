@@ -25,6 +25,14 @@ const MetricBar = ({
   tooltipText,
   maxValue = 1
 }: MetricBarProps) => {
+  console.log(`[MetricBar] Rendering ${title}:`, {
+    value,
+    format,
+    benchmark,
+    color,
+    tooltipText
+  });
+
   const formattedValue = formatNumber(value, format, 1);
   const formattedBenchmark = benchmark !== undefined 
     ? formatNumber(benchmark, format, 1)
@@ -39,6 +47,13 @@ const MetricBar = ({
   const formattedDifference = Math.abs(percentDifference) >= 0.1 
     ? `${percentDifference > 0 ? '+' : ''}${percentDifference.toFixed(1)}%`
     : '±0%';
+  
+  console.log(`[MetricBar] ${title} formatted values:`, {
+    formattedValue,
+    formattedBenchmark,
+    formattedDifference,
+    percentDifference
+  });
   
   return (
     <div className="space-y-3 p-4 bg-gray-50 rounded-lg border">
