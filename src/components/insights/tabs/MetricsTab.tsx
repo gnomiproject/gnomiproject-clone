@@ -64,6 +64,7 @@ const MetricsTab = ({ archetypeData }: MetricsTabProps) => {
   };
 
   // Mapping of metrics that are stored as decimals and need conversion to percentages
+  // IMPORTANT: Only include fields that are actually stored as decimals (0.0-1.0)
   const DECIMAL_PERCENTAGE_FIELDS = new Set([
     'Util_Telehealth Adoption',
     'Dise_Mental Health Disorder Prevalence',
@@ -74,12 +75,16 @@ const MetricsTab = ({ archetypeData }: MetricsTabProps) => {
     'Dise_Cancer Prevalence',
     'Dise_Substance Use Disorder Prevalence',
     'Util_Percent of Members who are Non-Utilizers'
+    // NOTE: 'Bene_Access to Health Insurance' is NOT included because it's stored as percentage (90.94 = 90.94%)
   ]);
 
   // Function to determine the correct format and value for a metric
   const getMetricFormatAndValue = (metricName: string, value: number): { format: 'percent' | 'currency' | 'number', processedValue: number } => {
+    console.log(`[MetricsTab] Processing metric: "${metricName}" with value: ${value}`);
+    
     // Cost metrics
     if (metricName.toLowerCase().includes('cost') || metricName.toLowerCase().includes('amount') || metricName.toLowerCase().includes('paid')) {
+      console.log(`[MetricsTab] Identified as currency metric: ${metricName}`);
       return { format: 'currency', processedValue: value };
     }
     
@@ -101,6 +106,7 @@ const MetricsTab = ({ archetypeData }: MetricsTabProps) => {
     }
     
     // Default to number format
+    console.log(`[MetricsTab] Using number format for ${metricName}: ${value}`);
     return { format: 'number', processedValue: value };
   };
 
