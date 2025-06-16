@@ -218,15 +218,19 @@ const MetricsTab = ({ archetypeData }: MetricsTabProps) => {
         wasAverageConverted: averageValue !== processedAverage
       });
       
-      // FIX: Return the processed values as the main value and format fields
-      return {
+      // CRITICAL FIX: Create a completely new object with the processed values
+      const finalMetric = {
         metric: metricName,
-        value: processedValue,  // This is the key fix - use processedValue
-        format: format,         // This is the key fix - include format
+        value: processedValue,  // Store the processed value as the main value
+        format: format,         // Store the determined format
         average: processedAverage,
         difference: differenceValue,
         significance: metric.significance || metric.Significance || ''
       };
+      
+      console.log(`[MetricsTab] 🎯 FINAL METRIC OBJECT CREATED:`, finalMetric);
+      
+      return finalMetric;
     });
     
     console.log('[MetricsTab] Using processed distinctive metrics:', distinctiveMetrics.length, 'items');
@@ -326,20 +330,29 @@ const MetricsTab = ({ archetypeData }: MetricsTabProps) => {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {distinctiveMetrics.slice(0, 6).map((metric, index) => (
-                <MetricBar 
-                  key={index}
-                  title={metric.metric}
-                  value={metric.value}
-                  format={metric.format}
-                  benchmark={metric.average}
-                  tooltipText={metric.average ? 
-                    `${metric.significance || ''} ${Math.abs(metric.difference || 0).toFixed(1)}% ${(metric.difference || 0) > 0 ? 'higher' : 'lower'} than average` :
-                    'Individual archetype value'
-                  }
-                  color={(metric.difference || 0) > 0 ? '#3b82f6' : '#10b981'}
-                />
-              ))}
+              {distinctiveMetrics.slice(0, 6).map((metric, index) => {
+                console.log(`[MetricsTab] 🎯 RENDERING METRIC ${index}:`, {
+                  title: metric.metric,
+                  value: metric.value,
+                  format: metric.format,
+                  benchmark: metric.average
+                });
+                
+                return (
+                  <MetricBar 
+                    key={index}
+                    title={metric.metric}
+                    value={metric.value}
+                    format={metric.format}
+                    benchmark={metric.average}
+                    tooltipText={metric.average ? 
+                      `${metric.significance || ''} ${Math.abs(metric.difference || 0).toFixed(1)}% ${(metric.difference || 0) > 0 ? 'higher' : 'lower'} than average` :
+                      'Individual archetype value'
+                    }
+                    color={(metric.difference || 0) > 0 ? '#3b82f6' : '#10b981'}
+                  />
+                );
+              })}
             </div>
           </CardContent>
         </Card>
