@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArchetypeDetailedData } from '@/types/archetype';
@@ -64,19 +63,45 @@ const MetricsTab = ({ archetypeData }: MetricsTabProps) => {
     return typeof value === 'number' ? value : undefined;
   };
 
-  // Helper function to fix percentage values that are already in decimal format
-  const normalizePercentageValue = (value: number, metricName: string): number => {
-    // Only convert to percentage if the metric name suggests it's a percentage 
-    // AND the value is clearly in decimal format (between 0 and 1)
-    // Be more conservative - only convert if value is definitely a decimal
-    if ((metricName.toLowerCase().includes('access') || 
-         metricName.toLowerCase().includes('adoption') || 
-         metricName.toLowerCase().includes('prevalence')) && 
-        value > 0 && value < 1) {  // Changed <= 1 to < 1 to be more conservative
-      console.log(`[MetricsTab] Converting decimal ${value} to percentage for ${metricName}`);
-      return value * 100;
+  // Mapping of metrics that are stored as decimals and need conversion to percentages
+  const DECIMAL_PERCENTAGE_FIELDS = new Set([
+    'Util_Telehealth Adoption',
+    'Dise_Mental Health Disorder Prevalence',
+    'Dise_Heart Disease Prevalence',
+    'Dise_Type 2 Diabetes Prevalence',
+    'Dise_Hypertension Prevalence',
+    'Dise_COPD Prevalence',
+    'Dise_Cancer Prevalence',
+    'Dise_Substance Use Disorder Prevalence',
+    'Util_Percent of Members who are Non-Utilizers'
+  ]);
+
+  // Function to determine the correct format and value for a metric
+  const getMetricFormatAndValue = (metricName: string, value: number): { format: 'percent' | 'currency' | 'number', processedValue: number } => {
+    // Cost metrics
+    if (metricName.toLowerCase().includes('cost') || metricName.toLowerCase().includes('amount') || metricName.toLowerCase().includes('paid')) {
+      return { format: 'currency', processedValue: value };
     }
-    return value;
+    
+    // Percentage metrics
+    if (metricName.toLowerCase().includes('percent') || 
+        metricName.toLowerCase().includes('prevalence') || 
+        metricName.toLowerCase().includes('access') || 
+        metricName.toLowerCase().includes('adoption')) {
+      
+      // Check if this field is known to be stored as decimal and needs conversion
+      if (DECIMAL_PERCENTAGE_FIELDS.has(metricName) && value <= 1) {
+        console.log(`[MetricsTab] Converting decimal to percentage for ${metricName}: ${value} -> ${value * 100}`);
+        return { format: 'percent', processedValue: value * 100 };
+      }
+      
+      // Otherwise, treat as already formatted percentage
+      console.log(`[MetricsTab] Using as-is percentage for ${metricName}: ${value}`);
+      return { format: 'percent', processedValue: value };
+    }
+    
+    // Default to number format
+    return { format: 'number', processedValue: value };
   };
 
   // Create distinctive metrics from raw data as fallback
@@ -112,21 +137,26 @@ const MetricsTab = ({ archetypeData }: MetricsTabProps) => {
     return rawMetrics.filter(metric => {
       const value = getMetricValue(metric.field);
       return value !== undefined && value !== null;
-    }).map(metric => ({
-      metric: metric.title,
-      value: getMetricValue(metric.field)!,
-      format: metric.format,
-      average: undefined,
-      difference: 0,
-      significance: ''
-    }));
+    }).map(metric => {
+      const value = getMetricValue(metric.field)!;
+      const { format, processedValue } = getMetricFormatAndValue(metric.title, value);
+      
+      return {
+        metric: metric.title,
+        value: processedValue,
+        format: format,
+        average: undefined,
+        difference: 0,
+        significance: ''
+      };
+    });
   };
 
   // Determine which distinctive metrics to use
   let distinctiveMetrics = null;
   
   if (processedDistinctiveMetrics && Array.isArray(processedDistinctiveMetrics) && processedDistinctiveMetrics.length > 0) {
-    // Ensure the processed metrics have the correct structure
+    // Process the metrics with proper formatting
     distinctiveMetrics = processedDistinctiveMetrics.map(metric => {
       // Handle different possible property names and structures
       const metricName = metric.metric || metric.Metric || metric.title || 'Unknown Metric';
@@ -141,40 +171,29 @@ const MetricsTab = ({ archetypeData }: MetricsTabProps) => {
       const differenceValue = metric.difference !== undefined ? metric.difference :
                              metric.Difference !== undefined ? metric.Difference : 0;
       
-      // Determine format based on metric name if not provided
-      let format = metric.format || 'number';
-      if (metricName.toLowerCase().includes('cost') || metricName.toLowerCase().includes('amount') || metricName.toLowerCase().includes('paid')) {
-        format = 'currency';
-      } else if (metricName.toLowerCase().includes('percent') || metricName.toLowerCase().includes('prevalence') || metricName.toLowerCase().includes('access') || metricName.toLowerCase().includes('adoption')) {
-        format = 'percent';
-        // Fix percentage values that are in decimal format - be more conservative
-        const originalValue = metricValue;
-        metricValue = normalizePercentageValue(metricValue, metricName);
-        if (averageValue !== undefined) {
-          averageValue = normalizePercentageValue(averageValue, metricName);
-        }
-        
-        console.log(`[MetricsTab] Percentage processing for "${metricName}":`, {
-          originalValue,
-          processedValue: metricValue,
-          wasConverted: originalValue !== metricValue
-        });
+      // Use the new formatting logic
+      const { format, processedValue } = getMetricFormatAndValue(metricName, metricValue);
+      let processedAverage = averageValue;
+      
+      // Apply same processing to average if it exists
+      if (averageValue !== undefined && format === 'percent' && DECIMAL_PERCENTAGE_FIELDS.has(metricName) && averageValue <= 1) {
+        processedAverage = averageValue * 100;
       }
       
       console.log(`[MetricsTab] Processing metric "${metricName}":`, {
-        originalMetric: metric,
-        extractedValue: metricValue,
-        extractedAverage: averageValue,
-        extractedDifference: differenceValue,
-        determinedFormat: format,
-        wasNormalized: format === 'percent' && metric.value !== metricValue
+        originalValue: metricValue,
+        processedValue: processedValue,
+        originalAverage: averageValue,
+        processedAverage: processedAverage,
+        format: format,
+        wasConverted: metricValue !== processedValue
       });
       
       return {
         metric: metricName,
-        value: metricValue,
+        value: processedValue,
         format: format,
-        average: averageValue,
+        average: processedAverage,
         difference: differenceValue,
         significance: metric.significance || metric.Significance || ''
       };
