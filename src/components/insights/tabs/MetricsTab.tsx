@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArchetypeDetailedData } from '@/types/archetype';
 import MetricCard from '../metrics/MetricCard';
-import MetricBar from '../metrics/MetricBar';
+import MetricBar from '../metrics/metricsBar/MetricBar';
 import { Badge } from '@/components/ui/badge';
 import { formatNumber } from '@/utils/formatters';
 
@@ -64,18 +64,18 @@ const MetricsTab = ({ archetypeData }: MetricsTabProps) => {
   };
 
   // Mapping of metrics that are stored as decimals and need conversion to percentages
-  // IMPORTANT: Only include fields that are actually stored as decimals (0.0-1.0)
+  // UPDATED: Using display names (without prefixes) to match distinctive metrics data
   const DECIMAL_PERCENTAGE_FIELDS = new Set([
-    'Util_Telehealth Adoption',
-    'Dise_Mental Health Disorder Prevalence',
-    'Dise_Heart Disease Prevalence',
-    'Dise_Type 2 Diabetes Prevalence',
-    'Dise_Hypertension Prevalence',
-    'Dise_COPD Prevalence',
-    'Dise_Cancer Prevalence',
-    'Dise_Substance Use Disorder Prevalence',
-    'Util_Percent of Members who are Non-Utilizers'
-    // NOTE: 'Bene_Access to Health Insurance' is NOT included because it's stored as percentage (90.94 = 90.94%)
+    'Telehealth Adoption',
+    'Mental Health Disorder Prevalence',
+    'Heart Disease Prevalence',
+    'Type 2 Diabetes Prevalence',
+    'Hypertension Prevalence',
+    'COPD Prevalence',
+    'Cancer Prevalence',
+    'Substance Use Disorder Prevalence',
+    'Percent of Members who are Non-Utilizers'
+    // NOTE: 'Access to Health Insurance' is NOT included because it's stored as percentage (90.94 = 90.94%)
   ]);
 
   // Function to determine the correct format and value for a metric
