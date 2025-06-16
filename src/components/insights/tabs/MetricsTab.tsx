@@ -80,11 +80,19 @@ const MetricsTab = ({ archetypeData }: MetricsTabProps) => {
 
   // Function to determine the correct format and value for a metric
   const getMetricFormatAndValue = (metricName: string, value: number): { format: 'percent' | 'currency' | 'number', processedValue: number } => {
-    console.log(`[MetricsTab] Processing metric: "${metricName}" with value: ${value}`);
+    console.log(`[MetricsTab] 🔍 DETAILED PROCESSING for "${metricName}":`, {
+      originalValue: value,
+      isInDecimalSet: DECIMAL_PERCENTAGE_FIELDS.has(metricName),
+      isValueLessThanOne: value <= 1,
+      containsPercent: metricName.toLowerCase().includes('percent'),
+      containsPrevalence: metricName.toLowerCase().includes('prevalence'),
+      containsAccess: metricName.toLowerCase().includes('access'),
+      containsAdoption: metricName.toLowerCase().includes('adoption')
+    });
     
     // Cost metrics
     if (metricName.toLowerCase().includes('cost') || metricName.toLowerCase().includes('amount') || metricName.toLowerCase().includes('paid')) {
-      console.log(`[MetricsTab] Identified as currency metric: ${metricName}`);
+      console.log(`[MetricsTab] ✅ Identified as currency metric: ${metricName}`);
       return { format: 'currency', processedValue: value };
     }
     
@@ -96,17 +104,17 @@ const MetricsTab = ({ archetypeData }: MetricsTabProps) => {
       
       // Check if this field is known to be stored as decimal and needs conversion
       if (DECIMAL_PERCENTAGE_FIELDS.has(metricName) && value <= 1) {
-        console.log(`[MetricsTab] Converting decimal to percentage for ${metricName}: ${value} -> ${value * 100}`);
+        console.log(`[MetricsTab] 🔄 Converting decimal to percentage for ${metricName}: ${value} -> ${value * 100}`);
         return { format: 'percent', processedValue: value * 100 };
       }
       
-      // Otherwise, treat as already formatted percentage
-      console.log(`[MetricsTab] Using as-is percentage for ${metricName}: ${value}`);
+      // OTHERWISE: treat as already formatted percentage
+      console.log(`[MetricsTab] ✅ Using as-is percentage for ${metricName}: ${value}`);
       return { format: 'percent', processedValue: value };
     }
     
     // Default to number format
-    console.log(`[MetricsTab] Using number format for ${metricName}: ${value}`);
+    console.log(`[MetricsTab] ✅ Using number format for ${metricName}: ${value}`);
     return { format: 'number', processedValue: value };
   };
 
@@ -177,6 +185,13 @@ const MetricsTab = ({ archetypeData }: MetricsTabProps) => {
       const differenceValue = metric.difference !== undefined ? metric.difference :
                              metric.Difference !== undefined ? metric.Difference : 0;
       
+      console.log(`[MetricsTab] 🎯 RAW METRIC BEFORE PROCESSING:`, {
+        metricName,
+        originalValue: metricValue,
+        originalAverage: averageValue,
+        originalDifference: differenceValue
+      });
+      
       // Use the new formatting logic
       const { format, processedValue } = getMetricFormatAndValue(metricName, metricValue);
       let processedAverage = averageValue;
@@ -184,15 +199,18 @@ const MetricsTab = ({ archetypeData }: MetricsTabProps) => {
       // Apply same processing to average if it exists
       if (averageValue !== undefined && format === 'percent' && DECIMAL_PERCENTAGE_FIELDS.has(metricName) && averageValue <= 1) {
         processedAverage = averageValue * 100;
+        console.log(`[MetricsTab] 🔄 Also converting average: ${averageValue} -> ${processedAverage}`);
       }
       
-      console.log(`[MetricsTab] Processing metric "${metricName}":`, {
+      console.log(`[MetricsTab] ✅ FINAL PROCESSED METRIC:`, {
+        metricName,
         originalValue: metricValue,
         processedValue: processedValue,
         originalAverage: averageValue,
         processedAverage: processedAverage,
         format: format,
-        wasConverted: metricValue !== processedValue
+        wasValueConverted: metricValue !== processedValue,
+        wasAverageConverted: averageValue !== processedAverage
       });
       
       return {
