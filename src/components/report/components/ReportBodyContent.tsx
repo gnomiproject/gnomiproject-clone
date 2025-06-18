@@ -2,8 +2,7 @@
 import React from 'react';
 import ReportSections from '../sections/ReportSections';
 import ReportDebugTools from '../ReportDebugTools';
-import { DiagnosticsPage } from '@/pages/DiagnosticsPage';
-import { ReportDebugInfo } from './ReportDebugInfo';
+import ReportDebugInfo from './ReportDebugInfo';
 
 interface ReportBodyContentProps {
   reportData: any;
@@ -55,7 +54,10 @@ const ReportBodyContent: React.FC<ReportBodyContentProps> = ({
 
       {/* Conditional rendering based on current state */}
       {showDiagnostics ? (
-        <DiagnosticsPage />
+        <div className="p-8 text-center">
+          <h2 className="text-xl font-bold mb-4">Diagnostics Page</h2>
+          <p className="text-gray-600">Diagnostics functionality would go here</p>
+        </div>
       ) : showDebugData ? (
         <ReportDebugInfo 
           reportData={reportData} 
