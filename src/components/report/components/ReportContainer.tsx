@@ -45,6 +45,7 @@ interface ReportContainerProps {
   onNavigate?: (sectionId: string) => void;
   children?: React.ReactNode;
   hideNavbar?: boolean;
+  hideDebugTools?: boolean;
 }
 
 const ReportContainer: React.FC<ReportContainerProps> = ({ 
@@ -55,7 +56,8 @@ const ReportContainer: React.FC<ReportContainerProps> = ({
   debugInfo,
   onNavigate,
   children,
-  hideNavbar = false
+  hideNavbar = false,
+  hideDebugTools = false
 }) => {
   // Enhanced debug logging
   console.log('[ReportContainer] Rendering with:', { 
@@ -63,6 +65,7 @@ const ReportContainer: React.FC<ReportContainerProps> = ({
     hasUserData: !!userData,
     hasChildren: !!children,
     hideNavbar,
+    hideDebugTools,
     reportName: reportData?.name || reportData?.archetype_name,
     childrenType: children ? typeof children : 'none'
   });
@@ -176,13 +179,14 @@ const ReportContainer: React.FC<ReportContainerProps> = ({
                 setShowDiagnostics={setShowDiagnostics}
                 handleRefreshData={handleRefreshData}
                 isDebugMode={isDebugMode}
+                hideDebugTools={hideDebugTools}
               />
             </>
           )}
         </div>
         
         {/* Debug Element - always present but only visible in debug mode and never in print */}
-        <div className={`fixed bottom-4 right-4 z-50 print:hidden ${isDebugMode ? 'block' : 'hidden'}`}>
+        <div className={`fixed bottom-4 right-4 z-50 print:hidden ${isDebugMode && !hideDebugTools ? 'block' : 'hidden'}`}>
           <button
             onClick={() => console.log("Debug Data:", { reportData, userData, averageData, activeSectionId })}
             className="bg-gray-800 text-white px-3 py-1 rounded text-xs shadow-lg"

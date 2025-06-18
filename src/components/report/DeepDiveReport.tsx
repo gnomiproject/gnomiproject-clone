@@ -56,6 +56,7 @@ const DeepDiveReport: React.FC<DeepDiveReportProps> = ({
           debugInfo={debugInfo}
           onNavigate={undefined}
           hideNavbar={false}
+          hideDebugTools={true}
         >
           <DeepDiveReportContent 
             archetype={reportData} 

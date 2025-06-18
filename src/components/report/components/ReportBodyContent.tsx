@@ -1,6 +1,9 @@
 
-import React, { useState, useEffect } from 'react';
-import ReportBody from './ReportBody';
+import React from 'react';
+import ReportSections from '../sections/ReportSections';
+import ReportDebugTools from '../ReportDebugTools';
+import { DiagnosticsPage } from '@/pages/DiagnosticsPage';
+import { ReportDebugInfo } from './ReportDebugInfo';
 
 interface ReportBodyContentProps {
   reportData: any;
@@ -10,10 +13,11 @@ interface ReportBodyContentProps {
   debugInfo?: any;
   showDebugData: boolean;
   showDiagnostics: boolean;
-  setShowDebugData: (value: boolean) => void;
-  setShowDiagnostics: (value: boolean) => void;
+  setShowDebugData: (show: boolean) => void;
+  setShowDiagnostics: (show: boolean) => void;
   handleRefreshData: () => void;
   isDebugMode: boolean;
+  hideDebugTools?: boolean;
 }
 
 const ReportBodyContent: React.FC<ReportBodyContentProps> = ({
@@ -27,40 +31,46 @@ const ReportBodyContent: React.FC<ReportBodyContentProps> = ({
   setShowDebugData,
   setShowDiagnostics,
   handleRefreshData,
-  isDebugMode
+  isDebugMode,
+  hideDebugTools = false
 }) => {
-  // Add state to track if report has been attempted to load
-  const [hasAttemptedLoad, setHasAttemptedLoad] = useState<boolean>(false);
-
-  // Flag when the component has mounted to prevent unnecessary token validations
-  useEffect(() => {
-    setHasAttemptedLoad(true);
-    
-    // Log debug information once when component mounts
-    if (isDebugMode) {
-      console.log('[ReportBodyContent] Rendering with data:', {
-        hasReportData: !!reportData,
-        hasUserData: !!userData,
-        hasAverageData: !!averageData,
-        isAdminView
-      });
-    }
-  }, [reportData, userData, averageData, isAdminView, isDebugMode]);
+  // Toggle functions
+  const toggleDebugData = () => setShowDebugData(!showDebugData);
+  const toggleDiagnostics = () => setShowDiagnostics(!showDiagnostics);
 
   return (
-    <ReportBody
-      reportData={reportData}
-      userData={userData}
-      averageData={averageData}
-      isAdminView={isAdminView}
-      debugInfo={debugInfo}
-      showDebugData={showDebugData}
-      showDiagnostics={showDiagnostics}
-      setShowDebugData={setShowDebugData}
-      setShowDiagnostics={setShowDiagnostics}
-      handleRefreshData={handleRefreshData}
-      isDebugMode={isDebugMode}
-    />
+    <>
+      {/* Debug Tools - only show if not hidden */}
+      {!hideDebugTools && (
+        <ReportDebugTools
+          showDebugData={showDebugData}
+          toggleDebugData={toggleDebugData}
+          showDiagnostics={showDiagnostics}
+          toggleDiagnostics={toggleDiagnostics}
+          onRefreshData={handleRefreshData}
+          isAdminView={isAdminView}
+          debugInfo={debugInfo}
+        />
+      )}
+
+      {/* Conditional rendering based on current state */}
+      {showDiagnostics ? (
+        <DiagnosticsPage />
+      ) : showDebugData ? (
+        <ReportDebugInfo 
+          reportData={reportData} 
+          userData={userData} 
+          averageData={averageData}
+          debugInfo={debugInfo}
+        />
+      ) : (
+        <ReportSections
+          reportData={reportData}
+          userData={userData}
+          averageData={averageData}
+        />
+      )}
+    </>
   );
 };
 
