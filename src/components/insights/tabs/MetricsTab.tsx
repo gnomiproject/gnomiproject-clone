@@ -240,6 +240,16 @@ const MetricsTab = ({ archetypeData }: MetricsTabProps) => {
 
   return (
     <div className="space-y-8">
+      {/* Archetype Context Banner */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="flex items-center gap-2 mb-2">
+          <Badge variant="secondary" className="bg-blue-100 text-blue-800">Your Archetype Match</Badge>
+        </div>
+        <p className="text-blue-800 text-sm">
+          The metrics below reflect the <strong>{archetypeData?.name || archetypeData?.archetype_name || 'archetype'}</strong> you most closely match based on your assessment responses.
+        </p>
+      </div>
+
       {/* Show distinctive metrics */}
       {distinctiveMetrics && distinctiveMetrics.length > 0 ? (
         <Card className="shadow-sm">
