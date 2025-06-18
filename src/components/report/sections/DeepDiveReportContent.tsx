@@ -71,14 +71,9 @@ const DeepDiveReportContent = ({
       {/* Debug information - shown in a less prominent way */}
       <ErrorBoundary>
         <ReportDebugInfo 
-          archetypeId={archetypeId}
-          archetypeName={archetypeName}
-          familyName={familyName}
-          familyId={archetype?.family_id || archetype?.familyId}
-          swotAnalysis={archetype?.swot_analysis}
-          strengths={archetype?.strengths}
-          weaknesses={archetype?.weaknesses}
+          reportData={safeArchetype}
           userData={userData}
+          averageData={averageData}
         />
       </ErrorBoundary>
     </div>
