@@ -15,6 +15,7 @@ interface ReportViewerProps {
   toggleDebugData: () => void;
   isInsightsReport?: boolean;
   isAdminView?: boolean;
+  hideDebugTools?: boolean;
 }
 
 const ReportViewer: React.FC<ReportViewerProps> = ({
@@ -28,6 +29,7 @@ const ReportViewer: React.FC<ReportViewerProps> = ({
   toggleDebugData,
   isInsightsReport = false,
   isAdminView = false,
+  hideDebugTools = false,
 }) => {
   const [refreshing, setRefreshing] = useState(false);
 
@@ -39,6 +41,7 @@ const ReportViewer: React.FC<ReportViewerProps> = ({
     archetypeId,
     isInsightsReport,
     isAdminView,
+    hideDebugTools
   });
 
   const handleRefresh = () => {
@@ -57,8 +60,8 @@ const ReportViewer: React.FC<ReportViewerProps> = ({
 
   return (
     <div className="relative">
-      {/* Debug Tools */}
-      {!showDiagnostics && !showDebugData && (
+      {/* Debug Tools - only show if hideDebugTools is false */}
+      {!hideDebugTools && !showDiagnostics && !showDebugData && (
         <div className="fixed right-6 top-24 z-50 flex gap-2 print:hidden">
           <Button
             variant="outline"
@@ -96,6 +99,7 @@ const ReportViewer: React.FC<ReportViewerProps> = ({
         userData={userData}
         averageData={averageData}
         isAdminView={isAdminView}
+        hideDebugTools={hideDebugTools}
       />
     </div>
   );

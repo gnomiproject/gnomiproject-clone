@@ -154,35 +154,37 @@ const ReportContainer: React.FC<ReportContainerProps> = ({
           documentTitle={`Healthcare Archetype Report - ${reportData?.archetype_name || reportData?.name || 'Unknown'}`} 
         />
 
-        {/* Main report content - apply padding-top to account for fixed header */}
+        {/* Main report content with proper spacing */}
         <div 
-          className={`${!hideNavbar ? 'lg:pl-64' : ''} py-6 print:py-0 print:pl-0 pt-16`}
+          className={`${!hideNavbar ? 'lg:pl-64' : ''} print:py-0 print:pl-0 pt-16`}
           ref={reportRef}
         >
-          {children ? (
-            <>
-              {console.log('[ReportContainer] Rendering children directly')}
-              {children}
-            </>
-          ) : (
-            <>
-              {console.log('[ReportContainer] Rendering ReportBodyContent')}
-              <ReportBodyContent
-                reportData={reportData}
-                userData={userData}
-                averageData={averageData}
-                isAdminView={isAdminView}
-                debugInfo={debugInfo}
-                showDebugData={showDebugData}
-                showDiagnostics={showDiagnostics}
-                setShowDebugData={setShowDebugData}
-                setShowDiagnostics={setShowDiagnostics}
-                handleRefreshData={handleRefreshData}
-                isDebugMode={isDebugMode}
-                hideDebugTools={hideDebugTools}
-              />
-            </>
-          )}
+          <div className="container mx-auto p-6">
+            {children ? (
+              <>
+                {console.log('[ReportContainer] Rendering children directly')}
+                {children}
+              </>
+            ) : (
+              <>
+                {console.log('[ReportContainer] Rendering ReportBodyContent')}
+                <ReportBodyContent
+                  reportData={reportData}
+                  userData={userData}
+                  averageData={averageData}
+                  isAdminView={isAdminView}
+                  debugInfo={debugInfo}
+                  showDebugData={showDebugData}
+                  showDiagnostics={showDiagnostics}
+                  setShowDebugData={setShowDebugData}
+                  setShowDiagnostics={setShowDiagnostics}
+                  handleRefreshData={handleRefreshData}
+                  isDebugMode={isDebugMode}
+                  hideDebugTools={hideDebugTools}
+                />
+              </>
+            )}
+          </div>
         </div>
         
         {/* Debug Element - always present but only visible in debug mode and never in print */}

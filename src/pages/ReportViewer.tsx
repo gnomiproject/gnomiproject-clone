@@ -34,8 +34,6 @@ const ReportViewer = () => {
   const trackingPixelLoadedRef = useRef<boolean>(false);
   const navigate = useNavigate();
   
-  // Removing page visibility tracking to prevent unnecessary operations
-  
   // Normalize the archetype ID to handle case sensitivity
   const archetypeId = rawArchetypeId ? normalizeArchetypeId(rawArchetypeId) : undefined;
   const isValidArchetype = !!archetypeId && isValidArchetypeId(archetypeId);
@@ -355,6 +353,7 @@ const ReportViewer = () => {
             onError={handleError}
             onRequestNewToken={handleRequestNewToken}
             hideNavbar={true}
+            hideDebugTools={true}
           />
         </div>
       </ErrorBoundary>
@@ -392,6 +391,7 @@ const ReportViewer = () => {
         onError={handleError}
         onRequestNewToken={handleRequestNewToken}
         hideNavbar={true}
+        hideDebugTools={true}
       />
       
       {/* Debug toolbar - only visible in development */}

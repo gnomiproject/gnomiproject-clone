@@ -32,6 +32,7 @@ interface ReportViewerContentProps {
   onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
   onRequestNewToken?: () => void;
   hideNavbar?: boolean;
+  hideDebugTools?: boolean;
 }
 
 const ReportViewerContent: React.FC<ReportViewerContentProps> = ({ 
@@ -49,7 +50,8 @@ const ReportViewerContent: React.FC<ReportViewerContentProps> = ({
   isUsingFallbackData: providedIsUsingFallbackData,
   onError,
   onRequestNewToken,
-  hideNavbar
+  hideNavbar,
+  hideDebugTools = false
 }) => {
   const { toast } = useToast();
   const { archetypeId: rawArchetypeId } = useParams();
@@ -246,6 +248,7 @@ const ReportViewerContent: React.FC<ReportViewerContentProps> = ({
           toggleDebugData={toggleDebugData}
           isInsightsReport={isInsightsReport}
           isAdminView={isAdminView}
+          hideDebugTools={hideDebugTools}
         />
       )}
     </>
