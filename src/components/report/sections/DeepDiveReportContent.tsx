@@ -60,8 +60,9 @@ const DeepDiveReportContent = ({
   });
   
   // Ensure we're passing the complete archetype data to all components
+  // Removed the container wrapper to prevent double padding - ReportContainer handles all layout
   return (
-    <div className="container mx-auto p-6">
+    <>
       <ReportSections 
         reportData={safeArchetype}
         userData={userData}
@@ -76,7 +77,7 @@ const DeepDiveReportContent = ({
           averageData={averageData}
         />
       </ErrorBoundary>
-    </div>
+    </>
   );
 };
 

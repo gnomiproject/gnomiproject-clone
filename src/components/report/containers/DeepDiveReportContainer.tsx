@@ -2,7 +2,6 @@
 import React, { useEffect } from 'react';
 import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import DeepDiveReport from '@/components/report/DeepDiveReport';
-import ReportDebugTools from '@/components/report/ReportDebugTools';
 import { ArchetypeDetailedData } from '@/types/archetype';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
@@ -79,14 +78,7 @@ const DeepDiveReportContainer: React.FC<DeepDiveReportContainerProps> = ({
   
   return (
     <div className="relative">
-      <ReportDebugTools
-        showDebugData={showDebugData}
-        toggleDebugData={toggleDebugData}
-        showDiagnostics={showDiagnostics}
-        toggleDiagnostics={toggleDiagnostics}
-        onRefreshData={refreshData}
-        isAdminView={isAdminView}
-      />
+      {/* Removed ReportDebugTools - they will be handled by ReportContainer */}
       
       {!hasRequiredData && reportData && (
         <Alert className="mb-4 bg-yellow-50 border-yellow-200">

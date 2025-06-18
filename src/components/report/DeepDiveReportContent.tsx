@@ -24,16 +24,15 @@ const DeepDiveReportContent = ({
     />;
   }
   
+  // Removed container wrapper to prevent double padding - layout should be handled by parent
   return (
-    <div className="container mx-auto p-6">
-      <ErrorBoundary>
-        <ReportSections 
-          reportData={archetype}
-          userData={userData}
-          averageData={averageData}
-        />
-      </ErrorBoundary>
-    </div>
+    <ErrorBoundary>
+      <ReportSections 
+        reportData={archetype}
+        userData={userData}
+        averageData={averageData}
+      />
+    </ErrorBoundary>
   );
 };
 
