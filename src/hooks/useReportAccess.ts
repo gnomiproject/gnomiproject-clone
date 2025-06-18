@@ -1,9 +1,10 @@
+
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArchetypeDetailedData, ArchetypeId } from '@/types/archetype';
 import { getFromCache, setInCache, clearFromCache } from '@/utils/reports/reportCache';
-import { AverageDataService, StandardizedAverageData } from '@/services/AverageDataService';
+import { averageDataService, StandardizedAverageData } from '@/services/AverageDataService';
 
 interface UseReportAccessParams {
   archetypeId: ArchetypeId;
@@ -91,7 +92,6 @@ export const useReportAccess = ({
         }
 
         // Get average data from service (with its own caching and fallback)
-        const averageDataService = new AverageDataService();
         const averageData = await averageDataService.getAverageData();
 
         const result = {

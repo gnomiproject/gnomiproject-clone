@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
-import { isValidArchetypeId } from '@/utils/archetypeValidation';
+import { isValidArchetypeId, validateArchetypeId } from '@/utils/archetypeValidation';
 import { useArchetypeDetails } from '@/hooks/archetype/useArchetypeDetails';
 import { useReportAccess } from '@/hooks/useReportAccess';
 import { useUserData } from '@/hooks/user/useUserData';
@@ -59,6 +59,7 @@ const ReportViewerContent: React.FC<ReportViewerContentProps> = ({
   const token = searchParams.get('token');
   const archetypeId = rawArchetypeId || '';
   const isValidArchetype = isValidArchetypeId(archetypeId);
+  const validArchetypeId = validateArchetypeId(archetypeId);
   const [showDiagnostics, setShowDiagnostics] = useState(false);
   const [showDebugData, setShowDebugData] = useState(false);
   const [isRetrying, setIsRetrying] = useState(false);
@@ -70,12 +71,12 @@ const ReportViewerContent: React.FC<ReportViewerContentProps> = ({
   // Use provided data if available, otherwise fetch it
   const shouldFetchData = !providedReportData || !providedUserData;
 
-  // Data fetching hooks - only used if data is not provided
+  // Data fetching hooks - only used if data is not provided and we have a valid archetype ID
   const { data: archetypeApiData, isLoading: archetypeLoading, error: archetypeError, refetch: refreshArchetypeData } = 
-    useArchetypeDetails(archetypeId as ArchetypeId);
+    useArchetypeDetails(validArchetypeId || 'a1');
   
   const { reportData: fetchedReportData, isLoading: reportDataLoading, error: reportDataError, refreshData: refreshReportData } = 
-    shouldFetchData ? useReportAccess({ archetypeId, token: token || '', isAdminView }) : { reportData: null, isLoading: false, error: null, refreshData: () => Promise.resolve() };
+    shouldFetchData && validArchetypeId ? useReportAccess({ archetypeId: validArchetypeId, token: token || '', isAdminView }) : { reportData: null, isLoading: false, error: null, refreshData: () => Promise.resolve() };
   
   const { data: fetchedUserData, isLoading: userDataFetchLoading, error: userDataFetchError } = 
     shouldFetchData ? useUserData(token) : { data: null, isLoading: false, error: null };
@@ -169,7 +170,7 @@ const ReportViewerContent: React.FC<ReportViewerContentProps> = ({
     <>
       {/* Global Loading State */}
       <ReportLoadingStateHandler
-        initialLoading={initialLoading}
+        initialLoading={!archetypeId}
         archetypeLoading={archetypeLoading}
         reportLoading={reportLoading}
         userDataLoading={userDataLoading}

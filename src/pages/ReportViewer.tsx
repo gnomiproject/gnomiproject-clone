@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { isValidArchetypeId, normalizeArchetypeId } from '@/utils/archetypeValidation';
+import { isValidArchetypeId, normalizeArchetypeId, validateArchetypeId } from '@/utils/archetypeValidation';
 import { toast } from 'sonner';
 import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import { useReportUserData } from '@/hooks/useReportUserData';
@@ -37,6 +37,7 @@ const ReportViewer = () => {
   
   const archetypeId = rawArchetypeId ? normalizeArchetypeId(rawArchetypeId) : undefined;
   const isValidArchetype = !!archetypeId && isValidArchetypeId(archetypeId);
+  const validArchetypeId = validateArchetypeId(archetypeId || '');
   const isAdminView = token === 'admin-view';
   
   const logTokenState = useCallback((action: string, state: any) => {
@@ -120,12 +121,21 @@ const ReportViewer = () => {
     debugInfo: reportDebugInfo,
     refreshData,
     isUsingFallbackData: isFallbackData = false
-  } = useReportAccess({
-    archetypeId: archetypeId || '', 
+  } = validArchetypeId ? useReportAccess({
+    archetypeId: validArchetypeId, 
     token: token || '',
     isAdminView,
     skipCache: refreshCounter > 0
-  });
+  }) : {
+    reportData: null,
+    archetypeData: null,
+    averageData: {},
+    isLoading: false,
+    error: null,
+    debugInfo: {},
+    refreshData: () => {},
+    isUsingFallbackData: false
+  };
   
   useEffect(() => {
     if (!reportLoading) {
