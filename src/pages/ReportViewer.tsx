@@ -12,6 +12,7 @@ import ReportViewerContent from '@/components/report/viewer/ReportViewerContent'
 import ErrorHandler from '@/components/report/viewer/ErrorHandler';
 import { trackReportAccess } from '@/utils/reports/accessTracking';
 import { getSupabaseUrl } from '@/integrations/supabase/client';
+import TrackingPixel from '@/components/report/TrackingPixel';
 
 /**
  * Enhanced ReportViewer with improved error handling and fallback strategies
@@ -325,12 +326,11 @@ const ReportViewer = () => {
 
   return (
     <ErrorBoundary onError={handleError} name="Report Viewer">
-      {/* Fixed tracking pixel URL using getSupabaseUrl() */}
+      {/* Use the new TrackingPixel component */}
       {!isAdminView && token && archetypeId && (
-        <img 
-          src={`${getSupabaseUrl()}/functions/v1/tracking/${archetypeId}/${token}?t=${new Date().getTime()}`} 
-          alt=""
-          style={{ position: 'absolute', width: '1px', height: '1px', opacity: 0 }}
+        <TrackingPixel
+          archetypeId={archetypeId}
+          token={token}
           onLoad={handleTrackingPixelLoad}
           onError={handleTrackingPixelError}
         />
