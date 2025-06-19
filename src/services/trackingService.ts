@@ -15,6 +15,7 @@ class TrackingService {
   private sessionId: string;
   private sessionStartTime: Date;
   private isEnabled: boolean;
+  private gaTrackingId: string = 'G-XSX7PSJKEQ';
 
   constructor() {
     this.sessionId = this.getOrCreateSessionId();
@@ -63,12 +64,21 @@ class TrackingService {
 
   private sendToGA(event: string, properties: Record<string, any>) {
     if (typeof window.gtag === 'function') {
+      // Send custom event to GA4
       window.gtag('event', event, {
+        event_category: 'user_flow',
+        session_id: this.sessionId,
+        archetype_id: properties.archetypeId || '',
+        question_number: properties.questionNumber || '',
+        cta_label: properties.ctaLabel || '',
+        page: properties.page || '',
         custom_parameter_1: properties.sessionId,
         custom_parameter_2: properties.archetypeId || '',
         custom_parameter_3: properties.questionNumber || '',
         value: properties.value || 1
       });
+    } else {
+      console.warn('[Tracking] Google Analytics gtag function not available');
     }
   }
 
