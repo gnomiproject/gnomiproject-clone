@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import LeftNavigation from '../navigation/LeftNavigation';
 import PrintButton from './PrintButton';
@@ -6,6 +5,7 @@ import { useReportNavigation } from '../hooks/useReportNavigation';
 import { debounce } from '@/utils/debounce';
 import { useRenderPerformance } from '@/components/shared/PerformanceMonitor';
 import ReportBodyContent from './ReportBodyContent';
+import BetaBadge from '@/components/shared/BetaBadge';
 
 // Create sections array for LeftNavigation - Ensure this matches exactly with section IDs in ReportSections.tsx
 const REPORT_SECTIONS = [
@@ -153,6 +153,11 @@ const ReportContainer: React.FC<ReportContainerProps> = ({
           contentRef={reportRef} 
           documentTitle={`Healthcare Archetype Report - ${reportData?.archetype_name || reportData?.name || 'Unknown'}`} 
         />
+
+        {/* Beta Badge - floating in bottom-left corner */}
+        <div className="fixed bottom-6 left-6 z-[9998] print:hidden">
+          <BetaBadge sticky={true} />
+        </div>
 
         {/* Main report content with proper spacing */}
         <div 
