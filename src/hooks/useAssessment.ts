@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { calculateArchetypeMatch, getAssessmentQuestions } from '../utils/assessmentUtils';
@@ -6,6 +5,7 @@ import { AssessmentResult } from '../types/assessment';
 import { ArchetypeId } from '../types/archetype';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
+import { trackingService } from '@/services/trackingService';
 
 // Storage keys for assessment data
 const INSIGHTS_STORAGE_KEY = 'healthcareArchetypeInsights';
@@ -24,18 +24,20 @@ export const useAssessment = () => {
   const [isCalculating, setIsCalculating] = useState(false);
   const [exactEmployeeCount, setExactEmployeeCount] = useState<number | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const [assessmentStartTime, setAssessmentStartTime] = useState<Date>(new Date());
   const navigate = useNavigate();
 
   const questions = getAssessmentQuestions();
   const totalQuestions = questions.length;
 
-  // Initialize or retrieve session ID
+  // Initialize or retrieve session ID and start time
   useEffect(() => {
     let storedSessionId = sessionStorage.getItem(SESSION_ID_KEY);
     if (!storedSessionId) {
       storedSessionId = uuidv4();
       sessionStorage.setItem(SESSION_ID_KEY, storedSessionId);
       localStorage.setItem('session_id', storedSessionId); // Also store in localStorage for persistence
+      setAssessmentStartTime(new Date()); // Set start time for new sessions
     }
     setSessionId(storedSessionId);
   }, []);
@@ -74,6 +76,9 @@ export const useAssessment = () => {
     setAnswers(updatedAnswers);
     // Save answers to sessionStorage
     sessionStorage.setItem(SESSION_ANSWERS_KEY, JSON.stringify(updatedAnswers));
+    
+    // Track the question answer
+    trackingService.questionAnswered(currentQuestion, questionId, answerId, totalQuestions);
   };
 
   /**
@@ -86,6 +91,9 @@ export const useAssessment = () => {
     setAnswers(updatedAnswers);
     // Save answers to sessionStorage
     sessionStorage.setItem(SESSION_ANSWERS_KEY, JSON.stringify(updatedAnswers));
+    
+    // Track the question answer
+    trackingService.questionAnswered(currentQuestion, questionId, answerIds.join(','), totalQuestions);
   };
 
   /**
@@ -129,6 +137,9 @@ export const useAssessment = () => {
   const calculateResults = () => {
     setIsCalculating(true);
     
+    // Calculate total assessment time
+    const totalTime = Date.now() - assessmentStartTime.getTime();
+    
     // Simulate calculation time
     setTimeout(() => {
       try {
@@ -144,6 +155,13 @@ export const useAssessment = () => {
         };
         
         setResult(resultWithEmployeeCount);
+        
+        // Track assessment completion
+        trackingService.assessmentCompleted(
+          resultWithEmployeeCount.primaryArchetype,
+          Math.round(totalTime / 1000), // Convert to seconds
+          exactEmployeeCount || undefined
+        );
         
         // Save results to localStorage for persistence
         localStorage.setItem(INSIGHTS_STORAGE_KEY, resultWithEmployeeCount.primaryArchetype);
@@ -187,6 +205,7 @@ export const useAssessment = () => {
     setAnswers({});
     setResult(null);
     setExactEmployeeCount(null);
+    setAssessmentStartTime(new Date());
     
     // Clear stored session data when assessment is reset but keep the session ID
     sessionStorage.removeItem(SESSION_RESULTS_KEY);

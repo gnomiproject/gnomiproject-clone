@@ -9,11 +9,17 @@ import CallToActionSection from '@/components/home/CallToActionSection';
 import { migrateDataToSupabase, checkDataInSupabase } from '@/utils/migrationUtil';
 import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { trackingService } from '@/services/trackingService';
 
 const Index = () => {
   const [isMigrating, setIsMigrating] = React.useState(false);
   const [dataExists, setDataExists] = React.useState<boolean | null>(null);
   const isMobile = useIsMobile();
+
+  // Track page view on component mount
+  React.useEffect(() => {
+    trackingService.pageView('home');
+  }, []);
 
   // Check if data exists in Supabase
   React.useEffect(() => {
@@ -50,7 +56,12 @@ const Index = () => {
   };
 
   const scrollToArchetypes = () => {
+    trackingService.ctaClicked('Explore All Archetypes', 'hero', 'archetype-section');
     document.getElementById('archetype-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const handlePrimaryCtaClick = () => {
+    trackingService.ctaClicked('Find Your Archetype', 'hero', '/assessment');
   };
 
   return (
@@ -88,7 +99,7 @@ const Index = () => {
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4 justify-start pt-4">
-                <Button asChild size="lg" className="text-lg px-8">
+                <Button asChild size="lg" className="text-lg px-8" onClick={handlePrimaryCtaClick}>
                   <Link to="/assessment">Find Your Archetype</Link>
                 </Button>
                 

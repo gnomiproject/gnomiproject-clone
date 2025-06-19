@@ -3,8 +3,13 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { trackingService } from '@/services/trackingService';
 
 const CallToActionSection = () => {
+  const handleCtaClick = () => {
+    trackingService.ctaClicked('Find Your Free Healthcare Archetype', 'call-to-action-section', '/assessment');
+  };
+
   return (
     <section className="bg-gradient-to-b from-white to-blue-50/30 py-20">
       <div className="container mx-auto px-6 max-w-4xl text-center">
@@ -20,7 +25,7 @@ const CallToActionSection = () => {
           Give it a try! Companies that have found their healthcare archetype have discovered high-impact opportunities without months of analysis.
         </p>
         
-        <Button asChild size="lg" className="text-lg px-8 py-6 rounded-full">
+        <Button asChild size="lg" className="text-lg px-8 py-6 rounded-full" onClick={handleCtaClick}>
           <Link to="/assessment">Find Your Free Healthcare Archetype</Link>
         </Button>
       </div>

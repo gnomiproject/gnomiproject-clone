@@ -4,6 +4,7 @@ import { useAssessment } from '../hooks/useAssessment';
 import { useQuestionValidation } from '@/hooks/useQuestionValidation';
 import CalculationLoader from '../components/assessment/CalculationLoader';
 import AssessmentLayout from '../components/assessment/AssessmentLayout';
+import { trackingService } from '@/services/trackingService';
 
 const Assessment = () => {
   const { 
@@ -21,6 +22,12 @@ const Assessment = () => {
   } = useAssessment();
   
   const { isCurrentQuestionValid } = useQuestionValidation(questions, answers, currentQuestion);
+  
+  // Track page view and assessment start on component mount
+  React.useEffect(() => {
+    trackingService.pageView('assessment');
+    trackingService.assessmentStarted();
+  }, []);
   
   return (
     <div className="min-h-screen bg-gray-50 py-6 sm:py-12 px-4 sm:px-6">

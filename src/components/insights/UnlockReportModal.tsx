@@ -23,6 +23,7 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, Lock, Unlock } from 'lucide-react';
 import { UnlockFormData } from '@/hooks/useReportUnlock';
+import { trackingService } from '@/services/trackingService';
 
 // Form validation schema
 const formSchema = z.object({
@@ -65,8 +66,22 @@ const UnlockReportModal: React.FC<UnlockReportModalProps> = ({
     },
   });
 
+  // Track when the modal is opened
+  React.useEffect(() => {
+    if (isOpen) {
+      trackingService.unlockFormViewed(archetypeId);
+    }
+  }, [isOpen, archetypeId]);
+
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     console.log("[UnlockReportModal] Form validation passed, submitting with values:", values);
+    
+    // Track form submission attempt
+    trackingService.unlockFormSubmitted(archetypeId, {
+      name: values.name,
+      organization: values.organization,
+      email: values.email
+    });
     
     // Create the formData with required properties, including session ID from localStorage
     const formData: UnlockFormData = {
@@ -89,6 +104,8 @@ const UnlockReportModal: React.FC<UnlockReportModalProps> = ({
     console.log("[UnlockReportModal] Submit result:", result);
     
     if (result.success) {
+      // Track successful form submission
+      trackingService.unlockFormSuccess(archetypeId);
       form.reset();
     }
   };
