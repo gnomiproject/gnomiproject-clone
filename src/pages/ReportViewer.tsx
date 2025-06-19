@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { isValidArchetypeId, normalizeArchetypeId, validateArchetypeId } from '@/utils/archetypeValidation';
 import { toast } from 'sonner';
@@ -14,16 +15,6 @@ import { trackReportAccess } from '@/utils/reports/accessTracking';
 import { getSupabaseUrl } from '@/integrations/supabase/client';
 import TrackingPixel from '@/components/report/TrackingPixel';
 
-/**
- * Enhanced ReportViewer with improved error handling and fallback strategies
- * 
- * Key improvements:
- * 1. Persistent token state tracking
- * 2. Fallback to cached data on token errors
- * 3. Graceful degradation UI instead of 404 redirects
- * 4. Progressive validation approach
- * 5. Improved logging and debugging for token states
- */
 const ReportViewer = () => {
   const { archetypeId: rawArchetypeId, token } = useParams();
   const [refreshCounter, setRefreshCounter] = useState(0);
@@ -35,10 +26,23 @@ const ReportViewer = () => {
   const trackingPixelLoadedRef = useRef<boolean>(false);
   const navigate = useNavigate();
   
-  const archetypeId = rawArchetypeId ? normalizeArchetypeId(rawArchetypeId) : undefined;
-  const isValidArchetype = !!archetypeId && isValidArchetypeId(archetypeId);
-  const validArchetypeId = validateArchetypeId(archetypeId || '');
-  const isAdminView = token === 'admin-view';
+  // Memoize these values to prevent constant recalculation
+  const archetypeId = useMemo(() => 
+    rawArchetypeId ? normalizeArchetypeId(rawArchetypeId) : undefined, 
+    [rawArchetypeId]
+  );
+  
+  const isValidArchetype = useMemo(() => 
+    !!archetypeId && isValidArchetypeId(archetypeId), 
+    [archetypeId]
+  );
+  
+  const validArchetypeId = useMemo(() => 
+    validateArchetypeId(archetypeId || ''), 
+    [archetypeId]
+  );
+  
+  const isAdminView = useMemo(() => token === 'admin-view', [token]);
   
   const logTokenState = useCallback((action: string, state: any) => {
     try {
@@ -60,24 +64,28 @@ const ReportViewer = () => {
     }
   }, [archetypeId, token]);
   
+  // Only log once on mount
   useEffect(() => {
-    console.log('[ReportViewer] Session started:', new Date(sessionStartTime).toISOString());
-    console.log('[ReportViewer] URL parameters:', {
-      rawArchetypeId,
-      normalizedArchetypeId: archetypeId,
-      token: token ? `${token.substring(0, 5)}...` : 'missing',
-      isAdminView
-    });
-    
-    const cacheHealth = checkCacheHealth();
-    console.log('[ReportViewer] Initial cache health:', cacheHealth);
-    
-    logTokenState('component_mount', { isValidArchetype, isAdminView });
+    if (!hasValidatedRef.current) {
+      hasValidatedRef.current = true;
+      console.log('[ReportViewer] Session started:', new Date(sessionStartTime).toISOString());
+      console.log('[ReportViewer] URL parameters:', {
+        rawArchetypeId,
+        normalizedArchetypeId: archetypeId,
+        token: token ? `${token.substring(0, 5)}...` : 'missing',
+        isAdminView
+      });
+      
+      const cacheHealth = checkCacheHealth();
+      console.log('[ReportViewer] Initial cache health:', cacheHealth);
+      
+      logTokenState('component_mount', { isValidArchetype, isAdminView });
+    }
     
     return () => {
       logTokenState('component_unmount', {});
     };
-  }, [sessionStartTime, rawArchetypeId, archetypeId, token, isAdminView, isValidArchetype, logTokenState]);
+  }, []); // Empty dependency array - only run once
 
   const {
     userData,
@@ -87,41 +95,28 @@ const ReportViewer = () => {
     debugInfo: userDataDebugInfo
   } = useReportUserData(token, archetypeId || '');
 
+  // Only track access once when conditions are met
   useEffect(() => {
-    if (!isAdminView && isValidAccess && archetypeId && token && !hasTrackedAccessRef.current) {
+    if (!isAdminView && 
+        isValidAccess && 
+        archetypeId && 
+        token && 
+        !hasTrackedAccessRef.current) {
+      
+      hasTrackedAccessRef.current = true;
       console.log(`[ReportViewer] Tracking access for ${archetypeId} with token ${token.substring(0, 5)}...`);
       
       trackReportAccess(archetypeId, token)
         .then(() => {
           console.log('[ReportViewer] Successfully tracked report access client-side');
-          hasTrackedAccessRef.current = true;
         })
         .catch(err => {
           console.error('[ReportViewer] Error tracking report access client-side:', err);
         });
     }
-  }, [archetypeId, token, isValidAccess, isAdminView]);
+  }, [archetypeId, token, isValidAccess, isAdminView]); // Stable dependencies
 
-  useEffect(() => {
-    if (!userDataLoading) {
-      logTokenState('user_data_loaded', {
-        isValid: isValidAccess,
-        hasError: !!userDataError,
-        hasUserData: !!userData
-      });
-    }
-  }, [userDataLoading, isValidAccess, userDataError, userData, logTokenState]);
-
-  const {
-    reportData, 
-    archetypeData,
-    averageData,
-    isLoading: reportLoading,
-    error: reportError,
-    debugInfo: reportDebugInfo,
-    refreshData,
-    isUsingFallbackData: isFallbackData = false
-  } = validArchetypeId ? useReportAccess({
+  const reportAccessResult = validArchetypeId ? useReportAccess({
     archetypeId: validArchetypeId, 
     token: token || '',
     isAdminView,
@@ -136,20 +131,24 @@ const ReportViewer = () => {
     refreshData: () => {},
     isUsingFallbackData: false
   };
+
+  const {
+    reportData, 
+    archetypeData,
+    averageData,
+    isLoading: reportLoading,
+    error: reportError,
+    debugInfo: reportDebugInfo,
+    refreshData,
+    isUsingFallbackData: isFallbackData = false
+  } = reportAccessResult;
   
+  // Update fallback state only when it actually changes
   useEffect(() => {
-    if (!reportLoading) {
-      logTokenState('report_data_loaded', {
-        hasReportData: !!reportData,
-        hasError: !!reportError,
-        isFallbackData
-      });
+    if (isFallbackData !== isUsingFallbackData) {
+      setIsUsingFallbackData(isFallbackData);
     }
-  }, [reportLoading, reportData, reportError, isFallbackData, logTokenState]);
-  
-  useEffect(() => {
-    setIsUsingFallbackData(isFallbackData || false);
-  }, [isFallbackData]);
+  }, [isFallbackData]); // Only depend on isFallbackData
   
   const {
     tokenStatus,
@@ -165,14 +164,6 @@ const ReportViewer = () => {
     sessionStartTime,
     reportData
   });
-  
-  useEffect(() => {
-    logTokenState('token_status_updated', {
-      tokenStatus,
-      lastCheck: new Date(lastStatusCheck).toISOString(),
-      errorDetails: tokenErrorDetails
-    });
-  }, [tokenStatus, lastStatusCheck, tokenErrorDetails, logTokenState]);
   
   const handleRefresh = useCallback(() => {
     console.log('[ReportViewer] Manual refresh requested');
@@ -198,7 +189,8 @@ const ReportViewer = () => {
     logTokenState('request_new_token', { archetypeId });
   }, [archetypeId, logTokenState]);
 
-  const combinedDebugInfo = {
+  // Memoize combined debug info to prevent recalculation
+  const combinedDebugInfo = useMemo(() => ({
     ...userDataDebugInfo,
     ...reportDebugInfo,
     reportViewerState: {
@@ -222,7 +214,20 @@ const ReportViewer = () => {
         trackingPixel: trackingPixelLoadedRef.current
       }
     }
-  };
+  }), [
+    userDataDebugInfo,
+    reportDebugInfo,
+    isAdminView,
+    userDataLoading,
+    reportLoading,
+    isValidAccess,
+    userData,
+    reportData,
+    tokenStatus,
+    lastStatusCheck,
+    sessionStartTime,
+    isUsingFallbackData
+  ]);
 
   const handleError = useCallback((error: Error, errorInfo: React.ErrorInfo) => {
     console.error('[ReportViewer] ErrorBoundary caught error:', error, errorInfo);
@@ -236,14 +241,7 @@ const ReportViewer = () => {
     logTokenState('error_boundary', {
       errorMessage: error.message
     });
-    
-    setTimeout(() => {
-      if (refreshData) {
-        console.log('[ReportViewer] Attempting recovery by refreshing data');
-        refreshData();
-      }
-    }, 2000);
-  }, [refreshData, logTokenState]);
+  }, [logTokenState]);
   
   const clearDebugLogs = useCallback(() => {
     try {
@@ -261,7 +259,6 @@ const ReportViewer = () => {
   
   const handleTrackingPixelError = useCallback((e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     console.error('[ReportViewer] Tracking pixel failed to load:', e);
-    // Gracefully handle the error without affecting user experience
   }, []);
 
   if (userDataLoading || reportLoading) {
@@ -336,7 +333,7 @@ const ReportViewer = () => {
 
   return (
     <ErrorBoundary onError={handleError} name="Report Viewer">
-      {/* Use the new TrackingPixel component */}
+      {/* Use the TrackingPixel component only once */}
       {!isAdminView && token && archetypeId && (
         <TrackingPixel
           archetypeId={archetypeId}

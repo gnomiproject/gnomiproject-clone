@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 export interface StandardizedAverageData {
@@ -10,6 +11,7 @@ export class AverageDataService {
   private cacheExpiry: number | null = null;
   private isUsingFallback: boolean = false;
   private readonly cacheDuration = 60 * 60 * 1000; // 1 hour
+  private fetchPromise: Promise<StandardizedAverageData> | null = null;
 
   private constructor() {}
 
@@ -37,28 +39,20 @@ export class AverageDataService {
     console.log('[AverageDataService] Clearing average data cache');
     this.cachedData = null;
     this.cacheExpiry = null;
+    this.fetchPromise = null;
   }
 
-  /**
-   * Processes raw data from the database to standardize keys and values
-   */
   private processRawData(rawData: any): StandardizedAverageData {
     const processedData: StandardizedAverageData = {};
-
     for (const key in rawData) {
       if (Object.hasOwnProperty.call(rawData, key) && key !== 'id') {
-        // Convert values to numbers, default to 0 if conversion fails
         const value = Number(rawData[key]);
         processedData[key] = isNaN(value) ? 0 : value;
       }
     }
-
     return processedData;
   }
 
-  /**
-   * Provides default average data as a fallback
-   */
   getDefaultAverageData(): StandardizedAverageData {
     console.log('[AverageDataService] Generating default average data');
     return {
@@ -69,9 +63,6 @@ export class AverageDataService {
     };
   }
 
-  /**
-   * Main method to get average data with improved error handling and fallback strategy
-   */
   async getAverageData(): Promise<StandardizedAverageData> {
     try {
       // Check cache first
@@ -81,55 +72,21 @@ export class AverageDataService {
         return this.cachedData;
       }
 
-      // Clear any stale cache
-      if (this.cachedData && !this.isValidCache()) {
-        console.log('[AverageDataService] Clearing stale cache');
-        this.clearCache();
+      // If there's already a fetch in progress, wait for it
+      if (this.fetchPromise) {
+        console.log('[AverageDataService] Waiting for existing fetch');
+        return await this.fetchPromise;
       }
 
-      console.log('[AverageDataService] Fetching fresh average data from database');
-      
-      // Try to fetch from database with timeout
-      const fetchPromise = supabase
-        .from('Core_Archetypes_Metrics')
-        .select('*')
-        .eq('id', 'All_Average')
-        .single();
-
-      // Add timeout to prevent hanging
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Database query timeout')), 10000);
-      });
-
-      const { data, error } = await Promise.race([fetchPromise, timeoutPromise]) as any;
-
-      if (error) {
-        console.warn('[AverageDataService] Database error, using fallback:', error.message);
-        this.isUsingFallback = true;
-        const fallbackData = this.getDefaultAverageData();
-        this.setCachedData(fallbackData);
-        return fallbackData;
-      }
-
-      if (!data) {
-        console.warn('[AverageDataService] No average data found, using fallback');
-        this.isUsingFallback = true;
-        const fallbackData = this.getDefaultAverageData();
-        this.setCachedData(fallbackData);
-        return fallbackData;
-      }
-
-      console.log('[AverageDataService] Successfully fetched data from database');
-      
-      // Process and cache the data
-      const processedData = this.processRawData(data);
-      this.setCachedData(processedData);
-      this.isUsingFallback = false;
-      
-      return processedData;
+      // Start new fetch
+      this.fetchPromise = this.fetchFromDatabase();
+      const result = await this.fetchPromise;
+      this.fetchPromise = null;
+      return result;
 
     } catch (fetchError) {
       console.error('[AverageDataService] Error fetching average data:', fetchError);
+      this.fetchPromise = null;
       
       // Try to use any existing cached data, even if expired
       if (this.cachedData) {
@@ -145,6 +102,49 @@ export class AverageDataService {
       this.setCachedData(fallbackData);
       return fallbackData;
     }
+  }
+
+  private async fetchFromDatabase(): Promise<StandardizedAverageData> {
+    console.log('[AverageDataService] Fetching fresh average data from database');
+    
+    // Try to fetch from database with timeout
+    const fetchPromise = supabase
+      .from('Core_Archetypes_Metrics')
+      .select('*')
+      .eq('id', 'All_Average')
+      .single();
+
+    // Add timeout to prevent hanging
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Database query timeout')), 10000);
+    });
+
+    const { data, error } = await Promise.race([fetchPromise, timeoutPromise]) as any;
+
+    if (error) {
+      console.warn('[AverageDataService] Database error, using fallback:', error.message);
+      this.isUsingFallback = true;
+      const fallbackData = this.getDefaultAverageData();
+      this.setCachedData(fallbackData);
+      return fallbackData;
+    }
+
+    if (!data) {
+      console.warn('[AverageDataService] No average data found, using fallback');
+      this.isUsingFallback = true;
+      const fallbackData = this.getDefaultAverageData();
+      this.setCachedData(fallbackData);
+      return fallbackData;
+    }
+
+    console.log('[AverageDataService] Successfully fetched data from database');
+    
+    // Process and cache the data
+    const processedData = this.processRawData(data);
+    this.setCachedData(processedData);
+    this.isUsingFallback = false;
+    
+    return processedData;
   }
 }
 
