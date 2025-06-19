@@ -154,8 +154,8 @@ const ReportContainer: React.FC<ReportContainerProps> = ({
           documentTitle={`Healthcare Archetype Report - ${reportData?.archetype_name || reportData?.name || 'Unknown'}`} 
         />
 
-        {/* Beta Badge - floating in bottom-left corner */}
-        <div className="fixed bottom-6 left-6 z-[9998] print:hidden">
+        {/* Beta Badge - floating in bottom-right corner */}
+        <div className="fixed bottom-6 right-6 z-[9998] print:hidden">
           <BetaBadge sticky={true} />
         </div>
 
