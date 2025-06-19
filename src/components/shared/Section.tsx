@@ -17,7 +17,7 @@ export const Section: React.FC<SectionProps> = ({
   return (
     <section 
       id={id} 
-      className={`w-full ${className}`}
+      className={`w-full pt-8 ${className}`}
       style={{ minHeight: '50px' }} // Ensure section has minimum height
     >
       {children}

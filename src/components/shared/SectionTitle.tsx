@@ -23,7 +23,7 @@ const SectionTitle = ({
 }: SectionTitleProps) => {
   return (
     <div className={cn(
-      'mb-8',
+      'mt-8 mb-8',
       center && 'text-center',
       className
     )}>
