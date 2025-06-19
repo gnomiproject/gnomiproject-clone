@@ -2,12 +2,10 @@
 import { ArchetypeDetailedData } from '@/types/archetype';
 import { averageDataService } from '@/services/AverageDataService';
 
-// Interface for processed report data - updated to include missing properties
+// Interface for processed report data - simplified to match production
 export interface ProcessedReportData {
   reportData: ArchetypeDetailedData | null;
-  archetypeData?: any;
   averageData: any;
-  isUsingFallbackData?: boolean;
 }
 
 // SIMPLIFIED process function - now uses AverageDataService for consistency
@@ -35,9 +33,7 @@ export const processReportData = async (data: ArchetypeDetailedData | null): Pro
   if (!data) {
     return {
       reportData: null,
-      archetypeData: null,
-      averageData,
-      isUsingFallbackData: averageDataService.isUsingFallbackData()
+      averageData
     };
   }
 
@@ -75,9 +71,7 @@ export const processReportData = async (data: ArchetypeDetailedData | null): Pro
 
   return {
     reportData: processedData,
-    archetypeData: processedData,
-    averageData,
-    isUsingFallbackData: averageDataService.isUsingFallbackData()
+    averageData
   };
 };
 
