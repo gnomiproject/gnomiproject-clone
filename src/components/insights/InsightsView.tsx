@@ -1,4 +1,3 @@
-
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ArchetypeId, ArchetypeDetailedData } from '@/types/archetype';
 import ArchetypeNavTabs from './components/ArchetypeNavTabs';
@@ -199,9 +198,9 @@ const InsightsView = ({
     return submitUnlockForm(formData);
   };
 
-  // Handle redirect for removed tabs
+  // Handle redirect for removed tabs - updated to include 'metrics'
   useEffect(() => {
-    if (activeTab === 'swot' || activeTab === 'disease-and-care') {
+    if (activeTab === 'swot' || activeTab === 'disease-and-care' || activeTab === 'metrics') {
       setActiveTab('overview');
     }
   }, [activeTab]);
@@ -270,26 +269,7 @@ const InsightsView = ({
           </div>
         )}
         
-        {
-        activeTab === 'metrics' && (
-          <>
-            {/* Show metrics data regardless of unlock status if data exists */}
-            {hasMetricsData ? (
-              <MetricsTab archetypeData={reportData} />
-            ) : !isUnlocked ? (
-              <UnlockPlaceholder name={name} onUnlock={openUnlockModal} />
-            ) : (
-              <div className="py-12 text-center">
-                <Badge variant="outline" className="mb-2 bg-yellow-50 text-yellow-800 hover:bg-yellow-100">Data Availability</Badge>
-                <h3 className="text-xl font-medium text-gray-800">Metrics data is being prepared</h3>
-                <p className="text-gray-600 mt-2 max-w-md mx-auto">
-                  Your metrics data is being processed and will be available soon. Please check back later.
-                </p>
-              </div>
-            )}
-          </>
-        )
-        }
+        {/* Removed metrics tab handling completely */}
 
         {
         activeTab === 'unique-advantages' && (
