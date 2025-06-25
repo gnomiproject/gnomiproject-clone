@@ -5,8 +5,6 @@ import ArchetypeNavTabs from './components/ArchetypeNavTabs';
 import ArchetypeHeader from './components/ArchetypeHeader';
 import OverviewTab from './tabs/OverviewTab';
 import MetricsTab from './tabs/MetricsTab';
-import SwotTab from './tabs/SwotTab';
-import DiseaseAndCareTab from './tabs/DiseaseAndCareTab';
 import UniqueAdvantagesTab from './tabs/UniqueAdvantagesTab';
 import BiggestChallengesTab from './tabs/BiggestChallengesTab';
 import BestOpportunitiesTab from './tabs/BestOpportunitiesTab';
@@ -25,7 +23,7 @@ interface ArchetypeReportProps {
   assessmentResult?: any;
   assessmentAnswers?: any;
   hideRequestSection?: boolean;
-  isPreUnlocked?: boolean; // Added prop to receive unlock status from parent
+  isPreUnlocked?: boolean;
 }
 
 const InsightsView = ({ 
@@ -34,12 +32,11 @@ const InsightsView = ({
   assessmentResult,
   assessmentAnswers,
   hideRequestSection = false,
-  isPreUnlocked = false // Default to false
+  isPreUnlocked = false
 }: ArchetypeReportProps) => {
   // Always define hooks at the top level
   const [activeTab, setActiveTab] = React.useState('overview');
   const processedRef = useRef(false);
-  const swotLoggedRef = useRef(false);
   const [isLoading, setIsLoading] = useState(false);
   const [reportData, setReportData] = useState<ArchetypeDetailedData>(initialReportData);
   
@@ -97,7 +94,6 @@ const InsightsView = ({
   useEffect(() => {
     if (refreshedData && !refreshLoading) {
       console.log("[InsightsView] Received refreshed data", {
-        hasSwotData: !!(refreshedData.swot_analysis || refreshedData.strengths),
         isUnlocked,
         archetypeName: refreshedData.name || refreshedData.archetype_name
       });
@@ -133,21 +129,11 @@ const InsightsView = ({
   }, [assessmentResult, archetypeId]);
 
   useEffect(() => {
-    if (reportData?.strengths && !swotLoggedRef.current) {
-      console.log('[InsightsView] SWOT data available:', {
-        directStrengths: !!reportData.strengths,
-        swotAnalysis: !!reportData.swot_analysis,
-        enhancedSwot: !!reportData.enhanced?.swot
-      });
-      swotLoggedRef.current = true;
-    }
-    
     // Reset refs when archetypeId changes
     return () => {
       processedRef.current = false;
-      swotLoggedRef.current = false;
     };
-  }, [reportData, archetypeId]);
+  }, [archetypeId]);
 
   if (!reportData) {
     // Return a minimal error state to avoid cascading failures
@@ -167,8 +153,6 @@ const InsightsView = ({
   // Enhanced logging for data availability
   console.log('[InsightsView] Available data for tab rendering:', {
     hasMetricsData: !!(reportData.distinctive_metrics || reportData.detailed_metrics),
-    hasSwotData: !!(reportData.strengths || reportData.swot_analysis),
-    hasDiseaseData: !!(reportData["Dise_Heart Disease Prevalence"] || reportData["Dise_Type 2 Diabetes Prevalence"]),
     hasStrengthsData: !!(reportData.strengths),
     hasChallengesData: !!(reportData.biggest_challenges),
     hasOpportunitiesData: !!(reportData.best_opportunities),
@@ -189,14 +173,6 @@ const InsightsView = ({
     reportData.distinctive_metrics || 
     reportData.detailed_metrics || 
     (reportData as any).Cost_Medical_Paid_Amount_PEPY
-  );
-  
-  const hasSwotData = !!(reportData.strengths || reportData.swot_analysis);
-  
-  const hasDiseaseData = !!(
-    reportData["Dise_Heart Disease Prevalence"] || 
-    reportData["Dise_Type 2 Diabetes Prevalence"] ||
-    Object.keys(reportData).some(key => key.toLowerCase().includes('dise_'))
   );
 
   const hasStrengthsData = !!(reportData.strengths && Array.isArray(reportData.strengths));
@@ -222,6 +198,13 @@ const InsightsView = ({
     });
     return submitUnlockForm(formData);
   };
+
+  // Handle redirect for removed tabs
+  useEffect(() => {
+    if (activeTab === 'swot' || activeTab === 'disease-and-care') {
+      setActiveTab('overview');
+    }
+  }, [activeTab]);
 
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">
@@ -272,7 +255,7 @@ const InsightsView = ({
                     Unlock your complete {name} archetype insights
                   </h3>
                   <p className="text-blue-700 mt-1">
-                    Get access to detailed metrics, SWOT analysis, and disease & care patterns by providing a few details.
+                    Get access to detailed metrics and strategic insights by providing a few details.
                   </p>
                 </div>
                 <Button 
@@ -289,7 +272,7 @@ const InsightsView = ({
         {
         activeTab === 'metrics' && (
           <>
-            {/* IMPORTANT: Show metrics data regardless of unlock status if data exists */}
+            {/* Show metrics data regardless of unlock status if data exists */}
             {hasMetricsData ? (
               <MetricsTab archetypeData={reportData} />
             ) : !isUnlocked ? (
@@ -300,48 +283,6 @@ const InsightsView = ({
                 <h3 className="text-xl font-medium text-gray-800">Metrics data is being prepared</h3>
                 <p className="text-gray-600 mt-2 max-w-md mx-auto">
                   Your metrics data is being processed and will be available soon. Please check back later.
-                </p>
-              </div>
-            )}
-          </>
-        )
-        }
-        
-        {
-        activeTab === 'swot' && (
-          <>
-            {/* IMPORTANT: Show SWOT data regardless of unlock status if data exists */}
-            {hasSwotData ? (
-              <SwotTab archetypeData={reportData} />
-            ) : !isUnlocked ? (
-              <UnlockPlaceholder name={name} onUnlock={openUnlockModal} />
-            ) : (
-              <div className="py-12 text-center">
-                <Badge variant="outline" className="mb-2 bg-yellow-50 text-yellow-800 hover:bg-yellow-100">Data Availability</Badge>
-                <h3 className="text-xl font-medium text-gray-800">SWOT data is being prepared</h3>
-                <p className="text-gray-600 mt-2 max-w-md mx-auto">
-                  Your SWOT analysis is being processed and will be available soon. Please check back later.
-                </p>
-              </div>
-            )}
-          </>
-        )
-        }
-        
-        {
-        activeTab === 'disease-and-care' && (
-          <>
-            {/* IMPORTANT: Show Disease data regardless of unlock status if data exists */}
-            {hasDiseaseData ? (
-              <DiseaseAndCareTab archetypeData={reportData} />
-            ) : !isUnlocked ? (
-              <UnlockPlaceholder name={name} onUnlock={openUnlockModal} />
-            ) : (
-              <div className="py-12 text-center">
-                <Badge variant="outline" className="mb-2 bg-yellow-50 text-yellow-800 hover:bg-yellow-100">Data Availability</Badge>
-                <h3 className="text-xl font-medium text-gray-800">Disease & Care data is being prepared</h3>
-                <p className="text-gray-600 mt-2 max-w-md mx-auto">
-                  Your disease and care data is being processed and will be available soon. Please check back later.
                 </p>
               </div>
             )}
@@ -410,7 +351,7 @@ const InsightsView = ({
           </>
         )}
 
-        {/* NEW: Potential Pitfalls Tab */}
+        {/* Potential Pitfalls Tab */}
         {activeTab === 'potential-pitfalls' && (
           <>
             {/* Show Potential Pitfalls data regardless of unlock status if data exists */}
