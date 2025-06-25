@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -127,32 +128,81 @@ const UniqueAdvantagesTab: React.FC<UniqueAdvantagesTabProps> = ({ archetypeData
     };
   };
 
-  // Get unique metric for each card to avoid duplicates
-  const getUniqueMetricForCard = (strength: string, distinctiveMetrics: any[], cardIndex: number): any => {
+  // Get relevant metric for each strength using improved matching logic
+  const getRelevantMetricForStrength = (strength: string, distinctiveMetrics: any[]): any => {
     if (!distinctiveMetrics || !Array.isArray(distinctiveMetrics)) return null;
     
     const strengthLower = strength.toLowerCase();
     
-    const keywordMatches: { [key: string]: string[] } = {
-      'cost': ['Cost', 'Amount', 'Savings'],
-      'visit': ['Visits', 'PCP', 'Specialist'],
-      'benefits': ['Access', 'Insurance', 'Benefits', 'Flexible'],
-      'emergency': ['Emergency', 'ER'],
-      'preventive': ['Wellness', 'Screening'],
-      'utilization': ['Utilization', 'Non-Utilizers'],
-      'risk': ['Risk', 'SDOH']
-    };
-    
-    for (const [strengthKey, metricKeys] of Object.entries(keywordMatches)) {
-      if (strengthLower.includes(strengthKey)) {
-        const match = distinctiveMetrics.find(metric => 
-          metricKeys.some(key => metric.metric && metric.metric.includes(key))
-        );
-        if (match) return match;
-      }
+    // Be very specific about keyword matching
+    if (strengthLower.includes('pcp') || strengthLower.includes('primary care')) {
+      // Look for PCP-specific metrics
+      return distinctiveMetrics.find(m => 
+        m.metric.toLowerCase().includes('pcp') || 
+        m.metric.toLowerCase().includes('primary')
+      );
     }
     
-    return distinctiveMetrics[cardIndex % distinctiveMetrics.length];
+    if (strengthLower.includes('specialist')) {
+      // Look for specialist-specific metrics
+      return distinctiveMetrics.find(m => 
+        m.metric.toLowerCase().includes('specialist') &&
+        !m.metric.toLowerCase().includes('pcp')
+      );
+    }
+    
+    if (strengthLower.includes('cost') || strengthLower.includes('savings')) {
+      return distinctiveMetrics.find(m => 
+        m.metric.toLowerCase().includes('cost') || 
+        m.metric.toLowerCase().includes('amount') || 
+        m.metric.toLowerCase().includes('savings')
+      );
+    }
+    
+    if (strengthLower.includes('access') || strengthLower.includes('insurance')) {
+      return distinctiveMetrics.find(m => 
+        m.metric.toLowerCase().includes('access') || 
+        m.metric.toLowerCase().includes('insurance')
+      );
+    }
+    
+    if (strengthLower.includes('benefits') || strengthLower.includes('flexible')) {
+      return distinctiveMetrics.find(m => 
+        m.metric.toLowerCase().includes('benefits') || 
+        m.metric.toLowerCase().includes('flexible')
+      );
+    }
+    
+    if (strengthLower.includes('emergency') || strengthLower.includes('er')) {
+      return distinctiveMetrics.find(m => 
+        m.metric.toLowerCase().includes('emergency') || 
+        m.metric.toLowerCase().includes('er')
+      );
+    }
+    
+    if (strengthLower.includes('preventive') || strengthLower.includes('wellness')) {
+      return distinctiveMetrics.find(m => 
+        m.metric.toLowerCase().includes('wellness') || 
+        m.metric.toLowerCase().includes('screening')
+      );
+    }
+    
+    if (strengthLower.includes('utilization') || strengthLower.includes('non-utilizers')) {
+      return distinctiveMetrics.find(m => 
+        m.metric.toLowerCase().includes('utilization') || 
+        m.metric.toLowerCase().includes('non-utilizers')
+      );
+    }
+    
+    if (strengthLower.includes('risk') || strengthLower.includes('sdoh')) {
+      return distinctiveMetrics.find(m => 
+        m.metric.toLowerCase().includes('risk') || 
+        m.metric.toLowerCase().includes('sdoh')
+      );
+    }
+    
+    // Fallback to first available metric
+    return distinctiveMetrics[0];
   };
 
   // Get appropriate icon for each strength
@@ -167,7 +217,7 @@ const UniqueAdvantagesTab: React.FC<UniqueAdvantagesTabProps> = ({ archetypeData
     return icons[index % icons.length];
   };
 
-  // Process strengths data with all improvements
+  // Process strengths data with improved metric matching
   const processedStrengths = React.useMemo(() => {
     const strengths = archetypeData?.strengths || [];
     const distinctiveMetrics = archetypeData?.distinctive_metrics || [];
@@ -175,7 +225,7 @@ const UniqueAdvantagesTab: React.FC<UniqueAdvantagesTabProps> = ({ archetypeData
     if (!Array.isArray(strengths)) return [];
     
     return strengths.map((strength: string, index: number) => {
-      const rawMetric = getUniqueMetricForCard(strength, distinctiveMetrics, index);
+      const rawMetric = getRelevantMetricForStrength(strength, distinctiveMetrics);
       const formattedMetric = rawMetric ? formatMetricDisplay(rawMetric) : null;
       
       return {
