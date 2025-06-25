@@ -19,10 +19,13 @@ const BehavioralHealthConditions = ({ reportData, averageData }: BehavioralHealt
     { id: 'Dise_Substance Use Disorder Prevalence', label: 'Substance Use Disorders' },
   ];
 
-  // Format difference as percentage points
-  const formatDifference = (diff: number): string => {
-    const sign = diff > 0 ? '+' : '';
-    return `${sign}${diff.toFixed(1)} pp`;
+  // Format difference as percentage change
+  const formatDifference = (value: number, average: number): string => {
+    if (average === 0 || !average) return 'N/A';
+    
+    const percentChange = ((value - average) / average) * 100;
+    const sign = percentChange > 0 ? '+' : '';
+    return `${sign}${percentChange.toFixed(1)}%`;
   };
 
   return (
@@ -56,11 +59,11 @@ const BehavioralHealthConditions = ({ reportData, averageData }: BehavioralHealt
                 const value = reportData[condition.id] || 0;
                 const avgValue = averageData && averageData[condition.id] ? averageData[condition.id] : 0;
                 
-                // Calculate percentage point difference
-                const diff = value - avgValue;
+                // Calculate percentage change
+                const percentChange = avgValue !== 0 ? ((value - avgValue) / avgValue) * 100 : 0;
                 
                 // Color coding: lower prevalence is better (green), higher is concerning (amber/red)
-                const diffClass = diff < 0 ? "text-green-600" : diff > 0 ? "text-amber-600" : "text-gray-600";
+                const diffClass = percentChange < 0 ? "text-green-600" : percentChange > 0 ? "text-amber-600" : "text-gray-600";
                 
                 return (
                   <tr key={condition.id} className="border-b border-gray-100">
@@ -68,7 +71,7 @@ const BehavioralHealthConditions = ({ reportData, averageData }: BehavioralHealt
                     <td className="text-right py-2 font-semibold">{formatPercent(value)}</td>
                     <td className="text-right py-2">{formatPercent(avgValue)}</td>
                     <td className={`text-right py-2 ${diffClass}`}>
-                      {formatDifference(diff)}
+                      {formatDifference(value, avgValue)}
                     </td>
                   </tr>
                 );
