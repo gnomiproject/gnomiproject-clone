@@ -15,6 +15,7 @@ import { AlertCircle, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useArchetypeDetails } from '@/hooks/archetype/useArchetypeDetails';
 import { Badge } from '@/components/ui/badge';
+import BetaBadge from '@/components/shared/BetaBadge';
 
 interface ArchetypeReportProps {
   archetypeId: ArchetypeId;
@@ -206,7 +207,12 @@ const InsightsView = ({
   }, [activeTab]);
 
   return (
-    <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+    <div className="bg-white rounded-lg shadow-sm overflow-hidden relative">
+      {/* Beta Badge - positioned in bottom right corner */}
+      <div className="fixed bottom-6 right-6 z-[9999] shadow-lg print:hidden">
+        <BetaBadge sticky={true} />
+      </div>
+
       <ArchetypeHeader 
         name={name} 
         description={shortDescription} 
