@@ -13,23 +13,27 @@ export const RenderCounter = ({
   children 
 }: RenderCounterProps) => {
   const renderCount = useRef(0);
-  const [, forceUpdate] = useState({});
+  const [displayCount, setDisplayCount] = useState(0);
   
   // Only show in development or if explicitly enabled
   const shouldShow = process.env.NODE_ENV !== 'production' || showInProduction;
   
+  // Increment render count on each render but only update display occasionally
+  renderCount.current += 1;
+  
   useEffect(() => {
-    renderCount.current += 1;
-    // Force a re-render to update the counter display
-    if (shouldShow) forceUpdate({});
-  });
+    // Only update display count every 10 renders to avoid excessive re-renders
+    if (renderCount.current % 10 === 0 || renderCount.current === 1) {
+      setDisplayCount(renderCount.current);
+    }
+  }, []); // Empty dependency array to run only once
 
   if (!shouldShow) return <>{children}</>;
 
   return (
     <>
-      <div className="hidden print:hidden absolute top-0 right-0 bg-amber-100 text-amber-800 text-xs px-1 py-0.5 rounded">
-        {componentName}: {renderCount.current} renders
+      <div className="fixed top-0 right-0 bg-amber-100 text-amber-800 text-xs px-2 py-1 rounded-bl z-50 pointer-events-none">
+        {componentName}: {displayCount} renders
       </div>
       {children}
     </>

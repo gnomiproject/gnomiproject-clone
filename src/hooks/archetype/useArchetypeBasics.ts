@@ -39,11 +39,14 @@ export const useArchetypeBasics = () => {
         industries: archetype.industries
       }));
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes - don't refetch if data is fresh
-    gcTime: 10 * 60 * 1000,   // 10 minutes - keep in memory
-    refetchOnWindowFocus: false, // Don't refetch when user switches tabs
-    refetchOnReconnect: false,   // Don't refetch on reconnect
-    refetchOnMount: false,       // Don't refetch on component mount if data exists
+    staleTime: 10 * 60 * 1000, // 10 minutes - longer stale time
+    gcTime: 30 * 60 * 1000,    // 30 minutes - longer cache time
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
+    // Add request deduplication
+    networkMode: 'online',
+    retry: 0, // Disable retries to prevent spam
   });
 
   const familiesQuery = useQuery({
@@ -79,11 +82,14 @@ export const useArchetypeBasics = () => {
           : []
       }));
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes - don't refetch if data is fresh
-    gcTime: 10 * 60 * 1000,   // 10 minutes - keep in memory
-    refetchOnWindowFocus: false, // Don't refetch when user switches tabs
-    refetchOnReconnect: false,   // Don't refetch on reconnect
-    refetchOnMount: false,       // Don't refetch on component mount if data exists
+    staleTime: 10 * 60 * 1000, // 10 minutes - longer stale time
+    gcTime: 30 * 60 * 1000,    // 30 minutes - longer cache time
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
+    // Add request deduplication
+    networkMode: 'online',
+    retry: 0, // Disable retries to prevent spam
   });
 
   const archetypeData = archetypesQuery.data || [];

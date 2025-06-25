@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -22,15 +21,27 @@ import ErrorBoundary from "./components/shared/ErrorBoundary";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 10 * 60 * 1000,   // 10 minutes
-      retry: 1,
+      staleTime: 10 * 60 * 1000, // 10 minutes - longer stale time
+      gcTime: 30 * 60 * 1000,    // 30 minutes - longer cache time
+      retry: 0, // Disable retries to prevent request spam
       retryDelay: 3000,
       refetchOnWindowFocus: false,
       refetchOnReconnect: false,
+      refetchOnMount: false, // Important: don't refetch on mount if data exists
+      // Add network mode and deduplication
+      networkMode: 'online',
     },
   },
 });
+
+// Add query deduplication logging in development
+if (process.env.NODE_ENV !== 'production') {
+  queryClient.getQueryCache().subscribe(event => {
+    if (event.type === 'added') {
+      console.log(`[Query Cache] Added: ${JSON.stringify(event.query.queryKey)}`);
+    }
+  });
+}
 
 function App() {
   return (
