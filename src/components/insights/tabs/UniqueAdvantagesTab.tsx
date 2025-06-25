@@ -9,7 +9,7 @@ interface UniqueAdvantagesTabProps {
   archetypeData: ArchetypeDetailedData;
 }
 
-interface StrengthCardProps {
+interface AdvantageCardProps {
   title: string;
   description: string;
   supportingMetric?: {
@@ -22,7 +22,7 @@ interface StrengthCardProps {
   index: number;
 }
 
-const StrengthCard: React.FC<StrengthCardProps> = ({ 
+const AdvantageCard: React.FC<AdvantageCardProps> = ({ 
   title, 
   description, 
   supportingMetric, 
@@ -38,6 +38,16 @@ const StrengthCard: React.FC<StrengthCardProps> = ({
   ];
   
   const cardColor = colors[index % colors.length];
+  
+  // Get badge variant based on significance
+  const getBadgeVariant = (significance: string) => {
+    switch(significance?.toLowerCase()) {
+      case 'high': return 'default'; // Green
+      case 'moderate': return 'secondary'; // Yellow  
+      case 'low': return 'outline'; // Gray
+      default: return 'secondary';
+    }
+  };
   
   return (
     <Card className={`bg-gradient-to-br ${cardColor} h-full transition-all duration-200 hover:shadow-md`}>
@@ -56,7 +66,7 @@ const StrengthCard: React.FC<StrengthCardProps> = ({
           <div className="mt-auto pt-4 border-t border-white/50">
             <div className="flex items-center justify-between">
               <span className="text-xs font-medium text-gray-600">{supportingMetric.metric}</span>
-              <Badge variant="secondary" className="text-xs">
+              <Badge variant={getBadgeVariant(supportingMetric.significance)} className="text-xs">
                 {supportingMetric.significance}
               </Badge>
             </div>
@@ -72,140 +82,7 @@ const StrengthCard: React.FC<StrengthCardProps> = ({
 };
 
 const UniqueAdvantagesTab: React.FC<UniqueAdvantagesTabProps> = ({ archetypeData }) => {
-  // Extract improved title from strength text
-  const extractCardTitle = (strength: string): string => {
-    if (strength.length < 50) {
-      return strength.split('(')[0].trim();
-    }
-    
-    const words = strength.split(' ');
-    if (words.length <= 6) {
-      return strength;
-    }
-    
-    return words.slice(0, 5).join(' ') + '...';
-  };
-
-  // Simplified strength text processing - no generic fluff
-  const processStrengthText = (strength: string): string => {
-    // Clean up the text but don't add generic fluff
-    if (strength.includes('vs average') || strength.includes('compared to')) {
-      // It's already contextual, use as-is
-      return strength;
-    }
-    
-    // Just add minimal framing if needed
-    if (!strength.includes('Companies') && !strength.includes('Organizations')) {
-      return `Organizations in this archetype demonstrate ${strength.toLowerCase()}.`;
-    }
-    
-    return strength;
-  };
-
-  // Format metric display with proper value types
-  const formatMetricDisplay = (metric: any) => {
-    const value = parseFloat(metric.archetype_value || metric.difference || 0);
-    const difference = parseFloat(metric.difference || 0);
-    
-    let formattedValue;
-    if (metric.metric.includes('Amount') || metric.metric.includes('Cost')) {
-      formattedValue = `$${Math.round(value).toLocaleString()}`;
-    } else if (metric.metric.includes('Percent') || metric.metric.includes('%')) {
-      formattedValue = `${Math.round(value)}%`;
-    } else if (metric.metric.includes('Visits') || metric.metric.includes('per 1k')) {
-      formattedValue = Math.round(value).toLocaleString();
-    } else {
-      formattedValue = `${Math.round(value)}%`;
-    }
-    
-    const diffSymbol = difference > 0 ? '+' : '';
-    const diffFormatted = `${diffSymbol}${difference}% vs avg`;
-    
-    return {
-      value: formattedValue,
-      difference: diffFormatted,
-      significance: metric.significance || 'Moderate'
-    };
-  };
-
-  // Get relevant metric for each strength using improved matching logic
-  const getRelevantMetricForStrength = (strength: string, distinctiveMetrics: any[]): any => {
-    if (!distinctiveMetrics || !Array.isArray(distinctiveMetrics)) return null;
-    
-    const strengthLower = strength.toLowerCase();
-    
-    // Be very specific about keyword matching
-    if (strengthLower.includes('pcp') || strengthLower.includes('primary care')) {
-      // Look for PCP-specific metrics
-      return distinctiveMetrics.find(m => 
-        m.metric.toLowerCase().includes('pcp') || 
-        m.metric.toLowerCase().includes('primary')
-      );
-    }
-    
-    if (strengthLower.includes('specialist')) {
-      // Look for specialist-specific metrics
-      return distinctiveMetrics.find(m => 
-        m.metric.toLowerCase().includes('specialist') &&
-        !m.metric.toLowerCase().includes('pcp')
-      );
-    }
-    
-    if (strengthLower.includes('cost') || strengthLower.includes('savings')) {
-      return distinctiveMetrics.find(m => 
-        m.metric.toLowerCase().includes('cost') || 
-        m.metric.toLowerCase().includes('amount') || 
-        m.metric.toLowerCase().includes('savings')
-      );
-    }
-    
-    if (strengthLower.includes('access') || strengthLower.includes('insurance')) {
-      return distinctiveMetrics.find(m => 
-        m.metric.toLowerCase().includes('access') || 
-        m.metric.toLowerCase().includes('insurance')
-      );
-    }
-    
-    if (strengthLower.includes('benefits') || strengthLower.includes('flexible')) {
-      return distinctiveMetrics.find(m => 
-        m.metric.toLowerCase().includes('benefits') || 
-        m.metric.toLowerCase().includes('flexible')
-      );
-    }
-    
-    if (strengthLower.includes('emergency') || strengthLower.includes('er')) {
-      return distinctiveMetrics.find(m => 
-        m.metric.toLowerCase().includes('emergency') || 
-        m.metric.toLowerCase().includes('er')
-      );
-    }
-    
-    if (strengthLower.includes('preventive') || strengthLower.includes('wellness')) {
-      return distinctiveMetrics.find(m => 
-        m.metric.toLowerCase().includes('wellness') || 
-        m.metric.toLowerCase().includes('screening')
-      );
-    }
-    
-    if (strengthLower.includes('utilization') || strengthLower.includes('non-utilizers')) {
-      return distinctiveMetrics.find(m => 
-        m.metric.toLowerCase().includes('utilization') || 
-        m.metric.toLowerCase().includes('non-utilizers')
-      );
-    }
-    
-    if (strengthLower.includes('risk') || strengthLower.includes('sdoh')) {
-      return distinctiveMetrics.find(m => 
-        m.metric.toLowerCase().includes('risk') || 
-        m.metric.toLowerCase().includes('sdoh')
-      );
-    }
-    
-    // Fallback to first available metric
-    return distinctiveMetrics[0];
-  };
-
-  // Get appropriate icon for each strength
+  // Get appropriate icon for each advantage
   const getIcon = (index: number) => {
     const icons = [
       <Lightbulb className="h-5 w-5 text-blue-600" />,
@@ -217,41 +94,37 @@ const UniqueAdvantagesTab: React.FC<UniqueAdvantagesTabProps> = ({ archetypeData
     return icons[index % icons.length];
   };
 
-  // Process strengths data with improved metric matching
-  const processedStrengths = React.useMemo(() => {
-    const strengths = archetypeData?.strengths || [];
-    const distinctiveMetrics = archetypeData?.distinctive_metrics || [];
+  // Process unique advantages data - simple mapping from pre-structured data
+  const processedAdvantages = React.useMemo(() => {
+    const uniqueAdvantages = archetypeData?.unique_advantages;
     
-    if (!Array.isArray(strengths)) return [];
+    if (!uniqueAdvantages || !Array.isArray(uniqueAdvantages)) {
+      return [];
+    }
     
-    return strengths.map((strength: string, index: number) => {
-      const rawMetric = getRelevantMetricForStrength(strength, distinctiveMetrics);
-      const formattedMetric = rawMetric ? formatMetricDisplay(rawMetric) : null;
-      
-      return {
-        title: extractCardTitle(strength),
-        description: processStrengthText(strength),
-        supportingMetric: formattedMetric ? {
-          metric: rawMetric.metric,
-          value: formattedMetric.value,
-          difference: formattedMetric.difference,
-          significance: formattedMetric.significance
-        } : null,
-        icon: getIcon(index),
-        index
-      };
-    });
+    return uniqueAdvantages.map((advantage: any, index: number) => ({
+      title: advantage.title,
+      description: advantage.description,
+      supportingMetric: advantage.supporting_metric ? {
+        metric: advantage.supporting_metric.name,
+        value: advantage.supporting_metric.value,
+        difference: advantage.supporting_metric.difference,
+        significance: advantage.supporting_metric.significance
+      } : null,
+      icon: getIcon(index),
+      index
+    }));
   }, [archetypeData]);
 
-  console.log('[UniqueAdvantagesTab] Processed strengths:', processedStrengths);
+  console.log('[UniqueAdvantagesTab] Processed advantages:', processedAdvantages);
 
-  if (!archetypeData?.strengths || !Array.isArray(archetypeData.strengths)) {
+  if (!archetypeData?.unique_advantages || !Array.isArray(archetypeData.unique_advantages)) {
     return (
       <div className="py-12 text-center">
         <Lightbulb className="mx-auto h-12 w-12 text-gray-400 mb-4" />
         <h3 className="text-xl font-medium text-gray-800 mb-2">Unique Advantages Not Available</h3>
         <p className="text-gray-600 max-w-md mx-auto">
-          Strength data is not available for this archetype. This may be due to data processing or the archetype being newly added.
+          Advantage data is not available for this archetype. This may be due to data processing or the archetype being newly added.
         </p>
       </div>
     );
@@ -267,15 +140,15 @@ const UniqueAdvantagesTab: React.FC<UniqueAdvantagesTabProps> = ({ archetypeData
         </p>
       </div>
 
-      {/* Strengths Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {processedStrengths.map((strength, index) => (
-          <StrengthCard
+      {/* Advantages Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {processedAdvantages.map((advantage, index) => (
+          <AdvantageCard
             key={index}
-            title={strength.title}
-            description={strength.description}
-            supportingMetric={strength.supportingMetric}
-            icon={strength.icon}
+            title={advantage.title}
+            description={advantage.description}
+            supportingMetric={advantage.supportingMetric}
+            icon={advantage.icon}
             index={index}
           />
         ))}
@@ -284,7 +157,7 @@ const UniqueAdvantagesTab: React.FC<UniqueAdvantagesTabProps> = ({ archetypeData
       {/* Summary Footer */}
       <div className="mt-8 p-4 bg-gradient-to-r from-blue-50 to-green-50 rounded-lg border border-blue-100">
         <p className="text-sm text-gray-700 text-center">
-          <strong>Key Insight:</strong> These {processedStrengths.length} unique advantages represent the core differentiators 
+          <strong>Key Insight:</strong> These {processedAdvantages.length} unique advantages represent the core differentiators 
           that set this archetype apart from other healthcare approaches. Companies sharing these strengths 
           tend to achieve better outcomes in cost management, member satisfaction, and overall program effectiveness.
         </p>
