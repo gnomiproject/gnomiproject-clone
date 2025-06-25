@@ -1,3 +1,4 @@
+
 export type ArchetypeId = 'a1' | 'a2' | 'a3' | 'b1' | 'b2' | 'b3' | 'c1' | 'c2' | 'c3';
 export type FamilyId = 'a' | 'b' | 'c';
 
@@ -71,6 +72,18 @@ export interface BiggestChallenge {
   };
 }
 
+// Define best opportunity structure - identical to UniqueAdvantage and BiggestChallenge
+export interface BestOpportunity {
+  title: string;
+  description: string;
+  supporting_metric?: {
+    name: string;
+    value: string;
+    difference: string;
+    significance: string;
+  };
+}
+
 // Analysis table interfaces
 export interface ArchetypeDetailed extends Archetype {
   swot?: SwotAnalysis;
@@ -88,6 +101,7 @@ export interface ArchetypeDetailed extends Archetype {
   }>;
   unique_advantages?: UniqueAdvantage[];
   biggest_challenges?: BiggestChallenge[];
+  best_opportunities?: BestOpportunity[];
 }
 
 // Flexible interface for database raw data (allows Json types)
@@ -156,6 +170,7 @@ export interface ArchetypeDetailedDataRaw {
   disease_prevalence?: any;
   unique_advantages?: UniqueAdvantage[] | Json;
   biggest_challenges?: BiggestChallenge[] | Json;
+  best_opportunities?: BestOpportunity[] | Json;
   
   "Demo_Average Family Size"?: number;
   "Demo_Average Age"?: number;
@@ -249,6 +264,7 @@ export interface ArchetypeDetailedData {
   disease_prevalence?: any;
   unique_advantages?: UniqueAdvantage[];
   biggest_challenges?: BiggestChallenge[];
+  best_opportunities?: BestOpportunity[];
   
   "Demo_Average Family Size"?: number;
   "Demo_Average Age"?: number;

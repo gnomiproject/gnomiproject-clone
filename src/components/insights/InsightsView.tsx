@@ -8,6 +8,7 @@ import SwotTab from './tabs/SwotTab';
 import DiseaseAndCareTab from './tabs/DiseaseAndCareTab';
 import UniqueAdvantagesTab from './tabs/UniqueAdvantagesTab';
 import BiggestChallengesTab from './tabs/BiggestChallengesTab';
+import BestOpportunitiesTab from './tabs/BestOpportunitiesTab';
 import UnlockReportModal from './UnlockReportModal';
 import UnlockSuccessMessage from './UnlockSuccessMessage';
 import { useReportUnlock, UnlockFormData } from '@/hooks/useReportUnlock';
@@ -168,6 +169,7 @@ const InsightsView = ({
     hasDiseaseData: !!(reportData["Dise_Heart Disease Prevalence"] || reportData["Dise_Type 2 Diabetes Prevalence"]),
     hasStrengthsData: !!(reportData.strengths),
     hasChallengesData: !!(reportData.biggest_challenges),
+    hasOpportunitiesData: !!(reportData.best_opportunities),
     activeTab,
     isUnlocked
   });
@@ -196,6 +198,7 @@ const InsightsView = ({
 
   const hasStrengthsData = !!(reportData.strengths && Array.isArray(reportData.strengths));
   const hasChallengesData = !!(reportData.biggest_challenges && Array.isArray(reportData.biggest_challenges));
+  const hasOpportunitiesData = !!(reportData.best_opportunities && Array.isArray(reportData.best_opportunities));
 
   console.log('[InsightsView] Rendering with name resolution:', { 
     fromName: reportData?.name,
@@ -363,7 +366,7 @@ const InsightsView = ({
         )
         }
 
-        {/* NEW: Biggest Challenges Tab */}
+        {/* Biggest Challenges Tab */}
         {activeTab === 'biggest-challenges' && (
           <>
             {/* Show Biggest Challenges data regardless of unlock status if data exists */}
@@ -377,6 +380,26 @@ const InsightsView = ({
                 <h3 className="text-xl font-medium text-gray-800">Biggest Challenges data is being prepared</h3>
                 <p className="text-gray-600 mt-2 max-w-md mx-auto">
                   Your biggest challenges data is being processed and will be available soon. Please check back later.
+                </p>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* NEW: Best Opportunities Tab */}
+        {activeTab === 'best-opportunities' && (
+          <>
+            {/* Show Best Opportunities data regardless of unlock status if data exists */}
+            {hasOpportunitiesData ? (
+              <BestOpportunitiesTab archetypeData={reportData} />
+            ) : !isUnlocked ? (
+              <UnlockPlaceholder name={name} onUnlock={openUnlockModal} />
+            ) : (
+              <div className="py-12 text-center">
+                <Badge variant="outline" className="mb-2 bg-yellow-50 text-yellow-800 hover:bg-yellow-100">Data Availability</Badge>
+                <h3 className="text-xl font-medium text-gray-800">Best Opportunities data is being prepared</h3>
+                <p className="text-gray-600 mt-2 max-w-md mx-auto">
+                  Your best opportunities data is being processed and will be available soon. Please check back later.
                 </p>
               </div>
             )}
