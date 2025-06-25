@@ -44,13 +44,26 @@ export const formatNumber = (value: number, type: 'currency' | 'percent' | 'numb
 };
 
 /**
- * Format a percentage value
- * @param value The decimal value (e.g., 0.75 for 75%)
+ * Format a percentage value with automatic decimal detection
+ * @param value The value to format (can be decimal like 0.0271 or percentage like 90.94)
  * @param decimals The number of decimal places to include
  * @returns The formatted percentage as a string
  */
 export const formatPercent = (value: number, decimals: number = 1): string => {
-  return formatNumber(value, 'percent', decimals);
+  if (value === null || value === undefined) return 'N/A';
+  
+  // FIXED: Detect if value is a decimal that needs conversion to percentage
+  // Values less than 1 are likely decimals (e.g., 0.0271 = 2.71%)
+  // Values >= 1 are likely already percentages (e.g., 90.94 = 90.94%)
+  let adjustedValue = value;
+  
+  if (value > 0 && value < 1) {
+    // Convert decimal to percentage (0.0271 -> 2.71)
+    adjustedValue = value * 100;
+    console.log(`[formatPercent] Converting decimal ${value} to percentage ${adjustedValue}%`);
+  }
+  
+  return formatNumber(adjustedValue, 'percent', decimals);
 };
 
 /**
