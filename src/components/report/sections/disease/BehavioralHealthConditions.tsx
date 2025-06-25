@@ -19,6 +19,12 @@ const BehavioralHealthConditions = ({ reportData, averageData }: BehavioralHealt
     { id: 'Dise_Substance Use Disorder Prevalence', label: 'Substance Use Disorders' },
   ];
 
+  // Format difference as percentage points
+  const formatDifference = (diff: number): string => {
+    const sign = diff > 0 ? '+' : '';
+    return `${sign}${diff.toFixed(1)} pp`;
+  };
+
   return (
     <Card>
       <CardHeader className="border-b border-gray-100">
@@ -49,8 +55,12 @@ const BehavioralHealthConditions = ({ reportData, averageData }: BehavioralHealt
               {conditions.map(condition => {
                 const value = reportData[condition.id] || 0;
                 const avgValue = averageData && averageData[condition.id] ? averageData[condition.id] : 0;
+                
+                // Calculate percentage point difference
                 const diff = value - avgValue;
-                const diffClass = diff > 0 ? "text-amber-600" : diff < 0 ? "text-green-600" : "text-gray-600";
+                
+                // Color coding: lower prevalence is better (green), higher is concerning (amber/red)
+                const diffClass = diff < 0 ? "text-green-600" : diff > 0 ? "text-amber-600" : "text-gray-600";
                 
                 return (
                   <tr key={condition.id} className="border-b border-gray-100">
@@ -58,7 +68,7 @@ const BehavioralHealthConditions = ({ reportData, averageData }: BehavioralHealt
                     <td className="text-right py-2 font-semibold">{formatPercent(value)}</td>
                     <td className="text-right py-2">{formatPercent(avgValue)}</td>
                     <td className={`text-right py-2 ${diffClass}`}>
-                      {diff > 0 ? '+' : ''}{formatPercent(diff)}
+                      {formatDifference(diff)}
                     </td>
                   </tr>
                 );
