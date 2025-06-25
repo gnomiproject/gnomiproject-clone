@@ -1,21 +1,18 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+
+import React, { useEffect, useState } from 'react';
 import { ArchetypeId, ArchetypeDetailedData } from '@/types/archetype';
 import ArchetypeNavTabs from './components/ArchetypeNavTabs';
 import ArchetypeHeader from './components/ArchetypeHeader';
 import OverviewTab from './tabs/OverviewTab';
-import MetricsTab from './tabs/MetricsTab';
-import UniqueAdvantagesTab from './tabs/UniqueAdvantagesTab';
-import BiggestChallengesTab from './tabs/BiggestChallengesTab';
-import BestOpportunitiesTab from './tabs/BestOpportunitiesTab';
-import PotentialPitfallsTab from './tabs/PotentialPitfallsTab';
 import UnlockReportModal from './UnlockReportModal';
 import UnlockSuccessMessage from './UnlockSuccessMessage';
 import { useReportUnlock, UnlockFormData } from '@/hooks/useReportUnlock';
-import { AlertCircle, Lock } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useArchetypeDetails } from '@/hooks/archetype/useArchetypeDetails';
-import { Badge } from '@/components/ui/badge';
 import BetaBadge from '@/components/shared/BetaBadge';
+import { useArchetypeData } from './hooks/useArchetypeData';
+import { useTabDataAvailability } from './hooks/useTabDataAvailability';
+import LoadingState from './components/LoadingState';
+import UnlockCallToAction from './components/UnlockCallToAction';
+import TabContentRenderer from './components/TabContentRenderer';
 
 interface ArchetypeReportProps {
   archetypeId: ArchetypeId;
@@ -34,17 +31,9 @@ const InsightsView = ({
   hideRequestSection = false,
   isPreUnlocked = false
 }: ArchetypeReportProps) => {
-  // Always define hooks at the top level
-  const [activeTab, setActiveTab] = React.useState('overview');
-  const processedRef = useRef(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [reportData, setReportData] = useState<ArchetypeDetailedData>(initialReportData);
+  const [activeTab, setActiveTab] = useState('overview');
   
-  // Refetch data capability
-  const { data: refreshedData, isLoading: refreshLoading, error: refreshError, refetch } = 
-    useArchetypeDetails(archetypeId);
-  
-  // Initialize unlock status hook - pass isPreUnlocked to override initial state
+  // Initialize unlock status hook
   const {
     isUnlocked: hookUnlocked,
     isSubmitting,
@@ -59,7 +48,23 @@ const InsightsView = ({
   // Combine the pre-unlocked state with the hook state
   const isUnlocked = isPreUnlocked || hookUnlocked;
   
-  // For debugging
+  // Use custom hooks for data management
+  const {
+    reportData,
+    isLoading,
+    setIsLoading,
+    refetch,
+    processedAssessmentResult,
+    name,
+    shortDescription,
+    familyId,
+    familyName,
+    familyColor
+  } = useArchetypeData(archetypeId, initialReportData, assessmentResult, isUnlocked);
+
+  const tabDataAvailability = useTabDataAvailability(reportData);
+
+  // Debug logging
   useEffect(() => {
     console.log("[InsightsView] Unlock status:", { 
       isPreUnlocked, 
@@ -68,12 +73,12 @@ const InsightsView = ({
     });
   }, [isPreUnlocked, hookUnlocked, isUnlocked]);
   
+  // Handle data refresh when unlocked
   useEffect(() => {
     if (isUnlocked) {
       console.log("[InsightsView] Report has been unlocked, refreshing data");
       setIsLoading(true);
       
-      // First try to refresh data through the hook
       refreshData(archetypeId)
         .then(success => {
           if (success) {
@@ -81,7 +86,6 @@ const InsightsView = ({
             return;
           }
           
-          // If that fails, use the standard refetch
           console.log("[InsightsView] Fallback to standard refetch");
           return refetch();
         })
@@ -89,54 +93,26 @@ const InsightsView = ({
           setIsLoading(false);
         });
     }
-  }, [isUnlocked, archetypeId, refreshData, refetch]);
-  
+  }, [isUnlocked, archetypeId, refreshData, refetch, setIsLoading]);
+
+  // Handle redirect for removed tabs
   useEffect(() => {
-    if (refreshedData && !refreshLoading) {
-      console.log("[InsightsView] Received refreshed data", {
-        isUnlocked,
-        archetypeName: refreshedData.name || refreshedData.archetype_name
-      });
-      setReportData(refreshedData);
+    if (activeTab === 'swot' || activeTab === 'disease-and-care' || activeTab === 'metrics') {
+      setActiveTab('overview');
     }
-  }, [refreshedData, refreshLoading, isUnlocked]);
-  
-  const processedAssessmentResult = useMemo(() => {
-    // Skip if we've already processed this result for this archetype
-    if (processedRef.current) {
-      return assessmentResult;
-    }
-    
-    // Only log once when the component mounts or when assessment data changes
-    console.log('[InsightsView] Using assessment result data', {
-      hasAssessmentResult: !!assessmentResult,
-      archetypeId,
-      exactEmployeeCount: assessmentResult?.exactData?.employeeCount
+  }, [activeTab]);
+
+  // Handle form submission
+  const handleUnlockFormSubmit = async (formData: UnlockFormData) => {
+    console.log('[InsightsView] Submitting unlock form with data:', { 
+      ...formData, 
+      assessmentAnswers: assessmentAnswers ? '[data present]' : '[no data]' 
     });
-    
-    processedRef.current = true;
-    
-    // If assessment data exists but exactData doesn't, add it
-    if (assessmentResult && !assessmentResult.exactData) {
-      const storedEmployeeCount = sessionStorage.getItem('healthcareArchetypeExactEmployeeCount');
-      const result = {...assessmentResult};
-      result.exactData = {
-        employeeCount: storedEmployeeCount ? Number(storedEmployeeCount) : null
-      };
-      return result;
-    }
-    return assessmentResult;
-  }, [assessmentResult, archetypeId]);
+    return submitUnlockForm(formData);
+  };
 
-  useEffect(() => {
-    // Reset refs when archetypeId changes
-    return () => {
-      processedRef.current = false;
-    };
-  }, [archetypeId]);
-
+  // Error state
   if (!reportData) {
-    // Return a minimal error state to avoid cascading failures
     return (
       <div className="bg-white rounded-lg shadow-sm p-6 text-center">
         <h3 className="text-lg font-medium text-red-800 mb-2">Data Loading Issue</h3>
@@ -149,62 +125,6 @@ const InsightsView = ({
       </div>
     );
   }
-
-  // Enhanced logging for data availability
-  console.log('[InsightsView] Available data for tab rendering:', {
-    hasMetricsData: !!(reportData.distinctive_metrics || reportData.detailed_metrics),
-    hasStrengthsData: !!(reportData.strengths),
-    hasChallengesData: !!(reportData.biggest_challenges),
-    hasOpportunitiesData: !!(reportData.best_opportunities),
-    hasPitfallsData: !!(reportData.potential_pitfalls),
-    activeTab,
-    isUnlocked
-  });
-
-  const name = reportData?.name || reportData?.archetype_name || reportData?.id?.toUpperCase() || 'Unnamed Archetype';
-  const shortDescription = reportData?.short_description || '';
-  const familyId = reportData?.familyId || reportData?.family_id;
-  const familyName = reportData?.familyName || reportData?.family_name || '';
-  // Fix: Use hexColor first, then fall back to color for compatibility with database sources
-  const familyColor = reportData?.hexColor || reportData?.color || (reportData as any)?.hex_color || '#4B5563';
-
-  // Debug data availability - better checks for all possible object paths
-  const hasMetricsData = !!(
-    reportData.distinctive_metrics || 
-    reportData.detailed_metrics || 
-    (reportData as any).Cost_Medical_Paid_Amount_PEPY
-  );
-
-  const hasStrengthsData = !!(reportData.strengths && Array.isArray(reportData.strengths));
-  const hasChallengesData = !!(reportData.biggest_challenges && Array.isArray(reportData.biggest_challenges));
-  const hasOpportunitiesData = !!(reportData.best_opportunities && Array.isArray(reportData.best_opportunities));
-  const hasPitfallsData = !!(reportData.potential_pitfalls && Array.isArray(reportData.potential_pitfalls));
-
-  console.log('[InsightsView] Rendering with name resolution:', { 
-    fromName: reportData?.name,
-    fromArchetype_name: reportData?.archetype_name,
-    fromId: reportData?.id,
-    finalName: name,
-    familyName, 
-    familyId, 
-    familyColor
-  });
-
-  // Handle form submission with proper typing
-  const handleUnlockFormSubmit = async (formData: UnlockFormData) => {
-    console.log('[InsightsView] Submitting unlock form with data:', { 
-      ...formData, 
-      assessmentAnswers: assessmentAnswers ? '[data present]' : '[no data]' 
-    });
-    return submitUnlockForm(formData);
-  };
-
-  // Handle redirect for removed tabs - updated to include 'metrics'
-  useEffect(() => {
-    if (activeTab === 'swot' || activeTab === 'disease-and-care' || activeTab === 'metrics') {
-      setActiveTab('overview');
-    }
-  }, [activeTab]);
 
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden relative">
@@ -234,18 +154,14 @@ const InsightsView = ({
       
       <div className="p-4 md:p-6">
         {/* Show loading state while refreshing data */}
-        {isLoading && (
-          <div className="mb-4 p-3 bg-blue-50 border border-blue-100 rounded-md flex items-center">
-            <div className="mr-3 h-5 w-5 rounded-full border-2 border-blue-600 border-t-transparent animate-spin"></div>
-            <p className="text-blue-800">Loading your unlocked content...</p>
-          </div>
-        )}
+        {isLoading && <LoadingState />}
       
         {/* Only show success message on overview tab */}
         {activeTab === 'overview' && isUnlocked && !isLoading && (
           <UnlockSuccessMessage archetypeName={name} />
         )}
         
+        {/* Overview Tab */}
         {activeTab === 'overview' && (
           <div>
             <OverviewTab 
@@ -255,108 +171,21 @@ const InsightsView = ({
             
             {/* Unlock call-to-action when not unlocked yet */}
             {!isUnlocked && (
-              <div className="mt-8 p-4 border border-blue-100 bg-blue-50 rounded-lg flex flex-col md:flex-row md:items-center gap-4">
-                <div className="flex-1">
-                  <h3 className="text-blue-800 font-medium flex items-center gap-2">
-                    <AlertCircle className="w-5 h-5" />
-                    Unlock your complete {name} archetype insights
-                  </h3>
-                  <p className="text-blue-700 mt-1">
-                    Get access to detailed metrics and strategic insights by providing a few details.
-                  </p>
-                </div>
-                <Button 
-                  onClick={openUnlockModal}
-                  className="bg-blue-600 hover:bg-blue-700 transition-all duration-200 hover:scale-105"
-                >
-                  Unlock Full Report
-                </Button>
-              </div>
+              <UnlockCallToAction name={name} onUnlock={openUnlockModal} />
             )}
           </div>
         )}
-        
-        {/* Removed metrics tab handling completely */}
 
-        {
-        activeTab === 'unique-advantages' && (
-          <>
-            {/* Show Unique Advantages data regardless of unlock status if data exists */}
-            {hasStrengthsData ? (
-              <UniqueAdvantagesTab archetypeData={reportData} />
-            ) : !isUnlocked ? (
-              <UnlockPlaceholder name={name} onUnlock={openUnlockModal} />
-            ) : (
-              <div className="py-12 text-center">
-                <Badge variant="outline" className="mb-2 bg-yellow-50 text-yellow-800 hover:bg-yellow-100">Data Availability</Badge>
-                <h3 className="text-xl font-medium text-gray-800">Unique Advantages data is being prepared</h3>
-                <p className="text-gray-600 mt-2 max-w-md mx-auto">
-                  Your unique advantages data is being processed and will be available soon. Please check back later.
-                </p>
-              </div>
-            )}
-          </>
-        )
-        }
-
-        {/* Biggest Challenges Tab */}
-        {activeTab === 'biggest-challenges' && (
-          <>
-            {/* Show Biggest Challenges data regardless of unlock status if data exists */}
-            {hasChallengesData ? (
-              <BiggestChallengesTab archetypeData={reportData} />
-            ) : !isUnlocked ? (
-              <UnlockPlaceholder name={name} onUnlock={openUnlockModal} />
-            ) : (
-              <div className="py-12 text-center">
-                <Badge variant="outline" className="mb-2 bg-yellow-50 text-yellow-800 hover:bg-yellow-100">Data Availability</Badge>
-                <h3 className="text-xl font-medium text-gray-800">Biggest Challenges data is being prepared</h3>
-                <p className="text-gray-600 mt-2 max-w-md mx-auto">
-                  Your biggest challenges data is being processed and will be available soon. Please check back later.
-                </p>
-              </div>
-            )}
-          </>
-        )}
-
-        {/* Best Opportunities Tab */}
-        {activeTab === 'best-opportunities' && (
-          <>
-            {/* Show Best Opportunities data regardless of unlock status if data exists */}
-            {hasOpportunitiesData ? (
-              <BestOpportunitiesTab archetypeData={reportData} />
-            ) : !isUnlocked ? (
-              <UnlockPlaceholder name={name} onUnlock={openUnlockModal} />
-            ) : (
-              <div className="py-12 text-center">
-                <Badge variant="outline" className="mb-2 bg-yellow-50 text-yellow-800 hover:bg-yellow-100">Data Availability</Badge>
-                <h3 className="text-xl font-medium text-gray-800">Best Opportunities data is being prepared</h3>
-                <p className="text-gray-600 mt-2 max-w-md mx-auto">
-                  Your best opportunities data is being processed and will be available soon. Please check back later.
-                </p>
-              </div>
-            )}
-          </>
-        )}
-
-        {/* Potential Pitfalls Tab */}
-        {activeTab === 'potential-pitfalls' && (
-          <>
-            {/* Show Potential Pitfalls data regardless of unlock status if data exists */}
-            {hasPitfallsData ? (
-              <PotentialPitfallsTab archetypeData={reportData} />
-            ) : !isUnlocked ? (
-              <UnlockPlaceholder name={name} onUnlock={openUnlockModal} />
-            ) : (
-              <div className="py-12 text-center">
-                <Badge variant="outline" className="mb-2 bg-yellow-50 text-yellow-800 hover:bg-yellow-100">Data Availability</Badge>
-                <h3 className="text-xl font-medium text-gray-800">Potential Pitfalls data is being prepared</h3>
-                <p className="text-gray-600 mt-2 max-w-md mx-auto">
-                  Your potential pitfalls data is being processed and will be available soon. Please check back later.
-                </p>
-              </div>
-            )}
-          </>
+        {/* Render other tabs using the centralized renderer */}
+        {activeTab !== 'overview' && (
+          <TabContentRenderer
+            activeTab={activeTab}
+            reportData={reportData}
+            isUnlocked={isUnlocked}
+            name={name}
+            onUnlock={openUnlockModal}
+            {...tabDataAvailability}
+          />
         )}
       </div>
       
@@ -374,27 +203,6 @@ const InsightsView = ({
     </div>
   );
 };
-
-// Placeholder component for locked tabs
-const UnlockPlaceholder = ({ name, onUnlock }: { name: string, onUnlock: () => void }) => (
-  <div className="py-16 px-4 text-center">
-    <div className="relative inline-block mb-6">
-      <div className="absolute w-16 h-16 bg-blue-100 rounded-full left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 animate-pulse"></div>
-      <Lock className="mx-auto h-12 w-12 text-blue-600 relative z-10" />
-    </div>
-    <h3 className="text-xl font-medium text-gray-800 mb-2">Premium Content Locked</h3>
-    <p className="text-gray-600 max-w-md mx-auto mb-6">
-      Unlock access to all detailed insights for your {name} archetype by providing a few details. No credit card required.
-    </p>
-    <Button 
-      onClick={onUnlock}
-      size="lg"
-      className="bg-blue-600 hover:bg-blue-700 transition-all duration-200 hover:scale-105"
-    >
-      Unlock Full Report
-    </Button>
-  </div>
-);
 
 // Use React.memo with a custom equality function to prevent unnecessary re-renders
 export default React.memo(InsightsView, (prevProps, nextProps) => {
