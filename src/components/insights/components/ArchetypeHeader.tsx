@@ -12,6 +12,7 @@ interface ArchetypeHeaderProps {
   familyName: string;
   familyColor: string;
   archetypeHexColor: string;
+  archetypeId?: string;
   dataSource?: string;
   gnomeImage?: string;
 }
@@ -23,6 +24,7 @@ const ArchetypeHeader = ({
   familyName,
   familyColor,
   archetypeHexColor,
+  archetypeId,
   dataSource,
   gnomeImage = 'chart'
 }: ArchetypeHeaderProps) => {
@@ -51,7 +53,21 @@ const ArchetypeHeader = ({
               </Badge>
             </div>
             
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900">{name}</h1>
+            <div className="flex items-center gap-3 flex-wrap">
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-900">{name}</h1>
+              {archetypeId && (
+                <Badge 
+                  className="bg-opacity-10 border border-opacity-30 px-3 py-1 text-sm font-medium"
+                  style={{ 
+                    backgroundColor: `${archetypeHexColor}20`,
+                    color: archetypeHexColor,
+                    borderColor: `${archetypeHexColor}50`
+                  }}
+                >
+                  {archetypeId.toLowerCase()}
+                </Badge>
+              )}
+            </div>
             
             <p className="text-xl text-gray-700 leading-relaxed">
               {description}

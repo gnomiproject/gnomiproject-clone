@@ -215,6 +215,7 @@ const InsightsView = ({
         familyName={familyName}
         familyColor={familyColor}
         archetypeHexColor={familyColor}
+        archetypeId={archetypeId}
         gnomeImage="chart"
       />
       
