@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -29,7 +28,6 @@ const StrengthCard: React.FC<StrengthCardProps> = ({
   icon, 
   index 
 }) => {
-  // Generate different colors for variety
   const colors = [
     'from-blue-50 to-blue-100 border-blue-200',
     'from-green-50 to-green-100 border-green-200',
@@ -75,42 +73,32 @@ const StrengthCard: React.FC<StrengthCardProps> = ({
 const UniqueAdvantagesTab: React.FC<UniqueAdvantagesTabProps> = ({ archetypeData }) => {
   // Extract improved title from strength text
   const extractCardTitle = (strength: string): string => {
-    // If strength is already a good title (< 50 chars), use first part
     if (strength.length < 50) {
-      return strength.split('(')[0].trim(); // Remove parenthetical info
+      return strength.split('(')[0].trim();
     }
     
-    // Extract key concept for longer descriptions
     const words = strength.split(' ');
     if (words.length <= 6) {
       return strength;
     }
     
-    // Take first meaningful phrase
     return words.slice(0, 5).join(' ') + '...';
   };
 
-  // Enhanced strength description with archetype context
-  const enhanceStrengthDescription = (strength: string, archetype_name: string): string => {
-    // If already has context, return as-is
-    if (strength.includes('Companies') || strength.includes('Organizations') || 
-        strength.includes('archetype') || strength.length > 100) {
+  // Simplified strength text processing - no generic fluff
+  const processStrengthText = (strength: string): string => {
+    // Clean up the text but don't add generic fluff
+    if (strength.includes('vs average') || strength.includes('compared to')) {
+      // It's already contextual, use as-is
       return strength;
     }
     
-    // Add contextual framing
-    const frames = [
-      `Companies in this archetype excel at ${strength.toLowerCase()}.`,
-      `Organizations like yours typically demonstrate ${strength.toLowerCase()}.`,
-      `This archetype is characterized by ${strength.toLowerCase()}.`
-    ];
-    
-    // Choose frame based on strength content
-    if (strength.includes('Lower') || strength.includes('Higher')) {
-      return `${frames[1]} This gives them a competitive advantage in healthcare management.`;
-    } else {
-      return `${frames[0]} This strength helps them achieve better health outcomes and cost efficiency.`;
+    // Just add minimal framing if needed
+    if (!strength.includes('Companies') && !strength.includes('Organizations')) {
+      return `Organizations in this archetype demonstrate ${strength.toLowerCase()}.`;
     }
+    
+    return strength;
   };
 
   // Format metric display with proper value types
@@ -118,7 +106,6 @@ const UniqueAdvantagesTab: React.FC<UniqueAdvantagesTabProps> = ({ archetypeData
     const value = parseFloat(metric.archetype_value || metric.difference || 0);
     const difference = parseFloat(metric.difference || 0);
     
-    // Format based on metric type
     let formattedValue;
     if (metric.metric.includes('Amount') || metric.metric.includes('Cost')) {
       formattedValue = `$${Math.round(value).toLocaleString()}`;
@@ -130,7 +117,6 @@ const UniqueAdvantagesTab: React.FC<UniqueAdvantagesTabProps> = ({ archetypeData
       formattedValue = `${Math.round(value)}%`;
     }
     
-    // Format difference
     const diffSymbol = difference > 0 ? '+' : '';
     const diffFormatted = `${diffSymbol}${difference}% vs avg`;
     
@@ -147,7 +133,6 @@ const UniqueAdvantagesTab: React.FC<UniqueAdvantagesTabProps> = ({ archetypeData
     
     const strengthLower = strength.toLowerCase();
     
-    // Improved keyword matching logic
     const keywordMatches: { [key: string]: string[] } = {
       'cost': ['Cost', 'Amount', 'Savings'],
       'visit': ['Visits', 'PCP', 'Specialist'],
@@ -158,7 +143,6 @@ const UniqueAdvantagesTab: React.FC<UniqueAdvantagesTabProps> = ({ archetypeData
       'risk': ['Risk', 'SDOH']
     };
     
-    // Find matching metric by keywords
     for (const [strengthKey, metricKeys] of Object.entries(keywordMatches)) {
       if (strengthLower.includes(strengthKey)) {
         const match = distinctiveMetrics.find(metric => 
@@ -168,7 +152,6 @@ const UniqueAdvantagesTab: React.FC<UniqueAdvantagesTabProps> = ({ archetypeData
       }
     }
     
-    // Fallback: Use different metric for each card (avoid duplicates)
     return distinctiveMetrics[cardIndex % distinctiveMetrics.length];
   };
 
@@ -188,7 +171,6 @@ const UniqueAdvantagesTab: React.FC<UniqueAdvantagesTabProps> = ({ archetypeData
   const processedStrengths = React.useMemo(() => {
     const strengths = archetypeData?.strengths || [];
     const distinctiveMetrics = archetypeData?.distinctive_metrics || [];
-    const archetypeName = archetypeData?.name || archetypeData?.archetype_name || '';
     
     if (!Array.isArray(strengths)) return [];
     
@@ -198,7 +180,7 @@ const UniqueAdvantagesTab: React.FC<UniqueAdvantagesTabProps> = ({ archetypeData
       
       return {
         title: extractCardTitle(strength),
-        description: enhanceStrengthDescription(strength, archetypeName),
+        description: processStrengthText(strength),
         supportingMetric: formattedMetric ? {
           metric: rawMetric.metric,
           value: formattedMetric.value,
