@@ -1,3 +1,4 @@
+
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ArchetypeId, ArchetypeDetailedData } from '@/types/archetype';
 import ArchetypeNavTabs from './components/ArchetypeNavTabs';
@@ -9,6 +10,7 @@ import DiseaseAndCareTab from './tabs/DiseaseAndCareTab';
 import UniqueAdvantagesTab from './tabs/UniqueAdvantagesTab';
 import BiggestChallengesTab from './tabs/BiggestChallengesTab';
 import BestOpportunitiesTab from './tabs/BestOpportunitiesTab';
+import PotentialPitfallsTab from './tabs/PotentialPitfallsTab';
 import UnlockReportModal from './UnlockReportModal';
 import UnlockSuccessMessage from './UnlockSuccessMessage';
 import { useReportUnlock, UnlockFormData } from '@/hooks/useReportUnlock';
@@ -170,6 +172,7 @@ const InsightsView = ({
     hasStrengthsData: !!(reportData.strengths),
     hasChallengesData: !!(reportData.biggest_challenges),
     hasOpportunitiesData: !!(reportData.best_opportunities),
+    hasPitfallsData: !!(reportData.potential_pitfalls),
     activeTab,
     isUnlocked
   });
@@ -199,6 +202,7 @@ const InsightsView = ({
   const hasStrengthsData = !!(reportData.strengths && Array.isArray(reportData.strengths));
   const hasChallengesData = !!(reportData.biggest_challenges && Array.isArray(reportData.biggest_challenges));
   const hasOpportunitiesData = !!(reportData.best_opportunities && Array.isArray(reportData.best_opportunities));
+  const hasPitfallsData = !!(reportData.potential_pitfalls && Array.isArray(reportData.potential_pitfalls));
 
   console.log('[InsightsView] Rendering with name resolution:', { 
     fromName: reportData?.name,
@@ -386,7 +390,7 @@ const InsightsView = ({
           </>
         )}
 
-        {/* NEW: Best Opportunities Tab */}
+        {/* Best Opportunities Tab */}
         {activeTab === 'best-opportunities' && (
           <>
             {/* Show Best Opportunities data regardless of unlock status if data exists */}
@@ -400,6 +404,26 @@ const InsightsView = ({
                 <h3 className="text-xl font-medium text-gray-800">Best Opportunities data is being prepared</h3>
                 <p className="text-gray-600 mt-2 max-w-md mx-auto">
                   Your best opportunities data is being processed and will be available soon. Please check back later.
+                </p>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* NEW: Potential Pitfalls Tab */}
+        {activeTab === 'potential-pitfalls' && (
+          <>
+            {/* Show Potential Pitfalls data regardless of unlock status if data exists */}
+            {hasPitfallsData ? (
+              <PotentialPitfallsTab archetypeData={reportData} />
+            ) : !isUnlocked ? (
+              <UnlockPlaceholder name={name} onUnlock={openUnlockModal} />
+            ) : (
+              <div className="py-12 text-center">
+                <Badge variant="outline" className="mb-2 bg-yellow-50 text-yellow-800 hover:bg-yellow-100">Data Availability</Badge>
+                <h3 className="text-xl font-medium text-gray-800">Potential Pitfalls data is being prepared</h3>
+                <p className="text-gray-600 mt-2 max-w-md mx-auto">
+                  Your potential pitfalls data is being processed and will be available soon. Please check back later.
                 </p>
               </div>
             )}

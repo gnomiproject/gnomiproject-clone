@@ -1,4 +1,3 @@
-
 export type ArchetypeId = 'a1' | 'a2' | 'a3' | 'b1' | 'b2' | 'b3' | 'c1' | 'c2' | 'c3';
 export type FamilyId = 'a' | 'b' | 'c';
 
@@ -84,6 +83,18 @@ export interface BestOpportunity {
   };
 }
 
+// Define potential pitfall structure - identical to other insight structures
+export interface PotentialPitfall {
+  title: string;
+  description: string;
+  supporting_metric?: {
+    name: string;
+    value: string;
+    difference: string;
+    significance: string;
+  };
+}
+
 // Analysis table interfaces
 export interface ArchetypeDetailed extends Archetype {
   swot?: SwotAnalysis;
@@ -102,6 +113,7 @@ export interface ArchetypeDetailed extends Archetype {
   unique_advantages?: UniqueAdvantage[];
   biggest_challenges?: BiggestChallenge[];
   best_opportunities?: BestOpportunity[];
+  potential_pitfalls?: PotentialPitfall[];
 }
 
 // Flexible interface for database raw data (allows Json types)
@@ -171,6 +183,7 @@ export interface ArchetypeDetailedDataRaw {
   unique_advantages?: UniqueAdvantage[] | Json;
   biggest_challenges?: BiggestChallenge[] | Json;
   best_opportunities?: BestOpportunity[] | Json;
+  potential_pitfalls?: PotentialPitfall[] | Json;
   
   "Demo_Average Family Size"?: number;
   "Demo_Average Age"?: number;
@@ -265,6 +278,7 @@ export interface ArchetypeDetailedData {
   unique_advantages?: UniqueAdvantage[];
   biggest_challenges?: BiggestChallenge[];
   best_opportunities?: BestOpportunity[];
+  potential_pitfalls?: PotentialPitfall[];
   
   "Demo_Average Family Size"?: number;
   "Demo_Average Age"?: number;
