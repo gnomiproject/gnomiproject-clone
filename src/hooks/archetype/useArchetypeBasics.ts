@@ -3,11 +3,33 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Archetype, ArchetypeFamily, ArchetypeId, FamilyId } from '@/types/archetype';
 
+// Global request deduplication map to prevent duplicate requests
+const pendingRequests = new Map<string, Promise<any>>();
+
+// Helper function to create deduplicated requests
+const createDeduplicated = <T>(key: string, fetcher: () => Promise<T>): Promise<T> => {
+  if (pendingRequests.has(key)) {
+    console.log(`[useArchetypeBasics] Deduplicating request for: ${key}`);
+    return pendingRequests.get(key);
+  }
+  
+  const promise = fetcher().finally(() => {
+    pendingRequests.delete(key);
+  });
+  
+  pendingRequests.set(key, promise);
+  return promise;
+};
+
 export const useArchetypeBasics = () => {
-  // Use consistent query keys across the app
+  // Consistent query keys - use the same keys across the entire app
+  const ARCHETYPE_QUERY_KEY = ['archetypes'] as const;
+  const FAMILY_QUERY_KEY = ['families'] as const;
+  
+  // Use React Query with enhanced deduplication
   const archetypesQuery = useQuery({
-    queryKey: ['archetypes'], // Simplified key
-    queryFn: async () => {
+    queryKey: ARCHETYPE_QUERY_KEY,
+    queryFn: () => createDeduplicated('archetypes', async () => {
       console.log('[useArchetypeBasics] Fetching archetypes...');
       
       const { data: archetypes, error } = await supabase
@@ -37,20 +59,19 @@ export const useArchetypeBasics = () => {
           : [],
         industries: archetype.industries
       }));
-    },
-    staleTime: 30 * 60 * 1000, // 30 minutes - much longer stale time
-    gcTime: 60 * 60 * 1000,    // 1 hour - longer cache time
+    }),
+    staleTime: Infinity, // Never consider stale in development
+    gcTime: Infinity,    // Keep in cache indefinitely
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
     refetchOnMount: false,
     retry: 0,
-    // Force request deduplication
     networkMode: 'online',
   });
 
   const familiesQuery = useQuery({
-    queryKey: ['families'], // Simplified key
-    queryFn: async () => {
+    queryKey: FAMILY_QUERY_KEY,
+    queryFn: () => createDeduplicated('families', async () => {
       console.log('[useArchetypeBasics] Fetching families...');
       
       const { data: families, error } = await supabase
@@ -79,9 +100,9 @@ export const useArchetypeBasics = () => {
           ? family.common_traits.map(item => String(item))
           : []
       }));
-    },
-    staleTime: 30 * 60 * 1000, // 30 minutes - much longer stale time
-    gcTime: 60 * 60 * 1000,    // 1 hour - longer cache time
+    }),
+    staleTime: Infinity, // Never consider stale in development
+    gcTime: Infinity,    // Keep in cache indefinitely
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
     refetchOnMount: false,

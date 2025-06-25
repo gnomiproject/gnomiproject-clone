@@ -22,6 +22,9 @@ const ApiRequestMonitor: React.FC = () => {
     const requestCache = new Map();
     let requestCount = 0;
     
+    // Enhanced deduplication with stricter timing
+    const DEDUP_WINDOW = 1000; // 1 second window for deduplication
+    
     window.fetch = async (...args) => {
       const startTime = Date.now();
       const url = args[0] as string;
@@ -33,14 +36,15 @@ const ApiRequestMonitor: React.FC = () => {
         const method = (args[1]?.method || 'GET').toUpperCase();
         const requestKey = `${method}:${cleanUrl}`;
         
-        // Enhanced duplicate detection
+        // Stricter duplicate detection with shorter window
         const now = Date.now();
         const recentRequests = requestCache.get(requestKey) || [];
-        const recentRequestsFiltered = recentRequests.filter((time: number) => now - time < 5000); // 5 second window
+        const recentRequestsFiltered = recentRequests.filter((time: number) => now - time < DEDUP_WINDOW);
         
         if (recentRequestsFiltered.length > 0) {
           setDuplicateCount(prev => prev + 1);
-          console.warn(`[API Monitor] Duplicate request #${requestCount}: ${requestKey}`);
+          console.warn(`[API Monitor] 🚨 DUPLICATE REQUEST #${requestCount}: ${requestKey} (within ${DEDUP_WINDOW}ms)`);
+          console.warn(`[API Monitor] Previous requests:`, recentRequestsFiltered.map(t => new Date(t).toISOString()));
         }
         
         recentRequestsFiltered.push(now);
@@ -60,7 +64,7 @@ const ApiRequestMonitor: React.FC = () => {
             const existingIndex = prev.findIndex(r => 
               r.url === logEntry.url && 
               r.method === logEntry.method &&
-              Math.abs(r.timestamp - logEntry.timestamp) < 1000
+              Math.abs(r.timestamp - logEntry.timestamp) < DEDUP_WINDOW
             );
             
             if (existingIndex >= 0) {
@@ -69,9 +73,9 @@ const ApiRequestMonitor: React.FC = () => {
                 ...updated[existingIndex],
                 count: (updated[existingIndex].count || 1) + 1
               };
-              return updated.slice(-10); // Keep last 10 requests
+              return updated.slice(-10);
             } else {
-              return [...prev.slice(-9), logEntry]; // Keep last 10 requests
+              return [...prev.slice(-9), logEntry];
             }
           });
           
@@ -100,7 +104,7 @@ const ApiRequestMonitor: React.FC = () => {
         <button
           onClick={() => setIsVisible(!isVisible)}
           className={`px-3 py-2 rounded-md text-sm shadow-lg text-white transition-colors ${
-            duplicateCount > 0 ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'
+            duplicateCount > 0 ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'
           }`}
         >
           API ({requests.length}) {duplicateCount > 0 && `⚠️ ${duplicateCount}`}
@@ -113,7 +117,7 @@ const ApiRequestMonitor: React.FC = () => {
             <h3 className="font-medium text-sm">
               API Request Monitor
               {duplicateCount > 0 && (
-                <span className="ml-2 text-red-600 text-xs">
+                <span className="ml-2 text-red-600 text-xs font-bold">
                   ({duplicateCount} duplicates detected)
                 </span>
               )}
@@ -138,7 +142,9 @@ const ApiRequestMonitor: React.FC = () => {
                     <span className="font-mono text-blue-600">
                       {request.method}
                       {request.count && request.count > 1 && (
-                        <span className="ml-1 text-red-600 font-bold">×{request.count}</span>
+                        <span className="ml-1 text-red-600 font-bold bg-red-100 px-1 rounded">
+                          ×{request.count} DUPE
+                        </span>
                       )}
                     </span>
                     <span className="text-gray-500">

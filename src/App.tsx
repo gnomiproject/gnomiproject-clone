@@ -19,20 +19,23 @@ import NotFound from "./pages/NotFound";
 import FixedHeader from "./components/layout/FixedHeader";
 import ErrorBoundary from "./components/shared/ErrorBoundary";
 
-// Optimized QueryClient with better deduplication
+// Enhanced QueryClient with maximum deduplication for development
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 30 * 60 * 1000, // 30 minutes - much longer stale time
-      gcTime: 60 * 60 * 1000,    // 1 hour - longer cache time
+      staleTime: Infinity, // Never refetch in development
+      gcTime: Infinity,    // Keep everything in cache
       retry: 0,
       retryDelay: 3000,
       refetchOnWindowFocus: false,
       refetchOnReconnect: false,
       refetchOnMount: false,
       networkMode: 'online',
-      // Enable automatic request deduplication
+      // Force deduplication - this is key
       enabled: true,
+      // Disable all automatic refetching
+      refetchInterval: false,
+      refetchIntervalInBackground: false,
     },
   },
 });
