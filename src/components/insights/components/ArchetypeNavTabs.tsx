@@ -8,13 +8,15 @@ interface ArchetypeNavTabsProps {
   onTabChange: (tab: string) => void;
   isUnlocked: boolean;
   onUnlockRequest: () => void;
+  archetypeColor?: string;
 }
 
 const ArchetypeNavTabs = ({ 
   activeTab, 
   onTabChange, 
   isUnlocked, 
-  onUnlockRequest 
+  onUnlockRequest,
+  archetypeColor = '#4B5563'
 }: ArchetypeNavTabsProps) => {
   const tabOptions = [
     { id: 'overview', label: 'Overview', requiresUnlock: false },
@@ -43,11 +45,15 @@ const ArchetypeNavTabs = ({
             className={`
               flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-t-lg
               ${activeTab === tab.id 
-                ? 'bg-blue-600 text-white border-b-2 border-blue-600' 
+                ? 'text-white border-b-2' 
                 : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
               }
               ${tab.requiresUnlock && !isUnlocked ? 'opacity-75' : ''}
             `}
+            style={activeTab === tab.id ? {
+              backgroundColor: archetypeColor,
+              borderBottomColor: archetypeColor
+            } : {}}
           >
             {tab.label}
             {tab.requiresUnlock && !isUnlocked && (

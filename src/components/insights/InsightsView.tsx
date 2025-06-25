@@ -223,6 +223,7 @@ const InsightsView = ({
         onTabChange={setActiveTab}
         isUnlocked={isUnlocked}
         onUnlockRequest={openUnlockModal}
+        archetypeColor={familyColor}
       />
       
       <div className="p-4 md:p-6">
