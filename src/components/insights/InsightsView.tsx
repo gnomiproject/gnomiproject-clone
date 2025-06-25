@@ -1,4 +1,3 @@
-
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ArchetypeId, ArchetypeDetailedData } from '@/types/archetype';
 import ArchetypeNavTabs from './components/ArchetypeNavTabs';
@@ -8,6 +7,7 @@ import MetricsTab from './tabs/MetricsTab';
 import SwotTab from './tabs/SwotTab';
 import DiseaseAndCareTab from './tabs/DiseaseAndCareTab';
 import UniqueAdvantagesTab from './tabs/UniqueAdvantagesTab';
+import BiggestChallengesTab from './tabs/BiggestChallengesTab';
 import UnlockReportModal from './UnlockReportModal';
 import UnlockSuccessMessage from './UnlockSuccessMessage';
 import { useReportUnlock, UnlockFormData } from '@/hooks/useReportUnlock';
@@ -68,7 +68,6 @@ const InsightsView = ({
     });
   }, [isPreUnlocked, hookUnlocked, isUnlocked]);
   
-  // Listen for unlock status changes and refresh data when needed
   useEffect(() => {
     if (isUnlocked) {
       console.log("[InsightsView] Report has been unlocked, refreshing data");
@@ -92,7 +91,6 @@ const InsightsView = ({
     }
   }, [isUnlocked, archetypeId, refreshData, refetch]);
   
-  // Update report data when refreshed data is available
   useEffect(() => {
     if (refreshedData && !refreshLoading) {
       console.log("[InsightsView] Received refreshed data", {
@@ -104,7 +102,6 @@ const InsightsView = ({
     }
   }, [refreshedData, refreshLoading, isUnlocked]);
   
-  // Process assessment data once with useMemo to prevent redundant processing
   const processedAssessmentResult = useMemo(() => {
     // Skip if we've already processed this result for this archetype
     if (processedRef.current) {
@@ -132,7 +129,6 @@ const InsightsView = ({
     return assessmentResult;
   }, [assessmentResult, archetypeId]);
 
-  // Log SWOT data only once on mount or if reportData changes
   useEffect(() => {
     if (reportData?.strengths && !swotLoggedRef.current) {
       console.log('[InsightsView] SWOT data available:', {
@@ -150,7 +146,6 @@ const InsightsView = ({
     };
   }, [reportData, archetypeId]);
 
-  // Error check - if reportData is null or undefined, show an error message
   if (!reportData) {
     // Return a minimal error state to avoid cascading failures
     return (
@@ -172,12 +167,11 @@ const InsightsView = ({
     hasSwotData: !!(reportData.strengths || reportData.swot_analysis),
     hasDiseaseData: !!(reportData["Dise_Heart Disease Prevalence"] || reportData["Dise_Type 2 Diabetes Prevalence"]),
     hasStrengthsData: !!(reportData.strengths),
+    hasChallengesData: !!(reportData.biggest_challenges),
     activeTab,
     isUnlocked
   });
 
-  // Ensure we have all the required properties for rendering
-  // Enhanced name resolution with better fallbacks
   const name = reportData?.name || reportData?.archetype_name || reportData?.id?.toUpperCase() || 'Unnamed Archetype';
   const shortDescription = reportData?.short_description || '';
   const familyId = reportData?.familyId || reportData?.family_id;
@@ -201,6 +195,7 @@ const InsightsView = ({
   );
 
   const hasStrengthsData = !!(reportData.strengths && Array.isArray(reportData.strengths));
+  const hasChallengesData = !!(reportData.biggest_challenges && Array.isArray(reportData.biggest_challenges));
 
   console.log('[InsightsView] Rendering with name resolution:', { 
     fromName: reportData?.name,
@@ -284,7 +279,8 @@ const InsightsView = ({
           </div>
         )}
         
-        {activeTab === 'metrics' && (
+        {
+        activeTab === 'metrics' && (
           <>
             {/* IMPORTANT: Show metrics data regardless of unlock status if data exists */}
             {hasMetricsData ? (
@@ -301,9 +297,11 @@ const InsightsView = ({
               </div>
             )}
           </>
-        )}
+        )
+        }
         
-        {activeTab === 'swot' && (
+        {
+        activeTab === 'swot' && (
           <>
             {/* IMPORTANT: Show SWOT data regardless of unlock status if data exists */}
             {hasSwotData ? (
@@ -320,9 +318,11 @@ const InsightsView = ({
               </div>
             )}
           </>
-        )}
+        )
+        }
         
-        {activeTab === 'disease-and-care' && (
+        {
+        activeTab === 'disease-and-care' && (
           <>
             {/* IMPORTANT: Show Disease data regardless of unlock status if data exists */}
             {hasDiseaseData ? (
@@ -339,9 +339,11 @@ const InsightsView = ({
               </div>
             )}
           </>
-        )}
+        )
+        }
 
-        {activeTab === 'unique-advantages' && (
+        {
+        activeTab === 'unique-advantages' && (
           <>
             {/* Show Unique Advantages data regardless of unlock status if data exists */}
             {hasStrengthsData ? (
@@ -358,10 +360,30 @@ const InsightsView = ({
               </div>
             )}
           </>
+        )
+        }
+
+        {/* NEW: Biggest Challenges Tab */}
+        {activeTab === 'biggest-challenges' && (
+          <>
+            {/* Show Biggest Challenges data regardless of unlock status if data exists */}
+            {hasChallengesData ? (
+              <BiggestChallengesTab archetypeData={reportData} />
+            ) : !isUnlocked ? (
+              <UnlockPlaceholder name={name} onUnlock={openUnlockModal} />
+            ) : (
+              <div className="py-12 text-center">
+                <Badge variant="outline" className="mb-2 bg-yellow-50 text-yellow-800 hover:bg-yellow-100">Data Availability</Badge>
+                <h3 className="text-xl font-medium text-gray-800">Biggest Challenges data is being prepared</h3>
+                <p className="text-gray-600 mt-2 max-w-md mx-auto">
+                  Your biggest challenges data is being processed and will be available soon. Please check back later.
+                </p>
+              </div>
+            )}
+          </>
         )}
       </div>
       
-      {/* Unlock report modal with proper submission handler */}
       <UnlockReportModal
         isOpen={showUnlockModal}
         onClose={closeUnlockModal}

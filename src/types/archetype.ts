@@ -59,6 +59,18 @@ export interface UniqueAdvantage {
   };
 }
 
+// Define biggest challenge structure - identical to UniqueAdvantage
+export interface BiggestChallenge {
+  title: string;
+  description: string;
+  supporting_metric?: {
+    name: string;
+    value: string;
+    difference: string;
+    significance: string;
+  };
+}
+
 // Analysis table interfaces
 export interface ArchetypeDetailed extends Archetype {
   swot?: SwotAnalysis;
@@ -75,6 +87,7 @@ export interface ArchetypeDetailed extends Archetype {
     metrics_references?: any[];
   }>;
   unique_advantages?: UniqueAdvantage[];
+  biggest_challenges?: BiggestChallenge[];
 }
 
 // Flexible interface for database raw data (allows Json types)
@@ -142,6 +155,7 @@ export interface ArchetypeDetailedDataRaw {
   detailed_metrics?: any;
   disease_prevalence?: any;
   unique_advantages?: UniqueAdvantage[] | Json;
+  biggest_challenges?: BiggestChallenge[] | Json;
   
   "Demo_Average Family Size"?: number;
   "Demo_Average Age"?: number;
@@ -234,6 +248,7 @@ export interface ArchetypeDetailedData {
   detailed_metrics?: any;
   disease_prevalence?: any;
   unique_advantages?: UniqueAdvantage[];
+  biggest_challenges?: BiggestChallenge[];
   
   "Demo_Average Family Size"?: number;
   "Demo_Average Age"?: number;
