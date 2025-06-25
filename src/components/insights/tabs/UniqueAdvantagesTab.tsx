@@ -14,7 +14,7 @@ interface StrengthCardProps {
   description: string;
   supportingMetric?: {
     metric: string;
-    value: number;
+    value: string;
     difference: string;
     significance: string;
   };
@@ -62,8 +62,8 @@ const StrengthCard: React.FC<StrengthCardProps> = ({
               </Badge>
             </div>
             <div className="flex items-center gap-2 mt-1">
-              <span className="text-lg font-bold text-gray-900">{supportingMetric.value}%</span>
-              <span className="text-xs text-gray-600">({supportingMetric.difference}% vs avg)</span>
+              <span className="text-lg font-bold text-gray-900">{supportingMetric.value}</span>
+              <span className="text-xs text-gray-600">({supportingMetric.difference})</span>
             </div>
           </div>
         )}
@@ -73,79 +73,103 @@ const StrengthCard: React.FC<StrengthCardProps> = ({
 };
 
 const UniqueAdvantagesTab: React.FC<UniqueAdvantagesTabProps> = ({ archetypeData }) => {
-  // Extract title from strength text (first sentence or up to first comma/period)
-  const extractTitle = (strength: string): string => {
-    // Handle various formats
-    if (strength.includes('(')) {
-      return strength.split('(')[0].trim();
-    }
-    if (strength.includes(':')) {
-      return strength.split(':')[0].trim();
-    }
-    if (strength.includes('.')) {
-      const firstSentence = strength.split('.')[0].trim();
-      if (firstSentence.length < 80) return firstSentence;
-    }
-    if (strength.includes(',')) {
-      const firstPart = strength.split(',')[0].trim();
-      if (firstPart.length < 60) return firstPart;
+  // Extract improved title from strength text
+  const extractCardTitle = (strength: string): string => {
+    // If strength is already a good title (< 50 chars), use first part
+    if (strength.length < 50) {
+      return strength.split('(')[0].trim(); // Remove parenthetical info
     }
     
-    // Fallback: use first 60 characters
-    return strength.length > 60 ? strength.substring(0, 60) + '...' : strength;
+    // Extract key concept for longer descriptions
+    const words = strength.split(' ');
+    if (words.length <= 6) {
+      return strength;
+    }
+    
+    // Take first meaningful phrase
+    return words.slice(0, 5).join(' ') + '...';
   };
 
-  // Find relevant metric for a strength
-  const findRelevantMetric = (strength: string, distinctiveMetrics: any[]): any => {
+  // Enhanced strength description with archetype context
+  const enhanceStrengthDescription = (strength: string, archetype_name: string): string => {
+    // If already has context, return as-is
+    if (strength.includes('Companies') || strength.includes('Organizations') || 
+        strength.includes('archetype') || strength.length > 100) {
+      return strength;
+    }
+    
+    // Add contextual framing
+    const frames = [
+      `Companies in this archetype excel at ${strength.toLowerCase()}.`,
+      `Organizations like yours typically demonstrate ${strength.toLowerCase()}.`,
+      `This archetype is characterized by ${strength.toLowerCase()}.`
+    ];
+    
+    // Choose frame based on strength content
+    if (strength.includes('Lower') || strength.includes('Higher')) {
+      return `${frames[1]} This gives them a competitive advantage in healthcare management.`;
+    } else {
+      return `${frames[0]} This strength helps them achieve better health outcomes and cost efficiency.`;
+    }
+  };
+
+  // Format metric display with proper value types
+  const formatMetricDisplay = (metric: any) => {
+    const value = parseFloat(metric.archetype_value || metric.difference || 0);
+    const difference = parseFloat(metric.difference || 0);
+    
+    // Format based on metric type
+    let formattedValue;
+    if (metric.metric.includes('Amount') || metric.metric.includes('Cost')) {
+      formattedValue = `$${Math.round(value).toLocaleString()}`;
+    } else if (metric.metric.includes('Percent') || metric.metric.includes('%')) {
+      formattedValue = `${Math.round(value)}%`;
+    } else if (metric.metric.includes('Visits') || metric.metric.includes('per 1k')) {
+      formattedValue = Math.round(value).toLocaleString();
+    } else {
+      formattedValue = `${Math.round(value)}%`;
+    }
+    
+    // Format difference
+    const diffSymbol = difference > 0 ? '+' : '';
+    const diffFormatted = `${diffSymbol}${difference}% vs avg`;
+    
+    return {
+      value: formattedValue,
+      difference: diffFormatted,
+      significance: metric.significance || 'Moderate'
+    };
+  };
+
+  // Get unique metric for each card to avoid duplicates
+  const getUniqueMetricForCard = (strength: string, distinctiveMetrics: any[], cardIndex: number): any => {
     if (!distinctiveMetrics || !Array.isArray(distinctiveMetrics)) return null;
     
     const strengthLower = strength.toLowerCase();
     
-    // Keywords to match metrics with strengths
-    const keywordMap: { [key: string]: string[] } = {
-      'benefits': ['benefits', 'health insurance', 'retirement', 'workplace', 'flexible'],
-      'cost': ['cost', 'medical', 'healthcare', 'savings', 'rx'],
-      'access': ['access', 'flexible', 'workplace', 'schedule'],
-      'wellness': ['wellness', 'preventative', 'health'],
-      'utilization': ['utilization', 'visits', 'emergency', 'specialist']
+    // Improved keyword matching logic
+    const keywordMatches: { [key: string]: string[] } = {
+      'cost': ['Cost', 'Amount', 'Savings'],
+      'visit': ['Visits', 'PCP', 'Specialist'],
+      'benefits': ['Access', 'Insurance', 'Benefits', 'Flexible'],
+      'emergency': ['Emergency', 'ER'],
+      'preventive': ['Wellness', 'Screening'],
+      'utilization': ['Utilization', 'Non-Utilizers'],
+      'risk': ['Risk', 'SDOH']
     };
     
-    // Find best matching metric
-    for (const metric of distinctiveMetrics) {
-      if (!metric || !metric.metric) continue;
-      
-      const metricLower = metric.metric.toLowerCase();
-      
-      // Direct keyword matching
-      for (const [category, keywords] of Object.entries(keywordMap)) {
-        if (keywords.some(keyword => strengthLower.includes(keyword))) {
-          if (keywords.some(keyword => metricLower.includes(keyword))) {
-            return {
-              metric: metric.metric,
-              value: Math.round(metric.archetype_value || 0),
-              difference: metric.difference > 0 ? `+${metric.difference}` : metric.difference?.toString() || '0',
-              significance: metric.significance || 'Moderate'
-            };
-          }
-        }
+    // Find matching metric by keywords
+    for (const [strengthKey, metricKeys] of Object.entries(keywordMatches)) {
+      if (strengthLower.includes(strengthKey)) {
+        const match = distinctiveMetrics.find(metric => 
+          metricKeys.some(key => metric.metric && metric.metric.includes(key))
+        );
+        if (match) return match;
       }
     }
     
-    // Return first high significance metric as fallback
-    const highSigMetric = distinctiveMetrics.find(m => 
-      m && m.significance && m.significance.toLowerCase().includes('high')
-    );
-    
-    if (highSigMetric) {
-      return {
-        metric: highSigMetric.metric,
-        value: Math.round(highSigMetric.archetype_value || 0),
-        difference: highSigMetric.difference > 0 ? `+${highSigMetric.difference}` : highSigMetric.difference?.toString() || '0',
-        significance: highSigMetric.significance || 'High'
-      };
-    }
-    
-    return null;
+    // Fallback: Use different metric for each card (avoid duplicates)
+    return distinctiveMetrics[cardIndex % distinctiveMetrics.length];
   };
 
   // Get appropriate icon for each strength
@@ -160,20 +184,31 @@ const UniqueAdvantagesTab: React.FC<UniqueAdvantagesTabProps> = ({ archetypeData
     return icons[index % icons.length];
   };
 
-  // Process strengths data
+  // Process strengths data with all improvements
   const processedStrengths = React.useMemo(() => {
     const strengths = archetypeData?.strengths || [];
     const distinctiveMetrics = archetypeData?.distinctive_metrics || [];
+    const archetypeName = archetypeData?.name || archetypeData?.archetype_name || '';
     
     if (!Array.isArray(strengths)) return [];
     
-    return strengths.map((strength: string, index: number) => ({
-      title: extractTitle(strength),
-      description: strength,
-      supportingMetric: findRelevantMetric(strength, distinctiveMetrics),
-      icon: getIcon(index),
-      index
-    }));
+    return strengths.map((strength: string, index: number) => {
+      const rawMetric = getUniqueMetricForCard(strength, distinctiveMetrics, index);
+      const formattedMetric = rawMetric ? formatMetricDisplay(rawMetric) : null;
+      
+      return {
+        title: extractCardTitle(strength),
+        description: enhanceStrengthDescription(strength, archetypeName),
+        supportingMetric: formattedMetric ? {
+          metric: rawMetric.metric,
+          value: formattedMetric.value,
+          difference: formattedMetric.difference,
+          significance: formattedMetric.significance
+        } : null,
+        icon: getIcon(index),
+        index
+      };
+    });
   }, [archetypeData]);
 
   console.log('[UniqueAdvantagesTab] Processed strengths:', processedStrengths);
