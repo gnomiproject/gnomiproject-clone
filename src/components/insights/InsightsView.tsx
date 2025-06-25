@@ -128,8 +128,8 @@ const InsightsView = ({
 
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden relative">
-      {/* Beta Badge - positioned in bottom right corner */}
-      <div className="fixed bottom-6 right-6 z-[9999] shadow-lg print:hidden">
+      {/* Beta Badge - moved to bottom left corner */}
+      <div className="fixed bottom-6 left-6 z-[9999] shadow-lg print:hidden">
         <BetaBadge sticky={true} />
       </div>
 
