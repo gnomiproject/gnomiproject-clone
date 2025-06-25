@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -18,27 +19,31 @@ import NotFound from "./pages/NotFound";
 import FixedHeader from "./components/layout/FixedHeader";
 import ErrorBoundary from "./components/shared/ErrorBoundary";
 
+// Optimized QueryClient with better deduplication
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 10 * 60 * 1000, // 10 minutes - longer stale time
-      gcTime: 30 * 60 * 1000,    // 30 minutes - longer cache time
-      retry: 0, // Disable retries to prevent request spam
+      staleTime: 30 * 60 * 1000, // 30 minutes - much longer stale time
+      gcTime: 60 * 60 * 1000,    // 1 hour - longer cache time
+      retry: 0,
       retryDelay: 3000,
       refetchOnWindowFocus: false,
       refetchOnReconnect: false,
-      refetchOnMount: false, // Important: don't refetch on mount if data exists
-      // Add network mode and deduplication
+      refetchOnMount: false,
       networkMode: 'online',
+      // Enable automatic request deduplication
+      enabled: true,
     },
   },
 });
 
-// Add query deduplication logging in development
-if (process.env.NODE_ENV !== 'production') {
+// Enhanced query cache logging for development
+if (process.env.NODE_ENV === 'development') {
   queryClient.getQueryCache().subscribe(event => {
     if (event.type === 'added') {
-      console.log(`[Query Cache] Added: ${JSON.stringify(event.query.queryKey)}`);
+      console.log(`[Query Cache] Added query: ${JSON.stringify(event.query.queryKey)}`);
+    } else if (event.type === 'removed') {
+      console.log(`[Query Cache] Removed query: ${JSON.stringify(event.query.queryKey)}`);
     }
   });
 }

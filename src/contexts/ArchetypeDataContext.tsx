@@ -22,19 +22,15 @@ interface ArchetypeDataProviderProps {
 export const ArchetypeDataProvider: React.FC<ArchetypeDataProviderProps> = ({ children }) => {
   const archetypeData = useArchetypeBasics();
   
-  // Add request tracking for debugging
+  // Simplified logging - only log once when data changes
   React.useEffect(() => {
-    if (archetypeData.isLoading) {
-      console.log('[ArchetypeDataProvider] Loading archetype data...');
-    } else if (archetypeData.error) {
-      console.error('[ArchetypeDataProvider] Error loading data:', archetypeData.error);
-    } else {
-      console.log('[ArchetypeDataProvider] Data loaded successfully:', {
+    if (!archetypeData.isLoading && !archetypeData.error) {
+      console.log('[ArchetypeDataProvider] Context data ready:', {
         archetypeCount: archetypeData.archetypes.length,
         familyCount: archetypeData.families.length
       });
     }
-  }, [archetypeData.isLoading, archetypeData.error, archetypeData.archetypes.length, archetypeData.families.length]);
+  }, [archetypeData.isLoading, archetypeData.error]);
   
   return (
     <ArchetypeDataContext.Provider value={archetypeData}>

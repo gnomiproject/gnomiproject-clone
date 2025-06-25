@@ -6,7 +6,7 @@ interface RequestLog {
   url: string;
   method: string;
   duration?: number;
-  count?: number; // Track duplicate requests
+  count?: number;
 }
 
 const ApiRequestMonitor: React.FC = () => {
@@ -16,11 +16,11 @@ const ApiRequestMonitor: React.FC = () => {
 
   useEffect(() => {
     // Only show in development
-    if (process.env.NODE_ENV !== 'production') return;
+    if (process.env.NODE_ENV !== 'development') return;
 
-    // Override fetch to track API calls
     const originalFetch = window.fetch;
-    const requestCache = new Map(); // Cache to track duplicate requests
+    const requestCache = new Map();
+    let requestCount = 0;
     
     window.fetch = async (...args) => {
       const startTime = Date.now();
@@ -28,21 +28,23 @@ const ApiRequestMonitor: React.FC = () => {
       
       // Only track Supabase API calls
       if (typeof url === 'string' && url.includes('supabase')) {
-        const cleanUrl = url.split('?')[0]; // Remove query params for cleaner logs
+        requestCount++;
+        const cleanUrl = url.split('?')[0];
         const method = (args[1]?.method || 'GET').toUpperCase();
         const requestKey = `${method}:${cleanUrl}`;
         
-        // Check for duplicate requests
+        // Enhanced duplicate detection
         const now = Date.now();
-        const lastRequest = requestCache.get(requestKey);
+        const recentRequests = requestCache.get(requestKey) || [];
+        const recentRequestsFiltered = recentRequests.filter((time: number) => now - time < 5000); // 5 second window
         
-        if (lastRequest && (now - lastRequest) < 1000) {
-          // Duplicate request within 1 second
+        if (recentRequestsFiltered.length > 0) {
           setDuplicateCount(prev => prev + 1);
-          console.warn(`[API Monitor] Duplicate request detected: ${requestKey}`);
+          console.warn(`[API Monitor] Duplicate request #${requestCount}: ${requestKey}`);
         }
         
-        requestCache.set(requestKey, now);
+        recentRequestsFiltered.push(now);
+        requestCache.set(requestKey, recentRequestsFiltered);
         
         const logEntry: RequestLog = {
           timestamp: startTime,
@@ -55,7 +57,6 @@ const ApiRequestMonitor: React.FC = () => {
           logEntry.duration = Date.now() - startTime;
           
           setRequests(prev => {
-            // Check if this exact request already exists
             const existingIndex = prev.findIndex(r => 
               r.url === logEntry.url && 
               r.method === logEntry.method &&
@@ -63,23 +64,21 @@ const ApiRequestMonitor: React.FC = () => {
             );
             
             if (existingIndex >= 0) {
-              // Update existing entry with count
               const updated = [...prev];
               updated[existingIndex] = {
                 ...updated[existingIndex],
                 count: (updated[existingIndex].count || 1) + 1
               };
-              return updated.slice(-19); // Keep last 20 requests
+              return updated.slice(-10); // Keep last 10 requests
             } else {
-              // Add new entry
-              return [...prev.slice(-19), logEntry];
+              return [...prev.slice(-9), logEntry]; // Keep last 10 requests
             }
           });
           
           return response;
         } catch (error) {
           logEntry.duration = Date.now() - startTime;
-          setRequests(prev => [...prev.slice(-19), logEntry]);
+          setRequests(prev => [...prev.slice(-9), logEntry]);
           throw error;
         }
       }
@@ -87,21 +86,20 @@ const ApiRequestMonitor: React.FC = () => {
       return originalFetch(...args);
     };
 
-    // Cleanup
     return () => {
       window.fetch = originalFetch;
     };
   }, []);
 
-  // Show toggle button in development
-  if (process.env.NODE_ENV !== 'production') return null;
+  // Only show in development
+  if (process.env.NODE_ENV !== 'development') return null;
 
   return (
     <>
       <div className="fixed bottom-4 right-4 z-50">
         <button
           onClick={() => setIsVisible(!isVisible)}
-          className={`px-3 py-2 rounded-md text-sm shadow-lg text-white ${
+          className={`px-3 py-2 rounded-md text-sm shadow-lg text-white transition-colors ${
             duplicateCount > 0 ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'
           }`}
         >
@@ -116,7 +114,7 @@ const ApiRequestMonitor: React.FC = () => {
               API Request Monitor
               {duplicateCount > 0 && (
                 <span className="ml-2 text-red-600 text-xs">
-                  ({duplicateCount} duplicates)
+                  ({duplicateCount} duplicates detected)
                 </span>
               )}
             </h3>
@@ -140,7 +138,7 @@ const ApiRequestMonitor: React.FC = () => {
                     <span className="font-mono text-blue-600">
                       {request.method}
                       {request.count && request.count > 1 && (
-                        <span className="ml-1 text-red-600">×{request.count}</span>
+                        <span className="ml-1 text-red-600 font-bold">×{request.count}</span>
                       )}
                     </span>
                     <span className="text-gray-500">
