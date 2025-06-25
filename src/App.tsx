@@ -4,7 +4,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ArchetypeDataProvider } from "@/contexts/ArchetypeDataContext";
-import ApiRequestMonitor from "@/components/shared/ApiRequestMonitor";
 import { RenderCounter } from "@/components/shared/PerformanceMonitor";
 import Index from "./pages/Index";
 import Assessment from "./pages/Assessment";
@@ -60,7 +59,6 @@ function App() {
             <BrowserRouter>
               <div className="min-h-screen bg-gray-50">
                 <RenderCounter componentName="App">
-                  <ApiRequestMonitor />
                   <FixedHeader />
                   <main className="flex-1">
                     <Routes>
