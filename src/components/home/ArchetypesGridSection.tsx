@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
@@ -6,17 +7,16 @@ import ArchetypeOverviewCard from './ArchetypeOverviewCard';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { migrateDataToSupabase } from '@/utils/migrationUtil';
-import { useArchetypeBasics } from '@/hooks/archetype/useArchetypeBasics';
-import { ArchetypeId } from '@/types/archetype';
+import { useArchetypeData } from '@/contexts/ArchetypeDataContext';
 
 const ArchetypesGridSection = () => {
-  const { archetypes, isLoading, error } = useArchetypeBasics();
+  const { archetypes, isLoading, error } = useArchetypeData();
   const [isMigrating, setIsMigrating] = React.useState(false);
   const [debugInfo, setDebugInfo] = React.useState<any>(null);
   
   React.useEffect(() => {
-    // Log to verify data access after RLS implementation
-    console.log('[RLS Test] ArchetypesGridSection data access:', {
+    // Log to verify data access after optimization
+    console.log('[ArchetypesGridSection] Using shared context data:', {
       hasArchetypes: Boolean(archetypes?.length),
       archetypeCount: archetypes?.length || 0,
       isLoading,
@@ -24,7 +24,7 @@ const ArchetypesGridSection = () => {
     });
     
     if (error) {
-      console.error('[RLS Test] ArchetypesGridSection error:', error);
+      console.error('[ArchetypesGridSection] Error from context:', error);
       setDebugInfo(error);
     }
   }, [archetypes, isLoading, error]);
@@ -44,7 +44,7 @@ const ArchetypesGridSection = () => {
   };
 
   if (error) {
-    console.error('Error in archetype query:', error);
+    console.error('Error in archetype context:', error);
     return (
       <div className="p-8 text-center">
         <p className="text-red-500">Failed to load archetypes. Please try again later.</p>

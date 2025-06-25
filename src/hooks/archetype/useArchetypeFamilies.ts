@@ -29,7 +29,12 @@ export const useArchetypeFamilies = () => {
           ? family.common_traits.map(String)
           : []
       }));
-    }
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes - don't refetch if data is fresh
+    gcTime: 10 * 60 * 1000,   // 10 minutes - keep in memory
+    refetchOnWindowFocus: false, // Don't refetch when user switches tabs
+    refetchOnReconnect: false,   // Don't refetch on reconnect
+    refetchOnMount: false,       // Don't refetch on component mount if data exists
   });
 
   // Helper function to get family by ID

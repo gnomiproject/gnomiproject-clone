@@ -1,3 +1,4 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Archetype, ArchetypeFamily, ArchetypeId, FamilyId } from '@/types/archetype';
@@ -37,7 +38,12 @@ export const useArchetypeBasics = () => {
           : [],
         industries: archetype.industries
       }));
-    }
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes - don't refetch if data is fresh
+    gcTime: 10 * 60 * 1000,   // 10 minutes - keep in memory
+    refetchOnWindowFocus: false, // Don't refetch when user switches tabs
+    refetchOnReconnect: false,   // Don't refetch on reconnect
+    refetchOnMount: false,       // Don't refetch on component mount if data exists
   });
 
   const familiesQuery = useQuery({
@@ -72,7 +78,12 @@ export const useArchetypeBasics = () => {
           ? family.common_traits.map(item => String(item))
           : []
       }));
-    }
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes - don't refetch if data is fresh
+    gcTime: 10 * 60 * 1000,   // 10 minutes - keep in memory
+    refetchOnWindowFocus: false, // Don't refetch when user switches tabs
+    refetchOnReconnect: false,   // Don't refetch on reconnect
+    refetchOnMount: false,       // Don't refetch on component mount if data exists
   });
 
   const archetypeData = archetypesQuery.data || [];

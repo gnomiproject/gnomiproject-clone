@@ -1,49 +1,48 @@
 
 import { useState, useEffect } from 'react';
 import { healthcareArchetypes } from '@/data/healthcareArchetypes';
-import { useArchetypes } from '@/hooks/useArchetypes';
+import { useArchetypeData } from '@/contexts/ArchetypeDataContext';
 import { FAMILY_COLORS } from '@/data/colors';
 
 export const useExplorerData = () => {
   const [renderCount, setRenderCount] = useState(0);
   
-  // Access archetype data
+  // Access archetype data from shared context
   const { 
-    getAllArchetypeSummaries,
-    getArchetypeSummary,
+    archetypes,
     getFamilyById
-  } = useArchetypes();
+  } = useArchetypeData();
 
   // Track mount/render count for debugging purposes
   useEffect(() => {
     const sequence = renderCount + 1;
     setRenderCount(sequence);
-    console.info(`InteractiveDNAExplorer: Mount/Render #${sequence}`);
+    console.info(`InteractiveDNAExplorer: Mount/Render #${sequence} - Using shared context`);
     
     return () => {
       console.info("InteractiveDNAExplorer: Unmounting");
     };
   }, []);
 
-  // Format archetypes data for display
+  // Format archetypes data for display - use data from context when available
   const formattedArchetypes = {
-    familyA: healthcareArchetypes.filter(a => a.familyId === 'A').map(a => ({
+    familyA: (archetypes.length > 0 ? archetypes.filter(a => a.family_id === 'A') : healthcareArchetypes.filter(a => a.familyId === 'A')).map(a => ({
       id: a.id,
       name: a.name,
-      description: a.shortDescription || '',
-      color: a.hexColor
+      description: a.short_description || (a as any).shortDescription || '',
+      color: a.hex_color || (a as any).hexColor
     })),
-    familyB: healthcareArchetypes.filter(a => a.familyId === 'B').map(a => ({
+    familyB: (archetypes.length > 0 ? archetypes.filter(a => a.family_id === 'B') : healthcareArchetypes.filter(a => a.familyId === 'B')).map(a => ({
       id: a.id,
       name: a.name,
-      description: a.shortDescription || '',
-      color: a.hexColor
+      description: a.short_description || (a as any).shortDescription || '',
+      color: a.hex_color || (a as any).hexColor
     })),
-    familyC: healthcareArchetypes.filter(a => a.familyId === 'C').map(a => ({
+    familyC: (archetypes.length > 0 ? archetypes.filter(a => a.family_id === 'C') : healthcareArchetypes.filter(a => a.familyId === 'C')).map(a => ({
       id: a.id,
       name: a.name,
-      description: a.shortDescription || '',
-      color: a.hexColor
+      description: a.short_description || (a as any).shortDescription || '',
+      color: a.hex_color || (a as any).hexColor
     }))
   };
 
@@ -59,7 +58,7 @@ export const useExplorerData = () => {
     // Get proper family name from colors data
     const familyName = FAMILY_COLORS[familyId].name;
     
-    // Get data from DB or use fallback
+    // Get data from shared context
     const family = getFamilyById(familyId.toUpperCase() as any);
     
     return {
@@ -72,7 +71,8 @@ export const useExplorerData = () => {
 
   // Format the selected archetype summary for display
   const formatArchetypeSummary = (archetypeId: string) => {
-    const archetype = getArchetypeSummary(archetypeId as any);
+    // Try to get from shared context first
+    const archetype = archetypes.find(a => a.id === archetypeId);
     
     if (!archetype) {
       // Fallback to static data if dynamic data is not available
@@ -89,11 +89,11 @@ export const useExplorerData = () => {
     
     return {
       id: archetype.id,
-      familyId: (archetype.familyId || '').toLowerCase() as 'a' | 'b' | 'c',
+      familyId: (archetype.family_id || '').toLowerCase() as 'a' | 'b' | 'c',
       name: archetype.name,
-      familyName: archetype.familyName || 'Unknown Family',
-      description: archetype.description || 'No description available',
-      keyCharacteristics: archetype.keyCharacteristics || []
+      familyName: getFamilyById(archetype.family_id)?.name || 'Unknown Family',
+      description: archetype.short_description || 'No description available',
+      keyCharacteristics: archetype.key_characteristics || []
     };
   };
 
@@ -101,7 +101,7 @@ export const useExplorerData = () => {
     formattedArchetypes,
     getFamilyInfo,
     formatArchetypeSummary,
-    getAllArchetypeSummaries,
-    getArchetypeSummary,
+    getAllArchetypeSummaries: () => archetypes,
+    getArchetypeSummary: (id: string) => archetypes.find(a => a.id === id),
   };
 };

@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { ChevronDown, ChevronUp } from 'lucide-react';
-import { useArchetypeFamilies } from '@/hooks/archetype/useArchetypeFamilies';
+import { useArchetypeData } from '@/contexts/ArchetypeDataContext';
 
 interface ArchetypeOverviewCardProps {
   id: string;
@@ -21,7 +21,7 @@ const ArchetypeOverviewCard = ({
   key_characteristics = []
 }: ArchetypeOverviewCardProps) => {
   const [isExpanded, setIsExpanded] = React.useState(false);
-  const { getFamilyById } = useArchetypeFamilies();
+  const { getFamilyById } = useArchetypeData();
   const familyInfo = getFamilyById(family_id as 'a' | 'b' | 'c');
   
   const handleToggleExpand = (e: React.MouseEvent) => {
