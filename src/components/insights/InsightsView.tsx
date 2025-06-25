@@ -1,3 +1,4 @@
+
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ArchetypeId, ArchetypeDetailedData } from '@/types/archetype';
 import ArchetypeNavTabs from './components/ArchetypeNavTabs';
@@ -6,6 +7,7 @@ import OverviewTab from './tabs/OverviewTab';
 import MetricsTab from './tabs/MetricsTab';
 import SwotTab from './tabs/SwotTab';
 import DiseaseAndCareTab from './tabs/DiseaseAndCareTab';
+import UniqueAdvantagesTab from './tabs/UniqueAdvantagesTab';
 import UnlockReportModal from './UnlockReportModal';
 import UnlockSuccessMessage from './UnlockSuccessMessage';
 import { useReportUnlock, UnlockFormData } from '@/hooks/useReportUnlock';
@@ -169,6 +171,7 @@ const InsightsView = ({
     hasMetricsData: !!(reportData.distinctive_metrics || reportData.detailed_metrics),
     hasSwotData: !!(reportData.strengths || reportData.swot_analysis),
     hasDiseaseData: !!(reportData["Dise_Heart Disease Prevalence"] || reportData["Dise_Type 2 Diabetes Prevalence"]),
+    hasStrengthsData: !!(reportData.strengths),
     activeTab,
     isUnlocked
   });
@@ -196,6 +199,8 @@ const InsightsView = ({
     reportData["Dise_Type 2 Diabetes Prevalence"] ||
     Object.keys(reportData).some(key => key.toLowerCase().includes('dise_'))
   );
+
+  const hasStrengthsData = !!(reportData.strengths && Array.isArray(reportData.strengths));
 
   console.log('[InsightsView] Rendering with name resolution:', { 
     fromName: reportData?.name,
@@ -330,6 +335,25 @@ const InsightsView = ({
                 <h3 className="text-xl font-medium text-gray-800">Disease & Care data is being prepared</h3>
                 <p className="text-gray-600 mt-2 max-w-md mx-auto">
                   Your disease and care data is being processed and will be available soon. Please check back later.
+                </p>
+              </div>
+            )}
+          </>
+        )}
+
+        {activeTab === 'unique-advantages' && (
+          <>
+            {/* Show Unique Advantages data regardless of unlock status if data exists */}
+            {hasStrengthsData ? (
+              <UniqueAdvantagesTab archetypeData={reportData} />
+            ) : !isUnlocked ? (
+              <UnlockPlaceholder name={name} onUnlock={openUnlockModal} />
+            ) : (
+              <div className="py-12 text-center">
+                <Badge variant="outline" className="mb-2 bg-yellow-50 text-yellow-800 hover:bg-yellow-100">Data Availability</Badge>
+                <h3 className="text-xl font-medium text-gray-800">Unique Advantages data is being prepared</h3>
+                <p className="text-gray-600 mt-2 max-w-md mx-auto">
+                  Your unique advantages data is being processed and will be available soon. Please check back later.
                 </p>
               </div>
             )}

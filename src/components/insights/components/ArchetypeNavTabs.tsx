@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { FileText, ChevronDown, StarHalf, PlusCircle, Lock } from "lucide-react";
+import { FileText, ChevronDown, StarHalf, PlusCircle, Lock, Lightbulb } from "lucide-react";
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -32,7 +32,8 @@ const ArchetypeNavTabs = ({
     'overview': { label: 'Overview', icon: <FileText className="w-4 h-4 mr-2" />, alwaysUnlocked: true },
     'metrics': { label: 'Key Metrics', icon: <ChevronDown className="w-4 h-4 mr-2" />, alwaysUnlocked: false },
     'swot': { label: 'SWOT Analysis', icon: <StarHalf className="w-4 h-4 mr-2" />, alwaysUnlocked: false },
-    'disease-and-care': { label: 'Disease & Care', icon: <PlusCircle className="w-4 h-4 mr-2" />, alwaysUnlocked: false }
+    'disease-and-care': { label: 'Disease & Care', icon: <PlusCircle className="w-4 h-4 mr-2" />, alwaysUnlocked: false },
+    'unique-advantages': { label: 'Unique Advantages', icon: <Lightbulb className="w-4 h-4 mr-2" />, alwaysUnlocked: false }
   };
 
   // Get the current active tab's display information for mobile
