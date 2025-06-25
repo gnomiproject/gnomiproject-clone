@@ -26,19 +26,19 @@ export const useExplorerData = () => {
 
   // Format archetypes data for display - use data from context when available
   const formattedArchetypes = {
-    familyA: (archetypes.length > 0 ? archetypes.filter(a => a.family_id === 'A') : healthcareArchetypes.filter(a => a.familyId === 'A')).map(a => ({
+    familyA: (archetypes.length > 0 ? archetypes.filter(a => a.family_id === 'a') : healthcareArchetypes.filter(a => a.familyId === 'A')).map(a => ({
       id: a.id,
       name: a.name,
       description: a.short_description || (a as any).shortDescription || '',
       color: a.hex_color || (a as any).hexColor
     })),
-    familyB: (archetypes.length > 0 ? archetypes.filter(a => a.family_id === 'B') : healthcareArchetypes.filter(a => a.familyId === 'B')).map(a => ({
+    familyB: (archetypes.length > 0 ? archetypes.filter(a => a.family_id === 'b') : healthcareArchetypes.filter(a => a.familyId === 'B')).map(a => ({
       id: a.id,
       name: a.name,
       description: a.short_description || (a as any).shortDescription || '',
       color: a.hex_color || (a as any).hexColor
     })),
-    familyC: (archetypes.length > 0 ? archetypes.filter(a => a.family_id === 'C') : healthcareArchetypes.filter(a => a.familyId === 'C')).map(a => ({
+    familyC: (archetypes.length > 0 ? archetypes.filter(a => a.family_id === 'c') : healthcareArchetypes.filter(a => a.familyId === 'C')).map(a => ({
       id: a.id,
       name: a.name,
       description: a.short_description || (a as any).shortDescription || '',
@@ -59,7 +59,7 @@ export const useExplorerData = () => {
     const familyName = FAMILY_COLORS[familyId].name;
     
     // Get data from shared context
-    const family = getFamilyById(familyId.toUpperCase() as any);
+    const family = getFamilyById(familyId as any);
     
     return {
       id: familyId,

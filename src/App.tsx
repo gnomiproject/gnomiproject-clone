@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ArchetypeDataProvider } from "@/contexts/ArchetypeDataContext";
 import ApiRequestMonitor from "@/components/shared/ApiRequestMonitor";
+import { RenderCounter } from "@/components/shared/PerformanceMonitor";
 import Index from "./pages/Index";
 import Assessment from "./pages/Assessment";
 import Insights from "./pages/Insights";
@@ -17,7 +18,6 @@ import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 import FixedHeader from "./components/layout/FixedHeader";
 import ErrorBoundary from "./components/shared/ErrorBoundary";
-import PerformanceMonitor from "./components/shared/PerformanceMonitor";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -40,23 +40,24 @@ function App() {
           <ErrorBoundary>
             <BrowserRouter>
               <div className="min-h-screen bg-gray-50">
-                <PerformanceMonitor />
-                <ApiRequestMonitor />
-                <FixedHeader />
-                <main className="flex-1">
-                  <Routes>
-                    <Route path="/" element={<Index />} />
-                    <Route path="/assessment" element={<Assessment />} />
-                    <Route path="/insights" element={<Insights />} />
-                    <Route path="/about" element={<About />} />
-                    <Route path="/report/:reportId" element={<ReportView />} />
-                    <Route path="/report-viewer/:reportId" element={<ReportViewer />} />
-                    <Route path="/admin/report/:reportId" element={<AdminReportViewer />} />
-                    <Route path="/admin/report-debug" element={<AdminReportDebug />} />
-                    <Route path="/admin" element={<Admin />} />
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </main>
+                <RenderCounter componentName="App">
+                  <ApiRequestMonitor />
+                  <FixedHeader />
+                  <main className="flex-1">
+                    <Routes>
+                      <Route path="/" element={<Index />} />
+                      <Route path="/assessment" element={<Assessment />} />
+                      <Route path="/insights" element={<Insights />} />
+                      <Route path="/about" element={<About />} />
+                      <Route path="/report/:reportId" element={<ReportView />} />
+                      <Route path="/report-viewer/:reportId" element={<ReportViewer />} />
+                      <Route path="/admin/report/:reportId" element={<AdminReportViewer />} />
+                      <Route path="/admin/report-debug" element={<AdminReportDebug />} />
+                      <Route path="/admin" element={<Admin />} />
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </main>
+                </RenderCounter>
               </div>
               <Toaster />
             </BrowserRouter>
