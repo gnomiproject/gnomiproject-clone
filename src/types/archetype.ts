@@ -47,6 +47,18 @@ export interface DistinctiveMetric {
   significance?: string;
 }
 
+// Define unique advantage structure
+export interface UniqueAdvantage {
+  title: string;
+  description: string;
+  supporting_metric?: {
+    name: string;
+    value: string;
+    difference: string;
+    significance: string;
+  };
+}
+
 // Analysis table interfaces
 export interface ArchetypeDetailed extends Archetype {
   swot?: SwotAnalysis;
@@ -62,6 +74,7 @@ export interface ArchetypeDetailed extends Archetype {
     description: string;
     metrics_references?: any[];
   }>;
+  unique_advantages?: UniqueAdvantage[];
 }
 
 // Flexible interface for database raw data (allows Json types)
@@ -128,6 +141,7 @@ export interface ArchetypeDetailedDataRaw {
   top_distinctive_metrics?: DistinctiveMetric[] | string | Json;
   detailed_metrics?: any;
   disease_prevalence?: any;
+  unique_advantages?: UniqueAdvantage[] | Json;
   
   "Demo_Average Family Size"?: number;
   "Demo_Average Age"?: number;
@@ -219,6 +233,7 @@ export interface ArchetypeDetailedData {
   top_distinctive_metrics?: DistinctiveMetric[] | string | Json;
   detailed_metrics?: any;
   disease_prevalence?: any;
+  unique_advantages?: UniqueAdvantage[];
   
   "Demo_Average Family Size"?: number;
   "Demo_Average Age"?: number;
