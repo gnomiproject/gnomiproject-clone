@@ -66,7 +66,7 @@ function App() {
                       <Route path="/assessment" element={<Assessment />} />
                       <Route path="/insights" element={<Insights />} />
                       <Route path="/about" element={<About />} />
-                      <Route path="/report/:reportId" element={<ReportView />} />
+                      <Route path="/report/:archetypeId/:token" element={<ReportView />} />
                       <Route path="/report-viewer/:reportId" element={<ReportViewer />} />
                       <Route path="/admin/report/:reportId" element={<AdminReportViewer />} />
                       <Route path="/admin/report-debug" element={<AdminReportDebug />} />
